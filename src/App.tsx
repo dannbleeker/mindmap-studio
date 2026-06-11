@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import { wrapSvgHtml } from "./io/html";
+import { buildPrintDoc, wrapSvgHtml } from "./io/html";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
@@ -178,6 +178,23 @@ export function App() {
     download(new Blob([html], { type: "text/html" }), `${baseName()}.html`);
   }
 
+  // Print-to-PDF: render the SVG into a hidden iframe and open the browser print
+  // dialog ("Save as PDF"). Dep-free and fully local; an iframe dodges popup blockers.
+  async function exportPdf() {
+    const svg = mapRef.current?.exportSvg();
+    if (!svg) return;
+    const html = buildPrintDoc(await svg.text(), baseName());
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
+    iframe.srcdoc = html;
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => iframe.remove(), 1000);
+    };
+    document.body.appendChild(iframe);
+  }
+
   function runSearch(event: FormEvent) {
     event.preventDefault();
     const matches = findMatches(liveDocRef.current.root, query);
@@ -279,6 +296,9 @@ export function App() {
         </button>
         <button type="button" onClick={exportHtml} style={controlStyle}>
           .html
+        </button>
+        <button type="button" onClick={exportPdf} style={controlStyle}>
+          .pdf
         </button>
         <label style={controlStyle}>
           Open file

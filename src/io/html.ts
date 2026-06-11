@@ -24,3 +24,27 @@ export function wrapSvgHtml(svg: string, title: string): string {
 </html>
 `;
 }
+
+// Print-to-PDF document: the same embedded SVG, scaled to fit a landscape page,
+// for the browser's "Save as PDF". Pure + deterministic; the app loads this into
+// a hidden iframe and calls print(). Maps are wide, so the page defaults to
+// landscape. No auto-print script here — the caller triggers print on load.
+export function buildPrintDoc(svg: string, title: string): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>${escapeHtml(title)}</title>
+<style>
+  @page { size: landscape; margin: 10mm; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  main { display: flex; justify-content: center; }
+  svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<main>${svg}</main>
+</body>
+</html>
+`;
+}

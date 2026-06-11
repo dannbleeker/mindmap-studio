@@ -21,9 +21,9 @@ topic, with cycling). **Phase 1 is complete** except:
 
 ## Later
 
-- [ ] Phase 2 — robust `.mmap` batch import, PDF export, images + boundaries
-      rendering on the canvas. (Presentation mode, self-contained HTML export,
-      lazy-load, and relationship arrows are done.)
+- [ ] Phase 2 — robust `.mmap` batch import, images + boundaries rendering on the
+      canvas. (Presentation mode, self-contained HTML export, print-to-PDF, node
+      search, lazy-load, and relationship arrows are done.)
 - [ ] Validate the `.mmap` importer's notes / hyperlinks / relationships /
       boundaries / floating-topic paths against a real map that *uses* them — the
       current impl is XSD-authoritative + synthetic-tested, but Dann's sample

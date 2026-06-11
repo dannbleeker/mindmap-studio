@@ -63,6 +63,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   and selects the match on the canvas, and cycles through multiple hits on repeated
   Enter (with an `n/total` counter). Matching is a pure, unit-tested helper
   (`src/search.ts`).
+- **Print / PDF export** — a `.pdf` button renders the map into a hidden iframe and
+  opens the browser's print dialog ("Save as PDF"), laid out landscape to fit wide
+  maps. Dep-free and fully local; the print document is a pure helper
+  (`buildPrintDoc` in `src/io/html.ts`).
 
 ### Changed
 

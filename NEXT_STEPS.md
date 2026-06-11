@@ -27,3 +27,7 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 - [ ] Custom tapered-branch renderer (only if pixel-exact organic branches are
       ever wanted; mind-elixir's default is already close).
 - [ ] Bump Vite 6 → 8 to match TP Studio.
+- [ ] CI: bump GitHub Actions majors (checkout / setup-node / pnpm-action-setup)
+      to Node 24-compatible versions. Node 20 runtime is deprecated and
+      auto-forced on 2026-06-16 — currently a benign CI annotation, not a
+      failure. Verify the new majors exist before bumping (don't redden CI).

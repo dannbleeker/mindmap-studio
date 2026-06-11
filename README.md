@@ -23,6 +23,8 @@ GitHub Pages).
   startup. Works fully offline.
 - **Relationships** — imported relationships render as arrows, and arrows you draw round-trip
   back into the model.
+- **Boundaries** — imported MindManager boundaries render as labelled brackets over their
+  subtree (one-way, via mind-elixir summaries).
 - **Export** — Markdown (`.md`), PNG, SVG, a self-contained HTML file, and print-to-PDF.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.
 - **Installable PWA** — install to the home screen / desktop; precached app shell for offline use.

@@ -3,7 +3,14 @@ import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import type { MindMapDoc } from "../model/types";
-import { type MeArrow, type MeNode, fromMindElixir, toArrows, toMindElixir } from "./sync";
+import {
+  type MeArrow,
+  type MeNode,
+  fromMindElixir,
+  toArrows,
+  toMindElixir,
+  toSummaries,
+} from "./sync";
 import { mindManagerTheme } from "./theme";
 
 export interface MindMapHandle {
@@ -69,6 +76,7 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
     me.init({
       nodeData: { ...toMindElixir(doc.root), root: true },
       arrows: toArrows(doc.links),
+      summaries: toSummaries(doc),
     } as never);
     meRef.current = me;
 

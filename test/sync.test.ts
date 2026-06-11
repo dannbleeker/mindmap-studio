@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fromMindElixir, toArrows, toMindElixir } from "../src/mindmap/sync";
-import type { MapNode, MindMapDoc } from "../src/model/types";
+import { fromMindElixir, toArrows, toMindElixir, toSummaries } from "../src/mindmap/sync";
+import type { Boundary, MapNode, MindMapDoc } from "../src/model/types";
 
 const n = (
   id: string,
@@ -84,5 +84,32 @@ describe("mind-elixir sync", () => {
     const me = toMindElixir(doc.root);
     me.topic = "Renamed";
     expect(fromMindElixir(me, doc).title).toBe("Renamed");
+  });
+});
+
+describe("toSummaries (boundaries -> mind-elixir summaries)", () => {
+  const withBoundaries = (...boundaries: Boundary[]): MindMapDoc => ({
+    ...doc,
+    boundaries,
+  });
+
+  it("brackets a boundary's subtree root within its parent", () => {
+    const summaries = toSummaries(
+      withBoundaries({ id: "b1", nodeIds: ["a", "a1"], label: "Group" }),
+    );
+    expect(summaries).toEqual([{ id: "b1", label: "Group", parent: "r", start: 0, end: 0 }]);
+  });
+
+  it("uses the node's sibling index (second child -> index 1)", () => {
+    const summaries = toSummaries(withBoundaries({ id: "b2", nodeIds: ["b"] }));
+    expect(summaries).toEqual([{ id: "b2", label: "", parent: "r", start: 1, end: 1 }]);
+  });
+
+  it("skips a boundary on the map root (no parent to bracket)", () => {
+    expect(toSummaries(withBoundaries({ id: "b3", nodeIds: ["r", "a", "b"] }))).toEqual([]);
+  });
+
+  it("returns [] when there are no boundaries", () => {
+    expect(toSummaries(doc)).toEqual([]);
   });
 });

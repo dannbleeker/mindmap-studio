@@ -1,5 +1,14 @@
 import type { CrossLink, MapNode, MindMapDoc, NodeStyle } from "../model/types";
 
+/** A mind-elixir summary ≈ our Boundary (a bracket over a node's subtree). */
+export interface MeSummary {
+  id: string;
+  label: string;
+  parent: string;
+  start: number;
+  end: number;
+}
+
 // Two-way bridge between mind-elixir's node shape and our canonical model.
 // mind-elixir is the editor; this lets edits on the canvas flow back into the
 // model (for export + persistence), while preserving canonical-only fields
@@ -54,6 +63,39 @@ export function toArrows(links: CrossLink[] | undefined): MeArrow[] {
     delta1: { x: -64, y: -64 },
     delta2: { x: 64, y: 64 },
   }));
+}
+
+// Map canonical boundaries → mind-elixir summaries. A boundary encloses a
+// subtree (its `nodeIds[0]` is the subtree root); mind-elixir brackets a child
+// range of a parent, so we bracket the root node within its parent (start ===
+// end), and the bracket spans that node's subtree height. A boundary on the map
+// root has no parent to bracket and is skipped. Render-only for now — summaries
+// drawn on the canvas aren't captured back into the model yet.
+export function toSummaries(doc: MindMapDoc): MeSummary[] {
+  const boundaries = doc.boundaries;
+  if (!boundaries?.length) return [];
+  // Index each node's parent id + position among its siblings.
+  const place = new Map<string, { parent: string; index: number }>();
+  const walk = (node: MapNode) => {
+    node.children.forEach((child, index) => {
+      place.set(child.id, { parent: node.id, index });
+      walk(child);
+    });
+  };
+  walk(doc.root);
+  const summaries: MeSummary[] = [];
+  for (const b of boundaries) {
+    const at = place.get(b.nodeIds[0]);
+    if (!at) continue; // boundary on the map root (or an unknown node) — can't bracket
+    summaries.push({
+      id: b.id,
+      label: b.label ?? "",
+      parent: at.parent,
+      start: at.index,
+      end: at.index,
+    });
+  }
+  return summaries;
 }
 
 function fromArrows(arrows: MeArrow[]): CrossLink[] {

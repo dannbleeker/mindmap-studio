@@ -65,3 +65,5 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - The `.mmap` importer (`fast-xml-parser` + `fflate`) is now **code-split** into an
   on-demand chunk, trimming the initial JS bundle to ~99 kB gz (from ~114 kB). The
   size gate now budgets the entry chunk and reports lazy chunks separately.
+- Bumped the GitHub Actions (checkout, setup-node, pnpm/action-setup) to **v6**
+  (node24 runtimes), clearing the Node 20 deprecation annotation on CI.

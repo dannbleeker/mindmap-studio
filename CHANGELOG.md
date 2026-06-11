@@ -26,3 +26,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   (Biome) → dead-code (knip) → tests (vitest) → build (vite) → bundle-size
   budget, fail-fast. Mirrored in GitHub Actions CI (`.github/workflows/ci.yml`).
 - **Working agreement** captured in `CLAUDE.md`.
+- **`.mmap` import wired into the app** — an Open-file control runs `parseMmap`
+  and renders the result on the canvas, surfacing importer warnings and parse
+  errors inline.
+- **Markdown I/O** (`src/io/markdown.ts`) — open `.md` outlines as maps and export
+  any map to `.md` (H1 root + nested bullets, round-trippable); wired into the open
+  dialog (accepts `.md` and `.mmap`) and an Export .md button.

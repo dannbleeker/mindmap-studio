@@ -9,10 +9,14 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Phase 1 — Brainstorming MVP
 
-- [ ] Keyboard-first capture (Enter = sibling, Tab = child), inline rename.
-- [ ] Icons / tags / notes on nodes.
-- [ ] Autosave + multi-map library (IndexedDB via Dexie).
-- [ ] Markdown import / export.
+Keyboard capture/editing (Enter/Tab/drag) is already provided by mind-elixir;
+`.mmap` + Markdown import and Markdown export are done. Remaining:
+
+- [ ] **Edit-capture seam** — sync mind-elixir edits back into the canonical doc
+      (mind-elixir `operation` event → model), so persistence and Markdown export
+      reflect *live* canvas edits. Keystone for the two slices below.
+- [ ] Autosave + multi-map library (IndexedDB).
+- [ ] Icons / tags / notes editing UI on nodes (mind-elixir node-menu plugin).
 - [ ] PNG / SVG export (snapdom).
 - [ ] PWA offline (vite-plugin-pwa).
 - [ ] Deploy to GitHub Pages.
@@ -28,6 +32,8 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 - [ ] Custom tapered-branch renderer (only if pixel-exact organic branches are
       ever wanted; mind-elixir's default is already close).
 - [ ] Bump Vite 6 → 8 to match TP Studio.
+- [ ] Lazy-load the importer (`fast-xml-parser`) via dynamic import so it stays
+      out of the initial bundle (added ~15 kB gz when wired into the app).
 - [ ] CI: bump GitHub Actions majors (checkout / setup-node / pnpm-action-setup)
       to Node 24-compatible versions. Node 20 runtime is deprecated and
       auto-forced on 2026-06-16 — currently a benign CI annotation, not a

@@ -43,3 +43,6 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **PNG / SVG export** — export the current map as a PNG or SVG image via
   mind-elixir's built-in renderers, exposed through a `MindMapHandle` ref
   (`.png` / `.svg` buttons in the header).
+- **Installable PWA** — `vite-plugin-pwa` adds a web manifest, an on-brand app
+  icon, and a Workbox service worker that precaches the app shell, so MindMap
+  Studio installs to the home screen / desktop and runs fully offline.

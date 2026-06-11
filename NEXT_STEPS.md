@@ -11,12 +11,13 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 Done: keyboard editing (mind-elixir), `.mmap` + Markdown import, Markdown export,
 edit-capture (canvas edits → canonical model), autosave + reload (IndexedDB), a
-multi-map library (list / switch / new / delete), and PNG / SVG export. Remaining:
+multi-map library (list / switch / new / delete), PNG / SVG export, and an
+installable offline PWA. Remaining:
 
-- [ ] PWA offline (vite-plugin-pwa).
-- [ ] Node icons/tags/style/link editing UI — blocked on a mind-elixir 4→5 upgrade
-      (`@mind-elixir/node-menu` peer-deps mind-elixir >5). Do the upgrade as its own
-      verified slice, then add node-menu.
+- [ ] Upgrade mind-elixir 4→5 (unblocks the node editing UI; re-verify render +
+      edit-capture + persistence after the bump).
+- [ ] Node icons/tags/style/link editing UI (`@mind-elixir/node-menu` — needs the
+      mind-elixir 5 upgrade above).
 - [ ] Deploy to GitHub Pages — **needs Dann**: enable Pages in repo settings +
       confirm a public live deploy (outward-facing, so skipped during the loop).
 

@@ -30,8 +30,6 @@ icons / tags / font style / link / memo↔note). **Phase 1 is complete** except:
 - [ ] Custom tapered-branch renderer (only if pixel-exact organic branches are
       ever wanted; mind-elixir's default is already close).
 - [ ] Bump Vite 6 → 8 to match TP Studio.
-- [ ] Lazy-load the importer (`fast-xml-parser`) via dynamic import so it stays
-      out of the initial bundle (added ~15 kB gz when wired into the app).
 - [ ] CI: bump GitHub Actions majors (checkout / setup-node / pnpm-action-setup)
       to Node 24-compatible versions. Node 20 runtime is deprecated and
       auto-forced on 2026-06-16 — currently a benign CI annotation, not a

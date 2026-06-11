@@ -62,3 +62,6 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - Upgraded the mind-elixir rendering core **4.6.2 → 5.12.2** (behavior-preserving —
   render, edit-capture, persistence, and export all re-verified in-browser).
   Unblocks the node-menu editing UI; the production bundle shrank slightly.
+- The `.mmap` importer (`fast-xml-parser` + `fflate`) is now **code-split** into an
+  on-demand chunk, trimming the initial JS bundle to ~99 kB gz (from ~114 kB). The
+  size gate now budgets the entry chunk and reports lazy chunks separately.

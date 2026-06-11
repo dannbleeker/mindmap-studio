@@ -1,5 +1,4 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import { parseMmap } from "./import/mmap";
 import { wrapSvgHtml } from "./io/html";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
@@ -95,6 +94,8 @@ export function App() {
       if (name.endsWith(".md") || name.endsWith(".markdown")) {
         next = fromMarkdown(await file.text());
       } else {
+        // Code-split: the .mmap importer (fast-xml-parser, fflate) loads on demand.
+        const { parseMmap } = await import("./import/mmap");
         const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
         next = result.doc;
         w = result.warnings;

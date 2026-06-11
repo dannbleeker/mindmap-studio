@@ -81,6 +81,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   Unlike the lossy/derived formats, this is a lossless round-trip — the format to use
   for backup or moving a map between machines. Malformed files are rejected with a clear
   message. Pure helpers (`serializeDoc`/`parseDoc` in `src/io/json.ts`).
+- **Fit button** — re-scales and centers the map to the viewport (MindManager's "Fit
+  Map"), handy after importing a large map or panning around. Exposed via the
+  `MindMapHandle` ref (`fitView` is also reused for the initial auto-fit).
 
 ### Changed
 

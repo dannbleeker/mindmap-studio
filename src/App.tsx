@@ -306,6 +306,9 @@ export function App() {
         >
           ▶ Present
         </button>
+        <button type="button" onClick={() => mapRef.current?.fit()} style={controlStyle}>
+          Fit
+        </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}

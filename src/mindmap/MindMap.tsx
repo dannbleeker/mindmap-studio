@@ -18,6 +18,14 @@ export interface MindMapHandle {
   exportPng: () => Promise<Blob | null>;
   exportSvg: () => Blob | null;
   focusNode: (id: string) => void;
+  fit: () => void;
+}
+
+/** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
+function fitView(me: MindElixirInstance): void {
+  const view = me as unknown as { scaleFit?: () => void; toCenter?: () => void };
+  if (view.scaleFit) view.scaleFit();
+  else view.toCenter?.();
 }
 
 interface MindMapProps {
@@ -53,6 +61,9 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
           // node not found / not rendered
         }
       },
+      fit: () => {
+        if (meRef.current) fitView(meRef.current);
+      },
     }),
     [],
   );
@@ -81,11 +92,7 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
     } as never);
     meRef.current = me;
 
-    requestAnimationFrame(() => {
-      const view = me as unknown as { scaleFit?: () => void; toCenter?: () => void };
-      if (view.scaleFit) view.scaleFit();
-      else view.toCenter?.();
-    });
+    requestAnimationFrame(() => fitView(me));
 
     // Capture canvas edits back into the canonical model.
     const handleOperation = () => {

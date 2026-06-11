@@ -11,13 +11,17 @@ const root: MapNode = {
       topic: "Marketing",
       children: [{ id: "a1", topic: "market research", children: [] }],
     },
-    { id: "b", topic: "Sales", children: [] },
+    { id: "b", topic: "Sales", note: "quota and pipeline notes", children: [] },
   ],
 };
 
 describe("findMatches", () => {
   it("matches topics case-insensitively in depth-first order", () => {
     expect(findMatches(root, "market")).toEqual(["a", "a1"]);
+  });
+
+  it("matches a node by its note when the topic doesn't match", () => {
+    expect(findMatches(root, "pipeline")).toEqual(["b"]);
   });
 
   it("returns an empty list for a blank query", () => {

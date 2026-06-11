@@ -76,6 +76,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   (`toSummaries`/`fromSummaries` in `src/mindmap/sync.ts`). Boundaries you draw on the
   canvas round-trip back into the model and persist, and imported ones survive edits —
   all keyed by stable node ids, so brackets re-derive correctly after structural edits.
+- **Native `.json` import/export** — a `.json` button saves the full canonical model
+  (notes, links, boundaries, icons, tags) and an imported `.json` restores it exactly.
+  Unlike the lossy/derived formats, this is a lossless round-trip — the format to use
+  for backup or moving a map between machines. Malformed files are rejected with a clear
+  message. Pure helpers (`serializeDoc`/`parseDoc` in `src/io/json.ts`).
 
 ### Changed
 

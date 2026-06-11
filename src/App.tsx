@@ -1,5 +1,6 @@
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { buildPrintDoc, wrapSvgHtml } from "./io/html";
+import { parseDoc, serializeDoc } from "./io/json";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
@@ -105,6 +106,9 @@ export function App() {
     if (name.endsWith(".md") || name.endsWith(".markdown")) {
       return { doc: fromMarkdown(await file.text()), warnings: [] };
     }
+    if (name.endsWith(".json")) {
+      return { doc: parseDoc(await file.text()), warnings: [] };
+    }
     const { parseMmap } = await importMmap();
     const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
     return { doc: result.doc, warnings: result.warnings };
@@ -180,6 +184,13 @@ export function App() {
     download(
       new Blob([toMarkdown(liveDocRef.current)], { type: "text/markdown" }),
       `${baseName()}.md`,
+    );
+  }
+
+  function exportJson() {
+    download(
+      new Blob([serializeDoc(liveDocRef.current)], { type: "application/json" }),
+      `${baseName()}.json`,
     );
   }
 
@@ -307,6 +318,9 @@ export function App() {
         </form>
         <span style={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "#73726c" }}>Export</span>
+        <button type="button" onClick={exportJson} style={controlStyle}>
+          .json
+        </button>
         <button type="button" onClick={exportMarkdown} style={controlStyle}>
           .md
         </button>
@@ -327,7 +341,7 @@ export function App() {
           <input
             id="mmap-input"
             type="file"
-            accept=".mmap,.mmp,.md,.markdown"
+            accept=".mmap,.mmp,.md,.markdown,.json"
             multiple
             onChange={handleFile}
             style={{ display: "none" }}

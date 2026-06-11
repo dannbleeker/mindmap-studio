@@ -14,6 +14,7 @@ GitHub Pages).
   MindManager-style map. The `.mmap` importer is field-mapped from the bundled MindManager
   XSD (topic tree, notes, icons, hyperlinks, relationships, boundaries, floating topics).
   Select multiple files to batch-import a whole folder of maps into the library at once.
+  Also opens native `.json` maps (exported from this app) losslessly.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   plus a node editor panel (icons, tags, font size/color, link, memo) via node-menu.
 - **Find** — search the map by topic; matches are focused and selected on the canvas,
@@ -26,7 +27,8 @@ GitHub Pages).
 - **Boundaries** — imported MindManager boundaries render as labelled brackets over their
   subtree, and boundaries you draw on the canvas round-trip back into the model (via
   mind-elixir summaries).
-- **Export** — Markdown (`.md`), PNG, SVG, a self-contained HTML file, and print-to-PDF.
+- **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
+  (`.md`), PNG, SVG, a self-contained HTML file, and print-to-PDF.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.
 - **Installable PWA** — install to the home screen / desktop; precached app shell for offline use.
 

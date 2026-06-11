@@ -47,6 +47,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   icon, and a Workbox service worker that precaches the app shell, so MindMap
   Studio installs to the home screen / desktop and runs fully offline.
 
+- **Node editing UI** — `@mind-elixir/node-menu` adds an inline editor panel
+  (icons, tags, font size/color, link, and memo) when a node is selected. Edits
+  flow through the capture seam into the canonical model; the memo maps to the
+  node's `note`, so notes persist and round-trip with imported maps.
+
 ### Changed
 
 - Upgraded the mind-elixir rendering core **4.6.2 → 5.12.2** (behavior-preserving —

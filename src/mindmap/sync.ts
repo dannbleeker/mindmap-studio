@@ -14,6 +14,7 @@ export interface MeNode {
   tags?: string[];
   icons?: string[];
   hyperLink?: string;
+  note?: string;
   expanded?: boolean;
   root?: boolean;
 }
@@ -29,6 +30,7 @@ export function toMindElixir(node: MapNode): MeNode {
   if (node.tags?.length) me.tags = node.tags;
   if (node.icons?.length) me.icons = node.icons;
   if (node.hyperlink) me.hyperLink = node.hyperlink;
+  if (node.note) me.note = node.note;
   return me;
 }
 
@@ -49,10 +51,11 @@ function meToNode(me: MeNode, prev: Map<string, MapNode>): MapNode {
   if (me.style) node.style = me.style;
   if (me.expanded === false) node.collapsed = true;
 
-  // mind-elixir doesn't carry these — preserve from the previous doc by id so an
-  // edit doesn't drop a node's note/task/image.
+  // mind-elixir 5 carries `note` (node-menu's memo editor) — prefer the live
+  // value, else keep the prior one. task/image are canonical-only: preserve by id.
   const before = prev.get(me.id);
-  if (before?.note) node.note = before.note;
+  const note = me.note ?? before?.note;
+  if (note) node.note = note;
   if (before?.task) node.task = before.task;
   if (before?.image) node.image = before.image;
   return node;

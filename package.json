@@ -18,6 +18,7 @@
     "gate": "tsc --noEmit && biome check . && knip && vitest run && vite build && node scripts/size-budget.mjs"
   },
   "dependencies": {
+    "@mind-elixir/node-menu": "^5.0.1",
     "fast-xml-parser": "^4.5.1",
     "fflate": "^0.8.2",
     "idb": "^8.0.3",

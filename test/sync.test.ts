@@ -41,10 +41,22 @@ describe("mind-elixir sync", () => {
     expect(shape(back.root)).toEqual(shape(doc.root));
   });
 
-  it("preserves canonical-only fields (note) by id across an edit", () => {
-    // mind-elixir's data never carries the note; it must be restored from prev.
+  it("round-trips notes (mind-elixir 5 carries them)", () => {
     const back = fromMindElixir(toMindElixir(doc.root), doc);
     expect(back.root.children.find((c) => c.id === "a")?.note).toBe("a note");
+  });
+
+  it("captures a node-menu memo edit (me.note -> node.note)", () => {
+    const me = toMindElixir(doc.root);
+    me.note = "edited memo";
+    expect(fromMindElixir(me, doc).root.note).toBe("edited memo");
+  });
+
+  it("preserves a note by id when mind-elixir omits it", () => {
+    const me = toMindElixir(doc.root);
+    const alpha = me.children?.find((c) => c.id === "a");
+    if (alpha) alpha.note = undefined; // mind-elixir didn't carry it this time
+    expect(fromMindElixir(me, doc).root.children.find((c) => c.id === "a")?.note).toBe("a note");
   });
 
   it("keeps links and meta from the previous doc", () => {

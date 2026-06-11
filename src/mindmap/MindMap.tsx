@@ -1,3 +1,5 @@
+import nodeMenu from "@mind-elixir/node-menu";
+import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import type { MindMapDoc } from "../model/types";
@@ -48,6 +50,8 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
       toolBar: true,
       keypress: true,
     });
+    // Node editor panel (icons / tags / font style / link) — must install before init.
+    me.install(nodeMenu);
     me.init({ nodeData: { ...toMindElixir(doc.root), root: true } } as never);
     meRef.current = me;
 

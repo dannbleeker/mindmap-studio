@@ -11,11 +11,10 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 Done: keyboard editing (mind-elixir), `.mmap` + Markdown import, Markdown export,
 edit-capture (canvas edits → canonical model), autosave + reload (IndexedDB), a
-multi-map library (list / switch / new / delete), PNG / SVG export, and an
-installable offline PWA. Remaining:
+multi-map library (list / switch / new / delete), PNG / SVG export, an installable
+offline PWA, the mind-elixir 5 upgrade, and the node editing UI (node-menu —
+icons / tags / font style / link / memo↔note). **Phase 1 is complete** except:
 
-- [ ] Node icons/tags/style/link editing UI (`@mind-elixir/node-menu`; mind-elixir
-      is now on 5.12.2 so the peer dep is satisfied).
 - [ ] Deploy to GitHub Pages — **needs Dann**: enable Pages in repo settings +
       confirm a public live deploy (outward-facing, so skipped during the loop).
 

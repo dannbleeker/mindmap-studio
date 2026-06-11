@@ -1,5 +1,6 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { parseMmap } from "./import/mmap";
+import { wrapSvgHtml } from "./io/html";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
@@ -155,6 +156,13 @@ export function App() {
     if (blob) download(blob, `${baseName()}.svg`);
   }
 
+  async function exportHtml() {
+    const svg = mapRef.current?.exportSvg();
+    if (!svg) return;
+    const html = wrapSvgHtml(await svg.text(), baseName());
+    download(new Blob([html], { type: "text/html" }), `${baseName()}.html`);
+  }
+
   // Restore the last-opened map on startup; fall back to the sample.
   useEffect(() => {
     let cancelled = false;
@@ -228,6 +236,9 @@ export function App() {
         </button>
         <button type="button" onClick={exportSvg} style={controlStyle}>
           .svg
+        </button>
+        <button type="button" onClick={exportHtml} style={controlStyle}>
+          .html
         </button>
         <label style={controlStyle}>
           Open file

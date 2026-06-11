@@ -97,25 +97,47 @@ export function App() {
     saveTimer.current = setTimeout(() => persist(liveDocRef.current), 500);
   }
 
+  async function parseImport(
+    file: File,
+    importMmap: () => Promise<typeof import("./import/mmap")>,
+  ): Promise<{ doc: MindMapDoc; warnings: string[] }> {
+    const name = file.name.toLowerCase();
+    if (name.endsWith(".md") || name.endsWith(".markdown")) {
+      return { doc: fromMarkdown(await file.text()), warnings: [] };
+    }
+    const { parseMmap } = await importMmap();
+    const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
+    return { doc: result.doc, warnings: result.warnings };
+  }
+
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = ""; // allow re-selecting the same file
-    if (!file) return;
+    const files = [...(event.target.files ?? [])];
+    event.target.value = ""; // allow re-selecting the same files
+    if (files.length === 0) return;
+    // Code-split: load the .mmap importer (fast-xml-parser, fflate) once, on demand.
+    const importMmap = () => import("./import/mmap");
+    const batch = files.length > 1;
     try {
-      const name = file.name.toLowerCase();
-      let next: MindMapDoc;
-      let w: string[] = [];
-      if (name.endsWith(".md") || name.endsWith(".markdown")) {
-        next = fromMarkdown(await file.text());
-      } else {
-        // Code-split: the .mmap importer (fast-xml-parser, fflate) loads on demand.
-        const { parseMmap } = await import("./import/mmap");
-        const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
-        next = result.doc;
-        w = result.warnings;
+      let lastDoc: MindMapDoc | null = null;
+      let lastWarnings: string[] = [];
+      const batchNotes: string[] = [];
+      for (const file of files) {
+        const { doc: next, warnings } = await parseImport(file, importMmap);
+        next.id = crypto.randomUUID(); // each import becomes its own library entry
+        if (batch) await saveMap(next); // persist every map in a batch
+        if (warnings.length > 0) {
+          const extra = warnings.length > 1 ? ` (+${warnings.length - 1} more)` : "";
+          batchNotes.push(`${next.title}: ${warnings[0]}${extra}`);
+        }
+        lastDoc = next;
+        lastWarnings = warnings;
       }
-      next.id = crypto.randomUUID(); // each import becomes its own library entry
-      load(next, w);
+      if (!lastDoc) return;
+      // Render the last import; for a batch, lead with a one-line summary.
+      load(
+        lastDoc,
+        batch ? [`Imported ${files.length} maps into the library.`, ...batchNotes] : lastWarnings,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -301,11 +323,12 @@ export function App() {
           .pdf
         </button>
         <label style={controlStyle}>
-          Open file
+          Open files
           <input
             id="mmap-input"
             type="file"
             accept=".mmap,.mmp,.md,.markdown"
+            multiple
             onChange={handleFile}
             style={{ display: "none" }}
           />

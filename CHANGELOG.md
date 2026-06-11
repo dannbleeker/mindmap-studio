@@ -67,6 +67,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   opens the browser's print dialog ("Save as PDF"), laid out landscape to fit wide
   maps. Dep-free and fully local; the print document is a pure helper
   (`buildPrintDoc` in `src/io/html.ts`).
+- **Batch import** — the Open control now accepts multiple files at once; each
+  `.mmap`/`.md` becomes its own library entry, the last one opens on the canvas, and
+  a one-line summary reports how many were imported (with per-map import notes).
+  Serves migrating a folder of existing MindManager maps in one go.
 
 ### Changed
 

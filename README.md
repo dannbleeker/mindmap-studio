@@ -13,6 +13,7 @@ GitHub Pages).
 - **Open** `.mmap` (MindManager exports) and `.md` (Markdown outlines) — rendered as a
   MindManager-style map. The `.mmap` importer is field-mapped from the bundled MindManager
   XSD (topic tree, notes, icons, hyperlinks, relationships, boundaries, floating topics).
+  Select multiple files to batch-import a whole folder of maps into the library at once.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   plus a node editor panel (icons, tags, font size/color, link, memo) via node-menu.
 - **Find** — search the map by topic; matches are focused and selected on the canvas,

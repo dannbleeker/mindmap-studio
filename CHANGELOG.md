@@ -46,3 +46,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Installable PWA** — `vite-plugin-pwa` adds a web manifest, an on-brand app
   icon, and a Workbox service worker that precaches the app shell, so MindMap
   Studio installs to the home screen / desktop and runs fully offline.
+
+### Changed
+
+- Upgraded the mind-elixir rendering core **4.6.2 → 5.12.2** (behavior-preserving —
+  render, edit-capture, persistence, and export all re-verified in-browser).
+  Unblocks the node-menu editing UI; the production bundle shrank slightly.

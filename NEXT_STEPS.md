@@ -14,10 +14,8 @@ edit-capture (canvas edits → canonical model), autosave + reload (IndexedDB), 
 multi-map library (list / switch / new / delete), PNG / SVG export, and an
 installable offline PWA. Remaining:
 
-- [ ] Upgrade mind-elixir 4→5 (unblocks the node editing UI; re-verify render +
-      edit-capture + persistence after the bump).
-- [ ] Node icons/tags/style/link editing UI (`@mind-elixir/node-menu` — needs the
-      mind-elixir 5 upgrade above).
+- [ ] Node icons/tags/style/link editing UI (`@mind-elixir/node-menu`; mind-elixir
+      is now on 5.12.2 so the peer dep is satisfied).
 - [ ] Deploy to GitHub Pages — **needs Dann**: enable Pages in repo settings +
       confirm a public live deploy (outward-facing, so skipped during the loop).
 

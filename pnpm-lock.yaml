@@ -18,8 +18,8 @@ importers:
         specifier: ^8.0.3
         version: 8.0.3
       mind-elixir:
-        specifier: ^4.3.6
-        version: 4.6.2
+        specifier: ^5.12.2
+        version: 5.12.2
       react:
         specifier: ^19.0.0
         version: 19.2.7
@@ -2024,8 +2024,8 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
-  mind-elixir@4.6.2:
-    resolution: {integrity: sha512-KjIjInLbMtW7J68Hm+oJ/+g/fhG+h6kkJkU5HL1LgqLSIyKFQM4V5xogibbqm+9ycBmKu2TTOlE+5O2/3VZPtA==}
+  mind-elixir@5.12.2:
+    resolution: {integrity: sha512-G9eyrmjp6Ot+Llf5oPZPj2N5ivzDVwiQpiJEaX7uTUvIRkUwkyoTW1vSKKayl6ZzRoEWE87zupEdlEJWwtqqVg==}
 
   minimatch@10.2.5:
     resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
@@ -4550,7 +4550,7 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mind-elixir@4.6.2: {}
+  mind-elixir@5.12.2: {}
 
   minimatch@10.2.5:
     dependencies:

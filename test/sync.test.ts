@@ -112,4 +112,24 @@ describe("toSummaries (boundaries -> mind-elixir summaries)", () => {
   it("returns [] when there are no boundaries", () => {
     expect(toSummaries(doc)).toEqual([]);
   });
+
+  it("captures a canvas summary back into a boundary (subtree under the range)", () => {
+    const back = fromMindElixir(toMindElixir(doc.root), doc, undefined, [
+      { id: "bd1", label: "Group", parent: "r", start: 0, end: 0 },
+    ]);
+    expect(back.boundaries).toEqual([{ id: "bd1", nodeIds: ["a", "a1"], label: "Group" }]);
+  });
+
+  it("round-trips a boundary through summaries and back", () => {
+    const withB: MindMapDoc = { ...doc, boundaries: [{ id: "bd1", nodeIds: ["a", "a1"] }] };
+    const back = fromMindElixir(toMindElixir(withB.root), withB, undefined, toSummaries(withB));
+    expect(back.boundaries).toEqual([{ id: "bd1", nodeIds: ["a", "a1"] }]);
+  });
+
+  it("clears boundaries when the canvas reports none", () => {
+    const withB: MindMapDoc = { ...doc, boundaries: [{ id: "bd1", nodeIds: ["a", "a1"] }] };
+    expect(
+      fromMindElixir(toMindElixir(withB.root), withB, undefined, []).boundaries,
+    ).toBeUndefined();
+  });
 });

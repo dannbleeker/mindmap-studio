@@ -6,6 +6,7 @@ import type { MindMapDoc } from "../model/types";
 import {
   type MeArrow,
   type MeNode,
+  type MeSummary,
   fromMindElixir,
   toArrows,
   toMindElixir,
@@ -88,8 +89,12 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
 
     // Capture canvas edits back into the canonical model.
     const handleOperation = () => {
-      const data = me.getData() as unknown as { nodeData: MeNode; arrows?: MeArrow[] };
-      const updated = fromMindElixir(data.nodeData, docRef.current, data.arrows);
+      const data = me.getData() as unknown as {
+        nodeData: MeNode;
+        arrows?: MeArrow[];
+        summaries?: MeSummary[];
+      };
+      const updated = fromMindElixir(data.nodeData, docRef.current, data.arrows, data.summaries);
       docRef.current = updated;
       onChangeRef.current?.(updated);
     };

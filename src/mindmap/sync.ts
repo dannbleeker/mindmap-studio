@@ -1,4 +1,4 @@
-import type { CrossLink, MapNode, MindMapDoc, NodeStyle } from "../model/types";
+import type { Boundary, CrossLink, MapNode, MindMapDoc, NodeStyle } from "../model/types";
 
 /** A mind-elixir summary ≈ our Boundary (a bracket over a node's subtree). */
 export interface MeSummary {
@@ -98,6 +98,38 @@ export function toSummaries(doc: MindMapDoc): MeSummary[] {
   return summaries;
 }
 
+function subtreeIds(node: MapNode): string[] {
+  const ids = [node.id];
+  for (const child of node.children) ids.push(...subtreeIds(child));
+  return ids;
+}
+
+// Inverse of toSummaries: rebuild canonical boundaries from mind-elixir summaries
+// (read off the canvas after an edit), so boundaries drawn or removed on the canvas
+// round-trip into the model. A summary brackets `parent.children[start..end]`; the
+// boundary encloses the subtrees under that range.
+function fromSummaries(summaries: MeSummary[], root: MapNode): Boundary[] {
+  const byId = new Map<string, MapNode>();
+  const index = (node: MapNode) => {
+    byId.set(node.id, node);
+    node.children.forEach(index);
+  };
+  index(root);
+  const boundaries: Boundary[] = [];
+  for (const s of summaries) {
+    const parent = byId.get(s.parent);
+    if (!parent) continue;
+    const range = parent.children.slice(s.start, s.end + 1);
+    if (range.length === 0) continue;
+    boundaries.push({
+      id: s.id,
+      nodeIds: range.flatMap(subtreeIds),
+      ...(s.label ? { label: s.label } : {}),
+    });
+  }
+  return boundaries;
+}
+
 function fromArrows(arrows: MeArrow[]): CrossLink[] {
   return arrows.map((a) => ({
     id: a.id,
@@ -138,16 +170,21 @@ export function fromMindElixir(
   nodeData: MeNode,
   prevDoc: MindMapDoc,
   arrows?: MeArrow[],
+  summaries?: MeSummary[],
 ): MindMapDoc {
   const prev = new Map<string, MapNode>();
   indexById(prevDoc.root, prev);
   const root = meToNode(nodeData, prev);
-  // Keep prevDoc's boundaries/floating/meta. Arrows (when mind-elixir reports
-  // them) round-trip back into links; otherwise the prior links are preserved.
+  // Keep prevDoc's floating/meta. Arrows and summaries (when mind-elixir reports
+  // them) round-trip back into links/boundaries; otherwise the prior ones persist.
   const result: MindMapDoc = { ...prevDoc, title: root.topic, root };
   if (arrows !== undefined) {
     const links = fromArrows(arrows);
     result.links = links.length > 0 ? links : undefined;
+  }
+  if (summaries !== undefined) {
+    const boundaries = fromSummaries(summaries, root);
+    result.boundaries = boundaries.length > 0 ? boundaries : undefined;
   }
   return result;
 }

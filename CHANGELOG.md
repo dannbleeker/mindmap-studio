@@ -71,11 +71,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `.mmap`/`.md` becomes its own library entry, the last one opens on the canvas, and
   a one-line summary reports how many were imported (with per-map import notes).
   Serves migrating a folder of existing MindManager maps in one go.
-- **Boundaries render** — imported MindManager boundaries (`doc.boundaries`) now draw
-  on the canvas as labelled brackets over their subtree, via mind-elixir summaries
-  (`toSummaries` in `src/mindmap/sync.ts`). Boundaries are keyed by stable node ids,
-  so the bracket re-derives correctly after edits. Render-only for now —
-  summaries drawn on the canvas aren't captured back into the model yet.
+- **Boundaries** — imported MindManager boundaries (`doc.boundaries`) draw on the
+  canvas as labelled brackets over their subtree, via mind-elixir summaries
+  (`toSummaries`/`fromSummaries` in `src/mindmap/sync.ts`). Boundaries you draw on the
+  canvas round-trip back into the model and persist, and imported ones survive edits —
+  all keyed by stable node ids, so brackets re-derive correctly after structural edits.
 
 ### Changed
 

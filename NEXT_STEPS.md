@@ -20,8 +20,9 @@ icons / tags / font style / link / memo↔note). **Phase 1 is complete** except:
 
 ## Later
 
-- [ ] Phase 2 — robust `.mmap` batch import, Walk-Through presentation mode,
-      share/export (PDF, self-contained HTML), images + boundaries.
+- [ ] Phase 2 — robust `.mmap` batch import, share/export (PDF, self-contained
+      HTML), images + boundaries + relationships rendering on the canvas.
+      (Walk-Through presentation mode is done.)
 - [ ] Validate the `.mmap` importer's notes / hyperlinks / relationships /
       boundaries / floating-topic paths against a real map that *uses* them — the
       current impl is XSD-authoritative + synthetic-tested, but Dann's sample

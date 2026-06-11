@@ -4,6 +4,7 @@ import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
+import { Presentation } from "./present/Presentation";
 import {
   type MapSummary,
   deleteMap,
@@ -43,6 +44,7 @@ export function App() {
   const [maps, setMaps] = useState<MapSummary[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
 
   const refreshMaps = useCallback(async () => {
     try {
@@ -209,6 +211,13 @@ export function App() {
         <button type="button" onClick={deleteCurrent} style={controlStyle}>
           Delete
         </button>
+        <button
+          type="button"
+          onClick={() => setPresentDoc(liveDocRef.current)}
+          style={controlStyle}
+        >
+          ▶ Present
+        </button>
         <span style={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "#73726c" }}>Export</span>
         <button type="button" onClick={exportMarkdown} style={controlStyle}>
@@ -271,6 +280,8 @@ export function App() {
           }}
         />
       </div>
+
+      {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}
     </div>
   );
 }

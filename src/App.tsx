@@ -4,41 +4,81 @@ import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
-import { loadCurrent, saveCurrent } from "./store/mapStore";
+import {
+  type MapSummary,
+  deleteMap,
+  getLastOpened,
+  listMaps,
+  loadMap,
+  saveMap,
+  setLastOpened,
+} from "./store/mapStore";
 
-const buttonStyle = {
+const controlStyle = {
   fontSize: 13,
   fontWeight: 600,
   color: "#26215c",
   border: "1px solid #cecbf6",
   background: "#eeedfe",
   borderRadius: 8,
-  padding: "6px 12px",
+  padding: "6px 10px",
   cursor: "pointer",
 } as const;
 
+function newDoc(): MindMapDoc {
+  return {
+    schemaVersion: 1,
+    id: crypto.randomUUID(),
+    title: "Untitled map",
+    root: { id: "root", topic: "Untitled map", children: [] },
+    meta: { source: "new" },
+  };
+}
+
 export function App() {
-  // `doc` re-seeds the canvas on load (import / new / startup). Live edits are
-  // tracked in a ref so they don't re-init mind-elixir (which would reset view).
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [maps, setMaps] = useState<MapSummary[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const refreshMaps = useCallback(async () => {
+    try {
+      setMaps(await listMaps());
+    } catch {
+      // library listing is best-effort
+    }
+  }, []);
+
+  const persist = useCallback(
+    async (d: MindMapDoc) => {
+      try {
+        await saveMap(d);
+        await setLastOpened(d.id);
+        await refreshMaps();
+      } catch {
+        // autosave is best-effort
+      }
+    },
+    [refreshMaps],
+  );
+
+  const load = useCallback(
+    (next: MindMapDoc, nextWarnings: string[] = []) => {
+      liveDocRef.current = next;
+      setWarnings(nextWarnings);
+      setError(null);
+      setDoc(next);
+      persist(next);
+    },
+    [persist],
+  );
+
   function scheduleSave() {
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      saveCurrent(liveDocRef.current).catch(() => {});
-    }, 500);
+    saveTimer.current = setTimeout(() => persist(liveDocRef.current), 500);
   }
-
-  const load = useCallback((next: MindMapDoc, nextWarnings: string[] = []) => {
-    liveDocRef.current = next;
-    setWarnings(nextWarnings);
-    setError(null);
-    setDoc(next);
-  }, []);
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -46,15 +86,41 @@ export function App() {
     if (!file) return;
     try {
       const name = file.name.toLowerCase();
+      let next: MindMapDoc;
+      let w: string[] = [];
       if (name.endsWith(".md") || name.endsWith(".markdown")) {
-        load(fromMarkdown(await file.text()));
+        next = fromMarkdown(await file.text());
       } else {
-        const { doc: imported, warnings: w } = parseMmap(new Uint8Array(await file.arrayBuffer()));
-        load(imported, w);
+        const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
+        next = result.doc;
+        w = result.warnings;
       }
-      scheduleSave();
+      next.id = crypto.randomUUID(); // each import becomes its own library entry
+      load(next, w);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async function switchMap(id: string) {
+    if (id === doc.id) return;
+    try {
+      await saveMap(liveDocRef.current); // flush current edits before switching
+      const next = await loadMap(id);
+      if (next) load(next);
+    } catch {
+      // ignore
+    }
+  }
+
+  async function deleteCurrent() {
+    try {
+      await deleteMap(liveDocRef.current.id);
+      const remaining = await listMaps();
+      const next = remaining.length > 0 ? await loadMap(remaining[0].id) : null;
+      load(next ?? newDoc());
+    } catch {
+      // ignore
     }
   }
 
@@ -69,14 +135,14 @@ export function App() {
     URL.revokeObjectURL(url);
   }
 
-  // Reload the last-saved map on startup; fall back to the sample.
+  // Restore the last-opened map on startup; fall back to the sample.
   useEffect(() => {
     let cancelled = false;
-    loadCurrent()
-      .then((saved) => {
-        if (!cancelled && saved) load(saved);
-      })
-      .catch(() => {});
+    (async () => {
+      const lastId = await getLastOpened().catch(() => null);
+      const restored = lastId ? await loadMap(lastId).catch(() => null) : null;
+      if (!cancelled) load(restored ?? sampleDoc);
+    })();
     return () => {
       cancelled = true;
     };
@@ -90,23 +156,46 @@ export function App() {
     }
   }, []);
 
+  // Keep the current map selectable even before its first save lands.
+  const mapOptions = maps.some((m) => m.id === doc.id)
+    ? maps
+    : [{ id: doc.id, title: doc.title }, ...maps];
+
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <header
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 12,
+          gap: 8,
           padding: "10px 16px",
           borderBottom: "1px solid #e2e0d8",
         }}
       >
-        <strong style={{ fontSize: 15 }}>MindMap Studio</strong>
-        <span style={{ fontSize: 12, color: "#73726c", flex: 1 }}>{doc.title}</span>
-        <button type="button" onClick={exportMarkdown} style={buttonStyle}>
+        <strong style={{ fontSize: 15, marginRight: 4 }}>MindMap Studio</strong>
+        <select
+          value={doc.id}
+          onChange={(e) => switchMap(e.target.value)}
+          style={controlStyle}
+          aria-label="Open map"
+        >
+          {mapOptions.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.title}
+            </option>
+          ))}
+        </select>
+        <button type="button" onClick={() => load(newDoc())} style={controlStyle}>
+          + New
+        </button>
+        <button type="button" onClick={deleteCurrent} style={controlStyle}>
+          Delete
+        </button>
+        <span style={{ flex: 1 }} />
+        <button type="button" onClick={exportMarkdown} style={controlStyle}>
           Export .md
         </button>
-        <label style={buttonStyle}>
+        <label style={controlStyle}>
           Open file
           <input
             id="mmap-input"

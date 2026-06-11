@@ -10,11 +10,9 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 ## Phase 1 — Brainstorming MVP
 
 Done: keyboard editing (mind-elixir), `.mmap` + Markdown import, Markdown export,
-edit-capture (canvas edits → canonical model), and autosave + reload (IndexedDB).
-Remaining:
+edit-capture (canvas edits → canonical model), autosave + reload (IndexedDB), and a
+multi-map library (list / switch / new / delete). Remaining:
 
-- [ ] Multi-map library — list / switch / new / delete maps (autosave foundation
-      is in; today there's a single "current" map in IndexedDB).
 - [ ] Icons / tags / notes editing UI on nodes (mind-elixir node-menu plugin).
 - [ ] PNG / SVG export (mind-elixir's built-in `exportPng` / `exportSvg`).
 - [ ] PWA offline (vite-plugin-pwa).

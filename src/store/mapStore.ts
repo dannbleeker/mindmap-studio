@@ -1,34 +1,59 @@
 import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 import type { MindMapDoc } from "../model/types";
 
-// Local-first persistence. The current map is autosaved to IndexedDB and
-// reloaded on startup, so work survives a refresh with no server involved.
+// Local-first multi-map library. Each map is stored under its id; a small `meta`
+// store remembers the last-opened map so startup restores where you left off.
 
 interface MindMapDB extends DBSchema {
   maps: { key: string; value: MindMapDoc };
+  meta: { key: string; value: string };
 }
 
 const DB_NAME = "mindmap-studio";
-const STORE = "maps";
-const CURRENT_KEY = "current";
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<MindMapDB>> | null = null;
 
 function db(): Promise<IDBPDatabase<MindMapDB>> {
   if (!dbPromise) {
-    dbPromise = openDB<MindMapDB>(DB_NAME, 1, {
+    dbPromise = openDB<MindMapDB>(DB_NAME, DB_VERSION, {
       upgrade(database) {
-        database.createObjectStore(STORE);
+        if (!database.objectStoreNames.contains("maps")) database.createObjectStore("maps");
+        if (!database.objectStoreNames.contains("meta")) database.createObjectStore("meta");
       },
     });
   }
   return dbPromise;
 }
 
-export async function saveCurrent(doc: MindMapDoc): Promise<void> {
-  await (await db()).put(STORE, doc, CURRENT_KEY);
+export interface MapSummary {
+  id: string;
+  title: string;
 }
 
-export async function loadCurrent(): Promise<MindMapDoc | null> {
-  return (await (await db()).get(STORE, CURRENT_KEY)) ?? null;
+export async function saveMap(doc: MindMapDoc): Promise<void> {
+  await (await db()).put("maps", doc, doc.id);
+}
+
+export async function loadMap(id: string): Promise<MindMapDoc | null> {
+  return (await (await db()).get("maps", id)) ?? null;
+}
+
+export async function deleteMap(id: string): Promise<void> {
+  await (await db()).delete("maps", id);
+}
+
+export async function listMaps(): Promise<MapSummary[]> {
+  const docs = await (await db()).getAll("maps");
+  return docs
+    .map((doc) => ({ id: doc.id, title: doc.title }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+export async function setLastOpened(id: string): Promise<void> {
+  await (await db()).put("meta", id, "lastOpened");
+}
+
+export async function getLastOpened(): Promise<string | null> {
+  return (await (await db()).get("meta", "lastOpened")) ?? null;
 }

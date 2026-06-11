@@ -37,3 +37,6 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   canonical-only fields (notes/tasks/images) by id, so Export .md reflects live edits.
 - **Local-first persistence** (`src/store/mapStore.ts`) — the current map autosaves
   to IndexedDB (debounced) and reloads on startup, so work survives a refresh.
+- **Multi-map library** — many named maps in IndexedDB keyed by id, with the
+  last-opened map restored on startup. The header gains a map switcher (dropdown)
+  plus New and Delete; each import becomes its own library entry.

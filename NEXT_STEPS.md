@@ -10,13 +10,15 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 ## Phase 1 — Brainstorming MVP
 
 Done: keyboard editing (mind-elixir), `.mmap` + Markdown import, Markdown export,
-edit-capture (canvas edits → canonical model), autosave + reload (IndexedDB), and a
-multi-map library (list / switch / new / delete). Remaining:
+edit-capture (canvas edits → canonical model), autosave + reload (IndexedDB), a
+multi-map library (list / switch / new / delete), and PNG / SVG export. Remaining:
 
-- [ ] Icons / tags / notes editing UI on nodes (mind-elixir node-menu plugin).
-- [ ] PNG / SVG export (mind-elixir's built-in `exportPng` / `exportSvg`).
 - [ ] PWA offline (vite-plugin-pwa).
-- [ ] Deploy to GitHub Pages.
+- [ ] Node icons/tags/style/link editing UI — blocked on a mind-elixir 4→5 upgrade
+      (`@mind-elixir/node-menu` peer-deps mind-elixir >5). Do the upgrade as its own
+      verified slice, then add node-menu.
+- [ ] Deploy to GitHub Pages — **needs Dann**: enable Pages in repo settings +
+      confirm a public live deploy (outward-facing, so skipped during the loop).
 
 ## Later
 

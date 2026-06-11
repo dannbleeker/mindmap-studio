@@ -1,7 +1,7 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { parseMmap } from "./import/mmap";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
-import { MindMap } from "./mindmap/MindMap";
+import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
 import {
@@ -39,6 +39,7 @@ export function App() {
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapRef = useRef<MindMapHandle>(null);
   const [maps, setMaps] = useState<MapSummary[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -124,15 +125,32 @@ export function App() {
     }
   }
 
-  function exportMarkdown() {
-    const live = liveDocRef.current;
-    const blob = new Blob([toMarkdown(live)], { type: "text/markdown" });
+  function download(blob: Blob, filename: string) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${live.title || "mindmap"}.md`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  const baseName = () => liveDocRef.current.title || "mindmap";
+
+  function exportMarkdown() {
+    download(
+      new Blob([toMarkdown(liveDocRef.current)], { type: "text/markdown" }),
+      `${baseName()}.md`,
+    );
+  }
+
+  async function exportPng() {
+    const blob = await mapRef.current?.exportPng();
+    if (blob) download(blob, `${baseName()}.png`);
+  }
+
+  function exportSvg() {
+    const blob = mapRef.current?.exportSvg();
+    if (blob) download(blob, `${baseName()}.svg`);
   }
 
   // Restore the last-opened map on startup; fall back to the sample.
@@ -192,8 +210,15 @@ export function App() {
           Delete
         </button>
         <span style={{ flex: 1 }} />
+        <span style={{ fontSize: 12, color: "#73726c" }}>Export</span>
         <button type="button" onClick={exportMarkdown} style={controlStyle}>
-          Export .md
+          .md
+        </button>
+        <button type="button" onClick={exportPng} style={controlStyle}>
+          .png
+        </button>
+        <button type="button" onClick={exportSvg} style={controlStyle}>
+          .svg
         </button>
         <label style={controlStyle}>
           Open file
@@ -238,6 +263,7 @@ export function App() {
 
       <div style={{ flex: 1, minHeight: 0 }}>
         <MindMap
+          ref={mapRef}
           doc={doc}
           onChange={(d) => {
             liveDocRef.current = d;

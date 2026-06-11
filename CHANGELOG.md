@@ -40,3 +40,6 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Multi-map library** — many named maps in IndexedDB keyed by id, with the
   last-opened map restored on startup. The header gains a map switcher (dropdown)
   plus New and Delete; each import becomes its own library entry.
+- **PNG / SVG export** — export the current map as a PNG or SVG image via
+  mind-elixir's built-in renderers, exposed through a `MindMapHandle` ref
+  (`.png` / `.svg` buttons in the header).

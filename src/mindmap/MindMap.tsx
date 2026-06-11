@@ -1,22 +1,37 @@
-import MindElixir from "mind-elixir";
-import { useEffect, useRef } from "react";
+import MindElixir, { type MindElixirInstance } from "mind-elixir";
+import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import type { MindMapDoc } from "../model/types";
 import { type MeNode, fromMindElixir, toMindElixir } from "./sync";
 import { mindManagerTheme } from "./theme";
+
+export interface MindMapHandle {
+  exportPng: () => Promise<Blob | null>;
+  exportSvg: () => Blob | null;
+}
 
 interface MindMapProps {
   doc: MindMapDoc;
   /** Fires after every canvas edit with the updated canonical doc. */
   onChange?: (doc: MindMapDoc) => void;
+  ref?: Ref<MindMapHandle>;
 }
 
-export function MindMap({ doc, onChange }: MindMapProps) {
+export function MindMap({ doc, onChange, ref }: MindMapProps) {
   const elRef = useRef<HTMLDivElement>(null);
-  // The live doc, used to preserve canonical-only fields across edits. Re-seeded
-  // whenever a new `doc` is loaded (import / new map).
+  const meRef = useRef<MindElixirInstance | null>(null);
+  // The live doc, used to preserve canonical-only fields across edits.
   const docRef = useRef(doc);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      exportPng: () => meRef.current?.exportPng() ?? Promise.resolve(null),
+      exportSvg: () => meRef.current?.exportSvg() ?? null,
+    }),
+    [],
+  );
 
   useEffect(() => {
     const el = elRef.current;
@@ -24,8 +39,8 @@ export function MindMap({ doc, onChange }: MindMapProps) {
     docRef.current = doc;
 
     const me = new MindElixir({
-      el,
       // SIDE = main branches split left/right of the root (MindManager's look).
+      el,
       direction: MindElixir.SIDE,
       theme: mindManagerTheme as never,
       draggable: true,
@@ -34,6 +49,7 @@ export function MindMap({ doc, onChange }: MindMapProps) {
       keypress: true,
     });
     me.init({ nodeData: { ...toMindElixir(doc.root), root: true } } as never);
+    meRef.current = me;
 
     requestAnimationFrame(() => {
       const view = me as unknown as { scaleFit?: () => void; toCenter?: () => void };
@@ -56,6 +72,7 @@ export function MindMap({ doc, onChange }: MindMapProps) {
 
     return () => {
       me.bus.removeListener("operation", handleOperation);
+      meRef.current = null;
       el.innerHTML = "";
     };
   }, [doc]);

@@ -68,6 +68,8 @@ export interface MindMapDoc {
   root: MapNode;
   links?: CrossLink[];
   boundaries?: Boundary[];
+  /** Top-level topics not attached to the central hierarchy (legends, notes). */
+  floatingTopics?: MapNode[];
   theme?: string;
   meta?: {
     createdAt?: string;

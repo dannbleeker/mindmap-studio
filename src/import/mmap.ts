@@ -1,15 +1,22 @@
 import { XMLParser } from "fast-xml-parser";
 import { strFromU8, unzipSync } from "fflate";
-import type { MapNode, MindMapDoc } from "../model/types";
+import type { Boundary, CrossLink, MapNode, MindMapDoc, NodeId } from "../model/types";
 
 // MindManager .mmap importer (one-way).
 //
-// A .mmap is a ZIP archive whose map lives in `Document.xml`, using the
-// namespace http://schemas.mindjet.com/MindManager/Application/2003. The format
-// is proprietary and only partially documented, so this importer is
-// deliberately lossy + defensive: it recovers the topic tree (and notes), warns
-// about features it sees but cannot yet map, and throws a *useful* error when
-// handed something that is not a MindManager map.
+// A .mmap is a ZIP archive whose map lives in `Document.xml`, namespace
+// http://schemas.mindjet.com/MindManager/Application/2003. The field shapes
+// below are taken from the bundled XSD schemas, so they are authoritative
+// (not guessed). The importer is defensive: it recovers everything it
+// understands, warns about what it deliberately drops, and throws a useful
+// error when handed something that is not a MindManager map.
+//
+// Imported: topic tree + text (Text@PlainText), notes
+// (NotesGroup>NotesXhtmlData@PreviewPlainText), stock icons (Icon@IconType),
+// hyperlinks (Hyperlink@Url), relationships (Relationships>Relationship>2x
+// ConnectionGroup>Connection>ObjectReference@OIdRef), boundaries
+// (Topic>OneBoundary, over the topic's subtree), and floating topics
+// (FloatingTopics). Out of scope: the task/PM layer (warned, not imported).
 
 export interface MmapImportResult {
   doc: MindMapDoc;
@@ -21,22 +28,29 @@ const ATTR = "@_";
 // biome-ignore lint/suspicious/noExplicitAny: parsed XML is dynamically shaped
 type Xml = any;
 
+interface ParseContext {
+  warnings: string[];
+  boundaries: Boundary[];
+}
+
 function asList<T>(x: T | T[] | undefined | null): T[] {
   if (x === undefined || x === null) return [];
   return Array.isArray(x) ? x : [x];
 }
 
-function extractText(topic: Xml): string {
-  const t = topic?.Text;
+function extractText(node: Xml): string {
+  const t = node?.Text;
   if (!t) return "";
   return String(t[`${ATTR}PlainText`] ?? t[`${ATTR}Text`] ?? t["#text"] ?? "");
 }
 
 function extractNote(topic: Xml): string | undefined {
-  const n = topic?.Notes;
-  if (!n) return undefined;
-  const c = n?.CDATA?.[`${ATTR}Text`] ?? n?.[`${ATTR}Text`] ?? n?.["#text"];
-  return c ? String(c) : undefined;
+  // Authoritative: NotesGroup > NotesXhtmlData[@PreviewPlainText].
+  const preview = topic?.NotesGroup?.NotesXhtmlData?.[`${ATTR}PreviewPlainText`];
+  if (preview) return String(preview);
+  // Tolerate other note shapes.
+  const legacy = topic?.Notes?.CDATA?.[`${ATTR}Text`] ?? topic?.Notes?.["#text"];
+  return legacy ? String(legacy) : undefined;
 }
 
 function extractIcons(topic: Xml): string[] {
@@ -47,6 +61,12 @@ function extractIcons(topic: Xml): string[] {
       return typeof type === "string" ? type.replace(/^urn:mindjet:/, "") : "";
     })
     .filter((name) => name.length > 0);
+}
+
+function subtreeIds(node: MapNode): NodeId[] {
+  const ids: NodeId[] = [node.id];
+  for (const child of node.children) ids.push(...subtreeIds(child));
+  return ids;
 }
 
 function countNodes(node: MapNode): number {
@@ -61,7 +81,7 @@ function makeId(): string {
   return `n${idCounter}`;
 }
 
-function topicToNode(topic: Xml, warnings: string[]): MapNode {
+function topicToNode(topic: Xml, ctx: ParseContext): MapNode {
   const node: MapNode = {
     id: String(topic?.[`${ATTR}OId`] ?? makeId()),
     topic: extractText(topic),
@@ -71,23 +91,47 @@ function topicToNode(topic: Xml, warnings: string[]): MapNode {
   const note = extractNote(topic);
   if (note) node.note = note;
 
+  const url = topic?.Hyperlink?.[`${ATTR}Url`];
+  if (url) node.hyperlink = String(url);
+
   const icons = extractIcons(topic);
   if (icons.length > 0) node.icons = icons;
 
-  // Task scheduling data (dates, priority, progress) exists in real maps, but the
-  // PM layer is out of scope — flag it rather than silently dropping it.
+  // Task scheduling data (dates, priority, progress) is out of scope (no PM
+  // layer) — flag it rather than silently dropping it.
   if (topic?.Task) {
-    warnings.push(
+    ctx.warnings.push(
       `"${node.topic || node.id}": task info present — not imported (PM features out of scope).`,
     );
   }
 
-  node.children = asList(topic?.SubTopics?.Topic).map((t) => topicToNode(t, warnings));
+  node.children = asList(topic?.SubTopics?.Topic).map((child) => topicToNode(child, ctx));
+
+  // A boundary drawn on this topic encloses its subtree.
+  if (topic?.OneBoundary) {
+    ctx.boundaries.push({ id: `b${ctx.boundaries.length + 1}`, nodeIds: subtreeIds(node) });
+  }
+
   return node;
 }
 
+function extractRelationships(map: Xml): CrossLink[] {
+  const links: CrossLink[] = [];
+  asList(map?.Relationships?.Relationship).forEach((rel, i) => {
+    const oids = asList(rel?.ConnectionGroup)
+      .map((cg) => cg?.Connection?.ObjectReference?.[`${ATTR}OIdRef`])
+      .filter(Boolean)
+      .map(String);
+    if (oids.length >= 2) {
+      const label = extractText(rel);
+      links.push({ id: `r${i + 1}`, from: oids[0], to: oids[1], ...(label ? { label } : {}) });
+    }
+  });
+  return links;
+}
+
 export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
-  const warnings: string[] = [];
+  const ctx: ParseContext = { warnings: [], boundaries: [] };
 
   const files = unzipSync(zipBytes);
   const entryName = Object.keys(files).find((k) => /(^|\/)document\.xml$/i.test(k));
@@ -114,14 +158,22 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
   }
 
   idCounter = 0;
-  const root = topicToNode(rootTopic, warnings);
+  const root = topicToNode(rootTopic, ctx);
 
-  // Honesty check: warn about topics left behind — floating / detached topics
-  // that live outside the central hierarchy (e.g. legends, sticky notes).
+  // Map-level floating topics (legends, sticky notes outside the central tree).
+  const floatingTopics = [
+    ...asList(map?.FloatingTopics?.Topic),
+    ...asList(rootTopic?.FloatingTopics?.Topic),
+  ].map((t) => topicToNode(t, ctx));
+
+  const links = extractRelationships(map);
+
+  // Honesty check: warn about any topics still left behind.
   const totalTopics = (xml.match(/<ap:Topic[\s>]/g) ?? []).length;
-  const importedTopics = countNodes(root);
+  const importedTopics =
+    countNodes(root) + floatingTopics.reduce((sum, f) => sum + countNodes(f), 0);
   if (totalTopics > importedTopics) {
-    warnings.push(
+    ctx.warnings.push(
       `${totalTopics - importedTopics} topic(s) outside the central hierarchy (floating/detached) were not imported.`,
     );
   }
@@ -131,8 +183,11 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
     id: makeId(),
     title: root.topic || "Imported map",
     root,
+    ...(links.length > 0 ? { links } : {}),
+    ...(ctx.boundaries.length > 0 ? { boundaries: ctx.boundaries } : {}),
+    ...(floatingTopics.length > 0 ? { floatingTopics } : {}),
     meta: { source: "mmap" },
   };
 
-  return { doc, warnings };
+  return { doc, warnings: ctx.warnings };
 }

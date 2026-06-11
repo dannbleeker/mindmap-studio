@@ -21,9 +21,10 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 - [ ] Phase 2 — robust `.mmap` batch import, Walk-Through presentation mode,
       share/export (PDF, self-contained HTML), images + boundaries.
-- [ ] `.mmap` importer follow-ups: import floating/detached topics (currently
-      counted + warned, not imported); verify the real notes + relationship
-      formats (the sample map had neither, so those code paths are still guesses).
+- [ ] Validate the `.mmap` importer's notes / hyperlinks / relationships /
+      boundaries / floating-topic paths against a real map that *uses* them — the
+      current impl is XSD-authoritative + synthetic-tested, but Dann's sample
+      exercised none of them.
 - [ ] Custom tapered-branch renderer (only if pixel-exact organic branches are
       ever wanted; mind-elixir's default is already close).
 - [ ] Bump Vite 6 → 8 to match TP Studio.

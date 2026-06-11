@@ -1,10 +1,11 @@
-import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { wrapSvgHtml } from "./io/html";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
 import { Presentation } from "./present/Presentation";
+import { findMatches } from "./search";
 import {
   type MapSummary,
   deleteMap,
@@ -26,6 +27,16 @@ const controlStyle = {
   cursor: "pointer",
 } as const;
 
+const inputStyle = {
+  fontSize: 13,
+  color: "#26215c",
+  border: "1px solid #cecbf6",
+  background: "#fff",
+  borderRadius: 8,
+  padding: "6px 10px",
+  width: 130,
+} as const;
+
 function newDoc(): MindMapDoc {
   return {
     schemaVersion: 1,
@@ -45,6 +56,9 @@ export function App() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
+  const [query, setQuery] = useState("");
+  const [matchInfo, setMatchInfo] = useState("");
+  const searchCursor = useRef({ q: "", i: -1 });
 
   const refreshMaps = useCallback(async () => {
     try {
@@ -164,6 +178,21 @@ export function App() {
     download(new Blob([html], { type: "text/html" }), `${baseName()}.html`);
   }
 
+  function runSearch(event: FormEvent) {
+    event.preventDefault();
+    const matches = findMatches(liveDocRef.current.root, query);
+    if (matches.length === 0) {
+      setMatchInfo(query.trim() ? "no matches" : "");
+      return;
+    }
+    // Cycle through matches on repeated Enter; restart when the query changes.
+    const cursor = searchCursor.current;
+    const i = cursor.q === query ? (cursor.i + 1) % matches.length : 0;
+    searchCursor.current = { q: query, i };
+    mapRef.current?.focusNode(matches[i]);
+    setMatchInfo(`${i + 1}/${matches.length}`);
+  }
+
   // Restore the last-opened map on startup; fall back to the sample.
   useEffect(() => {
     let cancelled = false;
@@ -227,6 +256,16 @@ export function App() {
         >
           ▶ Present
         </button>
+        <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Find…"
+            aria-label="Find node"
+            style={inputStyle}
+          />
+          {matchInfo && <span style={{ fontSize: 11, color: "#73726c" }}>{matchInfo}</span>}
+        </form>
         <span style={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "#73726c" }}>Export</span>
         <button type="button" onClick={exportMarkdown} style={controlStyle}>

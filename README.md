@@ -15,6 +15,8 @@ GitHub Pages).
   XSD (topic tree, notes, icons, hyperlinks, relationships, boundaries, floating topics).
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   plus a node editor panel (icons, tags, font size/color, link, memo) via node-menu.
+- **Find** — search the map by topic; matches are focused and selected on the canvas,
+  cycling through multiple hits on repeated Enter.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.

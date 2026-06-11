@@ -9,6 +9,7 @@ import { mindManagerTheme } from "./theme";
 export interface MindMapHandle {
   exportPng: () => Promise<Blob | null>;
   exportSvg: () => Blob | null;
+  focusNode: (id: string) => void;
 }
 
 interface MindMapProps {
@@ -31,6 +32,19 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
     () => ({
       exportPng: () => meRef.current?.exportPng() ?? Promise.resolve(null),
       exportSvg: () => meRef.current?.exportSvg() ?? null,
+      focusNode: (id: string) => {
+        const me = meRef.current;
+        if (!me) return;
+        try {
+          const ele = me.findEle(id);
+          if (ele) {
+            me.scrollIntoView(ele, true);
+            me.selectNode(ele);
+          }
+        } catch {
+          // node not found / not rendered
+        }
+      },
     }),
     [],
   );

@@ -59,6 +59,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   the model and persist.
 - **Self-contained HTML export** — a `.html` button exports the map as a single
   standalone HTML file with the SVG embedded; opens anywhere, offline, no deps.
+- **Find nodes** — a header search box matches topics (case-insensitive), focuses
+  and selects the match on the canvas, and cycles through multiple hits on repeated
+  Enter (with an `n/total` counter). Matching is a pure, unit-tested helper
+  (`src/search.ts`).
 
 ### Changed
 

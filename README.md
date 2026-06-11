@@ -27,11 +27,16 @@ tune the field mapping. Drop a sample map in and run the test to see what surviv
 
 ```sh
 pnpm install
-pnpm dev         # look spike — dev server
-pnpm test        # format spike — importer tests
+pnpm dev         # dev server (preview: "mindmap-dev", port 5175)
+pnpm gate        # full local gate — run before every push
+pnpm test        # importer + unit tests (vitest)
 pnpm build       # production build
-pnpm typecheck   # tsc --noEmit
 ```
+
+`pnpm gate` is the "green before done" check: typecheck → lint/format (Biome) →
+dead-code (knip) → tests → build → bundle-size budget, fail-fast. CI
+(`.github/workflows/ci.yml`) runs the same command. See `CLAUDE.md` for how we
+build, `CHANGELOG.md` for what's shipped, and `NEXT_STEPS.md` for open work.
 
 ## Roadmap (abridged)
 

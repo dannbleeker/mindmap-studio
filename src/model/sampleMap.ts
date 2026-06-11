@@ -23,11 +23,7 @@ export const sampleDoc: MindMapDoc = {
       {
         id: "ecom",
         topic: "E-commerce",
-        children: [
-          leaf("e1", "PDP redesign"),
-          leaf("e2", "Checkout A/B"),
-          leaf("e3", "App push"),
-        ],
+        children: [leaf("e1", "PDP redesign"), leaf("e2", "Checkout A/B"), leaf("e3", "App push")],
       },
       {
         id: "stores",

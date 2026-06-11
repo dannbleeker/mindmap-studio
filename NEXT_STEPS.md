@@ -4,11 +4,8 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Blocking / decisions
 
-- [ ] **GitHub repo + Pages deploy** (name, visibility, account) — needed for CI
-      to actually run. The workflow is in place and pinned to pnpm 11.0.9, but is
-      **unverified until the first push**.
-- [ ] **Get a real `.mmap` export** from Dann to harden the importer's field
-      mapping (currently validated only against a synthetic fixture).
+- [ ] **GitHub Pages deploy** — the repo is live and CI is green; the actual
+      Pages publish (build + deploy workflow) isn't set up yet.
 
 ## Phase 1 — Brainstorming MVP
 
@@ -24,6 +21,9 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 - [ ] Phase 2 — robust `.mmap` batch import, Walk-Through presentation mode,
       share/export (PDF, self-contained HTML), images + boundaries.
+- [ ] `.mmap` importer follow-ups: import floating/detached topics (currently
+      counted + warned, not imported); verify the real notes + relationship
+      formats (the sample map had neither, so those code paths are still guesses).
 - [ ] Custom tapered-branch renderer (only if pixel-exact organic branches are
       ever wanted; mind-elixir's default is already close).
 - [ ] Bump Vite 6 → 8 to match TP Studio.

@@ -12,9 +12,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   (`src/model/types.ts`) as the single source of truth.
 - **MindManager-style render** — theme with a per-branch colour palette,
   two-sided radial layout, and rounded topics (`src/mindmap/`).
-- **One-way `.mmap` importer** (`src/import/mmap.ts`) — recovers the topic tree +
-  notes and warns on unmapped features. Validated against a synthetic fixture;
-  pending a real `.mmap` to harden field mapping.
+- **One-way `.mmap` importer** (`src/import/mmap.ts`) — recovers the topic tree,
+  notes, and MindManager stock icons (`<ap:Icon IconType>` → `node.icons`); warns
+  on out-of-scope task data and on floating/detached topics left outside the
+  central hierarchy. Validated against a **real MindManager export** (a 25-topic
+  map imported with zero content loss), plus synthetic unit fixtures and a
+  CI-safe, env-gated (`MMAP_FILE`) integration test.
 - **The "green before done" gate** — `pnpm gate` runs typecheck → lint/format
   (Biome) → dead-code (knip) → tests (vitest) → build (vite) → bundle-size
   budget, fail-fast. Mirrored in GitHub Actions CI (`.github/workflows/ci.yml`).

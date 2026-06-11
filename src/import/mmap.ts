@@ -39,6 +39,22 @@ function extractNote(topic: Xml): string | undefined {
   return c ? String(c) : undefined;
 }
 
+function extractIcons(topic: Xml): string[] {
+  return asList(topic?.IconsGroup?.Icons?.Icon)
+    .map((icon) => {
+      const type = icon?.[`${ATTR}IconType`];
+      // e.g. "urn:mindjet:ThumbsUp" -> "ThumbsUp"
+      return typeof type === "string" ? type.replace(/^urn:mindjet:/, "") : "";
+    })
+    .filter((name) => name.length > 0);
+}
+
+function countNodes(node: MapNode): number {
+  let total = 1;
+  for (const child of node.children) total += countNodes(child);
+  return total;
+}
+
 let idCounter = 0;
 function makeId(): string {
   idCounter += 1;
@@ -55,9 +71,15 @@ function topicToNode(topic: Xml, warnings: string[]): MapNode {
   const note = extractNote(topic);
   if (note) node.note = note;
 
-  // These exist in real files; flagging keeps the import honest about loss.
-  if (topic?.Markers || topic?.IconKey || topic?.Icons) {
-    warnings.push(`Topic "${node.topic}": markers/icons present but not yet imported.`);
+  const icons = extractIcons(topic);
+  if (icons.length > 0) node.icons = icons;
+
+  // Task scheduling data (dates, priority, progress) exists in real maps, but the
+  // PM layer is out of scope — flag it rather than silently dropping it.
+  if (topic?.Task) {
+    warnings.push(
+      `"${node.topic || node.id}": task info present — not imported (PM features out of scope).`,
+    );
   }
 
   node.children = asList(topic?.SubTopics?.Topic).map((t) => topicToNode(t, warnings));
@@ -93,6 +115,16 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
 
   idCounter = 0;
   const root = topicToNode(rootTopic, warnings);
+
+  // Honesty check: warn about topics left behind — floating / detached topics
+  // that live outside the central hierarchy (e.g. legends, sticky notes).
+  const totalTopics = (xml.match(/<ap:Topic[\s>]/g) ?? []).length;
+  const importedTopics = countNodes(root);
+  if (totalTopics > importedTopics) {
+    warnings.push(
+      `${totalTopics - importedTopics} topic(s) outside the central hierarchy (floating/detached) were not imported.`,
+    );
+  }
 
   const doc: MindMapDoc = {
     schemaVersion: 1,

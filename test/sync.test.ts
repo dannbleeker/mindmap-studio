@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fromMindElixir, toMindElixir } from "../src/mindmap/sync";
+import { fromMindElixir, toArrows, toMindElixir } from "../src/mindmap/sync";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 
 const n = (
@@ -63,6 +63,12 @@ describe("mind-elixir sync", () => {
     const back = fromMindElixir(toMindElixir(doc.root), doc);
     expect(back.links).toEqual(doc.links);
     expect(back.id).toBe("d");
+  });
+
+  it("maps links to arrows and back", () => {
+    const arrows = toArrows(doc.links);
+    expect(arrows.map((a) => [a.from, a.to])).toEqual([["a", "b"]]);
+    expect(fromMindElixir(toMindElixir(doc.root), doc, arrows).links).toEqual(doc.links);
   });
 
   it("a brand-new node (unknown id) carries no stale note", () => {

@@ -54,6 +54,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Walk-Through presentation mode** — a "▶ Present" button opens a fullscreen
   slide view: an overview (title + branches), then one slide per branch with its
   nested bullets, navigated with Prev/Next, arrow keys, and Esc.
+- **Relationship arrows** — imported `.mmap` relationships (`doc.links`) render as
+  curved arrows between nodes, and arrows drawn on the canvas round-trip back into
+  the model and persist.
 - **Self-contained HTML export** — a `.html` button exports the map as a single
   standalone HTML file with the SVG embedded; opens anywhere, offline, no deps.
 

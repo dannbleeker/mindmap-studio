@@ -3,7 +3,7 @@ import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import type { MindMapDoc } from "../model/types";
-import { type MeNode, fromMindElixir, toMindElixir } from "./sync";
+import { type MeArrow, type MeNode, fromMindElixir, toArrows, toMindElixir } from "./sync";
 import { mindManagerTheme } from "./theme";
 
 export interface MindMapHandle {
@@ -52,7 +52,10 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
     });
     // Node editor panel (icons / tags / font style / link) — must install before init.
     me.install(nodeMenu);
-    me.init({ nodeData: { ...toMindElixir(doc.root), root: true } } as never);
+    me.init({
+      nodeData: { ...toMindElixir(doc.root), root: true },
+      arrows: toArrows(doc.links),
+    } as never);
     meRef.current = me;
 
     requestAnimationFrame(() => {
@@ -63,8 +66,8 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
 
     // Capture canvas edits back into the canonical model.
     const handleOperation = () => {
-      const { nodeData } = me.getData() as unknown as { nodeData: MeNode };
-      const updated = fromMindElixir(nodeData, docRef.current);
+      const data = me.getData() as unknown as { nodeData: MeNode; arrows?: MeArrow[] };
+      const updated = fromMindElixir(data.nodeData, docRef.current, data.arrows);
       docRef.current = updated;
       onChangeRef.current?.(updated);
     };

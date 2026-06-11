@@ -1,0 +1,32 @@
+{
+  "name": "mindmap-studio",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Local-first mind mapping PWA — a MindManager replacement. Phase 0 spike.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "biome check ."
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.1",
+    "fflate": "^0.8.2",
+    "mind-elixir": "^4.3.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}

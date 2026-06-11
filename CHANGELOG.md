@@ -101,3 +101,7 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - The `.mmap` importer now **warns when a map has floating topics** — they're captured
   into the model (and the `.json` export) but not drawn on the canvas yet, so the import
   banner says so instead of hiding them silently.
+- Upgraded the build toolchain to **Vite 8** (6.4.3 → 8.0.16) with `@vitejs/plugin-react`
+  6, matching TP Studio. Behavior-preserving — full gate green and the app re-verified
+  in-browser (render, search, exports, no console errors); the production bundle even
+  shrank (~100.6 → ~96.8 kB gz entry).

@@ -1,9 +1,10 @@
-import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { parseMmap } from "./import/mmap";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
+import { loadCurrent, saveCurrent } from "./store/mapStore";
 
 const buttonStyle = {
   fontSize: 13,
@@ -17,19 +18,27 @@ const buttonStyle = {
 } as const;
 
 export function App() {
-  // `doc` re-seeds the canvas on load (import/new). Live edits are tracked in a
-  // ref so they don't re-init mind-elixir (which would reset the view).
+  // `doc` re-seeds the canvas on load (import / new / startup). Live edits are
+  // tracked in a ref so they don't re-init mind-elixir (which would reset view).
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  function load(next: MindMapDoc, nextWarnings: string[] = []) {
+  function scheduleSave() {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveCurrent(liveDocRef.current).catch(() => {});
+    }, 500);
+  }
+
+  const load = useCallback((next: MindMapDoc, nextWarnings: string[] = []) => {
     liveDocRef.current = next;
     setWarnings(nextWarnings);
     setError(null);
     setDoc(next);
-  }
+  }, []);
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -43,6 +52,7 @@ export function App() {
         const { doc: imported, warnings: w } = parseMmap(new Uint8Array(await file.arrayBuffer()));
         load(imported, w);
       }
+      scheduleSave();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -58,6 +68,19 @@ export function App() {
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  // Reload the last-saved map on startup; fall back to the sample.
+  useEffect(() => {
+    let cancelled = false;
+    loadCurrent()
+      .then((saved) => {
+        if (!cancelled && saved) load(saved);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [load]);
 
   // Dev-only hook so the live model can be read during browser verification.
   useEffect(() => {
@@ -129,6 +152,7 @@ export function App() {
           doc={doc}
           onChange={(d) => {
             liveDocRef.current = d;
+            scheduleSave();
           }}
         />
       </div>

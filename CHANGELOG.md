@@ -32,3 +32,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Markdown I/O** (`src/io/markdown.ts`) — open `.md` outlines as maps and export
   any map to `.md` (H1 root + nested bullets, round-trippable); wired into the open
   dialog (accepts `.md` and `.mmap`) and an Export .md button.
+- **Edit capture** (`src/mindmap/sync.ts`) — canvas edits flow back into the
+  canonical model (mind-elixir `operation` → `fromMindElixir`), preserving
+  canonical-only fields (notes/tasks/images) by id, so Export .md reflects live edits.
+- **Local-first persistence** (`src/store/mapStore.ts`) — the current map autosaves
+  to IndexedDB (debounced) and reloads on startup, so work survives a refresh.

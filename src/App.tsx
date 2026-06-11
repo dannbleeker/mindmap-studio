@@ -1,4 +1,4 @@
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { parseMmap } from "./import/mmap";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import { MindMap } from "./mindmap/MindMap";
@@ -17,25 +17,31 @@ const buttonStyle = {
 } as const;
 
 export function App() {
+  // `doc` re-seeds the canvas on load (import/new). Live edits are tracked in a
+  // ref so they don't re-init mind-elixir (which would reset the view).
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
+  const liveDocRef = useRef<MindMapDoc>(sampleDoc);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  function load(next: MindMapDoc, nextWarnings: string[] = []) {
+    liveDocRef.current = next;
+    setWarnings(nextWarnings);
+    setError(null);
+    setDoc(next);
+  }
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = ""; // allow re-selecting the same file
     if (!file) return;
-    setError(null);
-    setWarnings([]);
     try {
       const name = file.name.toLowerCase();
       if (name.endsWith(".md") || name.endsWith(".markdown")) {
-        setDoc(fromMarkdown(await file.text()));
+        load(fromMarkdown(await file.text()));
       } else {
-        const bytes = new Uint8Array(await file.arrayBuffer());
-        const { doc: imported, warnings: w } = parseMmap(bytes);
-        setDoc(imported);
-        setWarnings(w);
+        const { doc: imported, warnings: w } = parseMmap(new Uint8Array(await file.arrayBuffer()));
+        load(imported, w);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -43,14 +49,23 @@ export function App() {
   }
 
   function exportMarkdown() {
-    const blob = new Blob([toMarkdown(doc)], { type: "text/markdown" });
+    const live = liveDocRef.current;
+    const blob = new Blob([toMarkdown(live)], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${doc.title || "mindmap"}.md`;
+    a.download = `${live.title || "mindmap"}.md`;
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  // Dev-only hook so the live model can be read during browser verification.
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      (window as unknown as { __getLiveDoc?: () => MindMapDoc }).__getLiveDoc = () =>
+        liveDocRef.current;
+    }
+  }, []);
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -110,7 +125,12 @@ export function App() {
       )}
 
       <div style={{ flex: 1, minHeight: 0 }}>
-        <MindMap doc={doc} />
+        <MindMap
+          doc={doc}
+          onChange={(d) => {
+            liveDocRef.current = d;
+          }}
+        />
       </div>
     </div>
   );

@@ -18,7 +18,8 @@ export interface TaskInfo {
 export interface NodeStyle {
   color?: string;
   background?: string;
-  fontSize?: number;
+  /** CSS size string, e.g. "20px" — matches the editor's node-style shape. */
+  fontSize?: string;
   fontWeight?: string;
 }
 

@@ -95,3 +95,6 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   size gate now budgets the entry chunk and reports lazy chunks separately.
 - Bumped the GitHub Actions (checkout, setup-node, pnpm/action-setup) to **v6**
   (node24 runtimes), clearing the Node 20 deprecation annotation on CI.
+- Extracted the six export handlers + the download helper out of `App` into a focused
+  `useMapExports` hook (`src/useMapExports.ts`), so the component reads as orchestration
+  rather than I/O plumbing (behavior-preserving — all formats re-verified in-browser).

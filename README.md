@@ -40,7 +40,8 @@ replaceable:
 
 - `src/mindmap/` — the mind-elixir renderer + a two-way `sync` bridge (canvas edits ⇄ model).
 - `src/import/mmap.ts` — one-way `.mmap` importer (ZIP of `Document.xml`; XSD-sourced mapping).
-- `src/io/` — Markdown and self-contained-HTML I/O.
+- `src/io/` — Markdown, native-JSON, and self-contained-HTML/print I/O.
+- `src/useMapExports.ts` — the header's export handlers (json/md/png/svg/html/pdf).
 - `src/store/mapStore.ts` — IndexedDB-backed multi-map library (autosave + last-opened).
 - `src/present/` — the Walk-Through presentation overlay.
 

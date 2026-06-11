@@ -118,14 +118,15 @@ describe("parseMmap", () => {
     expect(doc.boundaries?.[0].nodeIds).toEqual(["2", "3"]);
   });
 
-  it("imports map-level floating topics", () => {
-    const { doc } = parseMmap(
+  it("imports map-level floating topics and warns they aren't drawn", () => {
+    const { doc, warnings } = parseMmap(
       mmapOf(`${MAP_OPEN}
   <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" /></ap:Topic></ap:OneTopic>
   <ap:FloatingTopics><ap:Topic OId="9"><ap:Text PlainText="Legend" /></ap:Topic></ap:FloatingTopics>
 </ap:Map>`),
     );
     expect(doc.floatingTopics?.map((t) => t.topic)).toEqual(["Legend"]);
+    expect(warnings.some((w) => /floating topic\(s\) imported but not shown/.test(w))).toBe(true);
   });
 
   it("warns about topics it cannot reach", () => {

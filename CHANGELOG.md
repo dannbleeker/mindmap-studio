@@ -98,3 +98,6 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - Extracted the six export handlers + the download helper out of `App` into a focused
   `useMapExports` hook (`src/useMapExports.ts`), so the component reads as orchestration
   rather than I/O plumbing (behavior-preserving — all formats re-verified in-browser).
+- The `.mmap` importer now **warns when a map has floating topics** — they're captured
+  into the model (and the `.json` export) but not drawn on the canvas yet, so the import
+  banner says so instead of hiding them silently.

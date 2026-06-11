@@ -178,6 +178,14 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
     );
   }
 
+  // Floating topics are captured into the model (and the .json export) but aren't
+  // drawn on the canvas yet — say so rather than hiding them silently.
+  if (floatingTopics.length > 0) {
+    ctx.warnings.push(
+      `${floatingTopics.length} floating topic(s) imported but not shown on the canvas yet (kept in the map data and .json export).`,
+    );
+  }
+
   const doc: MindMapDoc = {
     schemaVersion: 1,
     id: makeId(),

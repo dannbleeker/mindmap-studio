@@ -116,6 +116,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Dark canvas theme** — a 🌙/☀ toggle switches the map to a dark theme (same MindManager
   branch palette, dark surfaces) for on-screen presentation; image exports inherit it. The
   switch is live (no reload, no lost edits) and the preference persists across sessions.
+- **Notes editor** — a 📝 Notes panel docks below the canvas and edits the selected node's
+  note in a comfortable textarea (debounced autosave + commit on blur), replacing the
+  cramped node-menu memo. Notes persist and round-trip through the model and `.json`.
 
 ### Fixed
 

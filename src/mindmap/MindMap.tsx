@@ -14,6 +14,12 @@ import {
 } from "./sync";
 import { mindManagerDarkTheme, mindManagerTheme } from "./theme";
 
+export interface SelectedNode {
+  id: string;
+  topic: string;
+  note: string;
+}
+
 export interface MindMapHandle {
   exportPng: () => Promise<Blob | null>;
   exportSvg: () => Blob | null;
@@ -21,6 +27,8 @@ export interface MindMapHandle {
   fit: () => void;
   /** Apply an image to the currently-selected node; false if nothing is selected. */
   setSelectedImage: (image: MapImage) => boolean;
+  /** Set the note on the currently-selected node; false if nothing is selected. */
+  setSelectedNote: (note: string) => boolean;
 }
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
@@ -34,18 +42,22 @@ interface MindMapProps {
   doc: MindMapDoc;
   /** Fires after every canvas edit with the updated canonical doc. */
   onChange?: (doc: MindMapDoc) => void;
+  /** Fires when the canvas selection changes (for the Notes panel). */
+  onSelect?: (selected: SelectedNode | null) => void;
   /** Dark canvas theme (presentation / screen use); exports inherit it. */
   dark?: boolean;
   ref?: Ref<MindMapHandle>;
 }
 
-export function MindMap({ doc, onChange, dark = false, ref }: MindMapProps) {
+export function MindMap({ doc, onChange, onSelect, dark = false, ref }: MindMapProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const meRef = useRef<MindElixirInstance | null>(null);
   // The live doc, used to preserve canonical-only fields across edits.
   const docRef = useRef(doc);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
   // Track dark via a ref so the init effect reads it without re-initialising
   // (re-init would rebuild from the doc prop and drop unsaved live edits).
   const darkRef = useRef(dark);
@@ -84,6 +96,18 @@ export function MindMap({ doc, onChange, dark = false, ref }: MindMapProps) {
         me.reshapeNode(el, {
           image: { url: image.url, width: image.width ?? 120, height: image.height ?? 120 },
         });
+        return true;
+      },
+      setSelectedNote: (note: string): boolean => {
+        const me = meRef.current as
+          | (MindElixirInstance & {
+              currentNode?: unknown;
+              reshapeNode?: (el: unknown, patch: unknown) => void;
+            })
+          | null;
+        const el = me?.currentNode;
+        if (!me || !el || !me.reshapeNode) return false;
+        me.reshapeNode(el, { note });
         return true;
       },
     }),
@@ -129,6 +153,17 @@ export function MindMap({ doc, onChange, dark = false, ref }: MindMapProps) {
     };
     me.bus.addListener("operation", handleOperation);
 
+    // Surface the current selection so App can show a Notes editor for it.
+    const readSelected = (): SelectedNode | null => {
+      const node = (me as unknown as { currentNode?: { nodeObj?: SelectedNode } }).currentNode
+        ?.nodeObj;
+      return node ? { id: node.id, topic: node.topic, note: node.note ?? "" } : null;
+    };
+    const handleSelect = () => onSelectRef.current?.(readSelected());
+    const handleUnselect = () => onSelectRef.current?.(null);
+    me.bus.addListener("selectNodes", handleSelect);
+    me.bus.addListener("unselectNodes", handleUnselect);
+
     // mind-elixir's undo/redo call refresh() WITHOUT firing 'operation', so our
     // model would desync from the canvas (the view reverts but the saved/exported
     // doc wouldn't). Wrap them to re-capture after they revert. This covers both
@@ -152,6 +187,8 @@ export function MindMap({ doc, onChange, dark = false, ref }: MindMapProps) {
 
     return () => {
       me.bus.removeListener("operation", handleOperation);
+      me.bus.removeListener("selectNodes", handleSelect);
+      me.bus.removeListener("unselectNodes", handleUnselect);
       meRef.current = null;
       el.innerHTML = "";
     };

@@ -2,7 +2,7 @@ import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "reac
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { fromMarkdown } from "./io/markdown";
-import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
+import { MindMap, type MindMapHandle, type SelectedNode } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
 import { Presentation } from "./present/Presentation";
@@ -63,6 +63,32 @@ export function App() {
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { dark, toggleDark } = useDarkMode();
   const { query, setQuery, matchInfo, runSearch } = useFind(mapRef, () => liveDocRef.current);
+  // Notes editor: tracks the selected node and a debounced draft of its note.
+  const [selected, setSelected] = useState<SelectedNode | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [notesOpen, setNotesOpen] = useState(false);
+  const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedIdRef = useRef<string | null>(null);
+
+  function handleSelect(sel: SelectedNode | null) {
+    // Only reset the draft when the selected node actually changes — a note
+    // commit re-fires selection for the same node, which must not clobber typing.
+    const changed = sel?.id !== selectedIdRef.current;
+    selectedIdRef.current = sel?.id ?? null;
+    setSelected(sel);
+    if (changed) setNoteDraft(sel?.note ?? "");
+  }
+
+  function onNoteChange(value: string) {
+    setNoteDraft(value);
+    if (noteCommit.current) clearTimeout(noteCommit.current);
+    noteCommit.current = setTimeout(() => mapRef.current?.setSelectedNote(value), 400);
+  }
+
+  function flushNote() {
+    if (noteCommit.current) clearTimeout(noteCommit.current);
+    mapRef.current?.setSelectedNote(noteDraft);
+  }
 
   function showHint(message: string) {
     setHint(message);
@@ -277,6 +303,15 @@ export function App() {
         >
           {dark ? "☀ Light" : "🌙 Dark"}
         </button>
+        <button
+          type="button"
+          onClick={() => setNotesOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={notesOpen}
+          title="Show the note editor for the selected node"
+        >
+          📝 Notes
+        </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}
@@ -372,8 +407,73 @@ export function App() {
             liveDocRef.current = d;
             scheduleSave();
           }}
+          onSelect={handleSelect}
         />
       </div>
+
+      {notesOpen && (
+        <div
+          style={{
+            height: 140,
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            padding: "8px 16px",
+            borderTop: "1px solid #e2e0d8",
+            background: "#fbfbf9",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              fontSize: 12,
+              color: "#73726c",
+            }}
+          >
+            <span>📝 Note{selected ? ` — ${selected.topic}` : ""}</span>
+            <button
+              type="button"
+              onClick={() => setNotesOpen(false)}
+              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+            >
+              Close
+            </button>
+          </div>
+          {selected ? (
+            <textarea
+              value={noteDraft}
+              onChange={(e) => onNoteChange(e.target.value)}
+              onBlur={flushNote}
+              placeholder="Add a note for this node…"
+              aria-label="Node note"
+              style={{
+                flex: 1,
+                resize: "none",
+                border: "1px solid #cecbf6",
+                borderRadius: 8,
+                padding: 8,
+                fontSize: 13,
+                fontFamily: "inherit",
+                color: "#26215c",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                color: "#999",
+                fontSize: 13,
+              }}
+            >
+              Select a node to add or edit its note.
+            </div>
+          )}
+        </div>
+      )}
 
       {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}
     </div>

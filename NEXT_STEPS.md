@@ -31,3 +31,20 @@ Remaining items are genuinely renderer-constrained or Dann-dependent:
       (XSD-authoritative + integration-tested, but only `MMAP_FILE` fully closes it).
 - [ ] Word / PowerPoint / Project / Excel export (heavy generators; `.html`/`.pdf`/`.png`/
       `.svg`/`.opml`/`.md`/`.json` cover sharing + interchange today).
+
+## Shippable product artifacts (parity with TP Studio, 2026-06-12)
+
+Four "ships-with-the-product" artifacts to match the sibling project, each wired into CI to
+stay current. **#1 (project dashboard + stats pipeline + feature catalogue) shipped** — see
+`CHANGELOG.md`. Remaining:
+
+- [ ] **Dual licensing** — `LICENSE` (Apache-2.0, for the code) + `LICENSE-BOOK`
+      (CC BY-NC 4.0, for the prose); a README `## License` section; and an in-app About
+      dialog surfacing copyright + a third-party-notices link (`NOTICE.md` → `/notices.html`).
+- [ ] **User manual** — render the existing `USER_GUIDE.md` to `user-guide.html` at build
+      time and link it in-app (Help/About). The catalogue's `manual` flag already tracks
+      coverage (41/44 today).
+- [ ] **Book** — a longer-form teach-the-domain book under `docs/guide/`, built to **both**
+      PDF and EPUB from one markdown source, with a "Rebuild book" workflow (rebuild only when
+      book inputs change) and an opt-in "send to Kindle". The catalogue's `book` /
+      `bookExample` flags (0/44 today) track coverage; the dashboard already renders the gap.

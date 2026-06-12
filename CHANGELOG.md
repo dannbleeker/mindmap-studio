@@ -26,6 +26,24 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   (Biome) → dead-code (knip) → tests (vitest) → build (vite) → bundle-size
   budget, fail-fast. Mirrored in GitHub Actions CI (`.github/workflows/ci.yml`).
 - **Working agreement** captured in `CLAUDE.md`.
+- **Feature catalogue** (`docs/features.json`) — the curated list of user-facing
+  capabilities that serves as the denominator for documentation coverage; a
+  `check-feature-coverage` gate validates its integrity (ids, areas, dates,
+  flags) and warns when the CHANGELOG advances past the catalogue's reviewed
+  watermark.
+- **Stats pipeline** (`scripts/build-stats.mjs`) — distils the repo's own tooling
+  (Vitest coverage, git history, file + build scan) into `public/stats.json` plus
+  a rolling `public/stats-history.json` for trend sparklines: lines of code by
+  category, coverage, test counts, a high-churn×low-coverage risk map, code
+  hygiene counters, domain richness, footprint and gzip bundle size. A **Stats**
+  workflow (`.github/workflows/stats.yml`) regenerates and commits them back on
+  every push to `main`, loop-guarded by `[skip ci]` + `paths-ignore`.
+- **Project dashboard** (`public/dashboard.html`) — a standalone, backend-free page
+  with two halves: a **live repo pulse** (commit frequency, conventional-commit
+  types, authorship, day/hour rhythm and merged-PR activity, pulled client-side
+  from the unauthenticated GitHub REST API on each open) and **project metrics from
+  CI** (everything from `stats.json`, including the documentation-coverage map and
+  the risk map). Chart.js from a pinned, SRI-checked CDN.
 - **`.mmap` import wired into the app** — an Open-file control runs `parseMmap`
   and renders the result on the canvas, surfacing importer warnings and parse
   errors inline.

@@ -14,8 +14,12 @@
     "deadcode": "knip",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=json --coverage.reporter=text-summary",
     "size": "node scripts/size-budget.mjs",
-    "gate": "tsc --noEmit && biome check . && knip && vitest run && vite build && node scripts/size-budget.mjs"
+    "features": "node scripts/check-feature-coverage.mjs",
+    "build-stats": "node scripts/build-stats.mjs",
+    "stats": "pnpm test:coverage && vite build && pnpm features && pnpm build-stats",
+    "gate": "tsc --noEmit && biome check . && knip && node scripts/check-feature-coverage.mjs && vitest run && vite build && node scripts/size-budget.mjs"
   },
   "dependencies": {
     "@mind-elixir/node-menu": "^5.0.1",
@@ -32,6 +36,7 @@
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^6.0.2",
+    "@vitest/coverage-v8": "2.1.9",
     "fake-indexeddb": "^6.2.5",
     "knip": "^6.16.1",
     "typescript": "^5.7.2",

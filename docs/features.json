@@ -1,0 +1,427 @@
+{
+  "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
+  "reviewedThroughChangelogBullets": 43,
+  "areas": [
+    "editing",
+    "notes",
+    "markers",
+    "styling",
+    "images",
+    "structure",
+    "navigation",
+    "library",
+    "import",
+    "export",
+    "presentation",
+    "pwa"
+  ],
+  "features": [
+    {
+      "id": "keyboard-editing",
+      "name": "Keyboard editing (Enter/Tab/Ctrl+Enter/Delete)",
+      "area": "editing",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "drag-reparent",
+      "name": "Drag to re-parent a node",
+      "area": "editing",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "undo-redo",
+      "name": "Undo / redo (model-synced)",
+      "area": "editing",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "node-menu",
+      "name": "Node editor panel (icons, tags, font size/colour, link)",
+      "area": "editing",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "edit-capture",
+      "name": "Canvas edits captured into the canonical model",
+      "area": "editing",
+      "since": "2026-06-11",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "notes-editor",
+      "name": "Notes editor for the selected node",
+      "area": "notes",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "notes-markdown",
+      "name": "Markdown preview for node notes",
+      "area": "notes",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "marker-palette",
+      "name": "Marker palette (click to toggle on a node)",
+      "area": "markers",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "imported-icon-emoji",
+      "name": "Imported .mmap icons rendered as emoji",
+      "area": "markers",
+      "since": "2026-06-12",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "per-topic-style",
+      "name": "Per-topic styling (shape, fill, border, bold)",
+      "area": "styling",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "theme-gallery",
+      "name": "Canvas theme gallery (Light/Dark/Ocean/Sunset)",
+      "area": "styling",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "per-topic-font",
+      "name": "Per-topic font size / colour / background",
+      "area": "styling",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "node-images",
+      "name": "Attach images to nodes",
+      "area": "images",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "boundaries",
+      "name": "Boundaries (render + draw, two-way)",
+      "area": "structure",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "relationships",
+      "name": "Relationship arrows (render + draw, two-way)",
+      "area": "structure",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "floating-topics",
+      "name": "Imported floating topics rendered",
+      "area": "structure",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cross-map-links",
+      "name": "Cross-map links between maps",
+      "area": "structure",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "outline",
+      "name": "Outline side panel (click to focus)",
+      "area": "navigation",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "outline-filter",
+      "name": "Filter the outline by topic",
+      "area": "navigation",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "find-replace",
+      "name": "Find (topics + notes) & Replace",
+      "area": "navigation",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "find-shortcut",
+      "name": "Press / to focus Find",
+      "area": "navigation",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "collapse-expand",
+      "name": "Collapse / expand all branches",
+      "area": "navigation",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "fit",
+      "name": "Fit map to viewport",
+      "area": "navigation",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "layout-direction",
+      "name": "Layout direction (both / right / left)",
+      "area": "navigation",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "multi-map-library",
+      "name": "Multi-map library (switch / new / delete)",
+      "area": "library",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "templates",
+      "name": "New-map templates (Blank/Brainstorm/SWOT/Project)",
+      "area": "library",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "duplicate-map",
+      "name": "Duplicate the current map",
+      "area": "library",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "library-backup",
+      "name": "Whole-library backup & restore",
+      "area": "library",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "autosave-reload",
+      "name": "Autosave + restore last-opened map",
+      "area": "library",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "panel-persistence",
+      "name": "Remembered open-panel workspace",
+      "area": "library",
+      "since": "2026-06-12",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "import-mmap",
+      "name": "Import MindManager .mmap (lossy, one-way)",
+      "area": "import",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "import-markdown",
+      "name": "Import Markdown outlines",
+      "area": "import",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "import-json",
+      "name": "Import native .json (lossless)",
+      "area": "import",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "import-opml",
+      "name": "Import OPML outlines",
+      "area": "import",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "batch-import",
+      "name": "Multi-file batch import",
+      "area": "import",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "export-json",
+      "name": "Export native .json (lossless)",
+      "area": "export",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "export-markdown",
+      "name": "Export Markdown",
+      "area": "export",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "export-opml",
+      "name": "Export OPML",
+      "area": "export",
+      "since": "2026-06-12",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "export-image",
+      "name": "Export PNG / SVG",
+      "area": "export",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "export-html",
+      "name": "Export self-contained HTML",
+      "area": "export",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "export-pdf",
+      "name": "Print to PDF",
+      "area": "export",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "presentation-mode",
+      "name": "Walk-Through presentation mode",
+      "area": "presentation",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+
+    {
+      "id": "pwa-offline",
+      "name": "Offline-capable (precached app shell)",
+      "area": "pwa",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "pwa-install",
+      "name": "Installable to desktop / home screen",
+      "area": "pwa",
+      "since": "2026-06-11",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    }
+  ]
+}

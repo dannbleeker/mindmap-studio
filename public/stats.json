@@ -1,0 +1,532 @@
+{
+  "generatedAt": "2026-06-12T14:28:50.437Z",
+  "commit": "883f049",
+  "headline": {
+    "linesTsJs": 3976,
+    "tests": 73,
+    "lineCoveragePct": 29.12,
+    "commits": 66,
+    "ageDays": 0,
+    "trackedFiles": 63,
+    "featureManualPct": 93.2,
+    "featureBookPct": 0,
+    "featureExamplePct": 0
+  },
+  "code": [
+    {
+      "category": "App code (src)",
+      "files": 27,
+      "lines": 3039
+    },
+    {
+      "category": "Unit tests",
+      "files": 13,
+      "lines": 902
+    },
+    {
+      "category": "Build scripts",
+      "files": 1,
+      "lines": 35
+    },
+    {
+      "category": "Styles (CSS)",
+      "files": 0,
+      "lines": 0
+    },
+    {
+      "category": "Docs (Markdown)",
+      "files": 0,
+      "lines": 0
+    }
+  ],
+  "coverage": {
+    "lines": {
+      "pct": 29.12,
+      "covered": 639,
+      "total": 2194
+    },
+    "statements": {
+      "pct": 29.12,
+      "covered": 639,
+      "total": 2194
+    },
+    "functions": {
+      "pct": 90.41,
+      "covered": 66,
+      "total": 73
+    },
+    "branches": {
+      "pct": 84.01,
+      "covered": 226,
+      "total": 269
+    }
+  },
+  "tests": {
+    "unit": 73,
+    "e2e": 0,
+    "durationMs": null,
+    "slowest": []
+  },
+  "domain": {
+    "components": 5,
+    "hooks": 3,
+    "ioModules": 6,
+    "canvasThemes": 4,
+    "markers": 12,
+    "templates": 4,
+    "exportFormats": 7
+  },
+  "footprint": {
+    "depsProd": 7,
+    "depsDev": 12,
+    "biggestFiles": [
+      {
+        "name": "App.tsx",
+        "lines": 697
+      },
+      {
+        "name": "mindmap/MindMap.tsx",
+        "lines": 363
+      },
+      {
+        "name": "Panels.tsx",
+        "lines": 343
+      },
+      {
+        "name": "mindmap/sync.ts",
+        "lines": 236
+      },
+      {
+        "name": "import/mmap.ts",
+        "lines": 206
+      }
+    ]
+  },
+  "quality": {
+    "mutationScore": null,
+    "leastCovered": [
+      {
+        "file": "App.tsx",
+        "pct": 0
+      },
+      {
+        "file": "Panels.tsx",
+        "pct": 0
+      },
+      {
+        "file": "templates.ts",
+        "pct": 0
+      },
+      {
+        "file": "ui.ts",
+        "pct": 0
+      },
+      {
+        "file": "useFind.ts",
+        "pct": 0
+      }
+    ],
+    "churnHotspots": [
+      {
+        "file": "App.tsx",
+        "commits": 39
+      },
+      {
+        "file": "mindmap/MindMap.tsx",
+        "commits": 21
+      },
+      {
+        "file": "mindmap/sync.ts",
+        "commits": 8
+      },
+      {
+        "file": "import/mmap.ts",
+        "commits": 6
+      },
+      {
+        "file": "model/types.ts",
+        "commits": 4
+      }
+    ],
+    "risky": [
+      {
+        "file": "App.tsx",
+        "pct": 0,
+        "commits": 39
+      },
+      {
+        "file": "mindmap/MindMap.tsx",
+        "pct": 0,
+        "commits": 21
+      },
+      {
+        "file": "Panels.tsx",
+        "pct": 0,
+        "commits": 3
+      },
+      {
+        "file": "model/sampleMap.ts",
+        "pct": 0,
+        "commits": 3
+      },
+      {
+        "file": "mindmap/theme.ts",
+        "pct": 0,
+        "commits": 3
+      }
+    ]
+  },
+  "hygiene": {
+    "todo": 0,
+    "fixme": 0,
+    "hack": 0,
+    "anyCount": 0,
+    "tsIgnore": 0,
+    "tsExpectError": 0,
+    "biomeIgnore": 4,
+    "nonNull": 2
+  },
+  "bundle": {
+    "jsGzipKb": 124.2,
+    "cssGzipKb": 0.6,
+    "totalGzipKb": 124.8,
+    "entryGzipKb": 103.2,
+    "budgetKb": 150,
+    "withinBudget": true
+  },
+  "docs": {
+    "bookWords": 0,
+    "chapters": 0,
+    "appLoc": 3039,
+    "docToCodeRatio": null
+  },
+  "featureCoverage": {
+    "total": 44,
+    "manual": 41,
+    "manualPct": 93.2,
+    "book": 0,
+    "bookPct": 0,
+    "bookExample": 0,
+    "bookExamplePct": 0,
+    "byArea": {
+      "editing": {
+        "total": 5,
+        "manual": 4,
+        "book": 0
+      },
+      "notes": {
+        "total": 2,
+        "manual": 2,
+        "book": 0
+      },
+      "markers": {
+        "total": 2,
+        "manual": 1,
+        "book": 0
+      },
+      "styling": {
+        "total": 3,
+        "manual": 3,
+        "book": 0
+      },
+      "images": {
+        "total": 1,
+        "manual": 1,
+        "book": 0
+      },
+      "structure": {
+        "total": 4,
+        "manual": 4,
+        "book": 0
+      },
+      "navigation": {
+        "total": 7,
+        "manual": 7,
+        "book": 0
+      },
+      "library": {
+        "total": 6,
+        "manual": 5,
+        "book": 0
+      },
+      "import": {
+        "total": 5,
+        "manual": 5,
+        "book": 0
+      },
+      "export": {
+        "total": 6,
+        "manual": 6,
+        "book": 0
+      },
+      "presentation": {
+        "total": 1,
+        "manual": 1,
+        "book": 0
+      },
+      "pwa": {
+        "total": 2,
+        "manual": 2,
+        "book": 0
+      }
+    },
+    "gaps": {
+      "noManual": [
+        {
+          "id": "imported-icon-emoji",
+          "name": "Imported .mmap icons rendered as emoji",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "panel-persistence",
+          "name": "Remembered open-panel workspace",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "edit-capture",
+          "name": "Canvas edits captured into the canonical model",
+          "since": "2026-06-11"
+        }
+      ],
+      "noBook": [
+        {
+          "id": "undo-redo",
+          "name": "Undo / redo (model-synced)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "notes-editor",
+          "name": "Notes editor for the selected node",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "notes-markdown",
+          "name": "Markdown preview for node notes",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "marker-palette",
+          "name": "Marker palette (click to toggle on a node)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "imported-icon-emoji",
+          "name": "Imported .mmap icons rendered as emoji",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "per-topic-style",
+          "name": "Per-topic styling (shape, fill, border, bold)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "theme-gallery",
+          "name": "Canvas theme gallery (Light/Dark/Ocean/Sunset)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "node-images",
+          "name": "Attach images to nodes",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "boundaries",
+          "name": "Boundaries (render + draw, two-way)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "floating-topics",
+          "name": "Imported floating topics rendered",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "cross-map-links",
+          "name": "Cross-map links between maps",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "outline",
+          "name": "Outline side panel (click to focus)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "outline-filter",
+          "name": "Filter the outline by topic",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "find-replace",
+          "name": "Find (topics + notes) & Replace",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "find-shortcut",
+          "name": "Press / to focus Find",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "collapse-expand",
+          "name": "Collapse / expand all branches",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "fit",
+          "name": "Fit map to viewport",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "layout-direction",
+          "name": "Layout direction (both / right / left)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "templates",
+          "name": "New-map templates (Blank/Brainstorm/SWOT/Project)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "duplicate-map",
+          "name": "Duplicate the current map",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "library-backup",
+          "name": "Whole-library backup & restore",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "panel-persistence",
+          "name": "Remembered open-panel workspace",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "import-json",
+          "name": "Import native .json (lossless)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "import-opml",
+          "name": "Import OPML outlines",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "batch-import",
+          "name": "Multi-file batch import",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "export-json",
+          "name": "Export native .json (lossless)",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "export-opml",
+          "name": "Export OPML",
+          "since": "2026-06-12"
+        },
+        {
+          "id": "keyboard-editing",
+          "name": "Keyboard editing (Enter/Tab/Ctrl+Enter/Delete)",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "drag-reparent",
+          "name": "Drag to re-parent a node",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "node-menu",
+          "name": "Node editor panel (icons, tags, font size/colour, link)",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "edit-capture",
+          "name": "Canvas edits captured into the canonical model",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "per-topic-font",
+          "name": "Per-topic font size / colour / background",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "relationships",
+          "name": "Relationship arrows (render + draw, two-way)",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "multi-map-library",
+          "name": "Multi-map library (switch / new / delete)",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "autosave-reload",
+          "name": "Autosave + restore last-opened map",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "import-mmap",
+          "name": "Import MindManager .mmap (lossy, one-way)",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "import-markdown",
+          "name": "Import Markdown outlines",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "export-markdown",
+          "name": "Export Markdown",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "export-image",
+          "name": "Export PNG / SVG",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "export-html",
+          "name": "Export self-contained HTML",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "export-pdf",
+          "name": "Print to PDF",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "presentation-mode",
+          "name": "Walk-Through presentation mode",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "pwa-offline",
+          "name": "Offline-capable (precached app shell)",
+          "since": "2026-06-11"
+        },
+        {
+          "id": "pwa-install",
+          "name": "Installable to desktop / home screen",
+          "since": "2026-06-11"
+        }
+      ]
+    }
+  },
+  "git": {
+    "born": "2026-06-11T20:30:20+02:00",
+    "ageDays": 0,
+    "commits": 66,
+    "commits7d": 66,
+    "authors": [
+      {
+        "name": "Dann Bleeker Pedersen",
+        "count": 66
+      }
+    ],
+    "churn30d": {
+      "added": 12597,
+      "removed": 2426
+    },
+    "changelogEntries": 43
+  }
+}

@@ -325,7 +325,6 @@ export function App() {
   }, []);
 
   // Persist the open-panel layout so the workspace is restored next time.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: persist on any panel toggle
   useEffect(() => {
     try {
       localStorage.setItem(

@@ -1,5 +1,7 @@
+import { useState } from "react";
 import type { SelectedNode } from "./mindmap/MindMap";
 import type { MapNode, NodeStyle } from "./model/types";
+import { renderNote } from "./noteFormat";
 import { outlineRows } from "./outline";
 import { controlStyle, inputStyle } from "./ui";
 
@@ -207,10 +209,11 @@ export function NotesPanel({
   onBlur: () => void;
   onClose: () => void;
 }) {
+  const [preview, setPreview] = useState(false);
   return (
     <div
       style={{
-        height: 140,
+        height: 160,
         display: "flex",
         flexDirection: "column",
         gap: 6,
@@ -228,33 +231,64 @@ export function NotesPanel({
           color: "#73726c",
         }}
       >
-        <span>📝 Note{selected ? ` — ${selected.topic}` : ""}</span>
-        <button
-          type="button"
-          onClick={onClose}
-          style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
-        >
-          Close
-        </button>
+        <span>📝 Note{selected ? ` — ${selected.topic}` : ""} · Markdown</span>
+        <span style={{ display: "flex", gap: 6 }}>
+          {selected && (
+            <button
+              type="button"
+              onClick={() => setPreview((p) => !p)}
+              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+            >
+              {preview ? "Edit" : "Preview"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+          >
+            Close
+          </button>
+        </span>
       </div>
       {selected ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onBlur}
-          placeholder="Add a note for this node…"
-          aria-label="Node note"
-          style={{
-            flex: 1,
-            resize: "none",
-            border: "1px solid #cecbf6",
-            borderRadius: 8,
-            padding: 8,
-            fontSize: 13,
-            fontFamily: "inherit",
-            color: "#26215c",
-          }}
-        />
+        preview ? (
+          <div
+            // Safe: renderNote escapes HTML and only emits a fixed tag subset.
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitised by renderNote
+            dangerouslySetInnerHTML={{
+              __html: renderNote(value) || "<p style='color:#999'>(empty)</p>",
+            }}
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              border: "1px solid #cecbf6",
+              borderRadius: 8,
+              padding: "2px 10px",
+              fontSize: 13,
+              color: "#26215c",
+              background: "#fff",
+            }}
+          />
+        ) : (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={onBlur}
+            placeholder="Add a note… Markdown supported (**bold**, *italic*, # heading, - list, links)"
+            aria-label="Node note"
+            style={{
+              flex: 1,
+              resize: "none",
+              border: "1px solid #cecbf6",
+              borderRadius: 8,
+              padding: 8,
+              fontSize: 13,
+              fontFamily: "inherit",
+              color: "#26215c",
+            }}
+          />
+        )
       ) : (
         <div
           style={{ flex: 1, display: "flex", alignItems: "center", color: "#999", fontSize: 13 }}

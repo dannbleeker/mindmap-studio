@@ -126,7 +126,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `border`). Complements node-menu's font size/colour controls.
 - **Notes editor** — a 📝 Notes panel docks below the canvas and edits the selected node's
   note in a comfortable textarea (debounced autosave + commit on blur), replacing the
-  cramped node-menu memo. Notes persist and round-trip through the model and `.json`.
+  cramped node-menu memo. Notes persist and round-trip through the model and `.json`. A
+  **Preview** toggle renders a safe Markdown subset (headings, bold/italic, lists, code,
+  http(s) links) — `renderNote` in `src/noteFormat.ts` (HTML-escaped, unit-tested).
 - **Outline view** — a ☰ Outline side panel lists the map as an indented, live outline;
   click a row to focus that node on the canvas, and noted nodes show a 📝 marker. A filter
   box narrows the outline by topic. Pure flattener in `src/outline.ts`.

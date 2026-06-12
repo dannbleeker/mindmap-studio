@@ -129,6 +129,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   box narrows the outline by topic. Pure flattener in `src/outline.ts`.
 - **Layout direction** — a picker switches the map between both-sides, right-only, and
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
+- **Collapse / Expand all** — ⊟ / ⊞ toolbar buttons collapse every branch to a level-1
+  overview or expand the whole tree (MindManager's detail-level control).
 - **Marker palette** — a 🏷 Markers bar of common markers (priority/flag/status/etc.);
   click one to toggle it on the selected node. Markers render on the node and persist.
 - **Find & Replace** — the Find bar gains a replace field + "Replace all" that rewrites the

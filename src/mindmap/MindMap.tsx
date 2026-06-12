@@ -34,6 +34,8 @@ export interface MindMapHandle {
   toggleSelectedIcon: (icon: string) => boolean;
   /** Replace the query in every matching node topic; returns the count changed. */
   replaceTopics: (query: string, replacement: string) => number;
+  /** Collapse (false) or expand (true) every branch below the root. */
+  setAllExpanded: (expanded: boolean) => void;
 }
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
@@ -178,6 +180,21 @@ export function MindMap({
         };
         walk((me.getData() as unknown as { nodeData: MeNode }).nodeData);
         return count;
+      },
+      setAllExpanded: (expanded: boolean): void => {
+        const me = meRef.current as
+          | (MindElixirInstance & { refresh?: (data: unknown) => void })
+          | null;
+        if (!me || !me.refresh) return;
+        const data = me.getData() as unknown as { nodeData: MeNode };
+        // Keep the root open; collapse/expand every branch beneath it (level-1 overview).
+        const walk = (node: MeNode, isRoot: boolean) => {
+          if (!isRoot && node.children && node.children.length > 0) node.expanded = expanded;
+          for (const child of node.children ?? []) walk(child, false);
+        };
+        walk(data.nodeData, true);
+        me.refresh(data);
+        fitView(me);
       },
     }),
     [],

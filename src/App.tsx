@@ -313,6 +313,22 @@ export function App() {
         <button type="button" onClick={() => mapRef.current?.fit()} style={controlStyle}>
           Fit
         </button>
+        <button
+          type="button"
+          onClick={() => mapRef.current?.setAllExpanded(false)}
+          style={controlStyle}
+          title="Collapse all branches"
+        >
+          ⊟
+        </button>
+        <button
+          type="button"
+          onClick={() => mapRef.current?.setAllExpanded(true)}
+          style={controlStyle}
+          title="Expand all branches"
+        >
+          ⊞
+        </button>
         <label style={controlStyle}>
           Image
           <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />

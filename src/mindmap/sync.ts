@@ -186,7 +186,13 @@ function meToNode(me: MeNode, prev: Map<string, MapNode>): MapNode {
   if (me.icons?.length) node.icons = me.icons;
   if (me.tags?.length) node.tags = me.tags;
   if (me.hyperLink) node.hyperlink = me.hyperLink;
-  if (me.style) node.style = me.style;
+  if (me.style) {
+    // Drop cleared ("") style keys so the model (and .json) stays tidy.
+    const style = Object.fromEntries(
+      Object.entries(me.style).filter(([, v]) => v !== "" && v != null),
+    );
+    if (Object.keys(style).length > 0) node.style = style as NodeStyle;
+  }
   if (me.expanded === false) node.collapsed = true;
 
   // mind-elixir 5 carries `note` + `image` — prefer the live value, else keep the

@@ -2,7 +2,7 @@ import nodeMenu from "@mind-elixir/node-menu";
 import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
-import type { MapImage, MindMapDoc } from "../model/types";
+import type { MapImage, MindMapDoc, NodeStyle } from "../model/types";
 import { replaceInTopic } from "../search";
 import {
   type MeArrow,
@@ -36,6 +36,8 @@ export interface MindMapHandle {
   replaceTopics: (query: string, replacement: string) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
   setAllExpanded: (expanded: boolean) => void;
+  /** Merge a style patch into the selected node ("" / null clears a key); false if none selected. */
+  setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
 }
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
@@ -195,6 +197,24 @@ export function MindMap({
         walk(data.nodeData, true);
         me.refresh(data);
         fitView(me);
+      },
+      setSelectedStyle: (patch: Partial<NodeStyle>): boolean => {
+        const me = meRef.current as
+          | (MindElixirInstance & {
+              currentNode?: { nodeObj?: { style?: NodeStyle } };
+              reshapeNode?: (el: unknown, patch: unknown) => void;
+            })
+          | null;
+        const el = me?.currentNode;
+        if (!me || !el || !me.reshapeNode) return false;
+        // reshapeNode MERGES style (Object.assign), so a cleared key must be set to
+        // "" (which clears the inline value) — deleting it would leave the old value.
+        const style: Record<string, string> = { ...(el.nodeObj?.style ?? {}) };
+        for (const [key, value] of Object.entries(patch)) {
+          style[key] = value == null ? "" : value;
+        }
+        me.reshapeNode(el, { style });
+        return true;
       },
     }),
     [],

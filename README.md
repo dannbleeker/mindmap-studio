@@ -24,6 +24,7 @@ GitHub Pages).
   that node (noted nodes are marked 📝).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on
   the selected node.
+- **Style** — a per-topic style bar: shape (box/rounded/pill), fill, border, and bold.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.

@@ -1,7 +1,132 @@
 import type { SelectedNode } from "./mindmap/MindMap";
-import type { MapNode } from "./model/types";
+import type { MapNode, NodeStyle } from "./model/types";
 import { outlineRows } from "./outline";
 import { controlStyle, inputStyle } from "./ui";
+
+const FILL_SWATCHES = ["#fde2e2", "#e2ecfd", "#e2fbe8", "#fdf3e2", "#efe2fd", "#ececec"];
+const BORDER_SWATCHES = ["#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"];
+
+const styleBtn = {
+  border: "1px solid #cecbf6",
+  background: "#fff",
+  borderRadius: 6,
+  cursor: "pointer",
+  fontSize: 14,
+  lineHeight: 1,
+  padding: "2px 6px",
+  color: "#26215c",
+} as const;
+
+// Per-topic styling bar: shape, fill, border, bold — applied to the selected node.
+export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => void }) {
+  const swatch = (color: string, onClick: () => void, title: string) => (
+    <button
+      key={title}
+      type="button"
+      onClick={onClick}
+      title={title}
+      style={{
+        width: 18,
+        height: 18,
+        borderRadius: 4,
+        border: "1px solid #cecbf6",
+        background: color,
+        cursor: "pointer",
+        padding: 0,
+      }}
+    />
+  );
+  const label = (text: string) => (
+    <span style={{ fontSize: 12, color: "#73726c", margin: "0 2px 0 6px" }}>{text}</span>
+  );
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 3,
+        flexWrap: "wrap",
+        padding: "6px 16px",
+        background: "#f4f3fb",
+        borderBottom: "1px solid #e2e0d8",
+      }}
+    >
+      {label("Shape")}
+      <button
+        type="button"
+        style={styleBtn}
+        title="Box"
+        onClick={() => onStyle({ borderRadius: "4px" })}
+      >
+        ▭
+      </button>
+      <button
+        type="button"
+        style={styleBtn}
+        title="Rounded"
+        onClick={() => onStyle({ borderRadius: "14px" })}
+      >
+        ▢
+      </button>
+      <button
+        type="button"
+        style={styleBtn}
+        title="Pill"
+        onClick={() => onStyle({ borderRadius: "999px" })}
+      >
+        ⬭
+      </button>
+      {label("Fill")}
+      {FILL_SWATCHES.map((c) => swatch(c, () => onStyle({ background: c }), `Fill ${c}`))}
+      <button
+        type="button"
+        style={styleBtn}
+        title="No fill"
+        onClick={() => onStyle({ background: "" })}
+      >
+        ✕
+      </button>
+      {label("Border")}
+      {BORDER_SWATCHES.map((c) =>
+        swatch(c, () => onStyle({ border: `2px solid ${c}` }), `Border ${c}`),
+      )}
+      <button
+        type="button"
+        style={styleBtn}
+        title="No border"
+        onClick={() => onStyle({ border: "" })}
+      >
+        ✕
+      </button>
+      <button
+        type="button"
+        style={styleBtn}
+        title="Bold"
+        onClick={() => onStyle({ fontWeight: "bold" })}
+      >
+        <b>B</b>
+      </button>
+      <button
+        type="button"
+        style={{ ...styleBtn, fontSize: 12 }}
+        title="Reset style"
+        onClick={() =>
+          onStyle({
+            background: "",
+            border: "",
+            borderRadius: "",
+            color: "",
+            fontWeight: "",
+            fontFamily: "",
+            textDecoration: "",
+          })
+        }
+      >
+        Reset
+      </button>
+    </div>
+  );
+}
 
 // Presentational panels for the canvas chrome. State lives in App; these just
 // render it and call back. Kept out of App so the component reads as orchestration.

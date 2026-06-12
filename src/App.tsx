@@ -1,5 +1,5 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import { MarkerBar, NotesPanel, OutlinePanel } from "./Panels";
+import { MarkerBar, NotesPanel, OutlinePanel, StyleBar } from "./Panels";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
@@ -69,6 +69,7 @@ export function App() {
   const [outlineOpen, setOutlineOpen] = useState(false);
   const [outlineFilter, setOutlineFilter] = useState("");
   const [markersOpen, setMarkersOpen] = useState(false);
+  const [styleOpen, setStyleOpen] = useState(false);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
 
@@ -394,6 +395,15 @@ export function App() {
         >
           🏷 Markers
         </button>
+        <button
+          type="button"
+          onClick={() => setStyleOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={styleOpen}
+          title="Show the style bar (shape, fill, border)"
+        >
+          🎨 Style
+        </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}
@@ -504,6 +514,15 @@ export function App() {
           onToggle={(marker) => {
             const ok = mapRef.current?.toggleSelectedIcon(marker);
             if (!ok) showHint("Select a node first, then click a marker.");
+          }}
+        />
+      )}
+
+      {styleOpen && (
+        <StyleBar
+          onStyle={(patch) => {
+            const ok = mapRef.current?.setSelectedStyle(patch);
+            if (!ok) showHint("Select a node first, then style it.");
           }}
         />
       )}

@@ -119,8 +119,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Canvas theme gallery** — a Theme picker swaps the whole map style live (Light, Dark,
   Ocean, Sunset — each its own branch palette + surfaces), for on-screen presentation;
   image exports inherit it. Switching is live (no reload, no lost edits) and the choice
-  persists across sessions. Per-topic font size/colour/background remain available via the
-  node editor panel.
+  persists across sessions.
+- **Per-topic styling** — a 🎨 Style bar applies shape (box / rounded / pill), fill, border,
+  and bold to the selected node, with ✕ to clear and Reset for all. Styles persist and
+  round-trip through the model and `.json` (`NodeStyle` extended with `borderRadius` /
+  `border`). Complements node-menu's font size/colour controls.
 - **Notes editor** — a 📝 Notes panel docks below the canvas and edits the selected node's
   note in a comfortable textarea (debounced autosave + commit on blur), replacing the
   cramped node-menu memo. Notes persist and round-trip through the model and `.json`.

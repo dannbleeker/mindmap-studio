@@ -21,6 +21,12 @@ export interface NodeStyle {
   /** CSS size string, e.g. "20px" — matches the editor's node-style shape. */
   fontSize?: string;
   fontWeight?: string;
+  /** Per-topic shape (CSS border-radius, e.g. "4px" box, "999px" pill). */
+  borderRadius?: string;
+  /** Per-topic outline (CSS border shorthand, e.g. "2px solid #e23"). */
+  border?: string;
+  fontFamily?: string;
+  textDecoration?: string;
 }
 
 export interface MapImage {

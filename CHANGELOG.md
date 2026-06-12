@@ -217,3 +217,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `refresh()` without firing an `operation` event, so the canonical doc (and thus
   autosave + export) used to drift out of sync with what's displayed after a Ctrl+Z.
   `MindMap` now wraps `undo`/`redo` to re-capture, so the model always matches the canvas.
+
+### Fixed
+
+- **Dashboard "last push"** read `repo.updated_at`, which GitHub bumps on stars, issue
+  comments, or any attribute change; it now uses `repo.pushed_at` (the actual last push).
+- **EPUB byte-determinism** — JSZip stamped every entry, including the `META-INF/` and
+  `OEBPS/` folder entries it auto-creates, with the wall-clock time, so each rebuild differed
+  and the Rebuild-book workflow committed a no-op timestamp churn. Every entry's date is now
+  pinned to date-only (midnight UTC), matching the PDF; the build is reproducible.
+- **Book PDF code blocks** now paginate cleanly — a block taller than a page draws a
+  background per page segment instead of spilling later lines onto the next page without one
+  (latent: the manuscript has no fenced code blocks yet).

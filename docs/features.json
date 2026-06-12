@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 46,
+  "reviewedThroughChangelogBullets": 47,
   "areas": [
     "editing",
     "notes",
@@ -22,8 +22,8 @@
       "area": "editing",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "drag-reparent",
@@ -31,8 +31,8 @@
       "area": "editing",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "undo-redo",
@@ -40,7 +40,7 @@
       "area": "editing",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -49,7 +49,7 @@
       "area": "editing",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -58,17 +58,16 @@
       "area": "editing",
       "since": "2026-06-11",
       "manual": false,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "notes-editor",
       "name": "Notes editor for the selected node",
       "area": "notes",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -77,17 +76,16 @@
       "area": "notes",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "marker-palette",
       "name": "Marker palette (click to toggle on a node)",
       "area": "markers",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -96,17 +94,16 @@
       "area": "markers",
       "since": "2026-06-12",
       "manual": false,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "per-topic-style",
       "name": "Per-topic styling (shape, fill, border, bold)",
       "area": "styling",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -115,7 +112,7 @@
       "area": "styling",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -124,27 +121,25 @@
       "area": "styling",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "node-images",
       "name": "Attach images to nodes",
       "area": "images",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "boundaries",
       "name": "Boundaries (render + draw, two-way)",
       "area": "structure",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -153,7 +148,7 @@
       "area": "structure",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -162,7 +157,7 @@
       "area": "structure",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -171,17 +166,16 @@
       "area": "structure",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "outline",
       "name": "Outline side panel (click to focus)",
       "area": "navigation",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -190,7 +184,7 @@
       "area": "navigation",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -199,7 +193,7 @@
       "area": "navigation",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -208,7 +202,7 @@
       "area": "navigation",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -217,7 +211,7 @@
       "area": "navigation",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -226,7 +220,7 @@
       "area": "navigation",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -235,17 +229,16 @@
       "area": "navigation",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "multi-map-library",
       "name": "Multi-map library (switch / new / delete)",
       "area": "library",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -254,8 +247,8 @@
       "area": "library",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "duplicate-map",
@@ -263,7 +256,7 @@
       "area": "library",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -272,7 +265,7 @@
       "area": "library",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -281,7 +274,7 @@
       "area": "library",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -293,14 +286,13 @@
       "book": false,
       "bookExample": false
     },
-
     {
       "id": "import-mmap",
       "name": "Import MindManager .mmap (lossy, one-way)",
       "area": "import",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -309,7 +301,7 @@
       "area": "import",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -318,7 +310,7 @@
       "area": "import",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -327,7 +319,7 @@
       "area": "import",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -336,17 +328,16 @@
       "area": "import",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "export-json",
       "name": "Export native .json (lossless)",
       "area": "export",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -355,7 +346,7 @@
       "area": "export",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -364,7 +355,7 @@
       "area": "export",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -373,7 +364,7 @@
       "area": "export",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -382,7 +373,7 @@
       "area": "export",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -391,27 +382,25 @@
       "area": "export",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "presentation-mode",
       "name": "Walk-Through presentation mode",
       "area": "presentation",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
-
     {
       "id": "pwa-offline",
       "name": "Offline-capable (precached app shell)",
       "area": "pwa",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -420,7 +409,7 @@
       "area": "pwa",
       "since": "2026-06-11",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     }
   ]

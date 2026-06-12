@@ -34,12 +34,13 @@ Remaining items are genuinely renderer-constrained or Dann-dependent:
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 
-Four "ships-with-the-product" artifacts to match the sibling project, each wired into CI to
-stay current. **#1 (dashboard + stats pipeline + feature catalogue), #2 (dual licensing +
-in-app About dialog) and #3 (user manual rendered to `/user-guide.html`) shipped** — see
-`CHANGELOG.md`. Remaining:
+All four "ships-with-the-product" artifacts (parity with the sibling project) are now
+**shipped and wired into CI** — see `CHANGELOG.md`:
 
-- [ ] **Book** — a longer-form teach-the-domain book under `docs/guide/`, built to **both**
-      PDF and EPUB from one markdown source, with a "Rebuild book" workflow (rebuild only when
-      book inputs change) and an opt-in "send to Kindle". The catalogue's `book` /
-      `bookExample` flags (0/44 today) track coverage; the dashboard already renders the gap.
+1. Project dashboard + stats pipeline + feature catalogue.
+2. Dual licensing (Apache-2.0 / CC BY-NC 4.0) + in-app About dialog.
+3. User manual rendered to `/user-guide.html`.
+4. The book — _Thinking in Maps_ — built to EPUB + PDF, with a Rebuild-book workflow.
+
+Open follow-ups: grow the book (the `book` flag is at 97.7%, `bookExample` at 6.8% — more
+worked examples would help); the lone un-booked feature is `panel-persistence`.

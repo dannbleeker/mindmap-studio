@@ -2,15 +2,15 @@
   "generatedAt": "2026-06-12T15:14:37.299Z",
   "commit": "37eda3e",
   "headline": {
-    "linesTsJs": 4620,
+    "linesTsJs": 5669,
     "tests": 73,
     "lineCoveragePct": 28.24,
     "commits": 72,
     "ageDays": 0,
-    "trackedFiles": 74,
+    "trackedFiles": 94,
     "featureManualPct": 93.2,
-    "featureBookPct": 0,
-    "featureExamplePct": 0
+    "featureBookPct": 97.7,
+    "featureExamplePct": 6.8
   },
   "code": [
     {
@@ -25,8 +25,8 @@
     },
     {
       "category": "Build scripts",
-      "files": 3,
-      "lines": 597
+      "files": 7,
+      "lines": 1646
     },
     {
       "category": "Styles (CSS)",
@@ -35,8 +35,8 @@
     },
     {
       "category": "Docs (Markdown)",
-      "files": 0,
-      "lines": 0
+      "files": 13,
+      "lines": 775
     }
   ],
   "coverage": {
@@ -99,7 +99,7 @@
   },
   "footprint": {
     "depsProd": 7,
-    "depsDev": 13,
+    "depsDev": 15,
     "biggestFiles": [
       {
         "name": "App.tsx",
@@ -216,79 +216,79 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 0,
-    "chapters": 0,
+    "bookWords": 5581,
+    "chapters": 11,
     "appLoc": 3121,
-    "docToCodeRatio": null
+    "docToCodeRatio": 1.79
   },
   "featureCoverage": {
     "total": 44,
     "manual": 41,
     "manualPct": 93.2,
-    "book": 0,
-    "bookPct": 0,
-    "bookExample": 0,
-    "bookExamplePct": 0,
+    "book": 43,
+    "bookPct": 97.7,
+    "bookExample": 3,
+    "bookExamplePct": 6.8,
     "byArea": {
       "editing": {
         "total": 5,
         "manual": 4,
-        "book": 0
+        "book": 5
       },
       "notes": {
         "total": 2,
         "manual": 2,
-        "book": 0
+        "book": 2
       },
       "markers": {
         "total": 2,
         "manual": 1,
-        "book": 0
+        "book": 2
       },
       "styling": {
         "total": 3,
         "manual": 3,
-        "book": 0
+        "book": 3
       },
       "images": {
         "total": 1,
         "manual": 1,
-        "book": 0
+        "book": 1
       },
       "structure": {
         "total": 4,
         "manual": 4,
-        "book": 0
+        "book": 4
       },
       "navigation": {
         "total": 7,
         "manual": 7,
-        "book": 0
+        "book": 7
       },
       "library": {
         "total": 6,
         "manual": 5,
-        "book": 0
+        "book": 5
       },
       "import": {
         "total": 5,
         "manual": 5,
-        "book": 0
+        "book": 5
       },
       "export": {
         "total": 6,
         "manual": 6,
-        "book": 0
+        "book": 6
       },
       "presentation": {
         "total": 1,
         "manual": 1,
-        "book": 0
+        "book": 1
       },
       "pwa": {
         "total": 2,
         "manual": 2,
-        "book": 0
+        "book": 2
       }
     },
     "gaps": {
@@ -311,224 +311,9 @@
       ],
       "noBook": [
         {
-          "id": "undo-redo",
-          "name": "Undo / redo (model-synced)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "notes-editor",
-          "name": "Notes editor for the selected node",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "notes-markdown",
-          "name": "Markdown preview for node notes",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "marker-palette",
-          "name": "Marker palette (click to toggle on a node)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "imported-icon-emoji",
-          "name": "Imported .mmap icons rendered as emoji",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "per-topic-style",
-          "name": "Per-topic styling (shape, fill, border, bold)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "theme-gallery",
-          "name": "Canvas theme gallery (Light/Dark/Ocean/Sunset)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "node-images",
-          "name": "Attach images to nodes",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "boundaries",
-          "name": "Boundaries (render + draw, two-way)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "floating-topics",
-          "name": "Imported floating topics rendered",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "cross-map-links",
-          "name": "Cross-map links between maps",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "outline",
-          "name": "Outline side panel (click to focus)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "outline-filter",
-          "name": "Filter the outline by topic",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "find-replace",
-          "name": "Find (topics + notes) & Replace",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "find-shortcut",
-          "name": "Press / to focus Find",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "collapse-expand",
-          "name": "Collapse / expand all branches",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "fit",
-          "name": "Fit map to viewport",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "layout-direction",
-          "name": "Layout direction (both / right / left)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "templates",
-          "name": "New-map templates (Blank/Brainstorm/SWOT/Project)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "duplicate-map",
-          "name": "Duplicate the current map",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "library-backup",
-          "name": "Whole-library backup & restore",
-          "since": "2026-06-12"
-        },
-        {
           "id": "panel-persistence",
           "name": "Remembered open-panel workspace",
           "since": "2026-06-12"
-        },
-        {
-          "id": "import-json",
-          "name": "Import native .json (lossless)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "import-opml",
-          "name": "Import OPML outlines",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "batch-import",
-          "name": "Multi-file batch import",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "export-json",
-          "name": "Export native .json (lossless)",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "export-opml",
-          "name": "Export OPML",
-          "since": "2026-06-12"
-        },
-        {
-          "id": "keyboard-editing",
-          "name": "Keyboard editing (Enter/Tab/Ctrl+Enter/Delete)",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "drag-reparent",
-          "name": "Drag to re-parent a node",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "node-menu",
-          "name": "Node editor panel (icons, tags, font size/colour, link)",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "edit-capture",
-          "name": "Canvas edits captured into the canonical model",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "per-topic-font",
-          "name": "Per-topic font size / colour / background",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "relationships",
-          "name": "Relationship arrows (render + draw, two-way)",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "multi-map-library",
-          "name": "Multi-map library (switch / new / delete)",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "autosave-reload",
-          "name": "Autosave + restore last-opened map",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "import-mmap",
-          "name": "Import MindManager .mmap (lossy, one-way)",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "import-markdown",
-          "name": "Import Markdown outlines",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "export-markdown",
-          "name": "Export Markdown",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "export-image",
-          "name": "Export PNG / SVG",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "export-html",
-          "name": "Export self-contained HTML",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "export-pdf",
-          "name": "Print to PDF",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "presentation-mode",
-          "name": "Walk-Through presentation mode",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "pwa-offline",
-          "name": "Offline-capable (precached app shell)",
-          "since": "2026-06-11"
-        },
-        {
-          "id": "pwa-install",
-          "name": "Installable to desktop / home screen",
-          "since": "2026-06-11"
         }
       ]
     }
@@ -552,6 +337,6 @@
       "added": 16252,
       "removed": 2537
     },
-    "changelogEntries": 46
+    "changelogEntries": 47
   }
 }

@@ -88,6 +88,20 @@ and a CI-safe, env-gated (`MMAP_FILE`) integration test.
 <https://mindmap-studio.struktureretsundfornuft.dk/> (GitHub Pages, custom domain). Phase 2 is in
 progress. Scope intentionally excludes the task / Gantt / resource PM layer. See `NEXT_STEPS.md`.
 
+## The book
+
+A longer-form guide to mind mapping — _Thinking in Maps_ — lives in
+[`docs/guide/`](docs/guide/), built from one Markdown source to two downloads that refresh
+automatically when the manuscript changes:
+
+- **EPUB** (reflowable, Kindle-friendly):
+  [`/Thinking-in-Maps.epub`](https://mindmap-studio.struktureretsundfornuft.dk/Thinking-in-Maps.epub)
+- **PDF** (fixed A4, cover + clickable TOC + bookmarks):
+  [`/Thinking-in-Maps.pdf`](https://mindmap-studio.struktureretsundfornuft.dk/Thinking-in-Maps.pdf)
+
+Run `pnpm book` to rebuild both (pure Node — no Chromium or LaTeX). Authoring notes are in
+[`docs/guide/AUTHORING.md`](docs/guide/AUTHORING.md).
+
 ## License
 
 MindMap Studio is dual-licensed. The two artefacts in this repository are governed by different

@@ -59,6 +59,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   (`marked`, with GitHub-style heading slugs so the guide's own in-page anchors
   resolve) and served on demand in dev. Reachable from the in-app **About** dialog.
   One canonical source — never a hand-maintained second copy that can drift.
+- **The book — _Thinking in Maps_** — a longer-form guide to mind mapping under
+  [`docs/guide/`](docs/guide/), built from one Markdown source to **both** a
+  reflowable EPUB (Kindle-friendly) and a fixed-A4 PDF (cover, clickable TOC,
+  chapter bookmarks, document metadata + a stable book id) by pure-Node builders
+  (`jszip` + `marked`, and `pdf-lib`). Its diagram is generated from a source
+  constant — rendered as SVG for the EPUB and drawn natively for the PDF. Both
+  builds are byte-deterministic. The artifacts deploy with the site
+  (`/Thinking-in-Maps.epub`, `/Thinking-in-Maps.pdf`); a **Rebuild book** workflow
+  regenerates and commits them when the manuscript changes (bot-actor loop guard),
+  with opt-in send-to-Kindle. The catalogue's `book` flag now tracks coverage (97.7%).
 - **`.mmap` import wired into the app** — an Open-file control runs `parseMmap`
   and renders the result on the canvas, surfacing importer warnings and parse
   errors inline.

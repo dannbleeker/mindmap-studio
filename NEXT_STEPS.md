@@ -15,8 +15,8 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Phase 2 — remaining
 
-- [ ] Render node **images** on the canvas — needs image *import* from the `.mmap`
-      binary blobs first (no image source today).
+- [ ] Import embedded **images from `.mmap`** binary blobs (the canvas already renders
+      node images added in-app; importing MindManager's embedded ones is the gap).
 - [ ] Make the floating-topics branch fully editable (currently display-only — edits to
       it aren't captured back into `floatingTopics`).
 - [ ] Validate the `.mmap` importer's notes / hyperlinks / relationships /

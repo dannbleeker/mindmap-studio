@@ -107,6 +107,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   import banner notes their separate placement). The branch is display-only —
   `fromMindElixir` strips it on capture, so it never enters the model and `floatingTopics`
   is preserved across edits.
+- **Node images** — an "Image" button attaches a picture to the selected node. The file
+  is downscaled and stored as a self-contained data URL (so maps stay offline and a `.json`
+  export carries its images), rendered on the node, and round-tripped through the model
+  (`fileToMapImage` in `src/io/image.ts`; image sync in `src/mindmap/sync.ts`).
 
 ### Fixed
 

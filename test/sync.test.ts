@@ -72,6 +72,38 @@ describe("mind-elixir sync", () => {
     expect(back.id).toBe("d");
   });
 
+  it("round-trips a node image", () => {
+    const withImg: MindMapDoc = {
+      ...doc,
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          {
+            id: "p",
+            topic: "Pic",
+            image: { url: "data:abc", width: 100, height: 50 },
+            children: [],
+          },
+        ],
+      },
+    };
+    const back = fromMindElixir(toMindElixir(withImg.root), withImg);
+    expect(back.root.children[0].image).toEqual({ url: "data:abc", width: 100, height: 50 });
+  });
+
+  it("captures an image added on the canvas (me.image -> node.image)", () => {
+    const me = toMindElixir(doc.root);
+    const a = me.children?.find((c) => c.id === "a");
+    if (a) a.image = { url: "data:xyz", width: 80, height: 40 };
+    const back = fromMindElixir(me, doc);
+    expect(back.root.children.find((c) => c.id === "a")?.image).toEqual({
+      url: "data:xyz",
+      width: 80,
+      height: 40,
+    });
+  });
+
   it("maps links to arrows and back", () => {
     const arrows = toArrows(doc.links);
     expect(arrows.map((a) => [a.from, a.to])).toEqual([["a", "b"]]);

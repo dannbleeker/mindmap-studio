@@ -2,7 +2,7 @@ import nodeMenu from "@mind-elixir/node-menu";
 import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
-import type { MindMapDoc } from "../model/types";
+import type { MapImage, MindMapDoc } from "../model/types";
 import {
   type MeArrow,
   type MeNode,
@@ -19,6 +19,8 @@ export interface MindMapHandle {
   exportSvg: () => Blob | null;
   focusNode: (id: string) => void;
   fit: () => void;
+  /** Apply an image to the currently-selected node; false if nothing is selected. */
+  setSelectedImage: (image: MapImage) => boolean;
 }
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
@@ -63,6 +65,20 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
       },
       fit: () => {
         if (meRef.current) fitView(meRef.current);
+      },
+      setSelectedImage: (image: MapImage): boolean => {
+        const me = meRef.current as
+          | (MindElixirInstance & {
+              currentNode?: unknown;
+              reshapeNode?: (el: unknown, patch: unknown) => void;
+            })
+          | null;
+        const el = me?.currentNode;
+        if (!me || !el || !me.reshapeNode) return false;
+        me.reshapeNode(el, {
+          image: { url: image.url, width: image.width ?? 120, height: image.height ?? 120 },
+        });
+        return true;
       },
     }),
     [],

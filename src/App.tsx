@@ -1,4 +1,5 @@
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { fromMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
@@ -60,6 +61,14 @@ export function App() {
   const [query, setQuery] = useState("");
   const [matchInfo, setMatchInfo] = useState("");
   const searchCursor = useRef({ q: "", i: -1 });
+  const [hint, setHint] = useState("");
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showHint(message: string) {
+    setHint(message);
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    hintTimer.current = setTimeout(() => setHint(""), 4000);
+  }
 
   const refreshMaps = useCallback(async () => {
     try {
@@ -144,6 +153,21 @@ export function App() {
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async function handleImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      const image = await fileToMapImage(file);
+      const applied = mapRef.current?.setSelectedImage(image);
+      showHint(
+        applied ? "Image added to the selected node." : "Select a node first, then add an image.",
+      );
+    } catch (err) {
+      showHint(err instanceof Error ? err.message : "Could not add image");
     }
   }
 
@@ -255,6 +279,10 @@ export function App() {
         <button type="button" onClick={() => mapRef.current?.fit()} style={controlStyle}>
           Fit
         </button>
+        <label style={controlStyle}>
+          Image
+          <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
+        </label>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}
@@ -324,6 +352,20 @@ export function App() {
         >
           Imported with {warnings.length} note{warnings.length > 1 ? "s" : ""}: {warnings[0]}
           {warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ""}
+        </div>
+      )}
+
+      {hint && (
+        <div
+          style={{
+            padding: "8px 16px",
+            background: "#eef2fc",
+            color: "#26215c",
+            fontSize: 13,
+            borderBottom: "1px solid #cecbf6",
+          }}
+        >
+          {hint}
         </div>
       )}
 

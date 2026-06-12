@@ -24,6 +24,7 @@ export interface MeNode {
   icons?: string[];
   hyperLink?: string;
   note?: string;
+  image?: { url: string; width: number; height: number };
   expanded?: boolean;
   root?: boolean;
 }
@@ -50,6 +51,13 @@ export function toMindElixir(node: MapNode): MeNode {
   if (node.icons?.length) me.icons = node.icons;
   if (node.hyperlink) me.hyperLink = node.hyperlink;
   if (node.note) me.note = node.note;
+  if (node.image) {
+    me.image = {
+      url: node.image.url,
+      width: node.image.width ?? 120,
+      height: node.image.height ?? 120,
+    };
+  }
   return me;
 }
 
@@ -181,13 +189,17 @@ function meToNode(me: MeNode, prev: Map<string, MapNode>): MapNode {
   if (me.style) node.style = me.style;
   if (me.expanded === false) node.collapsed = true;
 
-  // mind-elixir 5 carries `note` (node-menu's memo editor) — prefer the live
-  // value, else keep the prior one. task/image are canonical-only: preserve by id.
+  // mind-elixir 5 carries `note` + `image` — prefer the live value, else keep the
+  // prior one. task is canonical-only: preserve by id.
   const before = prev.get(me.id);
   const note = me.note ?? before?.note;
   if (note) node.note = note;
   if (before?.task) node.task = before.task;
-  if (before?.image) node.image = before.image;
+  if (me.image) {
+    node.image = { url: me.image.url, width: me.image.width, height: me.image.height };
+  } else if (before?.image) {
+    node.image = before.image;
+  }
   return node;
 }
 

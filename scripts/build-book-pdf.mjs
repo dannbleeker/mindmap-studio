@@ -267,30 +267,42 @@ async function main() {
       if (ln.length <= maxChars) wrapped.push(ln);
       else for (let j = 0; j < ln.length; j += maxChars) wrapped.push(ln.slice(j, j + maxChars));
     }
-    space(wrapped.length * lh + 12);
-    const blockTop = S.y;
-    S.page.drawRectangle({
-      x: M.left,
-      y: PAGE.h - blockTop - (wrapped.length * lh + 10),
-      width: CONTENT_W,
-      height: wrapped.length * lh + 10,
-      color: CODE_BG,
-      borderColor: RULE,
-      borderWidth: 0.5,
-    });
-    S.y += 6;
-    for (const ln of wrapped) {
-      space(lh);
-      safeDraw(S.page, pdfText(ln), {
-        x: M.left + 8,
-        y: PAGE.h - S.y - size,
-        font: F.mono,
-        size,
-        color: INK,
+    // Draw in per-page segments so a block taller than one page paginates cleanly
+    // — each page segment gets its own background — instead of one background that
+    // spills later lines onto the next page without one. A block that fits on a
+    // page is kept whole (moved to a fresh page if the remaining space is short).
+    const wholeHeight = wrapped.length * lh + 12;
+    if (wholeHeight <= PAGE.h - M.top - M.bottom) space(wholeHeight);
+    let i = 0;
+    while (i < wrapped.length) {
+      space(lh + 12);
+      const segTop = S.y;
+      const avail = PAGE.h - M.bottom - segTop - 10;
+      const fit = Math.max(1, Math.min(wrapped.length - i, Math.floor(avail / lh)));
+      S.page.drawRectangle({
+        x: M.left,
+        y: PAGE.h - segTop - (fit * lh + 10),
+        width: CONTENT_W,
+        height: fit * lh + 10,
+        color: CODE_BG,
+        borderColor: RULE,
+        borderWidth: 0.5,
       });
-      S.y += lh;
+      S.y += 6;
+      for (let k = 0; k < fit; k++, i++) {
+        safeDraw(S.page, pdfText(wrapped[i]), {
+          x: M.left + 8,
+          y: PAGE.h - S.y - size,
+          font: F.mono,
+          size,
+          color: INK,
+        });
+        S.y += lh;
+      }
+      S.y += 4;
+      if (i < wrapped.length) addPage();
     }
-    gap(10);
+    gap(6);
   }
 
   function blockquote(token) {

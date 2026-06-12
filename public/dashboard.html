@@ -376,7 +376,7 @@
       const branch=repo.default_branch||'main';
       document.getElementById('sub-lang').textContent=(repo.language||'—');
       document.getElementById('s-age').textContent=repo.created_at?daysSince(repo.created_at):'—';
-      document.getElementById('s-push').textContent=repo.updated_at?rel(repo.updated_at):'—';
+      document.getElementById('s-push').textContent=repo.pushed_at?rel(repo.pushed_at):'—';
       document.getElementById('s-issues').textContent=repo.open_issues_count!=null?repo.open_issues_count:'—';
       document.getElementById('pill-stars').innerHTML='<span class="dot"></span>★ '+(repo.stargazers_count!=null?repo.stargazers_count:'—');
       document.getElementById('lc-branch').textContent=branch;

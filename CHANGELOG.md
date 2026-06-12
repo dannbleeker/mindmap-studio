@@ -103,6 +103,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - Extracted the Outline, Notes, and Markers panels into presentational components
   (`src/Panels.tsx`) and the shared toolbar styles into `src/ui.ts`, so `App` reads as
   orchestration rather than markup (behavior-preserving — all three re-verified in-browser).
+- The toolbar now **wraps** instead of overflowing, and the seven export buttons collapsed
+  into one **⬆ Export…** menu to cut the clutter (all formats unchanged).
 - Upgraded the build toolchain to **Vite 8** (6.4.3 → 8.0.16) with `@vitejs/plugin-react`
   6, matching TP Studio. Behavior-preserving — full gate green and the app re-verified
   in-browser (render, search, exports, no console errors); the production bundle even

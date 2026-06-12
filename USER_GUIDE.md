@@ -40,7 +40,8 @@ Left to right:
 | **Find / Replace** | [Search and replace](#find--replace) topics & notes (`/` jumps here) |
 | **Theme** | [Canvas theme](#themes): Light / Dark / Ocean / Sunset |
 | **Layout** | [Layout direction](#layout): Both sides / Right / Left |
-| **Export buttons** | Save the map — see [Exporting](#exporting) |
+| **⬆ Export…** | Save the map in any format — see [Exporting](#exporting) |
+| **⬇ Backup** | [Back up](#backup--restore) the whole library to one file |
 | **Open files** | [Import](#importing) one or many files |
 
 ---
@@ -176,7 +177,9 @@ library to another machine or keeping a safe copy.
 
 ## Exporting
 
-| Button | Output |
+Pick a format from the **⬆ Export…** menu:
+
+| Format | Output |
 |---|---|
 | `.json` | Native, **lossless** — use for backup or moving a map between machines |
 | `.md` | Markdown outline |

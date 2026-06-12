@@ -542,28 +542,33 @@ export function App() {
           {matchInfo && <span style={{ fontSize: 11, color: "#73726c" }}>{matchInfo}</span>}
         </form>
         <span style={{ width: 1, height: 22, background: "#e2e0d8", margin: "0 2px" }} />
-        <span style={{ fontSize: 12, color: "#73726c" }}>Export</span>
-        <button type="button" onClick={exportJson} style={controlStyle}>
-          .json
-        </button>
-        <button type="button" onClick={exportMarkdown} style={controlStyle}>
-          .md
-        </button>
-        <button type="button" onClick={exportOpml} style={controlStyle}>
-          .opml
-        </button>
-        <button type="button" onClick={exportPng} style={controlStyle}>
-          .png
-        </button>
-        <button type="button" onClick={exportSvg} style={controlStyle}>
-          .svg
-        </button>
-        <button type="button" onClick={exportHtml} style={controlStyle}>
-          .html
-        </button>
-        <button type="button" onClick={exportPdf} style={controlStyle}>
-          .pdf
-        </button>
+        <select
+          value=""
+          onChange={(e) => {
+            const fn = {
+              json: exportJson,
+              md: exportMarkdown,
+              opml: exportOpml,
+              png: exportPng,
+              svg: exportSvg,
+              html: exportHtml,
+              pdf: exportPdf,
+            }[e.target.value];
+            fn?.();
+          }}
+          style={controlStyle}
+          aria-label="Export the map"
+          title="Export the map"
+        >
+          <option value="">⬆ Export…</option>
+          <option value="json">.json (lossless)</option>
+          <option value="md">.md (Markdown)</option>
+          <option value="opml">.opml (outline)</option>
+          <option value="png">.png (image)</option>
+          <option value="svg">.svg (vector)</option>
+          <option value="html">.html (standalone)</option>
+          <option value="pdf">.pdf (print)</option>
+        </select>
         <button
           type="button"
           onClick={exportLibrary}

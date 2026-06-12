@@ -5,6 +5,7 @@ import { fromMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle, type SelectedNode } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
+import { outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
   type MapSummary,
@@ -52,6 +53,9 @@ function newDoc(): MindMapDoc {
 
 export function App() {
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
+  // A reactive mirror of the live doc for panels (Outline) — `doc` is only the
+  // init prop for MindMap (changes on load), so edits update this without re-init.
+  const [liveDoc, setLiveDoc] = useState<MindMapDoc>(sampleDoc);
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mapRef = useRef<MindMapHandle>(null);
@@ -67,6 +71,7 @@ export function App() {
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
+  const [outlineOpen, setOutlineOpen] = useState(false);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
 
@@ -120,6 +125,7 @@ export function App() {
   const load = useCallback(
     (next: MindMapDoc, nextWarnings: string[] = []) => {
       liveDocRef.current = next;
+      setLiveDoc(next);
       setWarnings(nextWarnings);
       setError(null);
       setDoc(next);
@@ -262,6 +268,15 @@ export function App() {
         }}
       >
         <strong style={{ fontSize: 15, marginRight: 4 }}>MindMap Studio</strong>
+        <button
+          type="button"
+          onClick={() => setOutlineOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={outlineOpen}
+          title="Toggle the outline panel"
+        >
+          ☰ Outline
+        </button>
         <select
           value={doc.id}
           onChange={(e) => switchMap(e.target.value)}
@@ -398,17 +413,59 @@ export function App() {
         </div>
       )}
 
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <MindMap
-          ref={mapRef}
-          doc={doc}
-          dark={dark}
-          onChange={(d) => {
-            liveDocRef.current = d;
-            scheduleSave();
-          }}
-          onSelect={handleSelect}
-        />
+      <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+        {outlineOpen && (
+          <aside
+            style={{
+              width: 250,
+              flexShrink: 0,
+              overflowY: "auto",
+              borderRight: "1px solid #e2e0d8",
+              background: "#fbfbf9",
+              padding: "8px 0",
+            }}
+          >
+            {outlineRows(liveDoc.root).map((row) => (
+              <button
+                key={row.id}
+                type="button"
+                onClick={() => mapRef.current?.focusNode(row.id)}
+                title={row.topic}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  color: "#26215c",
+                  padding: "3px 10px",
+                  paddingLeft: 10 + row.depth * 14,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {row.hasNote ? "📝 " : ""}
+                {row.topic || "(untitled)"}
+              </button>
+            ))}
+          </aside>
+        )}
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <MindMap
+            ref={mapRef}
+            doc={doc}
+            dark={dark}
+            onChange={(d) => {
+              liveDocRef.current = d;
+              setLiveDoc(d);
+              scheduleSave();
+            }}
+            onSelect={handleSelect}
+          />
+        </div>
       </div>
 
       {notesOpen && (

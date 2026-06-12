@@ -20,6 +20,8 @@ GitHub Pages).
   selected node, plus a node editor panel (icons, tags, font size/color, link) via node-menu.
 - **Find** — search the map by topic or note; matches are focused and selected on the
   canvas, cycling through multiple hits on repeated Enter.
+- **Outline** — a side panel showing the map as an indented outline; click a row to jump to
+  that node (noted nodes are marked 📝).
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.

@@ -119,6 +119,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Notes editor** — a 📝 Notes panel docks below the canvas and edits the selected node's
   note in a comfortable textarea (debounced autosave + commit on blur), replacing the
   cramped node-menu memo. Notes persist and round-trip through the model and `.json`.
+- **Outline view** — a ☰ Outline side panel lists the map as an indented, live outline;
+  click a row to focus that node on the canvas, and noted nodes show a 📝 marker. Pure
+  flattener in `src/outline.ts`.
 
 ### Fixed
 

@@ -13,15 +13,21 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 - [ ] Deploy to GitHub Pages — **needs Dann**: enable Pages in repo settings +
       confirm a public live deploy (outward-facing, so skipped during the loop).
 
-## Phase 2 — remaining
+## MindManager UI-parity pass (2026-06-12)
 
-- [ ] Import embedded **images from `.mmap`** binary blobs (the canvas already renders
-      node images added in-app; importing MindManager's embedded ones is the gap).
-- [ ] Make the floating-topics branch fully editable (currently display-only — edits to
-      it aren't captured back into `floatingTopics`).
-- [ ] Validate the `.mmap` importer's notes / hyperlinks / relationships /
-      boundaries / floating-topic paths against a real map that *uses* them — the
-      current impl is XSD-authoritative + synthetic-tested, but Dann's sample
-      exercised none of them.
-- [ ] Custom tapered-branch renderer (only if pixel-exact organic branches are
-      ever wanted; mind-elixir's default is already close).
+Worked the gap groups from the UI comparison in order. **Built:** Notes editor,
+Outline view + filter, theme gallery (Light/Dark/Ocean/Sunset), layout direction
+(both/right/left), collapse/expand-all, marker palette + imported-icon→emoji, Find &
+Replace + `/` shortcut, new-map templates, OPML import/export, an enriched sample, and a
+panels/hooks refactor. Remaining items are renderer-constrained or Dann-dependent:
+
+- [ ] **Renderer-constrained (mind-elixir):** alternate layouts (org-chart / timeline /
+      fishbone), per-topic shapes / borders / branch styles, callouts, filled boundary
+      enclosures, rich-text topics/notes. Would need a custom renderer or a different engine.
+- [ ] Import embedded **images from `.mmap`** binary blobs (in-app images work; MM import
+      is the gap — needs the XSD image-ref scheme or a real image-bearing sample).
+- [ ] Make the floating-topics branch fully editable (currently display-only).
+- [ ] Validate the `.mmap` importer's rich paths against a *real* feature-rich map
+      (XSD-authoritative + now integration-tested, but only `MMAP_FILE` fully closes it).
+- [ ] Word / PowerPoint / Project / Excel export (heavy generators; `.html`/`.pdf`/`.png`/
+      `.svg`/`.opml` cover sharing today).

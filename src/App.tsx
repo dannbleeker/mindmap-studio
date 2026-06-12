@@ -251,6 +251,21 @@ export function App() {
     };
   }, [load]);
 
+  // Press "/" to jump to the Find box (ignored while typing in a field/node).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      const editing =
+        el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+      if (editing) return;
+      e.preventDefault();
+      document.querySelector<HTMLInputElement>('input[aria-label="Find node"]')?.focus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // Dev-only hook so the live model can be read during browser verification.
   useEffect(() => {
     if (import.meta.env.DEV) {

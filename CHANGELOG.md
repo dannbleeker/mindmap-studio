@@ -135,7 +135,7 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   click one to toggle it on the selected node. Markers render on the node and persist.
 - **Find & Replace** — the Find bar gains a replace field + "Replace all" that rewrites the
   search text in every matching topic (case-insensitive, literal). Pure `replaceInTopic`
-  helper in `src/search.ts`.
+  helper in `src/search.ts`. Press `/` to jump to Find from anywhere (ignored while typing).
 - **OPML import/export** — open and save `.opml` (the standard outline-interchange format
   used by Freeplane, OmniOutliner, Workflowy, …); topics + notes round-trip. The parser is
   lazy-loaded (`src/io/opml.ts`), so it stays out of the entry bundle.

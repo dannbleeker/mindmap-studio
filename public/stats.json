@@ -2,7 +2,7 @@
   "generatedAt": "2026-06-12T15:04:23.478Z",
   "commit": "7006bfc",
   "headline": {
-    "linesTsJs": 4617,
+    "linesTsJs": 4620,
     "tests": 73,
     "lineCoveragePct": 28.27,
     "commits": 70,
@@ -16,7 +16,7 @@
     {
       "category": "App code (src)",
       "files": 27,
-      "lines": 3118
+      "lines": 3121
     },
     {
       "category": "Unit tests",
@@ -41,14 +41,14 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 28.27,
+      "pct": 28.24,
       "covered": 639,
-      "total": 2260
+      "total": 2262
     },
     "statements": {
-      "pct": 28.27,
+      "pct": 28.24,
       "covered": 639,
-      "total": 2260
+      "total": 2262
     },
     "functions": {
       "pct": 90.41,
@@ -99,11 +99,11 @@
   },
   "footprint": {
     "depsProd": 7,
-    "depsDev": 12,
+    "depsDev": 13,
     "biggestFiles": [
       {
         "name": "App.tsx",
-        "lines": 776
+        "lines": 779
       },
       {
         "name": "mindmap/MindMap.tsx",
@@ -208,9 +208,9 @@
     "nonNull": 2
   },
   "bundle": {
-    "jsGzipKb": 124.8,
+    "jsGzipKb": 124.9,
     "cssGzipKb": 0.6,
-    "totalGzipKb": 125.4,
+    "totalGzipKb": 125.5,
     "entryGzipKb": 103.8,
     "budgetKb": 150,
     "withinBudget": true
@@ -218,7 +218,7 @@
   "docs": {
     "bookWords": 0,
     "chapters": 0,
-    "appLoc": 3118,
+    "appLoc": 3121,
     "docToCodeRatio": null
   },
   "featureCoverage": {
@@ -552,6 +552,6 @@
       "added": 16056,
       "removed": 2502
     },
-    "changelogEntries": 45
+    "changelogEntries": 46
   }
 }

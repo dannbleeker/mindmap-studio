@@ -35,12 +35,10 @@ Remaining items are genuinely renderer-constrained or Dann-dependent:
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 
 Four "ships-with-the-product" artifacts to match the sibling project, each wired into CI to
-stay current. **#1 (dashboard + stats pipeline + feature catalogue) and #2 (dual licensing +
-in-app About dialog) shipped** — see `CHANGELOG.md`. Remaining:
+stay current. **#1 (dashboard + stats pipeline + feature catalogue), #2 (dual licensing +
+in-app About dialog) and #3 (user manual rendered to `/user-guide.html`) shipped** — see
+`CHANGELOG.md`. Remaining:
 
-- [ ] **User manual** — render the existing `USER_GUIDE.md` to `user-guide.html` at build
-      time and link it in-app (Help/About). The catalogue's `manual` flag already tracks
-      coverage (41/44 today).
 - [ ] **Book** — a longer-form teach-the-domain book under `docs/guide/`, built to **both**
       PDF and EPUB from one markdown source, with a "Rebuild book" workflow (rebuild only when
       book inputs change) and an opt-in "send to Kindle". The catalogue's `book` /

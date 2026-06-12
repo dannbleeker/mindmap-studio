@@ -54,6 +54,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   and Escape-to-close handled by the browser) reachable from the header, surfacing
   the copyright, the dual-license summary, and links to the third-party notices,
   the live dashboard, and the source repository.
+- **User manual rendered to `/user-guide.html`** — the comprehensive `USER_GUIDE.md`
+  is rendered to a styled, standalone page at build time by a small Vite plugin
+  (`marked`, with GitHub-style heading slugs so the guide's own in-page anchors
+  resolve) and served on demand in dev. Reachable from the in-app **About** dialog.
+  One canonical source — never a hand-maintained second copy that can drift.
 - **`.mmap` import wired into the app** — an Open-file control runs `parseMmap`
   and renders the result on the canvas, surfacing importer warnings and parse
   errors inline.

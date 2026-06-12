@@ -756,6 +756,9 @@ export function App() {
           <div>Book and docs — CC BY-NC 4.0</div>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 13 }}>
+          <a href="/user-guide.html" target="_blank" rel="noopener noreferrer">
+            User guide
+          </a>
           <a href="/notices.html" target="_blank" rel="noopener noreferrer">
             Third-party notices
           </a>

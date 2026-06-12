@@ -1,6 +1,128 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { marked } from "marked";
+import { type Plugin, defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+
+const ROOT = dirname(fileURLToPath(import.meta.url));
+
+// Render USER_GUIDE.md to a styled, standalone user-guide.html. Done here (at
+// build time / on dev request) so the published manual is always generated from
+// the one canonical source — never a hand-maintained second copy that can drift.
+function renderUserGuide(): string {
+  const md = readFileSync(join(ROOT, "USER_GUIDE.md"), "utf8");
+  let body = marked.parse(md, { async: false, gfm: true }) as string;
+  // GitHub-style heading slugs so the guide's own [text](#anchor) links resolve.
+  body = body.replace(/<h([1-6])(?:\s[^>]*)?>([\s\S]*?)<\/h\1>/g, (_full, lvl, inner) => {
+    const id = inner
+      .replace(/<[^>]+>/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+    return `<h${lvl} id="${id}">${inner}</h${lvl}>`;
+  });
+  return userGuideShell(body);
+}
+
+function userGuideShell(body: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>User Guide — MindMap Studio</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #18181b; --muted: #71717a; --accent: #6366f1;
+    --border: #e4e4e7; --code-bg: #f4f4f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0a; --fg: #fafafa; --muted: #a1a1aa; --accent: #818cf8;
+      --border: #27272a; --code-bg: #18181b;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.65; font-size: 16px; padding: 2rem 1.25rem 4rem;
+  }
+  main { max-width: 48rem; margin: 0 auto; }
+  header.page-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 1;
+  }
+  header.page-header a.back { font-size: 0.875rem; color: var(--accent); text-decoration: none; }
+  header.page-header a.back:hover { text-decoration: underline; }
+  header.page-header .brand { font-size: 0.875rem; color: var(--muted); }
+  h1 { font-size: 1.9rem; margin: 0 0 1rem; letter-spacing: -0.02em; }
+  h2 { font-size: 1.35rem; margin: 2.25rem 0 0.75rem; letter-spacing: -0.01em;
+       padding-top: 0.5rem; border-top: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+  h2 a.anchor, h3 a.anchor { scroll-margin-top: 4rem; }
+  h2[id], h3[id] { scroll-margin-top: 4rem; }
+  p, ul, ol { margin: 0 0 1rem; }
+  ul, ol { padding-left: 1.5rem; }
+  li { margin-bottom: 0.35rem; }
+  a { color: var(--accent); }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 0.25rem; font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg); padding: 0.9rem 1rem; border-radius: 0.5rem;
+    overflow-x: auto; font-size: 0.875rem; line-height: 1.5;
+  }
+  pre code { background: transparent; padding: 0; }
+  blockquote { border-left: 3px solid var(--accent); padding: 0.1rem 1rem; margin: 1rem 0; color: var(--muted); }
+  table { border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; width: 100%; }
+  th, td { border: 1px solid var(--border); padding: 0.4rem 0.7rem; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+<header class="page-header">
+<a href="/" class="back">← Back to MindMap Studio</a>
+<span class="brand">MindMap Studio</span>
+</header>
+${body}
+<footer>Rendered from <code>USER_GUIDE.md</code> in the MindMap Studio repo at build time.</footer>
+</main>
+</body>
+</html>
+`;
+}
+
+// Serves /user-guide.html in dev and emits it into the build, both rendered from
+// USER_GUIDE.md on demand — so the in-app Help link always points at a fresh manual.
+function userGuidePlugin(): Plugin {
+  const FILE = "user-guide.html";
+  return {
+    name: "mindmap-user-guide",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url || "").split("?")[0];
+        if (url === `/${FILE}`) {
+          res.setHeader("Content-Type", "text/html; charset=utf-8");
+          res.end(renderUserGuide());
+          return;
+        }
+        next();
+      });
+    },
+    generateBundle() {
+      this.emitFile({ type: "asset", fileName: FILE, source: renderUserGuide() });
+    },
+  };
+}
 
 // base "./" keeps the build host-agnostic (local preview + a GitHub Pages
 // project/custom-domain deploy without path juggling). Vitest config lives in
@@ -9,6 +131,7 @@ export default defineConfig({
   base: "./",
   plugins: [
     react(),
+    userGuidePlugin(),
     // Installable, offline-capable PWA: precaches the app shell so it works
     // with no network and can be installed to the home screen / desktop.
     VitePWA({

@@ -69,7 +69,7 @@ describe("parseMmap", () => {
   </ap:Topic></ap:OneTopic>
 </ap:Map>`),
     );
-    expect(doc.root.icons).toEqual(["ThumbsUp"]);
+    expect(doc.root.icons).toEqual(["👍"]); // urn:mindjet:ThumbsUp -> emoji
   });
 
   it("imports topic hyperlinks", () => {
@@ -187,10 +187,10 @@ describe("parseMmap", () => {
     expect(strategy.children.map((c) => c.topic)).toEqual(["Grow EU", "Cut costs"]);
     // notes + icons + hyperlink, on the nodes that carry them
     expect(doc.root.note).toBe("Top-level note");
-    expect(doc.root.icons).toEqual(["Flag"]);
+    expect(doc.root.icons).toEqual(["🚩"]); // Flag -> emoji
     expect(strategy.hyperlink).toBe("https://plan.example/");
     expect(strategy.children[0].note).toBe("Expand into EU");
-    expect(strategy.children[1].icons).toEqual(["Priority1"]);
+    expect(strategy.children[1].icons).toEqual(["1️⃣"]); // Priority1 -> emoji
     // boundary over Strategy's subtree, relationship as a cross-link, floating topic
     expect(doc.boundaries).toEqual([{ id: "b1", nodeIds: ["2", "3", "4"] }]);
     expect(doc.links).toEqual([{ id: "r1", from: "3", to: "5" }]);

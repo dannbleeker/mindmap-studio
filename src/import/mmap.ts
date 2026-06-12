@@ -1,5 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { strFromU8, unzipSync } from "fflate";
+import { mindManagerIconToEmoji } from "../icons";
 import type { Boundary, CrossLink, MapNode, MindMapDoc, NodeId } from "../model/types";
 
 // MindManager .mmap importer (one-way).
@@ -54,13 +55,17 @@ function extractNote(topic: Xml): string | undefined {
 }
 
 function extractIcons(topic: Xml): string[] {
-  return asList(topic?.IconsGroup?.Icons?.Icon)
-    .map((icon) => {
-      const type = icon?.[`${ATTR}IconType`];
-      // e.g. "urn:mindjet:ThumbsUp" -> "ThumbsUp"
-      return typeof type === "string" ? type.replace(/^urn:mindjet:/, "") : "";
-    })
-    .filter((name) => name.length > 0);
+  return (
+    asList(topic?.IconsGroup?.Icons?.Icon)
+      .map((icon) => {
+        const type = icon?.[`${ATTR}IconType`];
+        // e.g. "urn:mindjet:ThumbsUp" -> "ThumbsUp"
+        return typeof type === "string" ? type.replace(/^urn:mindjet:/, "") : "";
+      })
+      .filter((name) => name.length > 0)
+      // Render as glyphs (👍) rather than literal "ThumbsUp"; unknown names kept as-is.
+      .map(mindManagerIconToEmoji)
+  );
 }
 
 function subtreeIds(node: MapNode): NodeId[] {

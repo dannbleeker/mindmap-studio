@@ -1,4 +1,5 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { fromMarkdown } from "./io/markdown";
@@ -46,9 +47,6 @@ const inputStyle = {
   padding: "6px 10px",
   width: 130,
 } as const;
-
-// A curated marker palette (MindManager-style). Emoji render as node icons.
-const MARKERS = ["✅", "❗", "❓", "⭐", "🚩", "📌", "🔴", "🟡", "🟢", "⏳", "💡", "🎯"];
 
 function newDoc(): MindMapDoc {
   return {
@@ -496,7 +494,7 @@ export function App() {
           }}
         >
           <span style={{ fontSize: 12, color: "#73726c", marginRight: 4 }}>Markers:</span>
-          {MARKERS.map((marker) => (
+          {MARKER_PALETTE.map((marker) => (
             <button
               key={marker}
               type="button"

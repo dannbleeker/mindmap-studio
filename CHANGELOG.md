@@ -137,6 +137,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Imported `.mmap` icons render as glyphs.** Stock-icon names (e.g.
+  `urn:mindjet:ThumbsUp`) used to show as literal text on nodes; common ones now map to
+  emoji (👍, 🚩, 1️⃣, …) via `src/icons.ts`, which also backs the marker palette. Unknown
+  names are kept as-is so nothing is lost.
 - **Undo/redo now sync the model.** mind-elixir's `undo`/`redo` revert the canvas via
   `refresh()` without firing an `operation` event, so the canonical doc (and thus
   autosave + export) used to drift out of sync with what's displayed after a Ctrl+Z.

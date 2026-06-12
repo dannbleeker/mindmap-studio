@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-12T18:00:01.514Z",
-  "commit": "952eebd",
+  "generatedAt": "2026-06-12T18:03:41.826Z",
+  "commit": "614d850",
   "headline": {
-    "linesTsJs": 5824,
+    "linesTsJs": 5830,
     "tests": 87,
-    "lineCoveragePct": 33.59,
-    "commits": 80,
+    "lineCoveragePct": 33.53,
+    "commits": 83,
     "ageDays": 0,
     "trackedFiles": 99,
     "featureManualPct": 93.2,
@@ -16,7 +16,7 @@
     {
       "category": "App code (src)",
       "files": 27,
-      "lines": 3121
+      "lines": 3127
     },
     {
       "category": "Unit tests",
@@ -41,14 +41,14 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 33.59,
+      "pct": 33.53,
       "covered": 760,
-      "total": 2262
+      "total": 2266
     },
     "statements": {
-      "pct": 33.59,
+      "pct": 33.53,
       "covered": 760,
-      "total": 2262
+      "total": 2266
     },
     "functions": {
       "pct": 91.13,
@@ -64,7 +64,7 @@
   "tests": {
     "unit": 87,
     "e2e": 0,
-    "durationMs": 1661,
+    "durationMs": 1246,
     "slowest": [
       {
         "file": "test/book.test.ts",
@@ -72,19 +72,19 @@
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 35
+        "ms": 30
       },
       {
         "file": "test/mapStore.test.ts",
-        "ms": 29
-      },
-      {
-        "file": "test/sync.test.ts",
-        "ms": 14
+        "ms": 18
       },
       {
         "file": "test/markdown.test.ts",
-        "ms": 13
+        "ms": 9
+      },
+      {
+        "file": "test/opml.test.ts",
+        "ms": 8
       }
     ]
   },
@@ -103,7 +103,7 @@
     "biggestFiles": [
       {
         "name": "App.tsx",
-        "lines": 779
+        "lines": 785
       },
       {
         "name": "mindmap/MindMap.tsx",
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 42
+        "commits": 43
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -173,7 +173,7 @@
       {
         "file": "App.tsx",
         "pct": 0,
-        "commits": 42
+        "commits": 43
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -218,8 +218,8 @@
   "docs": {
     "bookWords": 6008,
     "chapters": 11,
-    "appLoc": 3121,
-    "docToCodeRatio": 1.93
+    "appLoc": 3127,
+    "docToCodeRatio": 1.92
   },
   "featureCoverage": {
     "total": 44,
@@ -321,21 +321,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 0,
-    "commits": 80,
-    "commits7d": 80,
+    "commits": 83,
+    "commits7d": 83,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 73
+        "count": 74
       },
       {
         "name": "github-actions[bot]",
-        "count": 7
+        "count": 9
       }
     ],
     "churn30d": {
-      "added": 18838,
-      "removed": 2981
+      "added": 18860,
+      "removed": 2997
     },
     "changelogEntries": 47
   }

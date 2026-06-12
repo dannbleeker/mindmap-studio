@@ -1,4 +1,5 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { MarkerBar, NotesPanel, OutlinePanel } from "./Panels";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
@@ -12,7 +13,6 @@ import {
 import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
-import { outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
   type MapSummary,
@@ -23,30 +23,10 @@ import {
   saveMap,
   setLastOpened,
 } from "./store/mapStore";
+import { controlStyle, inputStyle } from "./ui";
 import { useFind } from "./useFind";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
-
-const controlStyle = {
-  fontSize: 13,
-  fontWeight: 600,
-  color: "#26215c",
-  border: "1px solid #cecbf6",
-  background: "#eeedfe",
-  borderRadius: 8,
-  padding: "6px 10px",
-  cursor: "pointer",
-} as const;
-
-const inputStyle = {
-  fontSize: 13,
-  color: "#26215c",
-  border: "1px solid #cecbf6",
-  background: "#fff",
-  borderRadius: 8,
-  padding: "6px 10px",
-  width: 130,
-} as const;
 
 function newDoc(): MindMapDoc {
   return {
@@ -484,96 +464,23 @@ export function App() {
       )}
 
       {markersOpen && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            padding: "6px 16px",
-            background: "#f4f3fb",
-            borderBottom: "1px solid #e2e0d8",
+        <MarkerBar
+          markers={MARKER_PALETTE}
+          onToggle={(marker) => {
+            const ok = mapRef.current?.toggleSelectedIcon(marker);
+            if (!ok) showHint("Select a node first, then click a marker.");
           }}
-        >
-          <span style={{ fontSize: 12, color: "#73726c", marginRight: 4 }}>Markers:</span>
-          {MARKER_PALETTE.map((marker) => (
-            <button
-              key={marker}
-              type="button"
-              onClick={() => {
-                const ok = mapRef.current?.toggleSelectedIcon(marker);
-                if (!ok) showHint("Select a node first, then click a marker.");
-              }}
-              title={`Toggle ${marker} on the selected node`}
-              style={{
-                border: "1px solid #cecbf6",
-                background: "#fff",
-                borderRadius: 6,
-                cursor: "pointer",
-                fontSize: 16,
-                lineHeight: 1,
-                padding: "3px 5px",
-              }}
-            >
-              {marker}
-            </button>
-          ))}
-        </div>
+        />
       )}
 
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
         {outlineOpen && (
-          <aside
-            style={{
-              width: 250,
-              flexShrink: 0,
-              display: "flex",
-              flexDirection: "column",
-              borderRight: "1px solid #e2e0d8",
-              background: "#fbfbf9",
-            }}
-          >
-            <input
-              value={outlineFilter}
-              onChange={(e) => setOutlineFilter(e.target.value)}
-              placeholder="Filter outline…"
-              aria-label="Filter outline"
-              style={{ ...inputStyle, width: "auto", margin: "8px 10px 4px" }}
-            />
-            <div style={{ overflowY: "auto", padding: "4px 0 8px" }}>
-              {outlineRows(liveDoc.root)
-                .filter(
-                  (row) =>
-                    !outlineFilter.trim() ||
-                    row.topic.toLowerCase().includes(outlineFilter.trim().toLowerCase()),
-                )
-                .map((row) => (
-                  <button
-                    key={row.id}
-                    type="button"
-                    onClick={() => mapRef.current?.focusNode(row.id)}
-                    title={row.topic}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      textAlign: "left",
-                      border: "none",
-                      background: "transparent",
-                      cursor: "pointer",
-                      fontSize: 13,
-                      color: "#26215c",
-                      padding: "3px 10px",
-                      paddingLeft: 10 + row.depth * 14,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {row.hasNote ? "📝 " : ""}
-                    {row.topic || "(untitled)"}
-                  </button>
-                ))}
-            </div>
-          </aside>
+          <OutlinePanel
+            root={liveDoc.root}
+            filter={outlineFilter}
+            onFilterChange={setOutlineFilter}
+            onPick={(id) => mapRef.current?.focusNode(id)}
+          />
         )}
         <div style={{ flex: 1, minHeight: 0 }}>
           <MindMap
@@ -592,67 +499,13 @@ export function App() {
       </div>
 
       {notesOpen && (
-        <div
-          style={{
-            height: 140,
-            display: "flex",
-            flexDirection: "column",
-            gap: 6,
-            padding: "8px 16px",
-            borderTop: "1px solid #e2e0d8",
-            background: "#fbfbf9",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              fontSize: 12,
-              color: "#73726c",
-            }}
-          >
-            <span>📝 Note{selected ? ` — ${selected.topic}` : ""}</span>
-            <button
-              type="button"
-              onClick={() => setNotesOpen(false)}
-              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
-            >
-              Close
-            </button>
-          </div>
-          {selected ? (
-            <textarea
-              value={noteDraft}
-              onChange={(e) => onNoteChange(e.target.value)}
-              onBlur={flushNote}
-              placeholder="Add a note for this node…"
-              aria-label="Node note"
-              style={{
-                flex: 1,
-                resize: "none",
-                border: "1px solid #cecbf6",
-                borderRadius: 8,
-                padding: 8,
-                fontSize: 13,
-                fontFamily: "inherit",
-                color: "#26215c",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                color: "#999",
-                fontSize: 13,
-              }}
-            >
-              Select a node to add or edit its note.
-            </div>
-          )}
-        </div>
+        <NotesPanel
+          selected={selected}
+          value={noteDraft}
+          onChange={onNoteChange}
+          onBlur={flushNote}
+          onClose={() => setNotesOpen(false)}
+        />
       )}
 
       {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}

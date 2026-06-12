@@ -127,6 +127,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Outline view** — a ☰ Outline side panel lists the map as an indented, live outline;
   click a row to focus that node on the canvas, and noted nodes show a 📝 marker. A filter
   box narrows the outline by topic. Pure flattener in `src/outline.ts`.
+- **New-map templates** — the New menu offers starter maps (Blank, Brainstorm, SWOT,
+  Project plan) instead of only a blank map (`src/templates.ts`).
 - **Layout direction** — a picker switches the map between both-sides, right-only, and
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
 - **Collapse / Expand all** — ⊟ / ⊞ toolbar buttons collapse every branch to a level-1

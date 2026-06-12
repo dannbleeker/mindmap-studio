@@ -23,20 +23,11 @@ import {
   saveMap,
   setLastOpened,
 } from "./store/mapStore";
+import { buildTemplate, templates } from "./templates";
 import { controlStyle, inputStyle } from "./ui";
 import { useFind } from "./useFind";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
-
-function newDoc(): MindMapDoc {
-  return {
-    schemaVersion: 1,
-    id: crypto.randomUUID(),
-    title: "Untitled map",
-    root: { id: "root", topic: "Untitled map", children: [] },
-    meta: { source: "new" },
-  };
-}
 
 export function App() {
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
@@ -229,7 +220,7 @@ export function App() {
       await deleteMap(liveDocRef.current.id);
       const remaining = await listMaps();
       const next = remaining.length > 0 ? await loadMap(remaining[0].id) : null;
-      load(next ?? newDoc());
+      load(next ?? buildTemplate("blank"));
     } catch {
       // ignore
     }
@@ -312,9 +303,22 @@ export function App() {
             </option>
           ))}
         </select>
-        <button type="button" onClick={() => load(newDoc())} style={controlStyle}>
-          + New
-        </button>
+        <select
+          value=""
+          onChange={(e) => {
+            if (e.target.value) load(buildTemplate(e.target.value));
+          }}
+          style={controlStyle}
+          aria-label="New map from template"
+          title="New map (pick a template)"
+        >
+          <option value="">+ New…</option>
+          {templates.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
+          ))}
+        </select>
         <button type="button" onClick={deleteCurrent} style={controlStyle}>
           Delete
         </button>

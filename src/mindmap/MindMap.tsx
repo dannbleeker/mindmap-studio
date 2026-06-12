@@ -107,6 +107,23 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
     };
     me.bus.addListener("operation", handleOperation);
 
+    // mind-elixir's undo/redo call refresh() WITHOUT firing 'operation', so our
+    // model would desync from the canvas (the view reverts but the saved/exported
+    // doc wouldn't). Wrap them to re-capture after they revert. This covers both
+    // the keyboard (Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y) and programmatic calls, since
+    // mind-elixir's own keydown handler dispatches through me.undo / me.redo.
+    const history = me as unknown as { undo: () => void; redo: () => void };
+    const originalUndo = history.undo.bind(me);
+    const originalRedo = history.redo.bind(me);
+    history.undo = () => {
+      originalUndo();
+      handleOperation();
+    };
+    history.redo = () => {
+      originalRedo();
+      handleOperation();
+    };
+
     if (import.meta.env.DEV) {
       (window as unknown as { __me?: unknown }).__me = me;
     }

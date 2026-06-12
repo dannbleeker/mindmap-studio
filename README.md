@@ -16,7 +16,8 @@ GitHub Pages).
   Select multiple files to batch-import a whole folder of maps into the library at once.
   Also opens native `.json` maps (exported from this app) losslessly.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
-  plus a node editor panel (icons, tags, font size/color, link, memo) via node-menu.
+  undo/redo (Ctrl+Z / Ctrl+Shift+Z), plus a node editor panel (icons, tags, font size/color,
+  link, memo) via node-menu.
 - **Find** — search the map by topic or note; matches are focused and selected on the
   canvas, cycling through multiple hits on repeated Enter.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.

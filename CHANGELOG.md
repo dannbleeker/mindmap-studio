@@ -98,14 +98,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - Extracted the six export handlers + the download helper out of `App` into a focused
   `useMapExports` hook (`src/useMapExports.ts`), so the component reads as orchestration
   rather than I/O plumbing (behavior-preserving — all formats re-verified in-browser).
-- The `.mmap` importer now **warns when a map has floating topics** — they're captured
-  into the model (and the `.json` export) but not drawn on the canvas yet, so the import
-  banner says so instead of hiding them silently.
 - Upgraded the build toolchain to **Vite 8** (6.4.3 → 8.0.16) with `@vitejs/plugin-react`
   6, matching TP Studio. Behavior-preserving — full gate green and the app re-verified
   in-browser (render, search, exports, no console errors); the production bundle even
   shrank (~100.6 → ~96.8 kB gz entry).
 - Imported **floating topics now render** on the canvas, in a labelled "Floating topics"
-  branch (mind-elixir has no detached nodes, so this is the honest representation). The
-  branch is display-only — `fromMindElixir` strips it on capture, so it never enters the
-  model and `floatingTopics` is preserved across edits.
+  branch (mind-elixir has no detached nodes, so this is the honest representation; the
+  import banner notes their separate placement). The branch is display-only —
+  `fromMindElixir` strips it on capture, so it never enters the model and `floatingTopics`
+  is preserved across edits.
+
+### Fixed
+
+- **Undo/redo now sync the model.** mind-elixir's `undo`/`redo` revert the canvas via
+  `refresh()` without firing an `operation` event, so the canonical doc (and thus
+  autosave + export) used to drift out of sync with what's displayed after a Ctrl+Z.
+  `MindMap` now wraps `undo`/`redo` to re-capture, so the model always matches the canvas.

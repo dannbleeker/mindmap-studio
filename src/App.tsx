@@ -67,11 +67,19 @@ export function App() {
   // Notes editor: tracks the selected node and a debounced draft of its note.
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
-  const [notesOpen, setNotesOpen] = useState(false);
-  const [outlineOpen, setOutlineOpen] = useState(false);
+  // Remember which panels were open last time (workspace layout).
+  const panels0 = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("mindmap-panels") ?? "{}");
+    } catch {
+      return {};
+    }
+  })();
+  const [notesOpen, setNotesOpen] = useState(!!panels0.notesOpen);
+  const [outlineOpen, setOutlineOpen] = useState(!!panels0.outlineOpen);
   const [outlineFilter, setOutlineFilter] = useState("");
-  const [markersOpen, setMarkersOpen] = useState(false);
-  const [styleOpen, setStyleOpen] = useState(false);
+  const [markersOpen, setMarkersOpen] = useState(!!panels0.markersOpen);
+  const [styleOpen, setStyleOpen] = useState(!!panels0.styleOpen);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
 
@@ -315,6 +323,19 @@ export function App() {
         liveDocRef.current;
     }
   }, []);
+
+  // Persist the open-panel layout so the workspace is restored next time.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: persist on any panel toggle
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "mindmap-panels",
+        JSON.stringify({ notesOpen, outlineOpen, markersOpen, styleOpen }),
+      );
+    } catch {
+      // preference is best-effort
+    }
+  }, [notesOpen, outlineOpen, markersOpen, styleOpen]);
 
   // Keep the current map selectable even before its first save lands.
   const mapOptions = maps.some((m) => m.id === doc.id)

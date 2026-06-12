@@ -139,6 +139,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   and intercepted on click (so it doesn't open a blank tab). Turns the library into a
   connected knowledge base.
 - **Duplicate map** — copy the current map into a new library entry ("… (copy)").
+- **Remembered workspace** — which panels (Outline / Notes / Markers / Style) you have open
+  is persisted, so the layout is restored next time.
 - **Layout direction** — a picker switches the map between both-sides, right-only, and
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
 - **Collapse / Expand all** — ⊟ / ⊞ toolbar buttons collapse every branch to a level-1

@@ -113,9 +113,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   is downscaled and stored as a self-contained data URL (so maps stay offline and a `.json`
   export carries its images), rendered on the node, and round-tripped through the model
   (`fileToMapImage` in `src/io/image.ts`; image sync in `src/mindmap/sync.ts`).
-- **Dark canvas theme** — a 🌙/☀ toggle switches the map to a dark theme (same MindManager
-  branch palette, dark surfaces) for on-screen presentation; image exports inherit it. The
-  switch is live (no reload, no lost edits) and the preference persists across sessions.
+- **Canvas theme gallery** — a Theme picker swaps the whole map style live (Light, Dark,
+  Ocean, Sunset — each its own branch palette + surfaces), for on-screen presentation;
+  image exports inherit it. Switching is live (no reload, no lost edits) and the choice
+  persists across sessions. Per-topic font size/colour/background remain available via the
+  node editor panel.
 - **Notes editor** — a 📝 Notes panel docks below the canvas and edits the selected node's
   note in a comfortable textarea (debounced autosave + commit on blur), replacing the
   cramped node-menu memo. Notes persist and round-trip through the model and `.json`.

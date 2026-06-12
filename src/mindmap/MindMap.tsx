@@ -12,7 +12,7 @@ import {
   toMindElixirRoot,
   toSummaries,
 } from "./sync";
-import { mindManagerDarkTheme, mindManagerTheme } from "./theme";
+import { type MindElixirTheme, mindManagerTheme } from "./theme";
 
 export interface SelectedNode {
   id: string;
@@ -44,12 +44,12 @@ interface MindMapProps {
   onChange?: (doc: MindMapDoc) => void;
   /** Fires when the canvas selection changes (for the Notes panel). */
   onSelect?: (selected: SelectedNode | null) => void;
-  /** Dark canvas theme (presentation / screen use); exports inherit it. */
-  dark?: boolean;
+  /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
+  theme?: MindElixirTheme;
   ref?: Ref<MindMapHandle>;
 }
 
-export function MindMap({ doc, onChange, onSelect, dark = false, ref }: MindMapProps) {
+export function MindMap({ doc, onChange, onSelect, theme = mindManagerTheme, ref }: MindMapProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const meRef = useRef<MindElixirInstance | null>(null);
   // The live doc, used to preserve canonical-only fields across edits.
@@ -58,10 +58,10 @@ export function MindMap({ doc, onChange, onSelect, dark = false, ref }: MindMapP
   onChangeRef.current = onChange;
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
-  // Track dark via a ref so the init effect reads it without re-initialising
+  // Track theme via a ref so the init effect reads it without re-initialising
   // (re-init would rebuild from the doc prop and drop unsaved live edits).
-  const darkRef = useRef(dark);
-  darkRef.current = dark;
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
 
   useImperativeHandle(
     ref,
@@ -123,7 +123,7 @@ export function MindMap({ doc, onChange, onSelect, dark = false, ref }: MindMapP
       // SIDE = main branches split left/right of the root (MindManager's look).
       el,
       direction: MindElixir.SIDE,
-      theme: (darkRef.current ? mindManagerDarkTheme : mindManagerTheme) as never,
+      theme: themeRef.current as never,
       draggable: true,
       contextMenu: true,
       toolBar: true,
@@ -199,8 +199,8 @@ export function MindMap({ doc, onChange, onSelect, dark = false, ref }: MindMapP
     const me = meRef.current as
       | (MindElixirInstance & { changeTheme?: (t: unknown) => void })
       | null;
-    me?.changeTheme?.((dark ? mindManagerDarkTheme : mindManagerTheme) as never);
-  }, [dark]);
+    me?.changeTheme?.(theme as never);
+  }, [theme]);
 
   return <div ref={elRef} style={{ height: "100%", width: "100%" }} />;
 }

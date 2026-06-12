@@ -3,6 +3,7 @@ import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { fromMarkdown } from "./io/markdown";
 import { MindMap, type MindMapHandle, type SelectedNode } from "./mindmap/MindMap";
+import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
 import { outlineRows } from "./outline";
@@ -16,9 +17,9 @@ import {
   saveMap,
   setLastOpened,
 } from "./store/mapStore";
-import { useDarkMode } from "./useDarkMode";
 import { useFind } from "./useFind";
 import { useMapExports } from "./useMapExports";
+import { useTheme } from "./useTheme";
 
 const controlStyle = {
   fontSize: 13,
@@ -65,7 +66,7 @@ export function App() {
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
   const [hint, setHint] = useState("");
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { dark, toggleDark } = useDarkMode();
+  const { theme, setThemeId } = useTheme();
   const { query, setQuery, matchInfo, runSearch } = useFind(mapRef, () => liveDocRef.current);
   // Notes editor: tracks the selected node and a debounced draft of its note.
   const [selected, setSelected] = useState<SelectedNode | null>(null);
@@ -309,15 +310,19 @@ export function App() {
           Image
           <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
         </label>
-        <button
-          type="button"
-          onClick={toggleDark}
+        <select
+          value={theme.id}
+          onChange={(e) => setThemeId(e.target.value)}
           style={controlStyle}
-          aria-pressed={dark}
-          title="Toggle dark canvas"
+          aria-label="Canvas theme"
+          title="Canvas style / theme"
         >
-          {dark ? "☀ Light" : "🌙 Dark"}
-        </button>
+          {canvasThemes.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
+          ))}
+        </select>
         <button
           type="button"
           onClick={() => setNotesOpen((v) => !v)}
@@ -457,7 +462,7 @@ export function App() {
           <MindMap
             ref={mapRef}
             doc={doc}
-            dark={dark}
+            theme={theme.theme}
             onChange={(d) => {
               liveDocRef.current = d;
               setLiveDoc(d);

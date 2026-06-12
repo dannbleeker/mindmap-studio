@@ -44,3 +44,57 @@ export const mindManagerDarkTheme = {
     "--line-color": "#56545e",
   },
 };
+
+// Ocean — cool blue/teal branch palette on a light surface.
+export const oceanTheme = {
+  name: "Ocean",
+  type: "light" as const,
+  palette: ["#0C6291", "#1B998B", "#2E86AB", "#3D5A80", "#5F7A61", "#2A9D8F", "#264653"],
+  cssVar: {
+    ...mindManagerTheme.cssVar,
+    "--main-bgcolor": "#f4f8fb",
+    "--root-bgcolor": "#0b3954",
+    "--line-color": "#a9c2cf",
+    "--selected": "#1b998b",
+  },
+};
+
+// Sunset — warm red/orange/amber branch palette on a light surface.
+export const sunsetTheme = {
+  name: "Sunset",
+  type: "light" as const,
+  palette: ["#C1121F", "#E36414", "#9A031E", "#BC6C25", "#A4243B", "#D8572A", "#6A040F"],
+  cssVar: {
+    ...mindManagerTheme.cssVar,
+    "--main-bgcolor": "#fbf6f1",
+    "--root-bgcolor": "#6a040f",
+    "--line-color": "#d8c3b3",
+    "--selected": "#e36414",
+  },
+};
+
+/** The shape mind-elixir's `theme` option (and `changeTheme`) accept. */
+export interface MindElixirTheme {
+  name: string;
+  type: "light" | "dark";
+  palette: string[];
+  cssVar: Record<string, string>;
+}
+
+export interface CanvasTheme {
+  id: string;
+  name: string;
+  theme: MindElixirTheme;
+}
+
+// The canvas style gallery, in pick order. id is persisted in localStorage.
+export const canvasThemes: CanvasTheme[] = [
+  { id: "light", name: "Light", theme: mindManagerTheme },
+  { id: "dark", name: "Dark", theme: mindManagerDarkTheme },
+  { id: "ocean", name: "Ocean", theme: oceanTheme },
+  { id: "sunset", name: "Sunset", theme: sunsetTheme },
+];
+
+export function themeById(id: string): CanvasTheme {
+  return canvasThemes.find((t) => t.id === id) ?? canvasThemes[0];
+}

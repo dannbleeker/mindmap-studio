@@ -262,12 +262,15 @@ figure.diagram svg { max-width: 100%; height: auto; }
 figure.diagram figcaption { font-family: sans-serif; font-size: 0.8em; color: #6b7280; margin-top: 0.5em; font-style: italic; }
 `;
 
-async function main() {
-  console.log(`📖 Building ${BOOK_SLUG}.epub …`);
+/** Build the EPUB and return it as a Node Buffer (no file write — keeps it testable). */
+export async function buildEpub() {
   const chapters = await readChapterMetadata();
-  console.log(`  ${chapters.length} chapters`);
-
   const now = new Date();
+  // Pin entry timestamps to date-only (midnight UTC) so the EPUB is byte-stable
+  // within a day. JSZip otherwise stamps each entry with the wall-clock time, so
+  // every rebuild would differ and the Rebuild-book workflow would commit a no-op
+  // "timestamp churn" each time the manuscript changes.
+  const date = new Date(`${now.toISOString().split("T")[0]}T00:00:00Z`);
   const zip = new JSZip();
 
   // mimetype MUST be first + STORE-compressed (uncompressed) per the EPUB spec.
@@ -282,17 +285,28 @@ async function main() {
     const num = String(idx).padStart(2, "0");
     zip.file(`OEBPS/chapter-${num}.xhtml`, chapterDocument(c.title, chapterToXhtml(c.slug, c.raw)));
   });
+  // Override the timestamp on EVERY entry — files and the folder entries JSZip
+  // auto-creates (META-INF/, OEBPS/) — so none carries the wall-clock time.
+  for (const entry of Object.values(zip.files)) entry.date = date;
 
-  const buf = await zip.generateAsync({
+  return zip.generateAsync({
     type: "nodebuffer",
     compression: "DEFLATE",
     compressionOptions: { level: 9 },
   });
+}
+
+async function main() {
+  console.log(`📖 Building ${BOOK_SLUG}.epub …`);
+  const buf = await buildEpub();
   await writeFile(OUT_PATH, buf);
   console.log(`✓ Wrote ${OUT_PATH} (${(buf.length / 1024).toFixed(1)} KB)`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Run only when executed directly (node scripts/build-book-epub.mjs), not on import.
+if (process.argv[1]?.endsWith("build-book-epub.mjs")) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

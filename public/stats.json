@@ -7,7 +7,7 @@
     "lineCoveragePct": 33.53,
     "commits": 88,
     "ageDays": 0,
-    "trackedFiles": 99,
+    "trackedFiles": 102,
     "featureManualPct": 100,
     "featureBookPct": 97.7,
     "featureExamplePct": 25
@@ -20,13 +20,13 @@
     },
     {
       "category": "Unit tests",
-      "files": 16,
-      "lines": 1049
+      "files": 17,
+      "lines": 1088
     },
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1666
+      "lines": 1686
     },
     {
       "category": "Styles (CSS)",
@@ -62,7 +62,7 @@
     }
   },
   "tests": {
-    "unit": 87,
+    "unit": 90,
     "e2e": 0,
     "durationMs": 1445,
     "slowest": [

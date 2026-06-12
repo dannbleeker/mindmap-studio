@@ -76,8 +76,8 @@ function pdfText(s) {
     .replace(/️/g, "");
 }
 
-async function main() {
-  console.log(`📕 Building ${BOOK_SLUG}.pdf …`);
+/** Build the PDF and return its bytes (no file write — keeps it testable). */
+export async function buildPdf() {
   const chapters = await readChapterMetadata();
   const pdf = await PDFDocument.create();
   const F = {
@@ -535,14 +535,20 @@ async function main() {
   pdf.setCreationDate(stamp);
   pdf.setModificationDate(stamp);
 
-  const bytes = await pdf.save();
-  await writeFile(OUT_PATH, bytes);
-  console.log(
-    `✓ Wrote ${OUT_PATH} (${(bytes.length / 1024).toFixed(1)} KB, ${pdf.getPageCount()} pages)`,
-  );
+  return pdf.save();
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+async function main() {
+  console.log(`📕 Building ${BOOK_SLUG}.pdf …`);
+  const bytes = await buildPdf();
+  await writeFile(OUT_PATH, bytes);
+  console.log(`✓ Wrote ${OUT_PATH} (${(bytes.length / 1024).toFixed(1)} KB)`);
+}
+
+// Run only when executed directly (node scripts/build-book-pdf.mjs), not on import.
+if (process.argv[1]?.endsWith("build-book-pdf.mjs")) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

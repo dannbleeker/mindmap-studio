@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-12T15:03:03.193Z",
-  "commit": "90b94d1",
+  "generatedAt": "2026-06-12T15:04:23.478Z",
+  "commit": "7006bfc",
   "headline": {
     "linesTsJs": 4617,
     "tests": 73,
     "lineCoveragePct": 28.27,
-    "commits": 69,
+    "commits": 70,
     "ageDays": 0,
-    "trackedFiles": 70,
+    "trackedFiles": 74,
     "featureManualPct": 93.2,
     "featureBookPct": 0,
     "featureExamplePct": 0
@@ -64,8 +64,29 @@
   "tests": {
     "unit": 73,
     "e2e": 0,
-    "durationMs": null,
-    "slowest": []
+    "durationMs": 1261,
+    "slowest": [
+      {
+        "file": "test/mmap.test.ts",
+        "ms": 35
+      },
+      {
+        "file": "test/mapStore.test.ts",
+        "ms": 19
+      },
+      {
+        "file": "test/sync.test.ts",
+        "ms": 13
+      },
+      {
+        "file": "test/opml.test.ts",
+        "ms": 10
+      },
+      {
+        "file": "test/html.test.ts",
+        "ms": 7
+      }
+    ]
   },
   "domain": {
     "components": 5,
@@ -129,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 40
+        "commits": 41
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -152,7 +173,7 @@
       {
         "file": "App.tsx",
         "pct": 0,
-        "commits": 40
+        "commits": 41
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -515,12 +536,12 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 0,
-    "commits": 69,
-    "commits7d": 69,
+    "commits": 70,
+    "commits7d": 70,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 68
+        "count": 69
       },
       {
         "name": "github-actions[bot]",
@@ -528,8 +549,8 @@
       }
     ],
     "churn30d": {
-      "added": 15344,
-      "removed": 2446
+      "added": 16056,
+      "removed": 2502
     },
     "changelogEntries": 45
   }

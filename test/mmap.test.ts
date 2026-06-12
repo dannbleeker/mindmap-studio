@@ -142,6 +142,64 @@ describe("parseMmap", () => {
     );
     expect(warnings.some((w) => /outside the central hierarchy/.test(w))).toBe(true);
   });
+
+  // One realistic map exercising every feature at once — the rich features are
+  // each covered in isolation above, but Dann's real sample used none of them, so
+  // this guards that they all decode correctly together.
+  it("imports a map using every feature together", () => {
+    const { doc, warnings } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic>
+    <ap:Topic OId="1">
+      <ap:Text PlainText="Company Plan" />
+      <ap:NotesGroup><ap:NotesXhtmlData PreviewPlainText="Top-level note" /></ap:NotesGroup>
+      <ap:IconsGroup><ap:Icons><ap:Icon xsi:type="ap:StockIcon" IconType="urn:mindjet:Flag" /></ap:Icons></ap:IconsGroup>
+      <ap:SubTopics>
+        <ap:Topic OId="2">
+          <ap:Text PlainText="Strategy" />
+          <ap:Hyperlink Url="https://plan.example/" Name="Plan" />
+          <ap:OneBoundary><ap:Boundary /></ap:OneBoundary>
+          <ap:SubTopics>
+            <ap:Topic OId="3"><ap:Text PlainText="Grow EU" />
+              <ap:NotesGroup><ap:NotesXhtmlData PreviewPlainText="Expand into EU" /></ap:NotesGroup>
+            </ap:Topic>
+            <ap:Topic OId="4"><ap:Text PlainText="Cut costs" />
+              <ap:IconsGroup><ap:Icons><ap:Icon xsi:type="ap:StockIcon" IconType="urn:mindjet:Priority1" /></ap:Icons></ap:IconsGroup>
+            </ap:Topic>
+          </ap:SubTopics>
+        </ap:Topic>
+        <ap:Topic OId="5"><ap:Text PlainText="Ops" /></ap:Topic>
+      </ap:SubTopics>
+    </ap:Topic>
+  </ap:OneTopic>
+  <ap:Relationships><ap:Relationship>
+    <ap:ConnectionGroup><ap:Connection><ap:ObjectReference OIdRef="3" /></ap:Connection></ap:ConnectionGroup>
+    <ap:ConnectionGroup><ap:Connection><ap:ObjectReference OIdRef="5" /></ap:Connection></ap:ConnectionGroup>
+  </ap:Relationship></ap:Relationships>
+  <ap:FloatingTopics><ap:Topic OId="9"><ap:Text PlainText="Legend" /></ap:Topic></ap:FloatingTopics>
+</ap:Map>`),
+    );
+
+    // tree + text
+    expect(doc.title).toBe("Company Plan");
+    expect(doc.root.children.map((c) => c.topic)).toEqual(["Strategy", "Ops"]);
+    const strategy = doc.root.children[0];
+    expect(strategy.children.map((c) => c.topic)).toEqual(["Grow EU", "Cut costs"]);
+    // notes + icons + hyperlink, on the nodes that carry them
+    expect(doc.root.note).toBe("Top-level note");
+    expect(doc.root.icons).toEqual(["Flag"]);
+    expect(strategy.hyperlink).toBe("https://plan.example/");
+    expect(strategy.children[0].note).toBe("Expand into EU");
+    expect(strategy.children[1].icons).toEqual(["Priority1"]);
+    // boundary over Strategy's subtree, relationship as a cross-link, floating topic
+    expect(doc.boundaries).toEqual([{ id: "b1", nodeIds: ["2", "3", "4"] }]);
+    expect(doc.links).toEqual([{ id: "r1", from: "3", to: "5" }]);
+    expect(doc.floatingTopics?.map((t) => t.topic)).toEqual(["Legend"]);
+    // floating-topics note surfaced; nothing left behind
+    expect(warnings.some((w) => /floating topic/.test(w))).toBe(true);
+    expect(warnings.some((w) => /outside the central hierarchy/.test(w))).toBe(false);
+    expect(doc.meta?.source).toBe("mmap");
+  });
 });
 
 function countWith(node: MapNode, pred: (n: MapNode) => boolean): number {

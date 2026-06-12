@@ -138,6 +138,7 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   node shows a 🔗 that navigates to the linked map in-app. Stored as a `#map=<id>` hyperlink
   and intercepted on click (so it doesn't open a blank tab). Turns the library into a
   connected knowledge base.
+- **Duplicate map** — copy the current map into a new library entry ("… (copy)").
 - **Layout direction** — a picker switches the map between both-sides, right-only, and
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
 - **Collapse / Expand all** — ⊟ / ⊞ toolbar buttons collapse every branch to a level-1

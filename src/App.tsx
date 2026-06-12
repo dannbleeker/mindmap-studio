@@ -258,6 +258,14 @@ export function App() {
     }
   }
 
+  function duplicateMap() {
+    const copy = structuredClone(liveDocRef.current);
+    copy.id = crypto.randomUUID();
+    copy.title = `${liveDocRef.current.title} (copy)`;
+    copy.root = { ...copy.root, topic: copy.title };
+    load(copy);
+  }
+
   async function deleteCurrent() {
     try {
       await deleteMap(liveDocRef.current.id);
@@ -364,6 +372,14 @@ export function App() {
             </option>
           ))}
         </select>
+        <button
+          type="button"
+          onClick={duplicateMap}
+          style={controlStyle}
+          title="Duplicate the current map"
+        >
+          Duplicate
+        </button>
         <button type="button" onClick={deleteCurrent} style={controlStyle}>
           Delete
         </button>

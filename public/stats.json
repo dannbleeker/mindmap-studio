@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-12T18:03:41.826Z",
-  "commit": "614d850",
+  "generatedAt": "2026-06-12T18:15:35.467Z",
+  "commit": "da37d85",
   "headline": {
-    "linesTsJs": 5830,
+    "linesTsJs": 5842,
     "tests": 87,
     "lineCoveragePct": 33.53,
-    "commits": 83,
+    "commits": 85,
     "ageDays": 0,
     "trackedFiles": 99,
     "featureManualPct": 93.2,
@@ -26,7 +26,7 @@
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1654
+      "lines": 1666
     },
     {
       "category": "Styles (CSS)",
@@ -64,23 +64,23 @@
   "tests": {
     "unit": 87,
     "e2e": 0,
-    "durationMs": 1246,
+    "durationMs": 1620,
     "slowest": [
       {
         "file": "test/book.test.ts",
-        "ms": 35
+        "ms": 42
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 30
+        "ms": 39
       },
       {
         "file": "test/mapStore.test.ts",
-        "ms": 18
+        "ms": 25
       },
       {
-        "file": "test/markdown.test.ts",
-        "ms": 9
+        "file": "test/sync.test.ts",
+        "ms": 23
       },
       {
         "file": "test/opml.test.ts",
@@ -321,21 +321,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 0,
-    "commits": 83,
-    "commits7d": 83,
+    "commits": 85,
+    "commits7d": 85,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 74
+        "count": 75
       },
       {
         "name": "github-actions[bot]",
-        "count": 9
+        "count": 10
       }
     ],
     "churn30d": {
-      "added": 18860,
-      "removed": 2997
+      "added": 18925,
+      "removed": 3050
     },
     "changelogEntries": 47
   }

@@ -17,6 +17,7 @@ function download(blob: Blob, filename: string): void {
 export interface MapExports {
   exportJson: () => void;
   exportMarkdown: () => void;
+  exportOpml: () => Promise<void>;
   exportPng: () => Promise<void>;
   exportSvg: () => void;
   exportHtml: () => Promise<void>;
@@ -41,6 +42,11 @@ export function useMapExports(
     },
     exportMarkdown() {
       download(new Blob([toMarkdown(getDoc())], { type: "text/markdown" }), `${baseName()}.md`);
+    },
+    async exportOpml() {
+      // Lazy: opml.ts pulls in fast-xml-parser, kept out of the entry bundle.
+      const { toOpml } = await import("./io/opml");
+      download(new Blob([toOpml(getDoc())], { type: "text/x-opml" }), `${baseName()}.opml`);
     },
     async exportPng() {
       const blob = await mapRef.current?.exportPng();

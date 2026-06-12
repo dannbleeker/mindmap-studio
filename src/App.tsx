@@ -177,6 +177,10 @@ export function App() {
     if (name.endsWith(".json")) {
       return { doc: parseDoc(await file.text()), warnings: [] };
     }
+    if (name.endsWith(".opml")) {
+      const { fromOpml } = await import("./io/opml");
+      return { doc: fromOpml(await file.text()), warnings: [] };
+    }
     const { parseMmap } = await importMmap();
     const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
     return { doc: result.doc, warnings: result.warnings };
@@ -252,10 +256,8 @@ export function App() {
     }
   }
 
-  const { exportJson, exportMarkdown, exportPng, exportSvg, exportHtml, exportPdf } = useMapExports(
-    mapRef,
-    () => liveDocRef.current,
-  );
+  const { exportJson, exportMarkdown, exportOpml, exportPng, exportSvg, exportHtml, exportPdf } =
+    useMapExports(mapRef, () => liveDocRef.current);
 
   // Restore the last-opened map on startup; fall back to the sample.
   useEffect(() => {
@@ -411,6 +413,9 @@ export function App() {
         <button type="button" onClick={exportMarkdown} style={controlStyle}>
           .md
         </button>
+        <button type="button" onClick={exportOpml} style={controlStyle}>
+          .opml
+        </button>
         <button type="button" onClick={exportPng} style={controlStyle}>
           .png
         </button>
@@ -428,7 +433,7 @@ export function App() {
           <input
             id="mmap-input"
             type="file"
-            accept=".mmap,.mmp,.md,.markdown,.json"
+            accept=".mmap,.mmp,.md,.markdown,.json,.opml"
             multiple
             onChange={handleFile}
             style={{ display: "none" }}

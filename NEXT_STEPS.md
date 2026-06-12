@@ -2,16 +2,12 @@
 
 Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
-## Blocking / decisions
+## Status
 
-- [ ] **GitHub Pages deploy** — the repo is live and CI is green; the actual
-      Pages publish (build + deploy workflow) isn't set up yet.
-
-**Phase 1 (Brainstorming MVP) is complete**, and a broad slice of Phase 2 is done too
-(see `CHANGELOG.md`). Only the Pages deploy remains for Phase 1:
-
-- [ ] Deploy to GitHub Pages — **needs Dann**: enable Pages in repo settings +
-      confirm a public live deploy (outward-facing, so skipped during the loop).
+**Phase 1 (Brainstorming MVP) is complete**, a broad slice of Phase 2 is done, and the app
+is **deployed** — a `deploy.yml` workflow publishes to GitHub Pages on every push to `main`,
+live at <https://mindmap-studio.struktureretsundfornuft.dk/> (custom domain, HTTPS). See
+`CHANGELOG.md`.
 
 ## MindManager UI-parity work (2026-06-12)
 

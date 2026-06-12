@@ -1,5 +1,7 @@
 # MindMap Studio
 
+**Live:** [mindmap-studio.struktureretsundfornuft.dk](https://mindmap-studio.struktureretsundfornuft.dk/)
+
 A local-first, offline mind-mapping PWA — a self-hosted replacement for Corel/Mindjet
 MindManager. Built on the [mind-elixir](https://github.com/SSShooter/mind-elixir-core) core
 (MIT) with a format-agnostic canonical model as the single source of truth. No telemetry, no

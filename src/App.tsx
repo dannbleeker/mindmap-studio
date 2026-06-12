@@ -96,6 +96,7 @@ export function App() {
   const [noteDraft, setNoteDraft] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [outlineFilter, setOutlineFilter] = useState("");
   const [markersOpen, setMarkersOpen] = useState(false);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
@@ -525,38 +526,53 @@ export function App() {
             style={{
               width: 250,
               flexShrink: 0,
-              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
               borderRight: "1px solid #e2e0d8",
               background: "#fbfbf9",
-              padding: "8px 0",
             }}
           >
-            {outlineRows(liveDoc.root).map((row) => (
-              <button
-                key={row.id}
-                type="button"
-                onClick={() => mapRef.current?.focusNode(row.id)}
-                title={row.topic}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "left",
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  color: "#26215c",
-                  padding: "3px 10px",
-                  paddingLeft: 10 + row.depth * 14,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {row.hasNote ? "📝 " : ""}
-                {row.topic || "(untitled)"}
-              </button>
-            ))}
+            <input
+              value={outlineFilter}
+              onChange={(e) => setOutlineFilter(e.target.value)}
+              placeholder="Filter outline…"
+              aria-label="Filter outline"
+              style={{ ...inputStyle, width: "auto", margin: "8px 10px 4px" }}
+            />
+            <div style={{ overflowY: "auto", padding: "4px 0 8px" }}>
+              {outlineRows(liveDoc.root)
+                .filter(
+                  (row) =>
+                    !outlineFilter.trim() ||
+                    row.topic.toLowerCase().includes(outlineFilter.trim().toLowerCase()),
+                )
+                .map((row) => (
+                  <button
+                    key={row.id}
+                    type="button"
+                    onClick={() => mapRef.current?.focusNode(row.id)}
+                    title={row.topic}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      fontSize: 13,
+                      color: "#26215c",
+                      padding: "3px 10px",
+                      paddingLeft: 10 + row.depth * 14,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {row.hasNote ? "📝 " : ""}
+                    {row.topic || "(untitled)"}
+                  </button>
+                ))}
+            </div>
           </aside>
         )}
         <div style={{ flex: 1, minHeight: 0 }}>

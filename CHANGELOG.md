@@ -122,8 +122,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   note in a comfortable textarea (debounced autosave + commit on blur), replacing the
   cramped node-menu memo. Notes persist and round-trip through the model and `.json`.
 - **Outline view** — a ☰ Outline side panel lists the map as an indented, live outline;
-  click a row to focus that node on the canvas, and noted nodes show a 📝 marker. Pure
-  flattener in `src/outline.ts`.
+  click a row to focus that node on the canvas, and noted nodes show a 📝 marker. A filter
+  box narrows the outline by topic. Pure flattener in `src/outline.ts`.
 - **Layout direction** — a picker switches the map between both-sides, right-only, and
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
 - **Marker palette** — a 🏷 Markers bar of common markers (priority/flag/status/etc.);

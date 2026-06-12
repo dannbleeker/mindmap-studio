@@ -62,4 +62,14 @@ to place, a caption, a note-to-self. MindMap Studio renders floating topics impo
 from other tools, and they're handy as a staging area while you decide where something
 belongs.
 
+## Now you try
+
+Open your conference map (or any map with a few branches). Pick a leaf that sits under the
+wrong parent and **drag it** where it belongs -- watch the whole sub-branch travel and
+re-colour. Then choose one branch that's genuinely "a thing" and give it a **boundary**.
+Finally, find two nodes on *different* branches that depend on each other and draw a
+**relationship** arrow between them. Step back: the tree now carries the hierarchy, the
+boundary carries the grouping, and the arrow carries the one link the tree couldn't. If you
+can't find a real cross-branch link, that's a good sign -- don't invent one.
+
 With structure under control, the next chapter makes individual nodes carry more.

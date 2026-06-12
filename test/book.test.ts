@@ -62,8 +62,19 @@ describe("book diagrams (generated from source constants)", () => {
     }
   });
 
+  it("lays out swot as a root plus four branches", () => {
+    const { nodes, edges } = diagramLayout("swot");
+    expect(nodes).toHaveLength(5); // 1 root + 4 children
+    expect(edges).toHaveLength(4);
+    const svg = diagramSvg("swot");
+    for (const label of ["Our product", "Strengths", "Weaknesses", "Opportunities", "Threats"]) {
+      expect(svg).toContain(label);
+    }
+  });
+
   it("reports known vs unknown diagrams", () => {
     expect(hasDiagram("first-map")).toBe(true);
+    expect(hasDiagram("swot")).toBe(true);
     expect(hasDiagram("does-not-exist")).toBe(false);
     expect(diagramCaption("first-map").length).toBeGreaterThan(0);
   });

@@ -59,4 +59,13 @@ The outline panel stays open on the side as a table of contents. None of these m
 clever on its own; the habit of using them together is what keeps a three-hundred-node
 map feeling as manageable as a thirty-node one.
 
+## Now you try
+
+Find (or build) a map big enough that it doesn't fit on screen. **Collapse all**, then open
+just one branch and talk yourself through it. Press **/** and jump to a node you only
+mentioned in a *note* -- prove to yourself that Find searches notes, not just topics. Open
+the **Outline** panel and use its filter to narrow a long map to a short list. The goal
+isn't to memorise the controls; it's to feel how much calmer a big map gets when you drive
+it at the right altitude instead of staring at the whole thing at once.
+
 Part 3 turns outward: getting the map off your screen and in front of other people.

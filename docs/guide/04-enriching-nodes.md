@@ -62,5 +62,14 @@ convention a team shares -- yes. Six fonts and a gradient on every node -- no. T
 useful maps are usually the plainest ones with enrichment applied exactly where it
 carries meaning.
 
+## Now you try
+
+Take a node that's carrying too much in its label and move the detail into a **note** (open
+the Notes panel and write a sentence or two in Markdown). Shorten the topic to a handful of
+words. Then agree a tiny **marker** convention with yourself -- say, a flag for "blocked"
+and a tick for "done" -- and apply it to three or four nodes. Read the map again: the canvas
+should be more scannable than before, with the depth one click away. If you reach for a
+fifth marker colour, stop -- the small vocabulary is the point.
+
 The next chapter is about the opposite problem: when a map gets big, how do you keep
 finding your way around it?

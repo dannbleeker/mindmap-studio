@@ -20,9 +20,9 @@ const NODE_FILL = "#ffffff";
 const NODE_INK = "#1f2933";
 
 /**
- * Diagram registry. `first-map` mirrors the shape of MindMap Studio's built-in
- * "Brainstorm" template (see src/templates.ts): one central idea radiating into
- * the six classic question branches.
+ * Diagram registry. Each entry mirrors the shape of one of MindMap Studio's
+ * built-in templates (see src/templates.ts) so the book's pictures match what the
+ * app actually produces: `first-map` = Brainstorm, `swot` = SWOT.
  */
 export const DIAGRAMS = {
   "first-map": {
@@ -31,6 +31,14 @@ export const DIAGRAMS = {
     model: {
       root: "New idea",
       children: ["Who", "What", "Why", "How", "When", "Where"],
+    },
+  },
+  swot: {
+    caption: "A SWOT map: a subject in the centre, four branches to fill in — the SWOT template.",
+    alt: "A mind map with the central subject 'Our product' connected to four branches: Strengths, Weaknesses, Opportunities, Threats.",
+    model: {
+      root: "Our product",
+      children: ["Strengths", "Weaknesses", "Opportunities", "Threats"],
     },
   },
 };

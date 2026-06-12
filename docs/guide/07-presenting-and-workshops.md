@@ -67,6 +67,19 @@ machine is not a single point of failure.
 4. **After:** export to **PNG** or **PDF** for the recap; export **JSON** or run a
    **library backup** to keep the working map safe.
 
+## Now you try
+
+Start a new map from the **SWOT** template. It opens with four branches ready to fill:
+
+<!-- DIAGRAM:swot -->
+
+Pick something real -- a product, a project, a decision -- put it in the centre, and spend
+ten minutes filling each branch. Don't aim for a long list; aim for the *honest* three
+items per branch. Then look across the four: does an Opportunity answer a Weakness? Does a
+Threat undercut a Strength? Those cross-links are where a SWOT stops being four lists and
+starts being analysis -- draw a **relationship** arrow for each one you find. That move,
+more than the lists themselves, is the thinking.
+
 That's the whole tool, end to end -- from a single node in Chapter 1 to a map you can
 think with, enrich, navigate, share and present. The appendices that follow are the
 reference you'll come back to.

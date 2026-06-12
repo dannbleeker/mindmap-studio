@@ -2,15 +2,15 @@
   "generatedAt": "2026-06-12T17:52:36.522Z",
   "commit": "1f15a65",
   "headline": {
-    "linesTsJs": 5805,
-    "tests": 86,
+    "linesTsJs": 5824,
+    "tests": 87,
     "lineCoveragePct": 33.59,
     "commits": 78,
     "ageDays": 0,
     "trackedFiles": 99,
     "featureManualPct": 93.2,
     "featureBookPct": 97.7,
-    "featureExamplePct": 6.8
+    "featureExamplePct": 25
   },
   "code": [
     {
@@ -21,12 +21,12 @@
     {
       "category": "Unit tests",
       "files": 16,
-      "lines": 1038
+      "lines": 1049
     },
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1646
+      "lines": 1654
     },
     {
       "category": "Styles (CSS)",
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 13,
-      "lines": 775
+      "lines": 816
     }
   ],
   "coverage": {
@@ -62,7 +62,7 @@
     }
   },
   "tests": {
-    "unit": 86,
+    "unit": 87,
     "e2e": 0,
     "durationMs": 1827,
     "slowest": [
@@ -216,10 +216,10 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 5581,
+    "bookWords": 6008,
     "chapters": 11,
     "appLoc": 3121,
-    "docToCodeRatio": 1.79
+    "docToCodeRatio": 1.93
   },
   "featureCoverage": {
     "total": 44,
@@ -227,8 +227,8 @@
     "manualPct": 93.2,
     "book": 43,
     "bookPct": 97.7,
-    "bookExample": 3,
-    "bookExamplePct": 6.8,
+    "bookExample": 11,
+    "bookExamplePct": 25,
     "byArea": {
       "editing": {
         "total": 5,

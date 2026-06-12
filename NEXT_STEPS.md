@@ -15,11 +15,10 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Phase 2 — remaining
 
-- [ ] Render imported **floating topics** on the canvas (currently imported into the
-      model + warned, but not drawn). mind-elixir has no first-class detached nodes, so
-      this needs an overlay or a synthetic-branch approach.
 - [ ] Render node **images** on the canvas — needs image *import* from the `.mmap`
-      binary blobs first (no image source today), so lower priority.
+      binary blobs first (no image source today).
+- [ ] Make the floating-topics branch fully editable (currently display-only — edits to
+      it aren't captured back into `floatingTopics`).
 - [ ] Validate the `.mmap` importer's notes / hyperlinks / relationships /
       boundaries / floating-topic paths against a real map that *uses* them — the
       current impl is XSD-authoritative + synthetic-tested, but Dann's sample

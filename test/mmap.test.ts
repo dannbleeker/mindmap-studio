@@ -126,7 +126,7 @@ describe("parseMmap", () => {
 </ap:Map>`),
     );
     expect(doc.floatingTopics?.map((t) => t.topic)).toEqual(["Legend"]);
-    expect(warnings.some((w) => /floating topic\(s\) imported but not shown/.test(w))).toBe(true);
+    expect(warnings.some((w) => /floating topic\(s\) imported/.test(w))).toBe(true);
   });
 
   it("warns about topics it cannot reach", () => {

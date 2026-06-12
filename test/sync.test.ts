@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { fromMindElixir, toArrows, toMindElixir, toSummaries } from "../src/mindmap/sync";
+import {
+  FLOATING_NODE_ID,
+  fromMindElixir,
+  toArrows,
+  toMindElixir,
+  toMindElixirRoot,
+  toSummaries,
+} from "../src/mindmap/sync";
 import type { Boundary, MapNode, MindMapDoc } from "../src/model/types";
 
 const n = (
@@ -131,5 +138,33 @@ describe("toSummaries (boundaries -> mind-elixir summaries)", () => {
     expect(
       fromMindElixir(toMindElixir(withB.root), withB, undefined, []).boundaries,
     ).toBeUndefined();
+  });
+});
+
+describe("toMindElixirRoot (floating topics)", () => {
+  const withFloat: MindMapDoc = {
+    ...doc,
+    floatingTopics: [{ id: "f1", topic: "Legend", children: [] }],
+  };
+
+  it("appends imported floating topics as one labelled branch", () => {
+    const meRoot = toMindElixirRoot(withFloat);
+    const branch = meRoot.children?.find((c) => c.id === FLOATING_NODE_ID);
+    expect(branch?.children?.map((c) => c.topic)).toEqual(["Legend"]);
+    // the real branches are untouched and come first
+    expect(meRoot.children?.slice(0, 2).map((c) => c.id)).toEqual(["a", "b"]);
+  });
+
+  it("adds no branch when there are no floating topics", () => {
+    const meRoot = toMindElixirRoot(doc);
+    expect(meRoot.children?.some((c) => c.id === FLOATING_NODE_ID)).toBe(false);
+  });
+
+  it("strips the display-only branch back out on capture (never enters the model)", () => {
+    const back = fromMindElixir(toMindElixirRoot(withFloat), withFloat);
+    expect(back.root.children.some((c) => c.id === FLOATING_NODE_ID)).toBe(false);
+    expect(back.root.children.map((c) => c.id)).toEqual(["a", "b"]);
+    // floatingTopics is preserved from the prior doc, not corrupted by the branch
+    expect(back.floatingTopics).toEqual(withFloat.floatingTopics);
   });
 });

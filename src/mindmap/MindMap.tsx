@@ -9,7 +9,7 @@ import {
   type MeSummary,
   fromMindElixir,
   toArrows,
-  toMindElixir,
+  toMindElixirRoot,
   toSummaries,
 } from "./sync";
 import { mindManagerTheme } from "./theme";
@@ -86,7 +86,7 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
     // Node editor panel (icons / tags / font style / link) — must install before init.
     me.install(nodeMenu);
     me.init({
-      nodeData: { ...toMindElixir(doc.root), root: true },
+      nodeData: { ...toMindElixirRoot(doc), root: true },
       arrows: toArrows(doc.links),
       summaries: toSummaries(doc),
     } as never);

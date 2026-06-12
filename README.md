@@ -27,6 +27,8 @@ GitHub Pages).
 - **Boundaries** — imported MindManager boundaries render as labelled brackets over their
   subtree, and boundaries you draw on the canvas round-trip back into the model (via
   mind-elixir summaries).
+- **Floating topics** — imported detached topics render in a labelled "Floating topics"
+  branch (display-only).
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
   (`.md`), PNG, SVG, a self-contained HTML file, and print-to-PDF.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.

@@ -6,7 +6,7 @@
     "tests": 87,
     "bundleKb": 125.5,
     "mutationScore": null,
-    "featureManualPct": 93.2,
+    "featureManualPct": 100,
     "featureBookPct": 97.7,
     "featureExamplePct": 25
   }

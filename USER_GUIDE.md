@@ -16,8 +16,9 @@ This guide covers everything in the toolbar, top to bottom. For what changed rec
 3. You'll see a sample map (**Q3 Retail Plan**) showing off notes, markers, a relationship
    arrow, and a boundary. Click around, or start your own with **+ New…**.
 
-Everything autosaves to your browser as you work, and the last map you had open is restored
-next time. It also works fully offline and can be installed (see [Install as an app](#install-as-an-app)).
+Everything autosaves to your browser as you work, and the last map you had open — along with
+the side panels you had open (Notes, Outline, Markers, Style) — is restored next time. It also
+works fully offline and can be installed (see [Install as an app](#install-as-an-app)).
 
 ---
 
@@ -58,6 +59,9 @@ Keyboard-first, just like MindManager:
 - **Drag** a node onto another — re-parent it
 - **Ctrl + Z / Ctrl + Shift + Z** (or Ctrl + Y) — **undo / redo** (kept in sync with what's saved)
 - Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down)
+
+Edits you make on the canvas — adding, renaming, moving, restyling — are captured into the map's
+underlying model, so the outline, every export, and the autosave always reflect your latest changes.
 
 ### Notes
 
@@ -166,6 +170,8 @@ Switch freely; each is autosaved. **Delete** removes the current one.
 | `.opml` | OPML outline (Freeplane, OmniOutliner, Workflowy, …) |
 
 Each imported file becomes its own library entry; batch imports report how many were added.
+MindManager stock icons are mapped to the closest **emoji** marker, so an imported map keeps its
+visual cues rather than arriving as bare text.
 
 ### Backup & restore
 

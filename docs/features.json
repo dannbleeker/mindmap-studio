@@ -57,7 +57,7 @@
       "name": "Canvas edits captured into the canonical model",
       "area": "editing",
       "since": "2026-06-11",
-      "manual": false,
+      "manual": true,
       "book": true,
       "bookExample": false
     },
@@ -93,7 +93,7 @@
       "name": "Imported .mmap icons rendered as emoji",
       "area": "markers",
       "since": "2026-06-12",
-      "manual": false,
+      "manual": true,
       "book": true,
       "bookExample": false
     },
@@ -282,7 +282,7 @@
       "name": "Remembered open-panel workspace",
       "area": "library",
       "since": "2026-06-12",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },

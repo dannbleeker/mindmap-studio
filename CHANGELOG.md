@@ -128,6 +128,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
 - **Marker palette** — a 🏷 Markers bar of common markers (priority/flag/status/etc.);
   click one to toggle it on the selected node. Markers render on the node and persist.
+- **Find & Replace** — the Find bar gains a replace field + "Replace all" that rewrites the
+  search text in every matching topic (case-insensitive, literal). Pure `replaceInTopic`
+  helper in `src/search.ts`.
 
 ### Fixed
 

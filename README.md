@@ -18,8 +18,8 @@ GitHub Pages).
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   undo/redo (Ctrl+Z / Ctrl+Shift+Z), images on nodes, a docked **Notes** editor for the
   selected node, plus a node editor panel (icons, tags, font size/color, link) via node-menu.
-- **Find** — search the map by topic or note; matches are focused and selected on the
-  canvas, cycling through multiple hits on repeated Enter.
+- **Find & Replace** — search the map by topic or note (matches focused on the canvas,
+  cycling on repeated Enter), and replace the search text across all matching topics.
 - **Outline** — a side panel showing the map as an indented outline; click a row to jump to
   that node (noted nodes are marked 📝).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on

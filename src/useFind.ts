@@ -8,6 +8,7 @@ import { findMatches } from "./search";
 // hook; the matching itself lives in the pure, unit-tested `findMatches`.
 export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => MindMapDoc) {
   const [query, setQuery] = useState("");
+  const [replaceWith, setReplaceWith] = useState("");
   const [matchInfo, setMatchInfo] = useState("");
   const cursor = useRef({ q: "", i: -1 });
 
@@ -26,5 +27,10 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
     setMatchInfo(`${i + 1}/${matches.length}`);
   }
 
-  return { query, setQuery, matchInfo, runSearch };
+  function runReplace() {
+    const n = mapRef.current?.replaceTopics(query, replaceWith) ?? 0;
+    setMatchInfo(n > 0 ? `replaced ${n}` : "no matches");
+  }
+
+  return { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace };
 }

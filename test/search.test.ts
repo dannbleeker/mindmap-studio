@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MapNode } from "../src/model/types";
-import { findMatches } from "../src/search";
+import { findMatches, replaceInTopic } from "../src/search";
 
 const root: MapNode = {
   id: "r",
@@ -30,5 +30,20 @@ describe("findMatches", () => {
 
   it("returns an empty list when nothing matches", () => {
     expect(findMatches(root, "xyz")).toEqual([]);
+  });
+});
+
+describe("replaceInTopic", () => {
+  it("replaces every occurrence, case-insensitively", () => {
+    expect(replaceInTopic("Marketing market", "market", "biz")).toBe("bizing biz");
+  });
+
+  it("returns the topic unchanged for a blank query", () => {
+    expect(replaceInTopic("Plan", "   ", "x")).toBe("Plan");
+  });
+
+  it("treats the query as a literal (regex chars escaped)", () => {
+    expect(replaceInTopic("a.b a.b", "a.b", "Z")).toBe("Z Z");
+    expect(replaceInTopic("axb", "a.b", "Z")).toBe("axb");
   });
 });

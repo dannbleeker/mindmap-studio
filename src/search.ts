@@ -17,3 +17,12 @@ export function findMatches(root: MapNode, query: string): string[] {
   walk(root);
   return ids;
 }
+
+// Case-insensitive replace of every occurrence of `query` within `topic`.
+// Pure + unit-tested; the canvas applies the result to each matching node.
+export function replaceInTopic(topic: string, query: string, replacement: string): string {
+  const q = query.trim();
+  if (!q) return topic;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return topic.replace(new RegExp(escaped, "gi"), replacement);
+}

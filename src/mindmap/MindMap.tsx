@@ -3,6 +3,7 @@ import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import type { MapImage, MindMapDoc } from "../model/types";
+import { replaceInTopic } from "../search";
 import {
   type MeArrow,
   type MeNode,
@@ -31,6 +32,8 @@ export interface MindMapHandle {
   setSelectedNote: (note: string) => boolean;
   /** Toggle a marker icon on the selected node; false if nothing is selected. */
   toggleSelectedIcon: (icon: string) => boolean;
+  /** Replace the query in every matching node topic; returns the count changed. */
+  replaceTopics: (query: string, replacement: string) => number;
 }
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
@@ -152,6 +155,29 @@ export function MindMap({
           : [...current, icon];
         me.reshapeNode(el, { icons: next });
         return true;
+      },
+      replaceTopics: (query: string, replacement: string): number => {
+        const me = meRef.current as
+          | (MindElixirInstance & { reshapeNode?: (el: unknown, patch: unknown) => void })
+          | null;
+        const q = query.trim();
+        if (!me || !q || !me.reshapeNode) return 0;
+        // Bind so `this` is preserved when we call it outside method position.
+        const reshapeNode = me.reshapeNode.bind(me);
+        let count = 0;
+        const walk = (node: MeNode) => {
+          const next = replaceInTopic(node.topic, q, replacement);
+          if (next !== node.topic) {
+            const el = me.findEle(node.id);
+            if (el) {
+              reshapeNode(el, { topic: next });
+              count += 1;
+            }
+          }
+          for (const child of node.children ?? []) walk(child);
+        };
+        walk((me.getData() as unknown as { nodeData: MeNode }).nodeData);
+        return count;
       },
     }),
     [],

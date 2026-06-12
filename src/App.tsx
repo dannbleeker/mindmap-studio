@@ -82,7 +82,8 @@ export function App() {
       return "side";
     }
   });
-  const { query, setQuery, matchInfo, runSearch } = useFind(mapRef, () => liveDocRef.current);
+  const { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace } =
+    useFind(mapRef, () => liveDocRef.current);
 
   function changeLayout(value: LayoutDirection) {
     setLayout(value);
@@ -383,8 +384,23 @@ export function App() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Find…"
             aria-label="Find node"
-            style={inputStyle}
+            style={{ ...inputStyle, width: 100 }}
           />
+          <input
+            value={replaceWith}
+            onChange={(e) => setReplaceWith(e.target.value)}
+            placeholder="Replace…"
+            aria-label="Replace with"
+            style={{ ...inputStyle, width: 100 }}
+          />
+          <button
+            type="button"
+            onClick={runReplace}
+            style={{ ...controlStyle, padding: "6px 8px" }}
+            title="Replace the find text in every matching topic"
+          >
+            Replace all
+          </button>
           {matchInfo && <span style={{ fontSize: 11, color: "#73726c" }}>{matchInfo}</span>}
         </form>
         <span style={{ flex: 1 }} />

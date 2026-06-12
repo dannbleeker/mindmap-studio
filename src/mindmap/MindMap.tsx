@@ -2,6 +2,7 @@ import nodeMenu from "@mind-elixir/node-menu";
 import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
+import { isDangerousUrl } from "../io/urlSafety";
 import type { MapImage, MindMapDoc, NodeStyle } from "../model/types";
 import { replaceInTopic } from "../search";
 import {
@@ -235,6 +236,9 @@ export function MindMap({
           | null;
         const el = me?.currentNode;
         if (!me || !el || !me.reshapeNode) return false;
+        // Never store a script-executing scheme (javascript:/data:/vbscript:).
+        // The export sanitiser is the real guard; this stops it at the source.
+        if (isDangerousUrl(url)) return false;
         me.reshapeNode(el, { hyperLink: url });
         return true;
       },

@@ -1,3 +1,4 @@
+import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, CrossLink, MapNode, MindMapDoc, NodeStyle } from "../model/types";
 
 /** A mind-elixir summary ≈ our Boundary (a bracket over a node's subtree). */
@@ -49,7 +50,9 @@ export function toMindElixir(node: MapNode): MeNode {
   if (node.style) me.style = node.style;
   if (node.tags?.length) me.tags = node.tags;
   if (node.icons?.length) me.icons = node.icons;
-  if (node.hyperlink) me.hyperLink = node.hyperlink;
+  // Drop dangerous-scheme links so they never render as a clickable
+  // javascript:/data: anchor on the live canvas (export is sanitised separately).
+  if (node.hyperlink && !isDangerousUrl(node.hyperlink)) me.hyperLink = node.hyperlink;
   if (node.note) me.note = node.note;
   if (node.image) {
     me.image = {
@@ -185,7 +188,9 @@ function meToNode(me: MeNode, prev: Map<string, MapNode>): MapNode {
   };
   if (me.icons?.length) node.icons = me.icons;
   if (me.tags?.length) node.tags = me.tags;
-  if (me.hyperLink) node.hyperlink = me.hyperLink;
+  // Strip a dangerous-scheme link on capture, so one typed into the node-menu
+  // never reaches the canonical model / autosave / a .json export.
+  if (me.hyperLink && !isDangerousUrl(me.hyperLink)) node.hyperlink = me.hyperLink;
   if (me.style) {
     // Drop cleared ("") style keys so the model (and .json) stays tidy.
     const style = Object.fromEntries(

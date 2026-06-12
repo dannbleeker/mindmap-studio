@@ -229,3 +229,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Book PDF code blocks** now paginate cleanly — a block taller than a page draws a
   background per page segment instead of spilling later lines onto the next page without one
   (latent: the manuscript has no fenced code blocks yet).
+
+### Security
+
+- **Stored XSS in the SVG / HTML / PDF export is fixed.** mind-elixir builds the export SVG by
+  re-injecting each node topic as live HTML inside an SVG `<foreignObject>` (and each hyperlink
+  as a raw `href`), and `src/io/html.ts` embeds that SVG as live markup — so a topic like
+  `<img src=x onerror=…>` or a `javascript:` link (typed, or carried in by a malicious import)
+  executed when the exported `.svg`/`.html` was opened or the map was printed to PDF. A new
+  namespace-aware sanitiser (`src/io/svgSanitize.ts`) now runs on every SVG/HTML/PDF export:
+  it strips `<script>`/`<iframe>`/`<object>`/… , every `on*` handler, and any URL scheme outside
+  a strict allowlist, while **preserving** the foreignObject node topics — which DOMPurify
+  cannot, as it deletes foreignObject content in every profile. As defence-in-depth, the
+  hyperlink input boundaries (`setSelectedHyperlink`, the model↔canvas sync in
+  `src/mindmap/sync.ts`, and the `.mmap` importer) reject `javascript:`/`data:`/`vbscript:`
+  links at the source (`src/io/urlSafety.ts`). Verified against a real export render — no script
+  executes and every node topic still renders — plus jsdom unit tests (`test/svgSanitize.test.ts`,
+  `test/urlSafety.test.ts`). The notes renderer and the XML/JSON importers were reviewed and were
+  already safe.

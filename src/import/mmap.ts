@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { strFromU8, unzipSync } from "fflate";
 import { mindManagerIconToEmoji } from "../icons";
+import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, CrossLink, MapNode, MindMapDoc, NodeId } from "../model/types";
 
 // MindManager .mmap importer (one-way).
@@ -97,7 +98,8 @@ function topicToNode(topic: Xml, ctx: ParseContext): MapNode {
   if (note) node.note = note;
 
   const url = topic?.Hyperlink?.[`${ATTR}Url`];
-  if (url) node.hyperlink = String(url);
+  // A malicious .mmap could carry a javascript:/data: hyperlink — skip it on import.
+  if (url && !isDangerousUrl(String(url))) node.hyperlink = String(url);
 
   const icons = extractIcons(topic);
   if (icons.length > 0) node.icons = icons;

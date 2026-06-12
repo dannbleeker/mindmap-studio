@@ -2,6 +2,7 @@ import type { RefObject } from "react";
 import { buildPrintDoc, wrapSvgHtml } from "./io/html";
 import { serializeDoc } from "./io/json";
 import { toMarkdown } from "./io/markdown";
+import { sanitizeSvg } from "./io/svgSanitize";
 import type { MindMapHandle } from "./mindmap/MindMap";
 import type { MindMapDoc } from "./model/types";
 
@@ -19,7 +20,7 @@ export interface MapExports {
   exportMarkdown: () => void;
   exportOpml: () => Promise<void>;
   exportPng: () => Promise<void>;
-  exportSvg: () => void;
+  exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
   exportPdf: () => Promise<void>;
 }
@@ -52,14 +53,19 @@ export function useMapExports(
       const blob = await mapRef.current?.exportPng();
       if (blob) download(blob, `${baseName()}.png`);
     },
-    exportSvg() {
-      const blob = mapRef.current?.exportSvg();
-      if (blob) download(blob, `${baseName()}.svg`);
+    // SVG/HTML/PDF all embed the rendered SVG as live markup, so every one runs
+    // through sanitizeSvg first — mind-elixir re-injects node topics + hyperlinks
+    // unescaped, which would otherwise execute when the exported file is opened.
+    async exportSvg() {
+      const svg = mapRef.current?.exportSvg();
+      if (!svg) return;
+      const clean = sanitizeSvg(await svg.text());
+      download(new Blob([clean], { type: "image/svg+xml" }), `${baseName()}.svg`);
     },
     async exportHtml() {
       const svg = mapRef.current?.exportSvg();
       if (!svg) return;
-      const html = wrapSvgHtml(await svg.text(), baseName());
+      const html = wrapSvgHtml(sanitizeSvg(await svg.text()), baseName());
       download(new Blob([html], { type: "text/html" }), `${baseName()}.html`);
     },
     // Print-to-PDF: render the SVG into a hidden iframe and open the browser print
@@ -67,7 +73,7 @@ export function useMapExports(
     async exportPdf() {
       const svg = mapRef.current?.exportSvg();
       if (!svg) return;
-      const html = buildPrintDoc(await svg.text(), baseName());
+      const html = buildPrintDoc(sanitizeSvg(await svg.text()), baseName());
       const iframe = document.createElement("iframe");
       iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
       iframe.srcdoc = html;

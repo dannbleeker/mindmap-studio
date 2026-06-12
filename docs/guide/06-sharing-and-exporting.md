@@ -66,5 +66,14 @@ local database, and the app works fully offline (Chapter 7). Sharing is always a
 explicit act, never a background one -- which is exactly how a thinking tool should treat
 the half-formed ideas you trust it with.
 
+## Now you try
+
+Take any map and export it twice: once to **JSON** and once to **Markdown**. Open the
+Markdown in a text editor — there's your outline, ready to paste into a document. Now start
+a **new** map and import the JSON you saved: it comes back exactly, down to the markers and
+arrows. You've just proved the thing that matters most about a thinking tool — your work
+isn't trapped in it. **JSON to keep it, Markdown to share it.** Make that round trip once
+and you'll trust the app with the ideas you're still figuring out.
+
 The final chapter is about the most demanding kind of sharing: standing up and walking a
 room through a map live.

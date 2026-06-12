@@ -311,7 +311,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-opml",
@@ -338,7 +338,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-markdown",
@@ -347,7 +347,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-opml",

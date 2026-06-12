@@ -2,7 +2,12 @@ import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "reac
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { fromMarkdown } from "./io/markdown";
-import { MindMap, type MindMapHandle, type SelectedNode } from "./mindmap/MindMap";
+import {
+  type LayoutDirection,
+  MindMap,
+  type MindMapHandle,
+  type SelectedNode,
+} from "./mindmap/MindMap";
 import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
@@ -67,7 +72,23 @@ export function App() {
   const [hint, setHint] = useState("");
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { theme, setThemeId } = useTheme();
+  const [layout, setLayout] = useState<LayoutDirection>(() => {
+    try {
+      return (localStorage.getItem("mindmap-layout") as LayoutDirection) || "side";
+    } catch {
+      return "side";
+    }
+  });
   const { query, setQuery, matchInfo, runSearch } = useFind(mapRef, () => liveDocRef.current);
+
+  function changeLayout(value: LayoutDirection) {
+    setLayout(value);
+    try {
+      localStorage.setItem("mindmap-layout", value);
+    } catch {
+      // preference is best-effort
+    }
+  }
   // Notes editor: tracks the selected node and a debounced draft of its note.
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
@@ -323,6 +344,17 @@ export function App() {
             </option>
           ))}
         </select>
+        <select
+          value={layout}
+          onChange={(e) => changeLayout(e.target.value as LayoutDirection)}
+          style={controlStyle}
+          aria-label="Layout direction"
+          title="Layout direction"
+        >
+          <option value="side">Both sides</option>
+          <option value="right">Right</option>
+          <option value="left">Left</option>
+        </select>
         <button
           type="button"
           onClick={() => setNotesOpen((v) => !v)}
@@ -463,6 +495,7 @@ export function App() {
             ref={mapRef}
             doc={doc}
             theme={theme.theme}
+            direction={layout}
             onChange={(d) => {
               liveDocRef.current = d;
               setLiveDoc(d);

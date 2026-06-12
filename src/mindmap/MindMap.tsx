@@ -46,10 +46,33 @@ interface MindMapProps {
   onSelect?: (selected: SelectedNode | null) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
   theme?: MindElixirTheme;
+  /** Layout direction: both sides, right-only, or left-only. */
+  direction?: LayoutDirection;
   ref?: Ref<MindMapHandle>;
 }
 
-export function MindMap({ doc, onChange, onSelect, theme = mindManagerTheme, ref }: MindMapProps) {
+export type LayoutDirection = "side" | "left" | "right";
+
+/** Re-layout the current map to a direction (preserves in-memory edits). */
+function applyDirection(me: MindElixirInstance, direction: LayoutDirection): void {
+  const m = me as unknown as {
+    initLeft?: () => void;
+    initRight?: () => void;
+    initSide?: () => void;
+  };
+  if (direction === "left") m.initLeft?.();
+  else if (direction === "right") m.initRight?.();
+  else m.initSide?.();
+}
+
+export function MindMap({
+  doc,
+  onChange,
+  onSelect,
+  theme = mindManagerTheme,
+  direction = "side",
+  ref,
+}: MindMapProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const meRef = useRef<MindElixirInstance | null>(null);
   // The live doc, used to preserve canonical-only fields across edits.
@@ -62,6 +85,8 @@ export function MindMap({ doc, onChange, onSelect, theme = mindManagerTheme, ref
   // (re-init would rebuild from the doc prop and drop unsaved live edits).
   const themeRef = useRef(theme);
   themeRef.current = theme;
+  const directionRef = useRef(direction);
+  directionRef.current = direction;
 
   useImperativeHandle(
     ref,
@@ -138,6 +163,8 @@ export function MindMap({ doc, onChange, onSelect, theme = mindManagerTheme, ref
     } as never);
     meRef.current = me;
 
+    // The constructor lays out as SIDE; apply a non-default direction on (re)init.
+    if (directionRef.current !== "side") applyDirection(me, directionRef.current);
     requestAnimationFrame(() => fitView(me));
 
     // Capture canvas edits back into the canonical model.
@@ -201,6 +228,19 @@ export function MindMap({ doc, onChange, onSelect, theme = mindManagerTheme, ref
       | null;
     me?.changeTheme?.(theme as never);
   }, [theme]);
+
+  // Live layout-direction switch (the init effect handles the on-load case).
+  const firstDirectionRun = useRef(true);
+  useEffect(() => {
+    if (firstDirectionRun.current) {
+      firstDirectionRun.current = false;
+      return;
+    }
+    const me = meRef.current;
+    if (!me) return;
+    applyDirection(me, direction);
+    fitView(me);
+  }, [direction]);
 
   return <div ref={elRef} style={{ height: "100%", width: "100%" }} />;
 }

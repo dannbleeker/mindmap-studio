@@ -124,6 +124,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Outline view** — a ☰ Outline side panel lists the map as an indented, live outline;
   click a row to focus that node on the canvas, and noted nodes show a 📝 marker. Pure
   flattener in `src/outline.ts`.
+- **Layout direction** — a picker switches the map between both-sides, right-only, and
+  left-only layouts (applied live, edits preserved); the choice persists across sessions.
 
 ### Fixed
 

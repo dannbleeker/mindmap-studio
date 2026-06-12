@@ -3,6 +3,7 @@ import { MarkerBar, NotesPanel, OutlinePanel, StyleBar } from "./Panels";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
+import { serializeLibrary, tryParseLibrary } from "./io/library";
 import { fromMarkdown } from "./io/markdown";
 import {
   type LayoutDirection,
@@ -158,10 +159,50 @@ export function App() {
     return { doc: result.doc, warnings: result.warnings };
   }
 
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportLibrary() {
+    try {
+      await saveMap(liveDocRef.current); // flush current edits into the backup
+      const docs: MindMapDoc[] = [];
+      for (const s of await listMaps()) {
+        const d = await loadMap(s.id);
+        if (d) docs.push(d);
+      }
+      downloadBlob(
+        new Blob([serializeLibrary(docs)], { type: "application/json" }),
+        "mindmap-library.json",
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const files = [...(event.target.files ?? [])];
     event.target.value = ""; // allow re-selecting the same files
     if (files.length === 0) return;
+    // A single .json that is a whole-library backup restores every map at once.
+    if (files.length === 1 && files[0].name.toLowerCase().endsWith(".json")) {
+      const lib = tryParseLibrary(await files[0].text());
+      if (lib) {
+        try {
+          for (const m of lib) await saveMap(m);
+          await refreshMaps();
+          load(lib[0] ?? buildTemplate("blank"), [`Restored ${lib.length} maps from backup.`]);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : String(err));
+        }
+        return;
+      }
+    }
     // Code-split: load the .mmap importer (fast-xml-parser, fflate) once, on demand.
     const importMmap = () => import("./import/mmap");
     const batch = files.length > 1;
@@ -481,6 +522,14 @@ export function App() {
         </button>
         <button type="button" onClick={exportPdf} style={controlStyle}>
           .pdf
+        </button>
+        <button
+          type="button"
+          onClick={exportLibrary}
+          style={controlStyle}
+          title="Back up every map to one .json file (restore by opening it)"
+        >
+          ⬇ Backup
         </button>
         <label style={controlStyle}>
           Open files

@@ -150,6 +150,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **OPML import/export** — open and save `.opml` (the standard outline-interchange format
   used by Freeplane, OmniOutliner, Workflowy, …); topics + notes round-trip. The parser is
   lazy-loaded (`src/io/opml.ts`), so it stays out of the entry bundle.
+- **Library backup & restore** — a ⬇ Backup button saves *every* map to one
+  `mindmap-library.json`; opening that file restores them all. Pure helpers
+  (`serializeLibrary`/`parseLibrary` in `src/io/library.ts`); restore is auto-detected when
+  you open a backup via Open files.
 
 ### Fixed
 

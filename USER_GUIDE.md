@@ -166,6 +166,12 @@ Switch freely; each is autosaved. **Delete** removes the current one.
 
 Each imported file becomes its own library entry; batch imports report how many were added.
 
+### Backup & restore
+
+**⬇ Backup** saves your entire library — every map — into a single `mindmap-library.json`.
+To restore, just **Open** that file: all the maps come back. Great for moving your whole
+library to another machine or keeping a safe copy.
+
 ---
 
 ## Exporting

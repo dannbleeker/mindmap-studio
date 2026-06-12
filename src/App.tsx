@@ -759,6 +759,12 @@ export function App() {
           <a href="/user-guide.html" target="_blank" rel="noopener noreferrer">
             User guide
           </a>
+          <a href="/Thinking-in-Maps.pdf" target="_blank" rel="noopener noreferrer">
+            Book (PDF)
+          </a>
+          <a href="/Thinking-in-Maps.epub" target="_blank" rel="noopener noreferrer">
+            Book (EPUB)
+          </a>
           <a href="/notices.html" target="_blank" rel="noopener noreferrer">
             Third-party notices
           </a>

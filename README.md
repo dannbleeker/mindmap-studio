@@ -67,8 +67,9 @@ pnpm build       # production build
 
 `pnpm gate` is the "green before done" check: typecheck → lint/format (Biome) → dead-code
 (knip) → tests → build → bundle-size budget (entry chunk), fail-fast. CI
-(`.github/workflows/ci.yml`) runs the same command. See `CLAUDE.md` for how we build,
-`CHANGELOG.md` for what's shipped, and `NEXT_STEPS.md` for open work.
+(`.github/workflows/ci.yml`) runs the same command. See `USER_GUIDE.md` for how to use the
+app, `CLAUDE.md` for how we build, `CHANGELOG.md` for what's shipped, and `NEXT_STEPS.md` for
+open work.
 
 ## The `.mmap` importer
 

@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Local-first mind mapping PWA — a MindManager replacement. Phase 0 spike.",
+  "description": "Local-first mind mapping PWA — a MindManager replacement.",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

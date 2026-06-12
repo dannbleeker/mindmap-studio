@@ -84,6 +84,24 @@ and a CI-safe, env-gated (`MMAP_FILE`) integration test.
 
 ## Status
 
-**Phase 1 (Brainstorming MVP) is complete**; Phase 2 is in progress. The only Phase 1 item left
-is a GitHub Pages deploy. Scope intentionally excludes the task / Gantt / resource PM layer. See
-`NEXT_STEPS.md`.
+**Phase 1 (Brainstorming MVP) is complete** and the app is **deployed** — live at
+<https://mindmap-studio.struktureretsundfornuft.dk/> (GitHub Pages, custom domain). Phase 2 is in
+progress. Scope intentionally excludes the task / Gantt / resource PM layer. See `NEXT_STEPS.md`.
+
+## License
+
+MindMap Studio is dual-licensed. The two artefacts in this repository are governed by different
+licenses:
+
+- **The software** — all source code under `src/`, `test/`, `scripts/`, the build configuration,
+  etc. — is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for the full text.
+  Permissive use including commercial use, with attribution and a patent grant.
+- **The book** — the practitioner guide in [`docs/guide/`](docs/guide/) (the source Markdown, the
+  assembled EPUB, the PDF) — is licensed under **Creative Commons Attribution-NonCommercial 4.0
+  International (CC BY-NC 4.0)**. See [LICENSE-BOOK](LICENSE-BOOK) for the full text + scope. Free
+  for non-commercial use with attribution; commercial republishing or paid courses / consulting use
+  requires prior written permission.
+
+Third-party trademarks and third-party authors' work referenced in the book remain the property of
+their respective owners. See [NOTICE.md](NOTICE.md) for the trademark notices and the boundary
+between MindMap Studio's own license and what it doesn't grant rights to.

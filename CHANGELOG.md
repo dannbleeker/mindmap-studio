@@ -44,6 +44,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   from the unauthenticated GitHub REST API on each open) and **project metrics from
   CI** (everything from `stats.json`, including the documentation-coverage map and
   the risk map). Chart.js from a pinned, SRI-checked CDN.
+- **Dual licensing** — the software is licensed under the **Apache License 2.0**
+  ([`LICENSE`](LICENSE); also `package.json`'s `license` field), while the
+  forthcoming practitioner book in `docs/guide/` is **CC BY-NC 4.0**
+  ([`LICENSE-BOOK`](LICENSE-BOOK)). Third-party trademark + open-source dependency
+  notices live in [`NOTICE.md`](NOTICE.md), rendered to `/notices.html`, and the
+  split is documented in the README "## License" section.
+- **In-app About dialog** — a native `<dialog>` (modal semantics, focus management
+  and Escape-to-close handled by the browser) reachable from the header, surfacing
+  the copyright, the dual-license summary, and links to the third-party notices,
+  the live dashboard, and the source repository.
 - **`.mmap` import wired into the app** — an Open-file control runs `parseMmap`
   and renders the result on the canvas, surfacing importer warnings and parse
   errors inline.

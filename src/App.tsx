@@ -80,6 +80,8 @@ export function App() {
   const [outlineFilter, setOutlineFilter] = useState("");
   const [markersOpen, setMarkersOpen] = useState(!!panels0.markersOpen);
   const [styleOpen, setStyleOpen] = useState(!!panels0.styleOpen);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const aboutRef = useRef<HTMLDialogElement>(null);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
 
@@ -336,6 +338,15 @@ export function App() {
     }
   }, [notesOpen, outlineOpen, markersOpen, styleOpen]);
 
+  // Drive the native <dialog> from React state: showModal() gives us the
+  // top-layer backdrop, focus handling, and Escape-to-close for free.
+  useEffect(() => {
+    const el = aboutRef.current;
+    if (!el) return;
+    if (aboutOpen && !el.open) el.showModal();
+    else if (!aboutOpen && el.open) el.close();
+  }, [aboutOpen]);
+
   // Keep the current map selectable even before its first save lands.
   const mapOptions = maps.some((m) => m.id === doc.id)
     ? maps
@@ -355,6 +366,14 @@ export function App() {
         }}
       >
         <strong style={{ fontSize: 15, marginRight: 4 }}>MindMap Studio</strong>
+        <button
+          type="button"
+          onClick={() => setAboutOpen(true)}
+          style={controlStyle}
+          title="About MindMap Studio — version, license, credits"
+        >
+          About
+        </button>
         <button
           type="button"
           onClick={() => setOutlineOpen((v) => !v)}
@@ -692,6 +711,66 @@ export function App() {
       )}
 
       {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}
+
+      {/* About — native <dialog>: modal semantics, focus trap and Esc handled by the browser. */}
+      <dialog
+        ref={aboutRef}
+        aria-label="About MindMap Studio"
+        onClose={() => setAboutOpen(false)}
+        style={{
+          border: "none",
+          borderRadius: 12,
+          boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
+          padding: "22px 24px",
+          maxWidth: 440,
+          width: "calc(100% - 32px)",
+          color: "#1f2933",
+          lineHeight: 1.5,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <h2 style={{ margin: 0, fontSize: 18 }}>MindMap Studio</h2>
+          <button
+            type="button"
+            onClick={() => setAboutOpen(false)}
+            style={controlStyle}
+            aria-label="Close about dialog"
+          >
+            ✕
+          </button>
+        </div>
+        <p style={{ margin: "8px 0 14px", color: "#52606d", fontSize: 13 }}>
+          Local-first mind mapping — a MindManager replacement. Your maps stay in your browser.
+        </p>
+        <p style={{ margin: "0 0 14px", fontSize: 13 }}>© 2026 Dann Bleeker Pedersen</p>
+        <div style={{ fontSize: 13, marginBottom: 14 }}>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>License (dual)</div>
+          <div>Software — Apache License 2.0</div>
+          <div>Book and docs — CC BY-NC 4.0</div>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 13 }}>
+          <a href="/notices.html" target="_blank" rel="noopener noreferrer">
+            Third-party notices
+          </a>
+          <a href="/dashboard.html" target="_blank" rel="noopener noreferrer">
+            Live dashboard
+          </a>
+          <a
+            href="https://github.com/dannbleeker/mindmap-studio"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Source
+          </a>
+        </div>
+      </dialog>
     </div>
   );
 }

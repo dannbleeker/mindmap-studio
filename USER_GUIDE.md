@@ -90,7 +90,11 @@ Open **🎨 Style** and, with a node selected:
 
 ### Links
 
-Select a node and use the node editor panel's **URL** field to attach a hyperlink.
+Select a node and use the node editor panel's **URL** field to attach a web hyperlink.
+
+To link a node to **another map**, select it and pick a map from the **🔗 Link…** dropdown
+in the toolbar. The node shows a 🔗 — click it to jump to that map. (Pick **✕ Remove link**
+to clear it.) This lets you build a connected web of maps.
 
 ---
 

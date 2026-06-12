@@ -6,6 +6,7 @@ import { parseDoc } from "./io/json";
 import { fromMarkdown } from "./io/markdown";
 import {
   type LayoutDirection,
+  MAP_LINK_PREFIX,
   MindMap,
   type MindMapHandle,
   type SelectedNode,
@@ -404,6 +405,35 @@ export function App() {
         >
           🎨 Style
         </button>
+        <select
+          value=""
+          onChange={(e) => {
+            const v = e.target.value;
+            if (!v) return;
+            const url = v === "__none__" ? "" : `${MAP_LINK_PREFIX}${v}`;
+            const ok = mapRef.current?.setSelectedHyperlink(url);
+            showHint(
+              !ok
+                ? "Select a node first, then link it to a map."
+                : v === "__none__"
+                  ? "Link removed from the node."
+                  : "Node linked — click the 🔗 on it to follow.",
+            );
+          }}
+          style={controlStyle}
+          aria-label="Link selected node to a map"
+          title="Link the selected node to another map"
+        >
+          <option value="">🔗 Link…</option>
+          {maps
+            .filter((m) => m.id !== doc.id)
+            .map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.title}
+              </option>
+            ))}
+          <option value="__none__">✕ Remove link</option>
+        </select>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}
@@ -548,6 +578,7 @@ export function App() {
               scheduleSave();
             }}
             onSelect={handleSelect}
+            onMapLink={(id) => switchMap(id)}
           />
         </div>
       </div>

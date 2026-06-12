@@ -134,6 +134,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   box narrows the outline by topic. Pure flattener in `src/outline.ts`.
 - **New-map templates** — the New menu offers starter maps (Blank, Brainstorm, SWOT,
   Project plan) instead of only a blank map (`src/templates.ts`).
+- **Cross-map links** — link a node to another map in the library (🔗 Link… picker); the
+  node shows a 🔗 that navigates to the linked map in-app. Stored as a `#map=<id>` hyperlink
+  and intercepted on click (so it doesn't open a blank tab). Turns the library into a
+  connected knowledge base.
 - **Layout direction** — a picker switches the map between both-sides, right-only, and
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
 - **Collapse / Expand all** — ⊟ / ⊞ toolbar buttons collapse every branch to a level-1

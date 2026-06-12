@@ -38,7 +38,12 @@ export interface MindMapHandle {
   setAllExpanded: (expanded: boolean) => void;
   /** Merge a style patch into the selected node ("" / null clears a key); false if none selected. */
   setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
+  /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
+  setSelectedHyperlink: (url: string) => boolean;
 }
+
+/** Prefix marking a node hyperlink as an in-app link to another map. */
+export const MAP_LINK_PREFIX = "#map=";
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
 function fitView(me: MindElixirInstance): void {
@@ -53,6 +58,8 @@ interface MindMapProps {
   onChange?: (doc: MindMapDoc) => void;
   /** Fires when the canvas selection changes (for the Notes panel). */
   onSelect?: (selected: SelectedNode | null) => void;
+  /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
+  onMapLink?: (mapId: string) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
   theme?: MindElixirTheme;
   /** Layout direction: both sides, right-only, or left-only. */
@@ -78,6 +85,7 @@ export function MindMap({
   doc,
   onChange,
   onSelect,
+  onMapLink,
   theme = mindManagerTheme,
   direction = "side",
   ref,
@@ -90,6 +98,8 @@ export function MindMap({
   onChangeRef.current = onChange;
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const onMapLinkRef = useRef(onMapLink);
+  onMapLinkRef.current = onMapLink;
   // Track theme via a ref so the init effect reads it without re-initialising
   // (re-init would rebuild from the doc prop and drop unsaved live edits).
   const themeRef = useRef(theme);
@@ -216,6 +226,18 @@ export function MindMap({
         me.reshapeNode(el, { style });
         return true;
       },
+      setSelectedHyperlink: (url: string): boolean => {
+        const me = meRef.current as
+          | (MindElixirInstance & {
+              currentNode?: unknown;
+              reshapeNode?: (el: unknown, patch: unknown) => void;
+            })
+          | null;
+        const el = me?.currentNode;
+        if (!me || !el || !me.reshapeNode) return false;
+        me.reshapeNode(el, { hyperLink: url });
+        return true;
+      },
     }),
     [],
   );
@@ -272,6 +294,19 @@ export function MindMap({
     me.bus.addListener("selectNodes", handleSelect);
     me.bus.addListener("unselectNodes", handleUnselect);
 
+    // Intercept clicks on in-app map links (#map=<id>) so they navigate within the
+    // app instead of opening a blank tab (mind-elixir renders hyperlinks target=_blank).
+    const handleLinkClick = (event: MouseEvent) => {
+      const anchor = (event.target as HTMLElement | null)?.closest?.("a.hyper-link");
+      const href = anchor?.getAttribute("href");
+      if (href?.startsWith(MAP_LINK_PREFIX)) {
+        event.preventDefault();
+        event.stopPropagation();
+        onMapLinkRef.current?.(href.slice(MAP_LINK_PREFIX.length));
+      }
+    };
+    el.addEventListener("click", handleLinkClick, true);
+
     // mind-elixir's undo/redo call refresh() WITHOUT firing 'operation', so our
     // model would desync from the canvas (the view reverts but the saved/exported
     // doc wouldn't). Wrap them to re-capture after they revert. This covers both
@@ -297,6 +332,7 @@ export function MindMap({
       me.bus.removeListener("operation", handleOperation);
       me.bus.removeListener("selectNodes", handleSelect);
       me.bus.removeListener("unselectNodes", handleUnselect);
+      el.removeEventListener("click", handleLinkClick, true);
       meRef.current = null;
       el.innerHTML = "";
     };

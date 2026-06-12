@@ -319,8 +319,10 @@ export function App() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "10px 16px",
+          flexWrap: "wrap",
+          gap: 6,
+          rowGap: 6,
+          padding: "8px 16px",
           borderBottom: "1px solid #e2e0d8",
         }}
       >
@@ -379,6 +381,7 @@ export function App() {
           type="button"
           onClick={() => mapRef.current?.setAllExpanded(false)}
           style={controlStyle}
+          aria-label="Collapse all branches"
           title="Collapse all branches"
         >
           ⊟
@@ -387,6 +390,7 @@ export function App() {
           type="button"
           onClick={() => mapRef.current?.setAllExpanded(true)}
           style={controlStyle}
+          aria-label="Expand all branches"
           title="Expand all branches"
         >
           ⊞
@@ -500,7 +504,7 @@ export function App() {
           </button>
           {matchInfo && <span style={{ fontSize: 11, color: "#73726c" }}>{matchInfo}</span>}
         </form>
-        <span style={{ flex: 1 }} />
+        <span style={{ width: 1, height: 22, background: "#e2e0d8", margin: "0 2px" }} />
         <span style={{ fontSize: 12, color: "#73726c" }}>Export</span>
         <button type="button" onClick={exportJson} style={controlStyle}>
           .json
@@ -546,6 +550,7 @@ export function App() {
 
       {error && (
         <div
+          role="alert"
           style={{
             padding: "8px 16px",
             background: "#fcebeb",
@@ -559,8 +564,9 @@ export function App() {
       )}
 
       {warnings.length > 0 && (
-        <div
+        <output
           style={{
+            display: "block",
             padding: "8px 16px",
             background: "#faeeda",
             color: "#633806",
@@ -570,12 +576,14 @@ export function App() {
         >
           Imported with {warnings.length} note{warnings.length > 1 ? "s" : ""}: {warnings[0]}
           {warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ""}
-        </div>
+        </output>
       )}
 
       {hint && (
-        <div
+        <output
+          aria-live="polite"
           style={{
+            display: "block",
             padding: "8px 16px",
             background: "#eef2fc",
             color: "#26215c",
@@ -584,7 +592,7 @@ export function App() {
           }}
         >
           {hint}
-        </div>
+        </output>
       )}
 
       {markersOpen && (

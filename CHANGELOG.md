@@ -98,6 +98,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - Extracted the six export handlers + the download helper out of `App` into a focused
   `useMapExports` hook (`src/useMapExports.ts`), so the component reads as orchestration
   rather than I/O plumbing (behavior-preserving — all formats re-verified in-browser).
+- Further slimmed `App` by extracting the dark-mode preference (`useDarkMode`) and the
+  Find behaviour (`useFind`) into self-contained hooks (behavior-preserving).
 - Upgraded the build toolchain to **Vite 8** (6.4.3 → 8.0.16) with `@vitejs/plugin-react`
   6, matching TP Studio. Behavior-preserving — full gate green and the app re-verified
   in-browser (render, search, exports, no console errors); the production bundle even

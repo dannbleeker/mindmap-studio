@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { fromMarkdown } from "./io/markdown";
@@ -6,7 +6,6 @@ import { MindMap, type MindMapHandle } from "./mindmap/MindMap";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
 import { Presentation } from "./present/Presentation";
-import { findMatches } from "./search";
 import {
   type MapSummary,
   deleteMap,
@@ -16,6 +15,8 @@ import {
   saveMap,
   setLastOpened,
 } from "./store/mapStore";
+import { useDarkMode } from "./useDarkMode";
+import { useFind } from "./useFind";
 import { useMapExports } from "./useMapExports";
 
 const controlStyle = {
@@ -58,35 +59,15 @@ export function App() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
-  const [query, setQuery] = useState("");
-  const [matchInfo, setMatchInfo] = useState("");
-  const searchCursor = useRef({ q: "", i: -1 });
   const [hint, setHint] = useState("");
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [dark, setDark] = useState(() => {
-    try {
-      return localStorage.getItem("mindmap-dark") === "1";
-    } catch {
-      return false;
-    }
-  });
+  const { dark, toggleDark } = useDarkMode();
+  const { query, setQuery, matchInfo, runSearch } = useFind(mapRef, () => liveDocRef.current);
 
   function showHint(message: string) {
     setHint(message);
     if (hintTimer.current) clearTimeout(hintTimer.current);
     hintTimer.current = setTimeout(() => setHint(""), 4000);
-  }
-
-  function toggleDark() {
-    setDark((d) => {
-      const next = !d;
-      try {
-        localStorage.setItem("mindmap-dark", next ? "1" : "0");
-      } catch {
-        // preference is best-effort
-      }
-      return next;
-    });
   }
 
   const refreshMaps = useCallback(async () => {
@@ -216,21 +197,6 @@ export function App() {
     mapRef,
     () => liveDocRef.current,
   );
-
-  function runSearch(event: FormEvent) {
-    event.preventDefault();
-    const matches = findMatches(liveDocRef.current.root, query);
-    if (matches.length === 0) {
-      setMatchInfo(query.trim() ? "no matches" : "");
-      return;
-    }
-    // Cycle through matches on repeated Enter; restart when the query changes.
-    const cursor = searchCursor.current;
-    const i = cursor.q === query ? (cursor.i + 1) % matches.length : 0;
-    searchCursor.current = { q: query, i };
-    mapRef.current?.focusNode(matches[i]);
-    setMatchInfo(`${i + 1}/${matches.length}`);
-  }
 
   // Restore the last-opened map on startup; fall back to the sample.
   useEffect(() => {

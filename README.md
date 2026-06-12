@@ -33,6 +33,8 @@ GitHub Pages).
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
   (`.md`), PNG, SVG, a self-contained HTML file, and print-to-PDF.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.
+- **Dark canvas** — a 🌙/☀ toggle for a dark map theme (great on a projector); persists and
+  carries into image exports.
 - **Installable PWA** — install to the home screen / desktop; precached app shell for offline use.
 
 ## Architecture

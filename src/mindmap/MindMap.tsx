@@ -12,7 +12,7 @@ import {
   toMindElixirRoot,
   toSummaries,
 } from "./sync";
-import { mindManagerTheme } from "./theme";
+import { mindManagerDarkTheme, mindManagerTheme } from "./theme";
 
 export interface MindMapHandle {
   exportPng: () => Promise<Blob | null>;
@@ -34,16 +34,22 @@ interface MindMapProps {
   doc: MindMapDoc;
   /** Fires after every canvas edit with the updated canonical doc. */
   onChange?: (doc: MindMapDoc) => void;
+  /** Dark canvas theme (presentation / screen use); exports inherit it. */
+  dark?: boolean;
   ref?: Ref<MindMapHandle>;
 }
 
-export function MindMap({ doc, onChange, ref }: MindMapProps) {
+export function MindMap({ doc, onChange, dark = false, ref }: MindMapProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const meRef = useRef<MindElixirInstance | null>(null);
   // The live doc, used to preserve canonical-only fields across edits.
   const docRef = useRef(doc);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  // Track dark via a ref so the init effect reads it without re-initialising
+  // (re-init would rebuild from the doc prop and drop unsaved live edits).
+  const darkRef = useRef(dark);
+  darkRef.current = dark;
 
   useImperativeHandle(
     ref,
@@ -93,7 +99,7 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
       // SIDE = main branches split left/right of the root (MindManager's look).
       el,
       direction: MindElixir.SIDE,
-      theme: mindManagerTheme as never,
+      theme: (darkRef.current ? mindManagerDarkTheme : mindManagerTheme) as never,
       draggable: true,
       contextMenu: true,
       toolBar: true,
@@ -150,6 +156,14 @@ export function MindMap({ doc, onChange, ref }: MindMapProps) {
       el.innerHTML = "";
     };
   }, [doc]);
+
+  // Live theme switch without re-initialising (which would drop unsaved edits).
+  useEffect(() => {
+    const me = meRef.current as
+      | (MindElixirInstance & { changeTheme?: (t: unknown) => void })
+      | null;
+    me?.changeTheme?.((dark ? mindManagerDarkTheme : mindManagerTheme) as never);
+  }, [dark]);
 
   return <div ref={elRef} style={{ height: "100%", width: "100%" }} />;
 }

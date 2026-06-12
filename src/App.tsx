@@ -63,11 +63,30 @@ export function App() {
   const searchCursor = useRef({ q: "", i: -1 });
   const [hint, setHint] = useState("");
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [dark, setDark] = useState(() => {
+    try {
+      return localStorage.getItem("mindmap-dark") === "1";
+    } catch {
+      return false;
+    }
+  });
 
   function showHint(message: string) {
     setHint(message);
     if (hintTimer.current) clearTimeout(hintTimer.current);
     hintTimer.current = setTimeout(() => setHint(""), 4000);
+  }
+
+  function toggleDark() {
+    setDark((d) => {
+      const next = !d;
+      try {
+        localStorage.setItem("mindmap-dark", next ? "1" : "0");
+      } catch {
+        // preference is best-effort
+      }
+      return next;
+    });
   }
 
   const refreshMaps = useCallback(async () => {
@@ -283,6 +302,15 @@ export function App() {
           Image
           <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
         </label>
+        <button
+          type="button"
+          onClick={toggleDark}
+          style={controlStyle}
+          aria-pressed={dark}
+          title="Toggle dark canvas"
+        >
+          {dark ? "☀ Light" : "🌙 Dark"}
+        </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}
@@ -373,6 +401,7 @@ export function App() {
         <MindMap
           ref={mapRef}
           doc={doc}
+          dark={dark}
           onChange={(d) => {
             liveDocRef.current = d;
             scheduleSave();

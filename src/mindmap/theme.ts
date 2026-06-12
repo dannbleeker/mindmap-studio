@@ -24,3 +24,23 @@ export const mindManagerTheme = {
     "--line-color": "#b4b2a9",
   },
 };
+
+// Dark canvas variant — same per-branch palette (the MindManager identity), dark
+// surfaces and dimmed connectors. Useful for on-screen presentation, and image
+// exports inherit it. Topic shapes/sizing stay identical to the light theme.
+export const mindManagerDarkTheme = {
+  name: "MindManager-ish dark",
+  type: "dark" as const,
+  palette: mindManagerTheme.palette,
+  cssVar: {
+    ...mindManagerTheme.cssVar,
+    "--main-color": "#e8e6df",
+    "--main-bgcolor": "#1d1c22",
+    "--color": "#e8e6df",
+    "--bgcolor": "#2a2930",
+    "--selected": "#9c95f0",
+    "--root-color": "#ffffff",
+    "--root-bgcolor": "#4a437f",
+    "--line-color": "#56545e",
+  },
+};

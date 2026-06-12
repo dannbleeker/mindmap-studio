@@ -126,6 +126,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   flattener in `src/outline.ts`.
 - **Layout direction** — a picker switches the map between both-sides, right-only, and
   left-only layouts (applied live, edits preserved); the choice persists across sessions.
+- **Marker palette** — a 🏷 Markers bar of common markers (priority/flag/status/etc.);
+  click one to toggle it on the selected node. Markers render on the node and persist.
 
 ### Fixed
 

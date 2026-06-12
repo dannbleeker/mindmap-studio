@@ -29,6 +29,8 @@ export interface MindMapHandle {
   setSelectedImage: (image: MapImage) => boolean;
   /** Set the note on the currently-selected node; false if nothing is selected. */
   setSelectedNote: (note: string) => boolean;
+  /** Toggle a marker icon on the selected node; false if nothing is selected. */
+  toggleSelectedIcon: (icon: string) => boolean;
 }
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
@@ -133,6 +135,22 @@ export function MindMap({
         const el = me?.currentNode;
         if (!me || !el || !me.reshapeNode) return false;
         me.reshapeNode(el, { note });
+        return true;
+      },
+      toggleSelectedIcon: (icon: string): boolean => {
+        const me = meRef.current as
+          | (MindElixirInstance & {
+              currentNode?: { nodeObj?: { icons?: string[] } };
+              reshapeNode?: (el: unknown, patch: unknown) => void;
+            })
+          | null;
+        const el = me?.currentNode;
+        if (!me || !el || !me.reshapeNode) return false;
+        const current = el.nodeObj?.icons ?? [];
+        const next = current.includes(icon)
+          ? current.filter((i) => i !== icon)
+          : [...current, icon];
+        me.reshapeNode(el, { icons: next });
         return true;
       },
     }),

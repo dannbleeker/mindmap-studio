@@ -47,6 +47,9 @@ const inputStyle = {
   width: 130,
 } as const;
 
+// A curated marker palette (MindManager-style). Emoji render as node icons.
+const MARKERS = ["✅", "❗", "❓", "⭐", "🚩", "📌", "🔴", "🟡", "🟢", "⏳", "💡", "🎯"];
+
 function newDoc(): MindMapDoc {
   return {
     schemaVersion: 1,
@@ -94,6 +97,7 @@ export function App() {
   const [noteDraft, setNoteDraft] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [markersOpen, setMarkersOpen] = useState(false);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
 
@@ -364,6 +368,15 @@ export function App() {
         >
           📝 Notes
         </button>
+        <button
+          type="button"
+          onClick={() => setMarkersOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={markersOpen}
+          title="Show the marker palette"
+        >
+          🏷 Markers
+        </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}
@@ -447,6 +460,43 @@ export function App() {
           }}
         >
           {hint}
+        </div>
+      )}
+
+      {markersOpen && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            padding: "6px 16px",
+            background: "#f4f3fb",
+            borderBottom: "1px solid #e2e0d8",
+          }}
+        >
+          <span style={{ fontSize: 12, color: "#73726c", marginRight: 4 }}>Markers:</span>
+          {MARKERS.map((marker) => (
+            <button
+              key={marker}
+              type="button"
+              onClick={() => {
+                const ok = mapRef.current?.toggleSelectedIcon(marker);
+                if (!ok) showHint("Select a node first, then click a marker.");
+              }}
+              title={`Toggle ${marker} on the selected node`}
+              style={{
+                border: "1px solid #cecbf6",
+                background: "#fff",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontSize: 16,
+                lineHeight: 1,
+                padding: "3px 5px",
+              }}
+            >
+              {marker}
+            </button>
+          ))}
         </div>
       )}
 

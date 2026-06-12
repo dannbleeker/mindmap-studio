@@ -92,6 +92,39 @@ describe("mind-elixir sync", () => {
     expect(back.root.children[0].image).toEqual({ url: "data:abc", width: 100, height: 50 });
   });
 
+  it("round-trips per-topic style (shape/border/fill)", () => {
+    const styled: MindMapDoc = {
+      ...doc,
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          {
+            id: "s",
+            topic: "Styled",
+            style: { borderRadius: "4px", border: "2px solid #e23", background: "#eef" },
+            children: [],
+          },
+        ],
+      },
+    };
+    const back = fromMindElixir(toMindElixir(styled.root), styled);
+    expect(back.root.children[0].style).toEqual({
+      borderRadius: "4px",
+      border: "2px solid #e23",
+      background: "#eef",
+    });
+  });
+
+  it("drops cleared (empty-string) style values on capture", () => {
+    const me = toMindElixir(doc.root);
+    const a = me.children?.find((c) => c.id === "a");
+    // a style key cleared via the Style bar arrives as "" — must not enter the model
+    if (a) a.style = { border: "", background: "#eef" };
+    const back = fromMindElixir(me, doc);
+    expect(back.root.children.find((c) => c.id === "a")?.style).toEqual({ background: "#eef" });
+  });
+
   it("captures an image added on the canvas (me.image -> node.image)", () => {
     const me = toMindElixir(doc.root);
     const a = me.children?.find((c) => c.id === "a");

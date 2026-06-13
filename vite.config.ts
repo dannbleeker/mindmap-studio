@@ -135,7 +135,10 @@ export default defineConfig({
     // Installable, offline-capable PWA: precaches the app shell so it works
     // with no network and can be installed to the home screen / desktop.
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt" (not "autoUpdate"): a new deploy parks the new SW in `waiting`
+      // and we surface an explicit "Refresh now" toast (src/pwa/pwaUpdate.ts),
+      // so a background reload never throws away in-flight edits.
+      registerType: "prompt",
       includeAssets: ["icon.svg"],
       manifest: {
         name: "MindMap Studio",
@@ -151,7 +154,12 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg}"],
+        // Don't rewrite the standalone pages (dashboard.html, notices.html,
+        // user-guide.html) into the SPA shell on navigation.
+        navigateFallbackDenylist: [/\.html$/],
       },
+      // No service worker in dev — it causes confusing reload loops.
+      devOptions: { enabled: false },
     }),
   ],
 });

@@ -17,6 +17,13 @@ import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
 import { Presentation } from "./present/Presentation";
+import {
+  type ToastAction,
+  type ToastKind,
+  type ToastOptions,
+  checkForUpdate,
+  initPwaUpdateToast,
+} from "./pwa/pwaUpdate";
 import { type LibraryHit, searchLibrary } from "./search";
 import {
   type MapSummary,
@@ -46,7 +53,12 @@ export function App() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
-  const [hint, setHint] = useState("");
+  // Transient toast: a message + an optional action button (e.g. "Refresh now").
+  const [toast, setToast] = useState<{
+    kind: ToastKind;
+    message: string;
+    action?: ToastAction;
+  } | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { theme, setThemeId } = useTheme();
   const [layout, setLayout] = useState<LayoutDirection>(() => {
@@ -113,11 +125,21 @@ export function App() {
     mapRef.current?.setSelectedNote(noteDraft);
   }
 
-  function showHint(message: string) {
-    setHint(message);
+  // Core toast. Stable (no deps) so it can be injected into the PWA updater once.
+  const showToast = useCallback((kind: ToastKind, message: string, opts?: ToastOptions) => {
+    setToast({ kind, message, action: opts?.action });
     if (hintTimer.current) clearTimeout(hintTimer.current);
-    hintTimer.current = setTimeout(() => setHint(""), 4000);
-  }
+    hintTimer.current = setTimeout(() => setToast(null), opts?.durationMs ?? 4000);
+  }, []);
+
+  // Message-only shorthand used across the toolbar handlers.
+  const showHint = (message: string) => showToast("info", message);
+
+  // Register the PWA self-updater once: a new deploy surfaces a "Refresh now" toast
+  // through showToast (no-op in dev — the service worker is disabled there).
+  useEffect(() => {
+    initPwaUpdateToast(showToast);
+  }, [showToast]);
 
   // Copy the map as a Markdown outline straight to the clipboard — no file download —
   // for pasting into an email, chat, or doc.
@@ -769,19 +791,33 @@ export function App() {
         </output>
       )}
 
-      {hint && (
+      {toast && (
         <output
           aria-live="polite"
           style={{
-            display: "block",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
             padding: "8px 16px",
-            background: "#eef2fc",
+            background: toast.kind === "success" ? "#eafaf0" : "#eef2fc",
             color: "#26215c",
             fontSize: 13,
             borderBottom: "1px solid #cecbf6",
           }}
         >
-          {hint}
+          <span>{toast.message}</span>
+          {toast.action && (
+            <button
+              type="button"
+              onClick={() => {
+                toast.action?.run();
+                setToast(null);
+              }}
+              style={{ ...controlStyle, padding: "4px 12px" }}
+            >
+              {toast.action.label}
+            </button>
+          )}
         </output>
       )}
 
@@ -991,6 +1027,33 @@ export function App() {
           >
             Source
           </a>
+        </div>
+        <div style={{ marginTop: 16, borderTop: "1px solid #e4e4e7", paddingTop: 14 }}>
+          <button
+            type="button"
+            onClick={async () => {
+              // Close so the result toast (top of the app) isn't hidden behind the modal.
+              setAboutOpen(false);
+              const result = await checkForUpdate();
+              if (result === "up-to-date") {
+                showToast("success", "You're on the latest version.");
+              } else if (result === "newly-found") {
+                showToast(
+                  "info",
+                  "New version found — the refresh prompt will appear once it finishes downloading.",
+                );
+              } else if (result === "unsupported") {
+                showToast(
+                  "info",
+                  "Update checks aren't available here (no service worker running).",
+                );
+              }
+              // 'already-pending' — checkForUpdate already re-surfaced the "Refresh now" prompt.
+            }}
+            style={controlStyle}
+          >
+            Check for updates
+          </button>
         </div>
       </dialog>
     </div>

@@ -55,6 +55,10 @@ basement meeting room, anywhere. You can also **install** it to your desktop or 
 screen, where it launches in its own window like a native app. For a tool you might open
 to capture a thought the instant you have it, "always available, never loading" matters.
 
+Because it caches itself, it also **updates itself politely**: when a new version ships, the
+running app shows a small "new version available -- Refresh now" prompt rather than reloading
+under you mid-thought. Click it when you're ready; an in-flight edit is never lost.
+
 ## Back up the whole library
 
 Individual maps export as JSON (Chapter 6). The whole **library** can be backed up and

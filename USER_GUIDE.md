@@ -240,6 +240,11 @@ MindMap Studio is an installable PWA: your browser will offer to install it to y
 home screen, after which it launches in its own window and runs fully offline (the app shell
 is precached).
 
+When a new version is deployed, the running app shows a quiet **"A new version is available —
+Refresh now"** prompt; click it to swap to the new build and reload. It never reloads on its
+own, so an in-flight edit is never lost. You can also force a check via **About → Check for
+updates**.
+
 ---
 
 ## Keyboard shortcuts

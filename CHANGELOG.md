@@ -213,6 +213,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   and double-clicking the bracket labels it. (Note: these are mind-elixir's *bracket*
   boundaries; MindManager-style filled enclosures and **callouts** remain renderer-ceiling
   items — the engine has no callout primitive — tracked in `NEXT_STEPS.md`.)
+- **PWA self-update — "New version available — Refresh now."** The service worker now uses
+  `registerType: "prompt"` (was `"autoUpdate"`, which reloaded silently): a new deploy parks
+  the new worker and surfaces a non-intrusive toast with a **Refresh now** action that swaps
+  to the new build and reloads — never a silent reload that could drop an in-flight edit. The
+  update service (`src/pwa/pwaUpdate.ts`) also powers a **Check for updates** action in the
+  About dialog (re-surfaces the prompt if one's already waiting). The toast surface gained an
+  optional action button + duration; `navigateFallbackDenylist: [/\.html$/]` keeps the
+  standalone pages out of the SPA shell. Verified offline end-to-end (kill the server → the
+  app still loads from the SW cache); covered by `test/pwaUpdate.test.ts` (callbacks, the
+  Refresh-now → `updateSW(true)` path, idempotency, and the four manual-check outcomes).
+  Adds `workbox-window` as a direct devDep (strict pnpm doesn't expose it to the app).
 
 ### Changed
 

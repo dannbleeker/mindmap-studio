@@ -51,4 +51,19 @@ describe("markdown io", () => {
     expect(doc.title).toBe("Untitled map");
     expect(doc.root.children.map((c) => c.topic)).toEqual(["lonely"]);
   });
+
+  it("keeps the default title for an empty heading", () => {
+    // "#   " matches the heading regex but yields an empty title — it must fall
+    // back to the default rather than blanking the root.
+    const doc = fromMarkdown("#   \n- x");
+    expect(doc.title).toBe("Untitled map");
+    expect(doc.root.children.map((c) => c.topic)).toEqual(["x"]);
+  });
+
+  it("attaches an over-indented bullet (no shallower parent) to the root", () => {
+    // A first bullet indented past level 1 has no parent on the stack; it should
+    // anchor to the root rather than crash.
+    const doc = fromMarkdown("# Root\n      - orphan");
+    expect(doc.root.children.map((c) => c.topic)).toEqual(["orphan"]);
+  });
 });

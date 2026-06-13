@@ -59,6 +59,24 @@ describe("parseMmap", () => {
     expect(() => parseMmap(notAMap)).toThrow(/Document\.xml not found/);
   });
 
+  it("throws when a <Map> has no root <Topic>", () => {
+    expect(() => parseMmap(mmapOf(`${MAP_OPEN}\n  <ap:OneTopic />\n</ap:Map>`))).toThrow(
+      /no root <Topic>/,
+    );
+  });
+
+  it("warns about task info but still imports the topic", () => {
+    const { doc, warnings } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Scheduled work" />
+    <ap:Task ap:Priority="1" />
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.topic).toBe("Scheduled work");
+    expect(warnings.some((w) => /task info/i.test(w))).toBe(true);
+  });
+
   it("imports MindManager stock icons as node.icons", () => {
     const { doc } = parseMmap(
       mmapOf(`${MAP_OPEN}

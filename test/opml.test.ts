@@ -51,4 +51,14 @@ describe("opml I/O", () => {
   it("rejects non-OPML input", () => {
     expect(() => fromOpml("<html><body>nope</body></html>")).toThrow(/Not an OPML/);
   });
+
+  it("handles a missing head title, the @_title attribute, and attribute-less outlines", () => {
+    // No <head>; the single top-level outline names itself with `title=` rather
+    // than `text=`, and its child has neither attribute.
+    const opml = `<?xml version="1.0"?><opml version="2.0"><body>
+      <outline title="From title attr"><outline/></outline></body></opml>`;
+    const result = fromOpml(opml);
+    expect(result.root.topic).toBe("From title attr"); // @_title fallback
+    expect(result.root.children.map((c) => c.topic)).toEqual([""]); // neither attr → empty
+  });
 });

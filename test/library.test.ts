@@ -29,4 +29,9 @@ describe("library backup I/O", () => {
     });
     expect(() => parseLibrary(bad)).toThrow(/invalid map/);
   });
+
+  it("rejects malformed JSON", () => {
+    expect(() => parseLibrary("{not json")).toThrow(/Not valid JSON/);
+    expect(tryParseLibrary("{not json")).toBeNull();
+  });
 });

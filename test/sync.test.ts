@@ -77,6 +77,21 @@ describe("mind-elixir sync", () => {
     expect(fromMindElixir(me, doc).root.note).toBe("edited memo");
   });
 
+  it("preserves a node's image when mind-elixir reports none", () => {
+    // mind-elixir 5 doesn't always carry the image back on capture; the prior
+    // model value must survive rather than be dropped.
+    const prevDoc: MindMapDoc = {
+      ...doc,
+      root: n("r", "Root", { image: { url: "pic.png", width: 12, height: 8 } }),
+    };
+    const me = toMindElixir(n("r", "Root")); // no image on the mind-elixir side
+    expect(fromMindElixir(me, prevDoc).root.image).toEqual({
+      url: "pic.png",
+      width: 12,
+      height: 8,
+    });
+  });
+
   it("preserves a note by id when mind-elixir omits it", () => {
     const me = toMindElixir(doc.root);
     const alpha = me.children?.find((c) => c.id === "a");

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-13T07:33:54.743Z",
-  "commit": "c92aa2e",
+  "generatedAt": "2026-06-13T07:47:54.156Z",
+  "commit": "accf016",
   "headline": {
-    "linesTsJs": 6163,
-    "tests": 103,
-    "lineCoveragePct": 35.02,
-    "commits": 98,
+    "linesTsJs": 6183,
+    "tests": 104,
+    "lineCoveragePct": 35.16,
+    "commits": 100,
     "ageDays": 1,
     "trackedFiles": 106,
     "featureManualPct": 100,
@@ -16,12 +16,12 @@
     {
       "category": "App code (src)",
       "files": 29,
-      "lines": 3260
+      "lines": 3269
     },
     {
       "category": "Unit tests",
       "files": 19,
-      "lines": 1217
+      "lines": 1228
     },
     {
       "category": "Build scripts",
@@ -41,14 +41,14 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 35.02,
-      "covered": 814,
-      "total": 2324
+      "pct": 35.16,
+      "covered": 819,
+      "total": 2329
     },
     "statements": {
-      "pct": 35.02,
-      "covered": 814,
-      "total": 2324
+      "pct": 35.16,
+      "covered": 819,
+      "total": 2329
     },
     "functions": {
       "pct": 91.76,
@@ -62,29 +62,29 @@
     }
   },
   "tests": {
-    "unit": 103,
+    "unit": 104,
     "e2e": 0,
-    "durationMs": 3590,
+    "durationMs": 3199,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1789
+        "ms": 1502
       },
       {
         "file": "test/book.test.ts",
-        "ms": 51
+        "ms": 39
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 40
+        "ms": 34
       },
       {
         "file": "test/mapStore.test.ts",
-        "ms": 28
+        "ms": 27
       },
       {
         "file": "test/svgSanitize.test.ts",
-        "ms": 23
+        "ms": 19
       }
     ]
   },
@@ -218,7 +218,7 @@
   "docs": {
     "bookWords": 6108,
     "chapters": 11,
-    "appLoc": 3260,
+    "appLoc": 3269,
     "docToCodeRatio": 1.87
   },
   "featureCoverage": {
@@ -305,22 +305,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 98,
-    "commits7d": 98,
+    "commits": 100,
+    "commits7d": 100,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 81
+        "count": 82
       },
       {
         "name": "github-actions[bot]",
-        "count": 17
+        "count": 18
       }
     ],
     "churn30d": {
-      "added": 19838,
-      "removed": 3299
+      "added": 19898,
+      "removed": 3322
     },
-    "changelogEntries": 51
+    "changelogEntries": 52
   }
 }

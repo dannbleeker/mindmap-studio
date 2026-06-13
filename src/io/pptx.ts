@@ -11,14 +11,9 @@
 // Pure + deterministic (entry mtimes pinned); only escaped topic text is
 // interpolated. Reuses the same slide model the in-app presentation renders.
 
-import { strToU8, zipSync } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { presentationSlides } from "../present/slides";
-
-// XML element-content escape (text lands inside <a:t>…</a:t>).
-function esc(text: string): string {
-  return text.replace(/[&<>]/g, (c) => (c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;"));
-}
+import { escapeXml, zipOoxml } from "./ooxml";
 
 const A = "http://schemas.openxmlformats.org/drawingml/2006/main";
 const P = "http://schemas.openxmlformats.org/presentationml/2006/main";
@@ -73,13 +68,13 @@ function collectBody(slide: { isOverview: boolean; node: MapNode }, doc: MindMap
 }
 
 function titlePara(title: string): string {
-  return `<a:p><a:r><a:rPr lang="en-US" sz="4000" b="1"><a:solidFill><a:srgbClr val="1F1B4D"/></a:solidFill></a:rPr><a:t>${esc(title)}</a:t></a:r></a:p>`;
+  return `<a:p><a:r><a:rPr lang="en-US" sz="4000" b="1"><a:solidFill><a:srgbClr val="1F1B4D"/></a:solidFill></a:rPr><a:t>${escapeXml(title)}</a:t></a:r></a:p>`;
 }
 
 function bodyPara(line: BodyLine): string {
   const sz = Math.max(1400, 2000 - line.level * 200);
   const marL = 285750 * (line.level + 1);
-  return `<a:p><a:pPr lvl="${line.level}" marL="${marL}" indent="-285750"><a:buFont typeface="Arial"/><a:buChar char="•"/></a:pPr><a:r><a:rPr lang="en-US" sz="${sz}"><a:solidFill><a:srgbClr val="333333"/></a:solidFill></a:rPr><a:t>${esc(line.text)}</a:t></a:r></a:p>`;
+  return `<a:p><a:pPr lvl="${line.level}" marL="${marL}" indent="-285750"><a:buFont typeface="Arial"/><a:buChar char="•"/></a:pPr><a:r><a:rPr lang="en-US" sz="${sz}"><a:solidFill><a:srgbClr val="333333"/></a:solidFill></a:rPr><a:t>${escapeXml(line.text)}</a:t></a:r></a:p>`;
 }
 
 function textBox(
@@ -145,27 +140,22 @@ function presentationRelsXml(slideCount: number): string {
   return `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_MASTER}" Target="slideMasters/slideMaster1.xml"/>${slides}</Relationships>`;
 }
 
-// ZIP's DOS timestamp can't predate 1980; pin every entry so the same map always
-// produces stable output instead of carrying wall-clock time.
-const FIXED_MTIME = Date.parse("1980-01-01T00:00:00Z");
-const u8 = (s: string) => [strToU8(s), { mtime: FIXED_MTIME }] as const;
-
 export function buildPptx(doc: MindMapDoc): Uint8Array {
   const slides = presentationSlides(doc);
-  const files: Record<string, readonly [Uint8Array, { mtime: number }]> = {
-    "[Content_Types].xml": u8(contentTypesXml(slides.length)),
-    "_rels/.rels": u8(ROOT_RELS),
-    "ppt/presentation.xml": u8(presentationXml(slides.length)),
-    "ppt/_rels/presentation.xml.rels": u8(presentationRelsXml(slides.length)),
-    "ppt/theme/theme1.xml": u8(THEME),
-    "ppt/slideMasters/slideMaster1.xml": u8(MASTER),
-    "ppt/slideMasters/_rels/slideMaster1.xml.rels": u8(MASTER_RELS),
-    "ppt/slideLayouts/slideLayout1.xml": u8(LAYOUT),
-    "ppt/slideLayouts/_rels/slideLayout1.xml.rels": u8(LAYOUT_RELS),
+  const parts: Record<string, string> = {
+    "[Content_Types].xml": contentTypesXml(slides.length),
+    "_rels/.rels": ROOT_RELS,
+    "ppt/presentation.xml": presentationXml(slides.length),
+    "ppt/_rels/presentation.xml.rels": presentationRelsXml(slides.length),
+    "ppt/theme/theme1.xml": THEME,
+    "ppt/slideMasters/slideMaster1.xml": MASTER,
+    "ppt/slideMasters/_rels/slideMaster1.xml.rels": MASTER_RELS,
+    "ppt/slideLayouts/slideLayout1.xml": LAYOUT,
+    "ppt/slideLayouts/_rels/slideLayout1.xml.rels": LAYOUT_RELS,
   };
   slides.forEach((slide, i) => {
-    files[`ppt/slides/slide${i + 1}.xml`] = u8(slideXml(slide.heading, collectBody(slide, doc)));
-    files[`ppt/slides/_rels/slide${i + 1}.xml.rels`] = u8(SLIDE_RELS);
+    parts[`ppt/slides/slide${i + 1}.xml`] = slideXml(slide.heading, collectBody(slide, doc));
+    parts[`ppt/slides/_rels/slide${i + 1}.xml.rels`] = SLIDE_RELS;
   });
-  return zipSync(files as Parameters<typeof zipSync>[0], { level: 6 });
+  return zipOoxml(parts);
 }

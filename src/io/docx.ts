@@ -10,13 +10,8 @@
 // Pure + deterministic (entry mtimes pinned), so it's unit-testable by unzipping
 // and validating the XML. Only escaped topic/note text is interpolated.
 
-import { strToU8, zipSync } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
-
-// XML element-content escape (text lands inside <w:t>…</w:t>).
-function esc(text: string): string {
-  return text.replace(/[&<>]/g, (c) => (c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;"));
-}
+import { escapeXml, zipOoxml } from "./ooxml";
 
 const TWIPS_PER_LEVEL = 360; // 0.25" of left indent per outline level
 
@@ -34,7 +29,7 @@ function run(text: string, opts: RunOpts = {}): string {
     opts.sizeHalfPt ? `<w:sz w:val="${opts.sizeHalfPt}"/>` : "",
   ].join("");
   // xml:space="preserve" keeps the bullet's trailing space and any indentation.
-  return `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ""}<w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
+  return `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ""}<w:t xml:space="preserve">${escapeXml(text)}</w:t></w:r>`;
 }
 
 function paragraph(runsXml: string, indentTwips = 0): string {
@@ -86,17 +81,10 @@ function documentXml(doc: MindMapDoc): string {
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${bodyXml(doc)}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr></w:body></w:document>`;
 }
 
-// ZIP's DOS timestamp can't predate 1980; pin every entry to that floor so the
-// same map always produces stable output instead of carrying wall-clock time.
-const FIXED_MTIME = Date.parse("1980-01-01T00:00:00Z");
-
 export function buildDocx(doc: MindMapDoc): Uint8Array {
-  return zipSync(
-    {
-      "[Content_Types].xml": [strToU8(CONTENT_TYPES), { mtime: FIXED_MTIME }],
-      "_rels/.rels": [strToU8(RELS), { mtime: FIXED_MTIME }],
-      "word/document.xml": [strToU8(documentXml(doc)), { mtime: FIXED_MTIME }],
-    },
-    { level: 6 },
-  );
+  return zipOoxml({
+    "[Content_Types].xml": CONTENT_TYPES,
+    "_rels/.rels": RELS,
+    "word/document.xml": documentXml(doc),
+  });
 }

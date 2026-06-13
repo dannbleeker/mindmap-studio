@@ -8,8 +8,8 @@
 // part) to keep it compact. Pure + deterministic (entry mtimes pinned); only escaped
 // topic/note text is interpolated.
 
-import { strToU8, zipSync } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
+import { escapeXml, zipOoxml } from "./ooxml";
 
 const NS_MAIN = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
 const NS_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
@@ -19,11 +19,6 @@ const REL_OFFICEDOC = `${NS_R}/officeDocument`;
 const REL_WORKSHEET = `${NS_R}/worksheet`;
 const REL_STYLES = `${NS_R}/styles`;
 const XML_DECL = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
-
-// XML element-content escape (text lands inside <t>…</t>).
-function esc(text: string): string {
-  return text.replace(/[&<>]/g, (c) => (c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;"));
-}
 
 // 1 -> "A", 26 -> "Z", 27 -> "AA"
 function colLetter(col: number): string {
@@ -60,7 +55,7 @@ function flatten(doc: MindMapDoc): { rows: OutlineRow[]; maxDepth: number } {
 }
 
 function cell(ref: string, text: string, bold = false): string {
-  return `<c r="${ref}"${bold ? ' s="1"' : ""} t="inlineStr"><is><t xml:space="preserve">${esc(text)}</t></is></c>`;
+  return `<c r="${ref}"${bold ? ' s="1"' : ""} t="inlineStr"><is><t xml:space="preserve">${escapeXml(text)}</t></is></c>`;
 }
 
 function sheetXml(doc: MindMapDoc): string {
@@ -96,21 +91,13 @@ const WORKBOOK_RELS = `${XML_DECL}<Relationships xmlns="${NS_PKG}"><Relationship
 // the two canonical fills (none + gray125) and a default font/border/cellStyleXf present.
 const STYLES = `${XML_DECL}<styleSheet xmlns="${NS_MAIN}"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 
-// ZIP's DOS timestamp can't predate 1980; pin every entry so the same map always
-// produces stable output instead of carrying wall-clock time.
-const FIXED_MTIME = Date.parse("1980-01-01T00:00:00Z");
-const u8 = (s: string): [Uint8Array, { mtime: number }] => [strToU8(s), { mtime: FIXED_MTIME }];
-
 export function buildXlsx(doc: MindMapDoc): Uint8Array {
-  return zipSync(
-    {
-      "[Content_Types].xml": u8(CONTENT_TYPES),
-      "_rels/.rels": u8(ROOT_RELS),
-      "xl/workbook.xml": u8(WORKBOOK),
-      "xl/_rels/workbook.xml.rels": u8(WORKBOOK_RELS),
-      "xl/worksheets/sheet1.xml": u8(sheetXml(doc)),
-      "xl/styles.xml": u8(STYLES),
-    },
-    { level: 6 },
-  );
+  return zipOoxml({
+    "[Content_Types].xml": CONTENT_TYPES,
+    "_rels/.rels": ROOT_RELS,
+    "xl/workbook.xml": WORKBOOK,
+    "xl/_rels/workbook.xml.rels": WORKBOOK_RELS,
+    "xl/worksheets/sheet1.xml": sheetXml(doc),
+    "xl/styles.xml": STYLES,
+  });
 }

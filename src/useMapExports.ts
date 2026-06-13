@@ -24,6 +24,7 @@ export interface MapExports {
   exportHtml: () => Promise<void>;
   exportDeck: () => Promise<void>;
   exportPdf: () => Promise<void>;
+  exportDocx: () => Promise<void>;
 }
 
 // Download handlers for every export format, kept out of App so the component
@@ -93,6 +94,21 @@ export function useMapExports(
         setTimeout(() => iframe.remove(), 1000);
       };
       document.body.appendChild(iframe);
+    },
+    // Word .docx — the outline as an editable document. Model-backed, lazy-loaded
+    // (docx.ts pulls fflate for the OPC zip), kept out of the entry bundle.
+    async exportDocx() {
+      const { buildDocx } = await import("./io/docx");
+      // fflate returns Uint8Array<ArrayBufferLike>; at runtime it's always a
+      // plain ArrayBuffer-backed view, so it's a valid BlobPart — the cast just
+      // satisfies the stricter lib.dom generic.
+      const bytes = buildDocx(getDoc()) as BlobPart;
+      download(
+        new Blob([bytes], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }),
+        `${baseName()}.docx`,
+      );
     },
   };
 }

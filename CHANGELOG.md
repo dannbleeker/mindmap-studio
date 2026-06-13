@@ -109,6 +109,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   slide model the in-app presentation renders (`src/io/deck.ts`, lazy-loaded so it
   stays out of the entry bundle); topic text is HTML-escaped, and the nav script is
   static, so map content has no scripting surface.
+- **Word (.docx) export** — a `.docx (Word)` export saves the map as an editable
+  outline document (a title, then indented bulleted topics, with notes as italic
+  lines). It writes the minimal valid Open-XML package by hand
+  (`[Content_Types].xml`, `_rels/.rels`, `word/document.xml`) via `fflate`, using
+  direct run formatting rather than named styles so it renders identically in Word,
+  LibreOffice, Pages, and Google Docs. Pure + deterministic (`src/io/docx.ts`,
+  lazy-loaded); topic and note text is XML-escaped.
 - **Find nodes** — a header search box matches node topics _and notes_
   (case-insensitive), focuses and selects the match on the canvas, and cycles through
   multiple hits on repeated Enter (with an `n/total` counter). Matching is a pure,

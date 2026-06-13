@@ -39,7 +39,8 @@ GitHub Pages).
   branch (display-only).
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
   (`.md`), OPML (`.opml`), PNG, SVG, a self-contained HTML file, a standalone HTML
-  **slide deck** (the Walk-Through as a shareable file), and print-to-PDF.
+  **slide deck** (the Walk-Through as a shareable file), a Word **`.docx`** outline
+  document, and print-to-PDF.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.
 - **Theme gallery** — pick a canvas style (Light, Dark, Ocean, Sunset); persists and carries
   into image exports. Per-topic font/colour/background via the node editor panel.

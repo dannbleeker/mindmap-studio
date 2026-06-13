@@ -12,9 +12,10 @@
 // correctly for the on-screen render), so labels land inside their boxes. Do not "simplify"
 // to exportSvg(true) without re-checking a rendered export.
 //
-// Known limitation: a topic with an explicit line break is collapsed to a single line
-// (see the textContent normalisation below). The common single-line case is exact; genuine
-// multi-line topics would benefit from per-line <tspan>s — tracked in NEXT_STEPS.
+// Multi-line topics (explicit line breaks) become one <text> with a <tspan> per line,
+// distributed over the box height; a single-line topic stays a plain <text> (the exact,
+// verified common case). Soft CSS wrapping carries no line break in textContent, so a very
+// long single-segment topic can still overflow its box — acceptable and rare.
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -25,6 +26,9 @@ function styleValue(style: string, prop: string): string | null {
   return m ? m[1].trim() : null;
 }
 
+// Round to 2 dp so serialized coordinates stay compact and stable across runs.
+const round2 = (n: number): string => String(Math.round(n * 100) / 100);
+
 export function inlineSvgText(svg: string): string {
   const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
   const root = doc.documentElement;
@@ -33,7 +37,16 @@ export function inlineSvgText(svg: string): string {
   }
 
   for (const fo of Array.from(doc.getElementsByTagName("foreignObject"))) {
-    const label = (fo.textContent ?? "").replace(/\s+/g, " ").trim();
+    // One trimmed line per explicit break; intra-line whitespace runs collapse to a space.
+    const lines = (fo.textContent ?? "")
+      .split("\n")
+      .map((line) => line.replace(/\s+/g, " ").trim())
+      .filter((line) => line.length > 0);
+    if (lines.length === 0) {
+      fo.remove(); // image-only / empty node — nothing to render as text
+      continue;
+    }
+
     const x = Number.parseFloat(fo.getAttribute("x") ?? "0");
     const y = Number.parseFloat(fo.getAttribute("y") ?? "0");
     const h = Number.parseFloat(fo.getAttribute("height") ?? "20");
@@ -46,13 +59,29 @@ export function inlineSvgText(svg: string): string {
 
     const text = doc.createElementNS(SVG_NS, "text");
     text.setAttribute("x", String(x));
-    // Baseline ~vertically centred in the original box (height h, font fontSize).
-    text.setAttribute("y", String(Math.round((y + h * 0.72) * 100) / 100));
     text.setAttribute("font-family", "sans-serif");
     text.setAttribute("font-size", String(fontSize));
     text.setAttribute("fill", color);
     if (weight && weight !== "400" && weight !== "normal") text.setAttribute("font-weight", weight);
-    text.textContent = label;
+
+    // Single line: baseline ~vertically centred in the box. Multiple lines: stack them around
+    // that same centre so the block stays centred (line advance ~1.2em, the usual ratio).
+    const centreBaseline = y + h * 0.72;
+    if (lines.length === 1) {
+      text.setAttribute("y", round2(centreBaseline));
+      text.textContent = lines[0];
+    } else {
+      const lineHeight = fontSize * 1.2;
+      const firstBaseline = centreBaseline - ((lines.length - 1) * lineHeight) / 2;
+      text.setAttribute("y", round2(firstBaseline));
+      for (const [i, line] of lines.entries()) {
+        const tspan = doc.createElementNS(SVG_NS, "tspan");
+        tspan.setAttribute("x", String(x));
+        if (i > 0) tspan.setAttribute("dy", round2(lineHeight));
+        tspan.textContent = line;
+        text.appendChild(tspan);
+      }
+    }
 
     fo.replaceWith(text);
   }

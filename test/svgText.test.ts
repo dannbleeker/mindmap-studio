@@ -49,4 +49,27 @@ describe("inlineSvgText", () => {
     expect(out).toMatch(/<rect/);
     expect(out).not.toMatch(/foreignObject|<text/);
   });
+
+  it("splits an explicit line break into one <text> with a <tspan> per line", () => {
+    const input = svg(
+      `<g><foreignObject x="5" y="0" width="60" height="40"><div ${XHTML} style="font-size:16px;color:#111;">Two\nLines</div></foreignObject></g>`,
+    );
+    const out = inlineSvgText(input);
+    expect(out).not.toMatch(/foreignObject/);
+    // exactly one <text>, two <tspan> children
+    expect((out.match(/<text[ >]/g) ?? []).length).toBe(1);
+    expect((out.match(/<tspan/g) ?? []).length).toBe(2);
+    expect(out).toMatch(/<tspan[^>]*x="5"[^>]*>Two<\/tspan>/);
+    // second line is offset by one line-height (16 * 1.2 = 19.2) and re-anchored at x
+    expect(out).toMatch(/<tspan[^>]*x="5"[^>]*dy="19.2"[^>]*>Lines<\/tspan>/);
+  });
+
+  it("drops a foreignObject with no text (image-only node) — no empty <text>", () => {
+    const input = svg(
+      `<g><foreignObject x="0" y="0" width="20" height="20"><div ${XHTML}></div></foreignObject></g><rect x="0" y="0" width="10" height="10"/>`,
+    );
+    const out = inlineSvgText(input);
+    expect(out).not.toMatch(/foreignObject|<text/);
+    expect(out).toMatch(/<rect/);
+  });
 });

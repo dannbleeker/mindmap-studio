@@ -175,6 +175,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   (`useMapExports.svgToPng`), replacing mind-elixir's taint-prone `exportPng`. Verified by
   a canvas-taint + text-pixel render check; the library's own `exportSvg(true)` was
   rejected because it mispositions every label. Covered by `test/svgText.test.ts`.
+- **Multi-line topic labels in exports** — `inlineSvgText` now splits a topic on its
+  explicit line breaks and emits one `<text>` with a `<tspan>` per line, distributed over
+  the box height (single-line topics stay a plain `<text>`). Previously a multi-line topic
+  collapsed onto one line in the exported image/document. Verified by a real multi-line
+  render. An **export-fidelity regression test** (`test/exportFidelity.test.ts`) now pins
+  the whole `sanitizeSvg → inlineSvgText` chain: topics (incl. multi-line), marker icons,
+  node images, and connector/arrow/boundary `<path>` geometry all survive, while scripts,
+  inline handlers, and dangerous URL schemes are stripped. (Known gap: mind-elixir's export
+  omits arrow/boundary *text* labels — their geometry exports, the labels don't.)
 
 ### Changed
 

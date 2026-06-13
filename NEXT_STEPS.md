@@ -28,12 +28,13 @@ render everywhere, not only inline in a browser). See `CHANGELOG.md`.
 
 Remaining items are renderer-constrained or Dann-dependent:
 
-- [ ] **Multi-line topic labels in exports collapse to one line.** `src/io/svgText.ts`
-      reuses each foreignObject's correct x/y (so labels land in their boxes) but emits a
-      single `<text>` per label. A topic with an explicit line break renders on one line.
-      Fix: split on the break and emit per-line `<tspan>`s, distributing over the box height.
-      Low severity (single-line is exact); the built-in `exportSvg(true)` is *not* the fix —
-      it mispositions every label (verified).
+- [ ] **Arrow / boundary text labels are dropped from image & document exports.** The
+      geometry exports fine (the relationship arrow curve and the boundary bracket are
+      `<path>`s that survive), but mind-elixir's `exportSvg` omits their *text* labels
+      (verified: the raw export contains neither the arrow label nor the boundary label).
+      A fix would read the labels' positions from the live DOM and inject `<text>` into the
+      export at mapped coordinates — finicky DOM→export coordinate work, hence deferred.
+      Topics (incl. multi-line), marker icons, and node images all export correctly.
 - [ ] **Renderer-constrained (mind-elixir):** alternate layouts (org-chart / timeline /
       fishbone), organic/tapered branches, callouts, filled boundary enclosures, rich-text
       *topics*. These need a custom SVG renderer or a different engine — a multi-day rebuild.

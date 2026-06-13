@@ -236,6 +236,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **No first-frame layout flash on load.** The canvas is hidden (`opacity:0`, kept measurable
+  so the fit still works) until mind-elixir has laid out and fit the map, then revealed — so a
+  fresh load or map switch no longer flashes the un-positioned nodes as one line before the
+  tree appears. The reveal is unconditional (a `finally`), so the canvas can never stay hidden
+  (`src/mindmap/MindMap.tsx`).
 - **Imported `.mmap` icons render as glyphs.** Stock-icon names (e.g.
   `urn:mindjet:ThumbsUp`) used to show as literal text on nodes; common ones now map to
   emoji (👍, 🚩, 1️⃣, …) via `src/icons.ts`, which also backs the marker palette. Unknown

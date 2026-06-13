@@ -250,6 +250,11 @@ export function MindMap({
     const el = elRef.current;
     if (!el) return;
     docRef.current = doc;
+    // Hide the canvas until it's laid out + fit, so the first frame isn't a flash of
+    // unpositioned nodes. Revealed in the rAF below; opacity (not display:none) keeps
+    // the element measurable so scaleFit can read its size. Managed via the ref rather
+    // than the style prop so a React re-render can't reset it back to hidden.
+    el.style.opacity = "0";
 
     const me = new MindElixir({
       // SIDE = main branches split left/right of the root (MindManager's look).
@@ -272,7 +277,17 @@ export function MindMap({
 
     // The constructor lays out as SIDE; apply a non-default direction on (re)init.
     if (directionRef.current !== "side") applyDirection(me, directionRef.current);
-    requestAnimationFrame(() => fitView(me));
+    // Fit on the next frame (mind-elixir finishes layout first), then reveal — so the
+    // map appears already laid out and centred, never as an unscaled first frame.
+    requestAnimationFrame(() => {
+      // Reveal unconditionally — even if fitView throws (e.g. on a torn-down
+      // instance during a fast re-init), the canvas must never stay hidden.
+      try {
+        fitView(me);
+      } finally {
+        el.style.opacity = "1";
+      }
+    });
 
     // Capture canvas edits back into the canonical model.
     const handleOperation = () => {

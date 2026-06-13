@@ -96,6 +96,37 @@ describe("parseMmap", () => {
     expect(doc.root.topic).toBe("Direct root");
   });
 
+  it("falls back to the @Text attribute for topic text", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text Text="Via Text attr" /></ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.topic).toBe("Via Text attr");
+  });
+
+  it("tolerates a legacy <Notes><CDATA> note shape", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:Notes><ap:CDATA Text="Legacy note text" /></ap:Notes>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.note).toBe("Legacy note text");
+  });
+
+  it("ignores an icon that has no IconType", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:IconsGroup><ap:Icons><ap:Icon /></ap:Icons></ap:IconsGroup>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.icons).toBeUndefined(); // the empty icon is filtered out
+  });
+
   it("imports MindManager stock icons as node.icons", () => {
     const { doc } = parseMmap(
       mmapOf(`${MAP_OPEN}

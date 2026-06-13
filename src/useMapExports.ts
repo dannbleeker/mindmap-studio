@@ -3,6 +3,7 @@ import { buildPrintDoc, wrapSvgHtml } from "./io/html";
 import { serializeDoc } from "./io/json";
 import { toMarkdown } from "./io/markdown";
 import { sanitizeSvg } from "./io/svgSanitize";
+import { inlineSvgText } from "./io/svgText";
 import type { MindMapHandle } from "./mindmap/MindMap";
 import type { MindMapDoc } from "./model/types";
 
@@ -13,6 +14,29 @@ function download(blob: Blob, filename: string): void {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// Rasterise an SVG string to a PNG via an offscreen canvas. Only safe because the SVG
+// carries native <text> (inlineSvgText ran) — a foreignObject SVG would taint the canvas,
+// which is exactly why the old PNG path produced a blank/broken image.
+async function svgToPng(svg: string): Promise<Blob | null> {
+  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth || 1;
+    canvas.height = img.naturalHeight || 1;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    return await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 export interface MapExports {
@@ -38,6 +62,16 @@ export function useMapExports(
 ): MapExports {
   const baseName = () => getDoc().title || "mindmap";
 
+  // The rendered map as a clean, portable SVG string: sanitizeSvg (strip XSS) then
+  // inlineSvgText (mind-elixir's foreignObject topic labels -> native SVG <text>), so the
+  // file renders everywhere — opened as a .svg, rasterized to PNG, in a PDF viewer, or
+  // placed in Office — not only inline in a browser. The sanitize-before-inline order is
+  // load-bearing. null when there is no live map. Shared by png/svg/html/pdf.
+  const cleanSvg = async (): Promise<string | null> => {
+    const svg = mapRef.current?.exportSvg();
+    return svg ? inlineSvgText(sanitizeSvg(await svg.text())) : null;
+  };
+
   return {
     exportJson() {
       download(
@@ -53,24 +87,25 @@ export function useMapExports(
       const { toOpml } = await import("./io/opml");
       download(new Blob([toOpml(getDoc())], { type: "text/x-opml" }), `${baseName()}.opml`);
     },
+    // png/svg/html/pdf all embed the rendered SVG via cleanSvg() (sanitize + native-text).
     async exportPng() {
-      const blob = await mapRef.current?.exportPng();
+      const clean = await cleanSvg();
+      if (!clean) return;
+      const blob = await svgToPng(clean);
       if (blob) download(blob, `${baseName()}.png`);
     },
-    // SVG/HTML/PDF all embed the rendered SVG as live markup, so every one runs
-    // through sanitizeSvg first — mind-elixir re-injects node topics + hyperlinks
-    // unescaped, which would otherwise execute when the exported file is opened.
     async exportSvg() {
-      const svg = mapRef.current?.exportSvg();
-      if (!svg) return;
-      const clean = sanitizeSvg(await svg.text());
+      const clean = await cleanSvg();
+      if (!clean) return;
       download(new Blob([clean], { type: "image/svg+xml" }), `${baseName()}.svg`);
     },
     async exportHtml() {
-      const svg = mapRef.current?.exportSvg();
-      if (!svg) return;
-      const html = wrapSvgHtml(sanitizeSvg(await svg.text()), baseName());
-      download(new Blob([html], { type: "text/html" }), `${baseName()}.html`);
+      const clean = await cleanSvg();
+      if (!clean) return;
+      download(
+        new Blob([wrapSvgHtml(clean, baseName())], { type: "text/html" }),
+        `${baseName()}.html`,
+      );
     },
     // Standalone slide deck — the Walk-Through as a shareable, offline .html file.
     // Model-backed (no SVG), lazy-loaded to keep the deck template out of the entry chunk.
@@ -84,9 +119,9 @@ export function useMapExports(
     // Print-to-PDF: render the SVG into a hidden iframe and open the browser print
     // dialog ("Save as PDF"). Dep-free and fully local; an iframe dodges popup blockers.
     async exportPdf() {
-      const svg = mapRef.current?.exportSvg();
-      if (!svg) return;
-      const html = buildPrintDoc(sanitizeSvg(await svg.text()), baseName());
+      const clean = await cleanSvg();
+      if (!clean) return;
+      const html = buildPrintDoc(clean, baseName());
       const iframe = document.createElement("iframe");
       iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
       iframe.srcdoc = html;

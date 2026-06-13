@@ -22,17 +22,18 @@ enriched sample, a panels/hooks refactor, and a toolbar-wrap + a11y pass.
 **Excel `.xlsx`** (each verified by opening the output with a real consumer — python-pptx /
 openpyxl — or structural XML checks) — plus an HTML **slide deck**, **Copy outline** to the
 clipboard, **editable floating topics**, **library-wide search** (🔎 All maps), the
-mind-elixir core-CSS fix + a bundle guard, a shared-OOXML refactor, and the Pages-actions
-node24 bump. See `CHANGELOG.md`.
+mind-elixir core-CSS fix + a bundle guard, a shared-OOXML refactor, the Pages-actions
+node24 bump, and the **native-SVG-`<text>` image export** (`.svg`/`.png`/`.html`/`.pdf` now
+render everywhere, not only inline in a browser). See `CHANGELOG.md`.
 
 Remaining items are renderer-constrained or Dann-dependent:
 
-- [ ] **Image exports (`.svg`/`.png`/`.pdf`) collapse outside a browser.** They embed
-      mind-elixir's `<foreignObject>` (HTML-in-SVG) labels, which only render inline in a real
-      browser — opened as a file, rasterized, or placed in Office, the labels flow into one
-      line. Fix: render labels as native SVG `<text>` (post-process the exported SVG). Real but
-      finicky (wrapping, markers, positioning) — wants a design pass on fidelity. **Top
-      remaining quality item.**
+- [ ] **Multi-line topic labels in exports collapse to one line.** `src/io/svgText.ts`
+      reuses each foreignObject's correct x/y (so labels land in their boxes) but emits a
+      single `<text>` per label. A topic with an explicit line break renders on one line.
+      Fix: split on the break and emit per-line `<tspan>`s, distributing over the box height.
+      Low severity (single-line is exact); the built-in `exportSvg(true)` is *not* the fix —
+      it mispositions every label (verified).
 - [ ] **Renderer-constrained (mind-elixir):** alternate layouts (org-chart / timeline /
       fishbone), organic/tapered branches, callouts, filled boundary enclosures, rich-text
       *topics*. These need a custom SVG renderer or a different engine — a multi-day rebuild.

@@ -28,7 +28,6 @@ export interface SelectedNode {
 }
 
 export interface MindMapHandle {
-  exportPng: () => Promise<Blob | null>;
   exportSvg: () => Blob | null;
   focusNode: (id: string) => void;
   fit: () => void;
@@ -116,7 +115,6 @@ export function MindMap({
   useImperativeHandle(
     ref,
     () => ({
-      exportPng: () => meRef.current?.exportPng() ?? Promise.resolve(null),
       exportSvg: () => meRef.current?.exportSvg() ?? null,
       focusNode: (id: string) => {
         const me = meRef.current;

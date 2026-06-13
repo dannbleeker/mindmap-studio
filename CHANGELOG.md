@@ -165,6 +165,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Fit button** — re-scales and centers the map to the viewport (MindManager's "Fit
   Map"), handy after importing a large map or panning around. Exposed via the
   `MindMapHandle` ref (`fitView` is also reused for the initial auto-fit).
+- **Image/document exports render everywhere** (`src/io/svgText.ts`) — mind-elixir
+  emits topic labels as `<foreignObject>` (HTML-in-SVG), which only renders inline in a
+  browser: opened as a file, rasterized to PNG, or placed in Office the labels vanished
+  (and foreignObject *taints* the canvas, so the PNG path produced a blank/failed image).
+  `inlineSvgText` rewrites those labels to native SVG `<text>`, reusing each label's
+  existing x/y so it lands inside its box, and now runs in the `.svg`/`.png`/`.html`/`.pdf`
+  pipeline (after `sanitizeSvg`). The PNG export rasterizes the cleaned SVG itself
+  (`useMapExports.svgToPng`), replacing mind-elixir's taint-prone `exportPng`. Verified by
+  a canvas-taint + text-pixel render check; the library's own `exportSvg(true)` was
+  rejected because it mispositions every label. Covered by `test/svgText.test.ts`.
 
 ### Changed
 

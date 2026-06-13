@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-13T16:37:45.372Z",
-  "commit": "bc40aac",
+  "generatedAt": "2026-06-13T16:50:01.599Z",
+  "commit": "3a291e8",
   "headline": {
-    "linesTsJs": 8127,
-    "tests": 184,
-    "lineCoveragePct": 42.82,
-    "commits": 154,
+    "linesTsJs": 8152,
+    "tests": 187,
+    "lineCoveragePct": 42.92,
+    "commits": 156,
     "ageDays": 1,
     "trackedFiles": 120,
     "featureManualPct": 100,
@@ -21,7 +21,7 @@
     {
       "category": "Unit tests",
       "files": 27,
-      "lines": 2098
+      "lines": 2123
     },
     {
       "category": "Build scripts",
@@ -41,13 +41,13 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 42.82,
-      "covered": 1295,
+      "pct": 42.92,
+      "covered": 1298,
       "total": 3024
     },
     "statements": {
-      "pct": 42.82,
-      "covered": 1295,
+      "pct": 42.92,
+      "covered": 1298,
       "total": 3024
     },
     "functions": {
@@ -56,35 +56,35 @@
       "total": 130
     },
     "branches": {
-      "pct": 89.82,
-      "covered": 415,
-      "total": 462
+      "pct": 91.2,
+      "covered": 425,
+      "total": 466
     }
   },
   "tests": {
-    "unit": 184,
+    "unit": 187,
     "e2e": 0,
-    "durationMs": 5493,
+    "durationMs": 4725,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2216
+        "ms": 1801
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 179
+        "ms": 142
       },
       {
         "file": "test/svgText.test.ts",
-        "ms": 73
+        "ms": 77
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 73
+        "ms": 63
       },
       {
-        "file": "test/mmap.test.ts",
-        "ms": 62
+        "file": "test/docx.test.ts",
+        "ms": 56
       }
     ]
   },
@@ -299,21 +299,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 154,
-    "commits7d": 154,
+    "commits": 156,
+    "commits7d": 156,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 109
+        "count": 110
       },
       {
         "name": "github-actions[bot]",
-        "count": 45
+        "count": 46
       }
     ],
     "churn30d": {
-      "added": 23439,
-      "removed": 4653
+      "added": 23515,
+      "removed": 4704
     },
     "changelogEntries": 65
   }

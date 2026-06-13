@@ -72,4 +72,20 @@ describe("inlineSvgText", () => {
     expect(out).not.toMatch(/foreignObject|<text/);
     expect(out).toMatch(/<rect/);
   });
+
+  it("returns the input unchanged when the SVG can't be parsed", () => {
+    // Unclosed <rect → XML parse error → leave the (already-sanitized) string as-is.
+    const malformed = "<svg><foreignObject><div>x</div></foreignObject><rect";
+    expect(inlineSvgText(malformed)).toBe(malformed);
+  });
+
+  it("applies defaults when a foreignObject has no position attrs or style", () => {
+    // Bare foreignObject (no x/y/height, no styled child) — exercise the fallbacks.
+    const out = inlineSvgText(svg("<foreignObject>Bare</foreignObject>"));
+    expect(out).toMatch(/<text[^>]*x="0"/);
+    expect(out).toMatch(/font-size="16"/); // default size
+    expect(out).toMatch(/fill="#2c2c2a"/); // default colour
+    expect(out).not.toMatch(/font-weight/); // no weight => not set
+    expect(out).toMatch(/>Bare<\/text>/);
+  });
 });

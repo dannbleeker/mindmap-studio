@@ -376,7 +376,7 @@ export async function buildPdf() {
       const fs = Math.max(8, 14 * scale);
       const f = nd.root ? F.bold : F.regular;
       const label = pdfText(nd.label);
-      const tw = f.widthOfTextAtSize(label, fs);
+      const tw = safeWidth(f, label, fs);
       safeDraw(S.page, label, {
         x: pX(nd.cx) - tw / 2,
         y: PAGE.h - pYtop(nd.cy) - fs * 0.35,
@@ -437,7 +437,7 @@ export async function buildPdf() {
   const dateIso = new Date().toISOString().split("T")[0];
   const center = (page, str, font, size, color, yFromTop) => {
     const s = pdfText(str);
-    const tw = font.widthOfTextAtSize(s, size);
+    const tw = safeWidth(font, s, size);
     safeDraw(page, s, { x: (PAGE.w - tw) / 2, y: PAGE.h - yFromTop - size, font, size, color });
   };
   const cover = addPage();
@@ -457,7 +457,7 @@ export async function buildPdf() {
     };
     for (const w of words) {
       const test = ln ? `${ln} ${w}` : w;
-      if (F.italic.widthOfTextAtSize(test, size) > 360) {
+      if (safeWidth(F.italic, test, size) > 360) {
         flush();
         ln = w;
       } else ln = test;

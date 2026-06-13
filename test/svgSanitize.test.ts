@@ -54,4 +54,13 @@ describe("sanitizeSvg", () => {
     expect(out).not.toMatch(/<script/i);
     expect(out).not.toMatch(/onmouseover/i);
   });
+
+  it("in the regex fallback, drops a dangerous href but keeps a safe one", () => {
+    // Unclosed <rect forces the fallback; the href scrub must run both ways.
+    const out = sanitizeSvg(
+      `<svg><a href="javascript:alert(1)">x</a><a href="https://example.com">y</a><rect`,
+    );
+    expect(out).not.toMatch(/javascript:/i);
+    expect(out).toContain("https://example.com");
+  });
 });

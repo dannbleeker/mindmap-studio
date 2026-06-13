@@ -190,11 +190,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   6, matching TP Studio. Behavior-preserving — full gate green and the app re-verified
   in-browser (render, search, exports, no console errors); the production bundle even
   shrank (~100.6 → ~96.8 kB gz entry).
-- Imported **floating topics now render** on the canvas, in a labelled "Floating topics"
-  branch (mind-elixir has no detached nodes, so this is the honest representation; the
-  import banner notes their separate placement). The branch is display-only —
-  `fromMindElixir` strips it on capture, so it never enters the model and `floatingTopics`
-  is preserved across edits.
+- Imported **floating topics render and are editable** on the canvas, in a labelled
+  "Floating topics" branch (mind-elixir has no detached nodes, so this is the honest
+  representation; the import banner notes their separate placement). Edits to the branch —
+  rename, add, remove, nest, or drag a topic in/out of the tree — are captured back into
+  `doc.floatingTopics` (with notes/images preserved by id) and persist; emptying or deleting
+  the branch clears them. Pure round-trip in `fromMindElixir` (`src/mindmap/sync.ts`).
 - **Node images** — an "Image" button attaches a picture to the selected node. The file
   is downscaled and stored as a self-contained data URL (so maps stay offline and a `.json`
   export carries its images), rendered on the node, and round-tripped through the model

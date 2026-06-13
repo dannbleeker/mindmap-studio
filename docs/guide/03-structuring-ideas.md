@@ -58,9 +58,11 @@ information on the page.
 
 Not everything has to connect to the root. A **floating topic** is a node (or small
 sub-tree) that sits on the canvas unattached -- a parking lot for ideas you're not ready
-to place, a caption, a note-to-self. MindMap Studio renders floating topics imported
-from other tools, and they're handy as a staging area while you decide where something
-belongs.
+to place, a caption, a note-to-self. MindMap Studio renders floating topics imported from
+other tools in a labelled "Floating topics" branch -- and they're fully editable, so they
+double as a staging area you can rename, grow, and prune while you decide where something
+belongs. Drag one onto a branch and it joins the tree; drag a branch topic out and it
+floats free.
 
 ## Now you try
 

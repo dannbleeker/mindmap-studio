@@ -185,11 +185,11 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
     );
   }
 
-  // Floating topics render in a separate, display-only "Floating topics" branch
+  // Floating topics render in a separate, editable "Floating topics" branch
   // (mind-elixir has no detached nodes) — note that so their placement isn't a surprise.
   if (floatingTopics.length > 0) {
     ctx.warnings.push(
-      `${floatingTopics.length} floating topic(s) imported — shown in a separate "Floating topics" branch (display-only).`,
+      `${floatingTopics.length} floating topic(s) imported — shown in a separate, editable "Floating topics" branch.`,
     );
   }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   FLOATING_NODE_ID,
+  type MeNode,
   fromMindElixir,
   toArrows,
   toMindElixir,
@@ -239,30 +240,85 @@ describe("toSummaries (boundaries -> mind-elixir summaries)", () => {
   });
 });
 
-describe("toMindElixirRoot (floating topics)", () => {
+describe("floating topics (editable round-trip)", () => {
   const withFloat: MindMapDoc = {
     ...doc,
     floatingTopics: [{ id: "f1", topic: "Legend", children: [] }],
   };
 
-  it("appends imported floating topics as one labelled branch", () => {
-    const meRoot = toMindElixirRoot(withFloat);
+  // The synthetic branch toMindElixirRoot adds; tests reach in to simulate canvas edits.
+  const floatingBranch = (meRoot: MeNode): MeNode => {
     const branch = meRoot.children?.find((c) => c.id === FLOATING_NODE_ID);
-    expect(branch?.children?.map((c) => c.topic)).toEqual(["Legend"]);
-    // the real branches are untouched and come first
+    if (!branch?.children) throw new Error("expected a floating-topics branch");
+    return branch;
+  };
+
+  it("appends floating topics as one labelled branch, real branches first", () => {
+    const meRoot = toMindElixirRoot(withFloat);
+    expect(floatingBranch(meRoot).children?.map((c) => c.topic)).toEqual(["Legend"]);
     expect(meRoot.children?.slice(0, 2).map((c) => c.id)).toEqual(["a", "b"]);
   });
 
   it("adds no branch when there are no floating topics", () => {
-    const meRoot = toMindElixirRoot(doc);
-    expect(meRoot.children?.some((c) => c.id === FLOATING_NODE_ID)).toBe(false);
+    expect(toMindElixirRoot(doc).children?.some((c) => c.id === FLOATING_NODE_ID)).toBe(false);
   });
 
-  it("strips the display-only branch back out on capture (never enters the model)", () => {
+  it("removes the synthetic branch from the main tree on capture", () => {
     const back = fromMindElixir(toMindElixirRoot(withFloat), withFloat);
     expect(back.root.children.some((c) => c.id === FLOATING_NODE_ID)).toBe(false);
     expect(back.root.children.map((c) => c.id)).toEqual(["a", "b"]);
-    // floatingTopics is preserved from the prior doc, not corrupted by the branch
+  });
+
+  it("round-trips floating topics unedited", () => {
+    const back = fromMindElixir(toMindElixirRoot(withFloat), withFloat);
     expect(back.floatingTopics).toEqual(withFloat.floatingTopics);
+  });
+
+  it("captures an edit to a floating topic", () => {
+    const meRoot = toMindElixirRoot(withFloat);
+    const kids = floatingBranch(meRoot).children;
+    if (kids) kids[0].topic = "Legend v2";
+    expect(fromMindElixir(meRoot, withFloat).floatingTopics?.map((f) => f.topic)).toEqual([
+      "Legend v2",
+    ]);
+  });
+
+  it("captures a newly added floating topic", () => {
+    const meRoot = toMindElixirRoot(withFloat);
+    floatingBranch(meRoot).children?.push({ id: "f2", topic: "Sticky" });
+    expect(fromMindElixir(meRoot, withFloat).floatingTopics?.map((f) => f.topic)).toEqual([
+      "Legend",
+      "Sticky",
+    ]);
+  });
+
+  it("captures a nested floating subtree", () => {
+    const nested: MindMapDoc = {
+      ...doc,
+      floatingTopics: [n("f1", "Group", {}, [n("f1a", "Child")])],
+    };
+    const back = fromMindElixir(toMindElixirRoot(nested), nested);
+    expect(back.floatingTopics?.[0].children.map((c) => c.topic)).toEqual(["Child"]);
+  });
+
+  it("preserves a floating topic's note by id when mind-elixir omits it", () => {
+    const noted: MindMapDoc = { ...doc, floatingTopics: [n("f1", "Legend", { note: "keep me" })] };
+    const meRoot = toMindElixirRoot(noted);
+    const kids = floatingBranch(meRoot).children;
+    if (kids) kids[0].note = undefined; // mind-elixir didn't carry it this time
+    expect(fromMindElixir(meRoot, noted).floatingTopics?.[0].note).toBe("keep me");
+  });
+
+  it("clears floating topics when the branch is emptied", () => {
+    const meRoot = toMindElixirRoot(withFloat);
+    floatingBranch(meRoot).children = [];
+    expect(fromMindElixir(meRoot, withFloat).floatingTopics).toBeUndefined();
+  });
+
+  it("clears floating topics when the whole branch is deleted on the canvas", () => {
+    // toMindElixir(root) carries no floating branch — as if the user deleted it
+    const back = fromMindElixir(toMindElixir(withFloat.root), withFloat);
+    expect(back.floatingTopics).toBeUndefined();
+    expect(back.root.children.map((c) => c.id)).toEqual(["a", "b"]);
   });
 });

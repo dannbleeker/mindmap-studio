@@ -153,7 +153,7 @@
     },
     {
       "id": "floating-topics",
-      "name": "Imported floating topics rendered",
+      "name": "Floating topics (imported, editable)",
       "area": "structure",
       "since": "2026-06-12",
       "manual": true,

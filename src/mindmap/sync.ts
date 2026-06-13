@@ -67,10 +67,10 @@ export function toMindElixir(node: MapNode): MeNode {
 /** Reserved id for the synthetic branch that surfaces imported floating topics. */
 export const FLOATING_NODE_ID = "__floating__";
 
-// Build the mind-elixir root, appending any imported floating topics as one
-// labelled branch so they're visible on the canvas — mind-elixir has no
-// first-class detached nodes. The branch is display-only: fromMindElixir strips
-// it back out, so it never enters the canonical model and edits to it aren't kept.
+// Build the mind-elixir root, appending any floating topics as one labelled branch so
+// they're visible and editable on the canvas — mind-elixir has no first-class detached
+// nodes. fromMindElixir captures this branch's children back into doc.floatingTopics and
+// removes the branch itself, so the round-trip stays clean and edits persist.
 export function toMindElixirRoot(doc: MindMapDoc): MeNode {
   const root = toMindElixir(doc.root);
   const floating = doc.floatingTopics ?? [];
@@ -222,13 +222,23 @@ export function fromMindElixir(
 ): MindMapDoc {
   const prev = new Map<string, MapNode>();
   indexById(prevDoc.root, prev);
+  // Index floating topics too, so their canonical-only fields (notes / images / tasks)
+  // are preserved by id on capture, exactly as for the main tree.
+  for (const floating of prevDoc.floatingTopics ?? []) indexById(floating, prev);
+
   const root = meToNode(nodeData, prev);
-  // The floating-topics branch is display-only — strip it so it never enters the
-  // model. floatingTopics itself is preserved from prevDoc via the spread below.
+  // Floating topics live under a synthetic branch (toMindElixirRoot). Capture its current
+  // children back into the model so edits to them persist, then remove the branch from the
+  // main tree. An absent branch (deleted on the canvas, or none to begin with) → no
+  // floating topics, which also clears any that existed before.
+  const floatingBranch = root.children.find((child) => child.id === FLOATING_NODE_ID);
   root.children = root.children.filter((child) => child.id !== FLOATING_NODE_ID);
-  // Keep prevDoc's floating/meta. Arrows and summaries (when mind-elixir reports
-  // them) round-trip back into links/boundaries; otherwise the prior ones persist.
+
+  // Arrows and summaries (when mind-elixir reports them) round-trip back into
+  // links/boundaries; otherwise the prior ones persist via the spread.
   const result: MindMapDoc = { ...prevDoc, title: root.topic, root };
+  result.floatingTopics =
+    floatingBranch && floatingBranch.children.length > 0 ? floatingBranch.children : undefined;
   if (arrows !== undefined) {
     const links = fromArrows(arrows);
     result.links = links.length > 0 ? links : undefined;

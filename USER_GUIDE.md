@@ -142,7 +142,8 @@ live, without losing edits. Image exports inherit the theme, so a dark map expor
 - **Boundaries** — a labelled bracket around a node's subtree (right-click → Summary). Drawn
   and imported boundaries both round-trip and persist.
 - **Floating topics** — detached topics imported from `.mmap` appear in a "Floating topics"
-  branch (display-only).
+  branch; edit them like any node (rename, add, remove, or drag in/out of the tree) and the
+  changes are saved.
 
 ---
 

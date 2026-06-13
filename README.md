@@ -36,7 +36,8 @@ GitHub Pages).
   subtree, and boundaries you draw on the canvas round-trip back into the model (via
   mind-elixir summaries).
 - **Floating topics** — imported detached topics render in a labelled "Floating topics"
-  branch (display-only).
+  branch, and are editable: rename, add, remove, nest, or drag them in/out of the tree, and
+  the changes round-trip back into the model.
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
   (`.md`), OPML (`.opml`), PNG, SVG, a self-contained HTML file, a standalone HTML
   **slide deck** (the Walk-Through as a shareable file), a **PowerPoint** (`.pptx`) deck,

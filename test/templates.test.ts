@@ -29,6 +29,37 @@ describe("buildTemplate", () => {
     expect(buildTemplate("project").root.children).toHaveLength(5);
   });
 
+  it("includes the structured-thinking templates", () => {
+    const ids = templates.map((t) => t.id);
+    expect(ids).toEqual(
+      expect.arrayContaining(["five-whys", "decision", "retrospective", "meeting", "pre-mortem"]),
+    );
+  });
+
+  it("builds the 5 Whys template as a nested causal chain", () => {
+    const root = buildTemplate("five-whys").root;
+    let node = root.children[0];
+    expect(node.topic).toBe("Problem statement");
+    const chain: string[] = [];
+    while (node.children.length > 0) {
+      node = node.children[0];
+      chain.push(node.topic);
+    }
+    expect(chain).toHaveLength(5);
+    expect(chain[4]).toContain("root cause");
+  });
+
+  it("gives the expected top-level structure for the new flat templates", () => {
+    expect(buildTemplate("decision").root.children.map((c) => c.topic)).toContain("Pros");
+    expect(buildTemplate("retrospective").root.children.map((c) => c.topic)).toEqual([
+      "Start",
+      "Stop",
+      "Continue",
+      "Action items",
+    ]);
+    expect(buildTemplate("pre-mortem").root.children).toHaveLength(5);
+  });
+
   it("falls back to the first template for an unknown id", () => {
     const fallback = buildTemplate("does-not-exist");
     const blank = buildTemplate(templates[0].id);

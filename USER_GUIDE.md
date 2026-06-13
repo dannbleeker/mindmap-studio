@@ -29,7 +29,7 @@ Left to right:
 | Control | What it does |
 |---|---|
 | **☰ Outline** | Toggle the [outline panel](#outline-panel) |
-| **+ New…** | Create a map from a [template](#templates) (Blank / Brainstorm / SWOT / Project plan) |
+| **+ New…** | Create a map from a [template](#templates) (Blank, Brainstorm, SWOT, Project, 5 Whys, Decision, Retrospective, Meeting, Pre-mortem) |
 | **(map dropdown)** | Switch between maps in your [library](#the-map-library) |
 | **Delete** | Delete the current map |
 | **▶ Present** | Start [presentation mode](#presentation-mode) |
@@ -153,8 +153,9 @@ Switch freely; each is autosaved. **Delete** removes the current one.
 
 ### Templates
 
-**+ New…** offers starter maps: **Blank**, **Brainstorm** (the 5 Ws + How), **SWOT**, and
-**Project plan**.
+**+ New…** offers starter maps: **Blank**, **Brainstorm** (the 5 Ws + How), **SWOT**,
+**Project plan**, **5 Whys** (a nested root-cause chain), **Decision** (pros & cons),
+**Retrospective** (Start / Stop / Continue), **Meeting notes**, and **Pre-mortem**.
 
 ---
 

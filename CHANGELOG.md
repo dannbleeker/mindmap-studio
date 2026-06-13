@@ -116,6 +116,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   direct run formatting rather than named styles so it renders identically in Word,
   LibreOffice, Pages, and Google Docs. Pure + deterministic (`src/io/docx.ts`,
   lazy-loaded); topic and note text is XML-escaped.
+- **More starter templates** — the New menu gains five structured-thinking starters:
+  **5 Whys** (a nested root-cause chain), **Decision** (pros & cons), **Retrospective**
+  (Start / Stop / Continue), **Meeting notes**, and **Pre-mortem** (`src/templates.ts`).
 - **Find nodes** — a header search box matches node topics _and notes_
   (case-insensitive), focuses and selects the match on the canvas, and cycles through
   multiple hits on repeated Enter (with an `n/total` counter). Matching is a pure,

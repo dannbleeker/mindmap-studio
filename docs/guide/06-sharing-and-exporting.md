@@ -33,10 +33,13 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
 - **Word (`.docx`)** -- the map as an editable outline document: a title, indented bulleted
   topics, and notes as italic lines. For when the next step lives in a word processor --
   minutes, a brief, a hand-off to someone who doesn't use the app.
+- **Excel (`.xlsx`)** -- the map as an indented outline worksheet: each topic in the column
+  matching its depth, with a Notes column. For when you want to sort, filter, or count the
+  outline as a spreadsheet.
 - **PDF** (via print) -- a fixed-layout document for sending and printing.
 
 A rule of thumb: **JSON to keep it, Markdown to discuss it, PNG/SVG/HTML to show it,
-the slide deck or PowerPoint to present it, Word or PDF to send it.**
+the slide deck or PowerPoint to present it, Word or PDF to send it, Excel to crunch it.**
 
 ## Importing
 

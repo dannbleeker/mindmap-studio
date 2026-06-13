@@ -298,6 +298,7 @@ export function App() {
     exportPdf,
     exportDocx,
     exportPptx,
+    exportXlsx,
   } = useMapExports(mapRef, () => liveDocRef.current);
 
   // Restore the last-opened map on startup; fall back to the sample.
@@ -584,6 +585,7 @@ export function App() {
               pdf: exportPdf,
               docx: exportDocx,
               pptx: exportPptx,
+              xlsx: exportXlsx,
             }[e.target.value];
             fn?.();
           }}
@@ -605,6 +607,7 @@ export function App() {
             <option value="html">.html (standalone)</option>
             <option value="pdf">.pdf (print)</option>
             <option value="docx">.docx (Word)</option>
+            <option value="xlsx">.xlsx (Excel)</option>
           </optgroup>
           <optgroup label="Presentation">
             <option value="deck">.html (slide deck)</option>

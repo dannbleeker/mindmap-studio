@@ -197,6 +197,7 @@ Pick a format from the **⬆ Export…** menu:
 | `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline) |
 | `.docx` | A Word document — the map as an editable, indented outline (opens in Word, LibreOffice, Pages, Google Docs) |
 | `.pptx` | A PowerPoint deck — an overview slide, then one per branch (opens in PowerPoint, Keynote, LibreOffice, Google Slides) |
+| `.xlsx` | An Excel worksheet — the map as an indented outline (a column per depth) with a Notes column (opens in Excel, LibreOffice Calc, Numbers, Google Sheets) |
 | `.pdf` | Opens your browser's print dialog → "Save as PDF" (landscape) |
 
 ---

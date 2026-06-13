@@ -26,6 +26,7 @@ export interface MapExports {
   exportPdf: () => Promise<void>;
   exportDocx: () => Promise<void>;
   exportPptx: () => Promise<void>;
+  exportXlsx: () => Promise<void>;
 }
 
 // Download handlers for every export format, kept out of App so the component
@@ -121,6 +122,18 @@ export function useMapExports(
           type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         }),
         `${baseName()}.pptx`,
+      );
+    },
+    // Excel .xlsx — the map as an indented outline worksheet. Model-backed,
+    // lazy-loaded (xlsx.ts pulls fflate for the OPC zip).
+    async exportXlsx() {
+      const { buildXlsx } = await import("./io/xlsx");
+      const bytes = buildXlsx(getDoc()) as BlobPart;
+      download(
+        new Blob([bytes], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+        `${baseName()}.xlsx`,
       );
     },
   };

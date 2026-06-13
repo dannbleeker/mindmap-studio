@@ -124,6 +124,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   they're self-describing. Pure + deterministic (`src/io/pptx.ts`, lazy-loaded); topic text is
   XML-escaped. Verified by opening the output with python-pptx (a real PowerPoint-class reader)
   plus well-formedness + referential-integrity unit tests.
+- **Excel (.xlsx) export** — a `.xlsx (Excel)` export saves the map as an indented outline
+  worksheet: each topic in the column matching its depth, plus a Notes column and a bold
+  header. Minimal SpreadsheetML written by hand via `fflate` (inline strings, no
+  sharedStrings part); pure + deterministic (`src/io/xlsx.ts`, lazy-loaded), topic/note text
+  XML-escaped. Verified by opening the output with openpyxl (a real Excel-class reader) plus
+  well-formedness + content unit tests.
 - **More starter templates** — the New menu gains five structured-thinking starters:
   **5 Whys** (a nested root-cause chain), **Decision** (pros & cons), **Retrospective**
   (Start / Stop / Continue), **Meeting notes**, and **Pre-mortem** (`src/templates.ts`).

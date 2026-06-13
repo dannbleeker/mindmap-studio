@@ -18,6 +18,9 @@ What goes in, what comes out, and what survives the trip. For the day-to-day gui
 - **PowerPoint (`.pptx`)** -- a real, editable slide deck (an overview slide, then one per
   branch with its subtree as bullets); a minimal PresentationML package that opens in
   PowerPoint, Keynote, LibreOffice, and Google Slides.
+- **Excel (`.xlsx`)** -- the map as an indented outline worksheet (each topic in the column
+  matching its depth, plus a Notes column); a minimal SpreadsheetML package that opens in
+  Excel, LibreOffice Calc, Numbers, and Google Sheets.
 - **Word (`.docx`)** -- the map as an editable outline document (title, indented bulleted
   topics, notes as italic lines); a minimal Open-XML package that opens in Word,
   LibreOffice, Pages, and Google Docs.

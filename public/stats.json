@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-13T11:55:51.200Z",
-  "commit": "72c1fe7",
+  "generatedAt": "2026-06-13T12:06:42.590Z",
+  "commit": "a74228c",
   "headline": {
-    "linesTsJs": 7139,
+    "linesTsJs": 7144,
     "tests": 139,
     "lineCoveragePct": 42.14,
-    "commits": 120,
+    "commits": 122,
     "ageDays": 1,
     "trackedFiles": 112,
     "featureManualPct": 100,
@@ -16,7 +16,7 @@
     {
       "category": "App code (src)",
       "files": 32,
-      "lines": 3826
+      "lines": 3831
     },
     {
       "category": "Unit tests",
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 139,
     "e2e": 0,
-    "durationMs": 3662,
+    "durationMs": 3558,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1625
+        "ms": 1624
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 145
-      },
-      {
-        "file": "test/docx.test.ts",
-        "ms": 46
+        "ms": 160
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 46
+        "ms": 60
+      },
+      {
+        "file": "test/docx.test.ts",
+        "ms": 42
       },
       {
         "file": "test/book.test.ts",
-        "ms": 41
+        "ms": 35
       }
     ]
   },
@@ -107,7 +107,7 @@
       },
       {
         "name": "mindmap/MindMap.tsx",
-        "lines": 382
+        "lines": 387
       },
       {
         "name": "Panels.tsx",
@@ -154,7 +154,7 @@
       },
       {
         "file": "mindmap/MindMap.tsx",
-        "commits": 23
+        "commits": 24
       },
       {
         "file": "mindmap/sync.ts",
@@ -178,7 +178,7 @@
       {
         "file": "mindmap/MindMap.tsx",
         "pct": 0,
-        "commits": 23
+        "commits": 24
       },
       {
         "file": "useMapExports.ts",
@@ -209,8 +209,8 @@
   },
   "bundle": {
     "jsGzipKb": 134.6,
-    "cssGzipKb": 0.6,
-    "totalGzipKb": 135.2,
+    "cssGzipKb": 3.4,
+    "totalGzipKb": 138,
     "entryGzipKb": 105.1,
     "budgetKb": 150,
     "withinBudget": true
@@ -218,7 +218,7 @@
   "docs": {
     "bookWords": 6430,
     "chapters": 11,
-    "appLoc": 3826,
+    "appLoc": 3831,
     "docToCodeRatio": 1.68
   },
   "featureCoverage": {
@@ -305,22 +305,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 120,
-    "commits7d": 120,
+    "commits": 122,
+    "commits7d": 122,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 92
+        "count": 93
       },
       {
         "name": "github-actions[bot]",
-        "count": 28
+        "count": 29
       }
     ],
     "churn30d": {
-      "added": 21429,
-      "removed": 3801
+      "added": 21474,
+      "removed": 3834
     },
-    "changelogEntries": 57
+    "changelogEntries": 58
   }
 }

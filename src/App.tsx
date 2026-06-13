@@ -595,6 +595,22 @@ export function App() {
         >
           🎨 Style
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            const id = selected?.id;
+            const ok = id ? mapRef.current?.groupBranch(id) : false;
+            showHint(
+              ok
+                ? "Branch grouped — double-click the bracket to rename it."
+                : "Select a node first, then group its branch.",
+            );
+          }}
+          style={controlStyle}
+          title="Draw a boundary around the selected branch (a visual group)"
+        >
+          ⬚ Group
+        </button>
         <select
           value=""
           onChange={(e) => {

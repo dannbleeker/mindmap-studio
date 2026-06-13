@@ -206,6 +206,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   topics, per-topic styling, images, deep nesting, hyperlinks. Each is canonical-model data
   (opening one mints a fresh, editable copy) and covered by `test/examples.test.ts` (every
   example builds with unique ids and no dangling link/boundary references).
+- **⬚ Group button — discoverable boundaries.** Boundaries (bracket groups around a branch)
+  worked before but were hidden in the right-click → Summary menu. A toolbar **⬚ Group**
+  button now draws one around the selected branch (`MindMapHandle.groupBranch` →
+  mind-elixir `createSummary`); it's captured into the model and persists like any edit,
+  and double-clicking the bracket labels it. (Note: these are mind-elixir's *bracket*
+  boundaries; MindManager-style filled enclosures and **callouts** remain renderer-ceiling
+  items — the engine has no callout primitive — tracked in `NEXT_STEPS.md`.)
 
 ### Changed
 

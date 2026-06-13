@@ -30,10 +30,10 @@ the structure, so flip it freely to see which framing helps.
 ## Boundaries: grouping a branch
 
 Sometimes a branch needs to be visibly *a thing*: "everything in here is out of scope",
-"this cluster is Phase 1". Select the node at the top of the branch and add a
-**boundary** -- a soft rounded outline is drawn around it and all its descendants. The
-boundary follows the branch as you edit it, so it keeps enclosing the right nodes even
-after you add or move children.
+"this cluster is Phase 1". Select the node at the top of the branch and click **⬚ Group**
+(or right-click → Summary): a **boundary** is drawn around it and all its descendants, and
+double-clicking the bracket lets you label it. The boundary follows the branch as you edit
+it, so it keeps enclosing the right nodes even after you add or move children.
 
 Boundaries are the right tool when the grouping is *hierarchical* -- it lines up with a
 single branch. When the grouping cuts across the tree, you want the next feature instead.

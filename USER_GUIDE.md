@@ -146,8 +146,9 @@ live, without losing edits. Image exports inherit the theme, so a dark map expor
 
 - **Relationships** — draw a labelled arrow between two nodes (right-click → Link). Arrows you
   draw are saved, and ones imported from `.mmap` are shown.
-- **Boundaries** — a labelled bracket around a node's subtree (right-click → Summary). Drawn
-  and imported boundaries both round-trip and persist.
+- **Boundaries** — a labelled bracket grouping a node and its subtree. Select a node and click
+  **⬚ Group** in the toolbar (or right-click → Summary), then double-click the bracket to rename
+  it. Drawn and imported boundaries both round-trip and persist.
 - **Floating topics** — detached topics imported from `.mmap` appear in a "Floating topics"
   branch; edit them like any node (rename, add, remove, or drag in/out of the tree) and the
   changes are saved.

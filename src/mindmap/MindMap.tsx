@@ -45,6 +45,8 @@ export interface MindMapHandle {
   setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
   setSelectedHyperlink: (url: string) => boolean;
+  /** Draw a boundary (bracket) around the node and its subtree; false if it isn't found. */
+  groupBranch: (id: string) => boolean;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */
@@ -131,6 +133,22 @@ export function MindMap({
       },
       fit: () => {
         if (meRef.current) fitView(meRef.current);
+      },
+      groupBranch: (id: string): boolean => {
+        // Select the node, then ask mind-elixir to draw a summary bracket over it and its
+        // subtree. createSummary fires an "operation" event, so the boundary is captured
+        // into the model and persisted like any other edit. Double-click the bracket to label it.
+        const me = meRef.current as (MindElixirInstance & { createSummary?: () => void }) | null;
+        if (!me?.createSummary) return false;
+        try {
+          const ele = me.findEle(id);
+          if (!ele) return false;
+          me.selectNode(ele);
+          me.createSummary();
+          return true;
+        } catch {
+          return false;
+        }
       },
       setSelectedImage: (image: MapImage): boolean => {
         const me = meRef.current as

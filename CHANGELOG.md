@@ -245,5 +245,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `src/mindmap/sync.ts`, and the `.mmap` importer) reject `javascript:`/`data:`/`vbscript:`
   links at the source (`src/io/urlSafety.ts`). Verified against a real export render — no script
   executes and every node topic still renders — plus jsdom unit tests (`test/svgSanitize.test.ts`,
-  `test/urlSafety.test.ts`). The notes renderer and the XML/JSON importers were reviewed and were
-  already safe.
+  `test/urlSafety.test.ts`). The XML/JSON importers were reviewed and are safe.
+- **Stored XSS in the note renderer is fixed.** `src/noteFormat.ts` escaped `&`/`<`/`>` but not
+  quotes, so a Markdown link whose URL contained a `"` broke out of the generated `href="…"` and
+  injected a live attribute (e.g. an event handler) into the `<a>`. Notes render via
+  `dangerouslySetInnerHTML` and can arrive from an imported map, so this was a stored vector, not
+  just a self-XSS. `escapeHtml` now also escapes `"`/`'`, so no user character survives as a raw
+  quote in the generated markup; the link transform still accepts only `http(s)` URLs. Regression
+  test in `test/noteFormat.test.ts`.

@@ -26,4 +26,15 @@ describe("renderNote", () => {
     // a javascript: link is not turned into an anchor
     expect(renderNote("[x](javascript:alert(1))")).not.toContain("<a ");
   });
+
+  it("escapes quotes so a link URL can't break out of the href attribute", () => {
+    // Regression: `"` used to pass through escapeHtml, so a markdown link URL
+    // containing a quote broke out of href="…" and injected a live attribute
+    // (e.g. an event handler) — a stored XSS, since notes render via
+    // dangerouslySetInnerHTML and can arrive from an imported map.
+    const styled = renderNote('[c](https://a"style=color:red)');
+    expect(styled).not.toContain('"style=');
+    expect(styled).toContain("&quot;style=color:red");
+    expect(renderNote('[h](https://x"onmouseover=alert)')).not.toMatch(/"onmouseover/i);
+  });
 });

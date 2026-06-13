@@ -4,7 +4,16 @@
 // result to dangerouslySetInnerHTML.
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // Quotes MUST be escaped too: the link transform drops the matched URL into a
+  // double-quoted href="…", so a `"` in a markdown link would otherwise break
+  // out of the attribute and inject live markup (e.g. an event handler). This
+  // runs first on the whole note, so no user character survives as a raw quote.
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function inline(s: string): string {

@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 63,
+  "reviewedThroughChangelogBullets": 64,
   "areas": [
     "editing",
     "notes",
@@ -230,7 +230,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "layout-direction",
@@ -292,8 +292,8 @@
       "area": "library",
       "since": "2026-06-12",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "import-mmap",
@@ -374,7 +374,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-html",
@@ -392,7 +392,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-deck",
@@ -428,7 +428,7 @@
       "since": "2026-06-13",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "copy-outline",
@@ -436,8 +436,8 @@
       "area": "export",
       "since": "2026-06-13",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "presentation-mode",

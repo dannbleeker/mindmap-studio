@@ -184,6 +184,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   node images, and connector/arrow/boundary `<path>` geometry all survive, while scripts,
   inline handlers, and dangerous URL schemes are stripped. (Known gap: mind-elixir's export
   omits arrow/boundary *text* labels — their geometry exports, the labels don't.)
+- **Book — _Thinking in Maps_ grown to full feature coverage.** The two previously
+  un-booked features now have prose: **Copy outline** (clipboard, Chapter 6) and the
+  **remembered-workspace** panel persistence (Chapter 5) — `book` coverage is now 100%.
+  The Chapter 5 & 6 "Now you try" exercises gained concrete worked examples for **Fit**,
+  **PNG/SVG**, **PDF**, **Excel**, **Copy outline**, and the remembered workspace, lifting
+  `bookExample` coverage to 54%. The PDF builder's `pdfText` now also strips the
+  Misc-Math-Symbols-B block (so a toolbar glyph like `⧉` named in prose can't break the
+  WinAnsi draw); both books still build byte-deterministically.
 
 ### Changed
 

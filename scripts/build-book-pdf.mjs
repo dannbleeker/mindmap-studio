@@ -65,14 +65,23 @@ function decodeEntities(s) {
 
 // Standard fonts use WinAnsi: it covers Latin + common punctuation (em dash,
 // curly quotes, ellipsis, bullet) but not arrows or emoji. Map the few arrows
-// we might use and strip emoji/dingbats so a draw never throws.
+// we might use and strip emoji/dingbats/UI-icon glyphs so a draw never throws.
+// The stripped blocks cover emoji (1F000-1FAFF), misc symbols + dingbats
+// (2600-27BF), misc symbols & arrows (2B00-2BFF), supplemental arrows-B & misc
+// math symbols-B (2900-29FF, e.g. ⧉ used as the Copy-outline button glyph), and
+// arrows (2190-21FF). Prose may name a toolbar button by its icon (e.g. "⧉ Copy
+// outline", "🔎 All maps"); the EPUB shows the glyph, the PDF drops it and keeps
+// the words. (Box-drawing in code fences renders via codeBlock's safe path.)
 function pdfText(s) {
   return decodeEntities(s)
     .replace(/→/g, "->")
     .replace(/←/g, "<-")
     .replace(/↔/g, "<->")
     .replace(/⇒/g, "=>")
-    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}]/gu, "")
+    .replace(
+      /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2900}-\u{29FF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}]/gu,
+      "",
+    )
     .replace(/️/g, "");
 }
 

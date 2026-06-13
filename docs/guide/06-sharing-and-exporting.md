@@ -41,6 +41,15 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
 A rule of thumb: **JSON to keep it, Markdown to discuss it, PNG/SVG/HTML to show it,
 the slide deck or PowerPoint to present it, Word or PDF to send it, Excel to crunch it.**
 
+## Copy the outline
+
+Sometimes you don't want a file at all -- you want the text on your clipboard, ready to
+paste. The **⧉ Copy outline** button copies the whole map as a Markdown outline in one
+click: drop it straight into an email, a chat message, a ticket, or a document. It's the
+same structure as the Markdown export without the round trip through a saved file -- the
+fastest way to turn a map into words somewhere else. Reach for it when the map was the
+*thinking* and some other place is where the writing has to land.
+
 ## Importing
 
 The same breadth applies going in. MindMap Studio reads:
@@ -94,6 +103,15 @@ then one slide per branch, arrow keys to move, nothing installed. Export **Word*
 in your word processor -- the same map as an editable
 outline, ready to become minutes or a brief. One map, four jobs -- archived, discussed,
 presented, and written up -- and not once did your work leave your machine.
+
+Now get it out as a *picture* and as a *paste*. Export **PNG** (or **SVG** for a crisp,
+scalable version) and drop it into a slide or a chat -- notice the labels, icons, arrows and
+boundaries all render, because the image carries real text, not a screenshot. Export to
+**PDF** when it needs to print, or to **Excel** when you want to sort and count the outline
+as a spreadsheet. Finally, when you just need the words somewhere *now*, click **⧉ Copy
+outline** and paste -- no file, no download, just the map as a Markdown outline wherever your
+cursor is. Same map, every door out: a file to keep, a picture to show, a sheet to crunch, a
+paste to drop.
 
 The final chapter is about the most demanding kind of sharing: standing up and walking a
 room through a map live.

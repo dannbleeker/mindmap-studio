@@ -167,6 +167,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `deploy-pages` v5) to their node24 majors, clearing the last Node-20 deprecation warning
   (on the Deploy workflow), and dropped the no-op `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` env
   that never actually suppressed it.
+- Added a build-time guard (in the size-budget gate step) that asserts mind-elixir's core
+  CSS is in the bundle — a `me-tpc` selector check — so the "canvas renders unstyled"
+  regression can never ship silently again.
 - **Deployed to GitHub Pages** — a `deploy.yml` workflow runs the gate, builds, and
   publishes on every push to `main`, served from the custom domain
   <https://mindmap-studio.struktureretsundfornuft.dk/> (HTTPS, with a `CNAME` baked into the

@@ -56,6 +56,17 @@ Remaining items are renderer-constrained or Dann-dependent:
       — multiple live mind-elixir instances; *high effort/risk* because selection, notes,
       markers, style panels and `sync` are all written around a single `meRef`/active map.
       **Recommendation:** do (a) if wanted; defer (b) unless side-by-side comparison is needed.
+- [ ] **More layout orientations — vertical (down / up) + remember orientation.** *Today:* the
+      Layout control offers **both / right / left** only — all *horizontal* — and the choice is
+      remembered globally (`localStorage["mindmap-layout"]`, applied via `applyDirection` →
+      mind-elixir `initSide`/`initRight`/`initLeft`). The ask: also **build down** (top-down
+      org-chart tree) and **up** (bottom-up), and possibly the **radial/hub** shown in the
+      reference, with the orientation remembered (consider per-map, not just global). **Feasibility
+      (verified):** mind-elixir has **only** `initLeft`/`initRight`/`initSide` — *no* vertical or
+      radial mode — so down/up/radial are **renderer-ceiling** (need a custom SVG renderer or an
+      engine that supports vertical/org-chart layouts; tie-in with the existing renderer-ceiling
+      item). The "remember orientation" + a richer layout picker (the 3-icon control) are doable
+      now; the new *orientations themselves* are the renderer-ceiling part.
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 

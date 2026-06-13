@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-13T08:29:53.255Z",
-  "commit": "ceb7d8f",
+  "generatedAt": "2026-06-13T08:33:21.399Z",
+  "commit": "b912c7f",
   "headline": {
-    "linesTsJs": 6246,
-    "tests": 111,
+    "linesTsJs": 6265,
+    "tests": 113,
     "lineCoveragePct": 35.59,
-    "commits": 102,
+    "commits": 104,
     "ageDays": 1,
     "trackedFiles": 106,
     "featureManualPct": 100,
@@ -21,7 +21,7 @@
     {
       "category": "Unit tests",
       "files": 19,
-      "lines": 1291
+      "lines": 1310
     },
     {
       "category": "Build scripts",
@@ -56,35 +56,35 @@
       "total": 85
     },
     "branches": {
-      "pct": 88.46,
-      "covered": 276,
-      "total": 312
+      "pct": 88.81,
+      "covered": 278,
+      "total": 313
     }
   },
   "tests": {
-    "unit": 111,
+    "unit": 113,
     "e2e": 0,
-    "durationMs": 3262,
+    "durationMs": 3214,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1715
+        "ms": 1578
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 44
-      },
-      {
-        "file": "test/book.test.ts",
-        "ms": 31
+        "ms": 33
       },
       {
         "file": "test/mapStore.test.ts",
-        "ms": 27
+        "ms": 25
+      },
+      {
+        "file": "test/book.test.ts",
+        "ms": 21
       },
       {
         "file": "test/svgSanitize.test.ts",
-        "ms": 21
+        "ms": 19
       }
     ]
   },
@@ -305,21 +305,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 102,
-    "commits7d": 102,
+    "commits": 104,
+    "commits7d": 104,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 83
+        "count": 84
       },
       {
         "name": "github-actions[bot]",
-        "count": 19
+        "count": 20
       }
     ],
     "churn30d": {
-      "added": 19993,
-      "removed": 3354
+      "added": 20043,
+      "removed": 3385
     },
     "changelogEntries": 52
   }

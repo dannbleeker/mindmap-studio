@@ -53,5 +53,14 @@ Made a mess? **Ctrl+Z** undoes; **Ctrl+Y** (or **Ctrl+Shift+Z**) redoes. Undo is
 model-aware -- it reverses the actual change to the map, not just a visual tweak -- so
 you can experiment with structure freely and walk it back if a branch turns out wrong.
 
+## Now you try
+
+Start a **Blank** map and build something real to you in five minutes -- a trip, a project, a
+decision you're weighing. Name the root, then grow three or four branches with a couple of
+children each, using only **Tab** (deeper), **Enter** (same level), and typing. Delete a branch
+and **Ctrl+Z** it back, just to feel the safety net. Then close the tab and reopen it: the map
+is exactly where you left it. That loop -- Tab, Enter, type, undo, and it already saved itself
+-- is the whole foundation the rest of this book builds on.
+
 That's enough to build maps. The next chapter slows down for a moment to explain *what*
 you've been building -- the handful of ideas the rest of the app rests on.

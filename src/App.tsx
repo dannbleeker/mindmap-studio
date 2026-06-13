@@ -590,15 +590,23 @@ export function App() {
           title="Export the map"
         >
           <option value="">⬆ Export…</option>
-          <option value="json">.json (lossless)</option>
-          <option value="md">.md (Markdown)</option>
-          <option value="opml">.opml (outline)</option>
-          <option value="png">.png (image)</option>
-          <option value="svg">.svg (vector)</option>
-          <option value="html">.html (standalone)</option>
-          <option value="deck">.html (slide deck)</option>
-          <option value="pdf">.pdf (print)</option>
-          <option value="docx">.docx (Word)</option>
+          <optgroup label="Data &amp; outline">
+            <option value="json">.json (lossless)</option>
+            <option value="md">.md (Markdown)</option>
+            <option value="opml">.opml (outline)</option>
+          </optgroup>
+          <optgroup label="Image">
+            <option value="png">.png (image)</option>
+            <option value="svg">.svg (vector)</option>
+          </optgroup>
+          <optgroup label="Document">
+            <option value="html">.html (standalone)</option>
+            <option value="pdf">.pdf (print)</option>
+            <option value="docx">.docx (Word)</option>
+          </optgroup>
+          <optgroup label="Presentation">
+            <option value="deck">.html (slide deck)</option>
+          </optgroup>
         </select>
         <button
           type="button"

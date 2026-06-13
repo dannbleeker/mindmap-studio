@@ -53,5 +53,6 @@ All four "ships-with-the-product" artifacts (parity with the sibling project) ar
 3. User manual rendered to `/user-guide.html`.
 4. The book — _Thinking in Maps_ — built to EPUB + PDF, with a Rebuild-book workflow.
 
-Open follow-ups: grow the book (`book` at 96%, `bookExample` at 36% — more worked examples
-would help); un-booked features are `panel-persistence` and `copy-outline`.
+Open follow-ups: every feature is now booked (`book` 100%); `bookExample` is at 54% — the
+remaining features without a worked example in the book (mostly import/styling/markers) are
+the place to keep growing it.

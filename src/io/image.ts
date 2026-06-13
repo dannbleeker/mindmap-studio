@@ -8,6 +8,35 @@ import type { MapImage } from "../model/types";
 const MAX_STORE_PX = 800; // cap the stored bitmap so saves/exports stay small
 const MAX_DISPLAY_PX = 220; // cap the on-node display width so layout stays sane
 
+interface ImageSizing {
+  /** Stored-bitmap dimensions (downscaled when the long side exceeds MAX_STORE_PX). */
+  storeW: number;
+  storeH: number;
+  /** True when the stored bitmap was downscaled and so needs re-encoding. */
+  downscaled: boolean;
+  /** On-canvas display dimensions (width capped at MAX_DISPLAY_PX). */
+  displayW: number;
+  displayH: number;
+}
+
+// Pure scale math behind fileToMapImage — extracted so it's unit-testable without a
+// browser (the canvas/FileReader parts can't be). Aspect ratio is preserved at both
+// the store and display caps, and every dimension is floored at 1px.
+export function imageSizing(naturalW: number, naturalH: number): ImageSizing {
+  const longSide = Math.max(naturalW, naturalH) || 1;
+  const storeScale = Math.min(1, MAX_STORE_PX / longSide);
+  const storeW = Math.max(1, Math.round(naturalW * storeScale));
+  const storeH = Math.max(1, Math.round(naturalH * storeScale));
+  const displayScale = Math.min(1, MAX_DISPLAY_PX / storeW);
+  return {
+    storeW,
+    storeH,
+    downscaled: storeScale < 1,
+    displayW: Math.max(1, Math.round(storeW * displayScale)),
+    displayH: Math.max(1, Math.round(storeH * displayScale)),
+  };
+}
+
 function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -29,14 +58,14 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 export async function fileToMapImage(file: File): Promise<MapImage> {
   const original = await readAsDataUrl(file);
   const img = await loadImage(original);
-  const natural = Math.max(img.naturalWidth, img.naturalHeight) || 1;
+  const { storeW, storeH, downscaled, displayW, displayH } = imageSizing(
+    img.naturalWidth,
+    img.naturalHeight,
+  );
 
-  // Downscale the stored bitmap when it's larger than MAX_STORE_PX.
-  const storeScale = Math.min(1, MAX_STORE_PX / natural);
-  const storeW = Math.max(1, Math.round(img.naturalWidth * storeScale));
-  const storeH = Math.max(1, Math.round(img.naturalHeight * storeScale));
+  // Re-encode at the stored size only when we actually downscaled.
   let url = original;
-  if (storeScale < 1) {
+  if (downscaled) {
     const canvas = document.createElement("canvas");
     canvas.width = storeW;
     canvas.height = storeH;
@@ -47,11 +76,5 @@ export async function fileToMapImage(file: File): Promise<MapImage> {
     }
   }
 
-  // Display size: cap the width so a big image doesn't blow up the node.
-  const displayScale = Math.min(1, MAX_DISPLAY_PX / storeW);
-  return {
-    url,
-    width: Math.max(1, Math.round(storeW * displayScale)),
-    height: Math.max(1, Math.round(storeH * displayScale)),
-  };
+  return { url, width: displayW, height: displayH };
 }

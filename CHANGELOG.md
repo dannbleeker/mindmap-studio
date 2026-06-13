@@ -195,6 +195,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Hardening pass.** The PDF book builder now measures text through a `safeWidth`
+  helper (mirroring `safeDraw`), so a glyph that slips past `pdfText` can never throw at
+  the width step — the build degrades to the ASCII fallback instead of failing. The pure
+  image-scale math is extracted from `src/io/image.ts` into a unit-tested `imageSizing`
+  helper, and the shared OOXML infra (`escapeXml` + the deterministic `zipOoxml`) gains a
+  direct test. Suite now 182 tests; no behavior change (books rebuild byte-for-byte).
 - Upgraded the mind-elixir rendering core **4.6.2 → 5.12.2** (behavior-preserving —
   render, edit-capture, persistence, and export all re-verified in-browser).
   Unblocks the node-menu editing UI; the production bundle shrank slightly.

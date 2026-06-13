@@ -113,6 +113,15 @@ export async function buildPdf() {
       page.drawText(str.replace(/[^\x20-\x7E]/g, ""), opts);
     }
   };
+  // Measure with the same ASCII fallback safeDraw uses: a glyph that slipped past
+  // pdfText can never throw here, and the measured width matches what is drawn.
+  const safeWidth = (font, str, size) => {
+    try {
+      return font.widthOfTextAtSize(str, size);
+    } catch {
+      return font.widthOfTextAtSize(str.replace(/[^\x20-\x7E]/g, ""), size);
+    }
+  };
 
   const fontFor = (run) => {
     if (run.code) return F.mono;
@@ -189,7 +198,7 @@ export async function buildPdf() {
         const f = fontFor(w.run);
         const col = w.run.code ? CODE_INK : w.run.link ? ACCENT : color;
         safeDraw(S.page, w.text, { x: cx, y: PAGE.h - top - size, font: f, size, color: col });
-        cx += f.widthOfTextAtSize(w.text, size) + spaceW;
+        cx += safeWidth(f, w.text, size) + spaceW;
       }
       S.y += lineHeight;
       line = [];
@@ -202,7 +211,7 @@ export async function buildPdf() {
         continue;
       }
       const f = fontFor(w.run);
-      const ww = f.widthOfTextAtSize(w.text, size);
+      const ww = safeWidth(f, w.text, size);
       if (line.length > 0 && lineW + ww > width) drawLine();
       line.push(w);
       lineW += ww + spaceW;

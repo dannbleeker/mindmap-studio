@@ -391,8 +391,8 @@
       "area": "export",
       "since": "2026-06-13",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "export-docx",
@@ -400,8 +400,8 @@
       "area": "export",
       "since": "2026-06-13",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "presentation-mode",

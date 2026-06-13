@@ -23,10 +23,17 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
   a crisp, scalable image that survives zooming.
 - **HTML** -- a self-contained web page of the map, openable in any browser with nothing
   installed.
+- **HTML slide deck** -- the walk-through (Chapter 7) as a standalone, navigable
+  presentation in a single file: an overview slide, then one per branch, advanced with the
+  arrow keys or a click. Hand someone the file and they can present your map with nothing
+  installed.
+- **Word (`.docx`)** -- the map as an editable outline document: a title, indented bulleted
+  topics, and notes as italic lines. For when the next step lives in a word processor --
+  minutes, a brief, a hand-off to someone who doesn't use the app.
 - **PDF** (via print) -- a fixed-layout document for sending and printing.
 
 A rule of thumb: **JSON to keep it, Markdown to discuss it, PNG/SVG/HTML to show it,
-PDF to send it.**
+the slide deck to present it, Word or PDF to send it.**
 
 ## Importing
 
@@ -74,6 +81,12 @@ a **new** map and import the JSON you saved: it comes back exactly, down to the 
 arrows. You've just proved the thing that matters most about a thinking tool — your work
 isn't trapped in it. **JSON to keep it, Markdown to share it.** Make that round trip once
 and you'll trust the app with the ideas you're still figuring out.
+
+Then take the same map to an audience two more ways. Export the **slide deck** and open it
+-- you're presenting: an overview, then one slide per branch, arrow keys to move, nothing
+installed. Export **Word** and open it in your word processor -- the same map as an editable
+outline, ready to become minutes or a brief. One map, four jobs -- archived, discussed,
+presented, and written up -- and not once did your work leave your machine.
 
 The final chapter is about the most demanding kind of sharing: standing up and walking a
 room through a map live.

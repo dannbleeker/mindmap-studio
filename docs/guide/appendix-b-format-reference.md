@@ -13,6 +13,11 @@ What goes in, what comes out, and what survives the trip. For the day-to-day gui
 - **PNG** -- a raster image of the canvas, for slides and chat.
 - **SVG** -- a vector image: crisp at any zoom, ideal for high-resolution use.
 - **HTML** -- a single self-contained page, openable in any browser.
+- **HTML slide deck** -- the walk-through as a standalone, navigable presentation in one
+  self-contained file (an overview slide, then one per branch).
+- **Word (`.docx`)** -- the map as an editable outline document (title, indented bulleted
+  topics, notes as italic lines); a minimal Open-XML package that opens in Word,
+  LibreOffice, Pages, and Google Docs.
 - **PDF** -- via the browser's print path; a fixed-layout document for sending or printing.
 
 ## Import formats

@@ -102,6 +102,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   the model and persist.
 - **Self-contained HTML export** — a `.html` button exports the map as a single
   standalone HTML file with the SVG embedded; opens anywhere, offline, no deps.
+- **HTML slide-deck export** — a `.html (slide deck)` export turns the map into a
+  standalone, navigable slide presentation — the Walk-Through as a shareable file:
+  an overview slide plus one slide per branch, navigated by arrow keys / click /
+  Prev-Next buttons, with embedded styling and no dependencies. Reuses the same
+  slide model the in-app presentation renders (`src/io/deck.ts`, lazy-loaded so it
+  stays out of the entry bundle); topic text is HTML-escaped, and the nav script is
+  static, so map content has no scripting surface.
 - **Find nodes** — a header search box matches node topics _and notes_
   (case-insensitive), focuses and selects the match on the canvas, and cycles through
   multiple hits on repeated Enter (with an `n/total` counter). Matching is a pure,

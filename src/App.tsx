@@ -287,8 +287,16 @@ export function App() {
     }
   }
 
-  const { exportJson, exportMarkdown, exportOpml, exportPng, exportSvg, exportHtml, exportPdf } =
-    useMapExports(mapRef, () => liveDocRef.current);
+  const {
+    exportJson,
+    exportMarkdown,
+    exportOpml,
+    exportPng,
+    exportSvg,
+    exportHtml,
+    exportDeck,
+    exportPdf,
+  } = useMapExports(mapRef, () => liveDocRef.current);
 
   // Restore the last-opened map on startup; fall back to the sample.
   useEffect(() => {
@@ -570,6 +578,7 @@ export function App() {
               png: exportPng,
               svg: exportSvg,
               html: exportHtml,
+              deck: exportDeck,
               pdf: exportPdf,
             }[e.target.value];
             fn?.();
@@ -585,6 +594,7 @@ export function App() {
           <option value="png">.png (image)</option>
           <option value="svg">.svg (vector)</option>
           <option value="html">.html (standalone)</option>
+          <option value="deck">.html (slide deck)</option>
           <option value="pdf">.pdf (print)</option>
         </select>
         <button

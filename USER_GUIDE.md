@@ -191,7 +191,8 @@ Pick a format from the **⬆ Export…** menu:
 | `.md` | Markdown outline |
 | `.opml` | OPML outline |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
-| `.html` | A single self-contained HTML file (opens anywhere, offline) |
+| `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
+| `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline) |
 | `.pdf` | Opens your browser's print dialog → "Save as PDF" (landscape) |
 
 ---
@@ -201,6 +202,10 @@ Pick a format from the **⬆ Export…** menu:
 **▶ Present** opens a fullscreen **Walk-Through**: an overview slide, then one slide per
 branch with its nested points. Navigate with **Prev / Next**, the **arrow keys**, and **Esc**
 to exit.
+
+To share the same walk-through without the app, export it as a **slide deck** — the
+`.html (slide deck)` option in the **⬆ Export…** menu saves a standalone, navigable HTML file
+that opens in any browser, offline.
 
 ---
 

@@ -22,6 +22,7 @@ export interface MapExports {
   exportPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
+  exportDeck: () => Promise<void>;
   exportPdf: () => Promise<void>;
 }
 
@@ -67,6 +68,15 @@ export function useMapExports(
       if (!svg) return;
       const html = wrapSvgHtml(sanitizeSvg(await svg.text()), baseName());
       download(new Blob([html], { type: "text/html" }), `${baseName()}.html`);
+    },
+    // Standalone slide deck — the Walk-Through as a shareable, offline .html file.
+    // Model-backed (no SVG), lazy-loaded to keep the deck template out of the entry chunk.
+    async exportDeck() {
+      const { buildDeckHtml } = await import("./io/deck");
+      download(
+        new Blob([buildDeckHtml(getDoc())], { type: "text/html" }),
+        `${baseName()}-slides.html`,
+      );
     },
     // Print-to-PDF: render the SVG into a hidden iframe and open the browser print
     // dialog ("Save as PDF"). Dep-free and fully local; an iframe dodges popup blockers.

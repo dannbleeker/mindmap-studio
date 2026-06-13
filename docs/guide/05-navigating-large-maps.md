@@ -83,9 +83,12 @@ mentioned in a *note* -- prove to yourself that Find searches notes, not just to
 the **Outline** panel and use its filter to narrow a long map to a short list. Zoom right in
 on one node, then press **Fit** -- watch the whole map snap back into view; that's your
 "take me home". If you keep more than one map, open **🔎 All maps** and search for a term you
-know lives in a *different* one -- watch it open that map and land on the node. Then **reload
-the page**: the Outline panel is exactly where you left it, because the app remembered your
-workspace. The goal isn't to memorise the controls; it's to feel how much calmer a big map
-gets when you drive it at the right altitude instead of staring at the whole thing at once.
+know lives in a *different* one -- watch it open that map and land on the node. While you have
+two maps, add a **cross-map link**: point a node in one at the other, then click it and watch
+the app hop maps -- that's how a high-level map becomes a set of doorways into the detailed
+ones beneath it. Then **reload the page**: the Outline panel is exactly where you left it,
+because the app remembered your workspace. The goal isn't to memorise the controls; it's to
+feel how much calmer a big map gets when you drive it at the right altitude instead of staring
+at the whole thing at once.
 
 Part 3 turns outward: getting the map off your screen and in front of other people.

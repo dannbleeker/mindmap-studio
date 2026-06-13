@@ -59,7 +59,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "notes-editor",
@@ -167,7 +167,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "outline",

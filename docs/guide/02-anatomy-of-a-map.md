@@ -67,6 +67,8 @@ Open the sample *Q3 Retail Plan* map and name the parts out loud: which node is 
 which are **branches**, where's the **boundary**, where's the **relationship** arrow. Then prove
 the "one model, many views" idea to yourself -- open the **Outline** panel (Chapter 5) and watch
 the same tree appear as an indented list, or export to **Markdown** (Chapter 6) and read your map
-as plain text. Same data, three faces.
+as plain text. Same data, three faces. Now **rename a node on the canvas** and look again: the
+outline and the Markdown already show your edit, because the canvas writes straight to the one
+model every view reads from -- nothing to "save", nothing to sync.
 
 With the parts named, the rest of the book is just learning what you can do to them.

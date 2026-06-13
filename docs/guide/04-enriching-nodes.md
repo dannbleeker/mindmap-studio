@@ -71,5 +71,13 @@ and a tick for "done" -- and apply it to three or four nodes. Read the map again
 should be more scannable than before, with the depth one click away. If you reach for a
 fifth marker colour, stop -- the small vocabulary is the point.
 
+Now add a layer of meaning. Attach an **image** to one node -- a screenshot or a logo -- and
+watch it render inline. Pick three related nodes (say, the ones that represent decisions) and
+give them a shared **fill** from the Style bar so the pattern reads at a glance; bump your
+headline branch's **font** up a size so the eye starts there. Finally, open the **theme**
+gallery and switch between Light and Dark -- your content doesn't change, only its coat of
+paint, so keep whichever helps you see the map. The rule throughout: styling that *encodes*
+something earns its place; styling that merely decorates doesn't.
+
 The next chapter is about the opposite problem: when a map gets big, how do you keep
 finding your way around it?

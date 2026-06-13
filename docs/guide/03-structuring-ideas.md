@@ -74,4 +74,10 @@ Finally, find two nodes on *different* branches that depend on each other and dr
 boundary carries the grouping, and the arrow carries the one link the tree couldn't. If you
 can't find a real cross-branch link, that's a good sign -- don't invent one.
 
+Two more moves worth a try. Flip the **layout direction** to right-only and back -- same
+structure, a different shape on the page; keep whichever frames the map better. Then drag a
+branch topic *out* into open space to make it a **floating topic** -- a parking lot for an
+idea you're not ready to place -- and drag it back onto a branch to re-attach it. Structure
+isn't a cage; it's something you reshape as the thinking firms up.
+
 With structure under control, the next chapter makes individual nodes carry more.

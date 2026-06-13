@@ -192,6 +192,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `bookExample` coverage to 54%. The PDF builder's `pdfText` now also strips the
   Misc-Math-Symbols-B block (so a toolbar glyph like `⧉` named in prose can't break the
   WinAnsi draw); both books still build byte-deterministically.
+- **More book worked examples (Chapters 3, 4, 7).** The "Now you try" exercises gained
+  concrete, hands-on steps for images, per-topic styling/font, themes, layout direction,
+  floating topics, duplicate/switch maps, walk-through Present, library backup, and PWA
+  install — lifting `bookExample` coverage **54% → 78%**. Flags flipped only for features
+  the prose genuinely walks the reader through.
 
 ### Changed
 

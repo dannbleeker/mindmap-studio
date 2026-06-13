@@ -80,6 +80,13 @@ Threat undercut a Strength? Those cross-links are where a SWOT stops being four 
 starts being analysis -- draw a **relationship** arrow for each one you find. That move,
 more than the lists themselves, is the thinking.
 
+Then rehearse the room. **Duplicate** the map so you can experiment freely, switch back to
+the original from the map switcher, and hit **Present**: walk-through frames each branch in
+turn -- arrow keys to move, the room's attention following yours, one branch at a time. When
+you're done, run a **library backup** -- one file holding every map, the belt to local
+storage's braces -- and, if you haven't already, **install** the app to your desktop so it's
+one click away and runs with no network.
+
 That's the whole tool, end to end -- from a single node in Chapter 1 to a map you can
 think with, enrich, navigate, share and present. The appendices that follow are the
 reference you'll come back to.

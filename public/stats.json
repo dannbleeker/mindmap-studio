@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-06-13T13:17:41.635Z",
-  "commit": "b75dcc4",
+  "generatedAt": "2026-06-13T13:20:16.350Z",
+  "commit": "63c79f1",
   "headline": {
     "linesTsJs": 7690,
     "tests": 159,
     "lineCoveragePct": 41.98,
-    "commits": 138,
+    "commits": 140,
     "ageDays": 1,
     "trackedFiles": 115,
     "featureManualPct": 100,
-    "featureBookPct": 95.9,
-    "featureExamplePct": 34.7
+    "featureBookPct": 98,
+    "featureExamplePct": 36.7
   },
   "code": [
     {
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 13,
-      "lines": 858
+      "lines": 868
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 159,
     "e2e": 0,
-    "durationMs": 3794,
+    "durationMs": 3816,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1530
+        "ms": 1671
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 128
+        "ms": 143
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 65
-      },
-      {
-        "file": "test/docx.test.ts",
-        "ms": 49
+        "ms": 63
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 49
+        "ms": 59
+      },
+      {
+        "file": "test/docx.test.ts",
+        "ms": 35
       }
     ]
   },
@@ -216,19 +216,19 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 6544,
+    "bookWords": 6654,
     "chapters": 11,
     "appLoc": 4142,
-    "docToCodeRatio": 1.58
+    "docToCodeRatio": 1.61
   },
   "featureCoverage": {
     "total": 49,
     "manual": 49,
     "manualPct": 100,
-    "book": 47,
-    "bookPct": 95.9,
-    "bookExample": 17,
-    "bookExamplePct": 34.7,
+    "book": 48,
+    "bookPct": 98,
+    "bookExample": 18,
+    "bookExamplePct": 36.7,
     "byArea": {
       "editing": {
         "total": 5,
@@ -263,7 +263,7 @@
       "navigation": {
         "total": 8,
         "manual": 8,
-        "book": 7
+        "book": 8
       },
       "library": {
         "total": 6,
@@ -295,11 +295,6 @@
       "noManual": [],
       "noBook": [
         {
-          "id": "library-search",
-          "name": "Library-wide search (all maps)",
-          "since": "2026-06-13"
-        },
-        {
           "id": "panel-persistence",
           "name": "Remembered open-panel workspace",
           "since": "2026-06-12"
@@ -310,21 +305,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 138,
-    "commits7d": 138,
+    "commits": 140,
+    "commits7d": 140,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 101
+        "count": 102
       },
       {
         "name": "github-actions[bot]",
-        "count": 37
+        "count": 38
       }
     ],
     "churn30d": {
-      "added": 22496,
-      "removed": 4250
+      "added": 22554,
+      "removed": 4298
     },
     "changelogEntries": 60
   }

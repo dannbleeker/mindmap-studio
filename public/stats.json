@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-06-13T13:20:16.350Z",
-  "commit": "63c79f1",
+  "generatedAt": "2026-06-13T13:27:40.811Z",
+  "commit": "54c0e17",
   "headline": {
-    "linesTsJs": 7690,
+    "linesTsJs": 7709,
     "tests": 159,
-    "lineCoveragePct": 41.98,
-    "commits": 140,
+    "lineCoveragePct": 41.77,
+    "commits": 142,
     "ageDays": 1,
     "trackedFiles": 115,
     "featureManualPct": 100,
-    "featureBookPct": 98,
-    "featureExamplePct": 36.7
+    "featureBookPct": 96,
+    "featureExamplePct": 36
   },
   "code": [
     {
       "category": "App code (src)",
       "files": 34,
-      "lines": 4142
+      "lines": 4161
     },
     {
       "category": "Unit tests",
@@ -41,14 +41,14 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 41.98,
+      "pct": 41.77,
       "covered": 1226,
-      "total": 2920
+      "total": 2935
     },
     "statements": {
-      "pct": 41.98,
+      "pct": 41.77,
       "covered": 1226,
-      "total": 2920
+      "total": 2935
     },
     "functions": {
       "pct": 93.54,
@@ -64,26 +64,26 @@
   "tests": {
     "unit": 159,
     "e2e": 0,
-    "durationMs": 3816,
+    "durationMs": 3688,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1671
+        "ms": 1551
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 143
+        "ms": 141
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 63
+        "ms": 64
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 59
+        "ms": 60
       },
       {
-        "file": "test/docx.test.ts",
+        "file": "test/book.test.ts",
         "ms": 35
       }
     ]
@@ -103,7 +103,7 @@
     "biggestFiles": [
       {
         "name": "App.tsx",
-        "lines": 952
+        "lines": 971
       },
       {
         "name": "mindmap/MindMap.tsx",
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 50
+        "commits": 51
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -173,7 +173,7 @@
       {
         "file": "App.tsx",
         "pct": 0,
-        "commits": 50
+        "commits": 51
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -208,27 +208,27 @@
     "nonNull": 2
   },
   "bundle": {
-    "jsGzipKb": 136.7,
+    "jsGzipKb": 136.8,
     "cssGzipKb": 3.4,
-    "totalGzipKb": 140,
-    "entryGzipKb": 105.9,
+    "totalGzipKb": 140.1,
+    "entryGzipKb": 106,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 6654,
     "chapters": 11,
-    "appLoc": 4142,
-    "docToCodeRatio": 1.61
+    "appLoc": 4161,
+    "docToCodeRatio": 1.6
   },
   "featureCoverage": {
-    "total": 49,
-    "manual": 49,
+    "total": 50,
+    "manual": 50,
     "manualPct": 100,
     "book": 48,
-    "bookPct": 98,
+    "bookPct": 96,
     "bookExample": 18,
-    "bookExamplePct": 36.7,
+    "bookExamplePct": 36,
     "byArea": {
       "editing": {
         "total": 5,
@@ -276,8 +276,8 @@
         "book": 5
       },
       "export": {
-        "total": 10,
-        "manual": 10,
+        "total": 11,
+        "manual": 11,
         "book": 10
       },
       "presentation": {
@@ -295,6 +295,11 @@
       "noManual": [],
       "noBook": [
         {
+          "id": "copy-outline",
+          "name": "Copy outline (Markdown) to clipboard",
+          "since": "2026-06-13"
+        },
+        {
           "id": "panel-persistence",
           "name": "Remembered open-panel workspace",
           "since": "2026-06-12"
@@ -305,22 +310,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 140,
-    "commits7d": 140,
+    "commits": 142,
+    "commits7d": 142,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 102
+        "count": 103
       },
       {
         "name": "github-actions[bot]",
-        "count": 38
+        "count": 39
       }
     ],
     "churn30d": {
-      "added": 22554,
-      "removed": 4298
+      "added": 22620,
+      "removed": 4334
     },
-    "changelogEntries": 60
+    "changelogEntries": 61
   }
 }

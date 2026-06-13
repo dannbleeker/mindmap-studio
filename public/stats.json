@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-06-13T13:30:26.167Z",
-  "commit": "65c7e80",
+  "generatedAt": "2026-06-13T13:33:39.819Z",
+  "commit": "d45a6c8",
   "headline": {
     "linesTsJs": 7709,
     "tests": 159,
     "lineCoveragePct": 41.77,
-    "commits": 144,
+    "commits": 146,
     "ageDays": 1,
     "trackedFiles": 115,
     "featureManualPct": 100,
     "featureBookPct": 96,
-    "featureExamplePct": 36
+    "featureExamplePct": 42
   },
   "code": [
     {
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 13,
-      "lines": 868
+      "lines": 885
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 159,
     "e2e": 0,
-    "durationMs": 3553,
+    "durationMs": 3793,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1618
+        "ms": 1557
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 184
+        "ms": 140
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 72
-      },
-      {
-        "file": "test/mmap.test.ts",
-        "ms": 47
+        "ms": 66
       },
       {
         "file": "test/docx.test.ts",
-        "ms": 46
+        "ms": 55
+      },
+      {
+        "file": "test/mmap.test.ts",
+        "ms": 52
       }
     ]
   },
@@ -216,10 +216,10 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 6654,
+    "bookWords": 6832,
     "chapters": 11,
     "appLoc": 4161,
-    "docToCodeRatio": 1.6
+    "docToCodeRatio": 1.64
   },
   "featureCoverage": {
     "total": 50,
@@ -227,8 +227,8 @@
     "manualPct": 100,
     "book": 48,
     "bookPct": 96,
-    "bookExample": 18,
-    "bookExamplePct": 36,
+    "bookExample": 21,
+    "bookExamplePct": 42,
     "byArea": {
       "editing": {
         "total": 5,
@@ -310,21 +310,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 144,
-    "commits7d": 144,
+    "commits": 146,
+    "commits7d": 146,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 104
+        "count": 105
       },
       {
         "name": "github-actions[bot]",
-        "count": 40
+        "count": 41
       }
     ],
     "churn30d": {
-      "added": 22687,
-      "removed": 4389
+      "added": 22723,
+      "removed": 4408
     },
     "changelogEntries": 61
   }

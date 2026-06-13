@@ -28,6 +28,21 @@ render everywhere, not only inline in a browser). See `CHANGELOG.md`.
 
 Remaining items are renderer-constrained or Dann-dependent:
 
+- [ ] **BUG: boundaries / the ⬚ Group button don't work** (Dann, 2026-06-13). Shipped in
+      `d178141` claiming it worked, but only the *data* round-trip was verified (`createSummary`
+      → captured → persisted via `window.__me`, 0→1); the **live canvas render was never
+      visually confirmed** (the render eval kept timing out, and I shipped on "shared render
+      path" reasoning — a violation of the visual-verify rule). The real user-facing behaviour
+      is broken. **Investigate (reproduce visually first):** does clicking **⬚ Group** on a
+      selected node draw a correct, visible boundary on the canvas? Suspects: `createSummary`
+      on a *single* selected node brackets the wrong range or renders invisibly; the toolbar
+      click deselects the canvas node before `groupBranch` re-selects; `selectNode` sets
+      `currentNode` but not the `currentNodes` range `createSummary` needs; or the new summary
+      isn't re-rendered after capture. Note the sample map's imported "Digital" boundary *does*
+      render, so the render path itself works for imported summaries — the gap is the
+      create-from-button path. Fix root cause; until then the live button is a broken control
+      (consider disabling it). Add a permanent check (real-render screenshot or DOM assertion
+      that a bracket element appears).
 - [ ] **Arrow / boundary text labels are dropped from image & document exports.** The
       geometry exports fine (the relationship arrow curve and the boundary bracket are
       `<path>`s that survive), but mind-elixir's `exportSvg` omits their *text* labels

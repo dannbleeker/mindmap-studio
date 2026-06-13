@@ -197,6 +197,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   into one **⬆ Export…** menu to cut the clutter (all formats unchanged).
 - The **⬆ Export…** menu is now grouped into labelled sections (Data & outline, Image,
   Document, Presentation) so the nine export formats stay scannable.
+- In-map **Find** now searches floating topics too, not just the central tree, matching the
+  newly-editable floating branch (`findDocMatches` in `src/search.ts`).
 - Upgraded the build toolchain to **Vite 8** (6.4.3 → 8.0.16) with `@vitejs/plugin-react`
   6, matching TP Studio. Behavior-preserving — full gate green and the app re-verified
   in-browser (render, search, exports, no console errors); the production bundle even

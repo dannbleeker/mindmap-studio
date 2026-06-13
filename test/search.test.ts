@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MapNode, MindMapDoc } from "../src/model/types";
-import { findMatches, replaceInTopic, searchLibrary } from "../src/search";
+import { findDocMatches, findMatches, replaceInTopic, searchLibrary } from "../src/search";
 
 const root: MapNode = {
   id: "r",
@@ -30,6 +30,25 @@ describe("findMatches", () => {
 
   it("returns an empty list when nothing matches", () => {
     expect(findMatches(root, "xyz")).toEqual([]);
+  });
+});
+
+describe("findDocMatches", () => {
+  it("searches the central tree and floating topics together", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root,
+      floatingTopics: [{ id: "f1", topic: "market legend", children: [] }],
+    };
+    expect(findDocMatches(doc, "market")).toEqual(["a", "a1", "f1"]);
+  });
+
+  it("works with no floating topics", () => {
+    expect(findDocMatches({ schemaVersion: 1, id: "d", title: "T", root }, "pipeline")).toEqual([
+      "b",
+    ]);
   });
 });
 

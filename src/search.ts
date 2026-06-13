@@ -19,6 +19,12 @@ export function findMatches(root: MapNode, query: string): string[] {
   return ids;
 }
 
+// Find matches across a whole map — the central tree AND floating topics — so in-map Find
+// covers the editable floating branch too. Returns node ids in depth-first order.
+export function findDocMatches(doc: MindMapDoc, query: string): string[] {
+  return [doc.root, ...(doc.floatingTopics ?? [])].flatMap((root) => findMatches(root, query));
+}
+
 /** A library-wide search hit: which map, which node, and the node's topic for display. */
 export interface LibraryHit {
   mapId: string;

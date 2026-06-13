@@ -1,7 +1,7 @@
 import { type FormEvent, type RefObject, useRef, useState } from "react";
 import type { MindMapHandle } from "./mindmap/MindMap";
 import type { MindMapDoc } from "./model/types";
-import { findMatches } from "./search";
+import { findDocMatches } from "./search";
 
 // Header "Find" behaviour: match nodes by topic/note, focus each on the canvas,
 // and cycle through hits on repeated Enter. Kept out of App as a self-contained
@@ -14,7 +14,7 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
 
   function runSearch(event: FormEvent) {
     event.preventDefault();
-    const matches = findMatches(getDoc().root, query);
+    const matches = findDocMatches(getDoc(), query);
     if (matches.length === 0) {
       setMatchInfo(query.trim() ? "no matches" : "");
       return;

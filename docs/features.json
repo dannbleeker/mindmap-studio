@@ -211,8 +211,8 @@
       "area": "navigation",
       "since": "2026-06-13",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "collapse-expand",

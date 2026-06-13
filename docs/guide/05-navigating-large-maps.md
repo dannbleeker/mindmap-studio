@@ -51,6 +51,14 @@ them: a node in your *Strategy* map can link to your *Q3 Plan* map, so clicking 
 the other map. This is how you build a small atlas instead of one unreadable continent --
 a high-level map whose nodes are doorways into the detailed maps beneath them.
 
+## Search every map
+
+Find searches the map you're in. Once your library grows into an atlas, **🔎 All maps**
+searches *all* of them at once -- every topic and note, floating topics included -- and
+picking a result opens that map and lands on the node. It's the companion to cross-map
+links: links are the doorways you placed on purpose, library search is for when you can't
+remember which map a thing is in.
+
 ## A working rhythm for big maps
 
 Put together, the loop looks like this: **collapse all** to see the shape, open the
@@ -64,8 +72,10 @@ map feeling as manageable as a thirty-node one.
 Find (or build) a map big enough that it doesn't fit on screen. **Collapse all**, then open
 just one branch and talk yourself through it. Press **/** and jump to a node you only
 mentioned in a *note* -- prove to yourself that Find searches notes, not just topics. Open
-the **Outline** panel and use its filter to narrow a long map to a short list. The goal
-isn't to memorise the controls; it's to feel how much calmer a big map gets when you drive
-it at the right altitude instead of staring at the whole thing at once.
+the **Outline** panel and use its filter to narrow a long map to a short list. Finally, if
+you keep more than one map, open **🔎 All maps** and search for a term you know lives in a
+*different* one -- watch it open that map and land on the node. The goal isn't to memorise
+the controls; it's to feel how much calmer a big map gets when you drive it at the right
+altitude instead of staring at the whole thing at once.
 
 Part 3 turns outward: getting the map off your screen and in front of other people.

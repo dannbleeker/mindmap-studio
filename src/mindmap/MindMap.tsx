@@ -1,6 +1,11 @@
 import nodeMenu from "@mind-elixir/node-menu";
 import "@mind-elixir/node-menu/dist/style.css";
 import MindElixir, { type MindElixirInstance } from "mind-elixir";
+// mind-elixir v5 ships its core stylesheet as a separate file (v4 injected it via JS,
+// so the v4->v5 upgrade silently dropped it). Without it the node wrappers lose
+// `position:absolute` and the whole map collapses into inline text. A direct CSS import
+// so it's always bundled in dev and production.
+import "mind-elixir/style.css";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { MapImage, MindMapDoc, NodeStyle } from "../model/types";

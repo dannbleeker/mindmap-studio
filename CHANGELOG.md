@@ -236,6 +236,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Canvas styling restored — the map no longer collapses into inline text.** The mind-elixir
+  v4→v5 upgrade moved the core stylesheet from JS-injected to a separate file, but the import
+  was never added — so in production the node wrappers lost their `position:absolute` and the
+  whole map flowed as one run of inline topics (the toolbar, which has its own CSS, still looked
+  fine, which masked it). `src/mindmap/MindMap.tsx` now imports `mind-elixir/style.css`
+  directly, so the stylesheet is always bundled (entry CSS ~1.8 kB → ~12.6 kB). Caught by
+  headless-rendering the live site, fixed, and re-verified the same way.
 - **No first-frame layout flash on load.** The canvas is hidden (`opacity:0`, kept measurable
   so the fit still works) until mind-elixir has laid out and fit the map, then revealed — so a
   fresh load or map switch no longer flashes the un-positioned nodes as one line before the

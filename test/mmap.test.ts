@@ -77,6 +77,25 @@ describe("parseMmap", () => {
     expect(warnings.some((w) => /task info/i.test(w))).toBe(true);
   });
 
+  it("generates an id for a topic that has no OId", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic><ap:Text PlainText="No id here" /></ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.topic).toBe("No id here");
+    expect(doc.root.id).toBeTruthy(); // a generated id, not undefined
+  });
+
+  it("reads a root <Topic> placed directly under <Map> (no <OneTopic>)", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:Topic OId="1"><ap:Text PlainText="Direct root" /></ap:Topic>
+</ap:Map>`),
+    );
+    expect(doc.root.topic).toBe("Direct root");
+  });
+
   it("imports MindManager stock icons as node.icons", () => {
     const { doc } = parseMmap(
       mmapOf(`${MAP_OPEN}

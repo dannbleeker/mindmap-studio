@@ -224,6 +224,40 @@ describe("parseMmap", () => {
     expect(warnings.some((w) => /outside the central hierarchy/.test(w))).toBe(true);
   });
 
+  it("throws when Document.xml parses but has no <Map> root element", () => {
+    const noMap = `<?xml version="1.0"?><ap:Document xmlns:ap="http://schemas.mindjet.com/MindManager/Application/2003" />`;
+    expect(() => parseMmap(mmapOf(noMap))).toThrow(/no <Map> root/);
+  });
+
+  it("imports a relationship's label when present", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:SubTopics>
+      <ap:Topic OId="2"><ap:Text PlainText="A" /></ap:Topic>
+      <ap:Topic OId="3"><ap:Text PlainText="B" /></ap:Topic>
+    </ap:SubTopics>
+  </ap:Topic></ap:OneTopic>
+  <ap:Relationships><ap:Relationship>
+    <ap:Text PlainText="depends on" />
+    <ap:ConnectionGroup><ap:Connection><ap:ObjectReference OIdRef="2" /></ap:Connection></ap:ConnectionGroup>
+    <ap:ConnectionGroup><ap:Connection><ap:ObjectReference OIdRef="3" /></ap:Connection></ap:ConnectionGroup>
+  </ap:Relationship></ap:Relationships>
+</ap:Map>`),
+    );
+    expect(doc.links).toEqual([{ id: "r1", from: "2", to: "3", label: "depends on" }]);
+  });
+
+  it("defaults the map title when the root topic has no text", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1" /></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.title).toBe("Imported map");
+    expect(doc.root.topic).toBe("");
+  });
+
   // One realistic map exercising every feature at once — the rich features are
   // each covered in isolation above, but Dann's real sample used none of them, so
   // this guards that they all decode correctly together.

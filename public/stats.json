@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-06-13T10:47:20.503Z",
-  "commit": "e91d711",
+  "generatedAt": "2026-06-13T10:53:02.512Z",
+  "commit": "a17e69e",
   "headline": {
     "linesTsJs": 6823,
     "tests": 130,
     "lineCoveragePct": 39.68,
-    "commits": 114,
+    "commits": 116,
     "ageDays": 1,
     "trackedFiles": 110,
     "featureManualPct": 100,
-    "featureBookPct": 93.5,
-    "featureExamplePct": 30.4
+    "featureBookPct": 97.8,
+    "featureExamplePct": 34.8
   },
   "code": [
     {
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 13,
-      "lines": 825
+      "lines": 843
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 130,
     "e2e": 0,
-    "durationMs": 3626,
+    "durationMs": 2661,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1700
+        "ms": 1183
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 50
+        "ms": 42
       },
       {
         "file": "test/docx.test.ts",
-        "ms": 45
-      },
-      {
-        "file": "test/mapStore.test.ts",
-        "ms": 30
+        "ms": 35
       },
       {
         "file": "test/book.test.ts",
         "ms": 25
+      },
+      {
+        "file": "test/mapStore.test.ts",
+        "ms": 17
       }
     ]
   },
@@ -216,19 +216,19 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 6108,
+    "bookWords": 6340,
     "chapters": 11,
     "appLoc": 3624,
-    "docToCodeRatio": 1.69
+    "docToCodeRatio": 1.75
   },
   "featureCoverage": {
     "total": 46,
     "manual": 46,
     "manualPct": 100,
-    "book": 43,
-    "bookPct": 93.5,
-    "bookExample": 14,
-    "bookExamplePct": 30.4,
+    "book": 45,
+    "bookPct": 97.8,
+    "bookExample": 16,
+    "bookExamplePct": 34.8,
     "byArea": {
       "editing": {
         "total": 5,
@@ -278,7 +278,7 @@
       "export": {
         "total": 8,
         "manual": 8,
-        "book": 6
+        "book": 8
       },
       "presentation": {
         "total": 1,
@@ -295,16 +295,6 @@
       "noManual": [],
       "noBook": [
         {
-          "id": "export-deck",
-          "name": "Export standalone HTML slide deck",
-          "since": "2026-06-13"
-        },
-        {
-          "id": "export-docx",
-          "name": "Export Word .docx outline",
-          "since": "2026-06-13"
-        },
-        {
           "id": "panel-persistence",
           "name": "Remembered open-panel workspace",
           "since": "2026-06-12"
@@ -315,21 +305,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 114,
-    "commits7d": 114,
+    "commits": 116,
+    "commits7d": 116,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 89
+        "count": 90
       },
       {
         "name": "github-actions[bot]",
-        "count": 25
+        "count": 26
       }
     ],
     "churn30d": {
-      "added": 20915,
-      "removed": 3640
+      "added": 20968,
+      "removed": 3675
     },
     "changelogEntries": 55
   }

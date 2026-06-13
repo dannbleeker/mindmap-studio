@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-13T16:55:25.208Z",
-  "commit": "867598a",
+  "generatedAt": "2026-06-13T17:02:32.281Z",
+  "commit": "0b88a1d",
   "headline": {
-    "linesTsJs": 8186,
-    "tests": 190,
+    "linesTsJs": 8223,
+    "tests": 195,
     "lineCoveragePct": 42.92,
-    "commits": 158,
+    "commits": 160,
     "ageDays": 1,
     "trackedFiles": 120,
     "featureManualPct": 100,
@@ -21,7 +21,7 @@
     {
       "category": "Unit tests",
       "files": 27,
-      "lines": 2157
+      "lines": 2194
     },
     {
       "category": "Build scripts",
@@ -56,35 +56,35 @@
       "total": 130
     },
     "branches": {
-      "pct": 91.86,
-      "covered": 429,
-      "total": 467
+      "pct": 93.4,
+      "covered": 439,
+      "total": 470
     }
   },
   "tests": {
-    "unit": 190,
+    "unit": 195,
     "e2e": 0,
-    "durationMs": 5580,
+    "durationMs": 4793,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2038
+        "ms": 1729
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 164
-      },
-      {
-        "file": "test/docx.test.ts",
-        "ms": 87
-      },
-      {
-        "file": "test/svgText.test.ts",
-        "ms": 77
+        "ms": 159
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 67
+        "ms": 94
+      },
+      {
+        "file": "test/svgText.test.ts",
+        "ms": 76
+      },
+      {
+        "file": "test/docx.test.ts",
+        "ms": 55
       }
     ]
   },
@@ -299,21 +299,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 158,
-    "commits7d": 158,
+    "commits": 160,
+    "commits7d": 160,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 111
+        "count": 112
       },
       {
         "name": "github-actions[bot]",
-        "count": 47
+        "count": 48
       }
     ],
     "churn30d": {
-      "added": 23580,
-      "removed": 4735
+      "added": 23643,
+      "removed": 4761
     },
     "changelogEntries": 65
   }

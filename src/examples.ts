@@ -1,0 +1,468 @@
+import type { MapNode, MindMapDoc } from "./model/types";
+
+// Pre-built example maps for the "Examples" group in the New menu. Unlike the
+// (empty) templates, these are complete, concrete maps that show the tool off
+// across domains and features — somewhere for a new user to land and explore.
+// Each is plain canonical-model data, so they cost ~nothing at runtime and
+// round-trip like any other map. Markers are emoji strings (see sampleMap.ts).
+
+const leaf = (id: string, topic: string, extra: Partial<MapNode> = {}): MapNode => ({
+  id,
+  topic,
+  children: [],
+  ...extra,
+});
+
+const node = (
+  id: string,
+  topic: string,
+  children: MapNode[],
+  extra: Partial<MapNode> = {},
+): MapNode => ({ id, topic, children, ...extra });
+
+function doc(title: string, root: MapNode, extra: Partial<MindMapDoc> = {}): MindMapDoc {
+  return {
+    schemaVersion: 1,
+    id: crypto.randomUUID(),
+    title,
+    root,
+    meta: { source: "example" },
+    ...extra,
+  };
+}
+
+// A tiny Japan-flag PNG (42×28, ~190 bytes) for the trip example's root node —
+// the one image in the gallery, kept small on purpose.
+const JAPAN_FLAG =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAcCAIAAACYgrq8AAAAhUlEQVR42u3VwQ2AIAwF0EKYpAO4hHO7hPd2Fb14MCiG/qA92N4wkVcw/SYRIb8qRMTMLraqZnKt4P/LF/jNJU3n5byt352+sm+fvMW3JKCDPMrGOsgDbaCDmPvg+6onW0z5Yz798+7W7EMuv2UAuQt++6uEZT7+y8G8GLzggz8GT1W9+B1aZSWF2iNgtgAAAABJRU5ErkJggg==";
+
+// 1 — Product launch plan: boundaries (go-live), relationships (dependencies), status markers.
+const launch = (): MindMapDoc =>
+  doc(
+    "Launch: Acme App v2",
+    node(
+      "root",
+      "Launch: Acme App v2",
+      [
+        node("prod", "Product", [
+          leaf("p1", "Feature freeze", { icons: ["✅"] }),
+          leaf("p2", "Public beta", {
+            icons: ["⏳"],
+            note: "2-week beta with 50 design partners.",
+          }),
+          leaf("p3", "Bug bash"),
+        ]),
+        node("mkt", "Marketing", [
+          leaf("k1", "Landing page"),
+          leaf("k2", "Launch email"),
+          leaf("k3", "Press kit"),
+        ]),
+        node("sal", "Sales", [
+          leaf("a1", "Enablement deck"),
+          leaf("a2", "Pricing page", { icons: ["🎯"] }),
+        ]),
+        node("sup", "Support", [
+          leaf("u1", "Help docs"),
+          leaf("u2", "Incident drill", { icons: ["⏳"] }),
+        ]),
+        node("week", "Go-live week", [
+          leaf("w1", "T-7 announce"),
+          leaf("w2", "T-0 ship it", { icons: ["❗"] }),
+          leaf("w3", "T+7 retro"),
+        ]),
+      ],
+      { note: "Cross-functional launch. Markers: ✅ done · ⏳ in progress · 🚩 risk · 🎯 goal." },
+    ),
+    {
+      boundaries: [{ id: "b1", nodeIds: ["week", "w1", "w2", "w3"], label: "Go-live week" }],
+      links: [
+        { id: "r1", from: "p2", to: "u2", label: "readiness" },
+        { id: "r2", from: "a2", to: "k2", label: "GTM" },
+      ],
+    },
+  );
+
+// 2 — Meeting notes (filled): action markers, a parking-lot floating topic, notes.
+const meeting = (): MindMapDoc =>
+  doc(
+    "Sprint planning — Mar 14",
+    node(
+      "root",
+      "Sprint planning — Mar 14",
+      [
+        node("ag", "Agenda", [
+          leaf("ag1", "Review last sprint"),
+          leaf("ag2", "Capacity check"),
+          leaf("ag3", "Commit"),
+        ]),
+        node("dec", "Decisions", [
+          leaf("d1", "Cut search scope this sprint", { icons: ["✅"] }),
+          leaf("d2", "Defer dark mode to next"),
+        ]),
+        node("act", "Action items", [
+          leaf("c1", "Spike on caching — Sam", { icons: ["⏳"] }),
+          leaf("c2", "Update the board — Lee"),
+        ]),
+        node("risk", "Risks", [leaf("rk1", "Two people on holiday", { icons: ["🚩"] })]),
+      ],
+      { note: "Attendees: whole team. 60 min, timeboxed." },
+    ),
+    {
+      floatingTopics: [
+        node("pl", "Parking lot", [
+          leaf("pl1", "Revisit notifications design"),
+          leaf("pl2", "Tech-debt week in Q3?"),
+        ]),
+      ],
+    },
+  );
+
+// 3 — Decision log: rationale notes, a relationship, status markers.
+const decision = (): MindMapDoc =>
+  doc(
+    "Decision: choose a CI provider",
+    node(
+      "root",
+      "Decision: choose a CI provider",
+      [
+        node("ctx", "Context", [
+          leaf("x1", "Current CI is slow and flaky", {
+            note: "~25 min builds, ~1 in 5 fails for no reason.",
+          }),
+        ]),
+        node("opt", "Options", [
+          leaf("o1", "GitHub Actions", { icons: ["✅"] }),
+          leaf("o2", "CircleCI"),
+          leaf("o3", "Self-hosted runners"),
+        ]),
+        node("crit", "Criteria", [
+          leaf("cr1", "Speed", { icons: ["🎯"] }),
+          leaf("cr2", "Cost"),
+          leaf("cr3", "Maintenance"),
+        ]),
+        node("dec", "Decision", [
+          leaf("dc1", "GitHub Actions", {
+            note: "Cheapest at our scale, no infra to babysit, good caching. Revisit if minutes blow up.",
+          }),
+        ]),
+      ],
+      { note: "Status: decided · Owner: Alex · Date: Mar 2026." },
+    ),
+    { links: [{ id: "r1", from: "cr3", to: "o1", label: "wins on" }] },
+  );
+
+// 4 — Quarterly OKRs: hierarchy, on-track / at-risk markers, per-objective styling.
+const okrs = (): MindMapDoc =>
+  doc(
+    "Q3 OKRs — Growth team",
+    node("root", "Q3 OKRs — Growth team", [
+      node(
+        "o1",
+        "Grow activation",
+        [
+          leaf("k11", "Signup→active 30% → 45%", { icons: ["⏳"] }),
+          leaf("k12", "Onboarding NPS > 40", { icons: ["✅"] }),
+          leaf("k13", "Ship new welcome flow"),
+        ],
+        { icons: ["🎯"], style: { fontWeight: "700", background: "#eef" } },
+      ),
+      node(
+        "o2",
+        "Reduce churn",
+        [
+          leaf("k21", "Monthly churn 5% → 3.5%", { icons: ["🚩"], note: "At risk — behind plan." }),
+          leaf("k22", "Win-back campaign live", { icons: ["⏳"] }),
+        ],
+        { icons: ["🎯"], style: { fontWeight: "700", background: "#eef" } },
+      ),
+    ]),
+  );
+
+// 5 — Team retrospective: fixed frame, vote markers, a relationship (action addresses a problem).
+const retro = (): MindMapDoc =>
+  doc(
+    "Sprint 23 retro",
+    node("root", "Sprint 23 retro", [
+      node("start", "Start", [leaf("st1", "Pairing on the hard tickets", { icons: ["⭐"] })]),
+      node("stop", "Stop", [leaf("sp1", "Scope changes mid-sprint", { icons: ["🚩"] })]),
+      node("cont", "Continue", [leaf("co1", "Async daily standup", { icons: ["⭐"] })]),
+      node("act", "Actions", [leaf("ac1", "Freeze scope after day 2", { icons: ["✅"] })]),
+    ]),
+    { links: [{ id: "r1", from: "sp1", to: "ac1", label: "addresses" }] },
+  );
+
+// 6 — SWOT worked: the analysis lives in the cross-quadrant relationships, not the lists.
+const swot = (): MindMapDoc =>
+  doc(
+    "SWOT: launch a paid tier",
+    node(
+      "root",
+      "SWOT: launch a paid tier",
+      [
+        node("s", "Strengths", [leaf("s1", "Loyal free users"), leaf("s2", "Low infra cost")]),
+        node("w", "Weaknesses", [
+          leaf("w1", "No billing system", { icons: ["🚩"] }),
+          leaf("w2", "Small team"),
+        ]),
+        node("o", "Opportunities", [
+          leaf("o1", "A competitor just raised prices"),
+          leaf("o2", "Inbound enterprise interest"),
+        ]),
+        node("t", "Threats", [
+          leaf("t1", "Cannibalising the free tier"),
+          leaf("t2", "Mispricing drives churn"),
+        ]),
+      ],
+      { note: "The analysis is in the arrows across the quadrants, not the four lists." },
+    ),
+    {
+      links: [
+        { id: "r1", from: "o1", to: "s1", label: "leverage" },
+        { id: "r2", from: "t1", to: "w1", label: "mitigate" },
+        { id: "r3", from: "o2", to: "w2", label: "blocked by" },
+      ],
+    },
+  );
+
+// 7 — Personal knowledge map: deep nesting, prose notes, a hyperlink.
+const pkm = (): MindMapDoc =>
+  doc(
+    "What I know about coffee",
+    node("root", "What I know about coffee", [
+      node("beans", "Beans", [
+        node("ar", "Arabica", [leaf("ar1", "Ethiopia"), leaf("ar2", "Colombia")], {
+          note: "Sweeter, more acidic; most specialty coffee.",
+        }),
+        leaf("ro", "Robusta", { note: "Bitter, more caffeine; espresso blends." }),
+      ]),
+      node("brew", "Brewing", [
+        node("po", "Pour-over", [leaf("po1", "1:16 ratio"), leaf("po2", "Medium grind")], {
+          hyperlink: "https://example.com/pour-over-guide",
+        }),
+        node("es", "Espresso", [leaf("es1", "9 bar"), leaf("es2", "Fine grind")]),
+        leaf("fp", "French press"),
+      ]),
+      node("gear", "Gear", [leaf("g1", "Burr grinder", { icons: ["⭐"] }), leaf("g2", "Scale")]),
+    ]),
+  );
+
+// 8 — Study / revision map: a confidence-marker vocabulary, notes.
+const study = (): MindMapDoc =>
+  doc(
+    "GCSE Biology — Cells",
+    node(
+      "root",
+      "GCSE Biology — Cells",
+      [
+        node("types", "Cell types", [
+          leaf("ty1", "Prokaryotic", { icons: ["✅"] }),
+          leaf("ty2", "Eukaryotic", { icons: ["⏳"] }),
+        ]),
+        node("org", "Organelles", [
+          leaf("or1", "Nucleus", { icons: ["✅"] }),
+          leaf("or2", "Mitochondria", { icons: ["⏳"], note: "Site of aerobic respiration." }),
+          leaf("or3", "Ribosomes", { icons: ["❓"] }),
+          leaf("or4", "Chloroplast", { icons: ["❓"] }),
+        ]),
+        node("trans", "Transport", [
+          leaf("tr1", "Diffusion", { icons: ["✅"] }),
+          leaf("tr2", "Osmosis", { icons: ["❓"], note: "Water, high → low concentration." }),
+          leaf("tr3", "Active transport", { icons: ["❓"] }),
+        ]),
+      ],
+      { note: "Confidence markers: ✅ solid · ⏳ revising · ❓ shaky — revise the ❓ first." },
+    ),
+  );
+
+// 9 — Trip plan: legs as a boundary, notes, and the gallery's one image.
+const trip = (): MindMapDoc =>
+  doc(
+    "Japan trip — 2 weeks",
+    node(
+      "root",
+      "Japan trip — 2 weeks",
+      [
+        node("before", "Before you go", [
+          leaf("bf1", "Flights", { icons: ["✅"] }),
+          leaf("bf2", "JR Pass", { icons: ["⏳"] }),
+          leaf("bf3", "eSIM"),
+        ]),
+        node("tokyo", "Tokyo · 5 days", [
+          leaf("tk1", "Shibuya & Shinjuku"),
+          leaf("tk2", "Asakusa"),
+          leaf("tk3", "Day trip: Hakone", { note: "Ryokan + onsen, book early." }),
+        ]),
+        node("kyoto", "Kyoto · 4 days", [
+          leaf("ky1", "Fushimi Inari", { icons: ["⭐"] }),
+          leaf("ky2", "Arashiyama"),
+          leaf("ky3", "Gion"),
+        ]),
+        node("osaka", "Osaka · 3 days", [leaf("os1", "Dotonbori"), leaf("os2", "Day trip: Nara")]),
+        node("budget", "Budget", [
+          leaf("bd1", "Flights"),
+          leaf("bd2", "Hotels"),
+          leaf("bd3", "Food & trains"),
+        ]),
+      ],
+      {
+        image: { url: JAPAN_FLAG, width: 42, height: 28 },
+        note: "2 weeks in March. Target ~£3k pp.",
+      },
+    ),
+    {
+      boundaries: [{ id: "b1", nodeIds: ["tokyo", "kyoto", "osaka"], label: "On the ground" }],
+    },
+  );
+
+// 10 — Talk / content outline: deep, leaf-heavy — built for the Outline view and Markdown export.
+const outline = (): MindMapDoc =>
+  doc(
+    "Talk: Focus in a noisy world",
+    node(
+      "root",
+      "Talk: Focus in a noisy world",
+      [
+        leaf("hook", "Hook: the cost of a single interruption"),
+        node("p1", "1 · Why focus is rare", [
+          leaf("p1a", "Always-on tools"),
+          leaf("p1b", "Open-plan everything"),
+          leaf("p1c", "Busy ≠ productive"),
+        ]),
+        node("p2", "2 · Habits that protect it", [
+          leaf("p2a", "Time-blocking"),
+          leaf("p2b", "A shutdown ritual"),
+          leaf("p2c", "Single-tasking"),
+        ]),
+        node("p3", "3 · Tools & traps", [
+          leaf("p3a", "Notifications off by default"),
+          leaf("p3b", "One screen, one task"),
+        ]),
+        leaf("close", "Close: one change to make tomorrow"),
+      ],
+      {
+        note: "Open the Outline panel to see it as a script; export Markdown for the speaker notes.",
+      },
+    ),
+  );
+
+// 11 — Incident runbook: a top-to-bottom flow, stages grouped by a boundary, step notes.
+const runbook = (): MindMapDoc =>
+  doc(
+    "Runbook: API latency spike",
+    node(
+      "root",
+      "Runbook: API latency spike",
+      [
+        node("detect", "Detect", [
+          leaf("de1", "Alert: p99 > 1s for 5 min"),
+          leaf("de2", "Open the latency dashboard"),
+        ]),
+        node("triage", "Triage", [
+          leaf("tr1", "Recent deploy?", { icons: ["🚩"] }),
+          leaf("tr2", "Slow DB queries?"),
+          leaf("tr3", "Traffic spike?"),
+        ]),
+        node("mitigate", "Mitigate", [
+          leaf("mi1", "Roll back the deploy", {
+            icons: ["❗"],
+            note: "Fastest fix if a deploy is the cause.",
+          }),
+          leaf("mi2", "Scale out"),
+          leaf("mi3", "Enable the cache"),
+        ]),
+        node("recover", "Recover", [leaf("re1", "Confirm p99 back to normal", { icons: ["✅"] })]),
+        node("review", "Review", [leaf("rv1", "Write the postmortem", { icons: ["⏳"] })]),
+      ],
+      {
+        note: "Work top to bottom. Tip: switch the layout to right-only for a flow you read in order.",
+      },
+    ),
+    { boundaries: [{ id: "b1", nodeIds: ["mitigate", "mi1", "mi2", "mi3"], label: "Act fast" }] },
+  );
+
+// 12 — Cross-map atlas: the "doorways" pattern. Built as the shape + guidance, since live
+// cross-map links point at specific map ids (which you wire to your own maps, Chapter 5).
+const atlas = (): MindMapDoc =>
+  doc(
+    "Company atlas",
+    node(
+      "root",
+      "Company atlas",
+      [
+        leaf("st", "Strategy ▸", {
+          note: "Select me → 🔗 Link → another map to open your Strategy map.",
+        }),
+        leaf("lp", "Product launch ▸", { note: "Link me to your launch map." }),
+        leaf("ok", "OKRs ▸", { note: "Link me to your OKRs map." }),
+        leaf("rm", "Roadmap ▸", { note: "Link me to your roadmap." }),
+        leaf("hr", "Hiring ▸", { note: "Link me to your hiring plan." }),
+      ],
+      {
+        note: "An atlas is a high-level map whose nodes are doorways into detailed maps. Wire each node to its own map with 🔗 Link (Chapter 5), then click to hop between them.",
+      },
+    ),
+  );
+
+// 13 — GTD Natural Planning Model: David Allen's five steps, applied to a real plan.
+const gtd = (): MindMapDoc =>
+  doc(
+    "Offsite in Lisbon — natural planning",
+    node(
+      "root",
+      "Offsite in Lisbon — natural planning",
+      [
+        node("purpose", "1 · Purpose & principles", [
+          leaf("pu1", "Why: re-align the team on H2"),
+          leaf("pu2", "Principle: everyone contributes"),
+        ]),
+        node("vision", "2 · Outcome / vision", [
+          leaf("vi1", "Success: a shared H2 plan + 3 decisions made"),
+        ]),
+        node("brain", "3 · Brainstorm", [
+          leaf("br1", "Venue ideas"),
+          leaf("br2", "Session topics"),
+          leaf("br3", "Social / dinner"),
+        ]),
+        node("org", "4 · Organise", [
+          leaf("og1", "Day 1: strategy"),
+          leaf("og2", "Day 2: planning"),
+          leaf("og3", "Assign owners"),
+        ]),
+        node("actions", "5 · Next actions", [
+          leaf("na1", "Book the venue — me", { icons: ["❗"] }),
+          leaf("na2", "Send the invite", { icons: ["⏳"] }),
+          leaf("na3", "Draft the agenda"),
+        ]),
+      ],
+      {
+        note: "David Allen's Natural Planning Model: purpose → vision → brainstorm → organise → next actions.",
+      },
+    ),
+  );
+
+interface MapExample {
+  id: string;
+  name: string;
+  build: () => MindMapDoc;
+}
+
+// Order roughly: work, then strategy/learning, then personal, then meta.
+export const examples: MapExample[] = [
+  { id: "launch", name: "Product launch plan", build: launch },
+  { id: "meeting", name: "Meeting notes (filled)", build: meeting },
+  { id: "decision", name: "Decision log", build: decision },
+  { id: "okrs", name: "Quarterly OKRs", build: okrs },
+  { id: "retro", name: "Team retrospective", build: retro },
+  { id: "swot", name: "SWOT (worked)", build: swot },
+  { id: "runbook", name: "Incident runbook", build: runbook },
+  { id: "gtd", name: "GTD natural planning", build: gtd },
+  { id: "outline", name: "Talk / content outline", build: outline },
+  { id: "pkm", name: "Personal knowledge map", build: pkm },
+  { id: "study", name: "Study / revision map", build: study },
+  { id: "trip", name: "Trip plan (with image)", build: trip },
+  { id: "atlas", name: "Cross-map atlas", build: atlas },
+];
+
+export function buildExample(id: string): MindMapDoc {
+  return (examples.find((e) => e.id === id) ?? examples[0]).build();
+}

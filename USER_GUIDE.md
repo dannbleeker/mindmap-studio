@@ -165,6 +165,15 @@ Switch freely; each is autosaved. **Delete** removes the current one.
 **Project plan**, **5 Whys** (a nested root-cause chain), **Decision** (pros & cons),
 **Retrospective** (Start / Stop / Continue), **Meeting notes**, and **Pre-mortem**.
 
+### Examples
+
+The same **+ New…** menu has an **Examples** group: 13 *complete*, worked maps to open and
+adapt — Product launch plan, Meeting notes, Decision log, Quarterly OKRs, Team retrospective,
+a worked SWOT, Incident runbook, GTD natural planning, Talk/content outline, Personal
+knowledge map, Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
+templates (empty frames), examples are filled in — the quickest way to see a finished map and
+learn a feature by reading one that uses it. Opening one creates a fresh, editable copy.
+
 ---
 
 ## Importing

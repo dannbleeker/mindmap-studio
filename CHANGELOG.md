@@ -197,6 +197,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   themes, layout direction, floating topics, cross-map links, duplicate/switch maps,
   walk-through Present, library backup, and PWA install — lifting `bookExample` coverage
   **54% → 82%**. Flags flipped only for features the prose genuinely walks the reader through.
+- **Example gallery — 13 pre-built maps** (`src/examples.ts`). An **Examples** group in the
+  **+ New…** menu (alongside the empty templates) opens complete, worked maps to explore and
+  adapt: Product launch, Meeting notes, Decision log, Quarterly OKRs, Retrospective, a worked
+  SWOT, Incident runbook, GTD natural planning, Talk/content outline, Personal knowledge map,
+  Study/revision map, Trip plan (with a small embedded image), and a Cross-map atlas. Between
+  them they exercise every major feature — notes, markers, boundaries, relationships, floating
+  topics, per-topic styling, images, deep nesting, hyperlinks. Each is canonical-model data
+  (opening one mints a fresh, editable copy) and covered by `test/examples.test.ts` (every
+  example builds with unique ids and no dangling link/boundary references).
 
 ### Changed
 

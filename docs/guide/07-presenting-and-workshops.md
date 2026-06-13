@@ -29,6 +29,12 @@ A template is just a starting structure you then make your own; its value is sav
 the first thirty seconds of "what were the boxes again?" and nudging you toward a
 complete frame.
 
+Where a template is an *empty* frame, the **Examples** group in the same **+ New…** menu
+gives you *complete*, worked maps -- a filled launch plan, a sprint retro, a worked SWOT, a
+trip itinerary, a study map -- to open and adapt rather than build from scratch. They're the
+fastest way to see what a finished map looks like, and to learn a feature by reading one that
+uses it.
+
 ## Walk-through presentation mode
 
 When it's time to present, **Present** enters a focused **walk-through** mode. Instead of
@@ -86,6 +92,10 @@ turn -- arrow keys to move, the room's attention following yours, one branch at 
 you're done, run a **library backup** -- one file holding every map, the belt to local
 storage's braces -- and, if you haven't already, **install** the app to your desktop so it's
 one click away and runs with no network.
+
+Prefer a running start over a blank SWOT? Open an **Example** instead (**+ New… → Examples**)
+-- a filled launch plan, a retro, a trip, a worked SWOT -- and adapt it. Same skills, less
+blank page; it's also the quickest way to see a feature used in anger.
 
 That's the whole tool, end to end -- from a single node in Chapter 1 to a map you can
 think with, enrich, navigate, share and present. The appendices that follow are the

@@ -1,5 +1,6 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { MarkerBar, NotesPanel, OutlinePanel, StyleBar } from "./Panels";
+import { buildExample, examples } from "./examples";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
@@ -477,18 +478,28 @@ export function App() {
         <select
           value=""
           onChange={(e) => {
-            if (e.target.value) load(buildTemplate(e.target.value));
+            const v = e.target.value;
+            if (v) load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
           }}
           style={controlStyle}
-          aria-label="New map from template"
-          title="New map (pick a template)"
+          aria-label="New map from a template or example"
+          title="New map (pick a blank template or a worked example)"
         >
           <option value="">+ New…</option>
-          {templates.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
+          <optgroup label="Templates">
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Examples">
+            {examples.map((e) => (
+              <option key={e.id} value={`ex:${e.id}`}>
+                {e.name}
+              </option>
+            ))}
+          </optgroup>
         </select>
         <button
           type="button"

@@ -45,15 +45,6 @@ Remaining items are renderer-constrained or Dann-dependent:
 
 ## Backlog — feature candidates
 
-- [ ] **Pre-built example gallery (≥ 10 maps users can open and try).** Distinct from the
-      *templates* (empty skeletons) and the single `Q3 Retail Plan` sample — a set of complete,
-      varied example maps that show the tool off across domains/use-cases (e.g. project plan,
-      SWOT in anger, meeting notes, decision log, OKRs, personal knowledge map, trip plan,
-      product launch, retro, study map). **Workflow:** (1) research + draft the 10+ example
-      ideas with a one-line purpose each, (2) get Dann's approval on the list, (3) build them
-      as openable maps. Likely wire into the **+ New…** menu (a "Examples" group) or a gallery
-      dialog; each example is canonical-model data (a `sampleMap.ts`-style builder or bundled
-      `.json`), so they cost ~nothing at runtime and round-trip like any map.
 - [ ] **Tab-based multi-map open (reviewed 2026-06-13).** *Today:* one active map at a time —
       `App` holds a single `doc`/`liveDoc`, swapped by `switchMap()` via a `<select>` dropdown;
       one mind-elixir instance (`MindMap`); persistence remembers a single `meta.lastOpened`.

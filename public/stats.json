@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-13T13:11:02.582Z",
-  "commit": "a2c49eb",
+  "generatedAt": "2026-06-13T13:14:30.362Z",
+  "commit": "528698b",
   "headline": {
-    "linesTsJs": 7666,
+    "linesTsJs": 7665,
     "tests": 157,
     "lineCoveragePct": 41.92,
-    "commits": 134,
+    "commits": 136,
     "ageDays": 1,
     "trackedFiles": 115,
     "featureManualPct": 100,
@@ -16,7 +16,7 @@
     {
       "category": "App code (src)",
       "files": 34,
-      "lines": 4137
+      "lines": 4136
     },
     {
       "category": "Unit tests",
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 157,
     "e2e": 0,
-    "durationMs": 3817,
+    "durationMs": 3913,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1661
+        "ms": 1648
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 149
-      },
-      {
-        "file": "test/xlsx.test.ts",
-        "ms": 65
+        "ms": 153
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 54
+        "ms": 61
+      },
+      {
+        "file": "test/xlsx.test.ts",
+        "ms": 53
       },
       {
         "file": "test/book.test.ts",
-        "ms": 37
+        "ms": 51
       }
     ]
   },
@@ -103,7 +103,7 @@
     "biggestFiles": [
       {
         "name": "App.tsx",
-        "lines": 953
+        "lines": 952
       },
       {
         "name": "mindmap/MindMap.tsx",
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 49
+        "commits": 50
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -173,7 +173,7 @@
       {
         "file": "App.tsx",
         "pct": 0,
-        "commits": 49
+        "commits": 50
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -218,7 +218,7 @@
   "docs": {
     "bookWords": 6544,
     "chapters": 11,
-    "appLoc": 4137,
+    "appLoc": 4136,
     "docToCodeRatio": 1.58
   },
   "featureCoverage": {
@@ -310,21 +310,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 134,
-    "commits7d": 134,
+    "commits": 136,
+    "commits7d": 136,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 99
+        "count": 100
       },
       {
         "name": "github-actions[bot]",
-        "count": 35
+        "count": 36
       }
     ],
     "churn30d": {
-      "added": 22378,
-      "removed": 4163
+      "added": 22442,
+      "removed": 4223
     },
     "changelogEntries": 60
   }

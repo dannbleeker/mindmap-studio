@@ -163,6 +163,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   size gate now budgets the entry chunk and reports lazy chunks separately.
 - Bumped the GitHub Actions (checkout, setup-node, pnpm/action-setup) to **v6**
   (node24 runtimes), clearing the Node 20 deprecation annotation on CI.
+- Bumped the GitHub **Pages** actions (`configure-pages` v6, `upload-pages-artifact` v5,
+  `deploy-pages` v5) to their node24 majors, clearing the last Node-20 deprecation warning
+  (on the Deploy workflow), and dropped the no-op `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` env
+  that never actually suppressed it.
 - **Deployed to GitHub Pages** — a `deploy.yml` workflow runs the gate, builds, and
   publishes on every push to `main`, served from the custom domain
   <https://mindmap-studio.struktureretsundfornuft.dk/> (HTTPS, with a `CNAME` baked into the

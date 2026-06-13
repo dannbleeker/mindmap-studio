@@ -3,6 +3,7 @@ import {
   FLOATING_NODE_ID,
   type MeNode,
   fromMindElixir,
+  setBoundaryLabel,
   toArrows,
   toMindElixir,
   toMindElixirRoot,
@@ -199,11 +200,19 @@ describe("toSummaries (boundaries -> mind-elixir summaries)", () => {
     boundaries,
   });
 
-  it("brackets a boundary's subtree root within its parent", () => {
+  it("brackets a boundary's subtree root within its parent (label blanked for the overlay)", () => {
     const summaries = toSummaries(
       withBoundaries({ id: "b1", nodeIds: ["a", "a1"], label: "Group" }),
     );
-    expect(summaries).toEqual([{ id: "b1", label: "Group", parent: "r", start: 0, end: 0 }]);
+    // Label is intentionally blanked — the filled-boundary overlay draws it, so mind-elixir
+    // must not render a duplicate. The canonical label stays in the model.
+    expect(summaries).toEqual([{ id: "b1", label: "", parent: "r", start: 0, end: 0 }]);
+  });
+
+  it("preserves a boundary's label across a round-trip even though the summary is blanked", () => {
+    const withB = withBoundaries({ id: "b1", nodeIds: ["a", "a1"], label: "Group" });
+    const back = fromMindElixir(toMindElixir(withB.root), withB, undefined, toSummaries(withB));
+    expect(back.boundaries).toEqual([{ id: "b1", nodeIds: ["a", "a1"], label: "Group" }]);
   });
 
   it("uses the node's sibling index (second child -> index 1)", () => {
@@ -237,6 +246,40 @@ describe("toSummaries (boundaries -> mind-elixir summaries)", () => {
     expect(
       fromMindElixir(toMindElixir(withB.root), withB, undefined, []).boundaries,
     ).toBeUndefined();
+  });
+});
+
+describe("setBoundaryLabel (on-canvas label-chip rename)", () => {
+  const b1: Boundary = { id: "b1", nodeIds: ["a", "a1"], label: "Old" };
+  const b2: Boundary = { id: "b2", nodeIds: ["b"] };
+
+  it("sets a label on the matching boundary, leaving others untouched", () => {
+    const next = setBoundaryLabel([b1, b2], "b1", "New");
+    expect(next).toEqual([{ id: "b1", nodeIds: ["a", "a1"], label: "New" }, b2]);
+  });
+
+  it("adds a label to a previously-unlabelled boundary", () => {
+    expect(setBoundaryLabel([b2], "b2", "Named")).toEqual([
+      { id: "b2", nodeIds: ["b"], label: "Named" },
+    ]);
+  });
+
+  it("clears the label when the new value is blank (no empty-string key left behind)", () => {
+    const [cleared] = setBoundaryLabel([b1], "b1", "");
+    expect(cleared).toEqual({ id: "b1", nodeIds: ["a", "a1"] });
+    expect("label" in cleared).toBe(false);
+  });
+
+  it("returns a new array and new object (no mutation of the input)", () => {
+    const input = [b1];
+    const next = setBoundaryLabel(input, "b1", "New");
+    expect(next).not.toBe(input);
+    expect(next[0]).not.toBe(b1);
+    expect(b1.label).toBe("Old");
+  });
+
+  it("is a no-op when no boundary matches the id", () => {
+    expect(setBoundaryLabel([b1], "nope", "New")).toEqual([b1]);
   });
 });
 

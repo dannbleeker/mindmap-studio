@@ -39,7 +39,7 @@ predictably: there are fewer kinds of thing to get wrong.
 
 Two features draw on the canvas without being part of the tree:
 
-- A **boundary** is a soft outline drawn around a node and everything beneath it,
+- A **boundary** is a soft, shaded box drawn around a node and everything beneath it,
   grouping a branch visually ("everything in here is Phase 1").
 - A **relationship** is an arrow drawn from one node to another, expressing a link
   that the tree structure can't -- a dependency, an influence, a "see also" across

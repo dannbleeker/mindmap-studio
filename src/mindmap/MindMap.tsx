@@ -8,13 +8,14 @@ import MindElixir, { type MindElixirInstance } from "mind-elixir";
 import "mind-elixir/style.css";
 import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { isDangerousUrl } from "../io/urlSafety";
-import type { MapImage, MindMapDoc, NodeStyle } from "../model/types";
+import type { Boundary, MapImage, MindMapDoc, NodeStyle } from "../model/types";
 import { replaceInTopic } from "../search";
 import {
   type MeArrow,
   type MeNode,
   type MeSummary,
   fromMindElixir,
+  setBoundaryLabel,
   toArrows,
   toMindElixirRoot,
   toSummaries,
@@ -45,7 +46,7 @@ export interface MindMapHandle {
   setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
   setSelectedHyperlink: (url: string) => boolean;
-  /** Draw a boundary (bracket) around the node and its subtree; false if it isn't found. */
+  /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
   groupBranch: (id: string) => boolean;
 }
 
@@ -57,6 +58,107 @@ function fitView(me: MindElixirInstance): void {
   const view = me as unknown as { scaleFit?: () => void; toCenter?: () => void };
   if (view.scaleFit) view.scaleFit();
   else view.toCenter?.();
+}
+
+// --- Filled boundary enclosures (MindManager-style) -------------------------
+// mind-elixir only draws bracket "summaries"; we hide those on-canvas and draw our own
+// rounded, filled box around each boundary's nodes. The overlay lives INSIDE the
+// transformed `.map-canvas`, so it pans/zooms with the map for free; it's recomputed
+// after layout changes (init / edit / direction). The image export is unaffected (it's
+// data-driven via exportSvg, and still carries the bracket).
+const OVERLAY_CLASS = "mm-boundary-overlay";
+const BOUNDARY_PAD = 16;
+
+let bracketCssInjected = false;
+function hideNativeBrackets(): void {
+  if (bracketCssInjected || typeof document === "undefined") return;
+  bracketCssInjected = true;
+  const style = document.createElement("style");
+  style.textContent = ".map-canvas .summary { display: none !important; }";
+  document.head.appendChild(style);
+}
+
+function findNodeEl(me: MindElixirInstance, id: string): HTMLElement | null {
+  return (me as unknown as { findEle?: (id: string) => HTMLElement | null }).findEle?.(id) ?? null;
+}
+
+function renderBoundaryOverlay(
+  el: HTMLElement,
+  me: MindElixirInstance,
+  boundaries: Boundary[],
+  onRelabel?: (id: string, label: string) => void,
+): void {
+  const canvas = el.querySelector<HTMLElement>(".map-canvas");
+  if (!canvas) return;
+  canvas.querySelector(`.${OVERLAY_CLASS}`)?.remove();
+  if (boundaries.length === 0) return;
+  const cRect = canvas.getBoundingClientRect();
+  const scale = new DOMMatrixReadOnly(getComputedStyle(canvas).transform).a || 1;
+  const overlay = document.createElement("div");
+  overlay.className = OVERLAY_CLASS;
+  overlay.style.cssText = "position:absolute;inset:0;pointer-events:none;";
+
+  for (const b of boundaries) {
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
+    let found = 0;
+    for (const id of b.nodeIds) {
+      const node = findNodeEl(me, id);
+      if (!node) continue;
+      const r = node.getBoundingClientRect();
+      const x = (r.left - cRect.left) / scale;
+      const y = (r.top - cRect.top) / scale;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + r.width / scale);
+      maxY = Math.max(maxY, y + r.height / scale);
+      found += 1;
+    }
+    if (found === 0) continue;
+    const box = document.createElement("div");
+    box.style.cssText = [
+      "position:absolute",
+      `left:${Math.round(minX - BOUNDARY_PAD)}px`,
+      `top:${Math.round(minY - BOUNDARY_PAD)}px`,
+      `width:${Math.round(maxX - minX + 2 * BOUNDARY_PAD)}px`,
+      `height:${Math.round(maxY - minY + 2 * BOUNDARY_PAD)}px`,
+      "box-sizing:border-box",
+      "border:1.5px solid #8b87e0",
+      "background:rgba(120,116,210,0.10)",
+      "border-radius:16px",
+    ].join(";");
+    const label = b.label && b.label !== "summary" ? b.label : "";
+    // Draw the label chip. With an onRelabel handler the chip is interactive (the native
+    // bracket — mind-elixir's old double-click-to-label affordance — is hidden), so even an
+    // unlabelled boundary shows a muted "Label…" placeholder you can double-click to name.
+    if (label || onRelabel) {
+      const tag = document.createElement("div");
+      tag.textContent = label || "Label…";
+      const chip =
+        "position:absolute;top:-11px;left:12px;padding:1px 8px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap;";
+      tag.style.cssText = label
+        ? `${chip}background:#eceafb;color:#26215c;border:1px solid #cecbf6;`
+        : `${chip}background:#f3f2fb;color:#9a96c4;border:1px dashed #cecbf6;`;
+      if (onRelabel) {
+        // Re-enable pointer events on just the chip (the overlay itself is click-through).
+        tag.style.cssText += "pointer-events:auto;cursor:text;";
+        tag.title = "Double-click to rename this boundary";
+        const id = b.id;
+        tag.addEventListener("dblclick", (event) => {
+          event.stopPropagation();
+          if (typeof window === "undefined" || !window.prompt) return;
+          const next = window.prompt("Boundary label", label);
+          if (next !== null) onRelabel(id, next.trim());
+        });
+      }
+      box.appendChild(tag);
+    }
+    overlay.appendChild(box);
+  }
+  // First child → painted behind the nodes; the translucent fill keeps them readable.
+  canvas.insertBefore(overlay, canvas.firstChild);
 }
 
 interface MindMapProps {
@@ -114,6 +216,21 @@ export function MindMap({
   const directionRef = useRef(direction);
   directionRef.current = direction;
 
+  // Rename (or clear) a boundary's label from its on-canvas chip, then persist + redraw.
+  // Held in a ref — like onChange/onSelect above — so its stable identity flows into the
+  // module-level overlay renderer and the effects below without widening their deps.
+  const relabelBoundaryRef = useRef<(id: string, label: string) => void>(() => {});
+  relabelBoundaryRef.current = (id: string, label: string): void => {
+    const current = docRef.current;
+    const boundaries = setBoundaryLabel(current.boundaries ?? [], id, label);
+    const updated: MindMapDoc = { ...current, boundaries };
+    docRef.current = updated;
+    onChangeRef.current?.(updated);
+    const host = elRef.current;
+    const me = meRef.current;
+    if (host && me) renderBoundaryOverlay(host, me, boundaries, relabelBoundaryRef.current);
+  };
+
   useImperativeHandle(
     ref,
     () => ({
@@ -135,9 +252,10 @@ export function MindMap({
         if (meRef.current) fitView(meRef.current);
       },
       groupBranch: (id: string): boolean => {
-        // Select the node, then ask mind-elixir to draw a summary bracket over it and its
-        // subtree. createSummary fires an "operation" event, so the boundary is captured
-        // into the model and persisted like any other edit. Double-click the bracket to label it.
+        // Select the node, then ask mind-elixir to create a summary over it and its subtree.
+        // createSummary fires an "operation" event, so the boundary is captured into the model
+        // and persisted like any other edit; our overlay (renderBoundaryOverlay) then draws it
+        // as a filled box and the on-box chip is double-click-to-label.
         const me = meRef.current as (MindElixirInstance & { createSummary?: () => void }) | null;
         if (!me?.createSummary) return false;
         try {
@@ -308,6 +426,9 @@ export function MindMap({
       } finally {
         el.style.opacity = "1";
       }
+      // Draw filled boundary boxes (and hide mind-elixir's brackets) once laid out.
+      hideNativeBrackets();
+      renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current);
     });
 
     // Capture canvas edits back into the canonical model.
@@ -320,6 +441,10 @@ export function MindMap({
       const updated = fromMindElixir(data.nodeData, docRef.current, data.arrows, data.summaries);
       docRef.current = updated;
       onChangeRef.current?.(updated);
+      // Re-draw the filled boundary boxes once the post-edit layout settles.
+      requestAnimationFrame(() =>
+        renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current),
+      );
     };
     me.bus.addListener("operation", handleOperation);
 
@@ -394,9 +519,13 @@ export function MindMap({
       return;
     }
     const me = meRef.current;
-    if (!me) return;
+    const el = elRef.current;
+    if (!me || !el) return;
     applyDirection(me, direction);
     fitView(me);
+    requestAnimationFrame(() =>
+      renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current),
+    );
   }, [direction]);
 
   return <div ref={elRef} style={{ height: "100%", width: "100%" }} />;

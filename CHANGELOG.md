@@ -153,10 +153,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   a one-line summary reports how many were imported (with per-map import notes).
   Serves migrating a folder of existing MindManager maps in one go.
 - **Boundaries** — imported MindManager boundaries (`doc.boundaries`) draw on the
-  canvas as labelled brackets over their subtree, via mind-elixir summaries
-  (`toSummaries`/`fromSummaries` in `src/mindmap/sync.ts`). Boundaries you draw on the
-  canvas round-trip back into the model and persist, and imported ones survive edits —
-  all keyed by stable node ids, so brackets re-derive correctly after structural edits.
+  canvas as labelled, shaded boxes around their subtree (see the filled-enclosure entry
+  above), via mind-elixir summaries (`toSummaries`/`fromSummaries` in `src/mindmap/sync.ts`).
+  Boundaries you draw on the canvas round-trip back into the model and persist, and imported
+  ones survive edits — all keyed by stable node ids, so the boxes re-derive correctly after
+  structural edits.
 - **Native `.json` import/export** — a `.json` button saves the full canonical model
   (notes, links, boundaries, icons, tags) and an imported `.json` restores it exactly.
   Unlike the lossy/derived formats, this is a lossless round-trip — the format to use
@@ -206,13 +207,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   topics, per-topic styling, images, deep nesting, hyperlinks. Each is canonical-model data
   (opening one mints a fresh, editable copy) and covered by `test/examples.test.ts` (every
   example builds with unique ids and no dangling link/boundary references).
-- **⬚ Group button — discoverable boundaries.** Boundaries (bracket groups around a branch)
-  worked before but were hidden in the right-click → Summary menu. A toolbar **⬚ Group**
-  button now draws one around the selected branch (`MindMapHandle.groupBranch` →
-  mind-elixir `createSummary`); it's captured into the model and persists like any edit,
-  and double-clicking the bracket labels it. (Note: these are mind-elixir's *bracket*
-  boundaries; MindManager-style filled enclosures and **callouts** remain renderer-ceiling
-  items — the engine has no callout primitive — tracked in `NEXT_STEPS.md`.)
+- **⬚ Group button — MindManager-style filled boundary enclosures.** A toolbar **⬚ Group**
+  button draws a shaded, rounded box around the selected branch and its whole subtree
+  (`MindMapHandle.groupBranch`); it's captured into the model (`doc.boundaries`) and persists
+  like any edit. The box is a **custom overlay** (`renderBoundaryOverlay` in `MindMap.tsx`):
+  it lives inside mind-elixir's transformed canvas, so it pans and zooms with the map, and
+  its bounds are recomputed from the live node rects on every edit, init, and layout change.
+  mind-elixir's own bracket summaries are suppressed (`hideNativeBrackets`) so only the filled
+  box shows, with a single label chip; the canonical label round-trips by id even though the
+  underlying summary's label is blanked (`toSummaries`/`fromSummaries`). This lifts filled
+  boundary enclosures out of the renderer-ceiling list — **callouts** remain there (the engine
+  has no callout primitive), tracked in `NEXT_STEPS.md`.
 - **PWA self-update — "New version available — Refresh now."** The service worker now uses
   `registerType: "prompt"` (was `"autoUpdate"`, which reloaded silently): a new deploy parks
   the new worker and surfaces a non-intrusive toast with a **Refresh now** action that swaps
@@ -324,6 +329,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Boundaries / the ⬚ Group button now actually work on the canvas.** The first cut shipped
+  on a verified *data* round-trip but the live render was never visually confirmed (it leaned
+  on mind-elixir's bracket summary, which only drew a faint `{` on the outer edge, not the
+  shaded box the user wanted — and a self-grouped node sometimes left a stray duplicate label).
+  Replaced with the custom filled-box overlay above and verified by a real headless-Chrome
+  render: a clean rounded shaded box encloses the branch + subtree with even padding, a single
+  label chip, no stray duplicate, and arrow labels intact. Pan/zoom and layout-direction
+  changes keep the box aligned.
 - **Canvas styling restored — the map no longer collapses into inline text.** The mind-elixir
   v4→v5 upgrade moved the core stylesheet from JS-injected to a separate file, but the import
   was never added — so in production the node wrappers lost their `position:absolute` and the

@@ -34,9 +34,9 @@ GitHub Pages).
   startup. Works fully offline.
 - **Relationships** — imported relationships render as arrows, and arrows you draw round-trip
   back into the model.
-- **Boundaries** — imported MindManager boundaries render as labelled brackets over their
-  subtree, and boundaries you draw on the canvas round-trip back into the model (via
-  mind-elixir summaries).
+- **Boundaries** — a toolbar **⬚ Group** draws a shaded, rounded box around the selected
+  branch and its subtree (double-click the box's chip to label it); imported MindManager
+  boundaries render the same way, and boundaries you draw round-trip back into the model.
 - **Floating topics** — imported detached topics render in a labelled "Floating topics"
   branch, and are editable: rename, add, remove, nest, or drag them in/out of the tree, and
   the changes round-trip back into the model.

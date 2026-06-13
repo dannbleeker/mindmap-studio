@@ -105,8 +105,9 @@ export function toArrows(links: CrossLink[] | undefined): MeArrow[] {
 // subtree (its `nodeIds[0]` is the subtree root); mind-elixir brackets a child
 // range of a parent, so we bracket the root node within its parent (start ===
 // end), and the bracket spans that node's subtree height. A boundary on the map
-// root has no parent to bracket and is skipped. Render-only for now — summaries
-// drawn on the canvas aren't captured back into the model yet.
+// root has no parent to bracket and is skipped. mind-elixir's own bracket is hidden
+// on-canvas (MindMap.tsx draws a filled box overlay instead); summaries created or
+// removed on the canvas are captured back into the model by fromSummaries.
 export function toSummaries(doc: MindMapDoc): MeSummary[] {
   const boundaries = doc.boundaries;
   if (!boundaries?.length) return [];
@@ -125,7 +126,10 @@ export function toSummaries(doc: MindMapDoc): MeSummary[] {
     if (!at) continue; // boundary on the map root (or an unknown node) — can't bracket
     summaries.push({
       id: b.id,
-      label: b.label ?? "",
+      // Blank: the on-canvas label is drawn by our filled-boundary overlay (MindMap.tsx),
+      // so mind-elixir shouldn't render its own (it'd be a stray duplicate). The canonical
+      // label stays in the model; fromSummaries preserves it by id.
+      label: "",
       parent: at.parent,
       start: at.index,
       end: at.index,
@@ -144,26 +148,44 @@ function subtreeIds(node: MapNode): string[] {
 // (read off the canvas after an edit), so boundaries drawn or removed on the canvas
 // round-trip into the model. A summary brackets `parent.children[start..end]`; the
 // boundary encloses the subtrees under that range.
-function fromSummaries(summaries: MeSummary[], root: MapNode): Boundary[] {
+function fromSummaries(summaries: MeSummary[], root: MapNode, prev: Boundary[] = []): Boundary[] {
   const byId = new Map<string, MapNode>();
   const index = (node: MapNode) => {
     byId.set(node.id, node);
     node.children.forEach(index);
   };
   index(root);
+  const prevLabel = new Map(prev.map((b) => [b.id, b.label]));
   const boundaries: Boundary[] = [];
   for (const s of summaries) {
     const parent = byId.get(s.parent);
     if (!parent) continue;
     const range = parent.children.slice(s.start, s.end + 1);
     if (range.length === 0) continue;
+    // toSummaries blanks mind-elixir's label, so recover the canonical one by id; fall back
+    // to a freshly-drawn summary's own label. Drop the meaningless "summary" default.
+    const label = prevLabel.get(s.id) || s.label || "";
     boundaries.push({
       id: s.id,
       nodeIds: range.flatMap(subtreeIds),
-      ...(s.label ? { label: s.label } : {}),
+      ...(label && label !== "summary" ? { label } : {}),
     });
   }
   return boundaries;
+}
+
+/**
+ * Set (or, when `label` is blank, clear) a boundary's label by id, returning a new array.
+ * Used by the on-canvas label chip (MindMap.tsx) — the filled-box overlay's rename path now
+ * that mind-elixir's native bracket (its double-click-to-label affordance) is hidden.
+ */
+export function setBoundaryLabel(boundaries: Boundary[], id: string, label: string): Boundary[] {
+  return boundaries.map((b) => {
+    if (b.id !== id) return b;
+    // Rebuild without the label key when clearing, so a blank rename leaves no `label: ""`
+    // (or `label: undefined`) behind — keeps the model + .json export tidy.
+    return label ? { ...b, label } : { id: b.id, nodeIds: b.nodeIds };
+  });
 }
 
 function fromArrows(arrows: MeArrow[]): CrossLink[] {
@@ -244,7 +266,7 @@ export function fromMindElixir(
     result.links = links.length > 0 ? links : undefined;
   }
   if (summaries !== undefined) {
-    const boundaries = fromSummaries(summaries, root);
+    const boundaries = fromSummaries(summaries, root, prevDoc.boundaries ?? []);
     result.boundaries = boundaries.length > 0 ? boundaries : undefined;
   }
   return result;

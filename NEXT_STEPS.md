@@ -28,31 +28,20 @@ render everywhere, not only inline in a browser). See `CHANGELOG.md`.
 
 Remaining items are renderer-constrained or Dann-dependent:
 
-- [ ] **BUG: boundaries / the ⬚ Group button don't work** (Dann, 2026-06-13). Shipped in
-      `d178141` claiming it worked, but only the *data* round-trip was verified (`createSummary`
-      → captured → persisted via `window.__me`, 0→1); the **live canvas render was never
-      visually confirmed** (the render eval kept timing out, and I shipped on "shared render
-      path" reasoning — a violation of the visual-verify rule). The real user-facing behaviour
-      is broken. **Investigate (reproduce visually first):** does clicking **⬚ Group** on a
-      selected node draw a correct, visible boundary on the canvas? Suspects: `createSummary`
-      on a *single* selected node brackets the wrong range or renders invisibly; the toolbar
-      click deselects the canvas node before `groupBranch` re-selects; `selectNode` sets
-      `currentNode` but not the `currentNodes` range `createSummary` needs; or the new summary
-      isn't re-rendered after capture. Note the sample map's imported "Digital" boundary *does*
-      render, so the render path itself works for imported summaries — the gap is the
-      create-from-button path. Fix root cause; until then the live button is a broken control
-      (consider disabling it). Add a permanent check (real-render screenshot or DOM assertion
-      that a bracket element appears).
-- [ ] **Arrow / boundary text labels are dropped from image & document exports.** The
-      geometry exports fine (the relationship arrow curve and the boundary bracket are
-      `<path>`s that survive), but mind-elixir's `exportSvg` omits their *text* labels
-      (verified: the raw export contains neither the arrow label nor the boundary label).
-      A fix would read the labels' positions from the live DOM and inject `<text>` into the
-      export at mapped coordinates — finicky DOM→export coordinate work, hence deferred.
+- [ ] **Arrow / boundary text labels are dropped from image & document exports, and a
+      boundary exports as a bracket, not the on-canvas box.** The geometry exports (the
+      relationship arrow curve, and the boundary as mind-elixir's bracket `<path>`), but
+      `exportSvg` omits their *text* labels (verified: the raw export contains neither the
+      arrow label nor the boundary label) and doesn't know about our filled-box overlay — so
+      a boundary that shows as a shaded box on-canvas still exports as a bracket. A fix would
+      read the labels' + boxes' positions from the live DOM and inject `<text>`/`<rect>` into
+      the export at mapped coordinates — finicky DOM→export coordinate work, hence deferred.
       Topics (incl. multi-line), marker icons, and node images all export correctly.
 - [ ] **Renderer-constrained (mind-elixir):** alternate layouts (org-chart / timeline /
-      fishbone), organic/tapered branches, callouts, filled boundary enclosures, rich-text
-      *topics*. These need a custom SVG renderer or a different engine — a multi-day rebuild.
+      fishbone), organic/tapered branches, callouts, rich-text *topics*. These need a custom
+      SVG renderer or a different engine — a multi-day rebuild. (Filled boundary enclosures
+      are now shipped — a custom overlay draws the MindManager-style shaded box, so they're
+      no longer renderer-blocked; see `CHANGELOG.md`.)
 - [ ] Import embedded **images from `.mmap`** binary blobs (in-app images work; MM import
       is the gap — needs the XSD image-ref scheme or a real image-bearing sample).
 - [ ] Validate the `.mmap` importer's rich paths against a *real* feature-rich map

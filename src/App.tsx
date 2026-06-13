@@ -624,7 +624,7 @@ export function App() {
             const ok = id ? mapRef.current?.groupBranch(id) : false;
             showHint(
               ok
-                ? "Branch grouped — double-click the bracket to rename it."
+                ? "Branch grouped — double-click the boundary's label chip to rename it."
                 : "Select a node first, then group its branch.",
             );
           }}

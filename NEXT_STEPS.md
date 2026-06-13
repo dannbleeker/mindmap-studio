@@ -18,21 +18,28 @@ styling (shape/fill/border/bold)**, Find & Replace + `/`, new-map templates, **d
 map**, OPML import/export, **whole-library backup/restore**, **cross-map links**, an
 enriched sample, a panels/hooks refactor, and a toolbar-wrap + a11y pass.
 
-Remaining items are genuinely renderer-constrained or Dann-dependent:
+**2026-06-13:** shipped the full Office export trio — **Word `.docx`**, **PowerPoint `.pptx`**,
+**Excel `.xlsx`** (each verified by opening the output with a real consumer — python-pptx /
+openpyxl — or structural XML checks) — plus an HTML **slide deck**, **Copy outline** to the
+clipboard, **editable floating topics**, **library-wide search** (🔎 All maps), the
+mind-elixir core-CSS fix + a bundle guard, a shared-OOXML refactor, and the Pages-actions
+node24 bump. See `CHANGELOG.md`.
 
+Remaining items are renderer-constrained or Dann-dependent:
+
+- [ ] **Image exports (`.svg`/`.png`/`.pdf`) collapse outside a browser.** They embed
+      mind-elixir's `<foreignObject>` (HTML-in-SVG) labels, which only render inline in a real
+      browser — opened as a file, rasterized, or placed in Office, the labels flow into one
+      line. Fix: render labels as native SVG `<text>` (post-process the exported SVG). Real but
+      finicky (wrapping, markers, positioning) — wants a design pass on fidelity. **Top
+      remaining quality item.**
 - [ ] **Renderer-constrained (mind-elixir):** alternate layouts (org-chart / timeline /
       fishbone), organic/tapered branches, callouts, filled boundary enclosures, rich-text
-      *topics*. These need a custom SVG renderer or a different engine — a multi-day rebuild,
-      not a tweak.
+      *topics*. These need a custom SVG renderer or a different engine — a multi-day rebuild.
 - [ ] Import embedded **images from `.mmap`** binary blobs (in-app images work; MM import
       is the gap — needs the XSD image-ref scheme or a real image-bearing sample).
-- [ ] Make the floating-topics branch fully editable (currently display-only).
 - [ ] Validate the `.mmap` importer's rich paths against a *real* feature-rich map
       (XSD-authoritative + integration-tested, but only `MMAP_FILE` fully closes it).
-- [ ] Excel (`.xlsx`) export (heavy OOXML generator). Word `.docx`, a standalone HTML
-      **slide deck**, and **PowerPoint `.pptx`** shipped 2026-06-13 (the `.pptx` verified by
-      opening the output with python-pptx, a real PowerPoint-class reader), alongside
-      `.html`/`.pdf`/`.png`/`.svg`/`.opml`/`.md`/`.json`.
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 
@@ -44,5 +51,5 @@ All four "ships-with-the-product" artifacts (parity with the sibling project) ar
 3. User manual rendered to `/user-guide.html`.
 4. The book — _Thinking in Maps_ — built to EPUB + PDF, with a Rebuild-book workflow.
 
-Open follow-ups: grow the book (`book` at 97.9%, `bookExample` at 36.2% — more worked
-examples would help); the only un-booked feature is `panel-persistence`.
+Open follow-ups: grow the book (`book` at 96%, `bookExample` at 36% — more worked examples
+would help); un-booked features are `panel-persistence` and `copy-outline`.

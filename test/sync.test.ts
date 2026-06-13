@@ -322,3 +322,40 @@ describe("floating topics (editable round-trip)", () => {
     expect(back.root.children.map((c) => c.id)).toEqual(["a", "b"]);
   });
 });
+
+describe("mind-elixir sync — edge cases", () => {
+  it("toArrows tolerates undefined links", () => {
+    expect(toArrows(undefined)).toEqual([]);
+  });
+
+  it("round-trips a relationship label through arrows", () => {
+    const d: MindMapDoc = {
+      ...doc,
+      links: [{ id: "l1", from: "a", to: "b", label: "depends on" }],
+    };
+    const back = fromMindElixir(toMindElixir(d.root), d, toArrows(d.links));
+    expect(back.links).toEqual([{ id: "l1", from: "a", to: "b", label: "depends on" }]);
+  });
+
+  it("defaults image dimensions to 120 when the picked image carries none", () => {
+    const me = toMindElixir(n("img", "Pic", { image: { url: "data:image/png;base64,AAAA" } }));
+    expect(me.image).toEqual({ url: "data:image/png;base64,AAAA", width: 120, height: 120 });
+  });
+
+  it("skips a summary whose parent is missing or whose range is empty", () => {
+    const back = fromMindElixir(toMindElixir(doc.root), doc, undefined, [
+      { id: "s1", label: "", parent: "nope", start: 0, end: 0 }, // no such parent
+      { id: "s2", label: "", parent: "r", start: 5, end: 9 }, // out of range -> empty slice
+    ]);
+    expect(back.boundaries).toBeUndefined();
+  });
+
+  it("preserves canonical-only task data across a re-sync", () => {
+    const withTask: MindMapDoc = {
+      ...doc,
+      root: n("r", "Root", {}, [n("a", "Alpha", { task: { priority: 1 } })]),
+    };
+    const back = fromMindElixir(toMindElixir(withTask.root), withTask);
+    expect(back.root.children.find((c) => c.id === "a")?.task).toEqual({ priority: 1 });
+  });
+});

@@ -71,19 +71,6 @@ Remaining items are renderer-constrained or Dann-dependent:
       engine that supports vertical/org-chart layouts; tie-in with the existing renderer-ceiling
       item). The "remember orientation" + a richer layout picker (the 3-icon control) are doable
       now; the new *orientations themselves* are the renderer-ceiling part.
-- [ ] **Minimap (corner overview) + zoom controls.** *Two parts:*
-      **(a) Minimap** — a small overview thumbnail in a canvas corner with a draggable viewport
-      rectangle for navigating large maps. **Feasibility (verified):** mind-elixir has **no**
-      built-in minimap (no minimap code in `dist`, and `@mind-elixir/minimap` is 404 on npm), so
-      it's **custom-built** — render a scaled-down map overview + a viewport box, reusing the
-      *overlay-inside-the-transformed-`.map-canvas`* pattern and live node-rect geometry from the
-      boundary overlay (`renderBoundaryOverlay`), driven by mind-elixir's transform + `.scale()`.
-      Alternatively vet a community plugin. Medium effort, no engine change needed.
-      **(b) Zoom controls** — *largely already present:* mind-elixir's built-in toolbar
-      (`toolBar:true`) renders a zoom widget bottom-right (−/+/fit/fullscreen). Open work is only
-      a **branded/app-integrated** control (or more prominent placement) if the built-in isn't
-      enough — trivial, using `me.scale(val)` / `scaleFit` / `toCenter`. Confirm with Dann whether
-      the built-in widget already covers the need before building a custom one.
 - [ ] **Import/export interop with other mind-mapping tools.** *Today:* import `.mmap`
       (MindManager, one-way lossy), **OPML**, and `.json` (native canonical); export `.json`,
       OPML, image (`.svg`/`.png`/`.html`/`.pdf`), Office (`.docx`/`.pptx`/`.xlsx`), an HTML slide

@@ -229,6 +229,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   app still loads from the SW cache); covered by `test/pwaUpdate.test.ts` (callbacks, the
   Refresh-now → `updateSW(true)` path, idempotency, and the four manual-check outcomes).
   Adds `workbox-window` as a direct devDep (strict pnpm doesn't expose it to the app).
+- **Corner minimap + integrated zoom controls** (`src/mindmap/minimap.ts`). A bottom-right
+  panel draws a schematic overview of the whole map — one branch-coloured rect per topic —
+  with a viewport rectangle you can **click or drag to pan** the main canvas; below it sit
+  zoom **−/+** buttons, a live percentage, and a **fit** button. mind-elixir has no built-in
+  minimap (verified), so the schematic is custom: node rects are projected from the live DOM
+  into the panel by a pure, unit-tested layout (`computeMinimapLayout`), redrawn on data
+  edits and re-aligned on pan/zoom via the engine's `move`/`scale` events. mind-elixir's own
+  bottom-right zoom widget is hidden so there's a single, integrated control, and the engine's
+  zoom range is widened (`scaleMin 0.2` / `scaleMax 3`) so the buttons and wheel zoom in
+  meaningfully. Covered by `test/minimap.test.ts` (projection, centring, viewport, inverse).
 
 ### Changed
 

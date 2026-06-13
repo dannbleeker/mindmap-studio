@@ -130,6 +130,14 @@ into a connected knowledge base.
 **⊟** collapses every branch to a level-1 overview; **⊞** expands the whole tree. **Fit**
 re-frames the map.
 
+### Minimap & zoom
+
+A **minimap** in the bottom-right corner shows a shrunk overview of the whole map with a
+rectangle marking the part you're viewing. **Click or drag** inside it to pan the main canvas
+there. Below it, the zoom controls — **−**, a live **percentage**, **+**, and **⤢ fit** — give
+precise, stepped zoom (the mouse wheel zooms too). Handy for orienting on a large map and for
+lining one up before a screenshot or screen-share.
+
 ### Layout
 
 The **Layout** dropdown arranges branches **Both sides**, **Right**, or **Left** of the root.

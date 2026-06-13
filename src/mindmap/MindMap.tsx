@@ -10,6 +10,7 @@ import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapImage, MindMapDoc, NodeStyle } from "../model/types";
 import { replaceInTopic } from "../search";
+import { type MinimapHandle, createMinimap } from "./minimap";
 import {
   type MeArrow,
   type MeNode,
@@ -201,6 +202,7 @@ export function MindMap({
 }: MindMapProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const meRef = useRef<MindElixirInstance | null>(null);
+  const minimapRef = useRef<MinimapHandle | null>(null);
   // The live doc, used to preserve canonical-only fields across edits.
   const docRef = useRef(doc);
   const onChangeRef = useRef(onChange);
@@ -404,6 +406,11 @@ export function MindMap({
       contextMenu: true,
       toolBar: true,
       keypress: true,
+      // Wider zoom range than the default (1.4/0.2) so the minimap's +/- and the wheel
+      // can zoom in meaningfully. The engine *blocks* (doesn't clamp) targets past the
+      // bound, so the minimap clamps to this same range — keep the two in sync.
+      scaleMax: 3,
+      scaleMin: 0.2,
     });
     // Node editor panel (icons / tags / font style / link) — must install before init.
     me.install(nodeMenu);
@@ -413,6 +420,8 @@ export function MindMap({
       summaries: toSummaries(doc),
     } as never);
     meRef.current = me;
+    // Corner minimap + integrated zoom controls (hides mind-elixir's own zoom widget).
+    minimapRef.current = createMinimap(me, el);
 
     // The constructor lays out as SIDE; apply a non-default direction on (re)init.
     if (directionRef.current !== "side") applyDirection(me, directionRef.current);
@@ -429,6 +438,7 @@ export function MindMap({
       // Draw filled boundary boxes (and hide mind-elixir's brackets) once laid out.
       hideNativeBrackets();
       renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current);
+      minimapRef.current?.refresh();
     });
 
     // Capture canvas edits back into the canonical model.
@@ -441,10 +451,11 @@ export function MindMap({
       const updated = fromMindElixir(data.nodeData, docRef.current, data.arrows, data.summaries);
       docRef.current = updated;
       onChangeRef.current?.(updated);
-      // Re-draw the filled boundary boxes once the post-edit layout settles.
-      requestAnimationFrame(() =>
-        renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current),
-      );
+      // Re-draw the filled boundary boxes + minimap once the post-edit layout settles.
+      requestAnimationFrame(() => {
+        renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current);
+        minimapRef.current?.refresh();
+      });
     };
     me.bus.addListener("operation", handleOperation);
 
@@ -498,6 +509,8 @@ export function MindMap({
       me.bus.removeListener("selectNodes", handleSelect);
       me.bus.removeListener("unselectNodes", handleUnselect);
       el.removeEventListener("click", handleLinkClick, true);
+      minimapRef.current?.destroy();
+      minimapRef.current = null;
       meRef.current = null;
       el.innerHTML = "";
     };
@@ -523,9 +536,10 @@ export function MindMap({
     if (!me || !el) return;
     applyDirection(me, direction);
     fitView(me);
-    requestAnimationFrame(() =>
-      renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current),
-    );
+    requestAnimationFrame(() => {
+      renderBoundaryOverlay(el, me, docRef.current.boundaries ?? [], relabelBoundaryRef.current);
+      minimapRef.current?.refresh();
+    });
   }, [direction]);
 
   return <div ref={elRef} style={{ height: "100%", width: "100%" }} />;

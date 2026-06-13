@@ -21,6 +21,21 @@ Lost? The **Fit** button reframes the entire map to the viewport in one click. I
 "take me home" of the canvas, and worth wiring into muscle memory: zoom in to work, hit
 Fit to see where you are.
 
+## The minimap and zoom
+
+In the bottom-right corner sits a **minimap** -- a shrunk-down overview of the whole map,
+with a highlighted rectangle showing the slice you're currently looking at. On a big map
+it answers the question "where am I, and what else is out there?" at a glance. Click or
+drag inside it to jump the main view somewhere else: the rectangle follows your pointer
+and the canvas pans to match, so the minimap doubles as a fast way to travel across a map
+too large to scroll comfortably.
+
+Below it are the **zoom controls** -- minus, a live percentage, plus, and a fit button.
+They do the same job as the mouse wheel but give you a precise readout and a deliberate
+step, which matters when you're lining a map up for a screenshot or a screen-share. The
+percentage tells you exactly how far in you are; the fit button is the same "take me home"
+as **Fit** above, kept within thumb's reach of the zoom buttons.
+
 ## The outline panel
 
 The **Outline** panel shows your map as an indented list -- the same tree, read top to

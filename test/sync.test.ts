@@ -53,6 +53,24 @@ describe("mind-elixir sync", () => {
     expect(back.root.children.find((c) => c.id === "a")?.note).toBe("a note");
   });
 
+  it("drops a dangerous-scheme hyperlink in both directions (XSS guard)", () => {
+    // A javascript: link — carried in by an import, or typed into the node-menu
+    // — must never render as a clickable anchor on the canvas, nor be captured
+    // back into the model. (The export sanitiser is the backstop; this is the
+    // source-side defense.)
+    expect(toMindElixir(n("h", "Hostile", { hyperlink: "javascript:alert(1)" })).hyperLink).toBe(
+      undefined,
+    );
+    // mind-elixir -> model: a node-menu-typed dangerous link is stripped on capture.
+    const me = toMindElixir(n("h", "Hostile"));
+    me.hyperLink = "javascript:alert(1)";
+    expect(fromMindElixir(me, doc).root.hyperlink).toBe(undefined);
+    // a safe link is untouched.
+    expect(toMindElixir(n("s", "Safe", { hyperlink: "https://ok.test/" })).hyperLink).toBe(
+      "https://ok.test/",
+    );
+  });
+
   it("captures a node-menu memo edit (me.note -> node.note)", () => {
     const me = toMindElixir(doc.root);
     me.note = "edited memo";

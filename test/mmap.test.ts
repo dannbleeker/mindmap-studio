@@ -83,6 +83,19 @@ describe("parseMmap", () => {
     expect(doc.root.hyperlink).toBe("https://example.com/");
   });
 
+  it("drops a dangerous-scheme hyperlink on import (XSS guard)", () => {
+    // A malicious .mmap could smuggle a javascript:/data: hyperlink; the
+    // importer must not store it (defense-in-depth alongside the export sanitiser).
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:Hyperlink Url="javascript:alert(1)" Name="x" />
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.hyperlink).toBeUndefined();
+  });
+
   it("imports relationships as cross-links", () => {
     const { doc } = parseMmap(
       mmapOf(`${MAP_OPEN}

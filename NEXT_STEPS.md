@@ -71,6 +71,40 @@ Remaining items are renderer-constrained or Dann-dependent:
       engine that supports vertical/org-chart layouts; tie-in with the existing renderer-ceiling
       item). The "remember orientation" + a richer layout picker (the 3-icon control) are doable
       now; the new *orientations themselves* are the renderer-ceiling part.
+- [ ] **Minimap (corner overview) + zoom controls.** *Two parts:*
+      **(a) Minimap** — a small overview thumbnail in a canvas corner with a draggable viewport
+      rectangle for navigating large maps. **Feasibility (verified):** mind-elixir has **no**
+      built-in minimap (no minimap code in `dist`, and `@mind-elixir/minimap` is 404 on npm), so
+      it's **custom-built** — render a scaled-down map overview + a viewport box, reusing the
+      *overlay-inside-the-transformed-`.map-canvas`* pattern and live node-rect geometry from the
+      boundary overlay (`renderBoundaryOverlay`), driven by mind-elixir's transform + `.scale()`.
+      Alternatively vet a community plugin. Medium effort, no engine change needed.
+      **(b) Zoom controls** — *largely already present:* mind-elixir's built-in toolbar
+      (`toolBar:true`) renders a zoom widget bottom-right (−/+/fit/fullscreen). Open work is only
+      a **branded/app-integrated** control (or more prominent placement) if the built-in isn't
+      enough — trivial, using `me.scale(val)` / `scaleFit` / `toCenter`. Confirm with Dann whether
+      the built-in widget already covers the need before building a custom one.
+- [ ] **Import/export interop with other mind-mapping tools.** *Today:* import `.mmap`
+      (MindManager, one-way lossy), **OPML**, and `.json` (native canonical); export `.json`,
+      OPML, image (`.svg`/`.png`/`.html`/`.pdf`), Office (`.docx`/`.pptx`/`.xlsx`), an HTML slide
+      deck, and Copy-outline. **Gap:** other tools' *native* formats. **Targets** (research each
+      tool's format + license, then add a thin adapter to/from the canonical model — the
+      architecture is built for exactly this): **FreeMind / Freeplane** (`.mm`, plain XML — the
+      most open + widely interchanged, do read+write first), **XMind** (`.xmind`, a ZIP of
+      `content.json`/`content.xml` — read first), **MindMup** (JSON), **iThoughts** (`.itmz`, ZIP),
+      **SimpleMind** (`.smmx`), and lightweight text formats **Markdown / Markmap** and **Mermaid
+      mindmap** syntax. *Note:* OPML already bridges many outliners and some MM tools, so
+      export-via-OPML covers a lot today — native importers/exporters add fidelity. Prioritize by
+      format openness + how many tools accept it (FreeMind `.mm` and Markdown/Mermaid are the
+      cheapest wins). First step is the deep research (enumerate every reachable tool + its format
+      spec + round-trip fidelity), get the target list approved, then build.
+- [ ] **Deep research: MindManager features vs MindMap Studio gaps.** A comprehensive,
+      systematic audit (deeper than the 2026-06-12 UI-comparison parity pass): catalogue
+      MindManager's *full* feature set — from official docs **and** the bundled XSD already in the
+      repo — and map each feature to MindMap Studio's status: **shipped / partial / renderer-ceiling
+      / out-of-scope (the PM layer is deliberately OUT — see top of file)**. Output a single
+      prioritized gap table that feeds the roadmap (and cross-checks the renderer-ceiling list).
+      Research + write-up task; no code, but it defines what's worth building next.
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 

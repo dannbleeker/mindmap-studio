@@ -116,6 +116,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   direct run formatting rather than named styles so it renders identically in Word,
   LibreOffice, Pages, and Google Docs. Pure + deterministic (`src/io/docx.ts`,
   lazy-loaded); topic and note text is XML-escaped.
+- **PowerPoint (.pptx) export** — a `.pptx (PowerPoint)` export turns the map into a real,
+  editable slide deck — an overview slide, then one per branch with its subtree as bullets —
+  reusing the same slide model as the in-app Walk-Through. It writes the full minimal
+  PresentationML package by hand (presentation, slide master, layout, theme, and one part per
+  slide, each wired through its own `.rels`) via `fflate`; slides are positioned text boxes, so
+  they're self-describing. Pure + deterministic (`src/io/pptx.ts`, lazy-loaded); topic text is
+  XML-escaped. Verified by opening the output with python-pptx (a real PowerPoint-class reader)
+  plus well-formedness + referential-integrity unit tests.
 - **More starter templates** — the New menu gains five structured-thinking starters:
   **5 Whys** (a nested root-cause chain), **Decision** (pros & cons), **Retrospective**
   (Start / Stop / Continue), **Meeting notes**, and **Pre-mortem** (`src/templates.ts`).

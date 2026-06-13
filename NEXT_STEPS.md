@@ -29,10 +29,10 @@ Remaining items are genuinely renderer-constrained or Dann-dependent:
 - [ ] Make the floating-topics branch fully editable (currently display-only).
 - [ ] Validate the `.mmap` importer's rich paths against a *real* feature-rich map
       (XSD-authoritative + integration-tested, but only `MMAP_FILE` fully closes it).
-- [ ] PowerPoint / Excel export (heavy OOXML generators). Word `.docx` + a standalone
-      HTML **slide deck** shipped 2026-06-13, alongside `.html`/`.pdf`/`.png`/`.svg`/
-      `.opml`/`.md`/`.json`. A blind `.pptx` is deferred: its minimal package is ~13
-      cross-referenced parts and can't be open-tested here without PowerPoint.
+- [ ] Excel (`.xlsx`) export (heavy OOXML generator). Word `.docx`, a standalone HTML
+      **slide deck**, and **PowerPoint `.pptx`** shipped 2026-06-13 (the `.pptx` verified by
+      opening the output with python-pptx, a real PowerPoint-class reader), alongside
+      `.html`/`.pdf`/`.png`/`.svg`/`.opml`/`.md`/`.json`.
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 
@@ -44,6 +44,5 @@ All four "ships-with-the-product" artifacts (parity with the sibling project) ar
 3. User manual rendered to `/user-guide.html`.
 4. The book — _Thinking in Maps_ — built to EPUB + PDF, with a Rebuild-book workflow.
 
-Open follow-ups: grow the book (`book` at 93.5%, `bookExample` at 30.4% — more worked
-examples would help); un-booked features are `panel-persistence`, `export-deck`, and
-`export-docx`.
+Open follow-ups: grow the book (`book` at 97.9%, `bookExample` at 36.2% — more worked
+examples would help); the only un-booked feature is `panel-persistence`.

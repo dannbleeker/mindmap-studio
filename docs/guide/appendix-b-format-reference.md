@@ -15,6 +15,9 @@ What goes in, what comes out, and what survives the trip. For the day-to-day gui
 - **HTML** -- a single self-contained page, openable in any browser.
 - **HTML slide deck** -- the walk-through as a standalone, navigable presentation in one
   self-contained file (an overview slide, then one per branch).
+- **PowerPoint (`.pptx`)** -- a real, editable slide deck (an overview slide, then one per
+  branch with its subtree as bullets); a minimal PresentationML package that opens in
+  PowerPoint, Keynote, LibreOffice, and Google Slides.
 - **Word (`.docx`)** -- the map as an editable outline document (title, indented bulleted
   topics, notes as italic lines); a minimal Open-XML package that opens in Word,
   LibreOffice, Pages, and Google Docs.

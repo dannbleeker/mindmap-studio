@@ -25,6 +25,7 @@ export interface MapExports {
   exportDeck: () => Promise<void>;
   exportPdf: () => Promise<void>;
   exportDocx: () => Promise<void>;
+  exportPptx: () => Promise<void>;
 }
 
 // Download handlers for every export format, kept out of App so the component
@@ -108,6 +109,18 @@ export function useMapExports(
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         }),
         `${baseName()}.docx`,
+      );
+    },
+    // PowerPoint .pptx — the Walk-Through as a real slide deck. Model-backed,
+    // lazy-loaded (pptx.ts pulls fflate for the OPC zip).
+    async exportPptx() {
+      const { buildPptx } = await import("./io/pptx");
+      const bytes = buildPptx(getDoc()) as BlobPart;
+      download(
+        new Blob([bytes], {
+          type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        }),
+        `${baseName()}.pptx`,
       );
     },
   };

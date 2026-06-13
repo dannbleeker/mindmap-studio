@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-06-13T16:14:02.703Z",
-  "commit": "0a8bcc5",
+  "generatedAt": "2026-06-13T16:27:45.632Z",
+  "commit": "ba91d57",
   "headline": {
-    "linesTsJs": 7984,
+    "linesTsJs": 7993,
     "tests": 173,
     "lineCoveragePct": 42.42,
-    "commits": 150,
+    "commits": 152,
     "ageDays": 1,
     "trackedFiles": 118,
     "featureManualPct": 100,
-    "featureBookPct": 96,
-    "featureExamplePct": 42
+    "featureBookPct": 100,
+    "featureExamplePct": 54
   },
   "code": [
     {
@@ -26,7 +26,7 @@
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1704
+      "lines": 1713
     },
     {
       "category": "Styles (CSS)",
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 13,
-      "lines": 885
+      "lines": 913
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 173,
     "e2e": 0,
-    "durationMs": 4607,
+    "durationMs": 4622,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1582
+        "ms": 1737
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 158
-      },
-      {
-        "file": "test/svgText.test.ts",
-        "ms": 78
+        "ms": 149
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 70
+        "ms": 77
       },
       {
-        "file": "test/mmap.test.ts",
+        "file": "test/svgText.test.ts",
         "ms": 65
+      },
+      {
+        "file": "test/docx.test.ts",
+        "ms": 51
       }
     ]
   },
@@ -216,19 +216,19 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 6832,
+    "bookWords": 7178,
     "chapters": 11,
     "appLoc": 4284,
-    "docToCodeRatio": 1.59
+    "docToCodeRatio": 1.68
   },
   "featureCoverage": {
     "total": 50,
     "manual": 50,
     "manualPct": 100,
-    "book": 48,
-    "bookPct": 96,
-    "bookExample": 21,
-    "bookExamplePct": 42,
+    "book": 50,
+    "bookPct": 100,
+    "bookExample": 27,
+    "bookExamplePct": 54,
     "byArea": {
       "editing": {
         "total": 5,
@@ -268,7 +268,7 @@
       "library": {
         "total": 6,
         "manual": 6,
-        "book": 5
+        "book": 6
       },
       "import": {
         "total": 5,
@@ -278,7 +278,7 @@
       "export": {
         "total": 11,
         "manual": 11,
-        "book": 10
+        "book": 11
       },
       "presentation": {
         "total": 1,
@@ -293,39 +293,28 @@
     },
     "gaps": {
       "noManual": [],
-      "noBook": [
-        {
-          "id": "copy-outline",
-          "name": "Copy outline (Markdown) to clipboard",
-          "since": "2026-06-13"
-        },
-        {
-          "id": "panel-persistence",
-          "name": "Remembered open-panel workspace",
-          "since": "2026-06-12"
-        }
-      ]
+      "noBook": []
     }
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 1,
-    "commits": 150,
-    "commits7d": 150,
+    "commits": 152,
+    "commits7d": 152,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 107
+        "count": 108
       },
       {
         "name": "github-actions[bot]",
-        "count": 43
+        "count": 44
       }
     ],
     "churn30d": {
-      "added": 23136,
-      "removed": 4525
+      "added": 23244,
+      "removed": 4588
     },
-    "changelogEntries": 63
+    "changelogEntries": 64
   }
 }

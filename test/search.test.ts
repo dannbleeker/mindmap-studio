@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { MapNode } from "../src/model/types";
-import { findMatches, replaceInTopic } from "../src/search";
+import type { MapNode, MindMapDoc } from "../src/model/types";
+import { findMatches, replaceInTopic, searchLibrary } from "../src/search";
 
 const root: MapNode = {
   id: "r",
@@ -30,6 +30,50 @@ describe("findMatches", () => {
 
   it("returns an empty list when nothing matches", () => {
     expect(findMatches(root, "xyz")).toEqual([]);
+  });
+});
+
+describe("searchLibrary", () => {
+  const docs: MindMapDoc[] = [
+    { schemaVersion: 1, id: "m1", title: "Q3 Plan", root },
+    {
+      schemaVersion: 1,
+      id: "m2",
+      title: "Roadmap",
+      root: {
+        id: "r2",
+        topic: "Roadmap",
+        children: [{ id: "x", topic: "Marketing push", children: [] }],
+      },
+      floatingTopics: [{ id: "f1", topic: "Legend: market codes", children: [] }],
+    },
+  ];
+
+  it("returns hits across every map with map + node context", () => {
+    const hits = searchLibrary(docs, "market");
+    expect(hits.map((h) => [h.mapId, h.nodeId])).toEqual([
+      ["m1", "a"],
+      ["m1", "a1"],
+      ["m2", "x"],
+      ["m2", "f1"],
+    ]);
+    expect(hits[0].mapTitle).toBe("Q3 Plan");
+    expect(hits[3].topic).toBe("Legend: market codes");
+  });
+
+  it("searches floating topics, not just the central tree", () => {
+    const hits = searchLibrary(docs, "Legend");
+    expect(hits).toEqual([
+      { mapId: "m2", mapTitle: "Roadmap", nodeId: "f1", topic: "Legend: market codes" },
+    ]);
+  });
+
+  it("matches notes too, case-insensitively", () => {
+    expect(searchLibrary(docs, "PIPELINE").map((h) => h.nodeId)).toEqual(["b"]);
+  });
+
+  it("returns an empty list for a blank query", () => {
+    expect(searchLibrary(docs, "  ")).toEqual([]);
   });
 });
 

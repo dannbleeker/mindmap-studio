@@ -137,6 +137,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   (case-insensitive), focuses and selects the match on the canvas, and cycles through
   multiple hits on repeated Enter (with an `n/total` counter). Matching is a pure,
   unit-tested helper (`src/search.ts`).
+- **Library-wide search** — a **🔎 All maps** button opens a dialog that searches *every* map
+  in the library (topics + notes, floating topics included) and jumps to the chosen map and
+  node: a same-map hit focuses in place, another map switches then focuses. Pure, unit-tested
+  matcher (`searchLibrary` in `src/search.ts`); the dialog loads the library with the live
+  current map merged over its saved copy, so it sees unsaved edits.
 - **Print / PDF export** — a `.pdf` button renders the map into a hidden iframe and
   opens the browser's print dialog ("Save as PDF"), laid out landscape to fit wide
   maps. Dep-free and fully local; the print document is a pure helper

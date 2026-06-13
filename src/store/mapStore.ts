@@ -50,6 +50,12 @@ export async function listMaps(): Promise<MapSummary[]> {
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
+// Every full map, for library-wide search. Read-all is fine for a personal library;
+// callers load them once (e.g. when the search dialog opens) and filter in memory.
+export async function getAllMaps(): Promise<MindMapDoc[]> {
+  return (await db()).getAll("maps");
+}
+
 export async function setLastOpened(id: string): Promise<void> {
   await (await db()).put("meta", id, "lastOpened");
 }

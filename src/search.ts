@@ -1,4 +1,7 @@
-import type { MapNode } from "./model/types";
+import type { MapNode, MindMapDoc } from "./model/types";
+
+const matchesQuery = (node: MapNode, q: string): boolean =>
+  node.topic.toLowerCase().includes(q) || (node.note?.toLowerCase().includes(q) ?? false);
 
 // Find node ids whose topic OR note contains the query (case-insensitive), in
 // depth-first order. Notes often hold the substantive content of a map, so Find
@@ -9,13 +12,38 @@ export function findMatches(root: MapNode, query: string): string[] {
   if (!q) return [];
   const ids: string[] = [];
   const walk = (node: MapNode) => {
-    if (node.topic.toLowerCase().includes(q) || node.note?.toLowerCase().includes(q)) {
-      ids.push(node.id);
-    }
+    if (matchesQuery(node, q)) ids.push(node.id);
     for (const child of node.children) walk(child);
   };
   walk(root);
   return ids;
+}
+
+/** A library-wide search hit: which map, which node, and the node's topic for display. */
+export interface LibraryHit {
+  mapId: string;
+  mapTitle: string;
+  nodeId: string;
+  topic: string;
+}
+
+// Search every map's topics + notes — the central tree AND floating topics — for the
+// query, returning hits with enough context to navigate to them. Pure + unit-tested; the
+// UI loads the library, filters with this, and jumps to the chosen map/node.
+export function searchLibrary(docs: MindMapDoc[], query: string): LibraryHit[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const hits: LibraryHit[] = [];
+  for (const doc of docs) {
+    const walk = (node: MapNode) => {
+      if (matchesQuery(node, q)) {
+        hits.push({ mapId: doc.id, mapTitle: doc.title, nodeId: node.id, topic: node.topic });
+      }
+      for (const child of node.children) walk(child);
+    };
+    for (const root of [doc.root, ...(doc.floatingTopics ?? [])]) walk(root);
+  }
+  return hits;
 }
 
 // Case-insensitive replace of every occurrence of `query` within `topic`.

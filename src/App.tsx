@@ -16,9 +16,11 @@ import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
 import { Presentation } from "./present/Presentation";
+import { type LibraryHit, searchLibrary } from "./search";
 import {
   type MapSummary,
   deleteMap,
+  getAllMaps,
   getLastOpened,
   listMaps,
   loadMap,
@@ -82,6 +84,11 @@ export function App() {
   const [styleOpen, setStyleOpen] = useState(!!panels0.styleOpen);
   const [aboutOpen, setAboutOpen] = useState(false);
   const aboutRef = useRef<HTMLDialogElement>(null);
+  const [searchAllOpen, setSearchAllOpen] = useState(false);
+  const [libDocs, setLibDocs] = useState<MindMapDoc[]>([]);
+  const [libQuery, setLibQuery] = useState("");
+  const searchRef = useRef<HTMLDialogElement>(null);
+  const pendingFocus = useRef<string | null>(null);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
 
@@ -358,6 +365,49 @@ export function App() {
     else if (!aboutOpen && el.open) el.close();
   }, [aboutOpen]);
 
+  // Library-wide search dialog (same native-<dialog> pattern). On open, load every map
+  // — with the live current map merged over its saved copy — so search sees latest edits.
+  useEffect(() => {
+    const el = searchRef.current;
+    if (!el) return;
+    if (searchAllOpen && !el.open) {
+      el.showModal();
+      el.querySelector("input")?.focus();
+      (async () => {
+        const all = await getAllMaps().catch(() => [] as MindMapDoc[]);
+        const live = liveDocRef.current;
+        setLibDocs([live, ...all.filter((d) => d.id !== live.id)]);
+      })();
+    } else if (!searchAllOpen && el.open) {
+      el.close();
+    }
+  }, [searchAllOpen]);
+
+  // After a cross-map jump, focus the target node once the new map has re-rendered (two
+  // frames lets mind-elixir finish init + fit). focusNode is a no-op if the id isn't found.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on `doc` on purpose — it
+  // must re-run when the map switches, though the body reads only the pendingFocus ref.
+  useEffect(() => {
+    const id = pendingFocus.current;
+    if (!id) return;
+    pendingFocus.current = null;
+    const raf = requestAnimationFrame(() =>
+      requestAnimationFrame(() => mapRef.current?.focusNode(id)),
+    );
+    return () => cancelAnimationFrame(raf);
+  }, [doc]);
+
+  function goToHit(hit: LibraryHit) {
+    setSearchAllOpen(false);
+    setLibQuery("");
+    if (hit.mapId === liveDocRef.current.id) {
+      mapRef.current?.focusNode(hit.nodeId);
+    } else {
+      pendingFocus.current = hit.nodeId;
+      void switchMap(hit.mapId);
+    }
+  }
+
   // Keep the current map selectable even before its first save lands.
   const mapOptions = maps.some((m) => m.id === doc.id)
     ? maps
@@ -384,6 +434,14 @@ export function App() {
           title="About MindMap Studio — version, license, credits"
         >
           About
+        </button>
+        <button
+          type="button"
+          onClick={() => setSearchAllOpen(true)}
+          style={controlStyle}
+          title="Search across every map in your library"
+        >
+          🔎 All maps
         </button>
         <button
           type="button"
@@ -738,6 +796,89 @@ export function App() {
       )}
 
       {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}
+
+      {/* Search all maps — native <dialog>, same modal semantics as About. */}
+      <dialog
+        ref={searchRef}
+        aria-label="Search all maps"
+        onClose={() => setSearchAllOpen(false)}
+        style={{
+          border: "none",
+          borderRadius: 12,
+          boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
+          padding: "18px 20px",
+          maxWidth: 520,
+          width: "calc(100% - 32px)",
+          color: "#1f2933",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <strong style={{ fontSize: 15, flex: 1 }}>Search all maps</strong>
+          <button
+            type="button"
+            onClick={() => setSearchAllOpen(false)}
+            style={controlStyle}
+            aria-label="Close search"
+          >
+            ✕
+          </button>
+        </div>
+        <input
+          value={libQuery}
+          onChange={(e) => setLibQuery(e.target.value)}
+          placeholder="Find a topic or note across every map…"
+          style={{ ...inputStyle, width: "100%", boxSizing: "border-box" }}
+          aria-label="Search query"
+        />
+        {libQuery.trim() &&
+          (() => {
+            const hits = searchLibrary(libDocs, libQuery);
+            if (hits.length === 0) {
+              return (
+                <p style={{ color: "#73726c", fontSize: 13, margin: "12px 2px 0" }}>No matches.</p>
+              );
+            }
+            return (
+              <ul
+                style={{
+                  listStyle: "none",
+                  margin: "10px 0 0",
+                  padding: 0,
+                  maxHeight: 320,
+                  overflow: "auto",
+                }}
+              >
+                {hits.slice(0, 50).map((h) => (
+                  <li key={`${h.mapId}:${h.nodeId}`}>
+                    <button
+                      type="button"
+                      onClick={() => goToHit(h)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        border: "none",
+                        borderRadius: 6,
+                        background: "transparent",
+                        padding: "6px 8px",
+                        cursor: "pointer",
+                        font: "inherit",
+                      }}
+                    >
+                      <span>{h.topic}</span>{" "}
+                      <span style={{ color: "#9aa5b1", fontSize: 12 }}>— {h.mapTitle}</span>
+                    </button>
+                  </li>
+                ))}
+                {hits.length > 50 && (
+                  <li style={{ color: "#9aa5b1", fontSize: 12, padding: "6px 8px" }}>
+                    +{hits.length - 50} more — refine your search
+                  </li>
+                )}
+              </ul>
+            );
+          })()}
+      </dialog>
 
       {/* About — native <dialog>: modal semantics, focus trap and Esc handled by the browser. */}
       <dialog

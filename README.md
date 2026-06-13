@@ -22,6 +22,8 @@ GitHub Pages).
   selected node, plus a node editor panel (icons, tags, font size/color, link) via node-menu.
 - **Find & Replace** — search the map by topic or note (matches focused on the canvas,
   cycling on repeated Enter), and replace the search text across all matching topics.
+- **Library-wide search** — the **🔎 All maps** button searches every map in the library by
+  topic or note (floating topics included) and jumps to the chosen map and node.
 - **Outline** — a side panel showing the map as an indented outline; click a row to jump to
   that node (noted nodes are marked 📝).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on

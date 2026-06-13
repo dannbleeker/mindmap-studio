@@ -118,6 +118,13 @@ cycle hits (an `n/total` counter shows where you are). Type in the **Replace** b
 **Replace all** to rewrite the search text across every matching topic. Press **`/`** anywhere
 (when you're not typing) to jump straight to Find.
 
+### Search all maps
+
+**🔎 All maps** (in the header) searches your whole library at once — every map's topics and
+notes, including floating topics. Pick a result and it opens that map and focuses the node
+(if the match is in the current map, it jumps straight there). Handy once the library grows
+into a connected knowledge base.
+
 ### Collapse / expand
 
 **⊟** collapses every branch to a level-1 overview; **⊞** expands the whole tree. **Fit**

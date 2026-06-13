@@ -44,6 +44,8 @@ GitHub Pages).
   (`.md`), OPML (`.opml`), PNG, SVG, a self-contained HTML file, a standalone HTML
   **slide deck** (the Walk-Through as a shareable file), a **PowerPoint** (`.pptx`) deck,
   a Word **`.docx`** outline document, an Excel **`.xlsx`** outline sheet, and print-to-PDF.
+- **Copy outline** — copy the map as a Markdown outline straight to the clipboard (no file),
+  for pasting into an email, chat, or doc.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.
 - **Theme gallery** — pick a canvas style (Light, Dark, Ocean, Sunset); persists and carries
   into image exports. Per-topic font/colour/background via the node editor panel.

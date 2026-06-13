@@ -130,6 +130,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   sharedStrings part); pure + deterministic (`src/io/xlsx.ts`, lazy-loaded), topic/note text
   XML-escaped. Verified by opening the output with openpyxl (a real Excel-class reader) plus
   well-formedness + content unit tests.
+- **Copy outline** — a `⧉ Copy outline` button copies the map as a Markdown outline straight
+  to the clipboard (no file download), for pasting into an email, chat, or doc.
 - **More starter templates** — the New menu gains five structured-thinking starters:
   **5 Whys** (a nested root-cause chain), **Decision** (pros & cons), **Retrospective**
   (Start / Stop / Continue), **Meeting notes**, and **Pre-mortem** (`src/templates.ts`).

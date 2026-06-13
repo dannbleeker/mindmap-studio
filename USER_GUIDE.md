@@ -207,6 +207,9 @@ Pick a format from the **⬆ Export…** menu:
 | `.xlsx` | An Excel worksheet — the map as an indented outline (a column per depth) with a Notes column (opens in Excel, LibreOffice Calc, Numbers, Google Sheets) |
 | `.pdf` | Opens your browser's print dialog → "Save as PDF" (landscape) |
 
+Or **⧉ Copy outline** copies the map as a Markdown outline straight to the clipboard — no
+file — for pasting into an email, chat, or doc.
+
 ---
 
 ## Presentation mode

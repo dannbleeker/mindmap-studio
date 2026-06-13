@@ -4,7 +4,7 @@ import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
-import { fromMarkdown } from "./io/markdown";
+import { fromMarkdown, toMarkdown } from "./io/markdown";
 import {
   type LayoutDirection,
   MAP_LINK_PREFIX,
@@ -116,6 +116,17 @@ export function App() {
     setHint(message);
     if (hintTimer.current) clearTimeout(hintTimer.current);
     hintTimer.current = setTimeout(() => setHint(""), 4000);
+  }
+
+  // Copy the map as a Markdown outline straight to the clipboard — no file download —
+  // for pasting into an email, chat, or doc.
+  async function copyOutline() {
+    try {
+      await navigator.clipboard.writeText(toMarkdown(liveDocRef.current));
+      showHint("Outline copied to clipboard");
+    } catch {
+      showHint("Couldn't access the clipboard");
+    }
   }
 
   const refreshMaps = useCallback(async () => {
@@ -678,6 +689,14 @@ export function App() {
           title="Back up every map to one .json file (restore by opening it)"
         >
           ⬇ Backup
+        </button>
+        <button
+          type="button"
+          onClick={copyOutline}
+          style={controlStyle}
+          title="Copy the map as a Markdown outline to the clipboard"
+        >
+          ⧉ Copy outline
         </button>
         <label style={controlStyle}>
           Open files

@@ -22,8 +22,12 @@ entry to 78.7 kB ≤ 150 kB); Phase B (read-only render at parity); Phase C (**a
 side/left/right/org-down/org-up/radial/timeline/fishbone in `flow/layout.ts`, all routed by
 **floating edges** `flow/floating.ts` so connections work in any orientation; layout `<select>`
 extended + a `?layout=` URL param; new kinds fall back to "side" on the elixir engine). All
-verified by headless screenshot under `?engine=flow`. **Next:** Phase D (keyboard editing UX —
-the hard one: `flow/ops.ts` + `useMindmapKeys` + inline contenteditable), then E–I per the plan.
+verified by headless screenshot under `?engine=flow`; Phase D (**editing UX**, model-first — pure
+`flow/ops.ts` transforms (add/outdent/indent/delete/reparent/setTopic/collapse/note/icon/style/
+group/replace; 14 tests), inline contenteditable (double-click / F2), keyboard tree-building
+(Enter=sibling, Tab=child, Shift+Tab=outdent, Delete), all MindMapHandle mutators wired; verified
+end-to-end via `__getLiveDoc`). **Next:** Phase E (undo/redo snapshot stack, drag-to-reparent,
+context menu, themes-as-CSS-vars), then F (new export, **go/no-go #2**)–I per the plan.
 
 ## MindManager UI-parity work (2026-06-12)
 

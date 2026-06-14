@@ -85,6 +85,7 @@ describe("examples gallery", () => {
     expect(anyTopic((n) => !!n.icons?.length)).toBe(true); // markers
     expect(anyTopic((n) => !!n.note)).toBe(true); // notes
     expect(anyTopic((n) => !!n.style)).toBe(true); // per-topic styling
+    expect(anyTopic((n) => !!n.style?.shape)).toBe(true); // geometric node shapes (flowchart vocab)
     expect(anyTopic((n) => !!n.hyperlink)).toBe(true); // hyperlink
   });
 

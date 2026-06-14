@@ -440,6 +440,90 @@ const gtd = (): MindMapDoc =>
     ),
   );
 
+// 14 — Flowchart: node shapes carry the step type, directional links label the branches.
+// Best read in the Org chart ↓ layout (a top-down flow).
+const flowchart = (): MindMapDoc =>
+  doc(
+    "Flowchart: support ticket",
+    node(
+      "fc-start",
+      "New ticket",
+      [
+        node(
+          "fc-triage",
+          "Triage & label",
+          [
+            node(
+              "fc-urgent",
+              "Urgent?",
+              [
+                leaf("fc-esc", "Escalate to on-call", { style: { shape: "rect" } }),
+                leaf("fc-queue", "Add to backlog", { style: { shape: "rect" } }),
+                node(
+                  "fc-resolve",
+                  "Resolve & verify",
+                  [
+                    node(
+                      "fc-notify",
+                      "Notify customer",
+                      [leaf("fc-end", "Closed", { style: { shape: "ellipse" } })],
+                      { style: { shape: "parallelogram" } },
+                    ),
+                  ],
+                  { style: { shape: "rect" } },
+                ),
+              ],
+              { style: { shape: "diamond" } },
+            ),
+          ],
+          { style: { shape: "rect" } },
+        ),
+      ],
+      {
+        style: { shape: "ellipse" },
+        note: "Shapes mark step types: oval = start/end, diamond = decision, parallelogram = I/O. Switch to the Org chart ↓ layout for a classic top-down flow.",
+      },
+    ),
+    {
+      links: [
+        { id: "fl1", from: "fc-urgent", to: "fc-esc", label: "yes" },
+        { id: "fl2", from: "fc-urgent", to: "fc-queue", label: "no" },
+        { id: "fl3", from: "fc-esc", to: "fc-resolve", label: "fixed" },
+        { id: "fl4", from: "fc-queue", to: "fc-resolve", label: "picked up" },
+      ],
+    },
+  );
+
+// 15 — Concept map: ideas linked across branches by labelled, directional arrows (the defining
+// concept-map move). Built around a cycle so the arrows tell a story. Try the Radial layout.
+const concept = (): MindMapDoc =>
+  doc(
+    "Concept map: the water cycle",
+    node(
+      "cm-root",
+      "Water cycle",
+      [
+        leaf("cm-sun", "The Sun", { style: { shape: "ellipse" }, icons: ["⭐"] }),
+        leaf("cm-evap", "Evaporation", { style: { shape: "ellipse" } }),
+        leaf("cm-cond", "Condensation", { style: { shape: "ellipse" } }),
+        leaf("cm-prec", "Precipitation", { style: { shape: "ellipse" } }),
+        leaf("cm-coll", "Collection", { style: { shape: "ellipse" } }),
+      ],
+      {
+        note: "A concept map links ideas across branches with labelled arrows — follow them around the cycle. The arrowheads show direction.",
+      },
+    ),
+    {
+      links: [
+        { id: "cl1", from: "cm-sun", to: "cm-evap", label: "drives" },
+        { id: "cl2", from: "cm-evap", to: "cm-cond", label: "vapour rises & cools" },
+        { id: "cl3", from: "cm-cond", to: "cm-prec", label: "forms clouds" },
+        { id: "cl4", from: "cm-prec", to: "cm-coll", label: "falls as rain / snow" },
+        { id: "cl5", from: "cm-coll", to: "cm-evap", label: "warms & repeats" },
+      ],
+    },
+  );
+
 interface MapExample {
   id: string;
   name: string;
@@ -454,6 +538,8 @@ export const examples: MapExample[] = [
   { id: "okrs", name: "Quarterly OKRs", build: okrs },
   { id: "retro", name: "Team retrospective", build: retro },
   { id: "swot", name: "SWOT (worked)", build: swot },
+  { id: "flowchart", name: "Flowchart (shapes + flow)", build: flowchart },
+  { id: "concept", name: "Concept map (linked ideas)", build: concept },
   { id: "runbook", name: "Incident runbook", build: runbook },
   { id: "gtd", name: "GTD natural planning", build: gtd },
   { id: "outline", name: "Talk / content outline", build: outline },

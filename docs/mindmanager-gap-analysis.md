@@ -54,7 +54,7 @@ reasonably own** — not "everything MindManager has."
 |---|---|---|
 | Central topic, topics, subtopics, deep nesting | ✅ | Core canvas (React Flow). |
 | Floating topics | ✅ | Imported + editable; rendered in a labelled branch. |
-| Relationships (labelled connectors) | ✅ | Cross-links / relationship arrows, two-way. |
+| Relationships (labelled connectors) | ✅ | Cross-links / relationship arrows with a **directional arrowhead** at the target (shipped 2026-06-14). |
 | Boundaries (grouping enclosures) | ✅ | MindManager-style **filled box** + label chip (custom overlay). |
 | Summary topics (bracket beside a range) | ✅ | **⊐ Summary** — a labelled, side-aware bracket beside a branch (renamable; drawn into exports). Shipped 2026-06-14. |
 | Callouts (annotation bubbles) | ✅ | Anchored callout bubbles (React Flow custom node). |
@@ -75,23 +75,27 @@ reasonably own** — not "everything MindManager has."
 | Org-chart / tree-down / tree-up | ✅ | Org-chart ↓ / ↑ layouts (dagre). |
 | Timeline layout | ✅ | Hand-written timeline layout. |
 | Fishbone / Ishikawa | ✅ | Hand-written fishbone layout. |
-| Flowchart / concept map (free connectors + shapes) | ⬜ | Possible on React Flow (place-anywhere nodes + free connectors), but a substantial build — not started. |
-| Funnel / matrix / Venn / onion diagrams | ⬜ | Distinct diagram builders; buildable but not started. |
+| Grid / matrix layout (2×2 SWOT) | ✅ | Tiles the first-level branches into a grid (shipped 2026-06-14). |
+| Flowchart / concept map | 🟡 | **Node shapes** (diamond/oval/parallelogram/hexagon/cylinder) + **directional arrows** + **flowchart & concept-map templates** shipped 2026-06-14. A true **free-connector canvas** (place-anywhere nodes) is still ⬜ — today's are tree-based. |
+| Funnel / Venn / onion diagrams | ⬜ | Distinct diagram builders; buildable but not started. (Matrix/grid now ✅ as a layout.) |
 | Kanban board view | ✅ | **▦ Board** — a read-only model-driven view grouping topics into columns by tag (shipped 2026-06-14). |
 | Whiteboard / sticky-note canvas | ⬜ | Free-form canvas (not a tree); buildable on React Flow, not started. |
 | Auto-layout / smart relationship routing | ✅ | Auto-layout per direction; boundary/minimap overlays track it. |
 | Per-branch layout override | ⬜ | A different layout on one branch — not built. |
 
-**Read:** the alternate-layout gap is **closed** — org-chart, timeline, fishbone, and radial all
-shipped with the React Flow engine. What remains in §2 is the *non-tree* diagram families
-(flowchart / concept map / matrix / Venn / funnel / whiteboard), each its own builder.
+**Read:** the alternate-layout gap is **closed** — org-chart, timeline, fishbone, radial, and now
+**grid/matrix** all ship with the React Flow engine. The flowchart/concept-map gap is **largely
+closed too**: node shapes (the flowchart vocabulary), directional relationship arrows, and starter
+templates all shipped 2026-06-14, so tree-shaped flowcharts and concept maps are first-class. What
+remains in §2 is the genuinely *free-canvas* families — place-anywhere flowchart/concept map, a
+whiteboard, and the Venn/onion/funnel/brace diagram builders — each its own build.
 
 ## 3. Styling & design
 
 | MindManager feature | Status | Notes |
 |---|---|---|
 | Themes (whole-map design) | ✅ | Light / Dark / Ocean / Sunset gallery. |
-| Per-topic formatting (font, fill, border, shape, bold) | ✅ | Style bar + per-topic font size/colour/background. |
+| Per-topic formatting (font, fill, border, shape, bold) | ✅ | Style bar + per-topic font size/colour/background; **shape** now includes the geometric flowchart vocabulary (diamond/oval/parallelogram/hexagon/cylinder), canvas == export. |
 | Rich-text **inside** a topic (mixed formatting) | ✅ | Inline bold/italic/underline/strike (contenteditable, sanitised). |
 | Icons / markers (priority, progress, flags, …) | ✅ | Marker palette; **task progress pie** + **due-date chip**; imported `.mmap` icons → emoji. |
 | Tags / tag groups | ✅ | Add/remove tags in the ℹ Info panel; index + filter + Board columns by tag. |

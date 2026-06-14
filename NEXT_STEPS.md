@@ -39,8 +39,11 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
 - [ ] **A — AI assist** (biggest category gap). Only a **keyless copy-prompt → paste-result
       bridge** (or optional BYO-key) fits the no-backend identity; paste-to-tree is half-built via
       OPML/Markdown import. Prompt→map, expand-branch, doc/URL→map, summarise.
-- [ ] **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple
-      sheets per file.
+- [x] **B — More structures** — Kanban board, summary topics, **node shapes** (flowchart vocabulary),
+      **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), and **flowchart +
+      concept-map templates** all **shipped 2026-06-14**. Remaining: a true **free-canvas** flowchart /
+      concept map (today's are tree-based), a **whiteboard**, **brace map**, **Venn / onion / funnel**
+      diagram builders, **per-branch layout**, and **multiple sheets per file**.
 - [x] **C — Content depth** — task progress + roll-up, start/due dates (overdue + filter), file
       attachments, conditional formatting, the styles organizer, and **task priority** (High/Med/Low
       + priority filter) all **shipped 2026-06-14**. Only **LaTeX/math** remains, deferred by decision
@@ -59,13 +62,10 @@ Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus)
 tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), **E**
 (saved filters + fuzzy Find), the first slice of **D** (paste text → map), and a good chunk of
 **C** (task progress + roll-up, then start/due dates with overdue + a due-date filter).
-Remaining bets: **A** (keyless AI bridge) and the rest of **B** (more diagram types: flowchart /
-concept map / matrix / Venn / funnel, free-form whiteboard, per-branch layout, richer node shapes).
-Shipped 2026-06-14 from **B**: **Kanban board** + **summary topics** + **node shapes** (flowchart
-vocabulary: diamond / oval / parallelogram / hexagon / cylinder) + **directional relationships**
-(arrowhead at the target) + **grid / matrix layout** (2×2 for SWOT / Eisenhower) — together the
-enablers for flowchart, concept-map, and matrix frames. (LaTeX is the only deferred C item — heavy
-KaTeX + offline fonts.)
+Remaining bets: **A** (keyless AI bridge) and the rest of **B** — the *free-canvas* families
+(place-anywhere flowchart / concept map, a whiteboard), plus brace / Venn / onion / funnel diagram
+builders, per-branch layout, and multiple sheets per file. (The tree-shaped diagram types — shapes,
+arrows, grid, flowchart/concept-map templates — are done.)
 
 ## Reference
 

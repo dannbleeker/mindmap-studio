@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Diagram starter templates** — two new entries in **+ New… → Examples** showcase the new
+  structures: a **Flowchart** (node shapes mark step types — oval start/end, diamond decision,
+  parallelogram I/O — with directional links labelling the branches) and a **Concept map** (ideas
+  linked across branches by labelled, directional arrows, built around the water cycle). Open one to
+  explore the shapes + arrows, or use it as a starting point.
 - **Grid / matrix layout** — a new layout (under **Diagram** in the layout picker) that **tiles the
   root's first-level branches into a grid** — four branches become a **2×2**, the shape of a SWOT,
   Eisenhower, or any matrix frame. Each branch keeps its own subtree laid out beneath it, with the

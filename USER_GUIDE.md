@@ -36,6 +36,7 @@ Left to right:
 | **▶ Present** | Start [presentation mode](#presentation-mode) |
 | **Fit** | Scale + center the map in the viewport |
 | **⊟ / ⊞** | [Collapse / expand all](#collapse--expand) branches |
+| **1. Numbering** | Toggle [outline numbering](#auto-numbering) (1, 1.2, …) on every topic |
 | **📝 Notes** | Toggle the [notes editor](#notes) |
 | **🏷 Markers** | Toggle the [marker palette](#markers) |
 | **🎨 Style** | Toggle the [style bar](#per-topic-styling) |
@@ -120,6 +121,16 @@ to clear it.) This lets you build a connected web of maps.
 **☰ Outline** opens a live, indented outline of the whole map. Click any row to jump to that
 node on the canvas. The **Filter outline…** box narrows the list to matching topics; 📝 marks
 noted nodes.
+
+### Auto-numbering
+
+**1. Numbering** prefixes every topic with its hierarchical outline number — `1`, `1.2`,
+`1.2.3`, and so on — both on the canvas and in the Outline panel, and the numbers carry through
+to image, PDF, and Office exports. The central topic is the implicit "0" and stays unnumbered.
+It's a view toggle: the numbers are derived from the tree's shape, never written into your topic
+text, so turning it off leaves your topics exactly as they were and search/exports stay clean.
+Handy for referring to a specific node by number ("see 3.2") in a meeting or a written summary.
+The setting is remembered between sessions.
 
 ### Marker & tag index
 

@@ -2,7 +2,13 @@ import { useState } from "react";
 import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
-import { type IndexEntry, type IndexHit, markerTagIndex, outlineRows } from "./outline";
+import {
+  type IndexEntry,
+  type IndexHit,
+  markerTagIndex,
+  outlineNumbers,
+  outlineRows,
+} from "./outline";
 import { controlStyle, inputStyle } from "./ui";
 
 const FILL_SWATCHES = ["#fde2e2", "#e2ecfd", "#e2fbe8", "#fdf3e2", "#efe2fd", "#ececec"];
@@ -136,16 +142,19 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
 export function OutlinePanel({
   root,
   filter,
+  numbered,
   onFilterChange,
   onPick,
 }: {
   root: MapNode;
   filter: string;
+  numbered?: boolean;
   onFilterChange: (value: string) => void;
   onPick: (id: string) => void;
 }) {
   const q = filter.trim().toLowerCase();
   const rows = outlineRows(root).filter((row) => !q || row.topic.toLowerCase().includes(q));
+  const numbers = numbered ? outlineNumbers(root) : undefined;
   return (
     <aside
       style={{
@@ -188,6 +197,7 @@ export function OutlinePanel({
             }}
           >
             {row.hasNote ? "📝 " : ""}
+            {numbers?.get(row.id) ? `${numbers.get(row.id)} ` : ""}
             {row.topic || "(untitled)"}
           </button>
         ))}

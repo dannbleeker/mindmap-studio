@@ -83,9 +83,17 @@ function themeVars(theme: MindMapProps["theme"]): CSSProperties {
   } as CSSProperties;
 }
 
-function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: MindMapProps) {
+function FlowInner({
+  doc,
+  theme,
+  direction = "side",
+  numbered = false,
+  onChange,
+  onSelect,
+  ref,
+}: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
-  const projected = useMemo(() => project(doc, palette), [doc, palette]);
+  const projected = useMemo(() => project(doc, palette, numbered), [doc, palette, numbered]);
   const initialNodes = useMemo(() => {
     const pos = computeLayout(
       projected.nodes,
@@ -135,6 +143,8 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   paletteRef.current = palette;
   const directionRef = useRef<LayoutKind>(direction);
   directionRef.current = direction;
+  const numberedRef = useRef(numbered);
+  numberedRef.current = numbered;
   const selectedRef = useRef<string | null>(null);
   selectedRef.current = selectedId;
   const editingRef = useRef<string | null>(null);
@@ -154,7 +164,7 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
       docRef.current = newDoc;
       setRenderDoc(newDoc);
       if (nextSelected !== undefined) selectedRef.current = nextSelected;
-      const proj = project(newDoc, paletteRef.current);
+      const proj = project(newDoc, paletteRef.current, numberedRef.current);
       const est = estimateSizeOf(proj.nodes);
       const measured = getNodes();
       const sizeOf = (id: string) => {
@@ -311,6 +321,17 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
     requestAnimationFrame(() => fitView({ duration: 300 }));
   }, [direction, sync, fitView]);
 
+  // Re-project + re-layout when auto-numbering is toggled (number prefixes change node widths).
+  const firstNumberRun = useRef(true);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `numbered` is the trigger; sync reads numberedRef.
+  useEffect(() => {
+    if (firstNumberRun.current) {
+      firstNumberRun.current = false;
+      return;
+    }
+    sync(docRef.current);
+  }, [numbered, sync]);
+
   // One-time refine once React Flow has measured the nodes (better sizing than estimates).
   const refined = useRef(false);
   useEffect(() => {
@@ -407,7 +428,13 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
           });
         }
         const cssVar = (themeRef.current ?? mindManagerTheme).cssVar;
-        const svg = buildFlowSvg(docRef.current, rects, paletteRef.current, cssVar);
+        const svg = buildFlowSvg(
+          docRef.current,
+          rects,
+          paletteRef.current,
+          cssVar,
+          numberedRef.current,
+        );
         return new Blob([svg], { type: "image/svg+xml" });
       },
       fit: () => fitView({ duration: 300 }),

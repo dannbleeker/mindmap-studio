@@ -30,6 +30,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
   const {
     topic,
     topicRich,
+    number,
     icons,
     tags,
     style,
@@ -117,6 +118,11 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
         />
       ) : null}
       <span style={{ whiteSpace: "pre-wrap" }}>
+        {number ? (
+          <span style={{ marginRight: 5, opacity: 0.55, fontVariantNumeric: "tabular-nums" }}>
+            {number}
+          </span>
+        ) : null}
         {icons?.length ? <span style={{ marginRight: 4 }}>{icons.join(" ")}</span> : null}
         {isEditing ? (
           <span

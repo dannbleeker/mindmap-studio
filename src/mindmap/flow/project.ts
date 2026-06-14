@@ -1,4 +1,5 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
+import { outlineNumbers } from "../../outline";
 import { CROSSLINK_COLOR } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
 
@@ -44,10 +45,17 @@ function assignSides(children: MapNode[]): ("left" | "right")[] {
   });
 }
 
-export function project(doc: MindMapDoc, palette: string[] = FALLBACK_PALETTE): ProjectResult {
+export function project(
+  doc: MindMapDoc,
+  palette: string[] = FALLBACK_PALETTE,
+  numbered = false,
+): ProjectResult {
   const pal = palette.length > 0 ? palette : FALLBACK_PALETTE;
   const nodes: TopicNode[] = [];
   const edges: FlowEdge[] = [];
+  // Auto-numbering is a view concern: numbers are computed from the tree and shown as a prefix,
+  // never written into the model's `topic` (so exports/search/outline stay clean).
+  const numbers = numbered ? outlineNumbers(doc.root) : undefined;
 
   const emit = (
     node: MapNode,
@@ -66,6 +74,7 @@ export function project(doc: MindMapDoc, palette: string[] = FALLBACK_PALETTE): 
       data: {
         topic: node.topic,
         topicRich: node.topicRich,
+        number: numbers?.get(node.id),
         note: node.note,
         hyperlink: node.hyperlink,
         image: node.image,

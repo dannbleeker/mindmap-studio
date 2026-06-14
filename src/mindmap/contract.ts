@@ -65,5 +65,7 @@ export interface MindMapProps {
   theme?: MindMapTheme;
   /** Layout: a direction, or an alternate layout (org-chart, radial, timeline, fishbone). */
   direction?: LayoutKind;
+  /** Show hierarchical outline numbers (1, 1.2, …) as a prefix on each topic (view-only). */
+  numbered?: boolean;
   ref?: Ref<MindMapHandle>;
 }

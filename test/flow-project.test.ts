@@ -68,4 +68,19 @@ describe("flow project (model → React Flow)", () => {
     expect(node("c")?.data.side).toBe("left");
     expect(["left", "right"]).toContain(node("a")?.data.side);
   });
+
+  it("omits outline numbers by default", () => {
+    expect(node("a")?.data.number).toBeUndefined();
+    expect(node("r")?.data.number).toBeUndefined();
+  });
+
+  it("attaches hierarchical outline numbers when numbered (root + floating excluded)", () => {
+    const numbered = project(doc, undefined, true).nodes;
+    const n = (id: string) => numbered.find((x) => x.id === id);
+    expect(n("r")?.data.number).toBeUndefined(); // root isn't numbered
+    expect(n("a")?.data.number).toBe("1");
+    expect(n("a1")?.data.number).toBe("1.1");
+    expect(n("c")?.data.number).toBe("3"); // third child, even with a collapsed sibling between
+    expect(n("f")?.data.number).toBeUndefined(); // floating topics aren't in the outline
+  });
 });

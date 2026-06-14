@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Auto-numbering** — a **1. Numbering** toolbar toggle that prefixes every topic with its
+  hierarchical outline number (1, 1.2, 1.2.3 …) on the canvas *and* in the Outline panel, and
+  carries through to image/PDF/Office exports. Purely a view: the numbers are computed from the
+  tree (pure `outlineNumbers()`), never written into the model, so topics, search, and the flat
+  exporters stay clean. The root (central topic) is the implicit "0" and isn't numbered. Persisted.
 - **Marker & tag index panel** — a new **📑 Index** side panel listing every marker and tag
   used in the map, each grouped with the topics carrying it (with a count); click any entry to
   centre + select that node. A read-only navigation companion to the per-node **Markers** palette,

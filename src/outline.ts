@@ -54,3 +54,19 @@ export function markerTagIndex(
     [...m.keys()].sort().map((key) => ({ key, hits: m.get(key) ?? [] }));
   return { markers: sorted(markers), tags: sorted(tags) };
 }
+
+// Hierarchical outline numbers (1, 1.2, 1.2.3, …) for every node *below* the root — the root
+// (the central topic) is the implicit "0" and isn't numbered. Pure; drives the optional
+// auto-numbering view on the canvas + outline panel. Keyed by node id.
+export function outlineNumbers(root: MapNode): Map<string, string> {
+  const numbers = new Map<string, string>();
+  const walk = (node: MapNode, prefix: string) => {
+    node.children.forEach((child, i) => {
+      const num = prefix ? `${prefix}.${i + 1}` : `${i + 1}`;
+      numbers.set(child.id, num);
+      walk(child, num);
+    });
+  };
+  walk(root, "");
+  return numbers;
+}

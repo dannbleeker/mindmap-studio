@@ -128,8 +128,9 @@ Remaining items are Dann-dependent:
       every MindManager capability mapped to shipped / partial / renderer-ceiling / out-of-scope,
       with a **prioritized list of buildable gaps**. Treat that doc's "Prioritized buildable gaps"
       section as the live signal behind this backlog. Headline quick wins it surfaced: the
-      **marker/tag index view** has shipped (📑 Index panel, 2026-06-14); still to build:
-      **auto-numbering**, a **read-only Power Filter**, and **in-map topic-to-topic jump links**.
+      **marker/tag index view** (📑 Index panel) and **auto-numbering** (1. Numbering toggle) have
+      both shipped (2026-06-14); still to build: a **read-only Power Filter** and **in-map
+      topic-to-topic jump links**.
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 

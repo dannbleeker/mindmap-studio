@@ -9,6 +9,8 @@ export type TopicData = {
   topic: string;
   /** Inline rich-text HTML (sanitised subset); rendered on the canvas, `topic` is the fallback. */
   topicRich?: string;
+  /** Outline number ("1.2.3") shown as a prefix when auto-numbering is on; undefined = off / root. */
+  number?: string;
   note?: string;
   hyperlink?: string;
   image?: MapImage;

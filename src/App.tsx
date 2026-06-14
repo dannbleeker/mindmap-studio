@@ -102,6 +102,8 @@ export function App() {
   const [indexOpen, setIndexOpen] = useState(!!panels0.indexOpen);
   const [markersOpen, setMarkersOpen] = useState(!!panels0.markersOpen);
   const [styleOpen, setStyleOpen] = useState(!!panels0.styleOpen);
+  // Auto-numbering: show hierarchical outline numbers (1, 1.2, …) on the canvas + outline.
+  const [numbered, setNumbered] = useState(!!panels0.numbered);
   const [aboutOpen, setAboutOpen] = useState(false);
   const aboutRef = useRef<HTMLDialogElement>(null);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
@@ -416,12 +418,12 @@ export function App() {
     try {
       localStorage.setItem(
         "mindmap-panels",
-        JSON.stringify({ notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen }),
+        JSON.stringify({ notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen, numbered }),
       );
     } catch {
       // preference is best-effort
     }
-  }, [notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen]);
+  }, [notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen, numbered]);
 
   // Drive the native <dialog> from React state: showModal() gives us the
   // top-layer backdrop, focus handling, and Escape-to-close for free.
@@ -603,6 +605,15 @@ export function App() {
           title="Expand all branches"
         >
           ⊞
+        </button>
+        <button
+          type="button"
+          onClick={() => setNumbered((v) => !v)}
+          style={controlStyle}
+          aria-pressed={numbered}
+          title="Toggle outline numbering (1, 1.2, 1.2.3 …) on topics"
+        >
+          1. Numbering
         </button>
         <label style={controlStyle}>
           Image
@@ -906,6 +917,7 @@ export function App() {
           <OutlinePanel
             root={liveDoc.root}
             filter={outlineFilter}
+            numbered={numbered}
             onFilterChange={setOutlineFilter}
             onPick={(id) => mapRef.current?.focusNode(id)}
           />
@@ -923,6 +935,7 @@ export function App() {
             doc={doc}
             theme={theme.theme}
             direction={layout}
+            numbered={numbered}
             onChange={(d) => {
               liveDocRef.current = d;
               setLiveDoc(d);

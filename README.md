@@ -30,6 +30,8 @@ GitHub Pages).
   that node (noted nodes are marked 📝).
 - **Marker & tag index** — a side panel listing every marker and tag in the map, grouped with
   the topics carrying each one; click a topic to jump to it.
+- **Auto-numbering** — a toggle that prefixes every topic with its outline number (1, 1.2, …)
+  on the canvas, in the outline, and in exports; purely a view (your topic text is untouched).
 - **Minimap + zoom** — a corner overview with a draggable viewport for panning large maps,
   plus integrated zoom controls (−/+, live %, fit).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on

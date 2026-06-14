@@ -76,6 +76,22 @@ a hundred topics, that's the difference between scanning the whole thing for red
 them off a list. Markers earn their keep precisely because the index makes them queryable after
 the fact -- so flag deliberately, and the index becomes a live status board.
 
+## Numbering the branches
+
+A radial map is wonderful for thinking and terrible for *pointing*. "Look at the third sub-point
+of the second branch" is a sentence no one wants to say. The **1. Numbering** toggle fixes that:
+it stamps every topic with its outline number -- `1`, then `1.1`, `1.2`, then `1.2.1` -- on the
+canvas and down the outline at once, so now you can just say "see 2.3" and everyone's eyes land in
+the same place. The numbers follow into the PNG, PDF, and Office exports too, which is exactly when
+you need them: a printed map handed round a meeting, or a slide that references a node by number.
+
+It's worth being clear about what numbering *isn't*. It doesn't change your map. The numbers are
+computed from the tree's shape the instant you switch it on and forgotten the instant you switch
+it off -- they never touch your topic text, so search still finds "Budget" and not "4.2 Budget",
+and a Markdown export is still clean prose. Reorder a branch and the numbers renumber themselves,
+because they were never really yours to begin with -- they belong to the structure. Turn it on
+when you need to talk *about* the map; turn it off when you just want to look *at* it.
+
 ## Find and replace
 
 Press **/** anywhere to jump straight to **Find**. It searches both topics *and* notes,

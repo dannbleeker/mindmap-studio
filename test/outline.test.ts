@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MapNode } from "../src/model/types";
-import { markerTagIndex, outlineRows } from "../src/outline";
+import { markerTagIndex, outlineNumbers, outlineRows } from "../src/outline";
 
 const root: MapNode = {
   id: "r",
@@ -82,5 +82,19 @@ describe("markerTagIndex", () => {
       markers: [],
       tags: [],
     });
+  });
+});
+
+describe("outlineNumbers", () => {
+  it("numbers the tree hierarchically, leaving the root unnumbered", () => {
+    const nums = outlineNumbers(tagged);
+    expect(nums.has("r")).toBe(false); // the root (central topic) gets no number
+    expect(nums.get("a")).toBe("1");
+    expect(nums.get("a1")).toBe("1.1");
+    expect(nums.get("b")).toBe("2");
+  });
+
+  it("returns an empty map for a childless root", () => {
+    expect(outlineNumbers({ id: "x", topic: "Bare", children: [] }).size).toBe(0);
   });
 });

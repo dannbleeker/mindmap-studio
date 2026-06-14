@@ -131,8 +131,9 @@ export function buildFlowSvg(
   rects: Map<string, NodeRect>,
   palette: string[],
   cssVar: Record<string, string>,
+  numbered = false,
 ): string {
-  const { nodes, edges } = project(doc, palette);
+  const { nodes, edges } = project(doc, palette, numbered);
   const callouts = collectCallouts(doc, rects);
   const nodeBg = cssVar["--bgcolor"] ?? "#ffffff";
   const color = cssVar["--color"] ?? "#2c2c2a";
@@ -259,6 +260,7 @@ export function buildFlowSvg(
     const fontSize = Number.parseFloat(d.style?.fontSize ?? "") || 16;
     const lines = d.topic.split("\n").map((l) => l.trim());
     if (d.icons?.length) lines[0] = `${d.icons.join(" ")} ${lines[0] ?? ""}`.trim();
+    if (d.number) lines[0] = `${d.number} ${lines[0] ?? ""}`.trim();
     const nonEmpty = lines.filter((l) => l.length > 0);
     if (nonEmpty.length > 0) {
       parts.push(

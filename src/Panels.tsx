@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { SelectedNode } from "./mindmap/MindMap";
+import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
 import { outlineRows } from "./outline";

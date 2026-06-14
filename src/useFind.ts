@@ -1,5 +1,5 @@
 import { type FormEvent, type RefObject, useRef, useState } from "react";
-import type { MindMapHandle } from "./mindmap/MindMap";
+import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
 import { findDocMatches } from "./search";
 

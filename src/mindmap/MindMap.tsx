@@ -10,6 +10,12 @@ import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapImage, MindMapDoc, NodeStyle } from "../model/types";
 import { replaceInTopic } from "../search";
+import {
+  type LayoutDirection,
+  MAP_LINK_PREFIX,
+  type MindMapHandle,
+  type SelectedNode,
+} from "./contract";
 import { type MinimapHandle, createMinimap } from "./minimap";
 import {
   type MeArrow,
@@ -22,37 +28,6 @@ import {
   toSummaries,
 } from "./sync";
 import { type MindElixirTheme, mindManagerTheme } from "./theme";
-
-export interface SelectedNode {
-  id: string;
-  topic: string;
-  note: string;
-}
-
-export interface MindMapHandle {
-  exportSvg: () => Blob | null;
-  focusNode: (id: string) => void;
-  fit: () => void;
-  /** Apply an image to the currently-selected node; false if nothing is selected. */
-  setSelectedImage: (image: MapImage) => boolean;
-  /** Set the note on the currently-selected node; false if nothing is selected. */
-  setSelectedNote: (note: string) => boolean;
-  /** Toggle a marker icon on the selected node; false if nothing is selected. */
-  toggleSelectedIcon: (icon: string) => boolean;
-  /** Replace the query in every matching node topic; returns the count changed. */
-  replaceTopics: (query: string, replacement: string) => number;
-  /** Collapse (false) or expand (true) every branch below the root. */
-  setAllExpanded: (expanded: boolean) => void;
-  /** Merge a style patch into the selected node ("" / null clears a key); false if none selected. */
-  setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
-  /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
-  setSelectedHyperlink: (url: string) => boolean;
-  /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
-  groupBranch: (id: string) => boolean;
-}
-
-/** Prefix marking a node hyperlink as an in-app link to another map. */
-export const MAP_LINK_PREFIX = "#map=";
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
 function fitView(me: MindElixirInstance): void {
@@ -176,8 +151,6 @@ interface MindMapProps {
   direction?: LayoutDirection;
   ref?: Ref<MindMapHandle>;
 }
-
-export type LayoutDirection = "side" | "left" | "right";
 
 /** Re-layout the current map to a direction (preserves in-memory edits). */
 function applyDirection(me: MindElixirInstance, direction: LayoutDirection): void {

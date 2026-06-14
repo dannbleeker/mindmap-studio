@@ -12,7 +12,7 @@ import {
   MindMap,
   type MindMapHandle,
   type SelectedNode,
-} from "./mindmap/MindMap";
+} from "./mindmap";
 import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";

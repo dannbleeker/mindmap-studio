@@ -5,7 +5,7 @@ import { toMarkdown } from "./io/markdown";
 import { toMermaid } from "./io/mermaid";
 import { sanitizeSvg } from "./io/svgSanitize";
 import { inlineSvgText } from "./io/svgText";
-import type { MindMapHandle } from "./mindmap/MindMap";
+import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
 
 function download(blob: Blob, filename: string): void {

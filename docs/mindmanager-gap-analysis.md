@@ -98,7 +98,7 @@ shipped with the React Flow engine. What remains in §2 is the *non-tree* diagra
 | Conditional formatting | ✅ | Style-by-rule (tag / marker / completion) via the **🎨 Styles** panel; view-only overlay. (The full SmartRules *automation* engine stays 🚫.) |
 | Images in topics / standalone images | ✅ | In-app image attach; `.mmap` blob import is the known gap. |
 | Map background / canvas styling | ✅ | Per-map background colour (the **Canvas** control); exports with the map. |
-| Styles organizer (reusable named styles) | ⬜ | Power-user nicety; low priority for a single-user tool. |
+| Styles organizer (reusable named styles) | ✅ | Save a topic's look as a named style + reuse it (in the **🎨 Styles** panel; app-wide). |
 
 ## 4. Notes, attachments & links
 
@@ -234,6 +234,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   tag (cards show progress + due; click to jump) — shipped 2026-06-14 (§2 alternate views).
 - **Conditional formatting** — the **🎨 Styles** panel: rules that auto-style topics by
   tag / marker / completion (view-only overlay) — shipped 2026-06-14 (§3 styling).
+- **Styles organizer** — named, reusable per-node styles (save a topic's look, apply it to others),
+  in the same **🎨 Styles** panel — shipped 2026-06-14 (§3 styling).
 - **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
   (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
   (navigation polish), alongside the earlier ◎ Focus.
@@ -258,9 +260,11 @@ After this session the in-scope list is short. What's genuinely left:
 3. **Free-form whiteboard / sticky-note canvas** — place notes anywhere, not in a tree.
 4. **Richer node shapes** (diamond / hexagon / chevron …) and **per-branch layout override** — both
    need clip-path/geometry + export work to avoid clipping text.
-5. **Styles organizer** (named reusable styles) — low priority for a single-user tool.
-   (Conditional formatting — style-by-rule — **shipped 2026-06-14**.)
-6. **LaTeX / math rendering** in topics/notes.
+5. **LaTeX / math rendering** in topics/notes — the one heavy item: needs KaTeX (large JS + ~1 MB of
+   offline-precached fonts) for something MindManager doesn't do natively. Deferred pending a call on
+   that offline-cache cost.
+6. **Numeric priority (1–9)** — deliberately **not built**: it duplicates the existing emoji priority
+   markers. Would only add value as *filterable/sortable* priority (a Power-Filter add), if wanted.
 7. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
 8. **Interchange long-tail** — **XMind export**, **MindMup** + **Markmap** import, **image-bearing
    `.mmap`** import (blocked on a real sample), and a **`.mmap` writer** (large XSD, high-risk).

@@ -7,6 +7,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Styles organizer** — in the **🎨 Styles** panel, save the selected topic's look as a **named
+  style** and reuse it on any topic with one click. Presets persist locally and travel between maps.
 - **Conditional formatting** — a **🎨 Styles** panel where you set rules that **auto-style topics**
   by **tag**, **marker**, or **completion** (e.g. *completed → green*, *#risk → red border*). Rules
   are a **view-only overlay** layered *under* a topic's own styling (manual styling always wins), so

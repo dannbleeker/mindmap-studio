@@ -6,6 +6,7 @@ import {
   HistoryPanel,
   InfoPanel,
   MarkerTagIndex,
+  type NamedStyle,
   OutlinePanel,
   StylesPanel,
 } from "./Panels";
@@ -174,6 +175,34 @@ export function App() {
       // preference is best-effort
     }
   }, [savedFilters]);
+  // Named styles ("styles organizer"), persisted app-wide so a look is reusable across maps.
+  const [namedStyles, setNamedStyles] = useState<NamedStyle[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("mindmap-named-styles") ?? "[]");
+    } catch {
+      return [];
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("mindmap-named-styles", JSON.stringify(namedStyles));
+    } catch {
+      // preference is best-effort
+    }
+  }, [namedStyles]);
+  const saveNamedStyle = (name: string) => {
+    const style = selectedNode?.style;
+    if (!style || Object.keys(style).length === 0) {
+      showHint("Select a styled topic first (style it, then save it as a named style).");
+      return;
+    }
+    setNamedStyles((prev) => [
+      ...prev.filter((s) => s.name !== name),
+      { id: crypto.randomUUID(), name, style },
+    ]);
+  };
+  const deleteNamedStyle = (id: string) =>
+    setNamedStyles((prev) => prev.filter((s) => s.id !== id));
   const saveCurrentFilter = (name: string) => {
     const criteria: FilterCriteria = {
       text: filterText,
@@ -1295,10 +1324,17 @@ export function App() {
           <StylesPanel
             rules={liveDoc.rules ?? []}
             markers={MARKER_PALETTE}
+            namedStyles={namedStyles}
             onAddRule={(rule) => mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])}
             onDeleteRule={(id) =>
               mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
             }
+            onSaveStyle={saveNamedStyle}
+            onApplyStyle={(style) => {
+              const ok = mapRef.current?.setSelectedStyle(style);
+              if (!ok) showHint("Select a topic first, then apply a named style.");
+            }}
+            onDeleteStyle={deleteNamedStyle}
           />
         )}
         {infoOpen && (

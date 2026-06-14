@@ -41,9 +41,10 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       OPML/Markdown import. Prompt→map, expand-branch, doc/URL→map, summarise.
 - [ ] **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple
       sheets per file.
-- [ ] **C — Content depth** — task progress + roll-up, start/due dates (overdue + filter),
-      **file attachments**, and **conditional formatting** all **shipped 2026-06-14**; remaining:
-      LaTeX/math rendering, styles organizer (named styles), numeric priority.
+- [x] **C — Content depth** — task progress + roll-up, start/due dates (overdue + filter), file
+      attachments, conditional formatting, and the styles organizer all **shipped 2026-06-14**.
+      Deferred on purpose: **LaTeX/math** (heavy KaTeX + offline fonts; needs a cost call) and
+      **numeric priority** (duplicates the emoji priority markers — only worth it as filterable).
 - [x] **D — Capture UX (cheap wins)** — paste-text → map, **Quick add** box, **drop-link-as-topic**,
       and a **brainstorm timer** all **shipped 2026-06-14**.
 - [x] **E — Navigation polish (cheap wins)** — focus / isolate-branch, saved Power-Filter presets,

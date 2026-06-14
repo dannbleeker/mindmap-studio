@@ -204,6 +204,11 @@ the map changes. Rules are a **view-only overlay** — they layer *under* a topi
 anything you set by hand on a node still wins, and nothing is baked into the topic. They're saved
 with the map and carried into image exports. Add a rule with **+ Add rule**; remove one with **✕**.
 
+The same panel has a **Named styles** organizer: style a topic by hand (shape / fill / border / bold
+in the **ℹ Info** panel), then in **🎨 Styles** type a name and **Save** to capture that look. It
+appears in the list — click it to **apply** that style to the selected topic, or **✕** to remove it.
+Named styles are kept locally and reusable across maps, so a house style is one click away.
+
 ### Collapse / expand
 
 **⊟** collapses every branch to a level-1 overview; **⊞** expands the whole tree. **Fit**

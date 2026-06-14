@@ -597,19 +597,36 @@ export function HistoryPanel({
   );
 }
 
-// Conditional formatting: map-wide rules that style topics by tag / marker / completion (view-only).
-// A small rules editor in a left-rail panel; matching is done in src/rules.ts + applied in projection.
+/** A reusable, named per-node style (the "styles organizer"); persisted app-wide. */
+export interface NamedStyle {
+  id: string;
+  name: string;
+  style: NodeStyle;
+}
+
+// Conditional formatting + a styles organizer. Map-wide rules style topics by tag/marker/completion
+// (view-only; matching in src/rules.ts, applied in projection); named styles capture a node's look
+// to reuse across nodes + maps. Both live in this one left-rail panel.
 export function StylesPanel({
   rules,
   markers,
+  namedStyles,
   onAddRule,
   onDeleteRule,
+  onSaveStyle,
+  onApplyStyle,
+  onDeleteStyle,
 }: {
   rules: ConditionalRule[];
   markers: readonly string[];
+  namedStyles: NamedStyle[];
   onAddRule: (rule: ConditionalRule) => void;
   onDeleteRule: (id: string) => void;
+  onSaveStyle: (name: string) => void;
+  onApplyStyle: (style: NodeStyle) => void;
+  onDeleteStyle: (id: string) => void;
 }) {
+  const [styleName, setStyleName] = useState("");
   const [kind, setKind] = useState<ConditionalRule["kind"]>("tag");
   const [value, setValue] = useState("");
   const [fill, setFill] = useState("");
@@ -740,6 +757,73 @@ export function StylesPanel({
         >
           + Add rule
         </button>
+
+        {groupLabel("Named styles")}
+        <div style={{ padding: "0 10px 4px", fontSize: 12, color: "#8a8780" }}>
+          Save the selected topic's look, then reuse it on others.
+        </div>
+        {namedStyles.map((s) => (
+          <div
+            key={s.id}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "2px 10px" }}
+          >
+            <span
+              style={{
+                width: 16,
+                height: 16,
+                borderRadius: 4,
+                flexShrink: 0,
+                background: s.style.background ?? "#fff",
+                border: s.style.border ?? "1px solid #cecbf6",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => onApplyStyle(s.style)}
+              title={`Apply "${s.name}" to the selected topic`}
+              style={{
+                flex: 1,
+                textAlign: "left",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                fontSize: 12,
+                color: "#26215c",
+              }}
+            >
+              {s.name}
+            </button>
+            <button
+              type="button"
+              onClick={() => onDeleteStyle(s.id)}
+              title="Remove named style"
+              style={{ ...controlStyle, padding: "0 6px", fontSize: 12 }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <div style={{ display: "flex", gap: 4, padding: "2px 10px" }}>
+          <input
+            value={styleName}
+            onChange={(e) => setStyleName(e.target.value)}
+            placeholder="Name this style…"
+            aria-label="Name this style"
+            style={{ ...inputStyle, width: "auto", flex: 1 }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (styleName.trim()) {
+                onSaveStyle(styleName.trim());
+                setStyleName("");
+              }
+            }}
+            style={{ ...controlStyle, fontSize: 12 }}
+          >
+            Save
+          </button>
+        </div>
       </div>
     </aside>
   );

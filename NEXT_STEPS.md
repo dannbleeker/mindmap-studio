@@ -80,13 +80,13 @@ Remaining items are renderer-constrained or Dann-dependent:
       ZIP), **SimpleMind** (`.smmx`), and **Markmap**. Lower priority — `.mm`/OPML/Markdown
       already bridge most of these tools both ways. Add by format openness + how many tools
       accept it.
-- [ ] **Deep research: MindManager features vs MindMap Studio gaps.** A comprehensive,
-      systematic audit (deeper than the 2026-06-12 UI-comparison parity pass): catalogue
-      MindManager's *full* feature set — from official docs **and** the bundled XSD already in the
-      repo — and map each feature to MindMap Studio's status: **shipped / partial / renderer-ceiling
-      / out-of-scope (the PM layer is deliberately OUT — see top of file)**. Output a single
-      prioritized gap table that feeds the roadmap (and cross-checks the renderer-ceiling list).
-      Research + write-up task; no code, but it defines what's worth building next.
+- [x] **Deep research: MindManager features vs MindMap Studio gaps** — done (2026-06-14).
+      The full audit lives in [`docs/mindmanager-gap-analysis.md`](docs/mindmanager-gap-analysis.md):
+      every MindManager capability mapped to shipped / partial / renderer-ceiling / out-of-scope,
+      with a **prioritized list of buildable gaps**. Treat that doc's "Prioritized buildable gaps"
+      section as the live signal behind this backlog. Headline quick wins it surfaced (not yet
+      built): **auto-numbering**, a **marker/tag index view**, a **read-only Power Filter**, and
+      **in-map topic-to-topic jump links**.
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 

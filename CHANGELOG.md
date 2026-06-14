@@ -250,6 +250,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `test/freemind.test.ts`, `test/mermaid.test.ts`, and `test/xmind.test.ts` (round-trips, shape/
   indentation parsing, malformed-input rejection). XMind export and older `.xmind` (`content.xml`)
   remain out of scope — `.opml`/`.mm` already import into XMind.
+- **MindManager gap-analysis doc** (`docs/mindmanager-gap-analysis.md`). A systematic audit of
+  MindManager's full current feature set (desktop 2023–2025, Web, Teams, Snap) mapped to
+  MindMap Studio's status — shipped / partial / renderer-ceiling / out-of-scope — with a
+  prioritized list of buildable gaps. It's the roadmap signal behind `NEXT_STEPS.md`: it shows
+  the alternate-layouts/callouts/rich-text cluster all share one root cause (the renderer), and
+  confirms the PM and collaboration/enterprise layers stay deliberately out of scope.
 
 ### Changed
 

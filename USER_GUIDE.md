@@ -245,6 +245,7 @@ Pick a format from the **⬆ Export…** menu:
 | `.opml` | OPML outline |
 | `.mm` | FreeMind / Freeplane — topics, links, folded state, notes (opens in FreeMind, Freeplane, XMind, …) |
 | `.mmd` | Mermaid `mindmap` text — paste into Markdown, GitHub, or docs that render Mermaid |
+| `.xmind` | XMind (2020+) — topic tree, notes, links, tags, plus floating topics + relationships |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
 | `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline) |

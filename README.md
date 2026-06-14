@@ -50,7 +50,7 @@ GitHub Pages).
   branch, and are editable: rename, add, remove, nest, or drag them in/out of the tree, and
   the changes round-trip back into the model.
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
-  (`.md`), OPML (`.opml`), **FreeMind/Freeplane `.mm`**, **Mermaid** (`.mmd`), PNG, SVG, a
+  (`.md`), OPML (`.opml`), **FreeMind/Freeplane `.mm`**, **Mermaid** (`.mmd`), **XMind `.xmind`**, PNG, SVG, a
   self-contained HTML file, a standalone HTML **slide deck** (the Walk-Through as a shareable
   file), a **PowerPoint** (`.pptx`) deck, a Word **`.docx`** outline document, an Excel
   **`.xlsx`** outline sheet, and print-to-PDF.

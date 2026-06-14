@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Export to XMind (`.xmind`)** — write the modern (2020+) `content.json` ZIP
+  (topic tree, notes, web links, tags, plus floating topics + relationships),
+  completing two-way XMind interop (import already shipped). `.xmind` is now in the
+  **⬆ Export…** menu.
 - **Polish** — a proper **favicon** for browser tabs + bookmarks (the mind-map glyph,
   `icon.svg` + a PNG/apple-touch fallback), and a **collapsible minimap** (a "Minimap ▾/▴"
   toggle that hides the corner overview when it's in the way; the choice persists).

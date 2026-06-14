@@ -350,6 +350,7 @@ export function App() {
     exportJson,
     exportMarkdown,
     exportMermaid,
+    exportXmind,
     exportOpml,
     exportFreemind,
     exportPng,
@@ -736,6 +737,7 @@ export function App() {
               svg: exportSvg,
               mermaid: exportMermaid,
               mm: exportFreemind,
+              xmind: exportXmind,
               html: exportHtml,
               deck: exportDeck,
               pdf: exportPdf,
@@ -756,6 +758,7 @@ export function App() {
             <option value="opml">.opml (outline)</option>
             <option value="mm">.mm (FreeMind/Freeplane)</option>
             <option value="mermaid">.mmd (Mermaid)</option>
+            <option value="xmind">.xmind (XMind)</option>
           </optgroup>
           <optgroup label="Image">
             <option value="png">.png (image)</option>

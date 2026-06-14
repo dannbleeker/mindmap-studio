@@ -25,6 +25,9 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
 - **Mermaid (`.mmd`)** -- the `mindmap` text format you embed in Markdown, a README, or a
   wiki that renders Mermaid (GitHub, GitLab, Notion, many docs tools). For when the map
   should live *as text* inside something you're already writing.
+- **XMind (`.xmind`)** -- the native format of one of the most popular mind-mappers, written
+  the modern (2020+) way. Carries the topic tree, notes, links, and tags, plus floating topics
+  and relationships, so the map opens natively in XMind rather than going through `.mm`.
 - **PNG** and **SVG** -- the map as a picture. PNG for slides and chat; SVG when you want
   a crisp, scalable image that survives zooming.
 - **HTML** -- a self-contained web page of the map, openable in any browser with nothing

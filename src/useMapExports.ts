@@ -45,6 +45,7 @@ export interface MapExports {
   exportMermaid: () => void;
   exportOpml: () => Promise<void>;
   exportFreemind: () => Promise<void>;
+  exportXmind: () => Promise<void>;
   exportPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
@@ -98,6 +99,15 @@ export function useMapExports(
       download(
         new Blob([toFreemind(getDoc())], { type: "application/x-freemind" }),
         `${baseName()}.mm`,
+      );
+    },
+    // XMind .xmind — a ZIP (content.json + metadata + manifest); lazy (xmind.ts pulls fflate).
+    async exportXmind() {
+      const { toXmind } = await import("./io/xmind");
+      const bytes = toXmind(getDoc()) as BlobPart;
+      download(
+        new Blob([bytes], { type: "application/vnd.xmind.workbook" }),
+        `${baseName()}.xmind`,
       );
     },
     // png/svg/html/pdf all embed the rendered SVG via cleanSvg() (sanitize + native-text).

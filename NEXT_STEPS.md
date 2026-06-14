@@ -110,12 +110,12 @@ Remaining items are Dann-dependent:
       show/hide if a single "canvas widgets" toggle reads cleaner.
 - [ ] **Import/export interop with other mind-mapping tools — remaining formats.** *Shipped
       (2026-06-14):* FreeMind/Freeplane `.mm` (import + export), Mermaid `mindmap` (import +
-      export), and XMind `.xmind` import — on top of the existing `.mmap`/OPML/Markdown/`.json`
-      and the image/Office/deck exporters. *Remaining targets* (each a thin adapter to/from the
-      canonical model): **XMind export** (zip `content.json` + manifest — the import side is
-      done) and **older `.xmind`** (`content.xml`); **MindMup** (JSON), **iThoughts** (`.itmz`,
-      ZIP), **SimpleMind** (`.smmx`, see its own item below), and **Markmap**. Lower priority —
-      `.mm`/OPML/Markdown already bridge most of these tools both ways. Add by format openness +
+      export), and **XMind `.xmind` import + export** (modern `content.json` ZIP; export carries
+      the tree + notes/links/tags + floating topics + relationships) — on top of the existing
+      `.mmap`/OPML/Markdown/`.json` and the image/Office/deck exporters. *Remaining targets* (each
+      a thin adapter to/from the canonical model): **older `.xmind`** (`content.xml`); **MindMup**
+      (JSON), **iThoughts** (`.itmz`, ZIP), **SimpleMind** (`.smmx`, see its own item below), and
+      **Markmap**. Lower priority — `.mm`/OPML/Markdown already bridge most of these tools both ways. Add by format openness +
       how many tools accept it.
 - [ ] **Favicon for browser tabs + bookmarks.** *Verified gap:* `index.html` has **no**
       `<link rel="icon">`, so tabs and bookmarks show a blank/default icon. `public/icon.svg`

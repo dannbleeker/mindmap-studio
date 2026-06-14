@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-14T16:15:55.130Z",
-  "commit": "65aaea1",
+  "generatedAt": "2026-06-14T16:55:20.950Z",
+  "commit": "8ec4c0d",
   "headline": {
-    "linesTsJs": 16549,
-    "tests": 392,
-    "lineCoveragePct": 49.54,
-    "commits": 275,
+    "linesTsJs": 16877,
+    "tests": 401,
+    "lineCoveragePct": 49.22,
+    "commits": 277,
     "ageDays": 2,
-    "trackedFiles": 174,
+    "trackedFiles": 176,
     "featureManualPct": 100,
-    "featureBookPct": 96.3,
-    "featureExamplePct": 55.6
+    "featureBookPct": 95.1,
+    "featureExamplePct": 54.9
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 63,
-      "lines": 10227
+      "files": 64,
+      "lines": 10463
     },
     {
       "category": "Unit tests",
-      "files": 51,
-      "lines": 4600
+      "files": 52,
+      "lines": 4692
     },
     {
       "category": "Build scripts",
@@ -36,55 +36,55 @@
     {
       "category": "Docs (Markdown)",
       "files": 15,
-      "lines": 1593
+      "lines": 1597
     }
   ],
   "coverage": {
     "lines": {
-      "pct": 49.54,
-      "covered": 3666,
-      "total": 7399
+      "pct": 49.22,
+      "covered": 3730,
+      "total": 7577
     },
     "statements": {
-      "pct": 49.54,
-      "covered": 3666,
-      "total": 7399
+      "pct": 49.22,
+      "covered": 3730,
+      "total": 7577
     },
     "functions": {
-      "pct": 91.23,
-      "covered": 302,
-      "total": 331
+      "pct": 91.17,
+      "covered": 310,
+      "total": 340
     },
     "branches": {
-      "pct": 82.92,
-      "covered": 1253,
-      "total": 1511
+      "pct": 83.24,
+      "covered": 1297,
+      "total": 1558
     }
   },
   "tests": {
-    "unit": 392,
+    "unit": 401,
     "e2e": 0,
-    "durationMs": 9461,
+    "durationMs": 9435,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2199
+        "ms": 2640
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 231
+        "ms": 156
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 189
+        "ms": 142
+      },
+      {
+        "file": "test/docx-import.test.ts",
+        "ms": 74
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 109
-      },
-      {
-        "file": "test/xmind.test.ts",
-        "ms": 85
+        "ms": 70
       }
     ]
   },
@@ -103,15 +103,15 @@
     "biggestFiles": [
       {
         "name": "App.tsx",
-        "lines": 1547
+        "lines": 1572
       },
       {
         "name": "Panels.tsx",
-        "lines": 992
+        "lines": 1048
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 729
+        "lines": 735
       },
       {
         "name": "examples.ts",
@@ -119,7 +119,7 @@
       },
       {
         "name": "mindmap/flow/ops.ts",
-        "lines": 419
+        "lines": 433
       }
     ]
   },
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 74
+        "commits": 75
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -158,11 +158,11 @@
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 19
+        "commits": 20
       },
       {
         "file": "Panels.tsx",
-        "commits": 13
+        "commits": 14
       },
       {
         "file": "useMapExports.ts",
@@ -173,17 +173,17 @@
       {
         "file": "App.tsx",
         "pct": 0,
-        "commits": 74
+        "commits": 75
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
         "pct": 0,
-        "commits": 19
+        "commits": 20
       },
       {
         "file": "Panels.tsx",
         "pct": 0,
-        "commits": 13
+        "commits": 14
       },
       {
         "file": "useMapExports.ts",
@@ -193,7 +193,7 @@
       {
         "file": "mindmap/flow/TopicNode.tsx",
         "pct": 0,
-        "commits": 10
+        "commits": 11
       }
     ]
   },
@@ -201,34 +201,34 @@
     "todo": 0,
     "fixme": 0,
     "hack": 0,
-    "anyCount": 3,
+    "anyCount": 4,
     "tsIgnore": 0,
     "tsExpectError": 0,
     "biomeIgnore": 17,
     "nonNull": 2
   },
   "bundle": {
-    "jsGzipKb": 194.1,
+    "jsGzipKb": 195.2,
     "cssGzipKb": 2.5,
-    "totalGzipKb": 196.6,
-    "entryGzipKb": 85.2,
+    "totalGzipKb": 197.7,
+    "entryGzipKb": 86,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 9822,
     "chapters": 11,
-    "appLoc": 10227,
-    "docToCodeRatio": 0.96
+    "appLoc": 10463,
+    "docToCodeRatio": 0.94
   },
   "featureCoverage": {
-    "total": 81,
-    "manual": 81,
+    "total": 82,
+    "manual": 82,
     "manualPct": 100,
     "book": 78,
-    "bookPct": 96.3,
+    "bookPct": 95.1,
     "bookExample": 45,
-    "bookExamplePct": 55.6,
+    "bookExamplePct": 54.9,
     "byArea": {
       "editing": {
         "total": 7,
@@ -241,8 +241,8 @@
         "book": 2
       },
       "markers": {
-        "total": 4,
-        "manual": 4,
+        "total": 5,
+        "manual": 5,
         "book": 3
       },
       "styling": {
@@ -300,6 +300,11 @@
           "since": "2026-06-14"
         },
         {
+          "id": "task-dates",
+          "name": "Start / due dates with overdue highlighting + a due-date filter",
+          "since": "2026-06-14"
+        },
+        {
           "id": "saved-filters",
           "name": "Saved Power Filter presets (named, reusable across maps)",
           "since": "2026-06-14"
@@ -315,22 +320,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 2,
-    "commits": 275,
-    "commits7d": 275,
+    "commits": 277,
+    "commits7d": 277,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 164
+        "count": 165
       },
       {
         "name": "github-actions[bot]",
-        "count": 111
+        "count": 112
       }
     ],
     "churn30d": {
-      "added": 39340,
-      "removed": 10583
+      "added": 39786,
+      "removed": 10676
     },
-    "changelogEntries": 93
+    "changelogEntries": 94
   }
 }

@@ -29,6 +29,7 @@ Left to right:
 | Control | What it does |
 |---|---|
 | **☰ Outline** | Toggle the [outline panel](#outline-panel) |
+| **📑 Index** | Toggle the [marker & tag index](#marker--tag-index) |
 | **+ New…** | Create a map from a [template](#templates) (Blank, Brainstorm, SWOT, Project, 5 Whys, Decision, Retrospective, Meeting, Pre-mortem) |
 | **(map dropdown)** | Switch between maps in your [library](#the-map-library) |
 | **Delete** | Delete the current map |
@@ -119,6 +120,14 @@ to clear it.) This lets you build a connected web of maps.
 **☰ Outline** opens a live, indented outline of the whole map. Click any row to jump to that
 node on the canvas. The **Filter outline…** box narrows the list to matching topics; 📝 marks
 noted nodes.
+
+### Marker & tag index
+
+**📑 Index** opens a side panel that gathers every [marker](#markers) and [tag](#markers) used
+anywhere in the map, grouped by marker/tag with a count and the list of topics carrying it. Click
+any topic to centre and select it on the canvas. It's the read-only counterpart to the **Markers**
+palette: the palette *applies* markers to a node, the index *finds* every node that already has one
+— handy for "show me everything flagged ❗" on a big map.
 
 ### Find & Replace
 

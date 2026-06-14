@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
-import { outlineRows } from "./outline";
+import { type IndexEntry, type IndexHit, markerTagIndex, outlineRows } from "./outline";
 import { controlStyle, inputStyle } from "./ui";
 
 const FILL_SWATCHES = ["#fde2e2", "#e2ecfd", "#e2fbe8", "#fdf3e2", "#efe2fd", "#ececec"];
@@ -191,6 +191,92 @@ export function OutlinePanel({
             {row.topic || "(untitled)"}
           </button>
         ))}
+      </div>
+    </aside>
+  );
+}
+
+// A map-wide index of every marker + tag and the nodes carrying it — click a node to jump there.
+// Read-only navigation aid (a companion to the per-node Markers palette); reads the live doc.
+// Collection lives in the pure markerTagIndex() so it's unit-tested alongside outlineRows.
+export function MarkerTagIndex({
+  root,
+  floatingTopics,
+  onPick,
+}: {
+  root: MapNode;
+  floatingTopics?: MapNode[];
+  onPick: (id: string) => void;
+}) {
+  const { markers, tags } = markerTagIndex(root, floatingTopics);
+
+  const jump = (hit: IndexHit, key: string) => (
+    <button
+      key={`${key}:${hit.id}`}
+      type="button"
+      onClick={() => onPick(hit.id)}
+      title={hit.topic}
+      style={{
+        display: "block",
+        width: "100%",
+        textAlign: "left",
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        fontSize: 13,
+        color: "#26215c",
+        padding: "2px 10px 2px 24px",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      }}
+    >
+      {hit.topic || "(untitled)"}
+    </button>
+  );
+
+  const group = (label: string, entries: IndexEntry[]) => {
+    if (entries.length === 0) return null;
+    return (
+      <div key={label}>
+        <div style={{ padding: "8px 10px 2px", fontSize: 11, fontWeight: 700, color: "#8a8780" }}>
+          {label}
+        </div>
+        {entries.map(({ key, hits }) => (
+          <div key={key}>
+            <div style={{ padding: "2px 10px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
+              {key} <span style={{ color: "#8a8780", fontWeight: 400 }}>({hits.length})</span>
+            </div>
+            {hits.map((hit) => jump(hit, key))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const empty = markers.length === 0 && tags.length === 0;
+  return (
+    <aside
+      style={{
+        width: 250,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        borderRight: "1px solid #e2e0d8",
+        background: "#fbfbf9",
+      }}
+    >
+      <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
+        Markers &amp; tags
+      </div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {empty ? (
+          <div style={{ padding: "4px 10px", fontSize: 13, color: "#8a8780" }}>
+            No markers or tags in this map yet.
+          </div>
+        ) : null}
+        {group("Markers", markers)}
+        {group("Tags", tags)}
       </div>
     </aside>
   );

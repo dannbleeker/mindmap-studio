@@ -1,5 +1,5 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import { MarkerBar, NotesPanel, OutlinePanel, StyleBar } from "./Panels";
+import { MarkerBar, MarkerTagIndex, NotesPanel, OutlinePanel, StyleBar } from "./Panels";
 import { buildExample, examples } from "./examples";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
@@ -99,6 +99,7 @@ export function App() {
   const [notesOpen, setNotesOpen] = useState(!!panels0.notesOpen);
   const [outlineOpen, setOutlineOpen] = useState(!!panels0.outlineOpen);
   const [outlineFilter, setOutlineFilter] = useState("");
+  const [indexOpen, setIndexOpen] = useState(!!panels0.indexOpen);
   const [markersOpen, setMarkersOpen] = useState(!!panels0.markersOpen);
   const [styleOpen, setStyleOpen] = useState(!!panels0.styleOpen);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -415,12 +416,12 @@ export function App() {
     try {
       localStorage.setItem(
         "mindmap-panels",
-        JSON.stringify({ notesOpen, outlineOpen, markersOpen, styleOpen }),
+        JSON.stringify({ notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen }),
       );
     } catch {
       // preference is best-effort
     }
-  }, [notesOpen, outlineOpen, markersOpen, styleOpen]);
+  }, [notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen]);
 
   // Drive the native <dialog> from React state: showModal() gives us the
   // top-layer backdrop, focus handling, and Escape-to-close for free.
@@ -516,6 +517,15 @@ export function App() {
           title="Toggle the outline panel"
         >
           ☰ Outline
+        </button>
+        <button
+          type="button"
+          onClick={() => setIndexOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={indexOpen}
+          title="Toggle the markers & tags index"
+        >
+          📑 Index
         </button>
         <select
           value={doc.id}
@@ -897,6 +907,13 @@ export function App() {
             root={liveDoc.root}
             filter={outlineFilter}
             onFilterChange={setOutlineFilter}
+            onPick={(id) => mapRef.current?.focusNode(id)}
+          />
+        )}
+        {indexOpen && (
+          <MarkerTagIndex
+            root={liveDoc.root}
+            floatingTopics={liveDoc.floatingTopics}
             onPick={(id) => mapRef.current?.focusNode(id)}
           />
         )}

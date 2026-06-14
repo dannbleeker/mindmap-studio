@@ -127,9 +127,9 @@ Remaining items are Dann-dependent:
       The full audit lives in [`docs/mindmanager-gap-analysis.md`](docs/mindmanager-gap-analysis.md):
       every MindManager capability mapped to shipped / partial / renderer-ceiling / out-of-scope,
       with a **prioritized list of buildable gaps**. Treat that doc's "Prioritized buildable gaps"
-      section as the live signal behind this backlog. Headline quick wins it surfaced (not yet
-      built): **auto-numbering**, a **marker/tag index view**, a **read-only Power Filter**, and
-      **in-map topic-to-topic jump links**.
+      section as the live signal behind this backlog. Headline quick wins it surfaced: the
+      **marker/tag index view** has shipped (📑 Index panel, 2026-06-14); still to build:
+      **auto-numbering**, a **read-only Power Filter**, and **in-map topic-to-topic jump links**.
 
 ## Shippable product artifacts (parity with TP Studio, 2026-06-12)
 

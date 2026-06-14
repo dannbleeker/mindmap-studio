@@ -62,6 +62,20 @@ that's gone six levels deep while its siblings stayed shallow.
 The outline has its own **filter** box: type a few letters and it narrows to matching
 topics, so a long map becomes a short list you can scan.
 
+## The marker and tag index
+
+The outline answers "where is this *topic*?" The **Index** panel (the **📑 Index** button)
+answers a different question: "where is everything I *flagged*?" It collects every marker and
+tag used anywhere in the map and lists them grouped by symbol -- a ❗ heading with the three
+topics you marked urgent under it, a ⭐ heading with your favourites, and so on, each with a
+count. Click a topic in the index and the canvas jumps to it, exactly like the outline.
+
+This is the read-only twin of the **Markers** palette. The palette is how you *put* a marker on
+the selected node; the index is how you *find* every node that already carries one. On a map with
+a hundred topics, that's the difference between scanning the whole thing for red flags and reading
+them off a list. Markers earn their keep precisely because the index makes them queryable after
+the fact -- so flag deliberately, and the index becomes a live status board.
+
 ## Find and replace
 
 Press **/** anywhere to jump straight to **Find**. It searches both topics *and* notes,

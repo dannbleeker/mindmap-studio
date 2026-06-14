@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Marker & tag index panel** — a new **📑 Index** side panel listing every marker and tag
+  used in the map, each grouped with the topics carrying it (with a count); click any entry to
+  centre + select that node. A read-only navigation companion to the per-node **Markers** palette,
+  mirroring the **Outline** panel. The collection logic is the pure, unit-tested `markerTagIndex()`.
 - **SimpleMind interop (`.smmx`)** — import *and* export SimpleMind's `.smmx` (a ZIP of
   `document/mindmap.xml`): the topic tree, notes, web links, and relations↔cross-links, plus
   floating topics. Now in **Open files** + the **⬆ Export…** menu.

@@ -28,6 +28,8 @@ GitHub Pages).
   topic or note (floating topics included) and jumps to the chosen map and node.
 - **Outline** — a side panel showing the map as an indented outline; click a row to jump to
   that node (noted nodes are marked 📝).
+- **Marker & tag index** — a side panel listing every marker and tag in the map, grouped with
+  the topics carrying each one; click a topic to jump to it.
 - **Minimap + zoom** — a corner overview with a draggable viewport for panning large maps,
   plus integrated zoom controls (−/+, live %, fit).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on

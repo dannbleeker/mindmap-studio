@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 78,
+  "reviewedThroughChangelogBullets": 79,
   "areas": [
     "editing",
     "notes",
@@ -204,6 +204,15 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "marker-tag-index",
+      "name": "Marker & tag index panel (click to jump)",
+      "area": "navigation",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
     },
     {
       "id": "find-replace",

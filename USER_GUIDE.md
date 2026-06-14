@@ -30,6 +30,7 @@ Left to right:
 |---|---|
 | **☰ Outline** | Toggle the [outline panel](#outline-panel) |
 | **📑 Index** | Toggle the [marker & tag index](#marker--tag-index) |
+| **🎚 Filter** | Toggle the [Power Filter](#power-filter) (dim non-matching topics) |
 | **+ New…** | Create a map from a [template](#templates) (Blank, Brainstorm, SWOT, Project, 5 Whys, Decision, Retrospective, Meeting, Pre-mortem) |
 | **(map dropdown)** | Switch between maps in your [library](#the-map-library) |
 | **Delete** | Delete the current map |
@@ -139,6 +140,17 @@ anywhere in the map, grouped by marker/tag with a count and the list of topics c
 any topic to centre and select it on the canvas. It's the read-only counterpart to the **Markers**
 palette: the palette *applies* markers to a node, the index *finds* every node that already has one
 — handy for "show me everything flagged ❗" on a big map.
+
+### Power Filter
+
+**🎚 Filter** opens a read-only filter that **dims** every topic except the ones that match your
+criteria — and the branches leading to them, so each match keeps its context. Combine a free-text
+search (matches topic **and** note) with toggle chips for any marker or tag in the map; marker/tag
+criteria are combined with AND (a topic must satisfy each category you've set). A live count shows
+how many topics matched. It changes nothing in the map — **Clear** or closing the panel restores
+everything — so it's a safe way to focus a crowded map on, say, every urgent (❗) item mentioning
+"budget". (This differs from **Find**, which steps you through matches one at a time, and the
+**Filter outline…** box, which narrows the outline list.)
 
 ### Find & Replace
 

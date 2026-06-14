@@ -292,6 +292,127 @@ export function MarkerTagIndex({
   );
 }
 
+// Read-only Power Filter: a free-text box plus toggle chips for every marker/tag in the map.
+// Matching topics (and the paths to them) stay lit on the canvas; everything else dims. Nothing
+// is deleted — closing the panel (or Clear) restores the full map.
+export function FilterPanel({
+  root,
+  floatingTopics,
+  text,
+  markers,
+  tags,
+  matchCount,
+  onText,
+  onToggleMarker,
+  onToggleTag,
+  onClear,
+}: {
+  root: MapNode;
+  floatingTopics?: MapNode[];
+  text: string;
+  markers: string[];
+  tags: string[];
+  matchCount: number;
+  onText: (value: string) => void;
+  onToggleMarker: (marker: string) => void;
+  onToggleTag: (tag: string) => void;
+  onClear: () => void;
+}) {
+  const { markers: markerEntries, tags: tagEntries } = markerTagIndex(root, floatingTopics);
+  const active = text.trim().length > 0 || markers.length > 0 || tags.length > 0;
+  const chip = (key: string, selected: boolean, onClick: () => void) => (
+    <button
+      key={key}
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      style={{
+        border: `1px solid ${selected ? "#6c63d6" : "#cecbf6"}`,
+        background: selected ? "#6c63d6" : "#fff",
+        color: selected ? "#fff" : "#26215c",
+        borderRadius: 6,
+        cursor: "pointer",
+        fontSize: 13,
+        lineHeight: 1.4,
+        padding: "2px 7px",
+      }}
+    >
+      {key}
+    </button>
+  );
+  const groupLabel = (label: string) => (
+    <div style={{ padding: "8px 10px 2px", fontSize: 11, fontWeight: 700, color: "#8a8780" }}>
+      {label}
+    </div>
+  );
+  return (
+    <aside
+      style={{
+        width: 250,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        borderRight: "1px solid #e2e0d8",
+        background: "#fbfbf9",
+      }}
+    >
+      <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
+        🎚 Power Filter
+      </div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        <input
+          value={text}
+          onChange={(e) => onText(e.target.value)}
+          placeholder="Filter by text…"
+          aria-label="Filter by text"
+          style={{ ...inputStyle, width: "auto", margin: "4px 10px" }}
+        />
+        {markerEntries.length > 0 ? (
+          <>
+            {groupLabel("Markers")}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
+              {markerEntries.map((e) =>
+                chip(e.key, markers.includes(e.key), () => onToggleMarker(e.key)),
+              )}
+            </div>
+          </>
+        ) : null}
+        {tagEntries.length > 0 ? (
+          <>
+            {groupLabel("Tags")}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
+              {tagEntries.map((e) => chip(e.key, tags.includes(e.key), () => onToggleTag(e.key)))}
+            </div>
+          </>
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 6,
+            padding: "10px 10px 2px",
+            fontSize: 12,
+            color: "#73726c",
+          }}
+        >
+          <span>
+            {active ? `${matchCount} match${matchCount === 1 ? "" : "es"}` : "Showing all"}
+          </span>
+          {active ? (
+            <button type="button" onClick={onClear} style={{ ...controlStyle, padding: "2px 8px" }}>
+              Clear
+            </button>
+          ) : null}
+        </div>
+        <div style={{ padding: "6px 10px", fontSize: 11, color: "#8a8780" }}>
+          Read-only: non-matching topics are dimmed, nothing is removed.
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 export function NotesPanel({
   selected,
   value,

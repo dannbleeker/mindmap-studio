@@ -92,6 +92,26 @@ and a Markdown export is still clean prose. Reorder a branch and the numbers ren
 because they were never really yours to begin with -- they belong to the structure. Turn it on
 when you need to talk *about* the map; turn it off when you just want to look *at* it.
 
+## Filtering without losing the forest
+
+There's a moment with every large map where you stop wanting to *see everything* and start wanting
+to *see one thing*: every red flag, every node tagged `q3`, every topic that mentions "budget". The
+**Filter** panel does that without throwing anything away. Type some text, or click the marker and
+tag chips for what you're hunting, and the map answers by **fading everything that doesn't match** --
+leaving the matches, and the branches that lead to them, at full strength. A count tells you how
+many topics qualified.
+
+The phrase to hold onto is *read-only*. A filter here is a spotlight, not a pair of scissors:
+nothing is hidden, collapsed, or deleted, and the instant you hit **Clear** or close the panel the
+whole map comes back. That's deliberate. The fastest way to lose trust in a tool is to have it
+quietly remove something you needed; a filter that only changes opacity can never do that. The
+context stays too -- because the path from the centre to each match keeps its colour, you never get
+the disorienting "lone highlighted node floating in grey" that makes you forget where you are.
+
+It pairs naturally with markers. Flag the risks as you build the map (Chapter 4), then, when the
+map is big and the meeting is short, filter to ❗ and read the risks straight off the lit branches.
+The markers are the *input*; the filter is the *question you ask of them later*.
+
 ## Find and replace
 
 Press **/** anywhere to jump straight to **Find**. It searches both topics *and* notes,

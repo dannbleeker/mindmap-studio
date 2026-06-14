@@ -29,6 +29,8 @@ export type TopicData = {
   hasChildren: boolean;
   /** A detached/floating topic (not part of the central hierarchy). */
   floating: boolean;
+  /** Dimmed by the read-only Power Filter (not on a path to a match); view-only opacity. */
+  dimmed?: boolean;
 };
 
 /** Data carried by an edge (branch or cross-link). */
@@ -37,6 +39,8 @@ export type EdgeData = {
   branchColor: string;
   /** true = a cross-link/relationship (dashed), false = a parent→child branch. */
   crosslink: boolean;
+  /** Dimmed by the read-only Power Filter (an endpoint isn't lit); view-only opacity. */
+  dimmed?: boolean;
 };
 
 export type TopicNode = Node<TopicData, "topic">;

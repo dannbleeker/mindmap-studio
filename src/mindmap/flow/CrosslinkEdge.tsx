@@ -26,12 +26,18 @@ export function CrosslinkEdge({ source, target, label, data }: EdgeProps<FlowEdg
     targetY: ty,
   });
   const color = data?.branchColor ?? CROSSLINK_COLOR;
+  const dimOpacity = data?.dimmed ? 0.12 : 1;
   return (
     <>
       <BaseEdge
         path={path}
         interactionWidth={20}
-        style={{ stroke: color, strokeWidth: CROSSLINK_WIDTH, strokeDasharray: CROSSLINK_DASH }}
+        style={{
+          stroke: color,
+          strokeWidth: CROSSLINK_WIDTH,
+          strokeDasharray: CROSSLINK_DASH,
+          opacity: dimOpacity,
+        }}
       />
       {label ? (
         <EdgeLabelRenderer>
@@ -45,6 +51,7 @@ export function CrosslinkEdge({ source, target, label, data }: EdgeProps<FlowEdg
               padding: "0 4px",
               borderRadius: 4,
               pointerEvents: "none",
+              opacity: dimOpacity,
             }}
           >
             {label}

@@ -41,6 +41,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     branchColor,
     collapsed,
     hasChildren,
+    dimmed,
   } = data;
   const editing = useEditing();
   const isEditing = editing?.editingId === id;
@@ -94,6 +95,9 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
         maxWidth: 320,
         lineHeight: 1.35,
         boxShadow: "0 1px 2px rgba(0,0,0,0.12)",
+        // Read-only Power Filter: fade nodes that aren't on a path to a match.
+        opacity: dimmed ? 0.22 : 1,
+        transition: "opacity 0.15s ease",
       }}
       onDoubleClick={(e) => {
         e.stopPropagation();

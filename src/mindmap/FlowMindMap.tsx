@@ -58,7 +58,7 @@ import {
   toggleIcon,
 } from "./flow/ops";
 import { project } from "./flow/project";
-import type { FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
+import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { mindManagerTheme } from "./theme";
 
 // React Flow canvas — a fully editable engine. Inline topic editing (double-click / F2),
@@ -88,6 +88,7 @@ function FlowInner({
   theme,
   direction = "side",
   numbered = false,
+  litIds = null,
   onChange,
   onSelect,
   ref,
@@ -145,6 +146,8 @@ function FlowInner({
   directionRef.current = direction;
   const numberedRef = useRef(numbered);
   numberedRef.current = numbered;
+  const litIdsRef = useRef(litIds);
+  litIdsRef.current = litIds;
   const selectedRef = useRef<string | null>(null);
   selectedRef.current = selectedId;
   const editingRef = useRef<string | null>(null);
@@ -175,14 +178,23 @@ function FlowInner({
       };
       const pos = computeLayout(proj.nodes, proj.edges, sizeOf, directionRef.current);
       const sel = selectedRef.current;
+      const lit = litIdsRef.current;
       setNodes(
         proj.nodes.map((n) => ({
           ...n,
           position: pos.get(n.id) ?? { x: 0, y: 0 },
           selected: n.id === sel,
+          data: lit ? { ...n.data, dimmed: !lit.has(n.id) } : n.data,
         })),
       );
-      setEdges(proj.edges);
+      setEdges(
+        lit
+          ? proj.edges.map((e) => ({
+              ...e,
+              data: { ...(e.data as EdgeData), dimmed: !(lit.has(e.source) && lit.has(e.target)) },
+            }))
+          : proj.edges,
+      );
     },
     [getNodes, setNodes, setEdges],
   );
@@ -331,6 +343,25 @@ function FlowInner({
     }
     sync(docRef.current);
   }, [numbered, sync]);
+
+  // Apply the read-only Power Filter by toggling node/edge opacity in place — no re-layout, since
+  // dimming doesn't change sizes. Lit = matches + their ancestors (computed in App); null = off.
+  useEffect(() => {
+    setNodes((ns) =>
+      ns.map((n) => {
+        const dimmed = litIds ? !litIds.has(n.id) : false;
+        return Boolean(n.data.dimmed) === dimmed ? n : { ...n, data: { ...n.data, dimmed } };
+      }),
+    );
+    setEdges((es) =>
+      es.map((e) => {
+        const dimmed = litIds ? !(litIds.has(e.source) && litIds.has(e.target)) : false;
+        return Boolean(e.data?.dimmed) === dimmed
+          ? e
+          : { ...e, data: { ...(e.data as EdgeData), dimmed } };
+      }),
+    );
+  }, [litIds, setNodes, setEdges]);
 
   // One-time refine once React Flow has measured the nodes (better sizing than estimates).
   const refined = useRef(false);

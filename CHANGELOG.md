@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Read-only Power Filter** — a **🎚 Filter** panel that dims every topic *except* the ones
+  matching your criteria (free text in topic/note, plus toggle chips for any marker or tag in the
+  map) and the paths leading to them, with a live match count. It's strictly a view: nothing is
+  hidden or deleted (pure `filterResult()` computes the lit set; the canvas only changes opacity),
+  and closing the panel restores the full map. Marker/tag criteria AND across categories.
 - **Auto-numbering** — a **1. Numbering** toolbar toggle that prefixes every topic with its
   hierarchical outline number (1, 1.2, 1.2.3 …) on the canvas *and* in the Outline panel, and
   carries through to image/PDF/Office exports. Purely a view: the numbers are computed from the

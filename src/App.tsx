@@ -1,6 +1,14 @@
-import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import { MarkerBar, MarkerTagIndex, NotesPanel, OutlinePanel, StyleBar } from "./Panels";
+import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FilterPanel,
+  MarkerBar,
+  MarkerTagIndex,
+  NotesPanel,
+  OutlinePanel,
+  StyleBar,
+} from "./Panels";
 import { buildExample, examples } from "./examples";
+import { type FilterCriteria, filterResult, isFilterActive } from "./filter";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
@@ -104,6 +112,31 @@ export function App() {
   const [styleOpen, setStyleOpen] = useState(!!panels0.styleOpen);
   // Auto-numbering: show hierarchical outline numbers (1, 1.2, …) on the canvas + outline.
   const [numbered, setNumbered] = useState(!!panels0.numbered);
+  // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterText, setFilterText] = useState("");
+  const [filterMarkers, setFilterMarkers] = useState<string[]>([]);
+  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const clearFilter = () => {
+    setFilterText("");
+    setFilterMarkers([]);
+    setFilterTags([]);
+  };
+  // Toggling the panel off also clears the filter, so dimming can't outlive a visible control.
+  const toggleFilter = () =>
+    setFilterOpen((open) => {
+      if (open) clearFilter();
+      return !open;
+    });
+  const toggle = (list: string[], value: string) =>
+    list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+  // Memoised so the canvas only re-dims when the map or the criteria actually change. The
+  // criteria object is built inside so the deps stay plain primitives (no per-render object).
+  const filterHits = useMemo(() => {
+    const criteria: FilterCriteria = { text: filterText, markers: filterMarkers, tags: filterTags };
+    if (!filterOpen || !isFilterActive(criteria)) return null;
+    return filterResult(liveDoc, criteria);
+  }, [filterOpen, filterText, filterMarkers, filterTags, liveDoc]);
   const [aboutOpen, setAboutOpen] = useState(false);
   const aboutRef = useRef<HTMLDialogElement>(null);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
@@ -529,6 +562,15 @@ export function App() {
         >
           📑 Index
         </button>
+        <button
+          type="button"
+          onClick={toggleFilter}
+          style={controlStyle}
+          aria-pressed={filterOpen}
+          title="Power Filter: dim topics that don't match a marker / tag / text (read-only)"
+        >
+          🎚 Filter
+        </button>
         <select
           value={doc.id}
           onChange={(e) => switchMap(e.target.value)}
@@ -929,6 +971,20 @@ export function App() {
             onPick={(id) => mapRef.current?.focusNode(id)}
           />
         )}
+        {filterOpen && (
+          <FilterPanel
+            root={liveDoc.root}
+            floatingTopics={liveDoc.floatingTopics}
+            text={filterText}
+            markers={filterMarkers}
+            tags={filterTags}
+            matchCount={filterHits?.matches ?? 0}
+            onText={setFilterText}
+            onToggleMarker={(m) => setFilterMarkers((list) => toggle(list, m))}
+            onToggleTag={(t) => setFilterTags((list) => toggle(list, t))}
+            onClear={clearFilter}
+          />
+        )}
         <div style={{ flex: 1, minHeight: 0 }}>
           <MindMap
             ref={mapRef}
@@ -936,6 +992,7 @@ export function App() {
             theme={theme.theme}
             direction={layout}
             numbered={numbered}
+            litIds={filterHits?.lit ?? null}
             onChange={(d) => {
               liveDocRef.current = d;
               setLiveDoc(d);

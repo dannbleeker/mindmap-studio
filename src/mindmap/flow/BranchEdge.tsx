@@ -49,5 +49,12 @@ export function BranchEdge({ source, target, data }: EdgeProps<FlowEdge>) {
   const { sx, sy, tx, ty } = getFloatingPoints(s, t);
   const color = data?.branchColor ?? "#999";
   const depth = data?.depth ?? 1;
-  return <path d={taperedRibbonPath(sx, sy, tx, ty, depth)} fill={color} stroke="none" />;
+  return (
+    <path
+      d={taperedRibbonPath(sx, sy, tx, ty, depth)}
+      fill={color}
+      stroke="none"
+      opacity={data?.dimmed ? 0.12 : 1}
+    />
+  );
 }

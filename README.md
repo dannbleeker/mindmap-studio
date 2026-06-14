@@ -32,6 +32,8 @@ GitHub Pages).
   the topics carrying each one; click a topic to jump to it.
 - **Auto-numbering** — a toggle that prefixes every topic with its outline number (1, 1.2, …)
   on the canvas, in the outline, and in exports; purely a view (your topic text is untouched).
+- **Power Filter** — a read-only filter that dims every topic except those matching your criteria
+  (text, markers, tags) and the paths to them; nothing is hidden or deleted.
 - **Minimap + zoom** — a corner overview with a draggable viewport for panning large maps,
   plus integrated zoom controls (−/+, live %, fit).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on

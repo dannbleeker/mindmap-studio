@@ -112,6 +112,13 @@ Remaining items are renderer-constrained or Dann-dependent:
       param). They were renderer-ceiling on mind-elixir; the migration unlocked them. **Becomes
       available to all users at cutover** (migration Phase H) — until then they fall back to "side"
       on the default elixir engine. No separate work needed; tracked by the migration above.
+- [ ] **Minimize/collapse the minimap.** The React Flow `<MiniMap>` (`src/mindmap/FlowMindMap.tsx`,
+      bottom-right, now the default canvas) is always shown and overlaps the lower-right of dense
+      maps. Add a small toggle — a collapse caret on the minimap itself (or a canvas-widget button) —
+      to hide it / shrink it to a restore chip, persisted in `localStorage` (e.g.
+      `mindmap-minimap-open`). RF has no built-in collapse, so it's a thin wrapper: conditionally
+      render `<MiniMap>` plus a fixed restore button. Consider folding `<Controls>` into the same
+      show/hide if a single "canvas widgets" toggle reads cleaner.
 - [ ] **Import/export interop with other mind-mapping tools — remaining formats.** *Shipped
       (2026-06-14):* FreeMind/Freeplane `.mm` (import + export), Mermaid `mindmap` (import +
       export), and XMind `.xmind` import — on top of the existing `.mmap`/OPML/Markdown/`.json`

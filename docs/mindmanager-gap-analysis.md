@@ -56,14 +56,14 @@ reasonably own** — not "everything MindManager has."
 | Floating topics | ✅ | Imported + editable; rendered in a labelled branch. |
 | Relationships (labelled connectors) | ✅ | Cross-links / relationship arrows, two-way. |
 | Boundaries (grouping enclosures) | ✅ | MindManager-style **filled box** + label chip (custom overlay). |
-| Summary topics (brace over a range) | 🟡 | mind-elixir summaries exist under the hood; surfaced as boundaries, not as a roll-up-into-a-new-topic. A true "summary topic" is ⬜ buildable. |
-| Callouts (annotation bubbles) | 🧱 | mind-elixir has no callout primitive — needs a custom renderer. |
+| Summary topics (brace over a range) | ⬜ | Boundaries group a branch, but a true roll-a-range-into-a-labelled-node summary isn't built — the #1 remaining structural gap (React Flow synthesised node + brace edge). |
+| Callouts (annotation bubbles) | ✅ | Anchored callout bubbles (React Flow custom node). |
 | Multi-map links / topic-to-other-map | ✅ | Cross-map links (`#map=`), click to hop maps. |
-| Topic-to-topic link **within** a map | ⬜ | We have relationships (visual) + cross-map links; an in-map click-to-jump hyperlink is a small add. |
+| Topic-to-topic link **within** a map | ✅ | In-map jump links (`#node=`), plus relationships + cross-map links. |
 | Map roll-ups (pull subtrees from many maps) | ⬜ / 🚫-ish | Feasible against the local library, but niche; low priority. |
 | Sticky-note topics | ⬜ | A free-floating note style; overlaps floating topics. Minor. |
 | Object shapes (arrows, chevrons, …) | 🟡 | We ship box / rounded / pill shapes; richer shape libraries are renderer-limited (🧱). |
-| Auto-numbering of topics | ⬜ | Pure model transform — a genuine quick win. |
+| Auto-numbering of topics | ✅ | A view toggle (1, 1.2, …) on canvas + outline + exports. |
 | Cut/copy/paste branches across maps | 🟡 | Within-map editing is full; cross-map branch paste is ⬜. |
 
 ## 2. Layouts & visualization
@@ -72,18 +72,19 @@ reasonably own** — not "everything MindManager has."
 |---|---|---|
 | Mind-map (radial) layout | ✅ | The default two-sided layout. |
 | Layout direction (left / right / both) | ✅ | Horizontal only today. |
-| Org-chart / tree-down / tree-up | 🧱 | mind-elixir has only `initLeft`/`initRight`/`initSide` — no vertical/org layout. |
-| Timeline layout | 🧱 | Renderer-ceiling. |
-| Fishbone / Ishikawa | 🧱 | Renderer-ceiling. |
-| Flowchart / concept map (free connectors + shapes) | 🧱 | Beyond a tree renderer. |
-| Funnel / matrix / Venn / onion diagrams | 🧱 / 🚫 | Different diagram engines; arguably out of the mind-map remit. |
+| Org-chart / tree-down / tree-up | ✅ | Org-chart ↓ / ↑ layouts (dagre). |
+| Timeline layout | ✅ | Hand-written timeline layout. |
+| Fishbone / Ishikawa | ✅ | Hand-written fishbone layout. |
+| Flowchart / concept map (free connectors + shapes) | ⬜ | Possible on React Flow (place-anywhere nodes + free connectors), but a substantial build — not started. |
+| Funnel / matrix / Venn / onion diagrams | ⬜ | Distinct diagram builders; buildable but not started. |
 | Kanban board view | ✅ | **▦ Board** — a read-only model-driven view grouping topics into columns by tag (shipped 2026-06-14). |
-| Whiteboard / sticky-note canvas | 🧱 | Free-form canvas, not a tree. |
-| Auto-layout / smart relationship routing | ✅ | mind-elixir auto-lays-out; our boundary/minimap overlays track it. |
-| Per-branch layout override | 🧱 | Tied to the layout-engine ceiling. |
+| Whiteboard / sticky-note canvas | ⬜ | Free-form canvas (not a tree); buildable on React Flow, not started. |
+| Auto-layout / smart relationship routing | ✅ | Auto-layout per direction; boundary/minimap overlays track it. |
+| Per-branch layout override | ⬜ | A different layout on one branch — not built. |
 
-**Read:** alternate layouts are the single biggest visual gap, and they cluster under one
-root cause — the mind-elixir renderer. They move together only with a renderer replacement.
+**Read:** the alternate-layout gap is **closed** — org-chart, timeline, fishbone, and radial all
+shipped with the React Flow engine. What remains in §2 is the *non-tree* diagram families
+(flowchart / concept map / matrix / Venn / funnel / whiteboard), each its own builder.
 
 ## 3. Styling & design
 
@@ -91,12 +92,12 @@ root cause — the mind-elixir renderer. They move together only with a renderer
 |---|---|---|
 | Themes (whole-map design) | ✅ | Light / Dark / Ocean / Sunset gallery. |
 | Per-topic formatting (font, fill, border, shape, bold) | ✅ | Style bar + per-topic font size/colour/background. |
-| Rich-text **inside** a topic (mixed formatting) | 🧱 | mind-elixir topics are plain text — needs a rich-text renderer. |
-| Icons / markers (priority, progress, flags, …) | ✅ | Marker palette; imported `.mmap` icons → emoji. |
-| Tags / tag groups | ✅ | Model supports tags (carried by importers incl. XMind labels). A tag-management UI is ⬜. |
+| Rich-text **inside** a topic (mixed formatting) | ✅ | Inline bold/italic/underline/strike (contenteditable, sanitised). |
+| Icons / markers (priority, progress, flags, …) | ✅ | Marker palette; **task progress pie** + **due-date chip**; imported `.mmap` icons → emoji. |
+| Tags / tag groups | ✅ | Add/remove tags in the ℹ Info panel; index + filter + Board columns by tag. |
 | Conditional formatting | 🚫-ish / ⬜ | Full version is SmartRules (PM/automation, out of scope). A small "style-by-simple-rule" is ⬜ but low priority. |
 | Images in topics / standalone images | ✅ | In-app image attach; `.mmap` blob import is the known gap. |
-| Map background / canvas styling | ⬜ | Per-map background colour/image is a modest add. |
+| Map background / canvas styling | ✅ | Per-map background colour (the **Canvas** control); exports with the map. |
 | Styles organizer (reusable named styles) | ⬜ | Power-user nicety; low priority for a single-user tool. |
 
 ## 4. Notes, attachments & links
@@ -105,25 +106,31 @@ root cause — the mind-elixir renderer. They move together only with a renderer
 |---|---|---|
 | Topic notes (rich-text, searchable) | ✅ | Notes editor + Markdown preview; Find searches notes. |
 | Hyperlinks (web / file / map) | ✅ | Per-node hyperlink; dangerous schemes stripped. |
-| Topic info side panel | 🟡 | Notes panel covers notes; a unified info card (notes+links+tags+props) is ⬜. |
-| Attachments (embed arbitrary files) | ⬜ / 🚫 | Embedding binaries in a local PWA model is possible but heavy; low priority. |
+| Topic info side panel | ✅ | Unified **ℹ Info** panel: note, markers, tags, progress, dates, attachments, style, links. |
+| Attachments (embed arbitrary files) | ✅ | Inline data-URL files on a topic (📎 chip + download), capped at 5 MB. |
 | Web-link live preview | 🚫 | Needs network fetch/proxy — against the offline-first grain. |
 
 ## 5. Task & project management / data — **🚫 out of scope (whole section)**
 
-Task Info, resources, dependencies, task countdown, **Gantt**, schedule view, cost tracking,
+Resources, dependencies, task countdown, **Gantt**, schedule view, cost tracking,
 **formulas / AutoCalc**, topic properties, **Excel Data Mapper**, **dashboard maps**, holiday
-import, cross-map roll-ups, MS Project/Planner/To-Do/Lists sync. All 🚫 — this is the PM layer
-the product deliberately excludes. (If that ever changes, Gantt + Task Info would be the entry
-point, but it's a different product.)
+import, cross-map roll-ups, MS Project/Planner/To-Do/Lists sync. All 🚫 — this is the PM **engine**
+the product deliberately excludes.
+
+**Adopted from this area as lightweight topic attributes (not the PM engine):** ✅ **task progress**
+(0–100% pie with parent roll-up), ✅ **start / due dates** (overdue highlight + due filter), and
+✅ **file attachments** — all shipped 2026-06-14 as per-topic content, with no Gantt/scheduler. The
+one small leftover we've skipped on purpose is **structured numeric priority** (it overlaps the
+emoji priority markers). If the full PM layer were ever wanted, Gantt + a scheduler would be the
+entry point — but that's a different product.
 
 ## 6. Filtering, rules & automation
 
 | MindManager feature | Status | Notes |
 |---|---|---|
 | Find / full-text search (topics + notes) | ✅ | Find & Replace, `/` shortcut, library-wide "All maps" search. |
-| Power Filter (show/hide by attribute) | ⬜ | A read-only filter (by marker/tag/text) is feasible and useful; the attribute-rich version leans on PM data (🚫). |
-| Marker / tag index view | ⬜ | "Show all topics with marker X / tag Y" — a buildable navigation aid. |
+| Power Filter (show/hide by attribute) | ✅ | Read-only dim by text/marker/tag/**due-date**; saveable presets. |
+| Marker / tag index view | ✅ | **📑 Index** — every marker + tag with the topics carrying it. |
 | SmartRules (if-this-then-that automation) | 🚫 | Automation/PM engine — out of scope. |
 | Saved queries (SharePoint/Outlook/Lists) | 🚫 | Integration/PM. |
 
@@ -138,7 +145,7 @@ point, but it's a different product.)
 | Zoom & pan | ✅ | Plus integrated **zoom controls** (−/+/%/fit). |
 | **Overview / minimap** | ✅ | Shipped 2026-06-14 — corner minimap with draggable viewport (MindManager itself no longer markets one). |
 | Outline view | ✅ | Outline side panel + filter. |
-| Multiple views (Map/Outline/Gantt/Schedule/Icon/Tag) | 🟡 | Map + Outline ship; Gantt/Schedule 🚫; Icon/Tag index views ⬜. |
+| Multiple views (Map/Outline/Gantt/Schedule/Icon/Tag) | ✅ (in scope) | Map, Outline, Marker/Tag **Index**, and a **Board** (tags→columns) all ship; Gantt/Schedule 🚫. |
 
 **Read:** navigation is our strongest area — at or ahead of MindManager (we ship a minimap
 they've dropped).
@@ -149,15 +156,16 @@ they've dropped).
 |---|---|---|
 | Native file (.mmap) import | ✅ | Field-mapped from the MindManager XSD (lossy, one-way, by design). |
 | Word / PowerPoint / Excel **export** | ✅ | `.docx` / `.pptx` / `.xlsx` all ship. |
-| Word / Excel **import** | 🟡 | Markdown/OPML cover outline import; direct `.docx`/`.xlsx` import is ⬜. |
+| Word / Excel **import** | ✅ | `.docx` (heading/indent outline) + `.xlsx` (indented sheet) import. |
 | PDF export | ✅ | Print-to-PDF. |
 | Image export (PNG/SVG/…) | ✅ | Native-text SVG → PNG; renders everywhere. |
 | HTML / interactive web export | ✅ | Self-contained `.html` + a standalone slide deck. |
 | OPML import/export | ✅ | Both ways. |
 | FreeMind / Freeplane (.mm) | ✅ | Import + export (2026-06-14). |
 | Mermaid mindmap | ✅ | Import + export (2026-06-14). |
-| XMind (.xmind) | 🟡 | Import ✅ (2020+ `content.json`); **export** ⬜; older `content.xml` ⬜. |
-| MindMup / iThoughts / SimpleMind / Markmap | ⬜ | Tracked in `NEXT_STEPS.md`; `.mm`/OPML already bridge most. |
+| XMind (.xmind) | 🟡 | Import ✅ (2020+ `content.json` **and** legacy `content.xml`); **export** ⬜. |
+| iThoughts (.itmz) / MindMeister (.mind) / SimpleMind (.smmx) | ✅ | All import; `.smmx` also exports. |
+| MindMup / Markmap | ⬜ | Long-tail importers; `.mm`/OPML/Markdown already bridge most. |
 | Office / Project / Outlook / Jira / SharePoint / Teams integrations | 🚫 | Cloud/enterprise integrations. |
 | Native generative AI | 🚫 | MindManager itself ships none (add-ins only); a keyless prompt-bridge approach is the most we'd consider, and AI is deferred. |
 
@@ -235,16 +243,32 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   overdue, a **Due date** option in the Power Filter, carried into image exports) shipped 2026-06-14 —
   more of cluster C. Stored on `task.start`/`task.due`; lossless in `.json`.
 
-### Next — remaining buildable gaps (in priority order)
-1. **The last interchange items** — **image-bearing `.mmap`** (the known binary-blob gap; needs a real sample) and a **`.mmap` writer** (large XSD; can't validate without MindManager). Both are higher-risk / blocked; the easy importers are all done.
-2. **True summary topics** — roll a sibling range up into its own labelled topic. NB: the original note assumed mind-elixir summaries as the base; post-migration this is now a React Flow + model feature (project a synthesised summary node over a range), so it needs re-scoping.
-3. **Kanban / board view** — a model-driven alternate view (tags → columns). Borders the PM layer; keep it **read-only / tags-as-columns** (a *visualisation*, not task management) to stay in scope, or defer.
-4. **Bigger bets** — AI keyless bridge, and more structures (flowchart / concept map / matrix / brace map). (Persistent version history — cluster F — shipped 2026-06-14.) See [`competitive-feature-matrix.md`](competitive-feature-matrix.md) clusters A/B.
+### Remaining buildable gaps (as of 2026-06-14, in rough priority order)
+
+After this session the in-scope list is short. What's genuinely left:
+
+1. **True summary topics** — roll a contiguous sibling range up into its own labelled summary node
+   (a brace beside the range). Post-migration this is a React Flow + model feature (a synthesised
+   node + a brace edge over a range) and needs dedicated layout work — the #1 structural gap.
+2. **More diagram types** — a **flowchart / true concept map** (free connectors + place-anywhere
+   nodes, beyond the tree) and **matrix / Venn / onion / funnel** diagrams. Each is its own builder;
+   multi-day. (React Flow makes them *possible* now — no longer renderer-blocked — just not small.)
+3. **Free-form whiteboard / sticky-note canvas** — place notes anywhere, not in a tree.
+4. **Richer node shapes** (diamond / hexagon / chevron …) and **per-branch layout override** — both
+   need clip-path/geometry + export work to avoid clipping text.
+5. **Conditional formatting** (style-by-simple-rule) and a **styles organizer** (named reusable
+   styles) — low priority for a single-user tool.
+6. **LaTeX / math rendering** in topics/notes.
+7. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
+8. **Interchange long-tail** — **XMind export**, **MindMup** + **Markmap** import, **image-bearing
+   `.mmap`** import (blocked on a real sample), and a **`.mmap` writer** (large XSD, high-risk).
+9. **Dedicated mobile UX** — the PWA is responsive-ish but not phone-optimised.
 
 ### Bigger bets (see the cross-tool matrix)
-- **AI assist** via a **keyless copy-prompt / paste-result bridge** (paste-to-tree is half-built through OPML/Markdown import) — the biggest category-wide gap; see [`competitive-feature-matrix.md`](competitive-feature-matrix.md) cluster A.
-- **Persistent per-map version history** (IndexedDB snapshots) — cluster F.
-- **More structures** (flowchart, true concept map, matrix, brace map, multi-sheet) — cluster B.
+- **AI assist** via a **keyless copy-prompt / paste-result bridge** (paste-to-tree is half-built
+  through OPML/Markdown import + Paste-text) — the biggest category-wide gap, deliberately **deferred**;
+  see [`competitive-feature-matrix.md`](competitive-feature-matrix.md) cluster A.
+- **More structures** (flowchart, true concept map, matrix, Venn/funnel, summary topics) — cluster B.
 
 > For the **full market landscape** (all 19 tools, not just MindManager) and the A–G gap
 > clusters, see [`competitive-feature-matrix.md`](competitive-feature-matrix.md).
@@ -256,7 +280,9 @@ ahead of MindManager on **open interchange** (it reads/writes `.mmap`, OPML, Mar
 FreeMind, Mermaid, XMind, JSON, plus Office/image/HTML export — more open formats than
 MindManager), on **navigation** (it ships a minimap MindManager has dropped), on **price +
 privacy** (free, local-first, offline, no account), and on **being genuinely cross-platform**
-from one codebase. The honest summary: we trail on **visual variety** (layouts, callouts,
-rich text — all one renderer away) and we intentionally don't play in **PM, collaboration, and
-enterprise**. The roadmap that follows from this doc is: pick off the quick wins, decide
-deliberately about the renderer, and stay out of the two excluded layers.
+from one codebase. The visual-variety gap that this doc once led with (layouts, callouts,
+rich text) is **closed** — the React Flow migration shipped all of it. The honest summary now:
+we trail only on **a few diagram types** (flowchart / concept map / matrix / Venn / true summary
+topics) and we intentionally don't play in **PM, collaboration, and enterprise**. The roadmap
+that follows: build the remaining diagram types as the appetite arises, and stay out of the two
+excluded layers.

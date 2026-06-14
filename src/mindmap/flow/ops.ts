@@ -1,4 +1,4 @@
-import type { MapImage, MapNode, MindMapDoc, NodeStyle } from "../../model/types";
+import type { Callout, MapImage, MapNode, MindMapDoc, NodeStyle } from "../../model/types";
 
 // Pure tree-edit transforms on the canonical MindMapDoc. Each returns a NEW doc (the input
 // is never mutated) plus, where relevant, the id to select next. This is the model-first
@@ -235,6 +235,44 @@ export function toggleIcon(doc: MindMapDoc, id: string, icon: string): OpResult 
   if (i >= 0) icons.splice(i, 1);
   else icons.push(icon);
   loc.node.icons = icons.length > 0 ? icons : undefined;
+  return { doc: next };
+}
+
+// --- callouts (anchored annotation bubbles) --------------------------------
+
+/** Add a callout to a node (offset staggered by existing count so they don't stack). */
+export function addCallout(doc: MindMapDoc, nodeId: string): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, nodeId);
+  if (!loc) return { doc };
+  const callouts = loc.node.callouts ?? [];
+  const callout: Callout = { id: makeId(), text: "Note", dx: 48, dy: -28 + callouts.length * 46 };
+  loc.node.callouts = [...callouts, callout];
+  return { doc: next, selectId: nodeId };
+}
+
+/** Set a callout's text. */
+export function setCalloutText(
+  doc: MindMapDoc,
+  nodeId: string,
+  calloutId: string,
+  text: string,
+): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, nodeId);
+  const callout = loc?.node.callouts?.find((c) => c.id === calloutId);
+  if (!callout) return { doc };
+  callout.text = text;
+  return { doc: next };
+}
+
+/** Remove a callout (clearing the array when it empties). */
+export function deleteCallout(doc: MindMapDoc, nodeId: string, calloutId: string): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, nodeId);
+  if (!loc?.node.callouts) return { doc };
+  const kept = loc.node.callouts.filter((c) => c.id !== calloutId);
+  loc.node.callouts = kept.length > 0 ? kept : undefined;
   return { doc: next };
 }
 

@@ -41,8 +41,15 @@ preserving canonical-only `task`/`side` by id, restoring a collapsed node's omit
 doc, and carrying boundaries (pruned of gone members). The headline guarantee is the round trip
 `fromFlow(project(doc)) ≈ doc` (13 tests). The flow engine is model-first, so `fromFlow` is the regression
 guard that `project()` stays lossless + the reconstruction primitive for future native gestures — not yet
-wired to a UI gesture). **Next:** Phase H (callouts + rich-text + minimap, then **cutover** — flip the
-default engine to flow), then I (remove mind-elixir).
+wired to a UI gesture); Phase H pre-cutover features (you chose callouts + rich-text *before* the cutover):
+**minimap + zoom Controls** (RF `<MiniMap>`/`<Controls>`, themed for dark via `colorMode`); **inline
+rich-text topics** (`MapNode.topicRich`, Ctrl+B/I/U → `io/richText.ts` allowlist sanitiser, plain `topic`
+fallback so flat formats are untouched); **anchored callouts** (`MapNode.callouts` + `flow/Callouts.tsx`
+overlay + add via context menu, inline edit, delete; rendered in the SVG export too). Fixed a latent bug:
+the boundary/callout overlays read a live `renderDoc` mirror (updated in `sync()`) instead of the stable
+`doc` prop, so freshly-created boundaries + callouts now appear. **go/no-go #3 met** (parity verified +
+441-node recompute ~1 ms). **Next:** the **cutover** (flip `VITE_CANVAS_ENGINE` default → flow; awaiting
+the go-ahead), then Phase I (remove mind-elixir).
 
 ## MindManager UI-parity work (2026-06-12)
 

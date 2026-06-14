@@ -31,6 +31,7 @@ const doc: MindMapDoc = {
         topic: "Multi\nLine",
         icons: ["⭐"],
         style: { border: "2px solid #e23" },
+        callouts: [{ id: "co1", text: "Review me", dx: 48, dy: -20 }],
         children: [],
       },
       // An image node.
@@ -100,6 +101,12 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(svg).toContain("Theme group");
   });
 
+  it("renders callouts (sticky bubble + dashed connector + text)", () => {
+    expect(svg).toContain("Review me");
+    expect(svg).toContain('fill="#fff8c5"'); // sticky-note bubble
+    expect(svg).toMatch(/stroke-dasharray="3 3"/); // callout connector (distinct from cross-link)
+  });
+
   it("escapes XML special characters in topics", () => {
     const tricky = buildFlowSvg(
       { ...doc, root: { id: "r", topic: "A & B <c>", children: [] } },
@@ -126,6 +133,10 @@ describe("flow exportSvg survives the cleanSvg pipeline (sanitize → inline)", 
   it("keeps the cross-link and boundary labels", () => {
     expect(out).toContain("depends on");
     expect(out).toContain("Theme group");
+  });
+
+  it("keeps callout text", () => {
+    expect(out).toContain("Review me");
   });
 
   it("keeps the marker icon and the image data URL", () => {

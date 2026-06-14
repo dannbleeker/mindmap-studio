@@ -24,6 +24,7 @@ import type { MapNode, MindMapDoc } from "../model/types";
 import type { LayoutKind, MindMapHandle, MindMapProps } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
 import { BranchEdge } from "./flow/BranchEdge";
+import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { TopicNode } from "./flow/TopicNode";
 import { EditingContext } from "./flow/editing";
@@ -32,8 +33,10 @@ import { createHistory, record, redo as redoHistory, undo as undoHistory } from 
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import {
   type OpResult,
+  addCallout,
   addChild,
   addSibling,
+  deleteCallout,
   deleteNode,
   findNode,
   groupBranch,
@@ -42,6 +45,7 @@ import {
   reparent,
   replaceTopics,
   setAllExpanded,
+  setCalloutText,
   setHyperlink,
   setImage,
   setNote,
@@ -93,6 +97,10 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
+  // The current doc, mirrored for render-time consumers (boundary + callout overlays). The
+  // canvas is model-first: edits update docRef + RF state via sync(); App keeps the `doc` prop
+  // stable during a session, so the overlays must track this live copy, not the prop.
+  const [renderDoc, setRenderDoc] = useState(doc);
   const { fitView, getNodes, setCenter } = useReactFlow();
   const initialized = useNodesInitialized();
 
@@ -118,6 +126,7 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   const sync = useCallback(
     (newDoc: MindMapDoc, nextSelected?: string | null) => {
       docRef.current = newDoc;
+      setRenderDoc(newDoc);
       if (nextSelected !== undefined) selectedRef.current = nextSelected;
       const proj = project(newDoc, paletteRef.current);
       const est = estimateSizeOf(proj.nodes);
@@ -242,6 +251,18 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
       toggleCollapse: (id: string) => apply(toggleCollapse(docRef.current, id)),
     };
   }, [editingId, apply]);
+
+  // Flatten every node's callouts for the overlay, from the live doc (so freshly-added ones show).
+  const calloutItems = useMemo<CalloutAnchor[]>(() => {
+    const out: CalloutAnchor[] = [];
+    const walk = (m: MapNode) => {
+      for (const c of m.callouts ?? []) out.push({ nodeId: m.id, callout: c });
+      for (const ch of m.children) walk(ch);
+    };
+    walk(renderDoc.root);
+    for (const f of renderDoc.floatingTopics ?? []) walk(f);
+    return out;
+  }, [renderDoc]);
 
   // Keep node selection flags in sync with selectedId (no re-layout).
   useEffect(() => {
@@ -429,7 +450,12 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
           onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
-          <Boundaries boundaries={doc.boundaries ?? []} />
+          <Boundaries boundaries={renderDoc.boundaries ?? []} />
+          <Callouts
+            items={calloutItems}
+            onCommit={(nid, cid, text) => apply(setCalloutText(docRef.current, nid, cid, text))}
+            onDelete={(nid, cid) => apply(deleteCallout(docRef.current, nid, cid))}
+          />
           <Controls showInteractive={false} />
           <MiniMap
             pannable
@@ -463,6 +489,7 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
                 ["Add child", () => apply(addChild(docRef.current, menu.id), true)],
                 ["Add sibling", () => apply(addSibling(docRef.current, menu.id), true)],
                 ["Rename", () => setEditingId(menu.id)],
+                ["Add callout", () => apply(addCallout(docRef.current, menu.id))],
                 ["Group in boundary", () => apply(groupBranch(docRef.current, menu.id))],
                 ["Collapse / expand", () => apply(toggleCollapse(docRef.current, menu.id))],
                 ["Delete", () => apply(deleteNode(docRef.current, menu.id))],

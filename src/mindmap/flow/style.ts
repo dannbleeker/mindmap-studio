@@ -19,6 +19,11 @@ export const BOUNDARY_LABEL_BG = "#eceafb";
 export const BOUNDARY_LABEL_BORDER = "#cecbf6";
 export const BOUNDARY_LABEL_COLOR = "#26215c";
 
+// Callout (anchored annotation bubble) — sticky-note yellow, readable on light + dark canvases.
+export const CALLOUT_BG = "#fff8c5";
+export const CALLOUT_STROKE = "#d4a72c";
+export const CALLOUT_TEXT = "#3b2f00";
+
 /**
  * The label to actually draw for a boundary. "summary" is the implicit default applied to
  * auto-created groupings, so it renders as no chip (matching mind-elixir's bare bracket).

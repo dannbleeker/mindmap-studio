@@ -35,6 +35,15 @@ export interface MapImage {
   height?: number;
 }
 
+/** A small annotation bubble anchored to a node (MindManager "callout"). */
+export interface Callout {
+  id: string;
+  text: string;
+  /** Offset of the bubble from the node's right edge / vertical centre, in flow units. */
+  dx: number;
+  dy: number;
+}
+
 export interface MapNode {
   id: NodeId;
   /** Plain-text topic — always kept in sync as the fallback for search, outline, and exports. */
@@ -54,6 +63,8 @@ export interface MapNode {
   style?: NodeStyle;
   collapsed?: boolean;
   task?: TaskInfo;
+  /** Anchored annotation bubbles (MindManager callouts); lossless in .json, ignored by flat formats. */
+  callouts?: Callout[];
   children: MapNode[];
   /** For the two-sided radial layout; left undefined = engine decides. */
   side?: "left" | "right";

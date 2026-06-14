@@ -165,6 +165,20 @@ describe("flow fromFlow (React Flow → model)", () => {
     expect(fresh?.side).toBeUndefined();
   });
 
+  it("preserves callouts by id", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "co",
+      title: "Root",
+      root: n("r", "Root", {}, [
+        n("a", "A", { callouts: [{ id: "c1", text: "Hi", dx: 40, dy: -20 }] }),
+      ]),
+    };
+    expect(roundTrip(d).root.children[0].callouts).toEqual([
+      { id: "c1", text: "Hi", dx: 40, dy: -20 },
+    ]);
+  });
+
   it("round-trips a rich-text topic (topicRich)", () => {
     const d: MindMapDoc = {
       schemaVersion: 1,

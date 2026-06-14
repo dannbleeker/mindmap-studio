@@ -1,4 +1,4 @@
-import type { MindMapDoc } from "../../model/types";
+import type { MapNode, MindMapDoc } from "../../model/types";
 import { taperedRibbonPath } from "./BranchEdge";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
@@ -10,6 +10,9 @@ import {
   BOUNDARY_PAD,
   BOUNDARY_RADIUS,
   BOUNDARY_STROKE,
+  CALLOUT_BG,
+  CALLOUT_STROKE,
+  CALLOUT_TEXT,
   CROSSLINK_COLOR,
   CROSSLINK_DASH,
   CROSSLINK_WIDTH,
@@ -87,6 +90,42 @@ function textBlock(
   return `<text ${attrs} y="${r2(firstBaseline)}">${tspans}</text>`;
 }
 
+interface CalloutBox {
+  ax: number; // node anchor (right-centre)
+  ay: number;
+  x: number; // bubble rect
+  y: number;
+  w: number;
+  h: number;
+  text: string;
+}
+
+/** Walk the model for callouts and resolve each to a bubble box anchored to its node's rect. */
+function collectCallouts(doc: MindMapDoc, rects: Map<string, NodeRect>): CalloutBox[] {
+  const out: CalloutBox[] = [];
+  const walk = (n: MapNode): void => {
+    const r = rects.get(n.id);
+    if (r) {
+      for (const c of n.callouts ?? []) {
+        const text = c.text || "…";
+        out.push({
+          ax: r.x + r.w,
+          ay: r.y + r.h / 2,
+          x: r.x + r.w + c.dx,
+          y: r.y + r.h / 2 + c.dy,
+          w: Math.max(36, text.length * 6.6 + 16),
+          h: 22,
+          text,
+        });
+      }
+    }
+    for (const child of n.children) walk(child);
+  };
+  walk(doc.root);
+  for (const f of doc.floatingTopics ?? []) walk(f);
+  return out;
+}
+
 export function buildFlowSvg(
   doc: MindMapDoc,
   rects: Map<string, NodeRect>,
@@ -94,13 +133,14 @@ export function buildFlowSvg(
   cssVar: Record<string, string>,
 ): string {
   const { nodes, edges } = project(doc, palette);
+  const callouts = collectCallouts(doc, rects);
   const nodeBg = cssVar["--bgcolor"] ?? "#ffffff";
   const color = cssVar["--color"] ?? "#2c2c2a";
   const rootBg = cssVar["--root-bgcolor"] ?? "#26215c";
   const rootColor = cssVar["--root-color"] ?? "#ffffff";
   const pageBg = cssVar["--main-bgcolor"] ?? "#ffffff";
 
-  // Overall bounds (nodes + boundaries), padded.
+  // Overall bounds (nodes + boundaries + callouts), padded.
   let minX = Number.POSITIVE_INFINITY;
   let minY = Number.POSITIVE_INFINITY;
   let maxX = Number.NEGATIVE_INFINITY;
@@ -110,6 +150,12 @@ export function buildFlowSvg(
     minY = Math.min(minY, r.y);
     maxX = Math.max(maxX, r.x + r.w);
     maxY = Math.max(maxY, r.y + r.h);
+  }
+  for (const c of callouts) {
+    minX = Math.min(minX, c.x);
+    minY = Math.min(minY, c.y);
+    maxX = Math.max(maxX, c.x + c.w);
+    maxY = Math.max(maxY, c.y + c.h);
   }
   if (!Number.isFinite(minX)) {
     minX = 0;
@@ -227,6 +273,15 @@ export function buildFlowSvg(
         ),
       );
     }
+  }
+
+  // Callouts (anchored bubbles, drawn on top): dashed connector + sticky-note bubble + text.
+  for (const c of callouts) {
+    parts.push(
+      `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${CALLOUT_STROKE}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
+      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${c.h}" rx="8" fill="${CALLOUT_BG}" stroke="${CALLOUT_STROKE}"/>`,
+      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${CALLOUT_TEXT}">${esc(c.text)}</text>`,
+    );
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vbX)} ${r2(vbY)} ${r2(vbW)} ${r2(vbH)}" width="${r2(vbW)}" height="${r2(vbH)}"><rect x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" fill="${esc(pageBg)}"/>${parts.join("")}</svg>`;

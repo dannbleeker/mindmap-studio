@@ -258,10 +258,11 @@ theme default.
 
 ## Relationships, boundaries & callouts
 
-- **Relationships** — draw a labelled arrow between two nodes: right-click the first node →
-  **Link to…**, then click the target (you'll be prompted for an optional label). Double-click a
-  relationship to relabel it, right-click it to delete. Drawn and imported (`.mmap`) relationships
-  both persist.
+- **Relationships** — draw a labelled, **directional** arrow (the arrowhead points at the target)
+  between two nodes: right-click the first node → **Link to…**, then click the target (you'll be
+  prompted for an optional label). Double-click a relationship to relabel it, right-click it to
+  delete. Drawn and imported (`.mmap`) relationships both persist, and the arrow direction carries
+  into image exports.
 - **Boundaries** — a shaded, rounded box grouping a node and its subtree. Select a node and
   click **⬚ Group** in the toolbar, then double-click the box's label chip to name it (an
   unlabelled box shows a "Label…" placeholder). Drawn and imported boundaries both round-trip

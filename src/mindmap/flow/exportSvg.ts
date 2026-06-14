@@ -3,6 +3,7 @@ import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
 import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
 import { taperedRibbonPath } from "./BranchEdge";
+import { arrowHeadPath } from "./CrosslinkEdge";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
@@ -279,6 +280,9 @@ export function buildFlowSvg(
       const clColor = e.data.branchColor ?? CROSSLINK_COLOR;
       parts.push(
         `<path d="M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}" fill="none" stroke="${clColor}" stroke-width="${CROSSLINK_WIDTH}" stroke-dasharray="${CROSSLINK_DASH}"/>`,
+        // Directional arrowhead at the target — same builder the canvas uses, so the relationship
+        // reads as flow in exports too.
+        `<path d="${arrowHeadPath(tx, ty, sx, sy)}" fill="${clColor}"/>`,
       );
       const label = typeof e.label === "string" ? e.label : "";
       if (label) {

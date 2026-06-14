@@ -80,9 +80,10 @@ GitHub Pages).
   capped at 30, stored in IndexedDB, deleted with the map.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.
-- **Relationships** — draw a labelled arrow between two nodes: right-click a node → **Link
-  to…**, then click the target (with an optional label). Double-click a relationship to
-  relabel it, right-click to delete. Imported `.mmap` relationships render too.
+- **Relationships** — draw a labelled, **directional** arrow (arrowhead at the target) between two
+  nodes: right-click a node → **Link to…**, then click the target (with an optional label).
+  Double-click a relationship to relabel it, right-click to delete. Imported `.mmap` relationships
+  render too.
 - **Links** — from the **ℹ Info** panel, give a node a clickable 🔗 to another **topic** in the
   same map, to another **map**, or to a **web page**; click the 🔗 to follow it.
 - **Boundaries** — a toolbar **⬚ Group** draws a shaded, rounded box around the selected

@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Directional relationships** — relationship arrows now carry a **filled arrowhead at the target**,
+  so a link reads as flow (the flowchart / concept-map connector). The arrowhead is built from one
+  shared path helper used by the canvas edge **and** the image export, so the direction shows on
+  screen and in exports alike. No model change — every existing and imported relationship gains it.
 - **Node shapes (flowchart vocabulary)** — the **Shape** row in the style bar now offers, beyond
   box / rounded / pill, five true geometric shapes: **diamond** (decision), **oval** (start/end),
   **parallelogram** (input/output), **hexagon** (preparation), and **cylinder** (data store). They're

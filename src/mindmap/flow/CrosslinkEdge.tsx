@@ -9,10 +9,35 @@ import { getFloatingPoints } from "./floating";
 import { CROSSLINK_COLOR, CROSSLINK_DASH, CROSSLINK_WIDTH } from "./style";
 import type { FlowEdge } from "./types";
 
-// Cross-link / relationship: a dashed floating bezier with an optional label chip. Floating
-// (border-to-border) so it routes sensibly in any layout, unlike a fixed-handle edge. Rendered
-// via BaseEdge so it carries a wide invisible hit-area — the thin dashed line is easy to
-// double-click (rename) or right-click (delete).
+const r2 = (n: number): number => Math.round(n * 100) / 100;
+
+/** A filled triangle arrowhead with its tip at (tipX,tipY), pointing away from (fromX,fromY).
+ *  Shared by the canvas edge and the SVG exporter so a relationship reads directionally in both
+ *  — the flowchart / concept-map connector. Returns an SVG path `d`. */
+export function arrowHeadPath(
+  tipX: number,
+  tipY: number,
+  fromX: number,
+  fromY: number,
+  size = 9,
+): string {
+  const dx = tipX - fromX;
+  const dy = tipY - fromY;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const bx = tipX - ux * size; // base centre, `size` back from the tip
+  const by = tipY - uy * size;
+  const px = -uy; // perpendicular
+  const py = ux;
+  const w = size * 0.55;
+  return `M ${r2(tipX)} ${r2(tipY)} L ${r2(bx + px * w)} ${r2(by + py * w)} L ${r2(bx - px * w)} ${r2(by - py * w)} Z`;
+}
+
+// Cross-link / relationship: a dashed floating bezier with a directional arrowhead and an optional
+// label chip. Floating (border-to-border) so it routes sensibly in any layout, unlike a fixed-handle
+// edge. Rendered via BaseEdge so it carries a wide invisible hit-area — the thin dashed line is easy
+// to double-click (rename) or right-click (delete).
 
 export function CrosslinkEdge({ source, target, label, data }: EdgeProps<FlowEdge>) {
   const s = useInternalNode(source);
@@ -39,6 +64,7 @@ export function CrosslinkEdge({ source, target, label, data }: EdgeProps<FlowEdg
           opacity: dimOpacity,
         }}
       />
+      <path d={arrowHeadPath(tx, ty, sx, sy)} fill={color} style={{ opacity: dimOpacity }} />
       {label ? (
         <EdgeLabelRenderer>
           <div

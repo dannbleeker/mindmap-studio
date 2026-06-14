@@ -10,8 +10,10 @@
 // that survives the export pipeline unchanged.
 import { describe, expect, it } from "vitest";
 import { sanitizeSvg } from "../src/io/svgSanitize";
+import { arrowHeadPath } from "../src/mindmap/flow/CrosslinkEdge";
 import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
 import { shapePath } from "../src/mindmap/flow/shapes";
+import { CROSSLINK_COLOR } from "../src/mindmap/flow/style";
 import type { MindMapDoc } from "../src/model/types";
 
 const PNG =
@@ -104,6 +106,16 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
 
   it("carries the cross-link label (dropped by the old export)", () => {
     expect(svg).toContain("depends on");
+  });
+
+  it("draws a directional arrowhead on the cross-link (a filled triangle at the target)", () => {
+    // a 3-vertex triangle filled with the cross-link colour — the relationship's arrowhead
+    // (branch ribbons fill with branch colours; the dashed line uses stroke, not fill)
+    expect(svg).toMatch(
+      new RegExp(
+        `<path d="M -?[\\d.]+ -?[\\d.]+ L -?[\\d.]+ -?[\\d.]+ L -?[\\d.]+ -?[\\d.]+ Z" fill="${CROSSLINK_COLOR}"`,
+      ),
+    );
   });
 
   it("draws the boundary box and carries its label (dropped by the old export)", () => {
@@ -199,12 +211,23 @@ describe("flow exportSvg survives the cleanSvg pipeline (sanitizeSvg)", () => {
     expect(out).toContain("data:image/png;base64,");
   });
 
-  it("keeps all branch + cross-link path geometry (4 nodes → 3 branches + 1 crosslink)", () => {
-    expect((out.match(/<path[\s>]/g) ?? []).length).toBe(4);
+  it("keeps all path geometry (3 branches + 1 crosslink line + 1 crosslink arrowhead)", () => {
+    expect((out.match(/<path[\s>]/g) ?? []).length).toBe(5);
   });
 
   it("introduced no foreignObject and no script", () => {
     expect(out).not.toMatch(/foreignObject/);
     expect(out).not.toMatch(/<script/i);
+  });
+});
+
+describe("arrowHeadPath (shared relationship arrowhead)", () => {
+  it("builds a 3-vertex triangle with its tip at the target, pointing away from the source", () => {
+    const d = arrowHeadPath(100, 0, 0, 0, 9); // horizontal, pointing +x
+    expect(d.startsWith("M 100 0 L")).toBe(true); // tip exactly at the target
+    expect(d.endsWith("Z")).toBe(true);
+    expect((d.match(/L/g) ?? []).length).toBe(2); // 3 vertices
+    // base sits `size` back from the tip along the axis
+    expect(d).toContain("L 91 "); // bx = 100 - 9
   });
 });

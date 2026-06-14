@@ -71,20 +71,15 @@ Remaining items are renderer-constrained or Dann-dependent:
       engine that supports vertical/org-chart layouts; tie-in with the existing renderer-ceiling
       item). The "remember orientation" + a richer layout picker (the 3-icon control) are doable
       now; the new *orientations themselves* are the renderer-ceiling part.
-- [ ] **Import/export interop with other mind-mapping tools.** *Today:* import `.mmap`
-      (MindManager, one-way lossy), **OPML**, and `.json` (native canonical); export `.json`,
-      OPML, image (`.svg`/`.png`/`.html`/`.pdf`), Office (`.docx`/`.pptx`/`.xlsx`), an HTML slide
-      deck, and Copy-outline. **Gap:** other tools' *native* formats. **Targets** (research each
-      tool's format + license, then add a thin adapter to/from the canonical model — the
-      architecture is built for exactly this): **FreeMind / Freeplane** (`.mm`, plain XML — the
-      most open + widely interchanged, do read+write first), **XMind** (`.xmind`, a ZIP of
-      `content.json`/`content.xml` — read first), **MindMup** (JSON), **iThoughts** (`.itmz`, ZIP),
-      **SimpleMind** (`.smmx`), and lightweight text formats **Markdown / Markmap** and **Mermaid
-      mindmap** syntax. *Note:* OPML already bridges many outliners and some MM tools, so
-      export-via-OPML covers a lot today — native importers/exporters add fidelity. Prioritize by
-      format openness + how many tools accept it (FreeMind `.mm` and Markdown/Mermaid are the
-      cheapest wins). First step is the deep research (enumerate every reachable tool + its format
-      spec + round-trip fidelity), get the target list approved, then build.
+- [ ] **Import/export interop with other mind-mapping tools — remaining formats.** *Shipped
+      (2026-06-14):* FreeMind/Freeplane `.mm` (import + export), Mermaid `mindmap` (import +
+      export), and XMind `.xmind` import — on top of the existing `.mmap`/OPML/Markdown/`.json`
+      and the image/Office/deck exporters. *Remaining targets* (each a thin adapter to/from the
+      canonical model): **XMind export** (zip `content.json` + manifest — the import side is
+      done) and **older `.xmind`** (`content.xml`); **MindMup** (JSON), **iThoughts** (`.itmz`,
+      ZIP), **SimpleMind** (`.smmx`), and **Markmap**. Lower priority — `.mm`/OPML/Markdown
+      already bridge most of these tools both ways. Add by format openness + how many tools
+      accept it.
 - [ ] **Deep research: MindManager features vs MindMap Studio gaps.** A comprehensive,
       systematic audit (deeper than the 2026-06-12 UI-comparison parity pass): catalogue
       MindManager's *full* feature set — from official docs **and** the bundled XSD already in the

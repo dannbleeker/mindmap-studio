@@ -16,7 +16,9 @@ GitHub Pages).
   MindManager-style map. The `.mmap` importer is field-mapped from the bundled MindManager
   XSD (topic tree, notes, icons, hyperlinks, relationships, boundaries, floating topics).
   Select multiple files to batch-import a whole folder of maps into the library at once.
-  Also opens native `.json` maps (exported from this app) losslessly, and `.opml` outlines.
+  Also opens native `.json` maps (exported from this app) losslessly, and interchanges with
+  other tools: `.opml` outlines, **FreeMind/Freeplane `.mm`**, **Mermaid** `mindmap`, and
+  **XMind `.xmind`**.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   undo/redo (Ctrl+Z / Ctrl+Shift+Z), images on nodes, a docked **Notes** editor for the
   selected node, plus a node editor panel (icons, tags, font size/color, link) via node-menu.
@@ -43,9 +45,10 @@ GitHub Pages).
   branch, and are editable: rename, add, remove, nest, or drag them in/out of the tree, and
   the changes round-trip back into the model.
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
-  (`.md`), OPML (`.opml`), PNG, SVG, a self-contained HTML file, a standalone HTML
-  **slide deck** (the Walk-Through as a shareable file), a **PowerPoint** (`.pptx`) deck,
-  a Word **`.docx`** outline document, an Excel **`.xlsx`** outline sheet, and print-to-PDF.
+  (`.md`), OPML (`.opml`), **FreeMind/Freeplane `.mm`**, **Mermaid** (`.mmd`), PNG, SVG, a
+  self-contained HTML file, a standalone HTML **slide deck** (the Walk-Through as a shareable
+  file), a **PowerPoint** (`.pptx`) deck, a Word **`.docx`** outline document, an Excel
+  **`.xlsx`** outline sheet, and print-to-PDF.
 - **Copy outline** — copy the map as a Markdown outline straight to the clipboard (no file),
   for pasting into an email, chat, or doc.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.

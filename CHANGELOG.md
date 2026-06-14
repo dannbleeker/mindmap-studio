@@ -239,6 +239,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   bottom-right zoom widget is hidden so there's a single, integrated control, and the engine's
   zoom range is widened (`scaleMin 0.2` / `scaleMax 3`) so the buttons and wheel zoom in
   meaningfully. Covered by `test/minimap.test.ts` (projection, centring, viewport, inverse).
+- **Interop with other mind-mapping tools — FreeMind/Freeplane, Mermaid, XMind.** New thin
+  adapters to/from the canonical model widen the round-trip beyond `.mmap`/OPML/Markdown/JSON:
+  **FreeMind/Freeplane `.mm`** (`src/io/freemind.ts`, import + export — topic tree, links,
+  folded state, and notes), **Mermaid `mindmap`** (`src/io/mermaid.ts`, import + export — the
+  text format you embed in Markdown/docs; topic tree), and **XMind `.xmind`** (`src/io/xmind.ts`,
+  import — unzips `content.json`, mapping titles, notes, web links, and labels→tags). Wired into
+  the **⬆ Export…** menu (`.mm`, `.mmd`) and **Open files** (`.mm`, `.mmd`/`.mermaid`, `.xmind`);
+  dangerous-scheme links are dropped on both directions, as everywhere. Covered by
+  `test/freemind.test.ts`, `test/mermaid.test.ts`, and `test/xmind.test.ts` (round-trips, shape/
+  indentation parsing, malformed-input rejection). XMind export and older `.xmind` (`content.xml`)
+  remain out of scope — `.opml`/`.mm` already import into XMind.
 
 ### Changed
 

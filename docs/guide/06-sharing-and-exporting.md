@@ -19,6 +19,12 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
   though it naturally drops canvas-only detail like colours and arrows.
 - **OPML** -- the interchange format outliners speak. Use it to hand your structure to
   another outlining tool.
+- **FreeMind / Freeplane (`.mm`)** -- the most widely-read mind-map format. Carries the
+  topic tree, links, folded branches, and notes, so a map opens in FreeMind, Freeplane,
+  XMind, and the many tools that import `.mm`. The bridge to almost any other mind-mapper.
+- **Mermaid (`.mmd`)** -- the `mindmap` text format you embed in Markdown, a README, or a
+  wiki that renders Mermaid (GitHub, GitLab, Notion, many docs tools). For when the map
+  should live *as text* inside something you're already writing.
 - **PNG** and **SVG** -- the map as a picture. PNG for slides and chat; SVG when you want
   a crisp, scalable image that survives zooming.
 - **HTML** -- a self-contained web page of the map, openable in any browser with nothing
@@ -57,10 +63,15 @@ The same breadth applies going in. MindMap Studio reads:
 - **Native `.json`** -- the lossless round trip of the export above.
 - **Markdown** outlines -- any `#`/bullet structure becomes a map.
 - **OPML** -- from other outliners.
+- **FreeMind / Freeplane `.mm`** -- topics, links, folded state, and notes.
+- **Mermaid** `mindmap` text -- any node shape; the hierarchy comes from the indentation.
+- **XMind `.xmind`** (2020+) -- topics, notes, web links, and labels become tags.
 - **MindManager `.mmap`** -- see below.
 
 You can **batch-import** several files at once, which turns a folder of outlines into a
-library of maps in one step.
+library of maps in one step. These bridges cover the common ground between tools; each
+keeps the topic tree and the fields that map cleanly, and -- like the `.mmap` importer --
+quietly leaves behind only the tool-specific extras it can't represent.
 
 ## The MindManager bridge
 

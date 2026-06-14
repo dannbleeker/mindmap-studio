@@ -196,6 +196,9 @@ learn a feature by reading one that uses it. Opening one creates a fresh, editab
 | `.md` / `.markdown` | Markdown outline (H1 root + nested bullets) |
 | `.json` | A native MindMap Studio map — **lossless** |
 | `.opml` | OPML outline (Freeplane, OmniOutliner, Workflowy, …) |
+| `.mm` | FreeMind / Freeplane map — topics, links, folded state, and notes |
+| `.mmd` / `.mermaid` | Mermaid `mindmap` text (any node shape; hierarchy by indentation) |
+| `.xmind` | XMind (2020+) — topics, notes, web links, and labels→tags from `content.json` |
 
 Each imported file becomes its own library entry; batch imports report how many were added.
 MindManager stock icons are mapped to the closest **emoji** marker, so an imported map keeps its
@@ -218,6 +221,8 @@ Pick a format from the **⬆ Export…** menu:
 | `.json` | Native, **lossless** — use for backup or moving a map between machines |
 | `.md` | Markdown outline |
 | `.opml` | OPML outline |
+| `.mm` | FreeMind / Freeplane — topics, links, folded state, notes (opens in FreeMind, Freeplane, XMind, …) |
+| `.mmd` | Mermaid `mindmap` text — paste into Markdown, GitHub, or docs that render Mermaid |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
 | `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline) |

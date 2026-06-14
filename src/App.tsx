@@ -198,12 +198,24 @@ export function App() {
     if (name.endsWith(".md") || name.endsWith(".markdown")) {
       return { doc: fromMarkdown(await file.text()), warnings: [] };
     }
+    if (name.endsWith(".mmd") || name.endsWith(".mermaid")) {
+      const { fromMermaid } = await import("./io/mermaid");
+      return { doc: fromMermaid(await file.text()), warnings: [] };
+    }
     if (name.endsWith(".json")) {
       return { doc: parseDoc(await file.text()), warnings: [] };
     }
     if (name.endsWith(".opml")) {
       const { fromOpml } = await import("./io/opml");
       return { doc: fromOpml(await file.text()), warnings: [] };
+    }
+    if (name.endsWith(".mm")) {
+      const { fromFreemind } = await import("./io/freemind");
+      return { doc: fromFreemind(await file.text()), warnings: [] };
+    }
+    if (name.endsWith(".xmind")) {
+      const { fromXmind } = await import("./io/xmind");
+      return { doc: fromXmind(new Uint8Array(await file.arrayBuffer())), warnings: [] };
     }
     const { parseMmap } = await importMmap();
     const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
@@ -331,7 +343,9 @@ export function App() {
   const {
     exportJson,
     exportMarkdown,
+    exportMermaid,
     exportOpml,
+    exportFreemind,
     exportPng,
     exportSvg,
     exportHtml,
@@ -697,6 +711,8 @@ export function App() {
               opml: exportOpml,
               png: exportPng,
               svg: exportSvg,
+              mermaid: exportMermaid,
+              mm: exportFreemind,
               html: exportHtml,
               deck: exportDeck,
               pdf: exportPdf,
@@ -715,6 +731,8 @@ export function App() {
             <option value="json">.json (lossless)</option>
             <option value="md">.md (Markdown)</option>
             <option value="opml">.opml (outline)</option>
+            <option value="mm">.mm (FreeMind/Freeplane)</option>
+            <option value="mermaid">.mmd (Mermaid)</option>
           </optgroup>
           <optgroup label="Image">
             <option value="png">.png (image)</option>
@@ -752,7 +770,7 @@ export function App() {
           <input
             id="mmap-input"
             type="file"
-            accept=".mmap,.mmp,.md,.markdown,.json,.opml"
+            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind"
             multiple
             onChange={handleFile}
             style={{ display: "none" }}

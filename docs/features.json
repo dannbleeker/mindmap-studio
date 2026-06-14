@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 71,
+  "reviewedThroughChangelogBullets": 72,
   "areas": [
     "editing",
     "notes",
@@ -350,6 +350,33 @@
       "bookExample": false
     },
     {
+      "id": "import-freemind",
+      "name": "Import FreeMind / Freeplane .mm",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "import-mermaid",
+      "name": "Import Mermaid mindmap",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "import-xmind",
+      "name": "Import XMind .xmind",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
       "id": "batch-import",
       "name": "Multi-file batch import",
       "area": "import",
@@ -381,6 +408,24 @@
       "name": "Export OPML",
       "area": "export",
       "since": "2026-06-12",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "export-freemind",
+      "name": "Export FreeMind / Freeplane .mm",
+      "area": "export",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "export-mermaid",
+      "name": "Export Mermaid mindmap",
+      "area": "export",
+      "since": "2026-06-14",
       "manual": true,
       "book": true,
       "bookExample": false

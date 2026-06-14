@@ -2,6 +2,7 @@ import type { RefObject } from "react";
 import { buildPrintDoc, wrapSvgHtml } from "./io/html";
 import { serializeDoc } from "./io/json";
 import { toMarkdown } from "./io/markdown";
+import { toMermaid } from "./io/mermaid";
 import { sanitizeSvg } from "./io/svgSanitize";
 import { inlineSvgText } from "./io/svgText";
 import type { MindMapHandle } from "./mindmap/MindMap";
@@ -42,7 +43,9 @@ async function svgToPng(svg: string): Promise<Blob | null> {
 export interface MapExports {
   exportJson: () => void;
   exportMarkdown: () => void;
+  exportMermaid: () => void;
   exportOpml: () => Promise<void>;
+  exportFreemind: () => Promise<void>;
   exportPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
@@ -82,10 +85,22 @@ export function useMapExports(
     exportMarkdown() {
       download(new Blob([toMarkdown(getDoc())], { type: "text/markdown" }), `${baseName()}.md`);
     },
+    // Mermaid `mindmap` text (mermaid.ts is dependency-free, so static-imported).
+    exportMermaid() {
+      download(new Blob([toMermaid(getDoc())], { type: "text/vnd.mermaid" }), `${baseName()}.mmd`);
+    },
     async exportOpml() {
       // Lazy: opml.ts pulls in fast-xml-parser, kept out of the entry bundle.
       const { toOpml } = await import("./io/opml");
       download(new Blob([toOpml(getDoc())], { type: "text/x-opml" }), `${baseName()}.opml`);
+    },
+    // FreeMind / Freeplane .mm — lazy (freemind.ts pulls fast-xml-parser for its importer).
+    async exportFreemind() {
+      const { toFreemind } = await import("./io/freemind");
+      download(
+        new Blob([toFreemind(getDoc())], { type: "application/x-freemind" }),
+        `${baseName()}.mm`,
+      );
     },
     // png/svg/html/pdf all embed the rendered SVG via cleanSvg() (sanitize + native-text).
     async exportPng() {

@@ -1,11 +1,12 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { type CSSProperties, useEffect, useMemo, useRef } from "react";
+import { Chip, DateChip } from "../../Chip";
 import { ProgressPie } from "../../ProgressPie";
 import { sanitizeRich } from "../../io/richText";
 import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
-import { formatDateShort, isOverdue, todayISO } from "../../taskDate";
+import { isOverdue, todayISO } from "../../taskDate";
 import { useEditing } from "./editing";
 import type { TopicNode as TopicNodeT } from "./types";
 
@@ -67,27 +68,6 @@ function ProgressBadge({ info, onCycle }: { info: ProgressInfo; onCycle?: () => 
     >
       {pie}
     </button>
-  );
-}
-
-/** A due-date chip on the node; turns red when overdue (past due and not finished). */
-function DateChip({ due, overdue }: { due: string; overdue: boolean }) {
-  return (
-    <span
-      title={overdue ? `Overdue — was due ${due}` : `Due ${due}`}
-      style={{
-        fontSize: 10.5,
-        lineHeight: "16px",
-        padding: "0 5px",
-        borderRadius: 6,
-        whiteSpace: "nowrap",
-        background: overdue ? "#fde2e2" : "rgba(0,0,0,0.06)",
-        color: overdue ? "#b42318" : "inherit",
-        fontWeight: overdue ? 600 : 400,
-      }}
-    >
-      📅 {formatDateShort(due)}
-    </span>
   );
 }
 
@@ -267,21 +247,14 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}
         >
           {priority ? (
-            <span
+            <Chip
               title={`${PRIORITY_LABEL[priority] ?? ""} priority`}
-              style={{
-                fontSize: 10.5,
-                lineHeight: "16px",
-                padding: "0 5px",
-                borderRadius: 6,
-                whiteSpace: "nowrap",
-                fontWeight: 600,
-                color: "#fff",
-                background: PRIORITY_COLOR[priority] ?? "#888",
-              }}
+              bg={PRIORITY_COLOR[priority] ?? "#888"}
+              color="#fff"
+              fontWeight={600}
             >
               {PRIORITY_LABEL[priority] ?? "?"}
-            </span>
+            </Chip>
           ) : null}
           {progress ? (
             <ProgressBadge
@@ -293,12 +266,9 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
             <DateChip due={due} overdue={isOverdue(due, progress?.progress ?? 0, todayISO())} />
           ) : null}
           {attachmentCount ? (
-            <span
-              title={`${attachmentCount} attachment${attachmentCount === 1 ? "" : "s"}`}
-              style={{ ...chipStyle, fontSize: 10.5, lineHeight: "16px" }}
-            >
+            <Chip title={`${attachmentCount} attachment${attachmentCount === 1 ? "" : "s"}`}>
               📎 {attachmentCount}
-            </span>
+            </Chip>
           ) : null}
         </div>
       ) : null}

@@ -25,6 +25,13 @@ describe("matchesRule", () => {
     expect(matchesRule(node({ icons: ["⭐"] }), rule({ kind: "marker", value: "❗" }))).toBe(false);
   });
 
+  it("never matches a tag/marker rule with an empty value", () => {
+    expect(matchesRule(node({ tags: ["risk"] }), rule({ kind: "tag", value: "" }))).toBe(false);
+    expect(matchesRule(node({ icons: ["❗"] }), rule({ kind: "marker", value: undefined }))).toBe(
+      false,
+    );
+  });
+
   it("matches 'completed' against effective progress (1 = done)", () => {
     const r = rule({ kind: "completed", value: undefined });
     expect(matchesRule(node(), r, 1)).toBe(true);

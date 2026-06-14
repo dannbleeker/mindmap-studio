@@ -1,7 +1,8 @@
+import { DateChip } from "./Chip";
 import { ProgressPie } from "./ProgressPie";
 import { type BoardColumn, UNTAGGED, boardColumns } from "./board";
 import type { MindMapDoc } from "./model/types";
-import { formatDateShort, isOverdue, todayISO } from "./taskDate";
+import { isOverdue, todayISO } from "./taskDate";
 import { controlStyle } from "./ui";
 
 // A read-only Kanban board: the map's topics grouped into columns by tag (a visualisation of the
@@ -130,16 +131,7 @@ function Column({
                   {card.progress !== undefined ? (
                     <ProgressPie fraction={card.progress / 100} size={14} />
                   ) : null}
-                  {card.due ? (
-                    <span
-                      style={{
-                        color: overdue ? "#b42318" : "#8a8780",
-                        fontWeight: overdue ? 600 : 400,
-                      }}
-                    >
-                      📅 {formatDateShort(card.due)}
-                    </span>
-                  ) : null}
+                  {card.due ? <DateChip due={card.due} overdue={overdue} variant="text" /> : null}
                 </span>
               ) : null}
             </button>

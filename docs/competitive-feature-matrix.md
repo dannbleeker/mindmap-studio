@@ -40,11 +40,11 @@ interchange capability we could reasonably own.
 | Undo / redo | ✅ | in-session snapshot stack |
 | Rich-text + multi-line topics | ✅ | Ctrl+B/I/U |
 | Free-positioned / floating topics | ✅ | |
-| Quick Entry / global capture | ❌ | MindNode Quick Entry, MindManager Snap |
-| Brainstorm timer / ZEN focus-write | ❌ | XMind ZEN, Ayoa |
+| Quick Entry / global capture | ✅ | **Quick add** box in the header (in-app fast capture; not OS-global) |
+| Brainstorm timer / ZEN focus-write | ✅ | **⏱ Brainstorm timer** (3/5/10/15-min timebox) |
 | Voice / audio-memo capture | ❌ | SimpleMind, XMind |
-| Paste text block → structured tree | 🟡 | works via Markdown/OPML *import*, not inline paste |
-| Drop web link → topic | ❌ | SimpleMind |
+| Paste text block → structured tree | ✅ | **📋 Paste text** dialog — outline/bullets/Markdown → topics, new map or graft |
+| Drop web link → topic | ✅ | drop a link/text onto the canvas → floating topic (unsafe schemes refused) |
 | Idea bank (capture-then-place) | ❌ | Ayoa |
 
 ## 2. Structure & layout (map types)
@@ -82,7 +82,7 @@ interchange capability we could reasonably own.
 | Custom fonts / sizes | 🟡 | via style; limited UI |
 | Large shape library (cloud/star/diamond…) | 🟡 | box/rounded/pill only |
 | Sticker / illustration library | ❌ | XMind, MindNode |
-| Canvas background image/colour | ❌ | |
+| Canvas background image/colour | 🟡 | per-map background **colour** ships (the Canvas control); background **image** ❌ |
 | LaTeX / math rendering | ❌ | XMind, Freeplane, Mindomo |
 | Conditional formatting (rules) | ✅ | style-by-rule (tag/marker/completion); not the SmartRules automation engine |
 | Line-jumps on crossing connectors | ❌ | MindManager |
@@ -127,14 +127,14 @@ interchange capability we could reasonably own.
 | Presence cursors / follow-presenter | ⛔ | |
 | Idea voting | ❌ | MindMeister, Ayoa (feasible single-user? marginal) |
 | Hosted share link / publish-to-web | 🟡 | export standalone HTML/SVG/deck; no hosted link |
-| Persistent version history + playback | 🟡 | in-session undo only |
+| Persistent version history + playback | 🟡 | **🕔 History** — per-map IndexedDB snapshots (auto + on-demand, restore-in-place, capped 30); timeline *playback* ❌ |
 | Permissions / roles / SSO | ⛔ | N/A for local-first |
 
 ## 7. Import / export & integrations
 | Feature | Status | Notes |
 |---|---|---|
 | Import .mmap, OPML, MD, JSON, .mm, Mermaid, XMind, .smmx | ✅ | strong |
-| Import iThoughts, MindMeister, older .xmind, TextBundle | ❌ | gaps |
+| Import iThoughts, MindMeister, older .xmind, TextBundle | 🟡 | iThoughts (.itmz), MindMeister (.mind), legacy XMind content.xml all ship; TextBundle ❌ |
 | Import images from .mmap blobs | ❌ | known gap |
 | Export PNG/SVG/PDF/HTML/DOCX/PPTX/XLSX/deck/MD/OPML/.mm/Mermaid/XMind/.smmx | ✅ | very strong |
 | Write MindManager .mmap | ❌ | |
@@ -212,12 +212,12 @@ interchange capability we could reasonably own.
 Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
-- **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple sheets per file.
-- **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), and file attachments shipped; remaining: LaTeX/math, conditional styling.
-- **D — Capture UX (cheap wins)** — Quick Entry, paste-text-as-tree, drop-link-as-topic, brainstorm timer.
+- **B — More structures** — ✅ Kanban board shipped; remaining: flowchart, true concept map, matrix/grid, true summary topics, multiple sheets per file.
+- **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), file attachments, conditional formatting, styles organizer, task priority shipped; remaining: LaTeX/math (deferred).
+- **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.
-- **F — Durability** — persistent per-map version history (fits local-first via IndexedDB snapshots).
-- **G — Interop fills** — iThoughts/.itmz import, MindMeister .mind, image-bearing .mmap, write .mmap.
+- **F — Durability** — ✅ shipped: persistent per-map version history (IndexedDB snapshots).
+- **G — Interop fills** — ✅ iThoughts/.itmz, MindMeister .mind, legacy XMind, XMind export all shipped; remaining: MindMup/Markmap import, image-bearing .mmap, write .mmap.
 
-Highest value-per-effort first pass: **D + E** (quick wins), then **A** (keyless AI bridge) and
-**F** (version history); **B / C** are the larger bets.
+Most clusters are now shipped. Remaining bets: **A** (keyless AI bridge, deferred), **B** (more
+diagram types — the larger structural builds), and the **C/G** long-tail (LaTeX, MindMup/Markmap, .mmap).

@@ -370,8 +370,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   the **⬆ Export…** menu (`.mm`, `.mmd`) and **Open files** (`.mm`, `.mmd`/`.mermaid`, `.xmind`);
   dangerous-scheme links are dropped on both directions, as everywhere. Covered by
   `test/freemind.test.ts`, `test/mermaid.test.ts`, and `test/xmind.test.ts` (round-trips, shape/
-  indentation parsing, malformed-input rejection). XMind export and older `.xmind` (`content.xml`)
-  remain out of scope — `.opml`/`.mm` already import into XMind.
+  indentation parsing, malformed-input rejection). _(Update: XMind **export** and legacy `.xmind`
+  `content.xml` **import** both shipped shortly after — see the entries above.)_
 - **MindManager gap-analysis doc** (`docs/mindmanager-gap-analysis.md`). A systematic audit of
   MindManager's full current feature set (desktop 2023–2025, Web, Teams, Snap) mapped to
   MindMap Studio's status — shipped / partial / renderer-ceiling / out-of-scope — with a

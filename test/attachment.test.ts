@@ -7,6 +7,7 @@ describe("formatBytes", () => {
     expect(formatBytes(1024)).toBe("1.0 KB");
     expect(formatBytes(1536)).toBe("1.5 KB");
     expect(formatBytes(5 * 1024 * 1024)).toBe("5.0 MB");
+    expect(formatBytes(10 * 1024)).toBe("10 KB"); // at the ≥10 boundary, no decimal
     expect(formatBytes(25 * 1024 * 1024)).toBe("25 MB");
     expect(formatBytes(3 * 1024 ** 3)).toBe("3.0 GB");
   });

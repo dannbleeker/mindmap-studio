@@ -192,7 +192,9 @@ describe("flow ops — content", () => {
 
   it("setProgress sets task completion, clamps, and clears task on undefined", () => {
     expect(findNode(setProgress(base(), "a", 0.5).doc, "a")?.task?.progress).toBe(0.5);
-    expect(findNode(setProgress(base(), "a", 9).doc, "a")?.task?.progress).toBe(1); // clamped
+    expect(findNode(setProgress(base(), "a", 0).doc, "a")?.task?.progress).toBe(0); // 0% is kept, not dropped
+    expect(findNode(setProgress(base(), "a", -1).doc, "a")?.task?.progress).toBe(0); // clamped up
+    expect(findNode(setProgress(base(), "a", 9).doc, "a")?.task?.progress).toBe(1); // clamped down
     // Clearing drops the whole task object once it carries nothing else.
     const set = setProgress(base(), "a", 0.5).doc;
     expect(findNode(setProgress(set, "a", undefined).doc, "a")?.task).toBeUndefined();

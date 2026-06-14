@@ -42,4 +42,8 @@ describe("isDueSoon", () => {
     expect(isDueSoon("2026-06-16", 1, TODAY)).toBe(false); // done
     expect(isDueSoon(undefined, 0, TODAY)).toBe(false);
   });
+  it("honours a custom window (days)", () => {
+    expect(isDueSoon("2026-06-17", 0, TODAY, 3)).toBe(true); // within 3 days
+    expect(isDueSoon("2026-06-18", 0, TODAY, 3)).toBe(false); // outside 3 days
+  });
 });

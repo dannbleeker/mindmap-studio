@@ -51,4 +51,24 @@ describe("boardColumns", () => {
     expect(alpha?.progress).toBe(50);
     expect(alpha?.due).toBe("2026-07-01");
   });
+
+  it("leaves a non-task card's progress undefined", () => {
+    const beta = cols.find((c) => c.tag === "now")?.cards.find((x) => x.id === "b");
+    expect(beta?.progress).toBeUndefined();
+  });
+
+  it("omits the Untagged column when every node is tagged", () => {
+    const allTagged: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d2",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "Root",
+        tags: ["x"],
+        children: [{ id: "k", topic: "K", tags: ["x"], children: [] }],
+      },
+    };
+    expect(boardColumns(allTagged).map((c) => c.tag)).toEqual(["x"]);
+  });
 });

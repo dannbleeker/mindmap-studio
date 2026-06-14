@@ -42,7 +42,7 @@ reasonably own** — not "everything MindManager has."
 |---|---|
 | ✅ | **Shipped** in MindMap Studio today |
 | 🟡 | **Partial** — a meaningful subset ships; more is possible |
-| 🧱 | **Renderer-ceiling** — blocked by mind-elixir's renderer; needs a custom SVG renderer or an engine swap (multi-day) |
+| 🧱 | **Historical** — was blocked by the old mind-elixir renderer; all such rows are now **done** (the React Flow migration resolved them — see the header note). |
 | ⬜ | **Buildable gap** — not built yet, but feasible within the current architecture + scope |
 | 🚫 | **Out of scope** — deliberately excluded (PM / collaboration / enterprise / capture / native AI) |
 
@@ -52,7 +52,7 @@ reasonably own** — not "everything MindManager has."
 
 | MindManager feature | Status | Notes |
 |---|---|---|
-| Central topic, topics, subtopics, deep nesting | ✅ | Core canvas (mind-elixir). |
+| Central topic, topics, subtopics, deep nesting | ✅ | Core canvas (React Flow). |
 | Floating topics | ✅ | Imported + editable; rendered in a labelled branch. |
 | Relationships (labelled connectors) | ✅ | Cross-links / relationship arrows, two-way. |
 | Boundaries (grouping enclosures) | ✅ | MindManager-style **filled box** + label chip (custom overlay). |
@@ -162,7 +162,7 @@ they've dropped).
 | OPML import/export | ✅ | Both ways. |
 | FreeMind / Freeplane (.mm) | ✅ | Import + export (2026-06-14). |
 | Mermaid mindmap | ✅ | Import + export (2026-06-14). |
-| XMind (.xmind) | 🟡 | Import ✅ (2020+ `content.json` **and** legacy `content.xml`); **export** ⬜. |
+| XMind (.xmind) | ✅ | Import (2020+ `content.json` **and** legacy `content.xml`) **and export** (`toXmind`) both ship. |
 | iThoughts (.itmz) / MindMeister (.mind) / SimpleMind (.smmx) | ✅ | All import; `.smmx` also exports. |
 | MindMup / Markmap | ⬜ | Long-tail importers; `.mm`/OPML/Markdown already bridge most. |
 | Office / Project / Outlook / Jira / SharePoint / Teams integrations | 🚫 | Cloud/enterprise integrations. |
@@ -265,8 +265,8 @@ After this session the in-scope list is short. What's genuinely left:
    offline-precached fonts) for something MindManager doesn't do natively. **Deferred by decision**
    (2026-06-14) on the offline-cache cost.
 6. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
-8. **Interchange long-tail** — **XMind export**, **MindMup** + **Markmap** import, **image-bearing
-   `.mmap`** import (blocked on a real sample), and a **`.mmap` writer** (large XSD, high-risk).
+8. **Interchange long-tail** — **MindMup** + **Markmap** import, **image-bearing `.mmap`** import
+   (blocked on a real sample), and a **`.mmap` writer** (large XSD, high-risk). *(XMind export ships.)*
 9. **Dedicated mobile UX** — the PWA is responsive-ish but not phone-optimised.
 
 ### Bigger bets (see the cross-tool matrix)

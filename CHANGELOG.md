@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Conditional formatting** — a **🎨 Styles** panel where you set rules that **auto-style topics**
+  by **tag**, **marker**, or **completion** (e.g. *completed → green*, *#risk → red border*). Rules
+  are a **view-only overlay** layered *under* a topic's own styling (manual styling always wins), so
+  nothing is baked into the model; they're per-map, lossless in `.json`, and carried into image
+  exports.
 - **Board view (Kanban)** — a new **▦ Board** toggle shows your topics grouped into **columns by tag**
   (a read-only visualisation of the same map — cards don't move or write back). Each card carries its
   rolled-up **progress pie** and **due date** (red when overdue); **click a card to jump** to that

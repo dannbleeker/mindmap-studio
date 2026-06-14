@@ -63,6 +63,7 @@ import {
   setLinkLabel,
   setNote,
   setProgress,
+  setRules,
   setStart,
   setTags,
   setTopicRich,
@@ -532,6 +533,7 @@ function FlowInner({
         return Boolean(findNode(docRef.current, id));
       },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
+      setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
       setSelectedProgress: (progress) =>
         withSelected((id) => apply(setProgress(docRef.current, id, progress))),

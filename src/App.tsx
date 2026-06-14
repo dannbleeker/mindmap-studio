@@ -1,7 +1,14 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrainstormTimer } from "./BrainstormTimer";
 import { Kanban } from "./Kanban";
-import { FilterPanel, HistoryPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
+import {
+  FilterPanel,
+  HistoryPanel,
+  InfoPanel,
+  MarkerTagIndex,
+  OutlinePanel,
+  StylesPanel,
+} from "./Panels";
 import { buildExample, examples } from "./examples";
 import {
   type DueMode,
@@ -236,6 +243,7 @@ export function App() {
   // when a version is restored in place (same map id, so the doc.id key wouldn't change otherwise).
   const [historyOpen, setHistoryOpen] = useState(false);
   const [boardOpen, setBoardOpen] = useState(false);
+  const [stylesOpen, setStylesOpen] = useState(false);
   const [versions, setVersions] = useState<VersionMeta[]>([]);
   const [restoreRev, setRestoreRev] = useState(0);
   const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
@@ -809,6 +817,15 @@ export function App() {
         </button>
         <button
           type="button"
+          onClick={() => setStylesOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={stylesOpen}
+          title="Conditional formatting — auto-style topics by tag / marker / completion"
+        >
+          🎨 Styles
+        </button>
+        <button
+          type="button"
           onClick={() => setHistoryOpen((v) => !v)}
           style={controlStyle}
           aria-pressed={historyOpen}
@@ -1272,6 +1289,16 @@ export function App() {
             onSaveFilter={saveCurrentFilter}
             onApplyFilter={applySavedFilter}
             onDeleteFilter={deleteSavedFilter}
+          />
+        )}
+        {stylesOpen && (
+          <StylesPanel
+            rules={liveDoc.rules ?? []}
+            markers={MARKER_PALETTE}
+            onAddRule={(rule) => mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])}
+            onDeleteRule={(id) =>
+              mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
+            }
           />
         )}
         {infoOpen && (

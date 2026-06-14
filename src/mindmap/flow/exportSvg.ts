@@ -249,13 +249,15 @@ export function buildFlowSvg(
     const r = rects.get(n.id);
     if (!r) continue;
     const d = n.data;
+    // Conditional-formatting style sits under the node's own style (manual wins) — matches the canvas.
+    const st = d.condStyle ? { ...d.condStyle, ...d.style } : d.style;
     const pad = d.isRoot ? ROOT_PAD : PAD;
-    const fill = d.isRoot ? rootBg : (d.style?.background ?? nodeBg);
-    const textColor = d.isRoot ? rootColor : (d.style?.color ?? color);
-    const radius = d.isRoot ? 22 : Number.parseFloat(d.style?.borderRadius ?? "16") || 16;
+    const fill = d.isRoot ? rootBg : (st?.background ?? nodeBg);
+    const textColor = d.isRoot ? rootColor : (st?.color ?? color);
+    const radius = d.isRoot ? 22 : Number.parseFloat(st?.borderRadius ?? "16") || 16;
     const border = d.isRoot
       ? null
-      : (parseBorder(d.style?.border) ?? { width: 2, color: d.branchColor });
+      : (parseBorder(st?.border) ?? { width: 2, color: d.branchColor });
     const strokeAttr = border
       ? ` stroke="${esc(border.color)}" stroke-width="${border.width}"`
       : "";
@@ -276,7 +278,7 @@ export function buildFlowSvg(
     // The task pie + due-date chip sit in a reserved strip at the bottom (matches the canvas badge).
     const pieReserve = d.progress || d.due ? 20 : 0;
 
-    const fontSize = Number.parseFloat(d.style?.fontSize ?? "") || 16;
+    const fontSize = Number.parseFloat(st?.fontSize ?? "") || 16;
     const lines = d.topic.split("\n").map((l) => l.trim());
     if (d.icons?.length) lines[0] = `${d.icons.join(" ")} ${lines[0] ?? ""}`.trim();
     if (d.number) lines[0] = `${d.number} ${lines[0] ?? ""}`.trim();
@@ -290,7 +292,7 @@ export function buildFlowSvg(
           r.y + r.h - pieReserve,
           fontSize,
           textColor,
-          d.isRoot ? "700" : d.style?.fontWeight,
+          d.isRoot ? "700" : st?.fontWeight,
         ),
       );
     }

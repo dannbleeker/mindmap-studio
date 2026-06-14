@@ -95,7 +95,7 @@ shipped with the React Flow engine. What remains in §2 is the *non-tree* diagra
 | Rich-text **inside** a topic (mixed formatting) | ✅ | Inline bold/italic/underline/strike (contenteditable, sanitised). |
 | Icons / markers (priority, progress, flags, …) | ✅ | Marker palette; **task progress pie** + **due-date chip**; imported `.mmap` icons → emoji. |
 | Tags / tag groups | ✅ | Add/remove tags in the ℹ Info panel; index + filter + Board columns by tag. |
-| Conditional formatting | 🚫-ish / ⬜ | Full version is SmartRules (PM/automation, out of scope). A small "style-by-simple-rule" is ⬜ but low priority. |
+| Conditional formatting | ✅ | Style-by-rule (tag / marker / completion) via the **🎨 Styles** panel; view-only overlay. (The full SmartRules *automation* engine stays 🚫.) |
 | Images in topics / standalone images | ✅ | In-app image attach; `.mmap` blob import is the known gap. |
 | Map background / canvas styling | ✅ | Per-map background colour (the **Canvas** control); exports with the map. |
 | Styles organizer (reusable named styles) | ⬜ | Power-user nicety; low priority for a single-user tool. |
@@ -232,6 +232,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   panel, capped at 5 MB) — shipped 2026-06-14; more of cluster C / §4.
 - **Board (Kanban) view** — the **▦ Board** toggle: a read-only view grouping topics into columns by
   tag (cards show progress + due; click to jump) — shipped 2026-06-14 (§2 alternate views).
+- **Conditional formatting** — the **🎨 Styles** panel: rules that auto-style topics by
+  tag / marker / completion (view-only overlay) — shipped 2026-06-14 (§3 styling).
 - **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
   (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
   (navigation polish), alongside the earlier ◎ Focus.
@@ -256,8 +258,8 @@ After this session the in-scope list is short. What's genuinely left:
 3. **Free-form whiteboard / sticky-note canvas** — place notes anywhere, not in a tree.
 4. **Richer node shapes** (diamond / hexagon / chevron …) and **per-branch layout override** — both
    need clip-path/geometry + export work to avoid clipping text.
-5. **Conditional formatting** (style-by-simple-rule) and a **styles organizer** (named reusable
-   styles) — low priority for a single-user tool.
+5. **Styles organizer** (named reusable styles) — low priority for a single-user tool.
+   (Conditional formatting — style-by-rule — **shipped 2026-06-14**.)
 6. **LaTeX / math rendering** in topics/notes.
 7. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
 8. **Interchange long-tail** — **XMind export**, **MindMup** + **Markmap** import, **image-bearing

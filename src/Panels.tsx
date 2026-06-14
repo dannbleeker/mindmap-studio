@@ -3,7 +3,7 @@ import { ProgressPie } from "./ProgressPie";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { formatBytes } from "./io/attachment";
 import type { SelectedNode } from "./mindmap";
-import type { MapNode, NodeStyle } from "./model/types";
+import type { ConditionalRule, MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
 import {
   type IndexEntry,
@@ -13,6 +13,7 @@ import {
   outlineRows,
 } from "./outline";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
+import { describeRule } from "./rules";
 import type { VersionMeta } from "./store/mapStore";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 
@@ -591,6 +592,154 @@ export function HistoryPanel({
             </div>
           ))
         )}
+      </div>
+    </aside>
+  );
+}
+
+// Conditional formatting: map-wide rules that style topics by tag / marker / completion (view-only).
+// A small rules editor in a left-rail panel; matching is done in src/rules.ts + applied in projection.
+export function StylesPanel({
+  rules,
+  markers,
+  onAddRule,
+  onDeleteRule,
+}: {
+  rules: ConditionalRule[];
+  markers: readonly string[];
+  onAddRule: (rule: ConditionalRule) => void;
+  onDeleteRule: (id: string) => void;
+}) {
+  const [kind, setKind] = useState<ConditionalRule["kind"]>("tag");
+  const [value, setValue] = useState("");
+  const [fill, setFill] = useState("");
+  const [border, setBorder] = useState("");
+  const groupLabel = (text: string) => <div style={PANEL_GROUP_LABEL}>{text}</div>;
+  const add = () => {
+    if (kind !== "completed" && !value.trim()) return;
+    if (!fill && !border) return;
+    const style: NodeStyle = {};
+    if (fill) style.background = fill;
+    if (border) style.border = `2px solid ${border}`;
+    onAddRule({
+      id: crypto.randomUUID(),
+      kind,
+      value: kind === "completed" ? undefined : value.trim(),
+      style,
+    });
+    setValue("");
+    setFill("");
+    setBorder("");
+  };
+  const swatchRow = (
+    colors: string[],
+    selected: string,
+    onPick: (c: string) => void,
+    label: string,
+  ) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 3, padding: "0 10px 4px" }}>
+      <span style={{ fontSize: 12, color: "#73726c", width: 44 }}>{label}</span>
+      {colors.map((c) => (
+        <button
+          key={c}
+          type="button"
+          onClick={() => onPick(selected === c ? "" : c)}
+          title={c}
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 4,
+            border: selected === c ? "2px solid #26215c" : "1px solid #cecbf6",
+            background: c,
+            cursor: "pointer",
+            padding: 0,
+          }}
+        />
+      ))}
+    </div>
+  );
+  return (
+    <aside style={PANEL_ASIDE}>
+      <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
+        🎨 Styles
+      </div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {groupLabel("Conditional formatting")}
+        <div style={{ padding: "0 10px 4px", fontSize: 12, color: "#8a8780" }}>
+          Auto-style topics by tag, marker, or completion. Manual styling still wins.
+        </div>
+        {rules.map((r) => (
+          <div
+            key={r.id}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "2px 10px" }}
+          >
+            <span
+              style={{
+                width: 16,
+                height: 16,
+                borderRadius: 4,
+                flexShrink: 0,
+                background: r.style.background ?? "#fff",
+                border: r.style.border ?? "1px solid #cecbf6",
+              }}
+            />
+            <span style={{ flex: 1, fontSize: 12, color: "#26215c" }}>{describeRule(r)}</span>
+            <button
+              type="button"
+              onClick={() => onDeleteRule(r.id)}
+              title="Remove rule"
+              style={{ ...controlStyle, padding: "0 6px", fontSize: 12 }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <div style={{ borderTop: "1px solid #e2e0d8", margin: "6px 10px", paddingTop: 6 }} />
+        <div style={{ display: "flex", gap: 4, padding: "0 10px 4px", alignItems: "center" }}>
+          <span style={{ fontSize: 12, color: "#73726c", width: 44 }}>When</span>
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value as ConditionalRule["kind"])}
+            aria-label="Rule condition"
+            style={{ ...inputStyle, width: "auto", flex: 1 }}
+          >
+            <option value="tag">has tag</option>
+            <option value="marker">has marker</option>
+            <option value="completed">is completed</option>
+          </select>
+        </div>
+        {kind === "tag" ? (
+          <input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="tag name"
+            aria-label="Rule tag"
+            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          />
+        ) : kind === "marker" ? (
+          <select
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            aria-label="Rule marker"
+            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          >
+            <option value="">Pick a marker…</option>
+            {markers.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
+        {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}
+        <button
+          type="button"
+          onClick={add}
+          style={{ ...controlStyle, margin: "4px 10px", fontSize: 12 }}
+        >
+          + Add rule
+        </button>
       </div>
     </aside>
   );

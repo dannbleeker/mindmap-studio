@@ -195,6 +195,15 @@ with everything else gathered in an **Untagged** column. Each card shows its rol
 status wall, not a task tracker. **Click a card** to jump to that topic on the canvas. Tag your
 topics (in the **ℹ Info** panel) to give the board its columns.
 
+### Conditional formatting
+
+**🎨 Styles** opens a panel where you set **rules** that auto-style topics: *When* a topic **has a
+tag**, **has a marker**, or **is completed** (task at 100%), apply a **fill** and/or **border**. So
+"colour completed topics green" or "give every **#risk** topic a red border" happens automatically as
+the map changes. Rules are a **view-only overlay** — they layer *under* a topic's own styling, so
+anything you set by hand on a node still wins, and nothing is baked into the topic. They're saved
+with the map and carried into image exports. Add a rule with **+ Add rule**; remove one with **✕**.
+
 ### Collapse / expand
 
 **⊟** collapses every branch to a level-1 overview; **⊞** expands the whole tree. **Fit**

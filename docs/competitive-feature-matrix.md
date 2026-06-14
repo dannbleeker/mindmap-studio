@@ -84,7 +84,7 @@ interchange capability we could reasonably own.
 | Sticker / illustration library | ❌ | XMind, MindNode |
 | Canvas background image/colour | ❌ | |
 | LaTeX / math rendering | ❌ | XMind, Freeplane, Mindomo |
-| Conditional formatting (rules) | ❌ | MindManager SmartRules, Freeplane |
+| Conditional formatting (rules) | ✅ | style-by-rule (tag/marker/completion); not the SmartRules automation engine |
 | Line-jumps on crossing connectors | ❌ | MindManager |
 
 ## 4. Content enrichment

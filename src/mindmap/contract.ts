@@ -1,5 +1,12 @@
 import type { Ref } from "react";
-import type { MapAttachment, MapImage, MapNode, MindMapDoc, NodeStyle } from "../model/types";
+import type {
+  ConditionalRule,
+  MapAttachment,
+  MapImage,
+  MapNode,
+  MindMapDoc,
+  NodeStyle,
+} from "../model/types";
 import type { MindMapTheme } from "./theme";
 
 // The contract between the app and the canvas. The React Flow engine implements this surface,
@@ -36,6 +43,8 @@ export interface MindMapHandle {
   groupBranch: (id: string) => boolean;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
+  /** Replace the map's conditional-formatting rules (empty array clears them). */
+  setRules: (rules: ConditionalRule[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */
   setSelectedTags: (tags: string[]) => boolean;
   /** Set the selected node's task completion (0..1), or clear it with undefined; false if none. */

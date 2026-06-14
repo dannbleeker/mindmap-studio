@@ -1,5 +1,6 @@
 import type {
   Callout,
+  ConditionalRule,
   CrossLink,
   MapAttachment,
   MapImage,
@@ -285,6 +286,13 @@ export function setDue(doc: MindMapDoc, id: string, due: string | undefined): Op
 /** Set a node's start date ("YYYY-MM-DD"), or clear it with "" / undefined. */
 export function setStart(doc: MindMapDoc, id: string, start: string | undefined): OpResult {
   return patchTask(doc, id, { start: start || undefined });
+}
+
+/** Replace the map's conditional-formatting rules (an empty array clears them). */
+export function setRules(doc: MindMapDoc, rules: ConditionalRule[]): OpResult {
+  const next = structuredClone(doc);
+  next.rules = rules.length > 0 ? rules : undefined;
+  return { doc: next };
 }
 
 /** Set the per-map canvas background colour ("" clears it back to the theme default). */

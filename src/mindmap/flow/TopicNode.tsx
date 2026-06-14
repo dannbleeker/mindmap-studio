@@ -97,7 +97,8 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     number,
     icons,
     tags,
-    style,
+    style: ownStyle,
+    condStyle,
     image,
     note,
     hyperlink,
@@ -110,6 +111,8 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     attachmentCount,
     dimmed,
   } = data;
+  // Conditional-formatting style sits *under* the node's own style (manual styling wins).
+  const style = condStyle ? { ...condStyle, ...ownStyle } : ownStyle;
   const editing = useEditing();
   const isEditing = editing?.editingId === id;
   const editRef = useRef<HTMLDivElement>(null);

@@ -1,6 +1,7 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
 import { outlineNumbers } from "../../outline";
 import { type ProgressInfo, progressMap } from "../../progress";
+import { conditionalStyle } from "../../rules";
 import { CROSSLINK_COLOR } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
 
@@ -60,6 +61,8 @@ export function project(
   // Task progress rolls up per subtree; compute once for the central tree + each floating root.
   const progress = new Map<string, ProgressInfo>(progressMap(doc.root));
   for (const f of doc.floatingTopics ?? []) for (const [k, v] of progressMap(f)) progress.set(k, v);
+  // Conditional formatting: a view-only style layered *under* each node's own style.
+  const rules = doc.rules ?? [];
 
   const emit = (
     node: MapNode,
@@ -85,6 +88,9 @@ export function project(
         icons: node.icons,
         tags: node.tags,
         style: node.style,
+        // Conditional formatting is a separate view-only overlay (merged under `style` at render),
+        // so the model + fromFlow stay lossless — nothing bakes into node.style.
+        condStyle: conditionalStyle(node, rules, progress.get(node.id)?.progress),
         isRoot,
         depth,
         branchColor: color,

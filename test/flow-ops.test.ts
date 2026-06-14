@@ -17,6 +17,7 @@ import {
   setDue,
   setNote,
   setProgress,
+  setRules,
   setStart,
   setTags,
   setTopic,
@@ -174,6 +175,12 @@ describe("flow ops — content", () => {
     expect(
       setBackground(setBackground(base(), "#fee").doc, "").doc.meta?.background,
     ).toBeUndefined();
+  });
+
+  it("setRules sets conditional-formatting rules and clears them on an empty array", () => {
+    const r = { id: "r1", kind: "tag" as const, value: "risk", style: { background: "#fee" } };
+    expect(setRules(base(), [r]).doc.rules).toEqual([r]);
+    expect(setRules(setRules(base(), [r]).doc, []).doc.rules).toBeUndefined();
   });
 
   it("setProgress sets task completion, clamps, and clears task on undefined", () => {

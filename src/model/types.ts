@@ -96,6 +96,16 @@ export interface Boundary {
   label?: string;
 }
 
+/** A conditional-formatting rule: topics matching `kind`/`value` get `style` applied (view-only). */
+export interface ConditionalRule {
+  id: string;
+  /** What to match: a tag, a marker icon, or completed (task at 100%). */
+  kind: "tag" | "marker" | "completed";
+  /** The tag/marker to match (unused for "completed"). */
+  value?: string;
+  style: NodeStyle;
+}
+
 export interface MindMapDoc {
   schemaVersion: 1;
   id: string;
@@ -103,6 +113,8 @@ export interface MindMapDoc {
   root: MapNode;
   links?: CrossLink[];
   boundaries?: Boundary[];
+  /** Conditional-formatting rules (style topics by tag/marker/completed); view-only, per map. */
+  rules?: ConditionalRule[];
   /** Top-level topics not attached to the central hierarchy (legends, notes). */
   floatingTopics?: MapNode[];
   theme?: string;

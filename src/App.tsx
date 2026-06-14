@@ -7,7 +7,7 @@ import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
 import {
-  type LayoutDirection,
+  type LayoutKind,
   MAP_LINK_PREFIX,
   MindMap,
   type MindMapHandle,
@@ -61,17 +61,23 @@ export function App() {
   } | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { theme, setThemeId } = useTheme();
-  const [layout, setLayout] = useState<LayoutDirection>(() => {
+  const [layout, setLayout] = useState<LayoutKind>(() => {
+    const valid = ["side", "left", "right", "org-down", "org-up", "radial", "timeline", "fishbone"];
     try {
-      return (localStorage.getItem("mindmap-layout") as LayoutDirection) || "side";
+      // A ?layout= query param wins (shareable layout links); else the persisted choice.
+      const q = new URLSearchParams(window.location.search).get("layout");
+      if (q && valid.includes(q)) return q as LayoutKind;
+      const ls = localStorage.getItem("mindmap-layout");
+      if (ls && valid.includes(ls)) return ls as LayoutKind;
     } catch {
-      return "side";
+      // ignore
     }
+    return "side";
   });
   const { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace } =
     useFind(mapRef, () => liveDocRef.current);
 
-  function changeLayout(value: LayoutDirection) {
+  function changeLayout(value: LayoutKind) {
     setLayout(value);
     try {
       localStorage.setItem("mindmap-layout", value);
@@ -595,14 +601,25 @@ export function App() {
         </select>
         <select
           value={layout}
-          onChange={(e) => changeLayout(e.target.value as LayoutDirection)}
+          onChange={(e) => changeLayout(e.target.value as LayoutKind)}
           style={controlStyle}
-          aria-label="Layout direction"
-          title="Layout direction"
+          aria-label="Layout"
+          title="Layout"
         >
-          <option value="side">Both sides</option>
-          <option value="right">Right</option>
-          <option value="left">Left</option>
+          <optgroup label="Radial">
+            <option value="side">Both sides</option>
+            <option value="right">Right</option>
+            <option value="left">Left</option>
+            <option value="radial">Radial / hub</option>
+          </optgroup>
+          <optgroup label="Tree">
+            <option value="org-down">Org chart ↓</option>
+            <option value="org-up">Org chart ↑</option>
+          </optgroup>
+          <optgroup label="Diagram">
+            <option value="timeline">Timeline</option>
+            <option value="fishbone">Fishbone</option>
+          </optgroup>
         </select>
         <button
           type="button"

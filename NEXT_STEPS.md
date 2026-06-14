@@ -18,10 +18,12 @@ engines run in parallel behind `VITE_CANVAS_ENGINE` + a dev `?engine=flow` overr
 stays elixir until parity; the canonical model never changes, so the flag is the rollback).
 **Done:** Phase 0 (engine-neutral contract `src/mindmap/contract.ts` + chooser `index.tsx`);
 Phase A (React Flow added, **go/no-go #1 cleared** — lazy-loading both engines *dropped* the
-entry to 78.7 kB ≤ 150 kB); Phase B (read-only render at parity — `flow/project.ts` +
-`flow/layout.ts` (d3-hierarchy two-sided tidy tree) + custom `TopicNode`/tapered `BranchEdge` +
-boundary boxes + dashed cross-links + markers, behind `?engine=flow`; entry still 78.7 kB).
-**Next:** Phase C (alternate layouts: org-chart/timeline/fishbone/radial), then D–I per the plan.
+entry to 78.7 kB ≤ 150 kB); Phase B (read-only render at parity); Phase C (**alternate layouts** —
+side/left/right/org-down/org-up/radial/timeline/fishbone in `flow/layout.ts`, all routed by
+**floating edges** `flow/floating.ts` so connections work in any orientation; layout `<select>`
+extended + a `?layout=` URL param; new kinds fall back to "side" on the elixir engine). All
+verified by headless screenshot under `?engine=flow`. **Next:** Phase D (keyboard editing UX —
+the hard one: `flow/ops.ts` + `useMindmapKeys` + inline contenteditable), then E–I per the plan.
 
 ## MindManager UI-parity work (2026-06-12)
 

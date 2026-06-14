@@ -41,18 +41,17 @@ describe("flow project (model → React Flow)", () => {
     expect(nodes.map((n) => n.id).sort()).toEqual(["a", "a1", "b", "c", "f", "f1", "r"]);
   });
 
-  it("emits a branch edge per parent→child with side-based handles", () => {
+  it("emits a floating branch edge per parent→child", () => {
     const ra = edges.find((e) => e.id === "e:r:a");
     expect(ra?.type).toBe("branch");
-    expect(ra?.sourceHandle).toBe("sr"); // a is on the right
     const rc = edges.find((e) => e.id === "e:r:c");
-    expect(rc?.sourceHandle).toBe("sl"); // c is pinned left
-    expect(rc?.targetHandle).toBe("tr");
+    expect(rc?.type).toBe("branch");
+    expect(rc?.data?.crosslink).toBe(false);
   });
 
-  it("renders a cross-link as a dashed default edge with its label", () => {
+  it("renders a cross-link as a labelled crosslink edge", () => {
     const link = edges.find((e) => e.id === "l1");
-    expect(link?.type).toBe("default");
+    expect(link?.type).toBe("crosslink");
     expect(link?.label).toBe("rel");
     expect(link?.data?.crosslink).toBe(true);
   });

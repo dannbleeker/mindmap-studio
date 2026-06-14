@@ -8,10 +8,18 @@ import {
   useNodesState,
   useReactFlow,
 } from "@xyflow/react";
-import { type CSSProperties, useEffect, useImperativeHandle, useMemo, useRef } from "react";
-import type { MindMapHandle, MindMapProps } from "./contract";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
+import type { LayoutKind, MindMapHandle, MindMapProps } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
 import { BranchEdge } from "./flow/BranchEdge";
+import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { TopicNode } from "./flow/TopicNode";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import { project } from "./flow/project";
@@ -24,7 +32,7 @@ import { mindManagerTheme } from "./theme";
 // behind the unchanged MindMapHandle contract.
 
 const nodeTypes = { topic: TopicNode };
-const edgeTypes = { branch: BranchEdge };
+const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
 
 // Phase B is read-only; the mutating handle methods are wired in Phase D.
 function noopHandle(over: Partial<MindMapHandle>): MindMapHandle {
@@ -56,35 +64,60 @@ function themeVars(theme: MindMapProps["theme"]): CSSProperties {
   } as CSSProperties;
 }
 
-function FlowInner({ doc, theme, ref }: MindMapProps) {
+function FlowInner({ doc, theme, direction = "side", ref }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
   const projected = useMemo(() => project(doc, palette), [doc, palette]);
   // Lay out immediately with estimated sizes so the first frame is already positioned
   // (no blank canvas, no reliance on a measurement callback). Measured sizes refine below.
   const initialNodes = useMemo(() => {
-    const pos = computeLayout(projected.nodes, projected.edges, estimateSizeOf(projected.nodes));
+    const pos = computeLayout(
+      projected.nodes,
+      projected.edges,
+      estimateSizeOf(projected.nodes),
+      direction,
+    );
     return projected.nodes.map((n) => ({ ...n, position: pos.get(n.id) ?? n.position }));
-  }, [projected]);
+  }, [projected, direction]);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(projected.edges);
   const { fitView, getNodes, setCenter } = useReactFlow();
   const initialized = useNodesInitialized();
-  const refined = useRef(false);
 
-  // Once React Flow has measured the rendered nodes, re-layout with the real sizes for
-  // precision. Best-effort: if measurement never fires, the estimated layout stands.
+  // Re-run the layout (with measured sizes when available, else estimated) and re-fit.
+  const relayout = useCallback(
+    (kind: LayoutKind) => {
+      const measured = getNodes();
+      const anyMeasured = measured.some((n) => n.measured?.width);
+      const sizeOf = anyMeasured
+        ? (id: string) => {
+            const m = measured.find((n) => n.id === id);
+            return { width: m?.measured?.width ?? 0, height: m?.measured?.height ?? 0 };
+          }
+        : estimateSizeOf(projected.nodes);
+      const pos = computeLayout(projected.nodes, projected.edges, sizeOf, kind);
+      setNodes((nds) => nds.map((n) => ({ ...n, position: pos.get(n.id) ?? n.position })));
+      requestAnimationFrame(() => fitView({ duration: 300 }));
+    },
+    [projected, getNodes, setNodes, fitView],
+  );
+
+  // Re-layout when the layout kind changes (the initial render is already laid out).
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+    relayout(direction);
+  }, [direction, relayout]);
+
+  // Refine with measured sizes once React Flow has measured the nodes (best-effort).
+  const refined = useRef(false);
   useEffect(() => {
     if (!initialized || refined.current) return;
     refined.current = true;
-    const measured = getNodes();
-    const sizeOf = (id: string) => {
-      const m = measured.find((n) => n.id === id);
-      return { width: m?.measured?.width ?? 0, height: m?.measured?.height ?? 0 };
-    };
-    const pos = computeLayout(projected.nodes, projected.edges, sizeOf);
-    setNodes((nds) => nds.map((n) => ({ ...n, position: pos.get(n.id) ?? n.position })));
-    requestAnimationFrame(() => fitView({ duration: 0 }));
-  }, [initialized, projected, getNodes, setNodes, fitView]);
+    relayout(direction);
+  }, [initialized, direction, relayout]);
 
   useImperativeHandle(
     ref,

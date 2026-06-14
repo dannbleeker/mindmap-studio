@@ -40,11 +40,21 @@ export interface MindMapHandle {
 /** Prefix marking a node hyperlink as an in-app link to another map. */
 export const MAP_LINK_PREFIX = "#map=";
 
-/**
- * Canvas layout. Today the engine supports horizontal radial only ("side"/"left"/"right");
- * Phase C widens this to a superset (org-chart / timeline / fishbone / radial).
- */
+/** The original three horizontal directions (mind-elixir's only modes). */
 export type LayoutDirection = "side" | "left" | "right";
+
+/**
+ * Full layout set. The first three are the mind-elixir directions (and the React Flow
+ * engine matches them); the rest are React-Flow-only alternate layouts. On the mind-elixir
+ * engine the extra kinds gracefully fall back to "side".
+ */
+export type LayoutKind =
+  | LayoutDirection
+  | "org-down"
+  | "org-up"
+  | "radial"
+  | "timeline"
+  | "fishbone";
 
 /** Props every canvas engine accepts. Engine-neutral so both the mind-elixir and React
  *  Flow components — and the lazy chooser in `index.tsx` — share one type. */
@@ -58,7 +68,7 @@ export interface MindMapProps {
   onMapLink?: (mapId: string) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
   theme?: MindElixirTheme;
-  /** Layout direction. */
-  direction?: LayoutDirection;
+  /** Layout (direction or alternate layout; alternate kinds are React-Flow-only). */
+  direction?: LayoutKind;
   ref?: Ref<MindMapHandle>;
 }

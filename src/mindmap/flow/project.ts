@@ -85,11 +85,7 @@ export function project(doc: MindMapDoc, palette: string[] = FALLBACK_PALETTE): 
         id: `e:${parentId}:${node.id}`,
         source: parentId,
         target: node.id,
-        type: "branch",
-        // Connect from the parent's outward side to the child's inward side, so branches
-        // fan left/right cleanly in the two-sided layout.
-        sourceHandle: side === "left" ? "sl" : "sr",
-        targetHandle: side === "left" ? "tr" : "tl",
+        type: "branch", // a floating tapered edge — routes itself from the node borders
         data: { depth, branchColor: color, crosslink: false },
       });
     }
@@ -115,18 +111,14 @@ export function project(doc: MindMapDoc, palette: string[] = FALLBACK_PALETTE): 
     emit(floating, undefined, 1, "right", FLOATING_COLOR, true, false);
   }
 
-  // Cross-links: dashed, labelled relationship edges (built-in bezier + dashed style).
+  // Cross-links: dashed, labelled relationship edges (floating custom edge).
   for (const link of doc.links ?? []) {
     edges.push({
       id: link.id,
       source: link.from,
       target: link.to,
-      type: "default",
-      sourceHandle: "sr",
-      targetHandle: "tl",
+      type: "crosslink",
       label: link.label,
-      style: { stroke: CROSSLINK_COLOR, strokeDasharray: "6 4", strokeWidth: 1.5 },
-      labelStyle: { fill: CROSSLINK_COLOR, fontSize: 12 },
       data: { depth: 0, branchColor: CROSSLINK_COLOR, crosslink: true },
     });
   }

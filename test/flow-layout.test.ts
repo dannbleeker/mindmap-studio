@@ -49,3 +49,43 @@ describe("flow layout (two-sided tidy tree)", () => {
     expect(pos.get("a")?.y).not.toBe(pos.get("c")?.y);
   });
 });
+
+describe("flow layout (alternate kinds)", () => {
+  const { nodes, edges } = project(doc);
+  const allFinite = (m: ReturnType<typeof computeLayout>) =>
+    [...m.values()].every((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+
+  it("org-down places children below the root and deeper rows lower", () => {
+    const pos = computeLayout(nodes, edges, size, "org-down");
+    expect(allFinite(pos)).toBe(true);
+    const ry = pos.get("r")?.y ?? 0;
+    expect(pos.get("a")?.y ?? 0).toBeGreaterThan(ry);
+    expect(pos.get("a1")?.y ?? 0).toBeGreaterThan(pos.get("a")?.y ?? 0);
+  });
+
+  it("org-up mirrors org-down (children above the root)", () => {
+    const pos = computeLayout(nodes, edges, size, "org-up");
+    expect(allFinite(pos)).toBe(true);
+    expect(pos.get("a")?.y ?? 0).toBeLessThan(pos.get("r")?.y ?? 0);
+  });
+
+  it("radial scatters depth-1 nodes off the centre at a similar radius", () => {
+    const pos = computeLayout(nodes, edges, size, "radial");
+    expect(allFinite(pos)).toBe(true);
+    const r = pos.get("r");
+    if (!r) throw new Error("no root");
+    const dist = (id: string) => {
+      const p = pos.get(id);
+      if (!p) return 0;
+      return Math.hypot(p.x - r.x, p.y - r.y);
+    };
+    expect(dist("a")).toBeGreaterThan(50);
+    // a and c are both depth-1 → roughly the same ring
+    expect(Math.abs(dist("a") - dist("c"))).toBeLessThan(dist("a"));
+  });
+
+  it("timeline and fishbone produce finite positions for every node", () => {
+    expect(allFinite(computeLayout(nodes, edges, size, "timeline"))).toBe(true);
+    expect(allFinite(computeLayout(nodes, edges, size, "fishbone"))).toBe(true);
+  });
+});

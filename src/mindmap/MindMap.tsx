@@ -10,12 +10,7 @@ import { useEffect, useImperativeHandle, useRef } from "react";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapImage, MindMapDoc, NodeStyle } from "../model/types";
 import { replaceInTopic } from "../search";
-import {
-  type LayoutDirection,
-  MAP_LINK_PREFIX,
-  type MindMapProps,
-  type SelectedNode,
-} from "./contract";
+import { type LayoutKind, MAP_LINK_PREFIX, type MindMapProps, type SelectedNode } from "./contract";
 import { type MinimapHandle, createMinimap } from "./minimap";
 import {
   type MeArrow,
@@ -138,7 +133,9 @@ function renderBoundaryOverlay(
 }
 
 /** Re-layout the current map to a direction (preserves in-memory edits). */
-function applyDirection(me: MindElixirInstance, direction: LayoutDirection): void {
+// mind-elixir only has left/right/side; the React-Flow-only alternate layouts fall back
+// to side here (they're a flow-engine feature until cutover).
+function applyDirection(me: MindElixirInstance, direction: LayoutKind): void {
   const m = me as unknown as {
     initLeft?: () => void;
     initRight?: () => void;

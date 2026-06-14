@@ -26,8 +26,11 @@ verified by headless screenshot under `?engine=flow`; Phase D (**editing UX**, m
 `flow/ops.ts` transforms (add/outdent/indent/delete/reparent/setTopic/collapse/note/icon/style/
 group/replace; 14 tests), inline contenteditable (double-click / F2), keyboard tree-building
 (Enter=sibling, Tab=child, Shift+Tab=outdent, Delete), all MindMapHandle mutators wired; verified
-end-to-end via `__getLiveDoc`). **Next:** Phase E (undo/redo snapshot stack, drag-to-reparent,
-context menu, themes-as-CSS-vars), then F (new export, **go/no-go #2**)–I per the plan.
+end-to-end via `__getLiveDoc`); Phase E (**undo/redo** snapshot stack `flow/history.ts` (Ctrl+Z /
+Ctrl+Shift+Z / Ctrl+Y; 4 tests), **drag-to-reparent** (floating hit-test → `reparent` op, snap-back
+on invalid drop), a right-click **context menu**, and **theming via CSS vars** (4 themes on flow +
+a `?theme=` URL param); undo/redo/menu/dark all verified). **Next:** Phase F (new `exportSvg` from
+the model — **go/no-go #2**; reuse `svgText.ts` baseline math), then G (fromFlow sync), H, I.
 
 ## MindManager UI-parity work (2026-06-12)
 

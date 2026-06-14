@@ -24,6 +24,7 @@ import { BranchEdge } from "./flow/BranchEdge";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { TopicNode } from "./flow/TopicNode";
 import { EditingContext } from "./flow/editing";
+import { createHistory, record, redo as redoHistory, undo as undoHistory } from "./flow/history";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import {
   type OpResult,
@@ -34,6 +35,7 @@ import {
   groupBranch,
   mergeStyle,
   outdent,
+  reparent,
   replaceTopics,
   setAllExpanded,
   setHyperlink,
@@ -47,11 +49,12 @@ import { project } from "./flow/project";
 import type { FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { mindManagerTheme } from "./theme";
 
-// React Flow canvas — Phase D makes it editable: inline topic editing (double-click / F2),
-// keyboard tree-building (Enter = sibling, Tab = child, Shift+Tab = outdent, Delete), and the
-// model-mutating MindMapHandle methods (note/style/marker/image/link/group/replace). Every
-// edit is a pure op on the canonical doc → re-project → re-layout → onChange, so the model is
-// the source of truth. (Drag-to-reparent + undo are Phase E.)
+// React Flow canvas — a fully editable engine. Inline topic editing (double-click / F2),
+// keyboard tree-building (Enter/Tab/Shift+Tab/Delete), drag-to-reparent, a right-click context
+// menu, undo/redo (Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y, doc-snapshot stack), theming via CSS vars,
+// and the model-mutating MindMapHandle methods. Every edit is a pure op on the canonical doc →
+// re-project → re-layout → onChange, so the model is the single source of truth. (SVG export
+// is Phase F.)
 
 const nodeTypes = { topic: TopicNode };
 const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
@@ -85,11 +88,13 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>(projected.edges);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   const { fitView, getNodes, setCenter } = useReactFlow();
   const initialized = useNodesInitialized();
 
   // Refs so the stable callbacks below always read the latest values.
   const docRef = useRef(doc);
+  const historyRef = useRef(createHistory<MindMapDoc>());
   const paletteRef = useRef(palette);
   paletteRef.current = palette;
   const directionRef = useRef<LayoutKind>(direction);
@@ -140,6 +145,7 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   const apply = useCallback(
     (result: OpResult, edit = false) => {
       if (result.doc !== docRef.current) {
+        historyRef.current = record(historyRef.current, docRef.current); // snapshot the old doc
         sync(result.doc, result.selectId);
         onChangeRef.current?.(result.doc);
       }
@@ -150,6 +156,54 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
       }
     },
     [sync, fireSelect],
+  );
+
+  // Undo/redo restore a snapshot without recording it.
+  const restore = useCallback(
+    (d: MindMapDoc) => {
+      sync(d);
+      onChangeRef.current?.(d);
+    },
+    [sync],
+  );
+  const undoAction = useCallback(() => {
+    const r = undoHistory(historyRef.current, docRef.current);
+    if (r) {
+      historyRef.current = r.history;
+      restore(r.value);
+    }
+  }, [restore]);
+  const redoAction = useCallback(() => {
+    const r = redoHistory(historyRef.current, docRef.current);
+    if (r) {
+      historyRef.current = r.history;
+      restore(r.value);
+    }
+  }, [restore]);
+
+  // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back.
+  const handleDragStop = useCallback(
+    (dragId: string, dropPos: { x: number; y: number }) => {
+      const all = getNodes();
+      const dragged = all.find((n) => n.id === dragId);
+      const cx = dropPos.x + (dragged?.measured?.width ?? 0) / 2;
+      const cy = dropPos.y + (dragged?.measured?.height ?? 0) / 2;
+      const target = all.find((n) => {
+        if (n.id === dragId) return false;
+        const w = n.measured?.width ?? 0;
+        const h = n.measured?.height ?? 0;
+        return (
+          cx >= n.position.x &&
+          cx <= n.position.x + w &&
+          cy >= n.position.y &&
+          cy <= n.position.y + h
+        );
+      });
+      const r = target ? reparent(docRef.current, dragId, target.id) : { doc: docRef.current };
+      if (r.doc !== docRef.current) apply(r);
+      else sync(docRef.current); // snap back to the computed layout
+    },
+    [getNodes, apply, sync],
   );
 
   // Editing API for the topic nodes.
@@ -210,6 +264,18 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName)))
         return;
+      // Undo/redo work regardless of selection.
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) redoAction();
+        else undoAction();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        redoAction();
+        return;
+      }
       const id = selectedRef.current;
       if (!id) return;
       if (e.key === "Enter") {
@@ -231,7 +297,25 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [apply]);
+  }, [apply, undoAction, redoAction]);
+
+  // Close the context menu on any click/Escape outside it.
+  useEffect(() => {
+    if (!menu) return;
+    const onDown = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement)?.closest?.("[data-mm-menu]")) setMenu(null);
+    };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenu(null);
+    };
+    const t = setTimeout(() => document.addEventListener("mousedown", onDown), 0);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      clearTimeout(t);
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [menu]);
 
   const withSelected = useCallback((fn: (id: string) => void): boolean => {
     const id = selectedRef.current;
@@ -286,7 +370,7 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          nodesDraggable={false}
+          nodesDraggable
           nodesConnectable={false}
           deleteKeyCode={null}
           zoomOnDoubleClick={false}
@@ -297,15 +381,80 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
           onNodeClick={(_, node) => {
             setSelectedId(node.id);
             fireSelect(node.id);
+            setMenu(null);
           }}
           onPaneClick={() => {
             setSelectedId(null);
             fireSelect(null);
+            setMenu(null);
           }}
+          onNodeContextMenu={(e, node) => {
+            e.preventDefault();
+            setSelectedId(node.id);
+            fireSelect(node.id);
+            setMenu({ x: e.clientX, y: e.clientY, id: node.id });
+          }}
+          onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
           <Boundaries boundaries={doc.boundaries ?? []} />
         </ReactFlow>
+        {menu ? (
+          <ul
+            data-mm-menu
+            style={{
+              position: "fixed",
+              left: menu.x,
+              top: menu.y,
+              zIndex: 20,
+              margin: 0,
+              padding: 4,
+              listStyle: "none",
+              background: "var(--mm-node-bg, #fff)",
+              color: "var(--mm-color, #222)",
+              border: "1px solid #cfcfe0",
+              borderRadius: 8,
+              boxShadow: "0 4px 14px #0003",
+              font: "13px system-ui, sans-serif",
+              minWidth: 168,
+            }}
+          >
+            {(
+              [
+                ["Add child", () => apply(addChild(docRef.current, menu.id), true)],
+                ["Add sibling", () => apply(addSibling(docRef.current, menu.id), true)],
+                ["Rename", () => setEditingId(menu.id)],
+                ["Group in boundary", () => apply(groupBranch(docRef.current, menu.id))],
+                ["Collapse / expand", () => apply(toggleCollapse(docRef.current, menu.id))],
+                ["Delete", () => apply(deleteNode(docRef.current, menu.id))],
+              ] as const
+            ).map(([label, fn]) => (
+              <li key={label}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    fn();
+                    setMenu(null);
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "5px 10px",
+                    border: "none",
+                    background: "transparent",
+                    color: "inherit",
+                    cursor: "pointer",
+                    borderRadius: 5,
+                    font: "inherit",
+                  }}
+                >
+                  {label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
     </EditingContext.Provider>
   );

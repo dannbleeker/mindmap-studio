@@ -8,6 +8,9 @@ const KEY = "mindmap-theme";
 export function useTheme(): { theme: CanvasTheme; setThemeId: (id: string) => void } {
   const [themeId, setId] = useState(() => {
     try {
+      // A ?theme= query param wins (shareable themed links); else the persisted choice.
+      const q = new URLSearchParams(window.location.search).get("theme");
+      if (q && themeById(q).id === q) return q;
       return localStorage.getItem(KEY) ?? "light";
     } catch {
       return "light";

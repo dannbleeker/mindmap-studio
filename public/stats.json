@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-14T06:00:12.770Z",
-  "commit": "53ab3c3",
+  "generatedAt": "2026-06-14T06:14:34.812Z",
+  "commit": "da01c55",
   "headline": {
-    "linesTsJs": 12105,
-    "tests": 270,
-    "lineCoveragePct": 47.09,
-    "commits": 198,
+    "linesTsJs": 12332,
+    "tests": 274,
+    "lineCoveragePct": 46.07,
+    "commits": 200,
     "ageDays": 2,
-    "trackedFiles": 150,
+    "trackedFiles": 152,
     "featureManualPct": 100,
     "featureBookPct": 100,
     "featureExamplePct": 72.4
@@ -15,13 +15,13 @@
   "code": [
     {
       "category": "App code (src)",
-      "files": 54,
-      "lines": 7316
+      "files": 55,
+      "lines": 7501
     },
     {
       "category": "Unit tests",
-      "files": 37,
-      "lines": 3067
+      "files": 38,
+      "lines": 3109
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 47.09,
-      "covered": 2493,
-      "total": 5294
+      "pct": 46.07,
+      "covered": 2510,
+      "total": 5448
     },
     "statements": {
-      "pct": 47.09,
-      "covered": 2493,
-      "total": 5294
+      "pct": 46.07,
+      "covered": 2510,
+      "total": 5448
     },
     "functions": {
-      "pct": 87.33,
-      "covered": 200,
-      "total": 229
+      "pct": 87.55,
+      "covered": 204,
+      "total": 233
     },
     "branches": {
-      "pct": 87.84,
-      "covered": 730,
-      "total": 831
+      "pct": 87.94,
+      "covered": 737,
+      "total": 838
     }
   },
   "tests": {
-    "unit": 270,
+    "unit": 274,
     "e2e": 0,
-    "durationMs": 6487,
+    "durationMs": 6617,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1959
+        "ms": 1924
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 153
+        "ms": 159
       },
       {
         "file": "test/svgText.test.ts",
-        "ms": 78
+        "ms": 76
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 58
+        "ms": 60
       },
       {
         "file": "test/mmap.test.ts",
-        "ms": 55
+        "ms": 53
       }
     ]
   },
@@ -110,16 +110,16 @@
         "lines": 501
       },
       {
+        "name": "mindmap/FlowMindMap.tsx",
+        "lines": 469
+      },
+      {
         "name": "examples.ts",
         "lines": 468
       },
       {
         "name": "Panels.tsx",
         "lines": 343
-      },
-      {
-        "name": "mindmap/FlowMindMap.tsx",
-        "lines": 320
       }
     ]
   },
@@ -188,7 +188,7 @@
       {
         "file": "mindmap/FlowMindMap.tsx",
         "pct": 0,
-        "commits": 4
+        "commits": 5
       },
       {
         "file": "Panels.tsx",
@@ -208,18 +208,18 @@
     "nonNull": 2
   },
   "bundle": {
-    "jsGzipKb": 213.6,
+    "jsGzipKb": 214.5,
     "cssGzipKb": 5.8,
-    "totalGzipKb": 219.5,
-    "entryGzipKb": 78.8,
+    "totalGzipKb": 220.4,
+    "entryGzipKb": 78.9,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 8036,
     "chapters": 11,
-    "appLoc": 7316,
-    "docToCodeRatio": 1.1
+    "appLoc": 7501,
+    "docToCodeRatio": 1.07
   },
   "featureCoverage": {
     "total": 58,
@@ -299,21 +299,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 2,
-    "commits": 198,
-    "commits7d": 198,
+    "commits": 200,
+    "commits7d": 200,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 131
+        "count": 132
       },
       {
         "name": "github-actions[bot]",
-        "count": 67
+        "count": 68
       }
     ],
     "churn30d": {
-      "added": 29628,
-      "removed": 6074
+      "added": 29883,
+      "removed": 6099
     },
     "changelogEntries": 73
   }

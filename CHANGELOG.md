@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Node shapes (flowchart vocabulary)** — the **Shape** row in the style bar now offers, beyond
+  box / rounded / pill, five true geometric shapes: **diamond** (decision), **oval** (start/end),
+  **parallelogram** (input/output), **hexagon** (preparation), and **cylinder** (data store). They're
+  painted from one shared SVG path builder used by the canvas, the image export, **and** the picker
+  icons — so the screen, the export, and the button always match (the canvas == export invariant).
+  Text gets per-shape padding so it stays inside the narrowing outline. Stored on `style.shape`,
+  lossless in `.json`. The foundation for flowcharts and concept maps.
 - **Summary topics** — select a branch and **⊐ Summary** (or right-click → *Summarize branch*) draws
   a labelled **bracket** beside it (the classic MindManager summary). The bracket auto-sizes to the
   branch and sits on the correct side (left-branch → `[` on the left, right-branch → `]` on the

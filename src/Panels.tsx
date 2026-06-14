@@ -3,7 +3,8 @@ import { ProgressPie } from "./ProgressPie";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { formatBytes } from "./io/attachment";
 import type { SelectedNode } from "./mindmap";
-import type { ConditionalRule, MapNode, NodeStyle } from "./model/types";
+import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
+import type { ConditionalRule, MapNode, NodeShape, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
 import {
   type IndexEntry,
@@ -73,6 +74,30 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
   const label = (text: string) => (
     <span style={{ fontSize: 12, color: "#73726c", margin: "0 2px 0 6px" }}>{text}</span>
   );
+  // A mini preview of each geometric shape, drawn from the very same path builder the canvas and
+  // exporter use — so the picker icon always matches what lands on the node.
+  const shapeIcon = (shape: NodeShape) => {
+    const overlay = shapeOverlayPath(shape, 5, 5, 90, 60);
+    return (
+      <svg
+        width={18}
+        height={13}
+        viewBox="0 0 100 70"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path d={shapePath(shape, 5, 5, 90, 60)} fill="none" stroke="#26215c" strokeWidth={7} />
+        {overlay ? <path d={overlay} fill="none" stroke="#26215c" strokeWidth={7} /> : null}
+      </svg>
+    );
+  };
+  const geomShapes: { shape: NodeShape; title: string }[] = [
+    { shape: "diamond", title: "Diamond (decision)" },
+    { shape: "ellipse", title: "Oval (start / end)" },
+    { shape: "parallelogram", title: "Parallelogram (input / output)" },
+    { shape: "hexagon", title: "Hexagon (preparation)" },
+    { shape: "cylinder", title: "Cylinder (data store)" },
+  ];
   return (
     <div
       style={{
@@ -90,7 +115,7 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
         type="button"
         style={styleBtn}
         title="Box"
-        onClick={() => onStyle({ borderRadius: "4px" })}
+        onClick={() => onStyle({ borderRadius: "4px", shape: undefined })}
       >
         ▭
       </button>
@@ -98,7 +123,7 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
         type="button"
         style={styleBtn}
         title="Rounded"
-        onClick={() => onStyle({ borderRadius: "14px" })}
+        onClick={() => onStyle({ borderRadius: "14px", shape: undefined })}
       >
         ▢
       </button>
@@ -106,10 +131,21 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
         type="button"
         style={styleBtn}
         title="Pill"
-        onClick={() => onStyle({ borderRadius: "999px" })}
+        onClick={() => onStyle({ borderRadius: "999px", shape: undefined })}
       >
         ⬭
       </button>
+      {geomShapes.map(({ shape, title }) => (
+        <button
+          key={shape}
+          type="button"
+          style={{ ...styleBtn, padding: "3px 5px" }}
+          title={title}
+          onClick={() => onStyle({ shape })}
+        >
+          {shapeIcon(shape)}
+        </button>
+      ))}
       {label("Fill")}
       {FILL_SWATCHES.map((c) => swatch(c, () => onStyle({ background: c }), `Fill ${c}`))}
       <button
@@ -149,6 +185,7 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
             background: "",
             border: "",
             borderRadius: "",
+            shape: undefined,
             color: "",
             fontWeight: "",
             fontFamily: "",

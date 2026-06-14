@@ -5,6 +5,7 @@ import { formatDateShort, isOverdue } from "../../taskDate";
 import { taperedRibbonPath } from "./BranchEdge";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
+import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import {
   BOUNDARY_FILL,
   BOUNDARY_LABEL_BG,
@@ -308,11 +309,24 @@ export function buildFlowSvg(
     const strokeAttr = border
       ? ` stroke="${esc(border.color)}" stroke-width="${border.width}"`
       : "";
-    parts.push(
-      `<rect x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" rx="${radius}" fill="${esc(fill)}"${strokeAttr}/>`,
-    );
+    // Geometric shapes (diamond/ellipse/…) paint an SVG path — the same builder the canvas
+    // uses — so the export matches the screen; the rest stay rounded rects. Insets keep text
+    // inside a narrowing outline.
+    const shape = d.isRoot ? undefined : st?.shape;
+    const ins = isGeometric(shape) ? shapeInset(shape) : { left: 0, right: 0, top: 0, bottom: 0 };
+    if (isGeometric(shape)) {
+      parts.push(
+        `<path d="${shapePath(shape, r.x, r.y, r.w, r.h)}" fill="${esc(fill)}"${strokeAttr}/>`,
+      );
+      const ov = shapeOverlayPath(shape, r.x, r.y, r.w, r.h);
+      if (ov) parts.push(`<path d="${ov}" fill="none"${strokeAttr}/>`);
+    } else {
+      parts.push(
+        `<rect x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" rx="${radius}" fill="${esc(fill)}"${strokeAttr}/>`,
+      );
+    }
 
-    let textTop = r.y;
+    let textTop = r.y + ins.top;
     if (d.image) {
       const iw = Math.min(r.w - 2 * pad, d.image.width ?? 120);
       const ih = d.image.height ?? 120;
@@ -334,16 +348,16 @@ export function buildFlowSvg(
       parts.push(
         textBlock(
           nonEmpty,
-          r.x + pad,
+          r.x + pad + ins.left,
           textTop,
-          r.y + r.h - pieReserve,
+          r.y + r.h - pieReserve - ins.bottom,
           fontSize,
           textColor,
           d.isRoot ? "700" : st?.fontWeight,
         ),
       );
     }
-    let badgeX = r.x + pad;
+    let badgeX = r.x + pad + ins.left;
     if (d.priority) {
       const label = PRIORITY_LABEL[d.priority] ?? "?";
       const w = label.length * 6.4 + 8;

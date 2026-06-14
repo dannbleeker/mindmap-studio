@@ -15,6 +15,18 @@ export interface TaskInfo {
   resources?: string[];
 }
 
+/** Node outline shape. The first three are CSS rounded rectangles (set via borderRadius);
+ *  the rest ("geometric") paint an SVG backdrop — the flowchart vocabulary. */
+export type NodeShape =
+  | "round"
+  | "rect"
+  | "pill"
+  | "ellipse"
+  | "diamond"
+  | "parallelogram"
+  | "hexagon"
+  | "cylinder";
+
 export interface NodeStyle {
   color?: string;
   background?: string;
@@ -23,6 +35,9 @@ export interface NodeStyle {
   fontWeight?: string;
   /** Per-topic shape (CSS border-radius, e.g. "4px" box, "999px" pill). */
   borderRadius?: string;
+  /** Per-topic geometric shape (diamond/ellipse/parallelogram/hexagon/cylinder). When set to
+   *  a geometric shape the node is drawn as an SVG path; otherwise borderRadius rules. */
+  shape?: NodeShape;
   /** Per-topic outline (CSS border shorthand, e.g. "2px solid #e23"). */
   border?: string;
   fontFamily?: string;

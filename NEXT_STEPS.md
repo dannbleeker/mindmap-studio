@@ -61,8 +61,9 @@ tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (ver
 **C** (task progress + roll-up, then start/due dates with overdue + a due-date filter).
 Remaining bets: **A** (keyless AI bridge) and the rest of **B** (more diagram types: flowchart /
 concept map / matrix / Venn / funnel, free-form whiteboard, per-branch layout, richer node shapes).
-Shipped 2026-06-14 from **B**: **Kanban board** + **summary topics**. (LaTeX is the only deferred C
-item — heavy KaTeX + offline fonts.)
+Shipped 2026-06-14 from **B**: **Kanban board** + **summary topics** + **node shapes** (flowchart
+vocabulary: diamond / oval / parallelogram / hexagon / cylinder — the enabler for flowchart & concept
+maps). (LaTeX is the only deferred C item — heavy KaTeX + offline fonts.)
 
 ## Reference
 

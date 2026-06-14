@@ -65,6 +65,10 @@ GitHub Pages).
   carry progress + due, and clicking one jumps to it on the map.
 - **Summary topics** — **⊐ Summary** draws a labelled bracket beside a branch (side-aware;
   double-click to rename), the classic MindManager summary.
+- **Node shapes** — beyond box / rounded / pill, give a topic a **diamond** (decision), **oval**
+  (start/end), **parallelogram** (I/O), **hexagon**, or **cylinder** (data store) from the style
+  bar — the flowchart vocabulary. Drawn from one path builder shared by the canvas, exports, and the
+  picker, so the screen and the export always match.
 - **Conditional formatting** — a **🎨 Styles** panel of rules that auto-style topics by tag, marker,
   or completion (view-only; manual styling wins).
 - **Styles organizer** — save a topic's look as a **named style** and reuse it on others (in the same

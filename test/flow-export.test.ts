@@ -11,6 +11,7 @@
 import { describe, expect, it } from "vitest";
 import { sanitizeSvg } from "../src/io/svgSanitize";
 import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
+import { shapePath } from "../src/mindmap/flow/shapes";
 import type { MindMapDoc } from "../src/model/types";
 
 const PNG =
@@ -109,6 +110,34 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     // a rounded boundary rect + its chip text
     expect(svg).toMatch(/<rect[^>]*rx="16"[^>]*stroke="#8b87e0"/);
     expect(svg).toContain("Theme group");
+  });
+
+  it("emits a geometric node as the shared shapePath (canvas == export), not a rect", () => {
+    const sdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "s",
+      title: "Shapes",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          {
+            id: "dia",
+            topic: "Decision",
+            style: { shape: "diamond", background: "#fde2e2" },
+            children: [],
+          },
+        ],
+      },
+    };
+    const srects = new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 100, h: 40 }],
+      ["dia", { x: 200, y: 0, w: 120, h: 50 }],
+    ]);
+    const out = buildFlowSvg(sdoc, srects, palette, cssVar);
+    // The exact path the canvas paints — same builder — filled with the node's own background.
+    expect(out).toContain(`<path d="${shapePath("diamond", 200, 0, 120, 50)}"`);
+    expect(out).toContain('fill="#fde2e2"');
   });
 
   it("draws a summary bracket (path) + its label, side-aware", () => {

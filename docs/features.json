@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 102,
+  "reviewedThroughChangelogBullets": 103,
   "areas": [
     "editing",
     "notes",
@@ -208,6 +208,15 @@
     {
       "id": "summary-topics",
       "name": "Summary topics — a labelled bracket beside a branch (side-aware, renamable)",
+      "area": "structure",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "node-shapes",
+      "name": "Node shapes — diamond / oval / parallelogram / hexagon / cylinder (flowchart vocabulary), canvas == export",
       "area": "structure",
       "since": "2026-06-14",
       "manual": true,

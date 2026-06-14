@@ -30,6 +30,7 @@ import { Boundaries } from "./flow/Boundaries";
 import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
+import { Summaries } from "./flow/Summaries";
 import { TopicNode } from "./flow/TopicNode";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
@@ -47,8 +48,10 @@ import {
   deleteCallout,
   deleteLink,
   deleteNode,
+  deleteSummary,
   findNode,
   groupBranch,
+  groupSummary,
   mergeStyle,
   outdent,
   removeAttachment,
@@ -66,6 +69,7 @@ import {
   setProgress,
   setRules,
   setStart,
+  setSummaryLabel,
   setTags,
   setTopicRich,
   toggleCollapse,
@@ -533,6 +537,10 @@ function FlowInner({
         apply(groupBranch(docRef.current, id));
         return Boolean(findNode(docRef.current, id));
       },
+      groupSummary: (id) => {
+        apply(groupSummary(docRef.current, id));
+        return Boolean(findNode(docRef.current, id));
+      },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
@@ -659,6 +667,22 @@ function FlowInner({
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
           <Boundaries boundaries={renderDoc.boundaries ?? []} />
+          <Summaries
+            summaries={renderDoc.summaries ?? []}
+            onRename={(sid) => {
+              const current = (docRef.current.summaries ?? []).find((s) => s.id === sid);
+              const next = window.prompt(
+                "Summary label (leave empty to remove):",
+                current?.label ?? "",
+              );
+              if (next === null) return; // cancelled
+              apply(
+                next.trim()
+                  ? setSummaryLabel(docRef.current, sid, next)
+                  : deleteSummary(docRef.current, sid),
+              );
+            }}
+          />
           <Callouts
             items={calloutItems}
             onCommit={(nid, cid, text) => apply(setCalloutText(docRef.current, nid, cid, text))}
@@ -722,6 +746,7 @@ function FlowInner({
                 ["Link to…", () => setLinkingFrom(menu.id)],
                 ["Add callout", () => apply(addCallout(docRef.current, menu.id))],
                 ["Group in boundary", () => apply(groupBranch(docRef.current, menu.id))],
+                ["Summarize branch", () => apply(groupSummary(docRef.current, menu.id))],
                 ["Collapse / expand", () => apply(toggleCollapse(docRef.current, menu.id))],
                 ["Delete", () => apply(deleteNode(docRef.current, menu.id))],
               ] as const

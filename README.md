@@ -63,6 +63,8 @@ GitHub Pages).
   travels with the map, with one-click download.
 - **Board view (Kanban)** — **▦ Board** shows topics grouped into columns by tag (read-only); cards
   carry progress + due, and clicking one jumps to it on the map.
+- **Summary topics** — **⊐ Summary** draws a labelled bracket beside a branch (side-aware;
+  double-click to rename), the classic MindManager summary.
 - **Conditional formatting** — a **🎨 Styles** panel of rules that auto-style topics by tag, marker,
   or completion (view-only; manual styling wins).
 - **Styles organizer** — save a topic's look as a **named style** and reuse it on others (in the same

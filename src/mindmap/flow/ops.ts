@@ -132,6 +132,12 @@ export function deleteNode(doc: MindMapDoc, id: string): OpResult {
       .filter((b) => b.nodeIds.length > 0);
     next.boundaries = kept.length > 0 ? kept : undefined;
   }
+  if (next.summaries) {
+    const kept = next.summaries
+      .map((s) => ({ ...s, nodeIds: s.nodeIds.filter((nid) => !removed.has(nid)) }))
+      .filter((s) => s.nodeIds.length > 0);
+    next.summaries = kept.length > 0 ? kept : undefined;
+  }
   return { doc: next, selectId };
 }
 
@@ -439,6 +445,40 @@ export function groupBranch(doc: MindMapDoc, id: string): OpResult {
   const next = structuredClone(doc);
   next.boundaries = [...(next.boundaries ?? []), { id: makeId(), nodeIds: ids }];
   return { doc: next, selectId: id };
+}
+
+/** Add a labelled summary bracket around a node and its whole subtree. */
+export function groupSummary(doc: MindMapDoc, id: string): OpResult {
+  const node = findNode(doc, id);
+  if (!node) return { doc };
+  const ids: string[] = [];
+  const collect = (n: MapNode) => {
+    ids.push(n.id);
+    for (const c of n.children) collect(c);
+  };
+  collect(node);
+  const next = structuredClone(doc);
+  next.summaries = [...(next.summaries ?? []), { id: makeId(), nodeIds: ids, label: "Summary" }];
+  return { doc: next, selectId: id };
+}
+
+/** Set (or clear, with "") a summary's label by id. */
+export function setSummaryLabel(doc: MindMapDoc, id: string, label: string): OpResult {
+  if (!(doc.summaries ?? []).some((s) => s.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.summaries = (next.summaries ?? []).map((s) =>
+    s.id === id ? { ...s, label: label.trim() || undefined } : s,
+  );
+  return { doc: next };
+}
+
+/** Remove a summary by id (clearing the array when it empties). */
+export function deleteSummary(doc: MindMapDoc, id: string): OpResult {
+  if (!(doc.summaries ?? []).some((s) => s.id === id)) return { doc };
+  const next = structuredClone(doc);
+  const kept = (next.summaries ?? []).filter((s) => s.id !== id);
+  next.summaries = kept.length > 0 ? kept : undefined;
+  return { doc: next };
 }
 
 /** Replace `query` (case-insensitive) in every topic; returns the doc + count changed. */

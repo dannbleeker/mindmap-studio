@@ -263,6 +263,10 @@ theme default.
   click **⬚ Group** in the toolbar, then double-click the box's label chip to name it (an
   unlabelled box shows a "Label…" placeholder). Drawn and imported boundaries both round-trip
   and persist.
+- **Summary topics** — a labelled **bracket** beside a branch (rather than a box around it). Select a
+  node and click **⊐ Summary** (or right-click → **Summarize branch**); the bracket auto-sizes to the
+  branch and sits on the matching side. **Double-click its label** to rename it (clear the label to
+  remove the summary). Summaries persist and are drawn into image exports.
 - **Callouts** — a small sticky-note annotation pinned beside a node. Right-click a node →
   **Add callout**, then double-click the bubble to edit its text (the **×** removes it). Callouts
   are saved with the map and are drawn into the image exports too.

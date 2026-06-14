@@ -19,6 +19,21 @@ export const BOUNDARY_LABEL_BG = "#eceafb";
 export const BOUNDARY_LABEL_BORDER = "#cecbf6";
 export const BOUNDARY_LABEL_COLOR = "#26215c";
 
+// Summary bracket (a labelled bracket beside a node's subtree). Green, to distinguish from the
+// purple boundary box. Drawn to one side of the range, spanning its height + a small overhang.
+export const SUMMARY_GAP = 22; // gap between the range edge and the bracket spine
+export const SUMMARY_BRACKET_W = 10; // how far the bracket caps reach toward the nodes
+export const SUMMARY_PAD = 10; // vertical overhang past the range's top/bottom
+export const SUMMARY_STROKE = "#27852f";
+export const SUMMARY_LABEL_BG = "#e2fbe8";
+export const SUMMARY_LABEL_BORDER = "#9fd9ab";
+export const SUMMARY_LABEL_COLOR = "#1e5a2a";
+
+/** The label to draw for a summary (defaults to "Summary" when unset, since a summary IS a label). */
+export function summaryLabel(label: string | undefined): string {
+  return label?.trim() ? label : "Summary";
+}
+
 // Callout (anchored annotation bubble) — sticky-note yellow, readable on light + dark canvases.
 export const CALLOUT_BG = "#fff8c5";
 export const CALLOUT_STROKE = "#d4a72c";

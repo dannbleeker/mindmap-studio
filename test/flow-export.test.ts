@@ -111,6 +111,22 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(svg).toContain("Theme group");
   });
 
+  it("draws a summary bracket (path) + its label, side-aware", () => {
+    // Isolated doc so the shared-doc path count above stays branch+crosslink only.
+    const withSummary = buildFlowSvg(
+      { ...doc, summaries: [{ id: "su1", nodeIds: ["b"], label: "Phase 1" }] },
+      rects,
+      palette,
+      cssVar,
+    );
+    expect(withSummary).toMatch(/<path[^>]*stroke="#27852f"/); // the bracket polyline
+    expect(withSummary).toContain("Phase 1");
+    // The bracket adds exactly one extra <path> over the no-summary export.
+    const base = (svg.match(/<path[\s>]/g) ?? []).length;
+    const withCount = (withSummary.match(/<path[\s>]/g) ?? []).length;
+    expect(withCount).toBe(base + 1);
+  });
+
   it("renders callouts (sticky bubble + dashed connector + text)", () => {
     expect(svg).toContain("Review me");
     expect(svg).toContain('fill="#fff8c5"'); // sticky-note bubble

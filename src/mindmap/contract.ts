@@ -41,6 +41,8 @@ export interface MindMapHandle {
   setSelectedHyperlink: (url: string) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
   groupBranch: (id: string) => boolean;
+  /** Add a labelled summary bracket around the node and its subtree; false if it isn't found. */
+  groupSummary: (id: string) => boolean;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
   /** Replace the map's conditional-formatting rules (empty array clears them). */

@@ -101,10 +101,16 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
   const boundaries: Boundary[] = (prevDoc.boundaries ?? [])
     .map((b) => ({ ...b, nodeIds: b.nodeIds.filter((id) => present.has(id)) }))
     .filter((b) => b.nodeIds.length > 0);
+  // Summaries (like boundaries) aren't in the nodes/edges graph — carry from prevDoc, pruning ids
+  // that no longer exist (and any summary thereby emptied).
+  const summaries = (prevDoc.summaries ?? [])
+    .map((s) => ({ ...s, nodeIds: s.nodeIds.filter((id) => present.has(id)) }))
+    .filter((s) => s.nodeIds.length > 0);
 
   const result: MindMapDoc = { ...prevDoc, title: root.topic, root };
   result.floatingTopics = floating.length > 0 ? floating : undefined;
   result.links = links.length > 0 ? links : undefined;
   result.boundaries = boundaries.length > 0 ? boundaries : undefined;
+  result.summaries = summaries.length > 0 ? summaries : undefined;
   return result;
 }

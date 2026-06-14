@@ -6,7 +6,9 @@ import {
   addSibling,
   addSubtree,
   deleteNode,
+  deleteSummary,
   findNode,
+  groupSummary,
   indent,
   mergeStyle,
   outdent,
@@ -20,6 +22,7 @@ import {
   setProgress,
   setRules,
   setStart,
+  setSummaryLabel,
   setTags,
   setTopic,
   toggleCollapse,
@@ -182,6 +185,29 @@ describe("flow ops — content", () => {
     expect(findNode(setPriority(base(), "a", 1).doc, "a")?.task?.priority).toBe(1);
     const set = setPriority(base(), "a", 2).doc;
     expect(findNode(setPriority(set, "a", undefined).doc, "a")?.task).toBeUndefined();
+  });
+
+  it("groupSummary brackets a node's subtree, labelled, and setSummaryLabel / deleteSummary edit it", () => {
+    const grouped = groupSummary(base(), "a").doc;
+    expect(grouped.summaries?.length).toBe(1);
+    const s = grouped.summaries?.[0];
+    expect(s?.nodeIds.sort()).toEqual(["a", "a1", "a2"]); // node + whole subtree
+    expect(s?.label).toBe("Summary");
+    // rename
+    const renamed = setSummaryLabel(grouped, s?.id ?? "", "Phase 1").doc;
+    expect(renamed.summaries?.[0]?.label).toBe("Phase 1");
+    // clearing the label leaves the summary (label undefined → renders the default)
+    expect(setSummaryLabel(grouped, s?.id ?? "", "").doc.summaries?.[0]?.label).toBeUndefined();
+    // delete drops the array
+    expect(deleteSummary(grouped, s?.id ?? "").doc.summaries).toBeUndefined();
+  });
+
+  it("deleteNode prunes a summary's member ids and drops an emptied summary", () => {
+    const grouped = groupSummary(base(), "a").doc; // summary over a, a1, a2
+    const afterDelA1 = deleteNode(grouped, "a1").doc;
+    expect(afterDelA1.summaries?.[0]?.nodeIds.sort()).toEqual(["a", "a2"]);
+    // deleting the whole branch empties + drops the summary
+    expect(deleteNode(grouped, "a").doc.summaries).toBeUndefined();
   });
 
   it("setRules sets conditional-formatting rules and clears them on an empty array", () => {

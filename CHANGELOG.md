@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Summary topics** — select a branch and **⊐ Summary** (or right-click → *Summarize branch*) draws
+  a labelled **bracket** beside it (the classic MindManager summary). The bracket auto-sizes to the
+  branch and sits on the correct side (left-branch → `[` on the left, right-branch → `]` on the
+  right); **double-click its label** to rename (or empty it to remove). Summaries persist with the
+  map and are drawn into image exports. The last of the renderer-era structural gaps.
 - **More import formats — MindMup (`.mup`) and Markmap.** MindMup's JSON tree imports (rank-ordered
   children, notes, links — dangerous schemes dropped). Markmap files are Markdown, so they import via
   **Open files** (`.md`), stripping any `---` frontmatter (its `title:` becomes the map title). As part

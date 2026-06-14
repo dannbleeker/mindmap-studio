@@ -96,6 +96,14 @@ export interface Boundary {
   label?: string;
 }
 
+/** A labelled bracket spanning a node + its subtree (MindManager "summary topic"). Like a Boundary,
+ *  but drawn as a bracket to one side with a label, rather than a box enclosing the nodes. */
+export interface Summary {
+  id: string;
+  nodeIds: NodeId[];
+  label?: string;
+}
+
 /** A conditional-formatting rule: topics matching `kind`/`value` get `style` applied (view-only). */
 export interface ConditionalRule {
   id: string;
@@ -115,6 +123,8 @@ export interface MindMapDoc {
   boundaries?: Boundary[];
   /** Conditional-formatting rules (style topics by tag/marker/completed); view-only, per map. */
   rules?: ConditionalRule[];
+  /** Summary brackets (a labelled bracket beside a node's subtree). */
+  summaries?: Summary[];
   /** Top-level topics not attached to the central hierarchy (legends, notes). */
   floatingTopics?: MapNode[];
   theme?: string;

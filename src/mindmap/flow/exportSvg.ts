@@ -19,7 +19,15 @@ import {
   CROSSLINK_COLOR,
   CROSSLINK_DASH,
   CROSSLINK_WIDTH,
+  SUMMARY_BRACKET_W,
+  SUMMARY_GAP,
+  SUMMARY_LABEL_BG,
+  SUMMARY_LABEL_BORDER,
+  SUMMARY_LABEL_COLOR,
+  SUMMARY_PAD,
+  SUMMARY_STROKE,
   boundaryLabel,
+  summaryLabel,
 } from "./style";
 
 // Author a clean, standalone SVG of the map directly from the canonical model + the live
@@ -219,6 +227,44 @@ export function buildFlowSvg(
         `<text x="${r2(x + 18)}" y="${r2(y + 3)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${BOUNDARY_LABEL_COLOR}">${esc(label)}</text>`,
       );
     }
+  }
+
+  // Summary brackets (a bracket + label to one side of a node's subtree).
+  const rootRect = rects.get(doc.root.id);
+  const rootCenterX = rootRect ? rootRect.x + rootRect.w / 2 : 0;
+  for (const s of doc.summaries ?? []) {
+    let sx = Number.POSITIVE_INFINITY;
+    let sy = Number.POSITIVE_INFINITY;
+    let sX = Number.NEGATIVE_INFINITY;
+    let sY = Number.NEGATIVE_INFINITY;
+    let found = 0;
+    for (const id of s.nodeIds) {
+      const r = rects.get(id);
+      if (!r) continue;
+      sx = Math.min(sx, r.x);
+      sy = Math.min(sy, r.y);
+      sX = Math.max(sX, r.x + r.w);
+      sY = Math.max(sY, r.y + r.h);
+      found += 1;
+    }
+    if (found === 0) continue;
+    const onLeft = (sx + sX) / 2 < rootCenterX;
+    const y0 = sy - SUMMARY_PAD;
+    const y1 = sY + SUMMARY_PAD;
+    // Spine + caps: a "]" on the right (caps reach left toward the nodes) or "[" on the left.
+    const spineX = onLeft ? sx - SUMMARY_GAP : sX + SUMMARY_GAP;
+    const capX = onLeft ? spineX + SUMMARY_BRACKET_W : spineX - SUMMARY_BRACKET_W;
+    parts.push(
+      `<path d="M ${r2(capX)} ${r2(y0)} L ${r2(spineX)} ${r2(y0)} L ${r2(spineX)} ${r2(y1)} L ${r2(capX)} ${r2(y1)}" fill="none" stroke="${SUMMARY_STROKE}" stroke-width="2"/>`,
+    );
+    const label = summaryLabel(s.label);
+    const midY = (y0 + y1) / 2;
+    const lw = label.length * 7 + 12;
+    const lx = onLeft ? spineX - 6 - lw : spineX + 6;
+    parts.push(
+      `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${SUMMARY_LABEL_BG}" stroke="${SUMMARY_LABEL_BORDER}"/>`,
+      `<text x="${r2(lx + 6)}" y="${r2(midY + 4)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${SUMMARY_LABEL_COLOR}">${esc(label)}</text>`,
+    );
   }
 
   // Edges.

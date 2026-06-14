@@ -1077,6 +1077,22 @@ export function App() {
         >
           ⬚ Group
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            const id = selected?.id;
+            const ok = id ? mapRef.current?.groupSummary(id) : false;
+            showHint(
+              ok
+                ? "Summary added — double-click its label to rename (or empty it to remove)."
+                : "Select a node first, then summarise its branch.",
+            );
+          }}
+          style={controlStyle}
+          title="Add a labelled summary bracket beside the selected branch"
+        >
+          ⊐ Summary
+        </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}

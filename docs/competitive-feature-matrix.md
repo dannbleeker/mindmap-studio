@@ -212,7 +212,7 @@ interchange capability we could reasonably own.
 Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
-- **B — More structures** — ✅ Kanban board shipped; remaining: flowchart, true concept map, matrix/grid, true summary topics, multiple sheets per file.
+- **B — More structures** — ✅ Kanban board + summary topics shipped; remaining: flowchart, true concept map, matrix/grid, multiple sheets per file.
 - **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), file attachments, conditional formatting, styles organizer, task priority shipped; remaining: LaTeX/math (deferred).
 - **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.

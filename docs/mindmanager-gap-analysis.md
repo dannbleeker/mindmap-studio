@@ -56,7 +56,7 @@ reasonably own** — not "everything MindManager has."
 | Floating topics | ✅ | Imported + editable; rendered in a labelled branch. |
 | Relationships (labelled connectors) | ✅ | Cross-links / relationship arrows, two-way. |
 | Boundaries (grouping enclosures) | ✅ | MindManager-style **filled box** + label chip (custom overlay). |
-| Summary topics (brace over a range) | ⬜ | Boundaries group a branch, but a true roll-a-range-into-a-labelled-node summary isn't built — the #1 remaining structural gap (React Flow synthesised node + brace edge). |
+| Summary topics (bracket beside a range) | ✅ | **⊐ Summary** — a labelled, side-aware bracket beside a branch (renamable; drawn into exports). Shipped 2026-06-14. |
 | Callouts (annotation bubbles) | ✅ | Anchored callout bubbles (React Flow custom node). |
 | Multi-map links / topic-to-other-map | ✅ | Cross-map links (`#map=`), click to hop maps. |
 | Topic-to-topic link **within** a map | ✅ | In-map jump links (`#node=`), plus relationships + cross-map links. |
@@ -233,6 +233,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   tag (cards show progress + due; click to jump) — shipped 2026-06-14 (§2 alternate views).
 - **MindMup (`.mup`) + Markmap import** — MindMup JSON maps and Markmap Markdown (frontmatter-aware);
   Markdown import now handles multi-level `#`/`##`/`###` headings too — shipped 2026-06-14 (§8).
+- **Summary topics** — the **⊐ Summary** bracket: a labelled, side-aware bracket beside a branch
+  (renamable; carried into exports) — shipped 2026-06-14 (§1). The last renderer-era structural gap.
 - **Conditional formatting** — the **🎨 Styles** panel: rules that auto-style topics by
   tag / marker / completion (view-only overlay) — shipped 2026-06-14 (§3 styling).
 - **Styles organizer** — named, reusable per-node styles (save a topic's look, apply it to others),
@@ -254,10 +256,7 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
 
 After this session the in-scope list is short. What's genuinely left:
 
-1. **True summary topics** — roll a contiguous sibling range up into its own labelled summary node
-   (a brace beside the range). Post-migration this is a React Flow + model feature (a synthesised
-   node + a brace edge over a range) and needs dedicated layout work — the #1 structural gap.
-2. **More diagram types** — a **flowchart / true concept map** (free connectors + place-anywhere
+1. **More diagram types** — a **flowchart / true concept map** (free connectors + place-anywhere
    nodes, beyond the tree) and **matrix / Venn / onion / funnel** diagrams. Each is its own builder;
    multi-day. (React Flow makes them *possible* now — no longer renderer-blocked — just not small.)
 3. **Free-form whiteboard / sticky-note canvas** — place notes anywhere, not in a tree.
@@ -275,7 +274,7 @@ After this session the in-scope list is short. What's genuinely left:
 - **AI assist** via a **keyless copy-prompt / paste-result bridge** (paste-to-tree is half-built
   through OPML/Markdown import + Paste-text) — the biggest category-wide gap, deliberately **deferred**;
   see [`competitive-feature-matrix.md`](competitive-feature-matrix.md) cluster A.
-- **More structures** (flowchart, true concept map, matrix, Venn/funnel, summary topics) — cluster B.
+- **More structures** (flowchart, true concept map, matrix, Venn/funnel) — cluster B.
 
 > For the **full market landscape** (all 19 tools, not just MindManager) and the A–G gap
 > clusters, see [`competitive-feature-matrix.md`](competitive-feature-matrix.md).
@@ -288,8 +287,7 @@ FreeMind, Mermaid, XMind, JSON, plus Office/image/HTML export — more open form
 MindManager), on **navigation** (it ships a minimap MindManager has dropped), on **price +
 privacy** (free, local-first, offline, no account), and on **being genuinely cross-platform**
 from one codebase. The visual-variety gap that this doc once led with (layouts, callouts,
-rich text) is **closed** — the React Flow migration shipped all of it. The honest summary now:
-we trail only on **a few diagram types** (flowchart / concept map / matrix / Venn / true summary
-topics) and we intentionally don't play in **PM, collaboration, and enterprise**. The roadmap
-that follows: build the remaining diagram types as the appetite arises, and stay out of the two
-excluded layers.
+rich text, summary topics) is **closed**. The honest summary now: we trail only on a few **non-tree
+diagram types** (flowchart / concept map / matrix / Venn / funnel) and we intentionally don't play in
+**PM, collaboration, and enterprise**. The roadmap that follows: build the remaining diagram types as
+the appetite arises, and stay out of the two excluded layers.

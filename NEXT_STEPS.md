@@ -59,9 +59,10 @@ Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus)
 tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), **E**
 (saved filters + fuzzy Find), the first slice of **D** (paste text → map), and a good chunk of
 **C** (task progress + roll-up, then start/due dates with overdue + a due-date filter).
-Remaining bets: **A** (keyless AI bridge), the rest of **C** (LaTeX, conditional styling), and the
-rest of **B** (more structures: true summary topics, flowchart / concept map, matrix / Venn / funnel,
-free-form whiteboard, per-branch layout, richer node shapes — **Kanban board shipped 2026-06-14**).
+Remaining bets: **A** (keyless AI bridge) and the rest of **B** (more diagram types: flowchart /
+concept map / matrix / Venn / funnel, free-form whiteboard, per-branch layout, richer node shapes).
+Shipped 2026-06-14 from **B**: **Kanban board** + **summary topics**. (LaTeX is the only deferred C
+item — heavy KaTeX + offline fonts.)
 
 ## Reference
 

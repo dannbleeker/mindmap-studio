@@ -1,6 +1,7 @@
 import { type CSSProperties, useState } from "react";
 import { ProgressPie } from "./ProgressPie";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
+import { formatBytes } from "./io/attachment";
 import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
@@ -612,6 +613,8 @@ export function InfoPanel({
   onSetProgress,
   onSetDue,
   onSetStart,
+  onAddAttachment,
+  onRemoveAttachment,
   onSetHyperlink,
   maps,
   onLinkMap,
@@ -632,6 +635,8 @@ export function InfoPanel({
   onSetProgress: (progress: number | undefined) => void;
   onSetDue: (due: string) => void;
   onSetStart: (start: string) => void;
+  onAddAttachment: (file: File) => void;
+  onRemoveAttachment: (index: number) => void;
   onSetHyperlink: (url: string) => void;
   maps: { id: string; title: string }[];
   onLinkMap: (mapId: string) => void;
@@ -821,6 +826,54 @@ export function InfoPanel({
                 onChange={(e) => onSetDue(e.target.value)}
                 aria-label="Due date"
                 style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+              />
+            </label>
+          </div>
+
+          {sectionLabel("Attachments")}
+          <div style={{ padding: "0 10px 6px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {(node.attachments ?? []).map((a, i) => (
+              <div
+                key={`${a.name}:${i}`}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}
+              >
+                <a
+                  href={a.dataUrl}
+                  download={a.name}
+                  title={`Download ${a.name}`}
+                  style={{
+                    color: "#26215c",
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  📎 {a.name}
+                </a>
+                <span style={{ color: "#8a8780" }}>{formatBytes(a.size)}</span>
+                <button
+                  type="button"
+                  onClick={() => onRemoveAttachment(i)}
+                  title="Remove attachment"
+                  style={{ ...controlStyle, padding: "1px 6px", fontSize: 12 }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <label
+              style={{ ...controlStyle, fontSize: 12, cursor: "pointer", textAlign: "center" }}
+            >
+              + Attach file
+              <input
+                type="file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) onAddAttachment(f);
+                  e.target.value = "";
+                }}
+                style={{ display: "none" }}
               />
             </label>
           </div>

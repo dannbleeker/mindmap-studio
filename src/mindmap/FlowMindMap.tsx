@@ -37,6 +37,7 @@ import { createHistory, record, redo as redoHistory, undo as undoHistory } from 
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import {
   type OpResult,
+  addAttachment,
   addCallout,
   addChild,
   addFloatingTopic,
@@ -50,6 +51,7 @@ import {
   groupBranch,
   mergeStyle,
   outdent,
+  removeAttachment,
   reparent,
   replaceTopics,
   setAllExpanded,
@@ -535,6 +537,10 @@ function FlowInner({
         withSelected((id) => apply(setProgress(docRef.current, id, progress))),
       setSelectedDue: (due) => withSelected((id) => apply(setDue(docRef.current, id, due))),
       setSelectedStart: (start) => withSelected((id) => apply(setStart(docRef.current, id, start))),
+      addSelectedAttachment: (attachment) =>
+        withSelected((id) => apply(addAttachment(docRef.current, id, attachment))),
+      removeSelectedAttachment: (index) =>
+        withSelected((id) => apply(removeAttachment(docRef.current, id, index))),
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
       quickAdd: (text) => {

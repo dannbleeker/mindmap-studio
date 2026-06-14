@@ -1,6 +1,7 @@
 import type {
   Callout,
   CrossLink,
+  MapAttachment,
   MapImage,
   MapNode,
   MindMapDoc,
@@ -299,6 +300,25 @@ export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult
   const loc = locate(next.root, id);
   if (!loc) return { doc };
   loc.node.hyperlink = url || undefined;
+  return { doc: next };
+}
+
+/** Append a file attachment to a node. */
+export function addAttachment(doc: MindMapDoc, id: string, attachment: MapAttachment): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc) return { doc };
+  loc.node.attachments = [...(loc.node.attachments ?? []), attachment];
+  return { doc: next };
+}
+
+/** Remove the attachment at `index` from a node (clearing the array when it empties). */
+export function removeAttachment(doc: MindMapDoc, id: string, index: number): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc?.node.attachments) return { doc };
+  const kept = loc.node.attachments.filter((_, i) => i !== index);
+  loc.node.attachments = kept.length > 0 ? kept : undefined;
   return { doc: next };
 }
 

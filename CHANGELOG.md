@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **File attachments on topics** — attach any file to a topic from the **ℹ Info** panel; a **📎 chip**
+  shows on the node and the panel lists each file with its size, a one-click **download**, and a
+  remove (✕). Files are stored inline (a data URL, capped at 5 MB each) so they travel with the
+  map — lossless in `.json`, fully offline, ignored by flat exports.
 - **Faster capture** — three quick-input additions: a **Quick add** box in the header (type a topic,
   press Enter to add it under the selected node — or the central topic — keeping focus for rapid
   fire); **drop a link** (or text) from your browser onto the canvas to create a floating topic

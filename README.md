@@ -56,6 +56,8 @@ GitHub Pages).
 - **Fast capture** — a header **Quick add** box (type + Enter to add under the selection, keeps
   focus), **drop a link** from your browser onto the canvas to make a floating topic, and a
   **⏱ brainstorm timer** for timeboxed sprints.
+- **File attachments** — attach any file to a topic (**📎 chip** on the node); stored inline so it
+  travels with the map, with one-click download.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.

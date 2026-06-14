@@ -220,6 +220,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   map or grafted under the selection) shipped 2026-06-14 — the first slice of cluster D (capture UX).
 - **The rest of capture (cluster D)** — a header **Quick add** box (rapid topic entry), **drop-a-link
   onto the canvas** → floating topic, and a **⏱ brainstorm timer** — shipped 2026-06-14.
+- **File attachments** — attach any file to a topic (inline data URL, 📎 chip + download in the Info
+  panel, capped at 5 MB) — shipped 2026-06-14; more of cluster C / §4.
 - **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
   (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
   (navigation polish), alongside the earlier ◎ Focus.

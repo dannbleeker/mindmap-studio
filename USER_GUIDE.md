@@ -92,6 +92,10 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
 - **Dates** — set a **Start** and **Due** date; a **📅 chip** appears on the node and turns **red when
   overdue** (past due and not yet 100%). Clearing a date removes the chip. Dates are carried into
   image exports and saved with the map; the [Power Filter](#power-filter) can filter by due date.
+- **Attachments** — attach any file (**+ Attach file**); a **📎** count shows on the node and the
+  panel lists each file with its size, a click-to-**download** link, and a ✕ to remove it. Files are
+  stored inline in the map (capped at 5 MB each), so they stay offline and travel with a `.json`
+  export — nothing is uploaded.
 - **Style** — **Shape** (Box / Rounded / Pill), **Fill**, **Border** (swatch or ✕ for none), **B**
   for bold, **Reset** to clear; font size/colour live here too.
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in

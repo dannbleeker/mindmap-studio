@@ -94,6 +94,7 @@ export function project(
         progress: progress.get(node.id),
         due: node.task?.due,
         start: node.task?.start,
+        attachmentCount: node.attachments?.length,
         floating,
       },
     });

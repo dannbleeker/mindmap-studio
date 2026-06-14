@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  addAttachment,
   addChild,
   addFloatingTopic,
   addSibling,
@@ -9,6 +10,7 @@ import {
   indent,
   mergeStyle,
   outdent,
+  removeAttachment,
   reparent,
   setAllExpanded,
   setBackground,
@@ -188,6 +190,20 @@ describe("flow ops — content", () => {
     if (a) a.task = { progress: 0.5, priority: 2 };
     const cleared = findNode(setProgress(withTask, "a", undefined).doc, "a");
     expect(cleared?.task).toEqual({ priority: 2 });
+  });
+
+  it("addAttachment / removeAttachment append and drop files, clearing an emptied array", () => {
+    const a = { name: "spec.pdf", dataUrl: "data:application/pdf;base64,AA==", size: 12 };
+    const b = { name: "notes.txt", dataUrl: "data:text/plain;base64,QQ==", size: 3 };
+    const withTwo = addAttachment(addAttachment(base(), "a", a).doc, "a", b).doc;
+    expect(findNode(withTwo, "a")?.attachments?.map((x) => x.name)).toEqual([
+      "spec.pdf",
+      "notes.txt",
+    ]);
+    const afterRemove = removeAttachment(withTwo, "a", 0).doc;
+    expect(findNode(afterRemove, "a")?.attachments?.map((x) => x.name)).toEqual(["notes.txt"]);
+    // Removing the last one drops the array entirely.
+    expect(findNode(removeAttachment(afterRemove, "a", 0).doc, "a")?.attachments).toBeUndefined();
   });
 
   it("addFloatingTopic appends a detached topic, with an optional link, and selects it", () => {

@@ -107,6 +107,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     hasChildren,
     progress,
     due,
+    attachmentCount,
     dimmed,
   } = data;
   const editing = useEditing();
@@ -256,7 +257,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           </span>
         ) : null}
       </span>
-      {progress || due ? (
+      {progress || due || attachmentCount ? (
         <div
           style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}
         >
@@ -268,6 +269,14 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           ) : null}
           {due ? (
             <DateChip due={due} overdue={isOverdue(due, progress?.progress ?? 0, todayISO())} />
+          ) : null}
+          {attachmentCount ? (
+            <span
+              title={`${attachmentCount} attachment${attachmentCount === 1 ? "" : "s"}`}
+              style={{ ...chipStyle, fontSize: 10.5, lineHeight: "16px" }}
+            >
+              📎 {attachmentCount}
+            </span>
           ) : null}
         </div>
       ) : null}

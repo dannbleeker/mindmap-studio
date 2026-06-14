@@ -1,5 +1,5 @@
 import type { Ref } from "react";
-import type { MapImage, MapNode, MindMapDoc, NodeStyle } from "../model/types";
+import type { MapAttachment, MapImage, MapNode, MindMapDoc, NodeStyle } from "../model/types";
 import type { MindMapTheme } from "./theme";
 
 // The contract between the app and the canvas. The React Flow engine implements this surface,
@@ -44,6 +44,10 @@ export interface MindMapHandle {
   setSelectedDue: (due: string) => boolean;
   /** Set the selected node's start date ("YYYY-MM-DD"), or clear with ""; false if nothing selected. */
   setSelectedStart: (start: string) => boolean;
+  /** Attach a file to the selected node; false if nothing is selected. */
+  addSelectedAttachment: (attachment: MapAttachment) => boolean;
+  /** Remove the attachment at `index` from the selected node; false if nothing is selected. */
+  removeSelectedAttachment: (index: number) => boolean;
   /** Graft a forest of nodes (e.g. parsed from pasted text) under the selected node; false if none. */
   addSubtreeToSelected: (nodes: MapNode[]) => boolean;
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the

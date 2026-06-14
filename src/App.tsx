@@ -11,6 +11,7 @@ import {
   isFilterActive,
 } from "./filter";
 import { MARKER_PALETTE } from "./icons";
+import { fileToAttachment } from "./io/attachment";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
@@ -1297,6 +1298,16 @@ export function App() {
               const ok = mapRef.current?.setSelectedStart(d);
               if (!ok) showHint("Select a node first, then set a start date.");
             }}
+            onAddAttachment={async (file) => {
+              try {
+                const att = await fileToAttachment(file);
+                const ok = mapRef.current?.addSelectedAttachment(att);
+                if (!ok) showHint("Select a node first, then attach a file.");
+              } catch (err) {
+                showHint(err instanceof Error ? err.message : "Could not attach that file.");
+              }
+            }}
+            onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
             onSetHyperlink={(url) => {
               const ok = mapRef.current?.setSelectedHyperlink(url);
               if (!ok) showHint("Select a node first, then add a link.");

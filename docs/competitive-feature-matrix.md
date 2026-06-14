@@ -95,7 +95,7 @@ interchange capability we could reasonably own.
 | In-map jump links + cross-map links | ✅ | |
 | Tags (+ index + filter) | ✅ | |
 | Priority/progress markers w/ data + roll-up | ✅ | task progress 0–100% rolls up to parents (+ emoji markers) |
-| File attachments (arbitrary) | ❌ | most tools |
+| File attachments (arbitrary) | ✅ | inline data-URL files on a topic, capped at 5 MB |
 | Audio / video embed or record | ❌ | Mindomo, Ayoa, SimpleMind |
 | Checkboxes / task checkbox + roll-up | ✅ | task progress (0/25/50/75/100) with done/total roll-up |
 | Dates on topics | ✅ | start/due dates, overdue highlight, due-date filter |
@@ -213,7 +213,7 @@ Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
 - **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple sheets per file.
-- **C — Content depth** — ✅ task progress + roll-up and start/due dates (overdue + filter) shipped; remaining: file attachments, LaTeX/math, conditional styling.
+- **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), and file attachments shipped; remaining: LaTeX/math, conditional styling.
 - **D — Capture UX (cheap wins)** — Quick Entry, paste-text-as-tree, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.
 - **F — Durability** — persistent per-map version history (fits local-first via IndexedDB snapshots).

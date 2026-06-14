@@ -35,6 +35,15 @@ export interface MapImage {
   height?: number;
 }
 
+/** A file attached to a topic, stored inline as a data URL so maps stay offline + portable. */
+export interface MapAttachment {
+  name: string;
+  /** The file contents as a data: URL. */
+  dataUrl: string;
+  /** Size in bytes (for display). */
+  size: number;
+}
+
 /** A small annotation bubble anchored to a node (MindManager "callout"). */
 export interface Callout {
   id: string;
@@ -60,6 +69,8 @@ export interface MapNode {
   /** Marker / icon ids (priority, progress, flags, ...). */
   icons?: string[];
   tags?: string[];
+  /** Files attached to this topic (inline data URLs); lossless in .json, ignored by flat formats. */
+  attachments?: MapAttachment[];
   style?: NodeStyle;
   collapsed?: boolean;
   task?: TaskInfo;

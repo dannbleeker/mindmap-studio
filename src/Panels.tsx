@@ -12,6 +12,7 @@ import {
   outlineNumbers,
   outlineRows,
 } from "./outline";
+import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import { describeRule } from "./rules";
 import type { VersionMeta } from "./store/mapStore";
@@ -310,12 +311,14 @@ export function FilterPanel({
   markers,
   tags,
   due,
+  priority,
   matchCount,
   savedFilters,
   onText,
   onToggleMarker,
   onToggleTag,
   onDue,
+  onPriority,
   onClear,
   onSaveFilter,
   onApplyFilter,
@@ -327,19 +330,22 @@ export function FilterPanel({
   markers: string[];
   tags: string[];
   due: DueMode;
+  priority: number;
   matchCount: number;
   savedFilters: SavedFilter[];
   onText: (value: string) => void;
   onToggleMarker: (marker: string) => void;
   onToggleTag: (tag: string) => void;
   onDue: (mode: DueMode) => void;
+  onPriority: (priority: number) => void;
   onClear: () => void;
   onSaveFilter: (name: string) => void;
   onApplyFilter: (criteria: FilterCriteria) => void;
   onDeleteFilter: (id: string) => void;
 }) {
   const { markers: markerEntries, tags: tagEntries } = markerTagIndex(root, floatingTopics);
-  const active = text.trim().length > 0 || markers.length > 0 || tags.length > 0 || due !== "";
+  const active =
+    text.trim().length > 0 || markers.length > 0 || tags.length > 0 || due !== "" || priority > 0;
   const [saveName, setSaveName] = useState("");
   const chip = (key: string, selected: boolean, onClick: () => void) => (
     <button
@@ -386,6 +392,20 @@ export function FilterPanel({
           <option value="dated">Has a date</option>
           <option value="overdue">Overdue</option>
           <option value="soon">Due ≤ 7 days</option>
+        </select>
+        {groupLabel("Priority")}
+        <select
+          value={priority}
+          onChange={(e) => onPriority(Number(e.target.value))}
+          aria-label="Filter by priority"
+          style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+        >
+          <option value={0}>Any</option>
+          {PRIORITY_LEVELS.map((p) => (
+            <option key={p} value={p}>
+              {PRIORITY_LABEL[p]}
+            </option>
+          ))}
         </select>
         {markerEntries.length > 0 ? (
           <>
@@ -846,6 +866,7 @@ export function InfoPanel({
   onSetProgress,
   onSetDue,
   onSetStart,
+  onSetPriority,
   onAddAttachment,
   onRemoveAttachment,
   onSetHyperlink,
@@ -868,6 +889,7 @@ export function InfoPanel({
   onSetProgress: (progress: number | undefined) => void;
   onSetDue: (due: string) => void;
   onSetStart: (start: string) => void;
+  onSetPriority: (priority: number | undefined) => void;
   onAddAttachment: (file: File) => void;
   onRemoveAttachment: (index: number) => void;
   onSetHyperlink: (url: string) => void;
@@ -1061,6 +1083,50 @@ export function InfoPanel({
                 style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
               />
             </label>
+          </div>
+
+          {sectionLabel("Priority")}
+          <div
+            style={{
+              padding: "0 10px 6px",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              flexWrap: "wrap",
+            }}
+          >
+            {PRIORITY_LEVELS.map((p) => {
+              const active = node.task?.priority === p;
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => onSetPriority(p)}
+                  title={`${PRIORITY_LABEL[p]} priority`}
+                  style={{
+                    ...controlStyle,
+                    padding: "1px 8px",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    background: active ? PRIORITY_COLOR[p] : "#fff",
+                    color: active ? "#fff" : PRIORITY_COLOR[p],
+                    borderColor: PRIORITY_COLOR[p],
+                  }}
+                >
+                  {PRIORITY_LABEL[p]}
+                </button>
+              );
+            })}
+            {node.task?.priority ? (
+              <button
+                type="button"
+                onClick={() => onSetPriority(undefined)}
+                title="Clear priority"
+                style={{ ...controlStyle, padding: "1px 7px", fontSize: 12 }}
+              >
+                ✕
+              </button>
+            ) : null}
           </div>
 
           {sectionLabel("Attachments")}

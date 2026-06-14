@@ -118,11 +118,10 @@ import, cross-map roll-ups, MS Project/Planner/To-Do/Lists sync. All 🚫 — th
 the product deliberately excludes.
 
 **Adopted from this area as lightweight topic attributes (not the PM engine):** ✅ **task progress**
-(0–100% pie with parent roll-up), ✅ **start / due dates** (overdue highlight + due filter), and
-✅ **file attachments** — all shipped 2026-06-14 as per-topic content, with no Gantt/scheduler. The
-one small leftover we've skipped on purpose is **structured numeric priority** (it overlaps the
-emoji priority markers). If the full PM layer were ever wanted, Gantt + a scheduler would be the
-entry point — but that's a different product.
+(0–100% pie with parent roll-up), ✅ **start / due dates** (overdue highlight + due filter), ✅ **file
+attachments**, and ✅ **task priority** (High/Med/Low chip + a priority filter) — all shipped
+2026-06-14 as per-topic content, with no Gantt/scheduler. If the full PM layer were ever wanted,
+Gantt + a scheduler would be the entry point — but that's a different product.
 
 ## 6. Filtering, rules & automation
 
@@ -236,6 +235,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   tag / marker / completion (view-only overlay) — shipped 2026-06-14 (§3 styling).
 - **Styles organizer** — named, reusable per-node styles (save a topic's look, apply it to others),
   in the same **🎨 Styles** panel — shipped 2026-06-14 (§3 styling).
+- **Task priority** — High/Med/Low on a topic (coloured chip + a Power-Filter priority option) —
+  shipped 2026-06-14 (the last cluster-C item; LaTeX is the only content-depth gap left, deferred).
 - **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
   (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
   (navigation polish), alongside the earlier ◎ Focus.
@@ -261,11 +262,9 @@ After this session the in-scope list is short. What's genuinely left:
 4. **Richer node shapes** (diamond / hexagon / chevron …) and **per-branch layout override** — both
    need clip-path/geometry + export work to avoid clipping text.
 5. **LaTeX / math rendering** in topics/notes — the one heavy item: needs KaTeX (large JS + ~1 MB of
-   offline-precached fonts) for something MindManager doesn't do natively. Deferred pending a call on
-   that offline-cache cost.
-6. **Numeric priority (1–9)** — deliberately **not built**: it duplicates the existing emoji priority
-   markers. Would only add value as *filterable/sortable* priority (a Power-Filter add), if wanted.
-7. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
+   offline-precached fonts) for something MindManager doesn't do natively. **Deferred by decision**
+   (2026-06-14) on the offline-cache cost.
+6. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
 8. **Interchange long-tail** — **XMind export**, **MindMup** + **Markmap** import, **image-bearing
    `.mmap`** import (blocked on a real sample), and a **`.mmap` writer** (large XSD, high-risk).
 9. **Dedicated mobile UX** — the PWA is responsive-ish but not phone-optimised.

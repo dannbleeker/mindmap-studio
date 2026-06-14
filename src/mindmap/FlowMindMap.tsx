@@ -62,6 +62,7 @@ import {
   setImage,
   setLinkLabel,
   setNote,
+  setPriority,
   setProgress,
   setRules,
   setStart,
@@ -539,6 +540,8 @@ function FlowInner({
         withSelected((id) => apply(setProgress(docRef.current, id, progress))),
       setSelectedDue: (due) => withSelected((id) => apply(setDue(docRef.current, id, due))),
       setSelectedStart: (start) => withSelected((id) => apply(setStart(docRef.current, id, start))),
+      setSelectedPriority: (priority) =>
+        withSelected((id) => apply(setPriority(docRef.current, id, priority))),
       addSelectedAttachment: (attachment) =>
         withSelected((id) => apply(addAttachment(docRef.current, id, attachment))),
       removeSelectedAttachment: (index) =>

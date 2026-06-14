@@ -7,6 +7,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Task priority** — set a topic's priority (**High / Med / Low**) in the **ℹ Info** panel; a small
+  coloured chip shows on the node, and the **🎚 Power Filter** can filter by priority. Distinct from
+  the emoji priority markers in that it's a structured, filterable value. Stored on `task.priority`.
 - **Styles organizer** — in the **🎨 Styles** panel, save the selected topic's look as a **named
   style** and reuse it on any topic with one click. Presets persist locally and travel between maps.
 - **Conditional formatting** — a **🎨 Styles** panel where you set rules that **auto-style topics**

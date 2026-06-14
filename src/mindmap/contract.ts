@@ -53,6 +53,8 @@ export interface MindMapHandle {
   setSelectedDue: (due: string) => boolean;
   /** Set the selected node's start date ("YYYY-MM-DD"), or clear with ""; false if nothing selected. */
   setSelectedStart: (start: string) => boolean;
+  /** Set the selected node's task priority (1=High..3=Low), or clear with undefined; false if none. */
+  setSelectedPriority: (priority: number | undefined) => boolean;
   /** Attach a file to the selected node; false if nothing is selected. */
   addSelectedAttachment: (attachment: MapAttachment) => boolean;
   /** Remove the attachment at `index` from the selected node; false if nothing is selected. */

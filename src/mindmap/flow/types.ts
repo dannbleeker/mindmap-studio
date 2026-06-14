@@ -36,6 +36,8 @@ export type TopicData = {
   due?: string;
   /** Task start date ("YYYY-MM-DD"). */
   start?: string;
+  /** Task priority (1=High..3=Low), shown as a coloured chip. */
+  priority?: number;
   /** How many files are attached (shown as a 📎 chip; the files live in the model). */
   attachmentCount?: number;
   /** A detached/floating topic (not part of the central hierarchy). */

@@ -92,6 +92,7 @@ describe("describeCriteria", () => {
       '"budget" · ⭐ · #q3',
     );
     expect(describeCriteria(crit({ due: "overdue" }))).toBe("📅 overdue");
+    expect(describeCriteria(crit({ priority: 1 }))).toBe("High priority");
     expect(describeCriteria(crit({}))).toBe("everything");
   });
 });
@@ -125,6 +126,28 @@ describe("filterResult — due date", () => {
   });
   it("'soon' matches tasks due within the next week (not the overdue or far ones)", () => {
     expect(lit("soon")).toEqual(["r", "soon"]);
+  });
+});
+
+describe("filterResult — priority", () => {
+  const prioDoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "d",
+    title: "T",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "hi", topic: "Hi", task: { priority: 1 }, children: [] },
+        { id: "lo", topic: "Lo", task: { priority: 3 }, children: [] },
+        { id: "none", topic: "None", children: [] },
+      ],
+    },
+  };
+  it("matches only nodes at the chosen priority (plus their ancestors)", () => {
+    expect([...filterResult(prioDoc, crit({ priority: 1 })).lit].sort()).toEqual(["hi", "r"]);
+    expect([...filterResult(prioDoc, crit({ priority: 3 })).lit].sort()).toEqual(["lo", "r"]);
+    expect(filterResult(prioDoc, crit({ priority: 2 })).matches).toBe(0);
   });
 });
 

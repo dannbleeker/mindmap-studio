@@ -16,6 +16,7 @@ import {
   setBackground,
   setDue,
   setNote,
+  setPriority,
   setProgress,
   setRules,
   setStart,
@@ -175,6 +176,12 @@ describe("flow ops — content", () => {
     expect(
       setBackground(setBackground(base(), "#fee").doc, "").doc.meta?.background,
     ).toBeUndefined();
+  });
+
+  it("setPriority sets task priority and clears it on undefined", () => {
+    expect(findNode(setPriority(base(), "a", 1).doc, "a")?.task?.priority).toBe(1);
+    const set = setPriority(base(), "a", 2).doc;
+    expect(findNode(setPriority(set, "a", undefined).doc, "a")?.task).toBeUndefined();
   });
 
   it("setRules sets conditional-formatting rules and clears them on an empty array", () => {

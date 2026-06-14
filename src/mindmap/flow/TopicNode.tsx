@@ -2,6 +2,7 @@ import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { type CSSProperties, useEffect, useMemo, useRef } from "react";
 import { ProgressPie } from "../../ProgressPie";
 import { sanitizeRich } from "../../io/richText";
+import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
 import { formatDateShort, isOverdue, todayISO } from "../../taskDate";
@@ -108,6 +109,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     hasChildren,
     progress,
     due,
+    priority,
     attachmentCount,
     dimmed,
   } = data;
@@ -260,10 +262,27 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           </span>
         ) : null}
       </span>
-      {progress || due || attachmentCount ? (
+      {progress || due || attachmentCount || priority ? (
         <div
           style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}
         >
+          {priority ? (
+            <span
+              title={`${PRIORITY_LABEL[priority] ?? ""} priority`}
+              style={{
+                fontSize: 10.5,
+                lineHeight: "16px",
+                padding: "0 5px",
+                borderRadius: 6,
+                whiteSpace: "nowrap",
+                fontWeight: 600,
+                color: "#fff",
+                background: PRIORITY_COLOR[priority] ?? "#888",
+              }}
+            >
+              {PRIORITY_LABEL[priority] ?? "?"}
+            </span>
+          ) : null}
           {progress ? (
             <ProgressBadge
               info={progress}

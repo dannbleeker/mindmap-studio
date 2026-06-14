@@ -288,6 +288,11 @@ export function setStart(doc: MindMapDoc, id: string, start: string | undefined)
   return patchTask(doc, id, { start: start || undefined });
 }
 
+/** Set a node's task priority (1 = High .. 3 = Low), or clear it with undefined. */
+export function setPriority(doc: MindMapDoc, id: string, priority: number | undefined): OpResult {
+  return patchTask(doc, id, { priority });
+}
+
 /** Replace the map's conditional-formatting rules (an empty array clears them). */
 export function setRules(doc: MindMapDoc, rules: ConditionalRule[]): OpResult {
   const next = structuredClone(doc);

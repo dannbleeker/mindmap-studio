@@ -1,4 +1,5 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
+import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
 import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
 import { taperedRibbonPath } from "./BranchEdge";
@@ -276,7 +277,7 @@ export function buildFlowSvg(
     }
 
     // The task pie + due-date chip sit in a reserved strip at the bottom (matches the canvas badge).
-    const pieReserve = d.progress || d.due ? 20 : 0;
+    const pieReserve = d.progress || d.due || d.priority ? 20 : 0;
 
     const fontSize = Number.parseFloat(st?.fontSize ?? "") || 16;
     const lines = d.topic.split("\n").map((l) => l.trim());
@@ -297,6 +298,15 @@ export function buildFlowSvg(
       );
     }
     let badgeX = r.x + pad;
+    if (d.priority) {
+      const label = PRIORITY_LABEL[d.priority] ?? "?";
+      const w = label.length * 6.4 + 8;
+      parts.push(
+        `<rect x="${r2(badgeX)}" y="${r2(r.y + r.h - 20)}" width="${r2(w)}" height="16" rx="5" fill="${PRIORITY_COLOR[d.priority] ?? "#888"}"/>`,
+        `<text x="${r2(badgeX + 4)}" y="${r2(r.y + r.h - 8)}" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
+      );
+      badgeX += w + 4;
+    }
     if (d.progress) {
       parts.push(pieSvg(badgeX + 8, r.y + r.h - 12, 8, d.progress.progress));
       badgeX += 22;

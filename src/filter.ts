@@ -1,4 +1,5 @@
 import type { MapNode, MindMapDoc } from "./model/types";
+import { PRIORITY_LABEL } from "./priority";
 import { progressMap } from "./progress";
 import { isDueSoon, isOverdue } from "./taskDate";
 
@@ -18,12 +19,18 @@ export interface FilterCriteria {
   tags: string[];
   /** Due-date constraint (optional, so older saved filters without it still load). */
   due?: DueMode;
+  /** Task-priority constraint: 1=High..3=Low, or 0/undefined for "any". */
+  priority?: number;
 }
 
 /** Is any criterion set? When false the canvas shows everything (no dimming). */
 export function isFilterActive(c: FilterCriteria): boolean {
   return (
-    c.text.trim().length > 0 || c.markers.length > 0 || c.tags.length > 0 || (c.due ?? "") !== ""
+    c.text.trim().length > 0 ||
+    c.markers.length > 0 ||
+    c.tags.length > 0 ||
+    (c.due ?? "") !== "" ||
+    !!c.priority
   );
 }
 
@@ -47,6 +54,7 @@ export function describeCriteria(c: FilterCriteria): string {
   if (c.markers.length) parts.push(c.markers.join(" "));
   if (c.tags.length) parts.push(c.tags.map((t) => `#${t}`).join(" "));
   if (c.due) parts.push(DUE_LABEL[c.due]);
+  if (c.priority) parts.push(`${PRIORITY_LABEL[c.priority] ?? "?"} priority`);
   return parts.join(" · ") || "everything";
 }
 
@@ -67,6 +75,7 @@ function nodeMatches(
   if (due === "dated" && !n.task?.due) return false;
   if (due === "overdue" && !isOverdue(n.task?.due, effectiveProgress, today)) return false;
   if (due === "soon" && !isDueSoon(n.task?.due, effectiveProgress, today)) return false;
+  if (c.priority && n.task?.priority !== c.priority) return false;
   return true;
 }
 

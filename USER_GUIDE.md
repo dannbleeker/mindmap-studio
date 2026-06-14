@@ -92,6 +92,9 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
 - **Dates** — set a **Start** and **Due** date; a **📅 chip** appears on the node and turns **red when
   overdue** (past due and not yet 100%). Clearing a date removes the chip. Dates are carried into
   image exports and saved with the map; the [Power Filter](#power-filter) can filter by due date.
+- **Priority** — set **High / Med / Low**; a small coloured chip shows on the node (✕ clears it).
+  Unlike the emoji priority markers, this is a structured value the [Power Filter](#power-filter) can
+  filter by.
 - **Attachments** — attach any file (**+ Attach file**); a **📎** count shows on the node and the
   panel lists each file with its size, a click-to-**download** link, and a ✕ to remove it. Files are
   stored inline in the map (capped at 5 MB each), so they stay offline and travel with a `.json`
@@ -149,8 +152,9 @@ palette: the palette *applies* markers to a node, the index *finds* every node t
 **🎚 Filter** opens a read-only filter that **dims** every topic except the ones that match your
 criteria — and the branches leading to them, so each match keeps its context. Combine a free-text
 search (matches topic **and** note) with toggle chips for any marker or tag in the map, plus a
-**Due date** option (*Has a date · Overdue · Due ≤ 7 days*); criteria are combined with AND (a topic
-must satisfy each category you've set). A live count shows how many topics matched. It changes nothing in the map — **Clear** or closing the panel restores
+**Due date** option (*Has a date · Overdue · Due ≤ 7 days*) and a **Priority** option (High / Med /
+Low); criteria are combined with AND (a topic must satisfy each category you've set). A live count
+shows how many topics matched. It changes nothing in the map — **Clear** or closing the panel restores
 everything — so it's a safe way to focus a crowded map on, say, every urgent (❗) item mentioning
 "budget". (This differs from **Find**, which steps you through matches one at a time, and the
 **Filter outline…** box, which narrows the outline list.)

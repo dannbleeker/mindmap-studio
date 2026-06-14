@@ -53,6 +53,8 @@ GitHub Pages).
 - **Due & start dates** — give a topic dates in the **ℹ Info** panel; a **📅 chip** shows on the node
   and turns **red when overdue**. Filter by due date (has-a-date / overdue / due ≤ 7 days) in the
   Power Filter.
+- **Task priority** — set High / Med / Low on a topic (coloured chip on the node); filter by priority
+  in the Power Filter.
 - **Fast capture** — a header **Quick add** box (type + Enter to add under the selection, keeps
   focus), **drop a link** from your browser onto the canvas to make a floating topic, and a
   **⏱ brainstorm timer** for timeboxed sprints.

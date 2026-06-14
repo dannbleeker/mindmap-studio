@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Saved filters** — name the current Power Filter and reuse it across maps. The **🎚 Filter** panel
+  grows a **Saved filters** list: type/pick criteria, give it a name, **Save**; click a saved name to
+  re-apply it on any map, or **✕** to remove it. Presets persist locally (browser storage) and travel
+  with you between maps. Fully local — nothing leaves the browser.
+- **Typo-tolerant Find** — **Find** now rescues near-misses. If an exact match isn't found, it falls
+  back to a fuzzy pass (bounded edit-distance per word) so `Launhc` still finds **Launch** and
+  `markteing` still finds **Marketing**. Exact matches always win and short queries (< 4 chars) stay
+  strict, so precise searches are unaffected.
 - **Paste text → map** — a **📋 Paste text** action turns a pasted outline, bullet list, or
   Markdown into topics: indentation (or `#` heading levels) sets the hierarchy, and `-`/`*`/`+`/`•`
   and numbered (`1.`) markers are all understood. Drop it in as a **new map**, or **Add under

@@ -46,8 +46,8 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
 - [ ] **D — Capture UX (cheap wins)** — **paste-text → map shipped 2026-06-14** (📋 Paste text:
       outline/bullets/Markdown → topics, new map or graft); remaining: Quick Entry, drop-link-as-topic,
       brainstorm timer.
-- [ ] **E — Navigation polish (cheap wins)** — one-click focus / isolate-branch, saved filters,
-      fuzzy search.
+- [x] **E — Navigation polish (cheap wins)** — focus / isolate-branch, saved Power-Filter presets,
+      and typo-tolerant Find all **shipped 2026-06-14**.
 - [x] **F — Durability** — persistent per-map version history (IndexedDB snapshots) **shipped
       2026-06-14** (🕔 History panel: auto + on-demand snapshots, restore-in-place, capped at 30).
 - [ ] **G — Interop fills** — iThoughts (`.itmz`), MindMeister (`.mind`), and legacy XMind
@@ -55,10 +55,10 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       sample), a `.mmap` writer, MindMup, and Markmap.
 
 Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus), **③** (info panel +
-tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), and the
-first slice of **D** (paste text → map).
+tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), **E**
+(saved filters + fuzzy Find), and the first slice of **D** (paste text → map).
 Remaining bets: **A** (keyless AI bridge), the rest of **D** (Quick Entry, drop-link, brainstorm
-timer) and **E** (saved filters, fuzzy search), and **B / C** (more structures / content depth).
+timer), and **B / C** (more structures / content depth).
 
 ## Reference
 

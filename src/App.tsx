@@ -1,7 +1,13 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FilterPanel, HistoryPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
 import { buildExample, examples } from "./examples";
-import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
+import {
+  type FilterCriteria,
+  type SavedFilter,
+  filterResult,
+  focusSet,
+  isFilterActive,
+} from "./filter";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
@@ -139,6 +145,37 @@ export function App() {
     });
   const toggle = (list: string[], value: string) =>
     list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+  // Saved Power-Filter presets, persisted app-wide (a saved "❗" filter is reusable across maps).
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("mindmap-saved-filters") ?? "[]");
+    } catch {
+      return [];
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("mindmap-saved-filters", JSON.stringify(savedFilters));
+    } catch {
+      // preference is best-effort
+    }
+  }, [savedFilters]);
+  const saveCurrentFilter = (name: string) => {
+    const criteria: FilterCriteria = { text: filterText, markers: filterMarkers, tags: filterTags };
+    if (!name.trim() || !isFilterActive(criteria)) return;
+    // Replace any existing preset with the same name, then add.
+    setSavedFilters((prev) => [
+      ...prev.filter((f) => f.name !== name.trim()),
+      { id: crypto.randomUUID(), name: name.trim(), criteria },
+    ]);
+  };
+  const applySavedFilter = (criteria: FilterCriteria) => {
+    setFilterText(criteria.text);
+    setFilterMarkers([...criteria.markers]);
+    setFilterTags([...criteria.tags]);
+  };
+  const deleteSavedFilter = (id: string) =>
+    setSavedFilters((prev) => prev.filter((f) => f.id !== id));
   // Memoised so the canvas only re-dims when the map or the criteria actually change. The
   // criteria object is built inside so the deps stay plain primitives (no per-render object).
   const filterHits = useMemo(() => {
@@ -1181,10 +1218,14 @@ export function App() {
             markers={filterMarkers}
             tags={filterTags}
             matchCount={filterHits?.matches ?? 0}
+            savedFilters={savedFilters}
             onText={setFilterText}
             onToggleMarker={(m) => setFilterMarkers((list) => toggle(list, m))}
             onToggleTag={(t) => setFilterTags((list) => toggle(list, t))}
             onClear={clearFilter}
+            onSaveFilter={saveCurrentFilter}
+            onApplyFilter={applySavedFilter}
+            onDeleteFilter={deleteSavedFilter}
           />
         )}
         {infoOpen && (

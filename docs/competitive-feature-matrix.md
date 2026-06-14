@@ -114,9 +114,9 @@ interchange capability we could reasonably own.
 | Auto-numbering | ✅ | |
 | Minimap + zoom + fit | ✅ | |
 | Collapse / expand all | ✅ | |
-| Focus mode ("show branch only", dim rest) | 🟡 | Power Filter dims; no one-click branch isolate |
-| Fuzzy / approximate search | ❌ | Freeplane |
-| Saved / named filters | 🟡 | filter is live, not saved |
+| Focus mode ("show branch only", dim rest) | ✅ | ◎ Focus isolates a branch |
+| Fuzzy / approximate search | ✅ | Find falls back to a typo-tolerant pass |
+| Saved / named filters | ✅ | name + save a Power Filter, reuse across maps |
 | Bookmarks / jump-to-named-node | 🟡 | jump links cover part |
 
 ## 6. Collaboration & sharing
@@ -215,7 +215,7 @@ Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 - **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple sheets per file.
 - **C — Content depth** — file attachments, dates + checkboxes with progress roll-up, LaTeX/math, conditional styling.
 - **D — Capture UX (cheap wins)** — Quick Entry, paste-text-as-tree, drop-link-as-topic, brainstorm timer.
-- **E — Navigation polish (cheap wins)** — one-click focus/isolate-branch, saved filters, fuzzy search.
+- **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.
 - **F — Durability** — persistent per-map version history (fits local-first via IndexedDB snapshots).
 - **G — Interop fills** — iThoughts/.itmz import, MindMeister .mind, image-bearing .mmap, write .mmap.
 

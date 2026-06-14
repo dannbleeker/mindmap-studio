@@ -18,6 +18,22 @@ export function isFilterActive(c: FilterCriteria): boolean {
   return c.text.trim().length > 0 || c.markers.length > 0 || c.tags.length > 0;
 }
 
+/** A named, reusable Power-Filter preset (persisted app-wide). */
+export interface SavedFilter {
+  id: string;
+  name: string;
+  criteria: FilterCriteria;
+}
+
+/** A short human label for a saved filter's criteria (for the saved-filters list tooltip). */
+export function describeCriteria(c: FilterCriteria): string {
+  const parts: string[] = [];
+  if (c.text.trim()) parts.push(`"${c.text.trim()}"`);
+  if (c.markers.length) parts.push(c.markers.join(" "));
+  if (c.tags.length) parts.push(c.tags.map((t) => `#${t}`).join(" "));
+  return parts.join(" · ") || "everything";
+}
+
 function nodeMatches(n: MapNode, c: FilterCriteria, q: string): boolean {
   // Text matches topic or note (the same surfaces Find searches), case-insensitive.
   if (q && !`${n.topic} ${n.note ?? ""}`.toLowerCase().includes(q)) return false;

@@ -1,4 +1,5 @@
 import { type CSSProperties, useState } from "react";
+import { type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
@@ -302,10 +303,14 @@ export function FilterPanel({
   markers,
   tags,
   matchCount,
+  savedFilters,
   onText,
   onToggleMarker,
   onToggleTag,
   onClear,
+  onSaveFilter,
+  onApplyFilter,
+  onDeleteFilter,
 }: {
   root: MapNode;
   floatingTopics?: MapNode[];
@@ -313,13 +318,18 @@ export function FilterPanel({
   markers: string[];
   tags: string[];
   matchCount: number;
+  savedFilters: SavedFilter[];
   onText: (value: string) => void;
   onToggleMarker: (marker: string) => void;
   onToggleTag: (tag: string) => void;
   onClear: () => void;
+  onSaveFilter: (name: string) => void;
+  onApplyFilter: (criteria: FilterCriteria) => void;
+  onDeleteFilter: (id: string) => void;
 }) {
   const { markers: markerEntries, tags: tagEntries } = markerTagIndex(root, floatingTopics);
   const active = text.trim().length > 0 || markers.length > 0 || tags.length > 0;
+  const [saveName, setSaveName] = useState("");
   const chip = (key: string, selected: boolean, onClick: () => void) => (
     <button
       key={key}
@@ -395,6 +405,83 @@ export function FilterPanel({
         <div style={{ padding: "6px 10px", fontSize: 11, color: "#8a8780" }}>
           Read-only: non-matching topics are dimmed, nothing is removed.
         </div>
+
+        {groupLabel("Saved filters")}
+        {savedFilters.length === 0 ? (
+          <div style={{ padding: "0 10px 4px", fontSize: 12, color: "#8a8780" }}>
+            Save a filter to reuse it across maps.
+          </div>
+        ) : (
+          savedFilters.map((f) => (
+            <div
+              key={f.id}
+              style={{ display: "flex", alignItems: "center", gap: 4, padding: "1px 10px" }}
+            >
+              <button
+                type="button"
+                onClick={() => onApplyFilter(f.criteria)}
+                title={describeCriteria(f.criteria)}
+                style={{
+                  flex: 1,
+                  textAlign: "left",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  color: "#26215c",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  padding: "2px 0",
+                }}
+              >
+                {f.name}
+              </button>
+              <button
+                type="button"
+                onClick={() => onDeleteFilter(f.id)}
+                title={`Delete "${f.name}"`}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  color: "#8a8780",
+                  fontSize: 12,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ))
+        )}
+        {active ? (
+          <div style={{ display: "flex", gap: 4, padding: "4px 10px 8px" }}>
+            <input
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && saveName.trim()) {
+                  onSaveFilter(saveName.trim());
+                  setSaveName("");
+                }
+              }}
+              placeholder="Name this filter…"
+              aria-label="Save filter name"
+              style={{ ...inputStyle, width: "auto", flex: 1 }}
+            />
+            <button
+              type="button"
+              disabled={!saveName.trim()}
+              onClick={() => {
+                onSaveFilter(saveName.trim());
+                setSaveName("");
+              }}
+              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+            >
+              Save
+            </button>
+          </div>
+        ) : null}
       </div>
     </aside>
   );

@@ -141,6 +141,11 @@ everything — so it's a safe way to focus a crowded map on, say, every urgent (
 "budget". (This differs from **Find**, which steps you through matches one at a time, and the
 **Filter outline…** box, which narrows the outline list.)
 
+Once a filter is set, name it and click **Save** to keep it as a reusable preset. **Saved filters**
+appear in the panel: click a name to re-apply it (on any map), or **✕** to remove it. Presets are
+stored locally and travel with you between maps — handy for views you return to, like "every blocked
+🚩 item" or "this quarter's tags".
+
 ### Focus a branch
 
 Select a node and click **◎ Focus** to spotlight just that branch: the node, its whole subtree,
@@ -155,6 +160,10 @@ Type in **Find** to jump between matching topics **and notes** — press **Enter
 cycle hits (an `n/total` counter shows where you are). Type in the **Replace** box and click
 **Replace all** to rewrite the search text across every matching topic. Press **`/`** anywhere
 (when you're not typing) to jump straight to Find.
+
+Find is **typo-tolerant**: if nothing matches exactly, it automatically retries with a fuzzy pass,
+so a slip like `Launhc` still finds **Launch**. Exact matches always take priority, and very short
+queries stay strict — so precise searches behave exactly as before.
 
 ### Search all maps
 

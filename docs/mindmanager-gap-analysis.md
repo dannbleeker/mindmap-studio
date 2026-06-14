@@ -218,6 +218,9 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   on-demand, restore-in-place, capped at 30) shipped 2026-06-14 — cluster F from the cross-tool matrix.
 - **Paste text → map** (the **📋 Paste text** dialog — outline/bullets/Markdown → topics, as a new
   map or grafted under the selection) shipped 2026-06-14 — the first slice of cluster D (capture UX).
+- **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
+  (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
+  (navigation polish), alongside the earlier ◎ Focus.
 
 ### Next — remaining buildable gaps (in priority order)
 1. **The last interchange items** — **image-bearing `.mmap`** (the known binary-blob gap; needs a real sample) and a **`.mmap` writer** (large XSD; can't validate without MindManager). Both are higher-risk / blocked; the easy importers are all done.

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { MapNode, MindMapDoc } from "../src/model/types";
-import { findDocMatches, findMatches, replaceInTopic, searchLibrary } from "../src/search";
+import {
+  findDocMatches,
+  findMatches,
+  fuzzyHit,
+  replaceInTopic,
+  searchLibrary,
+} from "../src/search";
 
 const root: MapNode = {
   id: "r",
@@ -108,5 +114,26 @@ describe("replaceInTopic", () => {
   it("treats the query as a literal (regex chars escaped)", () => {
     expect(replaceInTopic("a.b a.b", "a.b", "Z")).toBe("Z Z");
     expect(replaceInTopic("axb", "a.b", "Z")).toBe("axb");
+  });
+});
+
+describe("fuzzyHit", () => {
+  it("accepts an exact substring or a near-miss word, rejects unrelated", () => {
+    expect(fuzzyHit("Marketing plan", "marketing")).toBe(true); // exact
+    expect(fuzzyHit("Marketing plan", "markteing")).toBe(true); // transposition (dist 2)
+    expect(fuzzyHit("Marketing plan", "finance")).toBe(false);
+  });
+});
+
+describe("findDocMatches — fuzzy fallback", () => {
+  const doc: MindMapDoc = { schemaVersion: 1, id: "d", title: "T", root };
+
+  it("falls back to a typo-tolerant pass only when there's no exact hit", () => {
+    expect(findDocMatches(doc, "markteing")).toEqual(["a"]); // typo of "Marketing", no exact hit
+    expect(findDocMatches(doc, "market")).toEqual(["a", "a1"]); // exact hits short-circuit fuzzy
+  });
+
+  it("stays strict for very short queries (no fuzzy below 4 chars)", () => {
+    expect(findDocMatches(doc, "mkt")).toEqual([]);
   });
 });

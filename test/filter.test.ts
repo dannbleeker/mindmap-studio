@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "../src/filter";
+import {
+  type FilterCriteria,
+  describeCriteria,
+  filterResult,
+  focusSet,
+  isFilterActive,
+} from "../src/filter";
 import type { MindMapDoc } from "../src/model/types";
 
 const doc: MindMapDoc = {
@@ -77,6 +83,15 @@ describe("filterResult", () => {
     const r = filterResult(doc, crit({ text: "nonexistent" }));
     expect(r.matches).toBe(0);
     expect(r.lit.size).toBe(0);
+  });
+});
+
+describe("describeCriteria", () => {
+  it("summarises text, markers, and tags (and 'everything' when empty)", () => {
+    expect(describeCriteria(crit({ text: "budget", markers: ["⭐"], tags: ["q3"] }))).toBe(
+      '"budget" · ⭐ · #q3',
+    );
+    expect(describeCriteria(crit({}))).toBe("everything");
   });
 });
 

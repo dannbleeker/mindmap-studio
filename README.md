@@ -26,7 +26,8 @@ GitHub Pages).
   undo/redo (Ctrl+Z / Ctrl+Shift+Z), inline **rich-text** topics (Ctrl+B/I/U), images on
   nodes, and a unified **ℹ Info** panel (note, markers, tags, style, links) for the selected node.
 - **Find & Replace** — search the map by topic or note (matches focused on the canvas,
-  cycling on repeated Enter), and replace the search text across all matching topics.
+  cycling on repeated Enter), and replace the search text across all matching topics. Find is
+  **typo-tolerant** — it falls back to a fuzzy match when nothing matches exactly (`Launhc` → Launch).
 - **Library-wide search** — the **🔎 All maps** button searches every map in the library by
   topic or note (floating topics included) and jumps to the chosen map and node.
 - **Outline** — a side panel showing the map as an indented outline; click a row to jump to
@@ -36,7 +37,8 @@ GitHub Pages).
 - **Auto-numbering** — a toggle that prefixes every topic with its outline number (1, 1.2, …)
   on the canvas, in the outline, and in exports; purely a view (your topic text is untouched).
 - **Power Filter** — a read-only filter that dims every topic except those matching your criteria
-  (text, markers, tags) and the paths to them; nothing is hidden or deleted.
+  (text, markers, tags) and the paths to them; nothing is hidden or deleted. Name and **save** a
+  filter to reuse it as a preset across maps.
 - **Focus a branch** — spotlight one branch (and its path to the root); everything else dims (Esc exits).
 - **Per-map canvas background** — set a background colour for a map; it persists and exports with it.
 - **Minimap + zoom** — a corner overview with a draggable viewport for panning large maps,

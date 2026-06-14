@@ -99,5 +99,8 @@ export interface MindMapDoc {
     createdAt?: string;
     /** Where this doc came from: "sample" | "mmap" | "markdown" | ... */
     source?: string;
+    /** Per-map canvas background colour (CSS colour); overrides the theme. Lossless in .json,
+     *  ignored by flat exporters; carried into the image/PDF export. */
+    background?: string;
   };
 }

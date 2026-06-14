@@ -8,7 +8,7 @@ import {
   StyleBar,
 } from "./Panels";
 import { buildExample, examples } from "./examples";
-import { type FilterCriteria, filterResult, isFilterActive } from "./filter";
+import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
 import { MARKER_PALETTE } from "./icons";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
@@ -139,6 +139,22 @@ export function App() {
     if (!filterOpen || !isFilterActive(criteria)) return null;
     return filterResult(liveDoc, criteria);
   }, [filterOpen, filterText, filterMarkers, filterTags, liveDoc]);
+  // Focus / isolate-branch: session-only, reuses the Power Filter's dim pipeline. Focus wins over
+  // the filter as the dim source; both fall back to "no dimming".
+  const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
+  const focusLit = useMemo(() => (focus ? focusSet(liveDoc, focus.id) : null), [focus, liveDoc]);
+  const litIds = focusLit && focusLit.size > 0 ? focusLit : (filterHits?.lit ?? null);
+  // Drop a focus whose node has been deleted, and let Esc clear it.
+  useEffect(() => {
+    if (focus && (!focusLit || focusLit.size === 0)) setFocus(null);
+  }, [focus, focusLit]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFocus(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const [aboutOpen, setAboutOpen] = useState(false);
   const aboutRef = useRef<HTMLDialogElement>(null);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
@@ -659,6 +675,15 @@ export function App() {
         >
           1. Numbering
         </button>
+        <button
+          type="button"
+          onClick={() => selected && setFocus({ id: selected.id, topic: selected.topic })}
+          style={controlStyle}
+          disabled={!selected}
+          title="Focus the selected branch — dim everything off it (Esc to exit)"
+        >
+          ◎ Focus
+        </button>
         <label style={controlStyle}>
           Image
           <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
@@ -676,6 +701,41 @@ export function App() {
             </option>
           ))}
         </select>
+        <span
+          style={{ ...controlStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
+          title="Canvas background colour for this map (overrides the theme)"
+        >
+          Canvas
+          <input
+            type="color"
+            aria-label="Canvas background colour"
+            value={liveDoc.meta?.background || "#ffffff"}
+            onChange={(e) => mapRef.current?.setBackground(e.target.value)}
+            style={{
+              width: 22,
+              height: 18,
+              border: "none",
+              background: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => mapRef.current?.setBackground("")}
+            title="Reset background to the theme default"
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "#73726c",
+              fontSize: 12,
+              padding: 0,
+            }}
+          >
+            ✕
+          </button>
+        </span>
         <select
           value={layout}
           onChange={(e) => changeLayout(e.target.value as LayoutKind)}
@@ -981,6 +1041,33 @@ export function App() {
         />
       )}
 
+      {focus && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            padding: "4px 12px",
+            background: "#efe9ff",
+            borderBottom: "1px solid #cecbf6",
+            fontSize: 13,
+            color: "#26215c",
+          }}
+        >
+          <span>
+            ◎ Focusing branch: <strong>{focus.topic || "(untitled)"}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => setFocus(null)}
+            style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
+          >
+            Show all (Esc)
+          </button>
+        </div>
+      )}
+
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
         {outlineOpen && (
           <OutlinePanel
@@ -1019,7 +1106,7 @@ export function App() {
             theme={theme.theme}
             direction={layout}
             numbered={numbered}
-            litIds={filterHits?.lit ?? null}
+            litIds={litIds}
             onChange={(d) => {
               liveDocRef.current = d;
               setLiveDoc(d);

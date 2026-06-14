@@ -38,6 +38,8 @@ Left to right:
 | **Fit** | Scale + center the map in the viewport |
 | **⊟ / ⊞** | [Collapse / expand all](#collapse--expand) branches |
 | **1. Numbering** | Toggle [outline numbering](#auto-numbering) (1, 1.2, …) on every topic |
+| **◎ Focus** | [Focus the selected branch](#focus-a-branch) — dim everything else (Esc exits) |
+| **Canvas** | [Per-map background colour](#canvas-background) (overrides the theme) |
 | **📝 Notes** | Toggle the [notes editor](#notes) |
 | **🏷 Markers** | Toggle the [marker palette](#markers) |
 | **🎨 Style** | Toggle the [style bar](#per-topic-styling) |
@@ -160,6 +162,14 @@ everything — so it's a safe way to focus a crowded map on, say, every urgent (
 "budget". (This differs from **Find**, which steps you through matches one at a time, and the
 **Filter outline…** box, which narrows the outline list.)
 
+### Focus a branch
+
+Select a node and click **◎ Focus** to spotlight just that branch: the node, its whole subtree,
+and the path back to the central topic stay bright while everything else dims. It's the fastest way
+to talk through one part of a busy map without deleting or collapsing anything. Press **Esc** or
+click **Show all** in the banner to bring the rest back. (Like the Power Filter, it only changes
+opacity — nothing is removed.)
+
 ### Find & Replace
 
 Type in **Find** to jump between matching topics **and notes** — press **Enter** repeatedly to
@@ -204,6 +214,13 @@ map re-flows into the new shape without losing any edits:
 
 The **Theme** dropdown restyles the whole canvas — **Light**, **Dark**, **Ocean**, **Sunset** —
 live, without losing edits. Image exports inherit the theme, so a dark map exports dark.
+
+### Canvas background
+
+The **Canvas** colour control sets the background for **this map only**, overriding the theme's
+canvas colour — handy for colour-coding maps (a green "ideas" map, a red "risks" map) or matching a
+brand. It's saved with the map and carries into the image/PDF export; the **✕** resets it to the
+theme default.
 
 ---
 

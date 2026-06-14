@@ -112,6 +112,13 @@ It pairs naturally with markers. Flag the risks as you build the map (Chapter 4)
 map is big and the meeting is short, filter to ❗ and read the risks straight off the lit branches.
 The markers are the *input*; the filter is the *question you ask of them later*.
 
+The filter answers "where is everything matching X?" Its close cousin, **◎ Focus**, answers "show
+me just *this*." Select a node, click Focus, and the map dims to that node's branch and the single
+path back to the centre -- the same spotlight-not-scissors idea, aimed at one branch instead of a
+query. It's how you walk a meeting through section 3 of a forty-node map without the other thirty-odd
+nodes competing for attention; **Esc** brings them back. Reach for Focus when you know *which* branch
+you mean, and the filter when you're asking the map a question across all of them.
+
 ## Find and replace
 
 Press **/** anywhere to jump straight to **Find**. It searches both topics *and* notes,

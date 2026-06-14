@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type FilterCriteria, filterResult, isFilterActive } from "../src/filter";
+import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "../src/filter";
 import type { MindMapDoc } from "../src/model/types";
 
 const doc: MindMapDoc = {
@@ -77,5 +77,21 @@ describe("filterResult", () => {
     const r = filterResult(doc, crit({ text: "nonexistent" }));
     expect(r.matches).toBe(0);
     expect(r.lit.size).toBe(0);
+  });
+});
+
+describe("focusSet", () => {
+  it("lights a branch's subtree plus its ancestors", () => {
+    expect([...focusSet(doc, "m")].sort()).toEqual(["bg", "c", "m", "r"]); // Marketing + kids + root
+    expect([...focusSet(doc, "a")].sort()).toEqual(["a", "e", "r"]); // API + Engineering + root
+  });
+
+  it("lights the whole tree when focusing the root, and a floating node alone", () => {
+    expect([...focusSet(doc, "r")].sort()).toEqual(["a", "bg", "c", "e", "m", "r"]); // not floating
+    expect([...focusSet(doc, "f")]).toEqual(["f"]); // floating topic has no ancestors
+  });
+
+  it("returns an empty set for an unknown id", () => {
+    expect(focusSet(doc, "nope").size).toBe(0);
   });
 });

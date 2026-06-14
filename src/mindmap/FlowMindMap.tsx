@@ -49,6 +49,7 @@ import {
   reparent,
   replaceTopics,
   setAllExpanded,
+  setBackground,
   setCalloutText,
   setHyperlink,
   setImage,
@@ -514,13 +515,22 @@ function FlowInner({
         apply(groupBranch(docRef.current, id));
         return Boolean(findNode(docRef.current, id));
       },
+      setBackground: (color) => apply(setBackground(docRef.current, color)),
     }),
     [fitView, getNodes, apply, withSelected, focusNodeById],
   );
 
   return (
     <EditingContext.Provider value={editingApi}>
-      <div style={{ height: "100%", width: "100%", ...themeVars(theme) }}>
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          ...themeVars(theme),
+          // Per-map background overrides the theme's canvas colour (reads the live mirror).
+          ...(renderDoc.meta?.background ? { background: renderDoc.meta.background } : {}),
+        }}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}

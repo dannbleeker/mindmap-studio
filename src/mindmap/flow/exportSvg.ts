@@ -139,7 +139,7 @@ export function buildFlowSvg(
   const color = cssVar["--color"] ?? "#2c2c2a";
   const rootBg = cssVar["--root-bgcolor"] ?? "#26215c";
   const rootColor = cssVar["--root-color"] ?? "#ffffff";
-  const pageBg = cssVar["--main-bgcolor"] ?? "#ffffff";
+  const pageBg = doc.meta?.background || cssVar["--main-bgcolor"] || "#ffffff";
 
   // Overall bounds (nodes + boundaries + callouts), padded.
   let minX = Number.POSITIVE_INFINITY;

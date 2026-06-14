@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Per-map canvas background** — a **Canvas** colour control in the toolbar sets the background
+  for the current map (overrides the theme); it persists with the map (stored in `meta.background`,
+  lossless in `.json`) and carries into the image/PDF export.
+- **Focus a branch** — a **◎ Focus** button isolates the selected node's branch: everything except
+  that branch and its path back to the root dims (Esc or "Show all" exits). Read-only — it reuses
+  the Power Filter's dim pipeline, changing nothing in the map.
 - **In-map jump links + clickable hyperlinks** — link a node to **another topic in the same map**
   via the new **↪ Jump to…** toolbar picker (stored as a `#node=` hyperlink); clicking the node's
   **🔗** leaps to and selects that topic. The 🔗 is now a real button, which also restores following

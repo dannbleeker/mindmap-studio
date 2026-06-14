@@ -34,6 +34,8 @@ export interface MindMapHandle {
   setSelectedHyperlink: (url: string) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
   groupBranch: (id: string) => boolean;
+  /** Set the per-map canvas background colour ("" clears it back to the theme default). */
+  setBackground: (color: string) => void;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */

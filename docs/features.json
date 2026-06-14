@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 83,
+  "reviewedThroughChangelogBullets": 85,
   "areas": [
     "editing",
     "notes",
@@ -125,6 +125,15 @@
       "bookExample": true
     },
     {
+      "id": "canvas-background",
+      "name": "Per-map canvas background colour",
+      "area": "styling",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
       "id": "per-topic-font",
       "name": "Per-topic font size / colour / background",
       "area": "styling",
@@ -235,6 +244,15 @@
     {
       "id": "power-filter",
       "name": "Read-only Power Filter (dim by marker/tag/text)",
+      "area": "navigation",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "focus-branch",
+      "name": "Focus / isolate a branch (dim the rest)",
       "area": "navigation",
       "since": "2026-06-14",
       "manual": true,

@@ -9,6 +9,7 @@ import {
   outdent,
   reparent,
   setAllExpanded,
+  setBackground,
   setNote,
   setTopic,
   toggleCollapse,
@@ -133,6 +134,13 @@ describe("flow ops — content", () => {
     expect(findNode(mergeStyle(styled, "a", { background: "" }).doc, "a")?.style).toEqual({
       color: "#000",
     });
+  });
+
+  it("setBackground sets the per-map background and clears it on empty", () => {
+    expect(setBackground(base(), "#fee").doc.meta?.background).toBe("#fee");
+    expect(
+      setBackground(setBackground(base(), "#fee").doc, "").doc.meta?.background,
+    ).toBeUndefined();
   });
 });
 

@@ -34,6 +34,8 @@ GitHub Pages).
   on the canvas, in the outline, and in exports; purely a view (your topic text is untouched).
 - **Power Filter** — a read-only filter that dims every topic except those matching your criteria
   (text, markers, tags) and the paths to them; nothing is hidden or deleted.
+- **Focus a branch** — spotlight one branch (and its path to the root); everything else dims (Esc exits).
+- **Per-map canvas background** — set a background colour for a map; it persists and exports with it.
 - **Minimap + zoom** — a corner overview with a draggable viewport for panning large maps,
   plus integrated zoom controls (−/+, live %, fit).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on

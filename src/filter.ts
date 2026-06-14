@@ -34,6 +34,29 @@ export interface FilterResult {
   matches: number;
 }
 
+// "Focus this branch": the lit set is the node's whole subtree plus its ancestors (the path back
+// to the root), so focusing keeps the branch and its route visible while everything else dims.
+// Reuses the same lit/dim pipeline as the Power Filter. Empty set if the id isn't found. Pure.
+export function focusSet(doc: MindMapDoc, id: string): Set<string> {
+  const lit = new Set<string>();
+  const litSubtree = (n: MapNode): void => {
+    lit.add(n.id);
+    for (const c of n.children) litSubtree(c);
+  };
+  const find = (n: MapNode, ancestors: string[]): boolean => {
+    if (n.id === id) {
+      for (const a of ancestors) lit.add(a);
+      litSubtree(n);
+      return true;
+    }
+    return n.children.some((c) => find(c, [...ancestors, n.id]));
+  };
+  if (!find(doc.root, [])) {
+    for (const f of doc.floatingTopics ?? []) if (find(f, [])) break;
+  }
+  return lit;
+}
+
 export function filterResult(doc: MindMapDoc, c: FilterCriteria): FilterResult {
   const q = c.text.trim().toLowerCase();
   const lit = new Set<string>();

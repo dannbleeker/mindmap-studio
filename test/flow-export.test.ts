@@ -66,6 +66,17 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(svg).toContain("#faf9f5");
   });
 
+  it("uses a per-map background colour over the theme default", () => {
+    const withBg = buildFlowSvg(
+      { ...doc, meta: { background: "#abcdef" } },
+      rects,
+      palette,
+      cssVar,
+    );
+    expect(withBg).toContain('fill="#abcdef"');
+    expect(withBg).not.toContain("#faf9f5"); // the theme page bg is overridden
+  });
+
   it("renders every topic as native <text> (no foreignObject)", () => {
     expect(svg).not.toMatch(/foreignObject/);
     expect(svg).toMatch(/<text[^>]*>Root<\/text>/);

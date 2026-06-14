@@ -71,6 +71,12 @@ each a coordinated palette for the background, branches and text. Dark themes re
 on a projector in a dim room; light themes print cleanly. Switching theme never touches
 your content, so try a few and keep whichever helps you see the map.
 
+The **Canvas** colour control sits one notch below a theme: it overrides just the background of
+*this one map*, leaving the theme's branch and text palette intact. It's a quiet but useful signal
+when you keep many maps -- a faint green wash on the "ideas" map, a warm one on "risks" -- so you
+know which map you're in at a glance. The colour saves with the map and follows it into an image or
+PDF export; the **✕** clears it back to the theme.
+
 ## A note on restraint
 
 Every feature in this chapter can be overused. The test is always the same: *does this

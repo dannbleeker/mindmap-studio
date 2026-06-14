@@ -215,6 +215,13 @@ export function setNote(doc: MindMapDoc, id: string, note: string): OpResult {
   return { doc: next };
 }
 
+/** Set the per-map canvas background colour ("" clears it back to the theme default). */
+export function setBackground(doc: MindMapDoc, color: string): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, background: color || undefined };
+  return { doc: next };
+}
+
 /** Set a node's hyperlink ("" clears it). */
 export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult {
   const next = structuredClone(doc);

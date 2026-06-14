@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   addChild,
+  addFloatingTopic,
   addSibling,
   addSubtree,
   deleteNode,
@@ -187,6 +188,15 @@ describe("flow ops — content", () => {
     if (a) a.task = { progress: 0.5, priority: 2 };
     const cleared = findNode(setProgress(withTask, "a", undefined).doc, "a");
     expect(cleared?.task).toEqual({ priority: 2 });
+  });
+
+  it("addFloatingTopic appends a detached topic, with an optional link, and selects it", () => {
+    const r = addFloatingTopic(base(), "Docs", "https://example.com");
+    expect(r.doc.floatingTopics?.length).toBe(1);
+    expect(r.doc.floatingTopics?.[0]?.topic).toBe("Docs");
+    expect(r.doc.floatingTopics?.[0]?.hyperlink).toBe("https://example.com");
+    expect(r.selectId).toBe(r.doc.floatingTopics?.[0]?.id);
+    expect(addFloatingTopic(base(), "Idea").doc.floatingTopics?.[0]?.hyperlink).toBeUndefined();
   });
 
   it("setDue / setStart set dates and clear them on empty, dropping an emptied task", () => {

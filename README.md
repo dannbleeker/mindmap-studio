@@ -53,6 +53,9 @@ GitHub Pages).
 - **Due & start dates** — give a topic dates in the **ℹ Info** panel; a **📅 chip** shows on the node
   and turns **red when overdue**. Filter by due date (has-a-date / overdue / due ≤ 7 days) in the
   Power Filter.
+- **Fast capture** — a header **Quick add** box (type + Enter to add under the selection, keeps
+  focus), **drop a link** from your browser onto the canvas to make a floating topic, and a
+  **⏱ brainstorm timer** for timeboxed sprints.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.

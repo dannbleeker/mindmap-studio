@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Faster capture** — three quick-input additions: a **Quick add** box in the header (type a topic,
+  press Enter to add it under the selected node — or the central topic — keeping focus for rapid
+  fire); **drop a link** (or text) from your browser onto the canvas to create a floating topic
+  (URLs become a clickable link, dangerous schemes refused); and a **⏱ brainstorm timer** for
+  timeboxing an idea sprint (3 / 5 / 10 / 15 min, with a clear "time's up").
 - **Due & start dates on topics** — set a topic's **start** and **due** date in the **ℹ Info** panel
   and a **📅 date chip** appears on the node; it turns **red when overdue** (past due and not yet
   100%). The **🎚 Power Filter** gains a **Due date** option — *Has a date · Overdue · Due ≤ 7 days* —

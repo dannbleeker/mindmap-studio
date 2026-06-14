@@ -274,6 +274,18 @@ doc, an email, or anywhere else just works. Choose **New map** to drop it in as 
 **Add under selected** to graft it onto the current map under the selected node. It's all local —
 a fast, private way to bring in an outline you wrote (or generated) elsewhere, with no upload.
 
+### Fast capture
+
+For getting ideas down quickly, three header tools:
+
+- **Quick add** — type a topic in the **Quick add… ⏎** box and press **Enter**; it's added under the
+  selected node (or the central topic if nothing's selected) and the box keeps focus, so you can
+  fire off several in a row without touching the canvas.
+- **Drop a link** — drag a link (or selected text) from your browser onto the canvas to create a
+  **floating topic**; a dropped URL becomes a clickable link on it (unsafe links are refused).
+- **⏱ Brainstorm timer** — pick **3 / 5 / 10 / 15 min** to timebox an idea sprint; it counts down
+  in the toolbar and flags **time's up**. Purely a focus aid — it changes nothing in the map.
+
 ### Open files
 
 **Open files** accepts (and you can multi-select to **batch-import** a whole folder):

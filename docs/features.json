@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 94,
+  "reviewedThroughChangelogBullets": 95,
   "areas": [
     "editing",
     "notes",
@@ -500,6 +500,33 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "quick-add",
+      "name": "Quick add box (rapid topic capture from the header)",
+      "area": "editing",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "drop-link",
+      "name": "Drop a link/text onto the canvas → floating topic",
+      "area": "editing",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "brainstorm-timer",
+      "name": "Brainstorm timer (timeboxed idea sprints)",
+      "area": "editing",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": false,
       "bookExample": false
     },
     {

@@ -234,6 +234,19 @@ export function addSubtree(doc: MindMapDoc, parentId: string, nodes: MapNode[]):
   return { doc: next, selectId: grafted[0]?.id };
 }
 
+/** Add a detached floating topic (e.g. a link dropped onto the canvas), optionally with a link. */
+export function addFloatingTopic(doc: MindMapDoc, topic: string, hyperlink?: string): OpResult {
+  const next = structuredClone(doc);
+  const node: MapNode = {
+    id: makeId(),
+    topic,
+    children: [],
+    ...(hyperlink ? { hyperlink } : {}),
+  };
+  next.floatingTopics = [...(next.floatingTopics ?? []), node];
+  return { doc: next, selectId: node.id };
+}
+
 /** Replace a node's tags (an empty array clears them). */
 export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   const next = structuredClone(doc);

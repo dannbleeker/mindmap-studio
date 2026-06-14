@@ -43,9 +43,8 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       sheets per file.
 - [ ] **C — Content depth** — task progress + roll-up and start/due dates (overdue + filter)
       **shipped 2026-06-14**; remaining: file attachments, LaTeX/math rendering, conditional styling.
-- [ ] **D — Capture UX (cheap wins)** — **paste-text → map shipped 2026-06-14** (📋 Paste text:
-      outline/bullets/Markdown → topics, new map or graft); remaining: Quick Entry, drop-link-as-topic,
-      brainstorm timer.
+- [x] **D — Capture UX (cheap wins)** — paste-text → map, **Quick add** box, **drop-link-as-topic**,
+      and a **brainstorm timer** all **shipped 2026-06-14**.
 - [x] **E — Navigation polish (cheap wins)** — focus / isolate-branch, saved Power-Filter presets,
       and typo-tolerant Find all **shipped 2026-06-14**.
 - [x] **F — Durability** — persistent per-map version history (IndexedDB snapshots) **shipped
@@ -58,8 +57,8 @@ Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus)
 tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), **E**
 (saved filters + fuzzy Find), the first slice of **D** (paste text → map), and a good chunk of
 **C** (task progress + roll-up, then start/due dates with overdue + a due-date filter).
-Remaining bets: **A** (keyless AI bridge), the rest of **D** (Quick Entry, drop-link, brainstorm
-timer), the rest of **C** (attachments, LaTeX, conditional styling), and **B** (more structures).
+Remaining bets: **A** (keyless AI bridge), the rest of **C** (attachments, LaTeX, conditional
+styling), and **B** (more structures: flowchart / concept map / matrix / summary topics / kanban).
 
 ## Reference
 

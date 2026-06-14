@@ -1,4 +1,5 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BrainstormTimer } from "./BrainstormTimer";
 import { FilterPanel, HistoryPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
 import { buildExample, examples } from "./examples";
 import {
@@ -1118,6 +1119,22 @@ export function App() {
         >
           📋 Paste text
         </button>
+        <input
+          placeholder="Quick add… ⏎"
+          aria-label="Quick add topic"
+          title="Type a topic and press Enter to add it under the selected node (or the central topic). Keeps focus for rapid capture."
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const v = e.currentTarget.value.trim();
+              if (v) {
+                mapRef.current?.quickAdd(v);
+                e.currentTarget.value = "";
+              }
+            }
+          }}
+          style={{ ...inputStyle, width: 130 }}
+        />
+        <BrainstormTimer />
       </header>
 
       {error && (

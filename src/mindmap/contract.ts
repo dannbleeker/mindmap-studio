@@ -46,6 +46,9 @@ export interface MindMapHandle {
   setSelectedStart: (start: string) => boolean;
   /** Graft a forest of nodes (e.g. parsed from pasted text) under the selected node; false if none. */
   addSubtreeToSelected: (nodes: MapNode[]) => boolean;
+  /** Quick capture: add a named child under the selected node (or the root if none), keeping the
+   *  current selection so repeated calls add siblings under the same parent. */
+  quickAdd: (text: string) => void;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */

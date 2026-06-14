@@ -218,6 +218,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   on-demand, restore-in-place, capped at 30) shipped 2026-06-14 — cluster F from the cross-tool matrix.
 - **Paste text → map** (the **📋 Paste text** dialog — outline/bullets/Markdown → topics, as a new
   map or grafted under the selection) shipped 2026-06-14 — the first slice of cluster D (capture UX).
+- **The rest of capture (cluster D)** — a header **Quick add** box (rapid topic entry), **drop-a-link
+  onto the canvas** → floating topic, and a **⏱ brainstorm timer** — shipped 2026-06-14.
 - **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
   (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
   (navigation polish), alongside the earlier ◎ Focus.

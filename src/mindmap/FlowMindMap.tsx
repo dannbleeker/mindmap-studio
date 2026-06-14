@@ -39,6 +39,7 @@ import {
   type OpResult,
   addCallout,
   addChild,
+  addFloatingTopic,
   addLink,
   addSibling,
   addSubtree,
@@ -536,6 +537,14 @@ function FlowInner({
       setSelectedStart: (start) => withSelected((id) => apply(setStart(docRef.current, id, start))),
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
+      quickAdd: (text) => {
+        const t = text.trim();
+        if (!t) return;
+        const parentId = selectedRef.current ?? docRef.current.root.id;
+        // Apply without a selectId so the parent stays selected — rapid entry adds siblings.
+        const res = addSubtree(docRef.current, parentId, [{ id: "q", topic: t, children: [] }]);
+        apply({ doc: res.doc });
+      },
     }),
     [fitView, getNodes, apply, withSelected, focusNodeById],
   );
@@ -549,6 +558,37 @@ function FlowInner({
           ...themeVars(theme),
           // Per-map background overrides the theme's canvas colour (reads the live mirror).
           ...(renderDoc.meta?.background ? { background: renderDoc.meta.background } : {}),
+        }}
+        // Drop a link (or text) from the browser onto the canvas → a new floating topic.
+        onDragOver={(e) => {
+          if (
+            e.dataTransfer.types.includes("text/uri-list") ||
+            e.dataTransfer.types.includes("text/plain")
+          ) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+          }
+        }}
+        onDrop={(e) => {
+          const raw = (
+            e.dataTransfer.getData("text/uri-list") ||
+            e.dataTransfer.getData("text/plain") ||
+            ""
+          ).trim();
+          const first = raw.split(/\r?\n/).find((l) => l && !l.startsWith("#")) ?? "";
+          if (!first) return;
+          e.preventDefault();
+          let topic = first;
+          let link: string | undefined;
+          if (/^https?:\/\//i.test(first) && !isDangerousUrl(first)) {
+            link = first;
+            try {
+              topic = new URL(first).hostname.replace(/^www\./, "") || first;
+            } catch {
+              topic = first;
+            }
+          }
+          apply(addFloatingTopic(docRef.current, topic, link));
         }}
       >
         <ReactFlow

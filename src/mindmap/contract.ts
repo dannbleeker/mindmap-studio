@@ -1,4 +1,6 @@
-import type { MapImage, NodeStyle } from "../model/types";
+import type { Ref } from "react";
+import type { MapImage, MindMapDoc, NodeStyle } from "../model/types";
+import type { MindElixirTheme } from "./theme";
 
 // The engine-neutral contract between the app and whichever canvas engine renders the map.
 // Both the mind-elixir canvas (today) and the React Flow canvas (in progress) implement
@@ -43,3 +45,20 @@ export const MAP_LINK_PREFIX = "#map=";
  * Phase C widens this to a superset (org-chart / timeline / fishbone / radial).
  */
 export type LayoutDirection = "side" | "left" | "right";
+
+/** Props every canvas engine accepts. Engine-neutral so both the mind-elixir and React
+ *  Flow components — and the lazy chooser in `index.tsx` — share one type. */
+export interface MindMapProps {
+  doc: MindMapDoc;
+  /** Fires after every canvas edit with the updated canonical doc. */
+  onChange?: (doc: MindMapDoc) => void;
+  /** Fires when the canvas selection changes (for the Notes panel). */
+  onSelect?: (selected: SelectedNode | null) => void;
+  /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
+  onMapLink?: (mapId: string) => void;
+  /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
+  theme?: MindElixirTheme;
+  /** Layout direction. */
+  direction?: LayoutDirection;
+  ref?: Ref<MindMapHandle>;
+}

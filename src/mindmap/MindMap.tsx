@@ -6,14 +6,14 @@ import MindElixir, { type MindElixirInstance } from "mind-elixir";
 // `position:absolute` and the whole map collapses into inline text. A direct CSS import
 // so it's always bundled in dev and production.
 import "mind-elixir/style.css";
-import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
+import { useEffect, useImperativeHandle, useRef } from "react";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapImage, MindMapDoc, NodeStyle } from "../model/types";
 import { replaceInTopic } from "../search";
 import {
   type LayoutDirection,
   MAP_LINK_PREFIX,
-  type MindMapHandle,
+  type MindMapProps,
   type SelectedNode,
 } from "./contract";
 import { type MinimapHandle, createMinimap } from "./minimap";
@@ -27,7 +27,7 @@ import {
   toMindElixirRoot,
   toSummaries,
 } from "./sync";
-import { type MindElixirTheme, mindManagerTheme } from "./theme";
+import { mindManagerTheme } from "./theme";
 
 /** Scale + center the map to the viewport (mind-elixir's scaleFit, with a toCenter fallback). */
 function fitView(me: MindElixirInstance): void {
@@ -135,21 +135,6 @@ function renderBoundaryOverlay(
   }
   // First child → painted behind the nodes; the translucent fill keeps them readable.
   canvas.insertBefore(overlay, canvas.firstChild);
-}
-
-interface MindMapProps {
-  doc: MindMapDoc;
-  /** Fires after every canvas edit with the updated canonical doc. */
-  onChange?: (doc: MindMapDoc) => void;
-  /** Fires when the canvas selection changes (for the Notes panel). */
-  onSelect?: (selected: SelectedNode | null) => void;
-  /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
-  onMapLink?: (mapId: string) => void;
-  /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
-  theme?: MindElixirTheme;
-  /** Layout direction: both sides, right-only, or left-only. */
-  direction?: LayoutDirection;
-  ref?: Ref<MindMapHandle>;
 }
 
 /** Re-layout the current map to a direction (preserves in-memory edits). */

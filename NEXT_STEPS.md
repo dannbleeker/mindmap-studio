@@ -9,6 +9,18 @@ is **deployed** — a `deploy.yml` workflow publishes to GitHub Pages on every p
 live at <https://mindmap-studio.struktureretsundfornuft.dk/> (custom domain, HTTPS). See
 `CHANGELOG.md`.
 
+## 🚧 In progress: canvas engine migration (mind-elixir → React Flow)
+
+To unlock the renderer-ceiling cluster (editable alternate layouts, callouts, rich-text
+topics, organic branches) we're replacing the canvas engine with **@xyflow/react-flow**.
+Approved plan: `~/.claude/plans/bubbly-finding-squirrel.md` (10 phases, ~8–11 wks; both
+engines run in parallel behind `VITE_CANVAS_ENGINE` + a dev `?engine=flow` override, default
+stays elixir until parity; the canonical model never changes, so the flag is the rollback).
+**Done:** Phase 0 (engine-neutral contract `src/mindmap/contract.ts` + chooser `index.tsx`);
+Phase A (React Flow added, spike renders the model, **go/no-go #1 cleared** — lazy-loading
+both engines *dropped* the entry to 78.7 kB ≤ 150 kB). **Next:** Phase B (real `flow/project.ts`
++ custom nodes/edges + boundary overlay), then C–I per the plan.
+
 ## MindManager UI-parity work (2026-06-12)
 
 Worked the UI-comparison gap groups (1–8) plus deeper items. **Built:** Notes editor +

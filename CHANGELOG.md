@@ -7,6 +7,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **SimpleMind interop (`.smmx`)** — import *and* export SimpleMind's `.smmx` (a ZIP of
+  `document/mindmap.xml`): the topic tree, notes, web links, and relations↔cross-links, plus
+  floating topics. Now in **Open files** + the **⬆ Export…** menu.
 - **Export to XMind (`.xmind`)** — write the modern (2020+) `content.json` ZIP
   (topic tree, notes, web links, tags, plus floating topics + relationships),
   completing two-way XMind interop (import already shipped). `.xmind` is now in the

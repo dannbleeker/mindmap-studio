@@ -28,6 +28,9 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
 - **XMind (`.xmind`)** -- the native format of one of the most popular mind-mappers, written
   the modern (2020+) way. Carries the topic tree, notes, links, and tags, plus floating topics
   and relationships, so the map opens natively in XMind rather than going through `.mm`.
+- **SimpleMind (`.smmx`)** -- the native format of the cross-platform SimpleMind app. Carries
+  the topic tree, notes, web links, and relations, plus floating topics, so the map opens
+  natively in SimpleMind on desktop or mobile.
 - **PNG** and **SVG** -- the map as a picture. PNG for slides and chat; SVG when you want
   a crisp, scalable image that survives zooming.
 - **HTML** -- a self-contained web page of the map, openable in any browser with nothing
@@ -69,6 +72,7 @@ The same breadth applies going in. MindMap Studio reads:
 - **FreeMind / Freeplane `.mm`** -- topics, links, folded state, and notes.
 - **Mermaid** `mindmap` text -- any node shape; the hierarchy comes from the indentation.
 - **XMind `.xmind`** (2020+) -- topics, notes, web links, and labels become tags.
+- **SimpleMind `.smmx`** -- topic tree, notes, web links, and relations.
 - **MindManager `.mmap`** -- see below.
 
 You can **batch-import** several files at once, which turns a folder of outlines into a

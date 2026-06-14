@@ -223,6 +223,10 @@ export function App() {
       const { fromXmind } = await import("./io/xmind");
       return { doc: fromXmind(new Uint8Array(await file.arrayBuffer())), warnings: [] };
     }
+    if (name.endsWith(".smmx")) {
+      const { fromSmmx } = await import("./io/smmx");
+      return { doc: fromSmmx(new Uint8Array(await file.arrayBuffer())), warnings: [] };
+    }
     const { parseMmap } = await importMmap();
     const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
     return { doc: result.doc, warnings: result.warnings };
@@ -351,6 +355,7 @@ export function App() {
     exportMarkdown,
     exportMermaid,
     exportXmind,
+    exportSmmx,
     exportOpml,
     exportFreemind,
     exportPng,
@@ -738,6 +743,7 @@ export function App() {
               mermaid: exportMermaid,
               mm: exportFreemind,
               xmind: exportXmind,
+              smmx: exportSmmx,
               html: exportHtml,
               deck: exportDeck,
               pdf: exportPdf,
@@ -759,6 +765,7 @@ export function App() {
             <option value="mm">.mm (FreeMind/Freeplane)</option>
             <option value="mermaid">.mmd (Mermaid)</option>
             <option value="xmind">.xmind (XMind)</option>
+            <option value="smmx">.smmx (SimpleMind)</option>
           </optgroup>
           <optgroup label="Image">
             <option value="png">.png (image)</option>
@@ -796,7 +803,7 @@ export function App() {
           <input
             id="mmap-input"
             type="file"
-            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind"
+            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx"
             multiple
             onChange={handleFile}
             style={{ display: "none" }}

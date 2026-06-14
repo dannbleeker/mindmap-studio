@@ -101,13 +101,9 @@ Remaining items are Dann-dependent:
       timeline, and fishbone all ship in `flow/layout.ts` and are in the Layout `<select>`
       (remembered via `localStorage["mindmap-layout"]`). Available to all users — React Flow is
       the only engine.
-- [ ] **Minimize/collapse the minimap.** The React Flow `<MiniMap>` (`src/mindmap/FlowMindMap.tsx`,
-      bottom-right, now the default canvas) is always shown and overlaps the lower-right of dense
-      maps. Add a small toggle — a collapse caret on the minimap itself (or a canvas-widget button) —
-      to hide it / shrink it to a restore chip, persisted in `localStorage` (e.g.
-      `mindmap-minimap-open`). RF has no built-in collapse, so it's a thin wrapper: conditionally
-      render `<MiniMap>` plus a fixed restore button. Consider folding `<Controls>` into the same
-      show/hide if a single "canvas widgets" toggle reads cleaner.
+- [x] **Minimize/collapse the minimap — DONE (2026-06-14).** A "Minimap ▾/▴" toggle (RF
+      `<Panel>`, bottom-right) hides/shows the `<MiniMap>` when it covers a dense map; the choice
+      persists in `localStorage["mindmap-minimap-open"]`.
 - [ ] **Import/export interop with other mind-mapping tools — remaining formats.** *Shipped
       (2026-06-14):* FreeMind/Freeplane `.mm` (import + export), Mermaid `mindmap` (import +
       export), and **XMind `.xmind` import + export** (modern `content.json` ZIP; export carries
@@ -117,18 +113,16 @@ Remaining items are Dann-dependent:
       (JSON), **iThoughts** (`.itmz`, ZIP), **SimpleMind** (`.smmx`, see its own item below), and
       **Markmap**. Lower priority — `.mm`/OPML/Markdown already bridge most of these tools both ways. Add by format openness +
       how many tools accept it.
-- [ ] **Favicon for browser tabs + bookmarks.** *Verified gap:* `index.html` has **no**
-      `<link rel="icon">`, so tabs and bookmarks show a blank/default icon. `public/icon.svg`
-      already exists (used by the PWA manifest in `vite.config.ts`, `includeAssets`/`manifest.icons`)
-      but it's never wired as the document favicon. Fix: add `<link rel="icon" href="/icon.svg">`
-      to `index.html`, plus an `apple-touch-icon` and a small `.png`/`.ico` fallback for browsers
-      that don't render SVG favicons. Quick win — one HTML edit (+ a generated PNG/ICO from the SVG).
-- [ ] **SimpleMind import + export (`.smmx`).** A thin adapter to/from the canonical model for
-      SimpleMind's `.smmx` (a ZIP archive of the map's XML — confirm the internal file layout during
-      the research). *Import:* topic tree + notes + links. *Export:* emit the `.smmx` ZIP via
-      `fflate` (already a dep, as the XMind/Office adapters use). Wire into **Open files** + the
-      **⬆ Export…** menu exactly like the FreeMind/XMind adapters (`src/io/*` + `parseImport` +
-      `useMapExports`). Part of the interop umbrella item above, called out separately per request.
+- [x] **Favicon for browser tabs + bookmarks — DONE (2026-06-14).** Wired `icon.svg` as the
+      SVG favicon + a 180×180 `apple-touch-icon.png` (rendered from the SVG, for iOS + as a PNG
+      fallback) in `index.html`, and precached both in the PWA.
+- [x] **SimpleMind import + export (`.smmx`) — DONE (2026-06-14).** `src/io/smmx.ts`
+      (`fromSmmx`/`toSmmx`): a ZIP of `document/mindmap.xml`, topics stored FLAT with `parent`
+      id refs + `relations`; round-trips the tree, notes, web links, relations↔cross-links, and
+      floating topics, with a tidy x/y layout on export. Wired into **Open files** (`parseImport`)
+      + the **⬆ Export…** menu; 7 tests. Schema confirmed against a working `.smmx` parser, **but
+      not yet verified against a real SimpleMind file/app** — validate with a real `.smmx` when one
+      is available (same caveat as the `.mmap` importer).
 - [x] **Deep research: MindManager features vs MindMap Studio gaps** — done (2026-06-14).
       The full audit lives in [`docs/mindmanager-gap-analysis.md`](docs/mindmanager-gap-analysis.md):
       every MindManager capability mapped to shipped / partial / renderer-ceiling / out-of-scope,

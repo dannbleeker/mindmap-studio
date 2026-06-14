@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 77,
+  "reviewedThroughChangelogBullets": 78,
   "areas": [
     "editing",
     "notes",
@@ -404,6 +404,15 @@
       "bookExample": false
     },
     {
+      "id": "import-smmx",
+      "name": "Import SimpleMind .smmx",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
       "id": "batch-import",
       "name": "Multi-file batch import",
       "area": "import",
@@ -460,6 +469,15 @@
     {
       "id": "export-xmind",
       "name": "Export XMind .xmind (2020+)",
+      "area": "export",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "export-smmx",
+      "name": "Export SimpleMind .smmx",
       "area": "export",
       "since": "2026-06-14",
       "manual": true,

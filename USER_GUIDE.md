@@ -221,6 +221,7 @@ learn a feature by reading one that uses it. Opening one creates a fresh, editab
 | `.mm` | FreeMind / Freeplane map — topics, links, folded state, and notes |
 | `.mmd` / `.mermaid` | Mermaid `mindmap` text (any node shape; hierarchy by indentation) |
 | `.xmind` | XMind (2020+) — topics, notes, web links, and labels→tags from `content.json` |
+| `.smmx` | SimpleMind — topic tree, notes, web links, and relations→cross-links |
 
 Each imported file becomes its own library entry; batch imports report how many were added.
 MindManager stock icons are mapped to the closest **emoji** marker, so an imported map keeps its
@@ -246,6 +247,7 @@ Pick a format from the **⬆ Export…** menu:
 | `.mm` | FreeMind / Freeplane — topics, links, folded state, notes (opens in FreeMind, Freeplane, XMind, …) |
 | `.mmd` | Mermaid `mindmap` text — paste into Markdown, GitHub, or docs that render Mermaid |
 | `.xmind` | XMind (2020+) — topic tree, notes, links, tags, plus floating topics + relationships |
+| `.smmx` | SimpleMind — topic tree, notes, web links, relations, plus floating topics |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
 | `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline) |

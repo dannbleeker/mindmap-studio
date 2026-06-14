@@ -17,8 +17,8 @@ GitHub Pages).
   XSD (topic tree, notes, icons, hyperlinks, relationships, boundaries, floating topics).
   Select multiple files to batch-import a whole folder of maps into the library at once.
   Also opens native `.json` maps (exported from this app) losslessly, and interchanges with
-  other tools: `.opml` outlines, **FreeMind/Freeplane `.mm`**, **Mermaid** `mindmap`, and
-  **XMind `.xmind`**.
+  other tools: `.opml` outlines, **FreeMind/Freeplane `.mm`**, **Mermaid** `mindmap`,
+  **XMind `.xmind`**, and **SimpleMind `.smmx`**.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   undo/redo (Ctrl+Z / Ctrl+Shift+Z), inline **rich-text** topics (Ctrl+B/I/U), images on
   nodes, a docked **Notes** editor, and Marker/Style panels for the selected node.
@@ -50,7 +50,8 @@ GitHub Pages).
   branch, and are editable: rename, add, remove, nest, or drag them in/out of the tree, and
   the changes round-trip back into the model.
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
-  (`.md`), OPML (`.opml`), **FreeMind/Freeplane `.mm`**, **Mermaid** (`.mmd`), **XMind `.xmind`**, PNG, SVG, a
+  (`.md`), OPML (`.opml`), **FreeMind/Freeplane `.mm`**, **Mermaid** (`.mmd`), **XMind `.xmind`**,
+  **SimpleMind `.smmx`**, PNG, SVG, a
   self-contained HTML file, a standalone HTML **slide deck** (the Walk-Through as a shareable
   file), a **PowerPoint** (`.pptx`) deck, a Word **`.docx`** outline document, an Excel
   **`.xlsx`** outline sheet, and print-to-PDF.

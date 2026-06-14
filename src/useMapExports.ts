@@ -46,6 +46,7 @@ export interface MapExports {
   exportOpml: () => Promise<void>;
   exportFreemind: () => Promise<void>;
   exportXmind: () => Promise<void>;
+  exportSmmx: () => Promise<void>;
   exportPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
@@ -109,6 +110,12 @@ export function useMapExports(
         new Blob([bytes], { type: "application/vnd.xmind.workbook" }),
         `${baseName()}.xmind`,
       );
+    },
+    // SimpleMind .smmx — a ZIP (document/mindmap.xml); lazy (smmx.ts pulls fflate + fast-xml-parser).
+    async exportSmmx() {
+      const { toSmmx } = await import("./io/smmx");
+      const bytes = toSmmx(getDoc()) as BlobPart;
+      download(new Blob([bytes], { type: "application/octet-stream" }), `${baseName()}.smmx`);
     },
     // png/svg/html/pdf all embed the rendered SVG via cleanSvg() (sanitize + native-text).
     async exportPng() {

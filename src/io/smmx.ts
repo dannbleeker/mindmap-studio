@@ -1,0 +1,188 @@
+import { XMLParser } from "fast-xml-parser";
+import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
+import type { CrossLink, MapNode, MindMapDoc } from "../model/types";
+import { isDangerousUrl } from "./urlSafety";
+
+// SimpleMind `.smmx` <-> canonical model.
+//
+// A `.smmx` is a ZIP holding `document/mindmap.xml`. SimpleMind stores topics as a FLAT list
+// (`mindmap/topics/topic`) joined by `parent` id references (the central topic has parent="-1"),
+// with `relations` (source/target) for cross-links. We map `text` <-> topic, the parent graph
+// <-> the tree, `<note>` <-> note, `<link urllink>` <-> hyperlink, and relations <-> cross-links;
+// the exporter also writes a simple tidy x/y layout so the map opens readably. Schema confirmed
+// against a working `.smmx` parser; per-topic styling/images and rich-note markup aren't carried.
+// NOTE: not yet verified against a real SimpleMind file/app — validate with a real `.smmx` when
+// one is available (same caveat as the `.mmap` importer). fflate does the zip/unzip.
+
+const MINDMAP_PATH = "document/mindmap.xml";
+
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: tolerant shape from the XML parser
+type Xml = any;
+
+function asList<T>(x: T | T[] | undefined | null): T[] {
+  if (x === undefined || x === null) return [];
+  return Array.isArray(x) ? x : [x];
+}
+
+function guid(): string {
+  const c = globalThis.crypto;
+  return c?.randomUUID ? c.randomUUID() : `g-${Math.random().toString(36).slice(2)}`;
+}
+
+// --- import ----------------------------------------------------------------
+
+function noteOf(t: Xml): string {
+  const n = asList(t?.note)[0];
+  if (typeof n === "string" || typeof n === "number") return String(n).trim();
+  if (n && typeof n === "object") return String(n["#text"] ?? n["@_text"] ?? "").trim();
+  return "";
+}
+
+function linkOf(t: Xml): string {
+  for (const l of asList(t?.link)) {
+    const url = l?.["@_urllink"];
+    if (typeof url === "string" && url && !isDangerousUrl(url)) return url;
+  }
+  return "";
+}
+
+export function fromSmmx(bytes: Uint8Array): MindMapDoc {
+  let files: Record<string, Uint8Array>;
+  try {
+    files = unzipSync(bytes);
+  } catch {
+    throw new Error("Not a valid .smmx file (could not unzip)");
+  }
+  const xml = files[MINDMAP_PATH];
+  if (!xml) throw new Error(`Unsupported .smmx: no ${MINDMAP_PATH}`);
+  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
+  const tree = parser.parse(strFromU8(xml));
+  const mindmap = asList(tree?.["simplemind-mindmaps"]?.mindmap ?? tree?.mindmap)[0];
+  const topics = asList(mindmap?.topics?.topic);
+  if (topics.length === 0) throw new Error("SimpleMind file has no topics");
+
+  // Pass 1: build a node per topic, keyed by its SimpleMind id, remembering its parent ref.
+  const byId = new Map<string, { node: MapNode; parent: string }>();
+  for (const t of topics) {
+    const id = String(t["@_id"] ?? "");
+    if (!id) continue;
+    const node: MapNode = { id: `sm-${id}`, topic: String(t["@_text"] ?? "").trim(), children: [] };
+    const note = noteOf(t);
+    if (note) node.note = note;
+    const url = linkOf(t);
+    if (url) node.hyperlink = url;
+    byId.set(id, { node, parent: String(t["@_parent"] ?? "-1") });
+  }
+
+  // Pass 2: attach children to parents; topics with no resolvable parent are roots.
+  const roots: MapNode[] = [];
+  for (const { node, parent } of byId.values()) {
+    const at = byId.get(parent);
+    if (at && at.node !== node) at.node.children.push(node);
+    else roots.push(node);
+  }
+  const root = roots[0] ?? { id: "sm-root", topic: "Imported SimpleMind map", children: [] };
+  const floatingTopics = roots.slice(1);
+
+  // Relations -> cross-links (only those whose endpoints both exist).
+  const links: CrossLink[] = [];
+  asList(mindmap?.relations?.relation).forEach((r: Xml, i: number) => {
+    const from = String(r?.["@_source"] ?? "");
+    const to = String(r?.["@_target"] ?? "");
+    if (!byId.has(from) || !byId.has(to)) return;
+    const label = String(r?.["@_label"] ?? r?.label?.["#text"] ?? r?.label ?? "").trim();
+    links.push({
+      id: `sm-rel-${i}`,
+      from: `sm-${from}`,
+      to: `sm-${to}`,
+      ...(label ? { label } : {}),
+    });
+  });
+
+  const title = String(mindmap?.meta?.title?.["@_text"] ?? root.topic ?? "Imported SimpleMind map");
+  return {
+    schemaVersion: 1,
+    id: `sm-${guid()}`,
+    title,
+    root,
+    ...(links.length > 0 ? { links } : {}),
+    ...(floatingTopics.length > 0 ? { floatingTopics } : {}),
+    meta: { source: "smmx" },
+  };
+}
+
+// --- export ----------------------------------------------------------------
+
+interface Row {
+  id: number;
+  parent: number;
+  text: string;
+  x: number;
+  y: number;
+  note?: string;
+  href?: string;
+}
+
+/** Canonical model -> a `.smmx` ZIP (document/mindmap.xml), flat topics + a simple tidy layout. */
+export function toSmmx(doc: MindMapDoc): Uint8Array {
+  const rows: Row[] = [];
+  const idMap = new Map<string, number>();
+  let nextId = 0;
+  let leaf = 0;
+
+  // Place a subtree, returning its vertical centre; x by depth, y by leaf order (a tidy tree).
+  const place = (node: MapNode, parent: number, depth: number): number => {
+    const id = nextId++;
+    idMap.set(node.id, id);
+    const childYs = node.children.map((c) => place(c, id, depth + 1));
+    const y = childYs.length > 0 ? (Math.min(...childYs) + Math.max(...childYs)) / 2 : leaf++ * 56;
+    const row: Row = { id, parent, text: node.topic, x: depth * 240, y };
+    if (node.note) row.note = node.note;
+    if (node.hyperlink && !isDangerousUrl(node.hyperlink)) row.href = node.hyperlink;
+    rows.push(row);
+    return y;
+  };
+  place(doc.root, -1, 0);
+  for (const f of doc.floatingTopics ?? []) place(f, -1, 0); // floating -> extra parent="-1" roots
+
+  const relations = (doc.links ?? [])
+    .filter((l) => idMap.has(l.from) && idMap.has(l.to))
+    .map((l) => ({ source: idMap.get(l.from), target: idMap.get(l.to), label: l.label }));
+
+  const lines: string[] = [];
+  lines.push('<?xml version="1.0" encoding="UTF-8"?>');
+  lines.push('<simplemind-mindmaps doc-version="6" generator="MindMap Studio">');
+  lines.push("<mindmap>");
+  lines.push(`<meta><title text="${escapeXml(doc.title || "Mind map")}"/></meta>`);
+  lines.push("<topics>");
+  for (const r of rows.sort((a, b) => a.id - b.id)) {
+    const attrs = `id="${r.id}" parent="${r.parent}" guid="${guid()}" x="${Math.round(r.x)}" y="${Math.round(r.y)}" text="${escapeXml(r.text)}"`;
+    const inner: string[] = [];
+    if (r.note) inner.push(`<note>${escapeXml(r.note)}</note>`);
+    if (r.href) inner.push(`<link urllink="${escapeXml(r.href)}"/>`);
+    lines.push(
+      inner.length > 0 ? `<topic ${attrs}>${inner.join("")}</topic>` : `<topic ${attrs}/>`,
+    );
+  }
+  lines.push("</topics>");
+  if (relations.length > 0) {
+    lines.push("<relations>");
+    for (const rel of relations) {
+      const label = rel.label ? ` label="${escapeXml(rel.label)}"` : "";
+      lines.push(`<relation source="${rel.source}" target="${rel.target}"${label}/>`);
+    }
+    lines.push("</relations>");
+  }
+  lines.push("</mindmap>");
+  lines.push("</simplemind-mindmaps>");
+
+  return zipSync({ [MINDMAP_PATH]: strToU8(lines.join("\n")) });
+}

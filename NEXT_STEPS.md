@@ -35,8 +35,14 @@ canvas's tapered-ribbon + floating-edge geometry plus a new shared `flow/style.t
 constants, so *canvas == export* can't drift). **go/no-go #2 cleared:** the export carries arrow +
 boundary *labels* (the old elixir export dropped them), rasterises to PNG with **no canvas-taint**, and
 survives the `sanitizeSvg → inlineSvgText` pipeline (14 tests; Office/deck are model-backed → untouched);
-verified by rendering an exported SVG standalone). **Next:** Phase G (`flow/sync.ts` fromFlow + round-trip
-tests), then H (callouts + rich-text + cutover), I (remove mind-elixir).
+verified by rendering an exported SVG standalone); Phase G (**`flow/sync.ts` `fromFlow`** — the inverse of
+`project()`: rebuild the canonical doc from RF nodes+edges, reading canvas-editable fields from node `data`,
+preserving canonical-only `task`/`side` by id, restoring a collapsed node's omitted children from the prior
+doc, and carrying boundaries (pruned of gone members). The headline guarantee is the round trip
+`fromFlow(project(doc)) ≈ doc` (13 tests). The flow engine is model-first, so `fromFlow` is the regression
+guard that `project()` stays lossless + the reconstruction primitive for future native gestures — not yet
+wired to a UI gesture). **Next:** Phase H (callouts + rich-text + minimap, then **cutover** — flip the
+default engine to flow), then I (remove mind-elixir).
 
 ## MindManager UI-parity work (2026-06-12)
 

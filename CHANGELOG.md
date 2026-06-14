@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **More import formats — iThoughts `.itmz`, MindMeister `.mind`, and legacy XMind `content.xml`.**
+  iThoughts (a ZIP of `mapdata.xml`) brings in the topic tree, notes, web links, relationships, and
+  floating topics; MindMeister (a ZIP of `map.json`) brings in the tree, notes, and links;
+  and the XMind importer now falls back to the older `content.xml` layout when there's no
+  `content.json`. All in **Open files**. (Schema-verified against community specs, not yet against
+  real app exports — the same caveat as `.mmap`/`.smmx`; dangerous-scheme links are dropped.)
 - **Import Word `.docx` and Excel `.xlsx`** — round out the Office story (export already shipped).
   `.docx` reads the document's outline — heading styles (Title / Heading 1/2/3 …) **or** paragraph
   indentation — into the topic tree (our own `.docx` export round-trips exactly). `.xlsx` reads an

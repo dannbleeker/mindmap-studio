@@ -255,8 +255,10 @@ learn a feature by reading one that uses it. Opening one creates a fresh, editab
 | `.opml` | OPML outline (Freeplane, OmniOutliner, Workflowy, …) |
 | `.mm` | FreeMind / Freeplane map — topics, links, folded state, and notes |
 | `.mmd` / `.mermaid` | Mermaid `mindmap` text (any node shape; hierarchy by indentation) |
-| `.xmind` | XMind (2020+) — topics, notes, web links, and labels→tags from `content.json` |
+| `.xmind` | XMind — topics, notes, web links, labels→tags (modern `content.json` **and** legacy `content.xml`) |
 | `.smmx` | SimpleMind — topic tree, notes, web links, and relations→cross-links |
+| `.itmz` | iThoughts — topic tree, notes, web links, relationships→cross-links, floating topics |
+| `.mind` | MindMeister — topic tree, notes, and web links from `map.json` |
 | `.docx` | Word — the document's outline (heading styles or indentation) → topic tree, with italic note paragraphs |
 | `.xlsx` | Excel — an indented-outline sheet (first non-empty column = depth, trailing column = note); reads inline + shared strings. Empty-topic rows aren't imported |
 

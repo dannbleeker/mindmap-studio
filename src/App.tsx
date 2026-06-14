@@ -296,6 +296,14 @@ export function App() {
       const { fromXlsx } = await import("./io/xlsx");
       return { doc: fromXlsx(new Uint8Array(await file.arrayBuffer())), warnings: [] };
     }
+    if (name.endsWith(".itmz")) {
+      const { fromIthoughts } = await import("./io/ithoughts");
+      return { doc: fromIthoughts(new Uint8Array(await file.arrayBuffer())), warnings: [] };
+    }
+    if (name.endsWith(".mind")) {
+      const { fromMind } = await import("./io/mindmeister");
+      return { doc: fromMind(new Uint8Array(await file.arrayBuffer())), warnings: [] };
+    }
     const { parseMmap } = await importMmap();
     const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
     return { doc: result.doc, warnings: result.warnings };
@@ -896,7 +904,7 @@ export function App() {
           <input
             id="mmap-input"
             type="file"
-            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx"
+            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind"
             multiple
             onChange={handleFile}
             style={{ display: "none" }}

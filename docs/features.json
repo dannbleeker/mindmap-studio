@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 87,
+  "reviewedThroughChangelogBullets": 88,
   "areas": [
     "editing",
     "notes",
@@ -486,7 +486,7 @@
     },
     {
       "id": "import-xmind",
-      "name": "Import XMind .xmind",
+      "name": "Import XMind .xmind (content.json + legacy content.xml)",
       "area": "import",
       "since": "2026-06-14",
       "manual": true,
@@ -496,6 +496,24 @@
     {
       "id": "import-smmx",
       "name": "Import SimpleMind .smmx",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "import-ithoughts",
+      "name": "Import iThoughts .itmz",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "import-mindmeister",
+      "name": "Import MindMeister .mind",
       "area": "import",
       "since": "2026-06-14",
       "manual": true,

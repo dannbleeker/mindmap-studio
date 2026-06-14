@@ -1,3 +1,4 @@
+import { XMLParser } from "fast-xml-parser";
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
@@ -7,15 +8,25 @@ import { isDangerousUrl } from "./urlSafety";
 // A `.xmind` file is a ZIP. Modern XMind (2020+) stores the map in `content.json`: an
 // array of sheets, each with a `rootTopic` whose `children.attached[]` form the tree.
 // We map title -> topic, attached children -> children, `notes.plain.content` -> note,
-// `href` -> hyperlink, and `labels[]` -> tags. Older `.xmind` (content.xml) and per-topic
-// styling/markers are not imported. The exporter writes that same `content.json` (plus the
-// `metadata.json`/`manifest.json` XMind expects), so a round trip preserves the tree, notes,
-// links, and tags; it also emits floating topics as `detached` and cross-links as sheet
-// `relationships` for XMind's benefit (our importer doesn't read those back). fflate (already a
-// dep for the Office exporters) does the zip/unzip.
+// `href` -> hyperlink, and `labels[]` -> tags. Older XMind (pre-2020) stores the map in
+// `content.xml`: root `<xmap-content>` → `<sheet>` → `<topic>`, with child topics under
+// `<children><topics type="attached"><topic>…</topic></topics></children>`, notes under
+// `<notes><plain>…</plain></notes>`, hyperlinks via an `xlink:href` attribute (normalised
+// to `href` before parsing), and labels under `<labels><label>…</label></labels>`. Both
+// paths are supported on import. Per-topic styling/markers are not imported. The exporter
+// writes `content.json` (plus `metadata.json`/`manifest.json` XMind expects), so a round
+// trip preserves the tree, notes, links, and tags; it also emits floating topics as
+// `detached` and cross-links as sheet `relationships` for XMind's benefit (our importer
+// doesn't read those back). fflate (already a dep for the Office exporters) does the
+// zip/unzip.
 
-// biome-ignore lint/suspicious/noExplicitAny: tolerant shape from arbitrary XMind JSON
+// biome-ignore lint/suspicious/noExplicitAny: tolerant shape from arbitrary XMind JSON / XML
 type Json = any;
+
+function asList<T>(x: T | T[] | undefined | null): T[] {
+  if (x === undefined || x === null) return [];
+  return Array.isArray(x) ? x : [x];
+}
 
 let xmId = 0;
 
@@ -38,6 +49,92 @@ function topicToNode(t: Json): MapNode {
   return node;
 }
 
+// --- legacy content.xml parser --------------------------------------------
+
+// Convert a fast-xml-parser topic element (from legacy content.xml) into a MapNode.
+// The parser is configured with ignoreAttributes:false, attributeNamePrefix:"@_".
+// xlink:href has been pre-normalised to href in the raw XML before parsing so that
+// fast-xml-parser sees a plain attribute (the colon in "xlink:href" would otherwise
+// produce "@_xlink:href" which some parsers can't handle cleanly).
+function xmlTopicToNode(t: Json): MapNode {
+  xmId += 1;
+  // <title> can come back as a string or as { "#text": string } when it has attributes.
+  const rawTitle = t?.title;
+  const topic =
+    typeof rawTitle === "object" && rawTitle !== null
+      ? String(rawTitle["#text"] ?? "").trim()
+      : String(rawTitle ?? "").trim();
+
+  // Attached children live at: children → topics[@_type="attached"] → topic[]
+  const childTopicsContainers = asList(t?.children?.topics);
+  const attachedContainer = childTopicsContainers.find((tp: Json) => tp?.["@_type"] === "attached");
+  const children = asList(attachedContainer?.topic).map(xmlTopicToNode);
+
+  const node: MapNode = { id: `xm${xmId}`, topic, children };
+
+  // Notes: <notes><plain>text</plain></notes>
+  const plainNote = t?.notes?.plain;
+  const noteText =
+    typeof plainNote === "string"
+      ? plainNote.trim()
+      : typeof plainNote === "object" && plainNote !== null
+        ? String(plainNote["#text"] ?? "").trim()
+        : "";
+  if (noteText) node.note = noteText;
+
+  // Hyperlink: href attribute (pre-normalised from xlink:href)
+  const href = t?.["@_href"];
+  if (typeof href === "string" && href && !href.startsWith("xmind:") && !isDangerousUrl(href)) {
+    node.hyperlink = href;
+  }
+
+  // Labels/tags: <labels><label>text</label></labels>
+  const labelItems = asList(t?.labels?.label);
+  if (labelItems.length > 0) node.tags = labelItems.map(String);
+
+  return node;
+}
+
+function fromXmindXml(xmlBytes: Uint8Array): MindMapDoc {
+  let xmlText = strFromU8(xmlBytes);
+  // Normalise xlink:href → href so fast-xml-parser sees a plain attribute name.
+  // The xlink namespace declaration is harmless after this substitution.
+  xmlText = xmlText.replace(/xlink:href=/g, "href=");
+
+  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
+  const tree = parser.parse(xmlText);
+
+  // Root element is <xmap-content>; fast-xml-parser keys it as "xmap-content".
+  const xmapContent = tree?.["xmap-content"];
+  if (!xmapContent) throw new Error("XMind content.xml: missing <xmap-content> root element");
+
+  const sheet = asList(xmapContent?.sheet)[0];
+  if (!sheet) throw new Error("XMind content.xml: no <sheet> found");
+
+  const rootTopicEl = asList(sheet?.topic)[0];
+  if (!rootTopicEl) throw new Error("XMind content.xml: sheet has no root <topic>");
+
+  const root = xmlTopicToNode(rootTopicEl);
+
+  // Sheet title: <title> child of <sheet>, or fall back to root topic text.
+  const rawSheetTitle = sheet?.title;
+  const sheetTitle =
+    typeof rawSheetTitle === "object" && rawSheetTitle !== null
+      ? String(rawSheetTitle["#text"] ?? "").trim()
+      : String(rawSheetTitle ?? "").trim();
+
+  const title = sheetTitle || root.topic || "Imported XMind map";
+  return {
+    schemaVersion: 1,
+    id: `xm${xmId + 1}`,
+    title,
+    root,
+    meta: { source: "xmind" },
+  };
+}
+
+// --------------------------------------------------------------------------
+
 export function fromXmind(bytes: Uint8Array): MindMapDoc {
   xmId = 0;
   let files: Record<string, Uint8Array>;
@@ -46,25 +143,32 @@ export function fromXmind(bytes: Uint8Array): MindMapDoc {
   } catch {
     throw new Error("Not a valid .xmind file (could not unzip)");
   }
+
+  // Modern XMind (2020+): content.json takes priority.
   const content = files["content.json"];
-  if (!content) {
-    throw new Error(
-      "Unsupported .xmind: no content.json (older XMind files use content.xml, which isn't supported)",
-    );
+  if (content) {
+    const sheets = JSON.parse(strFromU8(content));
+    const sheet = Array.isArray(sheets) ? sheets[0] : sheets;
+    const rootTopic = sheet?.rootTopic;
+    if (!rootTopic) throw new Error("XMind file has no root topic");
+    const root = topicToNode(rootTopic);
+    const title = String(sheet?.title || root.topic || "Imported XMind map");
+    return {
+      schemaVersion: 1,
+      id: `xm${xmId + 1}`,
+      title,
+      root,
+      meta: { source: "xmind" },
+    };
   }
-  const sheets = JSON.parse(strFromU8(content));
-  const sheet = Array.isArray(sheets) ? sheets[0] : sheets;
-  const rootTopic = sheet?.rootTopic;
-  if (!rootTopic) throw new Error("XMind file has no root topic");
-  const root = topicToNode(rootTopic);
-  const title = String(sheet?.title || root.topic || "Imported XMind map");
-  return {
-    schemaVersion: 1,
-    id: `xm${xmId + 1}`,
-    title,
-    root,
-    meta: { source: "xmind" },
-  };
+
+  // Legacy XMind (pre-2020): fall back to content.xml.
+  const xmlContent = files["content.xml"];
+  if (xmlContent) {
+    return fromXmindXml(xmlContent);
+  }
+
+  throw new Error("Unsupported .xmind: no content.json or content.xml found");
 }
 
 // --- export ---------------------------------------------------------------

@@ -23,11 +23,12 @@ to GitHub Pages on every push to `main` — live at
       instances / split view — *high effort/risk* (selection, notes, markers, style all assume one
       active map via `docRef`). Recommendation: do (a) if wanted; defer (b) unless side-by-side
       comparison is needed.
-- [ ] **Interop — remaining formats.** Both-ways already: `.mmap` (in), OPML, Markdown, `.json`,
-      FreeMind/Freeplane `.mm`, Mermaid, XMind (modern `content.json`), SimpleMind `.smmx`.
-      Remaining thin adapters to/from the canonical model: **older `.xmind`** (`content.xml`),
-      **MindMup** (JSON), **iThoughts** (`.itmz`, ZIP), **Markmap**. Lower priority — `.mm`/OPML/
-      Markdown already bridge most tools both ways. Prioritise by format openness + adoption.
+- [ ] **Interop — remaining formats.** Read support is now broad: `.mmap`, OPML, Markdown, `.json`,
+      FreeMind/Freeplane `.mm`, Mermaid, XMind (modern **and** legacy `content.xml`), SimpleMind
+      `.smmx`, iThoughts `.itmz`, MindMeister `.mind`, Word `.docx`, Excel `.xlsx`. Remaining thin
+      adapters: **MindMup** (JSON), **Markmap** (markdown variant), and on the write side a
+      **`.mmap` writer** + **image-bearing `.mmap`** import (blocked on a real sample). Lower
+      priority — open formats already bridge most tools.
 
 ## Competitive gap clusters (backlog candidates, 2026-06-14)
 
@@ -47,8 +48,9 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
 - [ ] **E — Navigation polish (cheap wins)** — one-click focus / isolate-branch, saved filters,
       fuzzy search.
 - [ ] **F — Durability** — persistent per-map version history (IndexedDB snapshots).
-- [ ] **G — Interop fills** — iThoughts (`.itmz`), MindMeister (`.mind`), image-bearing `.mmap`,
-      write `.mmap`.
+- [ ] **G — Interop fills** — iThoughts (`.itmz`), MindMeister (`.mind`), and legacy XMind
+      `content.xml` **shipped 2026-06-14**; remaining: image-bearing `.mmap` (blocked on a real
+      sample), a `.mmap` writer, MindMup, and Markmap.
 
 Suggested first pass by value-per-effort: **D + E**, then **A** and **F**; **B / C** are larger bets.
 

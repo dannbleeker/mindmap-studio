@@ -1,5 +1,5 @@
 import type { Ref } from "react";
-import type { MapImage, MindMapDoc, NodeStyle } from "../model/types";
+import type { MapImage, MapNode, MindMapDoc, NodeStyle } from "../model/types";
 import type { MindMapTheme } from "./theme";
 
 // The contract between the app and the canvas. The React Flow engine implements this surface,
@@ -38,6 +38,8 @@ export interface MindMapHandle {
   setBackground: (color: string) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */
   setSelectedTags: (tags: string[]) => boolean;
+  /** Graft a forest of nodes (e.g. parsed from pasted text) under the selected node; false if none. */
+  addSubtreeToSelected: (nodes: MapNode[]) => boolean;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */

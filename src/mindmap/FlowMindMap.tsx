@@ -39,6 +39,7 @@ import {
   addChild,
   addLink,
   addSibling,
+  addSubtree,
   deleteCallout,
   deleteLink,
   deleteNode,
@@ -518,6 +519,8 @@ function FlowInner({
       },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
+      addSubtreeToSelected: (nodes) =>
+        withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
     }),
     [fitView, getNodes, apply, withSelected, focusNodeById],
   );

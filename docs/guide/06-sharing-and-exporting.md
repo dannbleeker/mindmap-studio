@@ -76,9 +76,18 @@ The same breadth applies going in. MindMap Studio reads:
 - **MindManager `.mmap`** -- see below.
 
 You can **batch-import** several files at once, which turns a folder of outlines into a
-library of maps in one step. These bridges cover the common ground between tools; each
-keeps the topic tree and the fields that map cleanly, and -- like the `.mmap` importer --
-quietly leaves behind only the tool-specific extras it can't represent.
+library of maps in one step. (The list keeps growing -- Word `.docx`, Excel `.xlsx`, iThoughts
+`.itmz`, MindMeister `.mind`, and older XMind files all open too.) These bridges cover the common
+ground between tools; each keeps the topic tree and the fields that map cleanly, and -- like the
+`.mmap` importer -- quietly leaves behind only the tool-specific extras it can't represent.
+
+Not everything you want to map arrives as a file, though. Often it's just *text* -- an agenda in
+an email, a list in a chat, the bones of an outline you typed somewhere else. **📋 Paste text**
+takes that straight from the clipboard: paste it in and the indentation (or `#` heading levels)
+becomes the tree, bullet and number markers are stripped, and you get topics. Drop it in as a new
+map, or **Add under selected** to graft it onto a branch you're already growing. It's the lowest-
+friction on-ramp there is -- and, because it never leaves the browser, the private way to bring in
+an outline you drafted anywhere, including one a chatbot wrote for you.
 
 ## The MindManager bridge
 

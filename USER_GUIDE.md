@@ -246,6 +246,17 @@ learn a feature by reading one that uses it. Opening one creates a fresh, editab
 
 ## Importing
 
+### Paste text → map
+
+**📋 Paste text** is the quickest way in: paste an outline, a bullet list, or Markdown and it
+becomes topics. **Indentation** (spaces or tabs) or **`#` heading levels** set the hierarchy, and
+`-` / `*` / `+` / `•` and numbered (`1.`) markers are all recognised — so an outline copied from a
+doc, an email, or anywhere else just works. Choose **New map** to drop it in as its own map, or
+**Add under selected** to graft it onto the current map under the selected node. It's all local —
+a fast, private way to bring in an outline you wrote (or generated) elsewhere, with no upload.
+
+### Open files
+
 **Open files** accepts (and you can multi-select to **batch-import** a whole folder):
 
 | Format | Notes |

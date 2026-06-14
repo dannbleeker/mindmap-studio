@@ -7,6 +7,7 @@ import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
 import { fromMarkdown, toMarkdown } from "./io/markdown";
+import { parseOutline } from "./io/pasteOutline";
 import {
   type LayoutKind,
   MAP_LINK_PREFIX,
@@ -51,6 +52,11 @@ import { useTheme } from "./useTheme";
 
 // Coalesce rapid edits into roughly one auto-saved version every few minutes per map.
 const SNAPSHOT_THROTTLE_MS = 3 * 60 * 1000;
+
+/** Total topics in a parsed paste forest (for the dialog's live count). */
+function countForest(nodes: MapNode[]): number {
+  return nodes.reduce((sum, n) => sum + 1 + countForest(n.children), 0);
+}
 
 export function App() {
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
@@ -183,6 +189,10 @@ export function App() {
   const [libDocs, setLibDocs] = useState<MindMapDoc[]>([]);
   const [libQuery, setLibQuery] = useState("");
   const searchRef = useRef<HTMLDialogElement>(null);
+  // "Paste text → map": parse a pasted outline into topics, as a new map or under the selection.
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const pasteRef = useRef<HTMLDialogElement>(null);
   const pendingFocus = useRef<string | null>(null);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
@@ -337,6 +347,42 @@ export function App() {
   useEffect(() => {
     if (historyOpen) refreshVersions();
   }, [historyOpen, refreshVersions]);
+
+  // --- paste text → map ---
+  function pasteAsNewMap() {
+    const forest = parseOutline(pasteText);
+    if (forest.length === 0) {
+      showHint("Nothing to add — paste an outline first.");
+      return;
+    }
+    const root: MapNode =
+      forest.length === 1 ? forest[0] : { id: "root", topic: "Pasted map", children: forest };
+    load({
+      schemaVersion: 1,
+      id: crypto.randomUUID(),
+      title: root.topic,
+      root,
+      meta: { source: "paste" },
+    });
+    setPasteOpen(false);
+    setPasteText("");
+    showHint("Created a map from the pasted text.");
+  }
+
+  function pasteUnderSelected() {
+    const forest = parseOutline(pasteText);
+    if (forest.length === 0) {
+      showHint("Nothing to add — paste an outline first.");
+      return;
+    }
+    if (!mapRef.current?.addSubtreeToSelected(forest)) {
+      showHint("Select a node first, or use New map.");
+      return;
+    }
+    setPasteOpen(false);
+    setPasteText("");
+    showHint(`Added ${forest.length} topic${forest.length === 1 ? "" : "s"} under the selection.`);
+  }
 
   async function parseImport(
     file: File,
@@ -588,6 +634,18 @@ export function App() {
     if (aboutOpen && !el.open) el.showModal();
     else if (!aboutOpen && el.open) el.close();
   }, [aboutOpen]);
+
+  // "Paste text" dialog (same native-<dialog> pattern).
+  useEffect(() => {
+    const el = pasteRef.current;
+    if (!el) return;
+    if (pasteOpen && !el.open) {
+      el.showModal();
+      el.querySelector("textarea")?.focus();
+    } else if (!pasteOpen && el.open) {
+      el.close();
+    }
+  }, [pasteOpen]);
 
   // Library-wide search dialog (same native-<dialog> pattern). On open, load every map
   // — with the live current map merged over its saved copy — so search sees latest edits.
@@ -1000,6 +1058,14 @@ export function App() {
             style={{ display: "none" }}
           />
         </label>
+        <button
+          type="button"
+          onClick={() => setPasteOpen(true)}
+          style={controlStyle}
+          title="Paste an outline, bullet list, or Markdown and turn it into topics"
+        >
+          📋 Paste text
+        </button>
       </header>
 
       {error && (
@@ -1365,6 +1431,70 @@ export function App() {
           >
             Check for updates
           </button>
+        </div>
+      </dialog>
+
+      {/* Paste text → map — native <dialog>, same modal semantics as About. */}
+      <dialog
+        ref={pasteRef}
+        onClose={() => setPasteOpen(false)}
+        style={{ border: "none", borderRadius: 12, padding: 0, width: "min(560px, 92vw)" }}
+      >
+        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+          <strong style={{ color: "#26215c" }}>Paste text → topics</strong>
+          <p style={{ margin: 0, fontSize: 13, color: "#73726c" }}>
+            Paste an outline, a bullet list, or Markdown. Indentation (or <code>#</code> headings)
+            sets the hierarchy.
+          </p>
+          <textarea
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
+            placeholder={"- Theme\n  - Idea\n  - Idea\n- Next theme"}
+            aria-label="Paste outline text"
+            rows={10}
+            style={{
+              resize: "vertical",
+              border: "1px solid #cecbf6",
+              borderRadius: 8,
+              padding: 8,
+              fontSize: 13,
+              fontFamily: "ui-monospace, monospace",
+              color: "#26215c",
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+            }}
+          >
+            <span style={{ fontSize: 12, color: "#8a8780" }}>
+              {countForest(parseOutline(pasteText))} topics
+            </span>
+            <span style={{ display: "flex", gap: 6 }}>
+              <button
+                type="button"
+                onClick={() => setPasteOpen(false)}
+                style={{ ...controlStyle, background: "#fff" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={pasteUnderSelected}
+                disabled={!selected}
+                style={controlStyle}
+                title={selected ? `Add under "${selected.topic}"` : "Select a node first"}
+              >
+                ➕ Add under selected
+              </button>
+              <button type="button" onClick={pasteAsNewMap} style={controlStyle}>
+                📋 New map
+              </button>
+            </span>
+          </div>
         </div>
       </dialog>
     </div>

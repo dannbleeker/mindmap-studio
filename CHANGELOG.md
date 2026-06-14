@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Paste text → map** — a **📋 Paste text** action turns a pasted outline, bullet list, or
+  Markdown into topics: indentation (or `#` heading levels) sets the hierarchy, and `-`/`*`/`+`/`•`
+  and numbered (`1.`) markers are all understood. Drop it in as a **new map**, or **Add under
+  selected** to graft it onto the current map. Fully local — the fast, private way to bring an
+  outline (including one you generated elsewhere) into a map without any upload.
 - **Version history** — a **🕔 History** panel keeps per-map snapshots in IndexedDB, so you can roll
   a map back to an earlier state. Snapshots are captured automatically while you edit (throttled to
   ~one per few minutes) and on demand via **Save version now**; **Restore** loads a snapshot back in

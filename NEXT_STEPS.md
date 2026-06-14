@@ -43,7 +43,8 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       sheets per file.
 - [ ] **C — Content depth** — file attachments, dates + checkboxes with progress roll-up,
       LaTeX/math rendering, conditional styling.
-- [ ] **D — Capture UX (cheap wins)** — Quick Entry, paste-text-as-tree, drop-link-as-topic,
+- [ ] **D — Capture UX (cheap wins)** — **paste-text → map shipped 2026-06-14** (📋 Paste text:
+      outline/bullets/Markdown → topics, new map or graft); remaining: Quick Entry, drop-link-as-topic,
       brainstorm timer.
 - [ ] **E — Navigation polish (cheap wins)** — one-click focus / isolate-branch, saved filters,
       fuzzy search.
@@ -54,9 +55,10 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       sample), a `.mmap` writer, MindMup, and Markmap.
 
 Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus), **③** (info panel +
-tag editing), **⑦** (Word/Excel import), **G** (interop importers), and **F** (version history).
-Remaining bets: **A** (keyless AI bridge), the rest of **D** (Quick Entry, paste-as-tree, etc.) and
-**E** (saved filters, fuzzy search), and **B / C** (more structures / content depth).
+tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), and the
+first slice of **D** (paste text → map).
+Remaining bets: **A** (keyless AI bridge), the rest of **D** (Quick Entry, drop-link, brainstorm
+timer) and **E** (saved filters, fuzzy search), and **B / C** (more structures / content depth).
 
 ## Reference
 

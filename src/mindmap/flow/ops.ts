@@ -215,6 +215,24 @@ export function setNote(doc: MindMapDoc, id: string, note: string): OpResult {
   return { doc: next };
 }
 
+/** Deep-clone a subtree with fresh ids (so grafted/pasted nodes never collide with existing ones). */
+function reId(node: MapNode): MapNode {
+  return { ...node, id: makeId(), children: node.children.map(reId) };
+}
+
+/** Graft a forest of nodes (e.g. parsed from pasted text) as children of a node; expands it.
+ *  The nodes are re-id'd, so the same parsed forest can be pasted repeatedly without id clashes. */
+export function addSubtree(doc: MindMapDoc, parentId: string, nodes: MapNode[]): OpResult {
+  if (nodes.length === 0) return { doc };
+  const next = structuredClone(doc);
+  const loc = locate(next.root, parentId);
+  if (!loc) return { doc };
+  const grafted = nodes.map(reId);
+  loc.node.children.push(...grafted);
+  loc.node.collapsed = false;
+  return { doc: next, selectId: grafted[0]?.id };
+}
+
 /** Replace a node's tags (an empty array clears them). */
 export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   const next = structuredClone(doc);

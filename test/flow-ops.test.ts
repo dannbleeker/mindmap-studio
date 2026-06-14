@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addChild,
   addSibling,
+  addSubtree,
   deleteNode,
   findNode,
   indent,
@@ -135,6 +136,24 @@ describe("flow ops — content", () => {
     expect(findNode(mergeStyle(styled, "a", { background: "" }).doc, "a")?.style).toEqual({
       color: "#000",
     });
+  });
+
+  it("addSubtree grafts a re-id'd forest under a node and expands it", () => {
+    const start = base();
+    const target = findNode(start, "b");
+    if (target) (target as { collapsed?: boolean }).collapsed = true;
+    const { doc, selectId } = addSubtree(start, "b", [
+      { id: "x", topic: "X", children: [{ id: "y", topic: "Y", children: [] }] },
+    ]);
+    const b = findNode(doc, "b");
+    expect(b?.children.map((c) => c.topic)).toEqual(["X"]);
+    expect(b?.children[0].children.map((c) => c.topic)).toEqual(["Y"]);
+    expect(b?.collapsed).toBe(false);
+    expect(b?.children[0].id).not.toBe("x"); // re-id'd, so repeated pastes can't collide
+    expect(selectId).toBe(b?.children[0].id);
+    // empty forest → the same doc, untouched
+    const d = base();
+    expect(addSubtree(d, "b", []).doc).toBe(d);
   });
 
   it("setTags replaces a node's tags and clears them on an empty array", () => {

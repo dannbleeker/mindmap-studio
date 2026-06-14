@@ -20,6 +20,8 @@ GitHub Pages).
   other tools: `.opml` outlines, **FreeMind/Freeplane `.mm`**, **Mermaid** `mindmap`,
   **XMind `.xmind`** (modern + legacy), **SimpleMind `.smmx`**, **iThoughts `.itmz`**,
   **MindMeister `.mind`**, and **Word `.docx` / Excel `.xlsx`** outlines.
+- **Paste text → map** — turn a pasted outline / bullet list / Markdown into topics (indentation or
+  `#` levels set the hierarchy); drop in as a new map or graft under the selected node.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   undo/redo (Ctrl+Z / Ctrl+Shift+Z), inline **rich-text** topics (Ctrl+B/I/U), images on
   nodes, and a unified **ℹ Info** panel (note, markers, tags, style, links) for the selected node.

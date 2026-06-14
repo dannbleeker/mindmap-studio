@@ -80,26 +80,33 @@ Remaining items are renderer-constrained or Dann-dependent:
       — multiple live mind-elixir instances; *high effort/risk* because selection, notes,
       markers, style panels and `sync` are all written around a single `meRef`/active map.
       **Recommendation:** do (a) if wanted; defer (b) unless side-by-side comparison is needed.
-- [ ] **More layout orientations — vertical (down / up) + remember orientation.** *Today:* the
-      Layout control offers **both / right / left** only — all *horizontal* — and the choice is
-      remembered globally (`localStorage["mindmap-layout"]`, applied via `applyDirection` →
-      mind-elixir `initSide`/`initRight`/`initLeft`). The ask: also **build down** (top-down
-      org-chart tree) and **up** (bottom-up), and possibly the **radial/hub** shown in the
-      reference, with the orientation remembered (consider per-map, not just global). **Feasibility
-      (verified):** mind-elixir has **only** `initLeft`/`initRight`/`initSide` — *no* vertical or
-      radial mode — so down/up/radial are **renderer-ceiling** (need a custom SVG renderer or an
-      engine that supports vertical/org-chart layouts; tie-in with the existing renderer-ceiling
-      item). The "remember orientation" + a richer layout picker (the 3-icon control) are doable
-      now; the new *orientations themselves* are the renderer-ceiling part.
+- [~] **More layout orientations — built on the React Flow engine (Phase C, behind `?engine=flow`).**
+      org-chart down/up, radial/hub, timeline, and fishbone all ship in `flow/layout.ts` and are in
+      the Layout `<select>` (remembered via `localStorage["mindmap-layout"]` + a `?layout=` URL
+      param). They were renderer-ceiling on mind-elixir; the migration unlocked them. **Becomes
+      available to all users at cutover** (migration Phase H) — until then they fall back to "side"
+      on the default elixir engine. No separate work needed; tracked by the migration above.
 - [ ] **Import/export interop with other mind-mapping tools — remaining formats.** *Shipped
       (2026-06-14):* FreeMind/Freeplane `.mm` (import + export), Mermaid `mindmap` (import +
       export), and XMind `.xmind` import — on top of the existing `.mmap`/OPML/Markdown/`.json`
       and the image/Office/deck exporters. *Remaining targets* (each a thin adapter to/from the
       canonical model): **XMind export** (zip `content.json` + manifest — the import side is
       done) and **older `.xmind`** (`content.xml`); **MindMup** (JSON), **iThoughts** (`.itmz`,
-      ZIP), **SimpleMind** (`.smmx`), and **Markmap**. Lower priority — `.mm`/OPML/Markdown
-      already bridge most of these tools both ways. Add by format openness + how many tools
-      accept it.
+      ZIP), **SimpleMind** (`.smmx`, see its own item below), and **Markmap**. Lower priority —
+      `.mm`/OPML/Markdown already bridge most of these tools both ways. Add by format openness +
+      how many tools accept it.
+- [ ] **Favicon for browser tabs + bookmarks.** *Verified gap:* `index.html` has **no**
+      `<link rel="icon">`, so tabs and bookmarks show a blank/default icon. `public/icon.svg`
+      already exists (used by the PWA manifest in `vite.config.ts`, `includeAssets`/`manifest.icons`)
+      but it's never wired as the document favicon. Fix: add `<link rel="icon" href="/icon.svg">`
+      to `index.html`, plus an `apple-touch-icon` and a small `.png`/`.ico` fallback for browsers
+      that don't render SVG favicons. Quick win — one HTML edit (+ a generated PNG/ICO from the SVG).
+- [ ] **SimpleMind import + export (`.smmx`).** A thin adapter to/from the canonical model for
+      SimpleMind's `.smmx` (a ZIP archive of the map's XML — confirm the internal file layout during
+      the research). *Import:* topic tree + notes + links. *Export:* emit the `.smmx` ZIP via
+      `fflate` (already a dep, as the XMind/Office adapters use). Wire into **Open files** + the
+      **⬆ Export…** menu exactly like the FreeMind/XMind adapters (`src/io/*` + `parseImport` +
+      `useMapExports`). Part of the interop umbrella item above, called out separately per request.
 - [x] **Deep research: MindManager features vs MindMap Studio gaps** — done (2026-06-14).
       The full audit lives in [`docs/mindmanager-gap-analysis.md`](docs/mindmanager-gap-analysis.md):
       every MindManager capability mapped to shipped / partial / renderer-ceiling / out-of-scope,

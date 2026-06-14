@@ -7,9 +7,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Canvas engine → React Flow.** Replaced the mind-elixir renderer with
+  **@xyflow/react** (MIT), unlocking first-class, editable **alternate layouts**
+  (org-chart down/up, radial, timeline, fishbone), **organic tapered branches**,
+  **anchored callouts**, **inline rich-text topics** (Ctrl+B/I/U), and a
+  branch-coloured **minimap + zoom controls**. The canvas is model-first (pure ops
+  on the canonical doc → re-project → re-layout → onChange), and the SVG export is
+  authored natively from the model (it now carries arrow + boundary labels and
+  rasterises without canvas-taint). The migration ran behind a flag across phases
+  0/A–I; mind-elixir and its `foreignObject` export shim are removed, and the entry
+  + lazy bundle shrank (the engine chunk dropped ~37 kB).
 - **Phase 0 scaffold** — local-first mind-map PWA on React 19 + Vite 6 + TS,
-  built on the mind-elixir core (MIT) with a format-agnostic canonical model
-  (`src/model/types.ts`) as the single source of truth.
+  built on the mind-elixir core (MIT, since replaced — see above) with a
+  format-agnostic canonical model (`src/model/types.ts`) as the single source of truth.
 - **MindManager-style render** — theme with a per-branch colour palette,
   two-sided radial layout, and rounded topics (`src/mindmap/`).
 - **One-way `.mmap` importer** (`src/import/mmap.ts`) — recovers the full common

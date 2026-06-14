@@ -9,7 +9,7 @@ is **deployed** — a `deploy.yml` workflow publishes to GitHub Pages on every p
 live at <https://mindmap-studio.struktureretsundfornuft.dk/> (custom domain, HTTPS). See
 `CHANGELOG.md`.
 
-## 🚧 In progress: canvas engine migration (mind-elixir → React Flow)
+## ✅ Done: canvas engine migration (mind-elixir → React Flow)
 
 To unlock the renderer-ceiling cluster (editable alternate layouts, callouts, rich-text
 topics, organic branches) we're replacing the canvas engine with **@xyflow/react-flow**.
@@ -48,11 +48,12 @@ fallback so flat formats are untouched); **anchored callouts** (`MapNode.callout
 overlay + add via context menu, inline edit, delete; rendered in the SVG export too). Fixed a latent bug:
 the boundary/callout overlays read a live `renderDoc` mirror (updated in `sync()`) instead of the stable
 `doc` prop, so freshly-created boundaries + callouts now appear. **go/no-go #3 met** (parity verified +
-441-node recompute ~1 ms). **CUTOVER LANDED** — `index.tsx pickEngine()` now defaults to flow (set
-`VITE_CANVAS_ENGINE="elixir"` to roll back; elixir stays bundled as the fallback through the soak, and
-`size-budget.mjs` now guards both `me-tpc` + `.react-flow`). **Next:** soak on prod, then **Phase I** —
-remove mind-elixir + elixir-only modules, re-baseline the bundle, make the `me-tpc` assertion flow-only,
-and the full docs sweep (CLAUDE.md / README / USER_GUIDE / CHANGELOG / features.json / book).
+441-node recompute ~1 ms). **CUTOVER + Phase I DONE (2026-06-14):** React Flow is now the only engine —
+mind-elixir, its `foreignObject` export shim (`svgText.ts`), the elixir minimap/sync/node-menu, and both
+deps are removed; `size-budget.mjs` guards `.react-flow`; the engine chunk (~37 kB) is gone (lazy 95.4 kB
+/ entry 78.5 kB). Docs swept (README / CLAUDE / CHANGELOG / NOTICE / gap-analysis). **Follow-up:** deepen
+USER_GUIDE + book + `features.json` coverage of the new features (callouts, rich-text, alternate layouts,
+minimap) — they ship and work, but aren't yet documented in depth.
 
 ## MindManager UI-parity work (2026-06-12)
 
@@ -71,23 +72,13 @@ mind-elixir core-CSS fix + a bundle guard, a shared-OOXML refactor, the Pages-ac
 node24 bump, and the **native-SVG-`<text>` image export** (`.svg`/`.png`/`.html`/`.pdf` now
 render everywhere, not only inline in a browser). See `CHANGELOG.md`.
 
-Remaining items are renderer-constrained or Dann-dependent:
+Remaining items are Dann-dependent:
 
-- [~] **Arrow / boundary text labels are dropped from image & document exports, and a
-      boundary exports as a bracket, not the on-canvas box** — *on the default mind-elixir
-      engine*. The geometry exports (the relationship arrow curve, and the boundary as
-      mind-elixir's bracket `<path>`), but `exportSvg` omits their *text* labels (verified: the
-      raw export contains neither the arrow label nor the boundary label) and doesn't know about
-      our filled-box overlay. **Fixed on the React Flow engine** (migration Phase F —
-      `flow/exportSvg.ts` authors the labels and the filled boundary box natively from the model;
-      verified the export carries both labels and rasterises clean); reaches all users **at
-      cutover** (migration Phase H). Topics (incl. multi-line), marker icons, and node images all
-      export correctly on both engines.
-- [ ] **Renderer-constrained (mind-elixir):** alternate layouts (org-chart / timeline /
-      fishbone), organic/tapered branches, callouts, rich-text *topics*. These need a custom
-      SVG renderer or a different engine — a multi-day rebuild. (Filled boundary enclosures
-      are now shipped — a custom overlay draws the MindManager-style shaded box, so they're
-      no longer renderer-blocked; see `CHANGELOG.md`.)
+- [x] **Renderer-ceiling features — ALL SHIPPED (React Flow migration).** Alternate layouts
+      (org-chart / timeline / fishbone / radial / up-down), organic tapered branches, callouts,
+      rich-text *topics*, and full-fidelity image export (arrow + boundary *labels* + the filled
+      boundary box, no canvas-taint) all ship now that React Flow is the only engine. See
+      `CHANGELOG.md`.
 - [ ] Import embedded **images from `.mmap`** binary blobs (in-app images work; MM import
       is the gap — needs the XSD image-ref scheme or a real image-bearing sample).
 - [ ] Validate the `.mmap` importer's rich paths against a *real* feature-rich map
@@ -97,21 +88,19 @@ Remaining items are renderer-constrained or Dann-dependent:
 
 - [ ] **Tab-based multi-map open (reviewed 2026-06-13).** *Today:* one active map at a time —
       `App` holds a single `doc`/`liveDoc`, swapped by `switchMap()` via a `<select>` dropdown;
-      one mind-elixir instance (`MindMap`); persistence remembers a single `meta.lastOpened`.
+      one React Flow canvas (`FlowMindMap`, keyed by `doc.id`); persistence remembers a single `meta.lastOpened`.
       The data layer already holds many maps (IndexedDB library), so "many available" exists;
       "many *open* in tabs" is a UI/state change. **Two routes:** (a) **tab bar over one canvas**
       — replace the dropdown with a tab strip, persist `{openIds[], activeId}` instead of one
       `lastOpened`, reuse `switchMap()`; only the active map renders. *Low effort/risk* and
       covers the real "files open in tabs" UX. (b) **true simultaneous instances / split view**
-      — multiple live mind-elixir instances; *high effort/risk* because selection, notes,
-      markers, style panels and `sync` are all written around a single `meRef`/active map.
+      — multiple live canvas instances; *high effort/risk* because selection, notes,
+      markers, and style panels are all written around a single active map (`docRef`).
       **Recommendation:** do (a) if wanted; defer (b) unless side-by-side comparison is needed.
-- [~] **More layout orientations — built on the React Flow engine (Phase C, behind `?engine=flow`).**
-      org-chart down/up, radial/hub, timeline, and fishbone all ship in `flow/layout.ts` and are in
-      the Layout `<select>` (remembered via `localStorage["mindmap-layout"]` + a `?layout=` URL
-      param). They were renderer-ceiling on mind-elixir; the migration unlocked them. **Becomes
-      available to all users at cutover** (migration Phase H) — until then they fall back to "side"
-      on the default elixir engine. No separate work needed; tracked by the migration above.
+- [x] **Alternate layout orientations — SHIPPED + default.** org-chart down/up, radial/hub,
+      timeline, and fishbone all ship in `flow/layout.ts` and are in the Layout `<select>`
+      (remembered via `localStorage["mindmap-layout"]`). Available to all users — React Flow is
+      the only engine.
 - [ ] **Minimize/collapse the minimap.** The React Flow `<MiniMap>` (`src/mindmap/FlowMindMap.tsx`,
       bottom-right, now the default canvas) is always shown and overlaps the lower-right of dense
       maps. Add a small toggle — a collapse caret on the minimap itself (or a canvas-widget button) —

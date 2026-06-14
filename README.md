@@ -3,9 +3,9 @@
 **Live:** [mindmap-studio.struktureretsundfornuft.dk](https://mindmap-studio.struktureretsundfornuft.dk/)
 
 A local-first, offline mind-mapping PWA — a self-hosted replacement for Corel/Mindjet
-MindManager. Built on the [mind-elixir](https://github.com/SSShooter/mind-elixir-core) core
-(MIT) with a format-agnostic canonical model as the single source of truth. No telemetry, no
-accounts — your maps live in your browser (IndexedDB) and on disk.
+MindManager. Built on [React Flow](https://reactflow.dev) (`@xyflow/react`, MIT) with a
+format-agnostic canonical model as the single source of truth. No telemetry, no accounts —
+your maps live in your browser (IndexedDB) and on disk.
 
 Sibling to TP Studio and MECE Studio (same stack: React 19 + Vite + TypeScript, deployed to
 GitHub Pages).
@@ -20,8 +20,8 @@ GitHub Pages).
   other tools: `.opml` outlines, **FreeMind/Freeplane `.mm`**, **Mermaid** `mindmap`, and
   **XMind `.xmind`**.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
-  undo/redo (Ctrl+Z / Ctrl+Shift+Z), images on nodes, a docked **Notes** editor for the
-  selected node, plus a node editor panel (icons, tags, font size/color, link) via node-menu.
+  undo/redo (Ctrl+Z / Ctrl+Shift+Z), inline **rich-text** topics (Ctrl+B/I/U), images on
+  nodes, a docked **Notes** editor, and Marker/Style panels for the selected node.
 - **Find & Replace** — search the map by topic or note (matches focused on the canvas,
   cycling on repeated Enter), and replace the search text across all matching topics.
 - **Library-wide search** — the **🔎 All maps** button searches every map in the library by
@@ -33,6 +33,8 @@ GitHub Pages).
 - **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on
   the selected node.
 - **Style** — a per-topic style bar: shape (box/rounded/pill), fill, border, and bold.
+- **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
+  timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.
@@ -41,6 +43,8 @@ GitHub Pages).
 - **Boundaries** — a toolbar **⬚ Group** draws a shaded, rounded box around the selected
   branch and its subtree (double-click the box's chip to label it); imported MindManager
   boundaries render the same way, and boundaries you draw round-trip back into the model.
+- **Callouts** — anchored sticky-note annotations on any node (right-click → Add callout),
+  inline-editable; they render into image exports too.
 - **Floating topics** — imported detached topics render in a labelled "Floating topics"
   branch, and are editable: rename, add, remove, nest, or drag them in/out of the tree, and
   the changes round-trip back into the model.
@@ -62,7 +66,8 @@ A format-agnostic **canonical model** (`src/model/types.ts`) is the single sourc
 Everything targets it through thin adapters, so the rendering engine and file formats stay
 replaceable:
 
-- `src/mindmap/` — the mind-elixir renderer + a two-way `sync` bridge (canvas edits ⇄ model).
+- `src/mindmap/flow/` — the React Flow canvas: model→nodes/edges projection (`project.ts`),
+  layouts (`layout.ts`), pure edit ops (`ops.ts`), and the native-text SVG exporter (`exportSvg.ts`).
 - `src/import/mmap.ts` — one-way `.mmap` importer (ZIP of `Document.xml`; XSD-sourced mapping).
 - `src/io/` — Markdown, native-JSON, and self-contained-HTML/print I/O.
 - `src/useMapExports.ts` — the header's export handlers (json/md/png/svg/html/pdf).

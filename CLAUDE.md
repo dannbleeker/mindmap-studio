@@ -1,7 +1,7 @@
 # MindMap Studio — working agreement
 
 A local-first, offline mind-mapping PWA replacing Corel/Mindjet MindManager.
-React 19 + Vite 6 + TypeScript, built on the **mind-elixir** core (MIT). Sibling
+React 19 + Vite + TypeScript, built on **React Flow** (`@xyflow/react`, MIT). Sibling
 to TP Studio and MECE Studio. These habits override default behavior — hold both
 of us to them.
 
@@ -54,8 +54,8 @@ pnpm gate
 
 - Keep a **framework-free core** that's pure and unit-tested. The canonical model
   (`src/model/`) and the import/export adapters (`src/import/`, later
-  `src/export/`) are deterministic with no DOM coupling. mind-elixir is wrapped
-  behind a thin adapter (`src/mindmap/`) so the engine stays replaceable.
+  `src/export/`) are deterministic with no DOM coupling. The React Flow canvas is
+  wrapped behind a thin contract (`src/mindmap/contract.ts`) so the renderer stays replaceable.
 - **One source of truth** for any cross-cutting rule: the canonical model
   (`src/model/types.ts`), the bundle budget (`scripts/size-budget.mjs`),
   validation — no drift between call sites.
@@ -82,7 +82,7 @@ pnpm gate
   package.json. Drive pnpm/node directly.
 - `C:\devtools` is AppLocker-allowlisted, so `node_modules` binaries run there.
 - Dev server is registered for preview as **`mindmap-dev`** on port **5175**.
-- Engine: mind-elixir (`src/mindmap/`). Canonical model: `src/model/types.ts`.
+- Engine: React Flow (`src/mindmap/flow/`). Canonical model: `src/model/types.ts`.
   Importers: `src/import/`. The `.mmap` importer is **one-way + lossy by design**.
 - Scope: **brainstorming/knowledge + presentations/sharing**. The task / Gantt /
   SmartRules / resource PM layer is **out of scope** unless we decide otherwise.

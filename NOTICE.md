@@ -50,8 +50,8 @@ or endorsement is implied.
 ## Open-source dependencies
 
 MindMap Studio's production runtime depends on third-party open-source software,
-including **mind-elixir** and **@mind-elixir/node-menu** (the canvas renderer and
-node editor, MIT), **fast-xml-parser** (`.mmap`/OPML parsing), **fflate**
+including **@xyflow/react** (React Flow — the canvas renderer, MIT), **d3-hierarchy**
+(tree / radial layout, ISC), **fast-xml-parser** (`.mmap`/OPML parsing), **fflate**
 (compression for `.mmap`), **idb** (IndexedDB wrapper), and **React** /
 **React-DOM**. Each dependency carries its own license; the full list and license
 texts are produced by the package manager's manifest (`package.json` +

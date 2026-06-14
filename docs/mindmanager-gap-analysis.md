@@ -2,6 +2,13 @@
 
 _Last updated: 2026-06-14._
 
+> **Update (2026-06-14): the renderer-ceiling cluster is RESOLVED.** The canvas engine was
+> migrated from mind-elixir to **React Flow** (mind-elixir now removed), which shipped the
+> features that were previously "blocked by the renderer": **alternate layouts** (org-chart
+> down/up, radial, timeline, fishbone), **organic tapered branches**, **callouts**, and
+> **inline rich-text topics**. Rows below that cite the renderer ceiling are kept for history —
+> treat them as **done**. The PM + collaboration/enterprise pillars remain out of scope.
+
 A systematic audit of Mindjet MindManager's full feature set (desktop 2023–2025, Web,
 Teams, Snap, Go) mapped against what MindMap Studio does today — the deeper follow-up to the
 2026-06-12 UI-comparison parity pass. It exists to drive the roadmap: it says, for every

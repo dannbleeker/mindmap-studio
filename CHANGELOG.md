@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **In-map jump links + clickable hyperlinks** — link a node to **another topic in the same map**
+  via the new **↪ Jump to…** toolbar picker (stored as a `#node=` hyperlink); clicking the node's
+  **🔗** leaps to and selects that topic. The 🔗 is now a real button, which also restores following
+  **cross-map links** (`#map=`, previously inert on the React Flow engine) and opens external URLs
+  in a new tab — dangerous schemes are refused by the app-wide XSS guard. Link routing is a pure,
+  unit-tested `classifyLink()`.
 - **Read-only Power Filter** — a **🎚 Filter** panel that dims every topic *except* the ones
   matching your criteria (free text in topic/note, plus toggle chips for any marker or tag in the
   map) and the paths leading to them, with a live match count. It's strictly a view: nothing is

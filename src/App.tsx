@@ -19,11 +19,13 @@ import {
   MAP_LINK_PREFIX,
   MindMap,
   type MindMapHandle,
+  NODE_LINK_PREFIX,
   type SelectedNode,
 } from "./mindmap";
 import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
 import type { MindMapDoc } from "./model/types";
+import { outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
   type ToastAction,
@@ -767,6 +769,31 @@ export function App() {
               </option>
             ))}
           <option value="__none__">✕ Remove link</option>
+        </select>
+        <select
+          value=""
+          onChange={(e) => {
+            const v = e.target.value;
+            if (!v) return;
+            const ok = mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${v}`);
+            showHint(
+              ok
+                ? "Jump link set — click the 🔗 on the node to leap to that topic."
+                : "Select a node first, then link it to another topic.",
+            );
+          }}
+          style={controlStyle}
+          aria-label="Link selected node to another topic"
+          title="Link the selected node to another topic in this map (an in-map jump)"
+        >
+          <option value="">↪ Jump to…</option>
+          {outlineRows(liveDoc.root)
+            .filter((row) => row.id !== selected?.id)
+            .map((row) => (
+              <option key={row.id} value={row.id}>
+                {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+              </option>
+            ))}
         </select>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input

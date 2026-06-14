@@ -164,9 +164,25 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           topic
         )}
         {hyperlink ? (
-          <span title={hyperlink} style={{ marginLeft: 4 }}>
+          <button
+            type="button"
+            className="nodrag nopan"
+            title={`Follow link: ${hyperlink}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              editing?.openLink(hyperlink);
+            }}
+            style={{
+              marginLeft: 4,
+              border: "none",
+              background: "transparent",
+              padding: 0,
+              cursor: "pointer",
+              font: "inherit",
+            }}
+          >
             🔗
-          </span>
+          </button>
         ) : null}
         {note ? (
           <span title="Has a note" style={{ marginLeft: 4, opacity: 0.55 }}>

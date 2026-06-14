@@ -123,13 +123,20 @@ pass.
 > The `/`-to-find shortcut is the single most useful key on a big map. When you can't
 > remember where something is, don't hunt -- press `/` and type.
 
-## Links between maps
+## Links: doorways between topics and maps
 
-Some subjects are too big for one map. Rather than one sprawling canvas, MindMap Studio
-lets you keep a **library** of maps (Chapter 7) and draw **cross-map links** between
-them: a node in your *Strategy* map can link to your *Q3 Plan* map, so clicking it opens
-the other map. This is how you build a small atlas instead of one unreadable continent --
-a high-level map whose nodes are doorways into the detailed maps beneath them.
+A radial map is a tree, but real subjects aren't: the risk you noted on one branch is the
+same risk that constrains a plan three branches away. Drawing a relationship line between
+them is one answer (Chapter 4); a **link** is the lighter one. Give a node a link and it
+grows a small **🔗** -- click it and you travel.
+
+A link can point three ways. **↪ Jump to…** points it at another *topic in the same map*, so
+"see also: Budget" becomes one click instead of a hunt -- the canvas leaps to that topic and
+selects it, no line cluttering the picture. **🔗 Link…** points it at *another map* in your
+library (Chapter 7): a node in your *Strategy* map can open your *Q3 Plan* map, which is how
+you build a small **atlas** instead of one unreadable continent -- a high-level map whose nodes
+are doorways into the detailed maps beneath them. And a plain web URL points it at a page, which
+opens in a new tab. A node holds one link at a time, and the 🔗 follows whichever you set.
 
 ## Search every map
 

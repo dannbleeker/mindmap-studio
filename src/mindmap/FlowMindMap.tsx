@@ -21,8 +21,9 @@ import {
   useState,
 } from "react";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
+import { isDangerousUrl } from "../io/urlSafety";
 import type { MapNode, MindMapDoc } from "../model/types";
-import type { LayoutKind, MindMapHandle, MindMapProps } from "./contract";
+import { type LayoutKind, type MindMapHandle, type MindMapProps, classifyLink } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
 import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
@@ -91,6 +92,7 @@ function FlowInner({
   litIds = null,
   onChange,
   onSelect,
+  onMapLink,
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
@@ -158,6 +160,8 @@ function FlowInner({
   onChangeRef.current = onChange;
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const onMapLinkRef = useRef(onMapLink);
+  onMapLinkRef.current = onMapLink;
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
@@ -269,6 +273,20 @@ function FlowInner({
     [getNodes, apply, sync],
   );
 
+  // Centre + select a node by id (shared by the imperative handle and the in-map jump links).
+  const focusNodeById = useCallback(
+    (id: string) => {
+      const n = getNodes().find((m) => m.id === id);
+      if (!n) return;
+      setSelectedId(id);
+      fireSelect(id);
+      const w = n.measured?.width ?? 0;
+      const h = n.measured?.height ?? 0;
+      setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: 300 });
+    },
+    [getNodes, fireSelect, setCenter],
+  );
+
   // Editing API for the topic nodes. Commits arrive as raw contenteditable HTML; sanitise to a
   // safe inline subset, derive the plain-text fallback, and store both — topicRich is dropped
   // when the text carries no formatting, so plain topics stay tidy.
@@ -297,8 +315,16 @@ function FlowInner({
         apply(what === "child" ? addChild(d, id) : addSibling(d, id), true);
       },
       toggleCollapse: (id: string) => apply(toggleCollapse(docRef.current, id)),
+      // Follow a node's hyperlink: jump within the map (#node=), open another map (#map=), or
+      // open an external URL in a new tab. Dangerous schemes are refused (the app-wide XSS guard).
+      openLink: (url: string) => {
+        const link = classifyLink(url);
+        if (link.kind === "node") focusNodeById(link.id);
+        else if (link.kind === "map") onMapLinkRef.current?.(link.id);
+        else if (!isDangerousUrl(link.url)) window.open(link.url, "_blank", "noopener,noreferrer");
+      },
     };
-  }, [editingId, apply]);
+  }, [editingId, apply, focusNodeById]);
 
   // Flatten every node's callouts for the overlay, from the live doc (so freshly-added ones show).
   const calloutItems = useMemo<CalloutAnchor[]>(() => {
@@ -469,15 +495,7 @@ function FlowInner({
         return new Blob([svg], { type: "image/svg+xml" });
       },
       fit: () => fitView({ duration: 300 }),
-      focusNode: (id: string) => {
-        const n = getNodes().find((m) => m.id === id);
-        if (!n) return;
-        setSelectedId(id);
-        fireSelect(id);
-        const w = n.measured?.width ?? 0;
-        const h = n.measured?.height ?? 0;
-        setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: 300 });
-      },
+      focusNode: focusNodeById,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
       setSelectedNote: (note) => withSelected((id) => apply(setNote(docRef.current, id, note))),
       toggleSelectedIcon: (icon) =>
@@ -497,7 +515,7 @@ function FlowInner({
         return Boolean(findNode(docRef.current, id));
       },
     }),
-    [fitView, getNodes, setCenter, apply, fireSelect, withSelected],
+    [fitView, getNodes, apply, withSelected, focusNodeById],
   );
 
   return (

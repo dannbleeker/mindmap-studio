@@ -47,6 +47,8 @@ GitHub Pages).
 - **Relationships** — draw a labelled arrow between two nodes: right-click a node → **Link
   to…**, then click the target (with an optional label). Double-click a relationship to
   relabel it, right-click to delete. Imported `.mmap` relationships render too.
+- **Links** — give a node a clickable 🔗 to another **topic** in the same map (**↪ Jump to…**),
+  to another **map** (**🔗 Link…**), or to a **web page**; click the 🔗 to follow it.
 - **Boundaries** — a toolbar **⬚ Group** draws a shaded, rounded box around the selected
   branch and its subtree (double-click the box's chip to label it); imported MindManager
   boundaries render the same way, and boundaries you draw round-trip back into the model.

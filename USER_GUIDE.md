@@ -107,11 +107,19 @@ kept alongside it, so the outline, Find, and the Markdown/Office exports stay cl
 
 ### Links
 
-Select a node and use the node editor panel's **URL** field to attach a web hyperlink.
+Select a node and use the node editor panel's **URL** field to attach a web hyperlink. A linked
+node shows a **🔗** — click it to follow the link (web links open in a new tab).
 
-To link a node to **another map**, select it and pick a map from the **🔗 Link…** dropdown
-in the toolbar. The node shows a 🔗 — click it to jump to that map. (Pick **✕ Remove link**
-to clear it.) This lets you build a connected web of maps.
+A node's link can point three ways, all followed by clicking its 🔗:
+
+- **To another topic in this map** — select the node and pick a destination from the **↪ Jump to…**
+  dropdown. Clicking 🔗 leaps to and selects that topic — handy for cross-references on a big map
+  ("see also…") without drawing a relationship line.
+- **To another map** — pick a map from the **🔗 Link…** dropdown to build a connected web of maps.
+  (Pick **✕ Remove link** to clear it.)
+- **To a web page** — any `http(s)` URL in the node editor's URL field.
+
+A node holds one link at a time, so setting a new one replaces the old.
 
 ---
 

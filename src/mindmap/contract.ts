@@ -39,6 +39,24 @@ export interface MindMapHandle {
 /** Prefix marking a node hyperlink as an in-app link to another map. */
 export const MAP_LINK_PREFIX = "#map=";
 
+/** Prefix marking a node hyperlink as an in-map jump to another topic (by node id). */
+export const NODE_LINK_PREFIX = "#node=";
+
+/** What a node's hyperlink points at, once classified. */
+export type ResolvedLink =
+  | { kind: "node"; id: string }
+  | { kind: "map"; id: string }
+  | { kind: "external"; url: string };
+
+/** Classify a node hyperlink: an in-map topic jump, an in-app map link, or an external URL. Pure. */
+export function classifyLink(url: string): ResolvedLink {
+  if (url.startsWith(NODE_LINK_PREFIX))
+    return { kind: "node", id: url.slice(NODE_LINK_PREFIX.length) };
+  if (url.startsWith(MAP_LINK_PREFIX))
+    return { kind: "map", id: url.slice(MAP_LINK_PREFIX.length) };
+  return { kind: "external", url };
+}
+
 /** The three horizontal directions (two-sided, or all branches left / right). */
 export type LayoutDirection = "side" | "left" | "right";
 

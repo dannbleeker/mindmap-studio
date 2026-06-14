@@ -16,6 +16,8 @@ export interface EditingApi {
   cancelEdit: () => void;
   /** Collapse/expand a node from its toggle. */
   toggleCollapse: (id: string) => void;
+  /** Follow a node's hyperlink: jump to a topic (#node=), open a map (#map=), or open a URL. */
+  openLink: (url: string) => void;
 }
 
 export const EditingContext = createContext<EditingApi | null>(null);

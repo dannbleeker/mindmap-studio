@@ -99,7 +99,8 @@ export type LayoutKind =
   | "org-up"
   | "radial"
   | "timeline"
-  | "fishbone";
+  | "fishbone"
+  | "grid";
 
 /** Props the canvas accepts. Kept engine-neutral so the renderer stays swappable behind
  *  the `index.tsx` chooser. */

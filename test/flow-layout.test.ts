@@ -88,4 +88,36 @@ describe("flow layout (alternate kinds)", () => {
     expect(allFinite(computeLayout(nodes, edges, size, "timeline"))).toBe(true);
     expect(allFinite(computeLayout(nodes, edges, size, "fishbone"))).toBe(true);
   });
+
+  it("grid tiles the root's branches and keeps each branch's subtree below it", () => {
+    // 4 branches → a 2×2 matrix (SWOT-shaped)
+    const swot: MindMapDoc = {
+      schemaVersion: 1,
+      id: "g",
+      title: "SWOT",
+      root: {
+        id: "r",
+        topic: "SWOT",
+        children: [
+          { id: "s", topic: "Strengths", children: [{ id: "s1", topic: "S1", children: [] }] },
+          { id: "w", topic: "Weaknesses", children: [] },
+          { id: "o", topic: "Opportunities", children: [] },
+          { id: "t", topic: "Threats", children: [] },
+        ],
+      },
+    };
+    const p = project(swot);
+    const pos = computeLayout(p.nodes, p.edges, size, "grid");
+    expect(allFinite(pos)).toBe(true);
+    const xs = ["s", "w", "o", "t"].map((id) => pos.get(id)?.x ?? 0);
+    const ys = ["s", "w", "o", "t"].map((id) => pos.get(id)?.y ?? 0);
+    // two distinct columns and two distinct rows → a 2×2 grid
+    expect(new Set(xs).size).toBe(2);
+    expect(new Set(ys).size).toBe(2);
+    // the root sits above every quadrant (title on top)
+    const ry = pos.get("r")?.y ?? 0;
+    for (const y of ys) expect(y).toBeGreaterThan(ry);
+    // a branch's child stays within its cell (below the branch)
+    expect(pos.get("s1")?.y ?? 0).toBeGreaterThan(pos.get("s")?.y ?? 0);
+  });
 });

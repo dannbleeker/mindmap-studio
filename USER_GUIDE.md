@@ -241,6 +241,8 @@ map re-flows into the new shape without losing any edits:
 - **Radial** — branches fan out evenly in a ring around the root.
 - **Timeline** — the first level laid left-to-right as a sequence; good for roadmaps and steps.
 - **Fishbone** — an Ishikawa cause-and-effect diagram, branches angling into a central spine.
+- **Grid / matrix** — tiles the first-level branches into a grid (four branches → a 2×2), each with
+  its subtree beneath it and the root as a title above; the shape of a SWOT or Eisenhower matrix.
 
 ### Themes
 

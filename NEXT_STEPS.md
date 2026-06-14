@@ -63,8 +63,9 @@ Remaining bets: **A** (keyless AI bridge) and the rest of **B** (more diagram ty
 concept map / matrix / Venn / funnel, free-form whiteboard, per-branch layout, richer node shapes).
 Shipped 2026-06-14 from **B**: **Kanban board** + **summary topics** + **node shapes** (flowchart
 vocabulary: diamond / oval / parallelogram / hexagon / cylinder) + **directional relationships**
-(arrowhead at the target) — together the enablers for flowchart & concept maps. (LaTeX is the only
-deferred C item — heavy KaTeX + offline fonts.)
+(arrowhead at the target) + **grid / matrix layout** (2×2 for SWOT / Eisenhower) — together the
+enablers for flowchart, concept-map, and matrix frames. (LaTeX is the only deferred C item — heavy
+KaTeX + offline fonts.)
 
 ## Reference
 

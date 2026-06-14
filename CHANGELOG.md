@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Grid / matrix layout** — a new layout (under **Diagram** in the layout picker) that **tiles the
+  root's first-level branches into a grid** — four branches become a **2×2**, the shape of a SWOT,
+  Eisenhower, or any matrix frame. Each branch keeps its own subtree laid out beneath it, with the
+  root as a title centred above. Like the other layouts it's a pure view (the model is untouched) and
+  persists per session.
 - **Directional relationships** — relationship arrows now carry a **filled arrowhead at the target**,
   so a link reads as flow (the flowchart / concept-map connector). The arrowhead is built from one
   shared path helper used by the canvas edge **and** the image export, so the direction shows on

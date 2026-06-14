@@ -22,6 +22,7 @@ const COL_GAP = 64; // horizontal gap between depth columns
 const ROW_GAP = 18; // vertical gap between sibling slots (horizontal layouts)
 const VROW_GAP = 56; // vertical gap between depth rows (vertical layouts)
 const VCOL_GAP = 26; // horizontal gap between siblings (vertical layouts)
+const GRID_GAP = 90; // gap between grid/matrix cells
 const FLOAT_GAP = 48;
 const DEFAULT_SIZE: LayoutSize = { width: 120, height: 36 };
 
@@ -92,6 +93,9 @@ export function computeLayout(
       break;
     case "fishbone":
       layoutFishbone(ctx);
+      break;
+    case "grid":
+      layoutGrid(ctx);
       break;
     default:
       layoutSide(ctx);
@@ -192,6 +196,50 @@ function layoutVertical(ctx: Ctx, sign: 1 | -1): void {
     maxW + VCOL_GAP,
   );
   for (const [id, b] of breadth) place(ctx, id, b.breadth, sign * (rowY[b.depth] ?? 0));
+}
+
+// --- grid / matrix (root's branches tiled in a grid; SWOT / 2x2 / Eisenhower) ----------
+// Each first-level branch is laid out as its own small downward tidy tree (a "cell"); the cells
+// are tiled into a grid (4 branches → 2×2), with the root as a title centred above. Recognisable
+// for SWOT, Eisenhower, and other matrix frames built as a 4-branch map.
+function layoutGrid(ctx: Ctx): void {
+  const { root, branchChildren } = ctx;
+  const kids = root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []);
+  if (kids.length === 0) {
+    place(ctx, root.id, 0, 0);
+    return;
+  }
+  const cellMaxW = Math.max(DEFAULT_SIZE.width, ...maxExtentAtDepth(ctx, "w"));
+  const cellMaxH = Math.max(DEFAULT_SIZE.height, ...maxExtentAtDepth(ctx, "h"));
+  const rowGap = cellMaxH + VROW_GAP;
+  const slot = cellMaxW + VCOL_GAP;
+
+  // One downward tidy tree per branch (breadth normalised so the branch root is at 0).
+  const cells = kids.map((kidId) => {
+    const local = tidy(kidId, (id) => branchChildren.get(id) ?? [], slot);
+    let halfBreadth = 0;
+    let depth = 0;
+    for (const [, b] of local) {
+      halfBreadth = Math.max(halfBreadth, Math.abs(b.breadth));
+      depth = Math.max(depth, b.depth);
+    }
+    return { local, halfW: halfBreadth + cellMaxW / 2, depth };
+  });
+  const cellW = 2 * Math.max(...cells.map((c) => c.halfW));
+  const cellH = Math.max(...cells.map((c) => c.depth)) * rowGap + cellMaxH;
+  const cols = Math.ceil(Math.sqrt(cells.length));
+
+  cells.forEach((cell, i) => {
+    const colCenterX = (i % cols) * (cellW + GRID_GAP) + cellW / 2;
+    const rowTopY = Math.floor(i / cols) * (cellH + GRID_GAP);
+    for (const [id, b] of cell.local) {
+      place(ctx, id, colCenterX + b.breadth, rowTopY + b.depth * rowGap);
+    }
+  });
+
+  // Title (root) centred above the whole grid.
+  const gridW = cols * cellW + (cols - 1) * GRID_GAP;
+  place(ctx, root.id, gridW / 2, -rowGap);
 }
 
 // --- radial (hub: root centred, descendants on rings by depth) -------------

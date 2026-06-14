@@ -98,7 +98,17 @@ export function App() {
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { theme, setThemeId } = useTheme();
   const [layout, setLayout] = useState<LayoutKind>(() => {
-    const valid = ["side", "left", "right", "org-down", "org-up", "radial", "timeline", "fishbone"];
+    const valid = [
+      "side",
+      "left",
+      "right",
+      "org-down",
+      "org-up",
+      "radial",
+      "timeline",
+      "fishbone",
+      "grid",
+    ];
     try {
       // A ?layout= query param wins (shareable layout links); else the persisted choice.
       const q = new URLSearchParams(window.location.search).get("layout");
@@ -1050,6 +1060,7 @@ export function App() {
           <optgroup label="Diagram">
             <option value="timeline">Timeline</option>
             <option value="fishbone">Fishbone</option>
+            <option value="grid">Grid / matrix</option>
           </optgroup>
         </select>
         <button

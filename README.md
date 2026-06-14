@@ -74,7 +74,8 @@ GitHub Pages).
 - **Styles organizer** — save a topic's look as a **named style** and reuse it on others (in the same
   **🎨 Styles** panel); persists across maps.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
-  timeline, and fishbone, switchable from the toolbar and remembered per session.
+  timeline, fishbone, and a **grid / matrix** (tiles the first-level branches into a grid — a
+  2×2 for SWOT / Eisenhower frames), switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
   capped at 30, stored in IndexedDB, deleted with the map.

@@ -29,8 +29,14 @@ group/replace; 14 tests), inline contenteditable (double-click / F2), keyboard t
 end-to-end via `__getLiveDoc`); Phase E (**undo/redo** snapshot stack `flow/history.ts` (Ctrl+Z /
 Ctrl+Shift+Z / Ctrl+Y; 4 tests), **drag-to-reparent** (floating hit-test → `reparent` op, snap-back
 on invalid drop), a right-click **context menu**, and **theming via CSS vars** (4 themes on flow +
-a `?theme=` URL param); undo/redo/menu/dark all verified). **Next:** Phase F (new `exportSvg` from
-the model — **go/no-go #2**; reuse `svgText.ts` baseline math), then G (fromFlow sync), H, I.
+a `?theme=` URL param); undo/redo/menu/dark all verified); Phase F (**model-authored
+`exportSvg`** `flow/exportSvg.ts` — native `<text>` SVG from the doc + live node rects, reusing the
+canvas's tapered-ribbon + floating-edge geometry plus a new shared `flow/style.ts` (boundary/cross-link
+constants, so *canvas == export* can't drift). **go/no-go #2 cleared:** the export carries arrow +
+boundary *labels* (the old elixir export dropped them), rasterises to PNG with **no canvas-taint**, and
+survives the `sanitizeSvg → inlineSvgText` pipeline (14 tests; Office/deck are model-backed → untouched);
+verified by rendering an exported SVG standalone). **Next:** Phase G (`flow/sync.ts` fromFlow + round-trip
+tests), then H (callouts + rich-text + cutover), I (remove mind-elixir).
 
 ## MindManager UI-parity work (2026-06-12)
 
@@ -51,15 +57,16 @@ render everywhere, not only inline in a browser). See `CHANGELOG.md`.
 
 Remaining items are renderer-constrained or Dann-dependent:
 
-- [ ] **Arrow / boundary text labels are dropped from image & document exports, and a
-      boundary exports as a bracket, not the on-canvas box.** The geometry exports (the
-      relationship arrow curve, and the boundary as mind-elixir's bracket `<path>`), but
-      `exportSvg` omits their *text* labels (verified: the raw export contains neither the
-      arrow label nor the boundary label) and doesn't know about our filled-box overlay — so
-      a boundary that shows as a shaded box on-canvas still exports as a bracket. A fix would
-      read the labels' + boxes' positions from the live DOM and inject `<text>`/`<rect>` into
-      the export at mapped coordinates — finicky DOM→export coordinate work, hence deferred.
-      Topics (incl. multi-line), marker icons, and node images all export correctly.
+- [~] **Arrow / boundary text labels are dropped from image & document exports, and a
+      boundary exports as a bracket, not the on-canvas box** — *on the default mind-elixir
+      engine*. The geometry exports (the relationship arrow curve, and the boundary as
+      mind-elixir's bracket `<path>`), but `exportSvg` omits their *text* labels (verified: the
+      raw export contains neither the arrow label nor the boundary label) and doesn't know about
+      our filled-box overlay. **Fixed on the React Flow engine** (migration Phase F —
+      `flow/exportSvg.ts` authors the labels and the filled boundary box natively from the model;
+      verified the export carries both labels and rasterises clean); reaches all users **at
+      cutover** (migration Phase H). Topics (incl. multi-line), marker icons, and node images all
+      export correctly on both engines.
 - [ ] **Renderer-constrained (mind-elixir):** alternate layouts (org-chart / timeline /
       fishbone), organic/tapered branches, callouts, rich-text *topics*. These need a custom
       SVG renderer or a different engine — a multi-day rebuild. (Filled boundary enclosures

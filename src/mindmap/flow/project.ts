@@ -1,4 +1,5 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
+import { CROSSLINK_COLOR } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
 
 // Pure projection: canonical MindMapDoc → React Flow nodes + edges (positions are 0,0
@@ -19,7 +20,6 @@ const FALLBACK_PALETTE = [
 ];
 const ROOT_COLOR = "#26215c";
 const FLOATING_COLOR = "#73726c";
-const CROSSLINK_COLOR = "#8b87e0";
 
 export interface ProjectResult {
   nodes: TopicNode[];

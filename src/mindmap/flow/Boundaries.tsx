@@ -1,22 +1,31 @@
 import { ViewportPortal, useNodes } from "@xyflow/react";
 import type { CSSProperties } from "react";
 import type { Boundary } from "../../model/types";
+import {
+  BOUNDARY_FILL,
+  BOUNDARY_LABEL_BG,
+  BOUNDARY_LABEL_BORDER,
+  BOUNDARY_LABEL_COLOR,
+  BOUNDARY_PAD,
+  BOUNDARY_RADIUS,
+  BOUNDARY_STROKE,
+  boundaryLabel,
+} from "./style";
 
 // Filled boundary boxes, rendered in the flow coordinate space via ViewportPortal so they
 // pan/zoom with the map. Each box is the padded bbox of its member nodes (read from their
 // live measured rects), with a label chip — the same MindManager-style enclosure the
-// mind-elixir overlay drew, now a first-class part of the React Flow canvas.
-
-const PAD = 16;
+// mind-elixir overlay drew, now a first-class part of the React Flow canvas. Geometry +
+// colours come from ./style so the SVG export draws an identical box.
 
 const chip: CSSProperties = {
   position: "absolute",
   top: -11,
   left: 12,
   padding: "1px 8px",
-  background: "#eceafb",
-  color: "#26215c",
-  border: "1px solid #cecbf6",
+  background: BOUNDARY_LABEL_BG,
+  color: BOUNDARY_LABEL_COLOR,
+  border: `1px solid ${BOUNDARY_LABEL_BORDER}`,
   borderRadius: 8,
   fontSize: 12,
   fontWeight: 600,
@@ -48,20 +57,20 @@ export function Boundaries({ boundaries }: { boundaries: Boundary[] }) {
           found += 1;
         }
         if (found === 0) return null;
-        const label = b.label && b.label !== "summary" ? b.label : "";
+        const label = boundaryLabel(b.label);
         return (
           <div
             key={b.id}
             style={{
               position: "absolute",
-              left: minX - PAD,
-              top: minY - PAD,
-              width: maxX - minX + 2 * PAD,
-              height: maxY - minY + 2 * PAD,
+              left: minX - BOUNDARY_PAD,
+              top: minY - BOUNDARY_PAD,
+              width: maxX - minX + 2 * BOUNDARY_PAD,
+              height: maxY - minY + 2 * BOUNDARY_PAD,
               boxSizing: "border-box",
-              border: "1.5px solid #8b87e0",
-              background: "rgba(120,116,210,0.10)",
-              borderRadius: 16,
+              border: `1.5px solid ${BOUNDARY_STROKE}`,
+              background: BOUNDARY_FILL,
+              borderRadius: BOUNDARY_RADIUS,
               pointerEvents: "none",
             }}
           >

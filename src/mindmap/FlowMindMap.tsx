@@ -24,6 +24,7 @@ import { BranchEdge } from "./flow/BranchEdge";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { TopicNode } from "./flow/TopicNode";
 import { EditingContext } from "./flow/editing";
+import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
 import { createHistory, record, redo as redoHistory, undo as undoHistory } from "./flow/history";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import {
@@ -52,9 +53,9 @@ import { mindManagerTheme } from "./theme";
 // React Flow canvas — a fully editable engine. Inline topic editing (double-click / F2),
 // keyboard tree-building (Enter/Tab/Shift+Tab/Delete), drag-to-reparent, a right-click context
 // menu, undo/redo (Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y, doc-snapshot stack), theming via CSS vars,
-// and the model-mutating MindMapHandle methods. Every edit is a pure op on the canonical doc →
-// re-project → re-layout → onChange, so the model is the single source of truth. (SVG export
-// is Phase F.)
+// SVG export (native <text>, authored from the model + live node rects), and the model-mutating
+// MindMapHandle methods. Every edit is a pure op on the canonical doc → re-project → re-layout →
+// onChange, so the model is the single source of truth.
 
 const nodeTypes = { topic: TopicNode };
 const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
@@ -107,6 +108,8 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   onChangeRef.current = onChange;
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
 
   // Re-project + re-layout from a doc (with measured sizes when available, else estimated).
   const sync = useCallback(
@@ -327,7 +330,23 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   useImperativeHandle(
     ref,
     (): MindMapHandle => ({
-      exportSvg: () => null, // Phase F
+      // Author a clean native-text SVG straight from the model + the live node rects
+      // (position + measured size). Flows through useMapExports.cleanSvg() to drive
+      // png/svg/html/pdf — and, unlike the old export, carries arrow + boundary labels.
+      exportSvg: () => {
+        const rects = new Map<string, NodeRect>();
+        for (const n of getNodes()) {
+          rects.set(n.id, {
+            x: n.position.x,
+            y: n.position.y,
+            w: n.measured?.width ?? 0,
+            h: n.measured?.height ?? 0,
+          });
+        }
+        const cssVar = (themeRef.current ?? mindManagerTheme).cssVar;
+        const svg = buildFlowSvg(docRef.current, rects, paletteRef.current, cssVar);
+        return new Blob([svg], { type: "image/svg+xml" });
+      },
       fit: () => fitView({ duration: 300 }),
       focusNode: (id: string) => {
         const n = getNodes().find((m) => m.id === id);

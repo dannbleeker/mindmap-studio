@@ -390,11 +390,17 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Dev-only hook so the live model can be read during browser verification.
+  // Dev-only hooks for browser verification: read the live model, and grab the raw
+  // exported SVG straight off the canvas handle (so the export can be rendered outside
+  // the app — the Phase F go/no-go check).
   useEffect(() => {
     if (import.meta.env.DEV) {
-      (window as unknown as { __getLiveDoc?: () => MindMapDoc }).__getLiveDoc = () =>
-        liveDocRef.current;
+      const w = window as unknown as {
+        __getLiveDoc?: () => MindMapDoc;
+        __exportSvg?: () => Promise<string> | null;
+      };
+      w.__getLiveDoc = () => liveDocRef.current;
+      w.__exportSvg = () => mapRef.current?.exportSvg()?.text() ?? null;
     }
   }, []);
 

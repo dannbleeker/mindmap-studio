@@ -29,13 +29,39 @@ to GitHub Pages on every push to `main` — live at
       **MindMup** (JSON), **iThoughts** (`.itmz`, ZIP), **Markmap**. Lower priority — `.mm`/OPML/
       Markdown already bridge most tools both ways. Prioritise by format openness + adoption.
 
+## Competitive gap clusters (backlog candidates, 2026-06-14)
+
+From the cross-tool survey of 19 mind-mapping tools —
+[`docs/competitive-feature-matrix.md`](docs/competitive-feature-matrix.md). Excludes the
+out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concrete build list:
+
+- [ ] **A — AI assist** (biggest category gap). Only a **keyless copy-prompt → paste-result
+      bridge** (or optional BYO-key) fits the no-backend identity; paste-to-tree is half-built via
+      OPML/Markdown import. Prompt→map, expand-branch, doc/URL→map, summarise.
+- [ ] **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple
+      sheets per file.
+- [ ] **C — Content depth** — file attachments, dates + checkboxes with progress roll-up,
+      LaTeX/math rendering, conditional styling.
+- [ ] **D — Capture UX (cheap wins)** — Quick Entry, paste-text-as-tree, drop-link-as-topic,
+      brainstorm timer.
+- [ ] **E — Navigation polish (cheap wins)** — one-click focus / isolate-branch, saved filters,
+      fuzzy search.
+- [ ] **F — Durability** — persistent per-map version history (IndexedDB snapshots).
+- [ ] **G — Interop fills** — iThoughts (`.itmz`), MindMeister (`.mind`), image-bearing `.mmap`,
+      write `.mmap`.
+
+Suggested first pass by value-per-effort: **D + E**, then **A** and **F**; **B / C** are larger bets.
+
 ## Reference
 
+- **Competitive feature matrix** — [`docs/competitive-feature-matrix.md`](docs/competitive-feature-matrix.md):
+  the whole-category survey (19 tools) mapped to MindMap Studio, grouped into 11 areas, with the
+  A–G gap clusters above.
 - **MindManager gap analysis** — [`docs/mindmanager-gap-analysis.md`](docs/mindmanager-gap-analysis.md)
-  is the live backlog signal: every MM capability mapped to shipped / partial / renderer-ceiling /
-  out-of-scope, with a prioritised list of buildable gaps. The headline quick wins (marker/tag
-  index, auto-numbering, Power Filter, in-map jump links) all shipped 2026-06-14 — re-run it for
-  the next tranche.
+  is the MindManager-specific deep audit. The four headline quick wins (marker/tag index,
+  auto-numbering, Power Filter, in-map jump links) **and** the whole renderer-ceiling cluster
+  (alternate layouts / callouts / rich-text / organic branches) all shipped 2026-06-14; its
+  refreshed "Next — remaining buildable gaps" list is the MindManager-side roadmap.
 - **Book worked examples** — every feature is booked (`book` 100%); `bookExample` is ~66%. The
   features still lacking a worked example in the book (mostly import / styling / markers) are where
   to keep growing it.

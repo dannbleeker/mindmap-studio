@@ -193,31 +193,35 @@ topic entry and `+New` templates already cover fast local capture.)
 
 ## Prioritized buildable gaps (the actual roadmap signal)
 
-Everything 🚫 is intentionally excluded; everything 🧱 moves only with a renderer change.
-What's left — the ⬜/🟡 items worth considering — ranked by value ÷ effort:
+Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconciled with what has
+**shipped** since this analysis was written.
 
-### Quick wins (model-only, low risk)
-1. **Auto-numbering of topics** — a pure model/derived-label transform.
-2. **Marker / tag index view** — "jump to every topic with marker X / tag Y"; reuses Find infra.
-3. **Read-only Power Filter** — dim/hide topics by marker, tag, or text match.
-4. **In-map topic-to-topic jump links** — extend the existing hyperlink mechanism.
-5. **Per-map background colour** — small styling add.
-6. **XMind export** + remaining interchange formats (MindMup, iThoughts, SimpleMind) — the import side and the adapter pattern already exist.
+### ✅ Done since this analysis (2026-06-14)
+- **Auto-numbering of topics**, **Marker / tag index view**, **Read-only Power Filter**, and
+  **In-map topic-to-topic jump links** — the four original "quick wins" all shipped.
+- **XMind export** and **SimpleMind (`.smmx`) import + export** shipped — interchange now spans
+  `.mmap`(in)/OPML/Markdown/JSON/FreeMind/Mermaid/XMind/SimpleMind.
+- **The entire 🧱 renderer-ceiling cluster** — alternate layouts (org-chart down/up, radial,
+  timeline, fishbone), **callouts**, **rich-text topics**, and **organic/tapered branches** — all
+  shipped via the **React Flow engine migration** (mind-elixir removed). The strategic
+  "renderer or engine swap?" question is resolved: we swapped the engine.
 
-### Medium (new self-contained surfaces)
-7. **Kanban / board view** — a model-driven alternate view (tags → columns), independent of the canvas renderer.
-8. **Unified topic info card** — notes + links + tags in one panel.
-9. **True summary topics** — roll a range up into its own topic (mind-elixir summaries as the base).
-10. **Direct `.docx` / `.xlsx` import** — round out the Office story (export already ships).
+### Next — remaining buildable gaps (in priority order)
+1. **Per-map background colour / canvas styling** — small styling add; the last untouched original quick win.
+2. **Remaining interchange imports** — **iThoughts (`.itmz`)**, **MindMeister (`.mind`)**, older XMind `content.xml`; plus **image-bearing `.mmap`** (the known binary-blob gap) and a **`.mmap` writer**. The adapter pattern + most formats already exist.
+3. **Unified topic info card** — notes + links + tags (+ jump-link) in one side panel, instead of separate Notes/Markers/Style panels.
+4. **One-click focus / isolate-branch** — "show this branch only, dim the rest" (the Power Filter already dims; this is a dedicated single-branch gesture).
+5. **True summary topics** — roll a sibling range up into its own labelled topic. NB: the original note assumed mind-elixir summaries as the base; post-migration this is now a React Flow + model feature (project a synthesised summary node over a range), so it needs re-scoping.
+6. **Kanban / board view** — a model-driven alternate view (tags → columns). Borders the PM layer; keep it **read-only / tags-as-columns** (a *visualisation*, not task management) to stay in scope, or defer.
+7. **Direct `.docx` / `.xlsx` import** — round out the Office story (export already ships).
 
-### Renderer-ceiling (one big rebuild unlocks the cluster) 🧱
-11. **Alternate layouts** — org-chart, tree up/down, timeline, fishbone, radial-hub.
-12. **Callouts**, **rich-text topics**, **organic/tapered branches**, richer **object shapes**.
+### Bigger bets (see the cross-tool matrix)
+- **AI assist** via a **keyless copy-prompt / paste-result bridge** (paste-to-tree is half-built through OPML/Markdown import) — the biggest category-wide gap; see [`competitive-feature-matrix.md`](competitive-feature-matrix.md) cluster A.
+- **Persistent per-map version history** (IndexedDB snapshots) — cluster F.
+- **More structures** (flowchart, true concept map, matrix, brace map, multi-sheet) — cluster B.
 
-> These all share one root cause (the mind-elixir renderer). The strategic question isn't
-> "build callouts" or "build org-chart layout" individually — it's **whether to invest in a
-> custom SVG renderer or an engine swap**, which would unlock the whole 🧱 cluster at once.
-> Until then, they stay blocked together. See the renderer-ceiling note in `NEXT_STEPS.md`.
+> For the **full market landscape** (all 19 tools, not just MindManager) and the A–G gap
+> clusters, see [`competitive-feature-matrix.md`](competitive-feature-matrix.md).
 
 ## Where MindMap Studio already leads
 

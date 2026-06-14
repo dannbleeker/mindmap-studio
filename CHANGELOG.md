@@ -7,6 +7,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Polish** — a proper **favicon** for browser tabs + bookmarks (the mind-map glyph,
+  `icon.svg` + a PNG/apple-touch fallback), and a **collapsible minimap** (a "Minimap ▾/▴"
+  toggle that hides the corner overview when it's in the way; the choice persists).
 - **Draw relationships on the canvas** — right-click a node → **Link to…** → click a
   target to add a labelled cross-link (double-click a relationship to relabel, right-click
   to delete). Restores interactive relationship-drawing on the React Flow engine.

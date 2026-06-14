@@ -139,7 +139,7 @@ export default defineConfig({
       // and we surface an explicit "Refresh now" toast (src/pwa/pwaUpdate.ts),
       // so a background reload never throws away in-flight edits.
       registerType: "prompt",
-      includeAssets: ["icon.svg"],
+      includeAssets: ["icon.svg", "apple-touch-icon.png"],
       manifest: {
         name: "MindMap Studio",
         short_name: "MindMap",

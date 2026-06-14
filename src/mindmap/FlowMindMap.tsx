@@ -3,6 +3,7 @@ import {
   Background,
   Controls,
   MiniMap,
+  Panel,
   ReactFlow,
   ReactFlowProvider,
   useEdgesState,
@@ -102,6 +103,24 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
+  // The corner minimap can be collapsed (it covers dense maps); the choice persists.
+  const [minimapOpen, setMinimapOpen] = useState(() => {
+    try {
+      return localStorage.getItem("mindmap-minimap-open") !== "false";
+    } catch {
+      return true;
+    }
+  });
+  const toggleMinimap = () =>
+    setMinimapOpen((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem("mindmap-minimap-open", String(next));
+      } catch {
+        // preference is best-effort
+      }
+      return next;
+    });
   // The current doc, mirrored for render-time consumers (boundary + callout overlays). The
   // canvas is model-first: edits update docRef + RF state via sync(); App keeps the `doc` prop
   // stable during a session, so the overlays must track this live copy, not the prop.
@@ -489,12 +508,34 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
             onDelete={(nid, cid) => apply(deleteCallout(docRef.current, nid, cid))}
           />
           <Controls showInteractive={false} />
-          <MiniMap
-            pannable
-            zoomable
-            nodeColor={(node) => (node.data as TopicNodeT["data"])?.branchColor ?? "#bbb"}
-            nodeStrokeWidth={3}
-          />
+          {minimapOpen ? (
+            <MiniMap
+              pannable
+              zoomable
+              nodeColor={(node) => (node.data as TopicNodeT["data"])?.branchColor ?? "#bbb"}
+              nodeStrokeWidth={3}
+              style={{ marginBottom: 30 }}
+            />
+          ) : null}
+          <Panel position="bottom-right">
+            <button
+              type="button"
+              onClick={toggleMinimap}
+              title={minimapOpen ? "Hide minimap" : "Show minimap"}
+              style={{
+                font: "12px system-ui, sans-serif",
+                padding: "2px 8px",
+                borderRadius: 6,
+                border: "1px solid #cfcfe0",
+                background: "var(--mm-node-bg, #fff)",
+                color: "var(--mm-color, #222)",
+                cursor: "pointer",
+                boxShadow: "0 1px 3px #0002",
+              }}
+            >
+              {minimapOpen ? "Minimap ▾" : "Minimap ▴"}
+            </button>
+          </Panel>
         </ReactFlow>
         {menu ? (
           <ul

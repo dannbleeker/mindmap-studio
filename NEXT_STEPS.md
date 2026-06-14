@@ -17,9 +17,11 @@ Approved plan: `~/.claude/plans/bubbly-finding-squirrel.md` (10 phases, ~8–11 
 engines run in parallel behind `VITE_CANVAS_ENGINE` + a dev `?engine=flow` override, default
 stays elixir until parity; the canonical model never changes, so the flag is the rollback).
 **Done:** Phase 0 (engine-neutral contract `src/mindmap/contract.ts` + chooser `index.tsx`);
-Phase A (React Flow added, spike renders the model, **go/no-go #1 cleared** — lazy-loading
-both engines *dropped* the entry to 78.7 kB ≤ 150 kB). **Next:** Phase B (real `flow/project.ts`
-+ custom nodes/edges + boundary overlay), then C–I per the plan.
+Phase A (React Flow added, **go/no-go #1 cleared** — lazy-loading both engines *dropped* the
+entry to 78.7 kB ≤ 150 kB); Phase B (read-only render at parity — `flow/project.ts` +
+`flow/layout.ts` (d3-hierarchy two-sided tidy tree) + custom `TopicNode`/tapered `BranchEdge` +
+boundary boxes + dashed cross-links + markers, behind `?engine=flow`; entry still 78.7 kB).
+**Next:** Phase C (alternate layouts: org-chart/timeline/fishbone/radial), then D–I per the plan.
 
 ## MindManager UI-parity work (2026-06-12)
 

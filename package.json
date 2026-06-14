@@ -28,6 +28,7 @@
   "dependencies": {
     "@mind-elixir/node-menu": "^5.0.1",
     "@xyflow/react": "^12.11.0",
+    "d3-hierarchy": "^3.1.2",
     "fast-xml-parser": "^4.5.1",
     "fflate": "^0.8.2",
     "idb": "^8.0.3",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@types/d3-hierarchy": "^3.1.7",
     "@types/node": "^25.9.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",

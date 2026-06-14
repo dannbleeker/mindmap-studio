@@ -34,30 +34,19 @@ if (entry > BUDGET_KB) {
 }
 console.log(`\n✓ Initial bundle within budget: ${entry.toFixed(1)} kB ≤ ${BUDGET_KB} kB`);
 
-// Critical-CSS guard. mind-elixir ships its core stylesheet as a SEPARATE file that must
-// be imported (src/mindmap/MindMap.tsx -> "mind-elixir/style.css"). If that import is ever
-// dropped the JS still builds, but the canvas renders unstyled — node wrappers lose
-// position:absolute and the whole map collapses into inline text. This shipped once,
-// undetected, so assert the engine's CSS is actually in the bundle. `me-tpc` (mind-elixir's
-// topic custom element) is a stable, engine-only selector the app never authors itself.
+// Critical-CSS guard. React Flow ships its core stylesheet as a SEPARATE file that must be
+// imported (src/mindmap/FlowMindMap.tsx -> "@xyflow/react/dist/style.css"). If that import is
+// ever dropped the JS still builds, but the canvas renders unstyled — nodes lose their absolute
+// positioning and the whole map collapses into inline text (this exact failure shipped once with
+// the mind-elixir CSS, undetected). `.react-flow` is a stable, engine-only selector the app never
+// authors itself.
 const cssText = readdirSync(assetsDir)
   .filter((name) => name.endsWith(".css"))
   .map((name) => readFileSync(join(assetsDir, name), "utf8"))
   .join("\n");
-if (!cssText.includes("me-tpc")) {
-  console.error(
-    '\n✗ mind-elixir core CSS missing from the bundle — the canvas would render unstyled.\n  Check that `import "mind-elixir/style.css"` is still in src/mindmap/MindMap.tsx.',
-  );
-  process.exit(1);
-}
-console.log("✓ mind-elixir core CSS bundled (me-tpc rules present)");
-
-// React Flow is now the default engine, so its core stylesheet must be bundled too — without
-// it nodes lose their absolute positioning and the canvas collapses. `.react-flow` is a stable,
-// engine-only selector from "@xyflow/react/dist/style.css" (imported in FlowMindMap.tsx).
 if (!cssText.includes(".react-flow")) {
   console.error(
-    '\n✗ React Flow core CSS missing from the bundle — the default canvas would render unstyled.\n  Check that `import "@xyflow/react/dist/style.css"` is still in src/mindmap/FlowMindMap.tsx.',
+    '\n✗ React Flow core CSS missing from the bundle — the canvas would render unstyled.\n  Check that `import "@xyflow/react/dist/style.css"` is still in src/mindmap/FlowMindMap.tsx.',
   );
   process.exit(1);
 }

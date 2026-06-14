@@ -185,8 +185,7 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
     );
   }
 
-  // Floating topics render in a separate, editable "Floating topics" branch
-  // (mind-elixir has no detached nodes) — note that so their placement isn't a surprise.
+  // Floating (detached) topics are imported as-is; note that so their placement isn't a surprise.
   if (floatingTopics.length > 0) {
     ctx.warnings.push(
       `${floatingTopics.length} floating topic(s) imported — shown in a separate, editable "Floating topics" branch.`,

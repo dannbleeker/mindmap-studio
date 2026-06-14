@@ -3,14 +3,13 @@
 // Phase F go/no-go: the React Flow SVG exporter. buildFlowSvg() authors a standalone,
 // native-<text> SVG straight from the canonical model + the live node rects (no
 // foreignObject), so it renders everywhere and flows cleanly through the same
-// useMapExports.cleanSvg() pipeline (sanitizeSvg → inlineSvgText) that drives
+// useMapExports.cleanSvg() pipeline (sanitizeSvg) that drives
 // png/svg/html/pdf. This pins two things: (1) the SVG carries every visible element —
 // topics (incl. multi-line), markers, images, branch + cross-link paths, boundary box —
-// AND the labels the old mind-elixir export dropped (cross-link + boundary); (2) all of
+// AND the labels a foreignObject-based export drops (cross-link + boundary); (2) all of
 // that survives the export pipeline unchanged.
 import { describe, expect, it } from "vitest";
 import { sanitizeSvg } from "../src/io/svgSanitize";
-import { inlineSvgText } from "../src/io/svgText";
 import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
 import type { MindMapDoc } from "../src/model/types";
 
@@ -119,10 +118,10 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
   });
 });
 
-describe("flow exportSvg survives the cleanSvg pipeline (sanitize → inline)", () => {
-  // The real Phase F gate: a native-text SVG must pass through unchanged (inlineSvgText is a
-  // no-op for it; sanitizeSvg keeps the safe vocabulary), so png/svg/html/pdf still work.
-  const out = inlineSvgText(sanitizeSvg(buildFlowSvg(doc, rects, palette, cssVar)));
+describe("flow exportSvg survives the cleanSvg pipeline (sanitizeSvg)", () => {
+  // The export gate: a native-text SVG must pass through cleanSvg unchanged (sanitizeSvg keeps
+  // the safe element vocabulary), so png/svg/html/pdf still work.
+  const out = sanitizeSvg(buildFlowSvg(doc, rects, palette, cssVar));
 
   it("keeps every topic + multi-line tspan", () => {
     expect(out).toContain("Root");

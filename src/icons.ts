@@ -1,4 +1,4 @@
-// Marker palette shown in the UI; emoji render as mind-elixir node icons.
+// Marker palette shown in the UI; emoji render as node markers on the canvas.
 export const MARKER_PALETTE = [
   "✅",
   "❗",

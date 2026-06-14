@@ -24,8 +24,8 @@ import {
 // everywhere and flows through useMapExports.cleanSvg() (sanitizeSvg stays the XSS guard,
 // inlineSvgText becomes a harmless pass-through). It reuses the canvas's own tapered-ribbon
 // and floating-edge geometry — and the boundary/cross-link colours from ./style — so the
-// export matches the screen, and, unlike the old mind-elixir export, it carries arrow +
-// boundary *labels*.
+// export matches the screen, and it carries arrow + boundary *labels* (which a foreignObject-
+// based export drops).
 
 export interface NodeRect {
   x: number;

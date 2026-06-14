@@ -1,18 +1,14 @@
 import { isExportSafeUrl } from "./urlSafety";
 
-// Neutralise XSS vectors in an exported map SVG before it leaves the app as a
-// standalone document (.svg / .html / print-to-PDF). mind-elixir builds the
-// export SVG by re-injecting each node topic as live HTML inside an SVG
-// <foreignObject> and each node hyperlink as a raw href — so a topic of
-// `<img src=x onerror=…>` or a `javascript:` link would execute when the file
-// is opened, because src/io/html.ts embeds the SVG as live markup.
-//
-// DOMPurify can't be used here: it strips <foreignObject> content in every
-// profile, which would blank every node. So this is a hand-rolled, namespace-
-// aware pass that KEEPS foreignObject + its xhtml while removing script-bearing
-// elements, event-handler attributes, and dangerous URL schemes. Browser-only
-// (DOMParser/XMLSerializer, like src/io/image.ts); unit-tested under jsdom and
-// verified to round-trip a real mind-elixir export with every topic intact.
+// Neutralise XSS vectors in an exported map SVG before it leaves the app as a standalone
+// document (.svg / .html / print-to-PDF), which embed the SVG as live markup via src/io/html.ts.
+// The exporter (flow/exportSvg.ts) authors native <text>, but it still emits node <image>s and
+// can carry a hyperlink, so a `javascript:`/`data:` URL or any injected script/handler must be
+// stripped before the file is opened. A hand-rolled, namespace-aware DOMParser/XMLSerializer pass
+// (DOMPurify is avoided — its SVG profiles strip content too aggressively): it removes
+// script-bearing elements, every on* handler, and any URL outside a strict allowlist, while
+// keeping the safe SVG vocabulary (incl. foreignObject — harmless now that nothing emits it).
+// Browser-only (DOMParser/XMLSerializer, like src/io/image.ts); unit-tested under jsdom.
 
 // Elements that can execute script or pull active remote content — removed with
 // their subtree. Everything else is kept: all SVG elements and the xhtml

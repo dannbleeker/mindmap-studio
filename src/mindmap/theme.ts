@@ -1,8 +1,8 @@
-// MindManager-flavoured theme for mind-elixir.
+// MindManager-flavoured canvas theme.
 //
-// `palette` is the important bit: mind-elixir colours each main branch (and its
-// descendants) by cycling this palette from the root outward — which is exactly
-// the MindManager "coloured branch" identity. The cssVar block rounds the topic
+// `palette` is the important bit: the canvas colours each main branch (and its
+// descendants) by cycling this palette from the root outward — exactly the
+// MindManager "coloured branch" identity. The cssVar block rounds the topic
 // shapes and fattens the connectors to push the look closer to MindManager.
 export const mindManagerTheme = {
   name: "MindManager-ish",
@@ -73,8 +73,8 @@ export const sunsetTheme = {
   },
 };
 
-/** The shape mind-elixir's `theme` option (and `changeTheme`) accept. */
-export interface MindElixirTheme {
+/** The shape of a canvas theme: a per-branch palette + CSS custom properties. */
+export interface MindMapTheme {
   name: string;
   type: "light" | "dark";
   palette: string[];
@@ -84,7 +84,7 @@ export interface MindElixirTheme {
 export interface CanvasTheme {
   id: string;
   name: string;
-  theme: MindElixirTheme;
+  theme: MindMapTheme;
 }
 
 // The canvas style gallery, in pick order. id is persisted in localStorage.

@@ -14,8 +14,7 @@ import {
 
 // Filled boundary boxes, rendered in the flow coordinate space via ViewportPortal so they
 // pan/zoom with the map. Each box is the padded bbox of its member nodes (read from their
-// live measured rects), with a label chip — the same MindManager-style enclosure the
-// mind-elixir overlay drew, now a first-class part of the React Flow canvas. Geometry +
+// live measured rects), with a label chip — a MindManager-style enclosure. Geometry +
 // colours come from ./style so the SVG export draws an identical box.
 
 const chip: CSSProperties = {

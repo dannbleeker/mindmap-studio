@@ -16,7 +16,7 @@ import type { FlowEdge, TopicNode } from "./types";
 //    they're restored verbatim from prevDoc.
 //  - Boundaries aren't encoded in nodes/edges (they render from doc.boundaries via an
 //    overlay), so they're carried from prevDoc and pruned of any members that no longer exist.
-// Dangerous-scheme hyperlinks are stripped on capture (the same XSS guard as the elixir bridge).
+// Dangerous-scheme hyperlinks are stripped on capture (the app-wide XSS guard).
 
 function indexById(node: MapNode, into: Map<string, MapNode>): void {
   into.set(node.id, node);

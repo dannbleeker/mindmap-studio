@@ -444,7 +444,7 @@ export function App() {
   }, [searchAllOpen]);
 
   // After a cross-map jump, focus the target node once the new map has re-rendered (two
-  // frames lets mind-elixir finish init + fit). focusNode is a no-op if the id isn't found.
+  // frames lets the canvas finish layout + fit). focusNode is a no-op if the id isn't found.
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on `doc` so it re-runs when the map switches, though the body reads only the pendingFocus ref.
   useEffect(() => {
     const id = pendingFocus.current;

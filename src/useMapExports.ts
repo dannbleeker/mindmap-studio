@@ -4,7 +4,6 @@ import { serializeDoc } from "./io/json";
 import { toMarkdown } from "./io/markdown";
 import { toMermaid } from "./io/mermaid";
 import { sanitizeSvg } from "./io/svgSanitize";
-import { inlineSvgText } from "./io/svgText";
 import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
 
@@ -17,9 +16,9 @@ function download(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
-// Rasterise an SVG string to a PNG via an offscreen canvas. Only safe because the SVG
-// carries native <text> (inlineSvgText ran) — a foreignObject SVG would taint the canvas,
-// which is exactly why the old PNG path produced a blank/broken image.
+// Rasterise an SVG string to a PNG via an offscreen canvas. Safe because the exporter emits
+// native <text> (no foreignObject) — a foreignObject SVG would taint the canvas, which is
+// exactly why an HTML-in-SVG export path produces a blank/broken image.
 async function svgToPng(svg: string): Promise<Blob | null> {
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   try {
@@ -65,14 +64,13 @@ export function useMapExports(
 ): MapExports {
   const baseName = () => getDoc().title || "mindmap";
 
-  // The rendered map as a clean, portable SVG string: sanitizeSvg (strip XSS) then
-  // inlineSvgText (mind-elixir's foreignObject topic labels -> native SVG <text>), so the
-  // file renders everywhere — opened as a .svg, rasterized to PNG, in a PDF viewer, or
-  // placed in Office — not only inline in a browser. The sanitize-before-inline order is
-  // load-bearing. null when there is no live map. Shared by png/svg/html/pdf.
+  // The rendered map as a clean, portable SVG string. The exporter (flow/exportSvg.ts) authors
+  // native <text> from the model, so this only needs sanitizeSvg (strip XSS) for the file to
+  // render everywhere — opened as a .svg, rasterized to PNG, in a PDF viewer, or placed in
+  // Office — not only inline in a browser. null when there is no live map. Shared by png/svg/html/pdf.
   const cleanSvg = async (): Promise<string | null> => {
     const svg = mapRef.current?.exportSvg();
-    return svg ? inlineSvgText(sanitizeSvg(await svg.text())) : null;
+    return svg ? sanitizeSvg(await svg.text()) : null;
   };
 
   return {

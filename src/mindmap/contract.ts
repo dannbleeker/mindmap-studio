@@ -1,11 +1,10 @@
 import type { Ref } from "react";
 import type { MapImage, MindMapDoc, NodeStyle } from "../model/types";
-import type { MindElixirTheme } from "./theme";
+import type { MindMapTheme } from "./theme";
 
-// The engine-neutral contract between the app and whichever canvas engine renders the map.
-// Both the mind-elixir canvas (today) and the React Flow canvas (in progress) implement
-// this identical surface, so App / useFind / useMapExports / panels never depend on the
-// engine — they import from `./mindmap` (the engine chooser), which re-exports this file.
+// The contract between the app and the canvas. The React Flow engine implements this surface,
+// so App / useFind / useMapExports / panels never depend on the engine internals — they import
+// from `./mindmap`, which re-exports this file. Kept as a seam so the renderer stays swappable.
 
 /** A node surfaced to the app's Notes panel when the canvas selection changes. */
 export interface SelectedNode {
@@ -40,14 +39,10 @@ export interface MindMapHandle {
 /** Prefix marking a node hyperlink as an in-app link to another map. */
 export const MAP_LINK_PREFIX = "#map=";
 
-/** The original three horizontal directions (mind-elixir's only modes). */
+/** The three horizontal directions (two-sided, or all branches left / right). */
 export type LayoutDirection = "side" | "left" | "right";
 
-/**
- * Full layout set. The first three are the mind-elixir directions (and the React Flow
- * engine matches them); the rest are React-Flow-only alternate layouts. On the mind-elixir
- * engine the extra kinds gracefully fall back to "side".
- */
+/** Full layout set: the three directions plus the canvas's alternate layouts. */
 export type LayoutKind =
   | LayoutDirection
   | "org-down"
@@ -56,8 +51,8 @@ export type LayoutKind =
   | "timeline"
   | "fishbone";
 
-/** Props every canvas engine accepts. Engine-neutral so both the mind-elixir and React
- *  Flow components — and the lazy chooser in `index.tsx` — share one type. */
+/** Props the canvas accepts. Kept engine-neutral so the renderer stays swappable behind
+ *  the `index.tsx` chooser. */
 export interface MindMapProps {
   doc: MindMapDoc;
   /** Fires after every canvas edit with the updated canonical doc. */
@@ -67,8 +62,8 @@ export interface MindMapProps {
   /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
   onMapLink?: (mapId: string) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
-  theme?: MindElixirTheme;
-  /** Layout (direction or alternate layout; alternate kinds are React-Flow-only). */
+  theme?: MindMapTheme;
+  /** Layout: a direction, or an alternate layout (org-chart, radial, timeline, fishbone). */
   direction?: LayoutKind;
   ref?: Ref<MindMapHandle>;
 }

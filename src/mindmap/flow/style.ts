@@ -26,7 +26,7 @@ export const CALLOUT_TEXT = "#3b2f00";
 
 /**
  * The label to actually draw for a boundary. "summary" is the implicit default applied to
- * auto-created groupings, so it renders as no chip (matching mind-elixir's bare bracket).
+ * auto-created groupings, so it renders as no chip.
  */
 export function boundaryLabel(label: string | undefined): string {
   return label && label !== "summary" ? label : "";

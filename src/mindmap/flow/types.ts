@@ -1,5 +1,6 @@
 import type { Edge, Node } from "@xyflow/react";
 import type { MapImage, NodeStyle } from "../../model/types";
+import type { ProgressInfo } from "../../progress";
 
 // Shared data shapes for the React Flow canvas. Using `type` (not `interface`) so the
 // shapes satisfy React Flow's `Record<string, unknown>` data constraint.
@@ -27,6 +28,8 @@ export type TopicData = {
   side: "left" | "right";
   collapsed: boolean;
   hasChildren: boolean;
+  /** Rolled-up task progress (0..1 + done/total), or undefined when the node isn't a task. */
+  progress?: ProgressInfo;
   /** A detached/floating topic (not part of the central hierarchy). */
   floating: boolean;
   /** Dimmed by the read-only Power Filter (not on a path to a match); view-only opacity. */

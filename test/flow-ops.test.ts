@@ -12,6 +12,7 @@ import {
   setAllExpanded,
   setBackground,
   setNote,
+  setProgress,
   setTags,
   setTopic,
   toggleCollapse,
@@ -168,6 +169,22 @@ describe("flow ops — content", () => {
     expect(
       setBackground(setBackground(base(), "#fee").doc, "").doc.meta?.background,
     ).toBeUndefined();
+  });
+
+  it("setProgress sets task completion, clamps, and clears task on undefined", () => {
+    expect(findNode(setProgress(base(), "a", 0.5).doc, "a")?.task?.progress).toBe(0.5);
+    expect(findNode(setProgress(base(), "a", 9).doc, "a")?.task?.progress).toBe(1); // clamped
+    // Clearing drops the whole task object once it carries nothing else.
+    const set = setProgress(base(), "a", 0.5).doc;
+    expect(findNode(setProgress(set, "a", undefined).doc, "a")?.task).toBeUndefined();
+  });
+
+  it("setProgress preserves other task fields when clearing only progress", () => {
+    const withTask = structuredClone(base());
+    const a = findNode(withTask, "a");
+    if (a) a.task = { progress: 0.5, priority: 2 };
+    const cleared = findNode(setProgress(withTask, "a", undefined).doc, "a");
+    expect(cleared?.task).toEqual({ priority: 2 });
   });
 });
 

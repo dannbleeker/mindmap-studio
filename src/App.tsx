@@ -1251,6 +1251,10 @@ export function App() {
             onRemoveTag={(t) =>
               mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
             }
+            onSetProgress={(progress) => {
+              const ok = mapRef.current?.setSelectedProgress(progress);
+              if (!ok) showHint("Select a node first, then set its progress.");
+            }}
             onSetHyperlink={(url) => {
               const ok = mapRef.current?.setSelectedHyperlink(url);
               if (!ok) showHint("Select a node first, then add a link.");

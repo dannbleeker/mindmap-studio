@@ -1,6 +1,8 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { type CSSProperties, useEffect, useMemo, useRef } from "react";
 import { sanitizeRich } from "../../io/richText";
+import type { ProgressInfo } from "../../progress";
+import { toPercent } from "../../progress";
 import { useEditing } from "./editing";
 import type { TopicNode as TopicNodeT } from "./types";
 
@@ -26,6 +28,50 @@ const chipStyle: CSSProperties = {
   color: "inherit",
 };
 
+/** A compact task-progress bar: a filled track + percentage (✓ at 100%), with a done/total
+ *  count when the value is rolled up from sub-tasks. */
+function ProgressBadge({ info }: { info: ProgressInfo }) {
+  const pct = toPercent(info.progress);
+  const complete = pct >= 100;
+  return (
+    <div
+      title={
+        info.derived
+          ? `${info.done} of ${info.total} sub-tasks complete (${pct}%)`
+          : `Task ${pct}% complete`
+      }
+      style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 5, fontSize: 10.5 }}
+    >
+      <span
+        style={{
+          position: "relative",
+          width: 40,
+          height: 6,
+          borderRadius: 999,
+          background: "rgba(0,0,0,0.12)",
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
+        <span
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${pct}%`,
+            background: complete ? "#27852f" : "#3b8bd4",
+          }}
+        />
+      </span>
+      <span style={{ opacity: 0.7, fontVariantNumeric: "tabular-nums" }}>
+        {complete ? "✓ " : ""}
+        {pct}%{info.derived ? ` · ${info.done}/${info.total}` : ""}
+      </span>
+    </div>
+  );
+}
+
 export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
   const {
     topic,
@@ -41,6 +87,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     branchColor,
     collapsed,
     hasChildren,
+    progress,
     dimmed,
   } = data;
   const editing = useEditing();
@@ -190,6 +237,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           </span>
         ) : null}
       </span>
+      {progress ? <ProgressBadge info={progress} /> : null}
       {tags?.length ? (
         <div style={{ marginTop: 4, display: "flex", gap: 4, flexWrap: "wrap" }}>
           {tags.map((t) => (

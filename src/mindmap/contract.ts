@@ -38,6 +38,8 @@ export interface MindMapHandle {
   setBackground: (color: string) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */
   setSelectedTags: (tags: string[]) => boolean;
+  /** Set the selected node's task completion (0..1), or clear it with undefined; false if none. */
+  setSelectedProgress: (progress: number | undefined) => boolean;
   /** Graft a forest of nodes (e.g. parsed from pasted text) under the selected node; false if none. */
   addSubtreeToSelected: (nodes: MapNode[]) => boolean;
 }

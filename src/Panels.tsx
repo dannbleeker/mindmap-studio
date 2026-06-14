@@ -10,6 +10,7 @@ import {
   outlineNumbers,
   outlineRows,
 } from "./outline";
+import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import type { VersionMeta } from "./store/mapStore";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 
@@ -211,6 +212,9 @@ export function OutlinePanel({
             {row.hasNote ? "📝 " : ""}
             {numbers?.get(row.id) ? `${numbers.get(row.id)} ` : ""}
             {row.topic || "(untitled)"}
+            {row.progress !== undefined ? (
+              <span style={{ marginLeft: 6, fontSize: 11, color: "#8a8780" }}>{row.progress}%</span>
+            ) : null}
           </button>
         ))}
       </div>
@@ -588,6 +592,7 @@ export function InfoPanel({
   onStyle,
   onAddTag,
   onRemoveTag,
+  onSetProgress,
   onSetHyperlink,
   maps,
   onLinkMap,
@@ -605,6 +610,7 @@ export function InfoPanel({
   onStyle: (patch: Partial<NodeStyle>) => void;
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
+  onSetProgress: (progress: number | undefined) => void;
   onSetHyperlink: (url: string) => void;
   maps: { id: string; title: string }[];
   onLinkMap: (mapId: string) => void;
@@ -617,6 +623,102 @@ export function InfoPanel({
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
   const webUrl = link.startsWith("#") ? "" : link;
   const sectionLabel = (text: string) => <div style={PANEL_GROUP_LABEL}>{text}</div>;
+
+  // Task progress: parents with sub-tasks show an auto-rolled-up bar (read-only); a leaf (or an
+  // undivided node) gets quarter-step buttons to set its own completion, plus a clear-task control.
+  const renderProgress = (n: MapNode) => {
+    const info = nodeProgress(n);
+    const derived = hasTaskDescendants(n);
+    const pct = info ? toPercent(info.progress) : null;
+    const bar = info ? (
+      <span
+        style={{
+          position: "relative",
+          display: "inline-block",
+          width: 56,
+          height: 7,
+          borderRadius: 999,
+          background: "rgba(0,0,0,0.12)",
+          overflow: "hidden",
+          verticalAlign: "middle",
+        }}
+      >
+        <span
+          style={{
+            position: "absolute",
+            inset: "0 auto 0 0",
+            width: `${pct}%`,
+            background: (pct ?? 0) >= 100 ? "#27852f" : "#3b8bd4",
+          }}
+        />
+      </span>
+    ) : null;
+    return (
+      <>
+        {sectionLabel("Progress")}
+        {derived ? (
+          <div
+            style={{
+              padding: "0 10px 6px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 12,
+            }}
+          >
+            {bar}
+            <span style={{ color: "#26215c", fontVariantNumeric: "tabular-nums" }}>
+              {pct}% · {info?.done}/{info?.total} done
+            </span>
+            <span style={{ color: "#8a8780" }}>(auto)</span>
+          </div>
+        ) : (
+          <div
+            style={{
+              padding: "0 10px 6px",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              flexWrap: "wrap",
+            }}
+          >
+            {[0, 25, 50, 75, 100].map((step) => {
+              const active = pct === step;
+              return (
+                <button
+                  key={step}
+                  type="button"
+                  onClick={() => onSetProgress(step / 100)}
+                  title={`Set task to ${step}% complete`}
+                  style={{
+                    ...controlStyle,
+                    padding: "1px 7px",
+                    fontSize: 12,
+                    fontVariantNumeric: "tabular-nums",
+                    background: active ? "#26215c" : "#fff",
+                    color: active ? "#fff" : "#26215c",
+                    borderColor: active ? "#26215c" : undefined,
+                  }}
+                >
+                  {step}
+                </button>
+              );
+            })}
+            {info ? (
+              <button
+                type="button"
+                onClick={() => onSetProgress(undefined)}
+                title="Clear task status"
+                style={{ ...controlStyle, padding: "1px 7px", fontSize: 12 }}
+              >
+                ✕
+              </button>
+            ) : null}
+          </div>
+        )}
+      </>
+    );
+  };
   const aside = (
     <aside style={{ ...PANEL_ASIDE, width: 280 }}>
       <div
@@ -685,6 +787,8 @@ export function InfoPanel({
             aria-label="Add a tag"
             style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
           />
+
+          {renderProgress(node)}
 
           {sectionLabel("Links")}
           <input

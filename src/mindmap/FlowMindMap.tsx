@@ -56,6 +56,7 @@ import {
   setImage,
   setLinkLabel,
   setNote,
+  setProgress,
   setTags,
   setTopicRich,
   toggleCollapse,
@@ -519,6 +520,8 @@ function FlowInner({
       },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
+      setSelectedProgress: (progress) =>
+        withSelected((id) => apply(setProgress(docRef.current, id, progress))),
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
     }),

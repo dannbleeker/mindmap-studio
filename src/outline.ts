@@ -1,18 +1,29 @@
 import type { MapNode } from "./model/types";
+import { progressMap, toPercent } from "./progress";
 
 export interface OutlineRow {
   id: string;
   topic: string;
   depth: number;
   hasNote: boolean;
+  /** Rolled-up task completion as a whole percent (0..100), or undefined when not a task. */
+  progress?: number;
 }
 
 // Flatten the tree into an indented outline (depth-first) for the Outline panel.
 // Pure + deterministic; the panel renders these rows and focuses a node on click.
 export function outlineRows(root: MapNode): OutlineRow[] {
   const rows: OutlineRow[] = [];
+  const progress = progressMap(root);
   const walk = (node: MapNode, depth: number) => {
-    rows.push({ id: node.id, topic: node.topic, depth, hasNote: !!node.note?.trim() });
+    const info = progress.get(node.id);
+    rows.push({
+      id: node.id,
+      topic: node.topic,
+      depth,
+      hasNote: !!node.note?.trim(),
+      progress: info ? toPercent(info.progress) : undefined,
+    });
     for (const child of node.children) walk(child, depth + 1);
   };
   walk(root, 0);

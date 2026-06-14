@@ -41,8 +41,8 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       OPML/Markdown import. Prompt→map, expand-branch, doc/URL→map, summarise.
 - [ ] **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple
       sheets per file.
-- [ ] **C — Content depth** — file attachments, dates + checkboxes with progress roll-up,
-      LaTeX/math rendering, conditional styling.
+- [ ] **C — Content depth** — task progress + roll-up **shipped 2026-06-14**; remaining: file
+      attachments, dates, LaTeX/math rendering, conditional styling.
 - [ ] **D — Capture UX (cheap wins)** — **paste-text → map shipped 2026-06-14** (📋 Paste text:
       outline/bullets/Markdown → topics, new map or graft); remaining: Quick Entry, drop-link-as-topic,
       brainstorm timer.
@@ -56,9 +56,10 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
 
 Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus), **③** (info panel +
 tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), **E**
-(saved filters + fuzzy Find), and the first slice of **D** (paste text → map).
+(saved filters + fuzzy Find), the first slice of **D** (paste text → map), and the first slice of
+**C** (task progress + roll-up).
 Remaining bets: **A** (keyless AI bridge), the rest of **D** (Quick Entry, drop-link, brainstorm
-timer), and **B / C** (more structures / content depth).
+timer), the rest of **C** (attachments, dates, LaTeX, conditional styling), and **B** (more structures).
 
 ## Reference
 

@@ -94,10 +94,10 @@ interchange capability we could reasonably own.
 | Web hyperlinks | ✅ | |
 | In-map jump links + cross-map links | ✅ | |
 | Tags (+ index + filter) | ✅ | |
-| Priority/progress markers w/ data + roll-up | 🟡 | emoji markers only; no structured data |
+| Priority/progress markers w/ data + roll-up | ✅ | task progress 0–100% rolls up to parents (+ emoji markers) |
 | File attachments (arbitrary) | ❌ | most tools |
 | Audio / video embed or record | ❌ | Mindomo, Ayoa, SimpleMind |
-| Checkboxes / task checkbox + roll-up | ❌ | SimpleMind, Coggle |
+| Checkboxes / task checkbox + roll-up | ✅ | task progress (0/25/50/75/100) with done/total roll-up |
 | Dates on topics | ❌ | |
 | Formulas / key-value attributes | ❌ | Freeplane, MindManager |
 | Spreadsheet / Excel data binding | ❌ | MindManager |
@@ -213,7 +213,7 @@ Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
 - **B — More structures** — flowchart, true concept map, matrix/grid, brace map, multiple sheets per file.
-- **C — Content depth** — file attachments, dates + checkboxes with progress roll-up, LaTeX/math, conditional styling.
+- **C — Content depth** — ✅ task progress + roll-up shipped; remaining: file attachments, dates, LaTeX/math, conditional styling.
 - **D — Capture UX (cheap wins)** — Quick Entry, paste-text-as-tree, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.
 - **F — Durability** — persistent per-map version history (fits local-first via IndexedDB snapshots).

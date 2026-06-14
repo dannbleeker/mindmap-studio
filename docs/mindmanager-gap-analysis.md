@@ -221,6 +221,9 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
 - **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
   (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
   (navigation polish), alongside the earlier ◎ Focus.
+- **Task progress + roll-up** (set 0–100% in the **ℹ Info** panel; a node progress bar plus automatic
+  parent roll-up with a done/total count, echoed in the Outline) shipped 2026-06-14 — the first slice
+  of cluster C (content depth). Stored on `task.progress`; lossless in `.json`.
 
 ### Next — remaining buildable gaps (in priority order)
 1. **The last interchange items** — **image-bearing `.mmap`** (the known binary-blob gap; needs a real sample) and a **`.mmap` writer** (large XSD; can't validate without MindManager). Both are higher-risk / blocked; the easy importers are all done.

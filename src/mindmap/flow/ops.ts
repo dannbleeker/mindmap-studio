@@ -5,6 +5,7 @@ import type {
   MapNode,
   MindMapDoc,
   NodeStyle,
+  TaskInfo,
 } from "../../model/types";
 
 // Pure tree-edit transforms on the canonical MindMapDoc. Each returns a NEW doc (the input
@@ -239,6 +240,22 @@ export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   const loc = locate(next.root, id);
   if (!loc) return { doc };
   loc.node.tags = tags.length > 0 ? tags : undefined;
+  return { doc: next };
+}
+
+/** Set a node's task completion (0..1), or clear its task status with `undefined`. Drops the
+ *  whole `task` object once it carries nothing else, so a cleared node stops being a task. */
+export function setProgress(doc: MindMapDoc, id: string, progress: number | undefined): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc) return { doc };
+  // Rebuild the task object minus `progress`, then re-add it (clamped) unless we're clearing.
+  // This keeps every other task field while letting an emptied task drop away entirely.
+  const task: TaskInfo = {};
+  for (const [k, v] of Object.entries(loc.node.task ?? {}))
+    if (k !== "progress") (task as Record<string, unknown>)[k] = v;
+  if (progress !== undefined) task.progress = Math.max(0, Math.min(1, progress));
+  loc.node.task = Object.keys(task).length > 0 ? task : undefined;
   return { doc: next };
 }
 

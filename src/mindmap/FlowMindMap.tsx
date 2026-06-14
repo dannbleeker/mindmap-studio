@@ -24,6 +24,7 @@ import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { nextProgressLevel } from "../progress";
+import { todayISO } from "../taskDate";
 import { type LayoutKind, type MindMapHandle, type MindMapProps, classifyLink } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
 import { BranchEdge } from "./flow/BranchEdge";
@@ -53,11 +54,13 @@ import {
   setAllExpanded,
   setBackground,
   setCalloutText,
+  setDue,
   setHyperlink,
   setImage,
   setLinkLabel,
   setNote,
   setProgress,
+  setStart,
   setTags,
   setTopicRich,
   toggleCollapse,
@@ -501,6 +504,7 @@ function FlowInner({
           paletteRef.current,
           cssVar,
           numberedRef.current,
+          todayISO(),
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
@@ -528,6 +532,8 @@ function FlowInner({
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
       setSelectedProgress: (progress) =>
         withSelected((id) => apply(setProgress(docRef.current, id, progress))),
+      setSelectedDue: (due) => withSelected((id) => apply(setDue(docRef.current, id, due))),
+      setSelectedStart: (start) => withSelected((id) => apply(setStart(docRef.current, id, start))),
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
     }),

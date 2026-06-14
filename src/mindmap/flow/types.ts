@@ -30,6 +30,10 @@ export type TopicData = {
   hasChildren: boolean;
   /** Rolled-up task progress (0..1 + done/total), or undefined when the node isn't a task. */
   progress?: ProgressInfo;
+  /** Task due date ("YYYY-MM-DD"), shown as a chip (red when overdue). */
+  due?: string;
+  /** Task start date ("YYYY-MM-DD"). */
+  start?: string;
   /** A detached/floating topic (not part of the central hierarchy). */
   floating: boolean;
   /** Dimmed by the read-only Power Filter (not on a path to a match); view-only opacity. */

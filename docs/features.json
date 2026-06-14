@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 93,
+  "reviewedThroughChangelogBullets": 94,
   "areas": [
     "editing",
     "notes",
@@ -109,6 +109,15 @@
     {
       "id": "task-progress",
       "name": "Task progress (0–100%) with automatic parent roll-up",
+      "area": "markers",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "task-dates",
+      "name": "Start / due dates with overdue highlighting + a due-date filter",
       "area": "markers",
       "since": "2026-06-14",
       "manual": true,

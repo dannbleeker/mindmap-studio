@@ -1,5 +1,6 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
 import { checkPath, piePath } from "../../progress";
+import { formatDateShort, isOverdue } from "../../taskDate";
 import { taperedRibbonPath } from "./BranchEdge";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
@@ -146,6 +147,7 @@ export function buildFlowSvg(
   palette: string[],
   cssVar: Record<string, string>,
   numbered = false,
+  today = "",
 ): string {
   const { nodes, edges } = project(doc, palette, numbered);
   const callouts = collectCallouts(doc, rects);
@@ -271,8 +273,8 @@ export function buildFlowSvg(
       textTop = r.y + pad + ih;
     }
 
-    // A task pie sits in a reserved strip at the bottom-left (matches the on-canvas node badge).
-    const pieReserve = d.progress ? 20 : 0;
+    // The task pie + due-date chip sit in a reserved strip at the bottom (matches the canvas badge).
+    const pieReserve = d.progress || d.due ? 20 : 0;
 
     const fontSize = Number.parseFloat(d.style?.fontSize ?? "") || 16;
     const lines = d.topic.split("\n").map((l) => l.trim());
@@ -292,7 +294,21 @@ export function buildFlowSvg(
         ),
       );
     }
-    if (d.progress) parts.push(pieSvg(r.x + pad + 8, r.y + r.h - 12, 8, d.progress.progress));
+    let badgeX = r.x + pad;
+    if (d.progress) {
+      parts.push(pieSvg(badgeX + 8, r.y + r.h - 12, 8, d.progress.progress));
+      badgeX += 22;
+    }
+    if (d.due) {
+      const over = isOverdue(d.due, d.progress?.progress ?? 0, today);
+      const label = formatDateShort(d.due);
+      const chipW = label.length * 6.2 + 10;
+      const chipY = r.y + r.h - 20;
+      parts.push(
+        `<rect x="${r2(badgeX)}" y="${r2(chipY)}" width="${r2(chipW)}" height="16" rx="5" fill="${over ? "#fde2e2" : "rgba(0,0,0,0.06)"}"/>`,
+        `<text x="${r2(badgeX + 5)}" y="${r2(chipY + 12)}" font-family="sans-serif" font-size="10.5" fill="${over ? "#b42318" : esc(textColor)}">${esc(label)}</text>`,
+      );
+    }
   }
 
   // Callouts (anchored bubbles, drawn on top): dashed connector + sticky-note bubble + text.

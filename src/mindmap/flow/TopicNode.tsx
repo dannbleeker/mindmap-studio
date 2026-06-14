@@ -4,6 +4,7 @@ import { ProgressPie } from "../../ProgressPie";
 import { sanitizeRich } from "../../io/richText";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
+import { formatDateShort, isOverdue, todayISO } from "../../taskDate";
 import { useEditing } from "./editing";
 import type { TopicNode as TopicNodeT } from "./types";
 
@@ -45,7 +46,7 @@ function ProgressBadge({ info, onCycle }: { info: ProgressInfo; onCycle?: () => 
       }
     />
   );
-  if (!onCycle) return <div style={{ marginTop: 4 }}>{pie}</div>;
+  if (!onCycle) return pie;
   return (
     <button
       type="button"
@@ -55,7 +56,6 @@ function ProgressBadge({ info, onCycle }: { info: ProgressInfo; onCycle?: () => 
         onCycle();
       }}
       style={{
-        marginTop: 4,
         padding: 0,
         border: "none",
         background: "transparent",
@@ -66,6 +66,27 @@ function ProgressBadge({ info, onCycle }: { info: ProgressInfo; onCycle?: () => 
     >
       {pie}
     </button>
+  );
+}
+
+/** A due-date chip on the node; turns red when overdue (past due and not finished). */
+function DateChip({ due, overdue }: { due: string; overdue: boolean }) {
+  return (
+    <span
+      title={overdue ? `Overdue — was due ${due}` : `Due ${due}`}
+      style={{
+        fontSize: 10.5,
+        lineHeight: "16px",
+        padding: "0 5px",
+        borderRadius: 6,
+        whiteSpace: "nowrap",
+        background: overdue ? "#fde2e2" : "rgba(0,0,0,0.06)",
+        color: overdue ? "#b42318" : "inherit",
+        fontWeight: overdue ? 600 : 400,
+      }}
+    >
+      📅 {formatDateShort(due)}
+    </span>
   );
 }
 
@@ -85,6 +106,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     collapsed,
     hasChildren,
     progress,
+    due,
     dimmed,
   } = data;
   const editing = useEditing();
@@ -234,11 +256,20 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           </span>
         ) : null}
       </span>
-      {progress ? (
-        <ProgressBadge
-          info={progress}
-          onCycle={progress.derived ? undefined : () => editing?.cycleProgress(id)}
-        />
+      {progress || due ? (
+        <div
+          style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}
+        >
+          {progress ? (
+            <ProgressBadge
+              info={progress}
+              onCycle={progress.derived ? undefined : () => editing?.cycleProgress(id)}
+            />
+          ) : null}
+          {due ? (
+            <DateChip due={due} overdue={isOverdue(due, progress?.progress ?? 0, todayISO())} />
+          ) : null}
+        </div>
       ) : null}
       {tags?.length ? (
         <div style={{ marginTop: 4, display: "flex", gap: 4, flexWrap: "wrap" }}>

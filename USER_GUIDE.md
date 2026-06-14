@@ -89,6 +89,9 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
   roll up automatically**: a branch with sub-tasks shows their average plus a *done / total* count
   (e.g. *75% · 1/2*) and is read-only (marked *auto*, so its pie isn't clickable). The percentage also
   shows in the Outline, and the pie is carried into image exports (PNG/SVG).
+- **Dates** — set a **Start** and **Due** date; a **📅 chip** appears on the node and turns **red when
+  overdue** (past due and not yet 100%). Clearing a date removes the chip. Dates are carried into
+  image exports and saved with the map; the [Power Filter](#power-filter) can filter by due date.
 - **Style** — **Shape** (Box / Rounded / Pill), **Fill**, **Border** (swatch or ✕ for none), **B**
   for bold, **Reset** to clear; font size/colour live here too.
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in
@@ -141,9 +144,9 @@ palette: the palette *applies* markers to a node, the index *finds* every node t
 
 **🎚 Filter** opens a read-only filter that **dims** every topic except the ones that match your
 criteria — and the branches leading to them, so each match keeps its context. Combine a free-text
-search (matches topic **and** note) with toggle chips for any marker or tag in the map; marker/tag
-criteria are combined with AND (a topic must satisfy each category you've set). A live count shows
-how many topics matched. It changes nothing in the map — **Clear** or closing the panel restores
+search (matches topic **and** note) with toggle chips for any marker or tag in the map, plus a
+**Due date** option (*Has a date · Overdue · Due ≤ 7 days*); criteria are combined with AND (a topic
+must satisfy each category you've set). A live count shows how many topics matched. It changes nothing in the map — **Clear** or closing the panel restores
 everything — so it's a safe way to focus a crowded map on, say, every urgent (❗) item mentioning
 "budget". (This differs from **Find**, which steps you through matches one at a time, and the
 **Filter outline…** box, which narrows the outline list.)

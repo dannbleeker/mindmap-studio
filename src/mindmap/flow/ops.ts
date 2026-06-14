@@ -243,20 +243,34 @@ export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   return { doc: next };
 }
 
-/** Set a node's task completion (0..1), or clear its task status with `undefined`. Drops the
- *  whole `task` object once it carries nothing else, so a cleared node stops being a task. */
-export function setProgress(doc: MindMapDoc, id: string, progress: number | undefined): OpResult {
+/** Merge a patch into a node's TaskInfo; a key set to undefined/"" is dropped, and the whole `task`
+ *  object falls away once it carries nothing — so clearing the last field stops it being a task. */
+function patchTask(doc: MindMapDoc, id: string, patch: Partial<TaskInfo>): OpResult {
   const next = structuredClone(doc);
   const loc = locate(next.root, id);
   if (!loc) return { doc };
-  // Rebuild the task object minus `progress`, then re-add it (clamped) unless we're clearing.
-  // This keeps every other task field while letting an emptied task drop away entirely.
-  const task: TaskInfo = {};
-  for (const [k, v] of Object.entries(loc.node.task ?? {}))
-    if (k !== "progress") (task as Record<string, unknown>)[k] = v;
-  if (progress !== undefined) task.progress = Math.max(0, Math.min(1, progress));
-  loc.node.task = Object.keys(task).length > 0 ? task : undefined;
+  const merged: TaskInfo = {};
+  for (const [k, v] of Object.entries({ ...(loc.node.task ?? {}), ...patch }))
+    if (v !== undefined && v !== "") (merged as Record<string, unknown>)[k] = v;
+  loc.node.task = Object.keys(merged).length > 0 ? merged : undefined;
   return { doc: next };
+}
+
+/** Set a node's task completion (0..1), or clear its task status with `undefined`. */
+export function setProgress(doc: MindMapDoc, id: string, progress: number | undefined): OpResult {
+  return patchTask(doc, id, {
+    progress: progress === undefined ? undefined : Math.max(0, Math.min(1, progress)),
+  });
+}
+
+/** Set a node's due date ("YYYY-MM-DD"), or clear it with "" / undefined. */
+export function setDue(doc: MindMapDoc, id: string, due: string | undefined): OpResult {
+  return patchTask(doc, id, { due: due || undefined });
+}
+
+/** Set a node's start date ("YYYY-MM-DD"), or clear it with "" / undefined. */
+export function setStart(doc: MindMapDoc, id: string, start: string | undefined): OpResult {
+  return patchTask(doc, id, { start: start || undefined });
 }
 
 /** Set the per-map canvas background colour ("" clears it back to the theme default). */

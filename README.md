@@ -50,6 +50,9 @@ GitHub Pages).
   (MindManager-style, ✓ at 100%) shows on the node — click the pie to step it (0→25→…→100→0).
   Parents **roll up automatically** (average + done/total count), with the percentage echoed in the
   Outline and in image exports.
+- **Due & start dates** — give a topic dates in the **ℹ Info** panel; a **📅 chip** shows on the node
+  and turns **red when overdue**. Filter by due date (has-a-date / overdue / due ≤ 7 days) in the
+  Power Filter.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.

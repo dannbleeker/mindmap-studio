@@ -1,6 +1,6 @@
 import { type CSSProperties, useState } from "react";
 import { ProgressPie } from "./ProgressPie";
-import { type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
+import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
@@ -307,11 +307,13 @@ export function FilterPanel({
   text,
   markers,
   tags,
+  due,
   matchCount,
   savedFilters,
   onText,
   onToggleMarker,
   onToggleTag,
+  onDue,
   onClear,
   onSaveFilter,
   onApplyFilter,
@@ -322,18 +324,20 @@ export function FilterPanel({
   text: string;
   markers: string[];
   tags: string[];
+  due: DueMode;
   matchCount: number;
   savedFilters: SavedFilter[];
   onText: (value: string) => void;
   onToggleMarker: (marker: string) => void;
   onToggleTag: (tag: string) => void;
+  onDue: (mode: DueMode) => void;
   onClear: () => void;
   onSaveFilter: (name: string) => void;
   onApplyFilter: (criteria: FilterCriteria) => void;
   onDeleteFilter: (id: string) => void;
 }) {
   const { markers: markerEntries, tags: tagEntries } = markerTagIndex(root, floatingTopics);
-  const active = text.trim().length > 0 || markers.length > 0 || tags.length > 0;
+  const active = text.trim().length > 0 || markers.length > 0 || tags.length > 0 || due !== "";
   const [saveName, setSaveName] = useState("");
   const chip = (key: string, selected: boolean, onClick: () => void) => (
     <button
@@ -369,6 +373,18 @@ export function FilterPanel({
           aria-label="Filter by text"
           style={{ ...inputStyle, width: "auto", margin: "4px 10px" }}
         />
+        {groupLabel("Due date")}
+        <select
+          value={due}
+          onChange={(e) => onDue(e.target.value as DueMode)}
+          aria-label="Filter by due date"
+          style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+        >
+          <option value="">Any</option>
+          <option value="dated">Has a date</option>
+          <option value="overdue">Overdue</option>
+          <option value="soon">Due ≤ 7 days</option>
+        </select>
         {markerEntries.length > 0 ? (
           <>
             {groupLabel("Markers")}
@@ -594,6 +610,8 @@ export function InfoPanel({
   onAddTag,
   onRemoveTag,
   onSetProgress,
+  onSetDue,
+  onSetStart,
   onSetHyperlink,
   maps,
   onLinkMap,
@@ -612,6 +630,8 @@ export function InfoPanel({
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
   onSetProgress: (progress: number | undefined) => void;
+  onSetDue: (due: string) => void;
+  onSetStart: (start: string) => void;
   onSetHyperlink: (url: string) => void;
   maps: { id: string; title: string }[];
   onLinkMap: (mapId: string) => void;
@@ -768,6 +788,42 @@ export function InfoPanel({
           />
 
           {renderProgress(node)}
+
+          {sectionLabel("Dates")}
+          <div
+            style={{
+              padding: "0 10px 6px",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              flexWrap: "wrap",
+              fontSize: 12,
+              color: "#73726c",
+            }}
+          >
+            <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
+              Start
+              <input
+                key={`${node.id}:start`}
+                type="date"
+                defaultValue={node.task?.start ?? ""}
+                onChange={(e) => onSetStart(e.target.value)}
+                aria-label="Start date"
+                style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+              />
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
+              Due
+              <input
+                key={`${node.id}:due`}
+                type="date"
+                defaultValue={node.task?.due ?? ""}
+                onChange={(e) => onSetDue(e.target.value)}
+                aria-label="Due date"
+                style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+              />
+            </label>
+          </div>
 
           {sectionLabel("Links")}
           <input

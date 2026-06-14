@@ -92,6 +92,8 @@ export function project(
         collapsed: Boolean(node.collapsed),
         hasChildren: node.children.length > 0,
         progress: progress.get(node.id),
+        due: node.task?.due,
+        start: node.task?.start,
         floating,
       },
     });

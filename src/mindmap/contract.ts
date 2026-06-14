@@ -40,6 +40,10 @@ export interface MindMapHandle {
   setSelectedTags: (tags: string[]) => boolean;
   /** Set the selected node's task completion (0..1), or clear it with undefined; false if none. */
   setSelectedProgress: (progress: number | undefined) => boolean;
+  /** Set the selected node's due date ("YYYY-MM-DD"), or clear with ""; false if nothing selected. */
+  setSelectedDue: (due: string) => boolean;
+  /** Set the selected node's start date ("YYYY-MM-DD"), or clear with ""; false if nothing selected. */
+  setSelectedStart: (start: string) => boolean;
   /** Graft a forest of nodes (e.g. parsed from pasted text) under the selected node; false if none. */
   addSubtreeToSelected: (nodes: MapNode[]) => boolean;
 }

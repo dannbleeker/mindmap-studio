@@ -11,8 +11,10 @@ import {
   reparent,
   setAllExpanded,
   setBackground,
+  setDue,
   setNote,
   setProgress,
+  setStart,
   setTags,
   setTopic,
   toggleCollapse,
@@ -185,6 +187,18 @@ describe("flow ops — content", () => {
     if (a) a.task = { progress: 0.5, priority: 2 };
     const cleared = findNode(setProgress(withTask, "a", undefined).doc, "a");
     expect(cleared?.task).toEqual({ priority: 2 });
+  });
+
+  it("setDue / setStart set dates and clear them on empty, dropping an emptied task", () => {
+    expect(findNode(setDue(base(), "a", "2026-07-01").doc, "a")?.task?.due).toBe("2026-07-01");
+    expect(findNode(setStart(base(), "a", "2026-06-01").doc, "a")?.task?.start).toBe("2026-06-01");
+    // The two dates coexist on one task...
+    const both = setStart(setDue(base(), "a", "2026-07-01").doc, "a", "2026-06-01").doc;
+    expect(findNode(both, "a")?.task).toEqual({ due: "2026-07-01", start: "2026-06-01" });
+    // ...and clearing the only field drops the whole task object.
+    expect(findNode(setDue(setDue(base(), "a", "2026-07-01").doc, "a", "").doc, "a")?.task).toBe(
+      undefined,
+    );
   });
 });
 

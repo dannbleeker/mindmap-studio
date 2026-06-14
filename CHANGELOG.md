@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Due & start dates on topics** — set a topic's **start** and **due** date in the **ℹ Info** panel
+  and a **📅 date chip** appears on the node; it turns **red when overdue** (past due and not yet
+  100%). The **🎚 Power Filter** gains a **Due date** option — *Has a date · Overdue · Due ≤ 7 days* —
+  so you can dim everything except what needs attention (and save it as a preset). Dates show in image
+  exports too and are lossless in `.json`. Together with task progress, that's the core of a topic's
+  task info.
 - **Task progress + roll-up** — mark a topic's completion (0 / 25 / 50 / 75 / 100%) from the **ℹ Info**
   panel and a small **completion pie** (MindManager-style — empty / wedge / full, with a ✓ at 100%)
   appears on the node. **Click a node's pie to step its completion** (0 → 25 → 50 → 75 → 100 → 0). Parents

@@ -87,11 +87,44 @@ describe("filterResult", () => {
 });
 
 describe("describeCriteria", () => {
-  it("summarises text, markers, and tags (and 'everything' when empty)", () => {
+  it("summarises text, markers, tags, and due (and 'everything' when empty)", () => {
     expect(describeCriteria(crit({ text: "budget", markers: ["⭐"], tags: ["q3"] }))).toBe(
       '"budget" · ⭐ · #q3',
     );
+    expect(describeCriteria(crit({ due: "overdue" }))).toBe("📅 overdue");
     expect(describeCriteria(crit({}))).toBe("everything");
+  });
+});
+
+describe("filterResult — due date", () => {
+  const TODAY = "2026-06-14";
+  const dueDoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "d",
+    title: "T",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "over", topic: "Overdue", task: { due: "2026-06-10", progress: 0.5 }, children: [] },
+        { id: "done", topic: "Done late", task: { due: "2026-06-10", progress: 1 }, children: [] },
+        { id: "soon", topic: "Soon", task: { due: "2026-06-18" }, children: [] },
+        { id: "far", topic: "Far", task: { due: "2026-09-01" }, children: [] },
+        { id: "none", topic: "No date", children: [] },
+      ],
+    },
+  };
+  const lit = (mode: "dated" | "overdue" | "soon") =>
+    [...filterResult(dueDoc, crit({ due: mode }), TODAY).lit].sort();
+
+  it("'dated' matches every node carrying a due date", () => {
+    expect(lit("dated")).toEqual(["done", "far", "over", "r", "soon"]); // 4 dated + root ancestor
+  });
+  it("'overdue' matches past-due, unfinished tasks only (a finished one is excluded)", () => {
+    expect(lit("overdue")).toEqual(["over", "r"]);
+  });
+  it("'soon' matches tasks due within the next week (not the overdue or far ones)", () => {
+    expect(lit("soon")).toEqual(["r", "soon"]);
   });
 });
 

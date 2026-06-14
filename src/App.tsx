@@ -2,6 +2,7 @@ import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } f
 import { FilterPanel, HistoryPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
 import { buildExample, examples } from "./examples";
 import {
+  type DueMode,
   type FilterCriteria,
   type SavedFilter,
   filterResult,
@@ -50,6 +51,7 @@ import {
   saveVersion,
   setLastOpened,
 } from "./store/mapStore";
+import { todayISO } from "./taskDate";
 import { buildTemplate, templates } from "./templates";
 import { controlStyle, inputStyle } from "./ui";
 import { useFind } from "./useFind";
@@ -132,10 +134,12 @@ export function App() {
   const [filterText, setFilterText] = useState("");
   const [filterMarkers, setFilterMarkers] = useState<string[]>([]);
   const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [filterDue, setFilterDue] = useState<DueMode>("");
   const clearFilter = () => {
     setFilterText("");
     setFilterMarkers([]);
     setFilterTags([]);
+    setFilterDue("");
   };
   // Toggling the panel off also clears the filter, so dimming can't outlive a visible control.
   const toggleFilter = () =>
@@ -161,7 +165,12 @@ export function App() {
     }
   }, [savedFilters]);
   const saveCurrentFilter = (name: string) => {
-    const criteria: FilterCriteria = { text: filterText, markers: filterMarkers, tags: filterTags };
+    const criteria: FilterCriteria = {
+      text: filterText,
+      markers: filterMarkers,
+      tags: filterTags,
+      due: filterDue,
+    };
     if (!name.trim() || !isFilterActive(criteria)) return;
     // Replace any existing preset with the same name, then add.
     setSavedFilters((prev) => [
@@ -173,16 +182,22 @@ export function App() {
     setFilterText(criteria.text);
     setFilterMarkers([...criteria.markers]);
     setFilterTags([...criteria.tags]);
+    setFilterDue(criteria.due ?? "");
   };
   const deleteSavedFilter = (id: string) =>
     setSavedFilters((prev) => prev.filter((f) => f.id !== id));
   // Memoised so the canvas only re-dims when the map or the criteria actually change. The
   // criteria object is built inside so the deps stay plain primitives (no per-render object).
   const filterHits = useMemo(() => {
-    const criteria: FilterCriteria = { text: filterText, markers: filterMarkers, tags: filterTags };
+    const criteria: FilterCriteria = {
+      text: filterText,
+      markers: filterMarkers,
+      tags: filterTags,
+      due: filterDue,
+    };
     if (!filterOpen || !isFilterActive(criteria)) return null;
-    return filterResult(liveDoc, criteria);
-  }, [filterOpen, filterText, filterMarkers, filterTags, liveDoc]);
+    return filterResult(liveDoc, criteria, todayISO());
+  }, [filterOpen, filterText, filterMarkers, filterTags, filterDue, liveDoc]);
   // Focus / isolate-branch: session-only, reuses the Power Filter's dim pipeline. Focus wins over
   // the filter as the dim source; both fall back to "no dimming".
   // The full selected node (for the Info panel's tags / markers / link state); `selected` only
@@ -1217,11 +1232,13 @@ export function App() {
             text={filterText}
             markers={filterMarkers}
             tags={filterTags}
+            due={filterDue}
             matchCount={filterHits?.matches ?? 0}
             savedFilters={savedFilters}
             onText={setFilterText}
             onToggleMarker={(m) => setFilterMarkers((list) => toggle(list, m))}
             onToggleTag={(t) => setFilterTags((list) => toggle(list, t))}
+            onDue={setFilterDue}
             onClear={clearFilter}
             onSaveFilter={saveCurrentFilter}
             onApplyFilter={applySavedFilter}
@@ -1254,6 +1271,14 @@ export function App() {
             onSetProgress={(progress) => {
               const ok = mapRef.current?.setSelectedProgress(progress);
               if (!ok) showHint("Select a node first, then set its progress.");
+            }}
+            onSetDue={(d) => {
+              const ok = mapRef.current?.setSelectedDue(d);
+              if (!ok) showHint("Select a node first, then set a due date.");
+            }}
+            onSetStart={(d) => {
+              const ok = mapRef.current?.setSelectedStart(d);
+              if (!ok) showHint("Select a node first, then set a start date.");
             }}
             onSetHyperlink={(url) => {
               const ok = mapRef.current?.setSelectedHyperlink(url);

@@ -36,6 +36,21 @@ step, which matters when you're lining a map up for a screenshot or a screen-sha
 percentage tells you exactly how far in you are; the fit button is the same "take me home"
 as **Fit** above, kept within thumb's reach of the zoom buttons.
 
+## Layouts: the same map, different shape
+
+The map's default shape -- a two-sided radial -- isn't the only way to read it. The **Layout**
+dropdown re-flows the *same* nodes into a different arrangement, and which one reads best
+depends on what the map *is*:
+
+- An **org-chart** (top-down or bottom-up) suits a hierarchy: a team, a taxonomy, a decomposition.
+- A **timeline** lays the first level out as a left-to-right sequence -- a roadmap, a process, the steps of an argument.
+- A **fishbone** (the Ishikawa diagram) angles branches into a spine, the classic shape for cause-and-effect analysis.
+- **Radial** fans every branch evenly around the root when you want the pure, balanced bloom.
+
+Switching layout never changes your content -- only its geometry -- so it costs nothing to try
+a few and keep the one that makes the structure obvious. A backlog that felt tangled as a radial
+map can read as a clean timeline; a muddled list of problems snaps into focus as a fishbone.
+
 ## The outline panel
 
 The **Outline** panel shows your map as an indented list -- the same tree, read top to
@@ -101,7 +116,9 @@ on one node, then press **Fit** -- watch the whole map snap back into view; that
 know lives in a *different* one -- watch it open that map and land on the node. While you have
 two maps, add a **cross-map link**: point a node in one at the other, then click it and watch
 the app hop maps -- that's how a high-level map becomes a set of doorways into the detailed
-ones beneath it. Then **reload the page**: the Outline panel is exactly where you left it,
+ones beneath it. While you're here, flip the **Layout** dropdown between the radial default, an
+org-chart, and a timeline -- same nodes, three readings -- and keep whichever makes the
+structure clearest. Then **reload the page**: the Outline panel is exactly where you left it,
 because the app remembered your workspace. The goal isn't to memorise the controls; it's to
 feel how much calmer a big map gets when you drive it at the right altitude instead of staring
 at the whole thing at once.

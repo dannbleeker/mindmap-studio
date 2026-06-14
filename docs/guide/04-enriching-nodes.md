@@ -46,6 +46,23 @@ border, or weight; bump a topic's font size or colour. Styling earns its keep wh
 is bolder than the rest -- and costs you readability when it's merely decorative. Style
 to create a pattern the reader can rely on, not to make the map "pop".
 
+## Rich text: emphasis inside a topic
+
+Styling paints the whole node; sometimes you want to stress just a word or two *inside* the
+label. While editing a topic, **Ctrl+B**, **Ctrl+I**, and **Ctrl+U** bold, italicise, or
+underline the selection -- the same muscle memory as any editor. Reach for it sparingly: one
+bold word that names the decision, an italicised term you're defining. The plain text is kept
+underneath, so your outline and every flat export stay clean even when the canvas is dressed up.
+
+## Callouts: a note that points
+
+A **callout** is a small sticky note pinned beside a node -- a caveat, an open question, a
+"revisit this" -- without promoting it to a child topic. Right-click a node, choose **Add
+callout**, then double-click the bubble to write in it. Unlike a note, which lives *behind* the
+node one click away, a callout sits *on the canvas*, visible at a glance and drawn into your
+image exports -- the right tool for the one remark a reader must not miss. Like markers, their
+power is in scarcity: a map speckled with callouts has none.
+
 ## Themes: the whole canvas at once
 
 Where per-node styling is a scalpel, a **theme** is a coat of paint for the entire map.
@@ -78,6 +95,12 @@ headline branch's **font** up a size so the eye starts there. Finally, open the 
 gallery and switch between Light and Dark -- your content doesn't change, only its coat of
 paint, so keep whichever helps you see the map. The rule throughout: styling that *encodes*
 something earns its place; styling that merely decorates doesn't.
+
+Finally, dress one topic up *inside* its label -- bold the single word that names what it is
+(**Ctrl+B** while editing) -- and pin a **callout** to the node you're least sure about,
+holding the question you still need to answer. Notice how differently the two read: the bold
+word is part of the idea; the callout hovers beside it, plainly a comment on the work rather
+than the work itself.
 
 The next chapter is about the opposite problem: when a map gets big, how do you keep
 finding your way around it?

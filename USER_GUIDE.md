@@ -56,6 +56,7 @@ Keyboard-first, just like MindManager:
 - **Ctrl + Enter** — add a parent
 - **Delete** — remove the selected node
 - **Double-click** a node — edit its text (or just start typing on a selected node)
+- **Ctrl + B / I / U** — while editing a topic: bold / italic / underline the selection
 - **Drag** a node onto another — re-parent it
 - **Ctrl + Z / Ctrl + Shift + Z** (or Ctrl + Y) — **undo / redo** (kept in sync with what's saved)
 - Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down)
@@ -92,6 +93,14 @@ Open **🎨 Style** and, with a node selected:
 - **B** — bold; **Reset** clears all styling
 
 (Font size and colour also live in the node editor panel that appears when you select a node.)
+
+### Rich-text topics
+
+Per-topic styling restyles the *whole* node; rich text formats *part* of the topic. While
+editing a topic, press **Ctrl + B**, **Ctrl + I**, or **Ctrl + U** to bold, italic, or
+underline — select the characters first, or toggle the format on and keep typing. The
+formatting is saved with the map and travels in the `.json` export. The plain text is always
+kept alongside it, so the outline, Find, and the Markdown/Office exports stay clean and readable.
 
 ### Links
 
@@ -140,8 +149,15 @@ lining one up before a screenshot or screen-share.
 
 ### Layout
 
-The **Layout** dropdown arranges branches **Both sides**, **Right**, or **Left** of the root.
-The choice is remembered.
+The **Layout** dropdown changes how the whole map is arranged; the choice is remembered and the
+map re-flows into the new shape without losing any edits:
+
+- **Both sides / Right / Left** — the classic radial map, branches on both sides of the root or
+  pushed all to one side.
+- **Org-chart (down / up)** — a top-down (or bottom-up) hierarchy, like a reporting tree.
+- **Radial** — branches fan out evenly in a ring around the root.
+- **Timeline** — the first level laid left-to-right as a sequence; good for roadmaps and steps.
+- **Fishbone** — an Ishikawa cause-and-effect diagram, branches angling into a central spine.
 
 ### Themes
 
@@ -150,7 +166,7 @@ live, without losing edits. Image exports inherit the theme, so a dark map expor
 
 ---
 
-## Relationships & boundaries
+## Relationships, boundaries & callouts
 
 - **Relationships** — draw a labelled arrow between two nodes (right-click → Link). Arrows you
   draw are saved, and ones imported from `.mmap` are shown.
@@ -158,6 +174,9 @@ live, without losing edits. Image exports inherit the theme, so a dark map expor
   click **⬚ Group** in the toolbar, then double-click the box's label chip to name it (an
   unlabelled box shows a "Label…" placeholder). Drawn and imported boundaries both round-trip
   and persist.
+- **Callouts** — a small sticky-note annotation pinned beside a node. Right-click a node →
+  **Add callout**, then double-click the bubble to edit its text (the **×** removes it). Callouts
+  are saved with the map and are drawn into the image exports too.
 - **Floating topics** — detached topics imported from `.mmap` appear in a "Floating topics"
   branch; edit them like any node (rename, add, remove, or drag in/out of the tree) and the
   changes are saved.
@@ -269,6 +288,7 @@ updates**.
 | Tab | Add child |
 | Ctrl + Enter | Add parent |
 | Delete | Remove node |
+| Ctrl + B / I / U (while editing) | Bold / italic / underline the selection |
 | Ctrl + Z / Ctrl + Shift + Z / Ctrl + Y | Undo / redo |
 | `/` | Focus Find |
 | Enter (in Find) | Next match |
@@ -280,6 +300,5 @@ updates**.
 
 MindMap Studio targets **brainstorming, knowledge mapping, and presentation/sharing**. The
 project / task-management layer (Gantt, schedules, dependencies, resources) is intentionally
-out of scope. Some MindManager visual features (organic/tapered branches, alternate layouts
-like org-chart/timeline/fishbone, callouts) depend on the rendering engine and aren't
-available; see `NEXT_STEPS.md` for the current edges.
+out of scope, as are MindManager's collaboration / enterprise features (real-time co-editing,
+cloud sync, the web/Teams apps); see `NEXT_STEPS.md` for the current edges.

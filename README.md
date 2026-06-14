@@ -46,9 +46,9 @@ GitHub Pages).
 - **Topic info panel** — one **ℹ Info** side panel consolidating the selected node's note,
   markers (click-to-toggle, with active highlighted), **tags** (add/remove), style
   (shape/fill/border/bold), and links.
-- **Task progress** — set a topic's completion (0–100%) and a progress bar shows on the node;
-  parents **roll up automatically** (average + done/total count), with the percentage echoed in the
-  Outline.
+- **Task progress** — set a topic's completion (0–100%) and a small **completion pie**
+  (MindManager-style) shows on the node; parents **roll up automatically** (average + done/total
+  count), with the percentage echoed in the Outline and in image exports.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.

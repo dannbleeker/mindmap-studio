@@ -1,4 +1,5 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
+import { piePath } from "../../progress";
 import { taperedRibbonPath } from "./BranchEdge";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
@@ -48,6 +49,16 @@ function esc(s: string): string {
 }
 
 const r2 = (n: number): number => Math.round(n * 100) / 100;
+
+/** A task-completion pie as an SVG string (mirrors the on-canvas ProgressPie via piePath). */
+function pieSvg(cx: number, cy: number, r: number, fraction: number): string {
+  const f = Math.max(0, Math.min(1, fraction));
+  const fill = f >= 1 ? "#27852f" : "#3b8bd4";
+  const base = `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="1"/>`;
+  if (f >= 1) return `${base}<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${fill}"/>`;
+  if (f <= 0) return base;
+  return `${base}<path d="${piePath(cx, cy, r, f)}" fill="${fill}"/>`;
+}
 
 function boxOf(rect: NodeRect): Box {
   return { cx: rect.x + rect.w / 2, cy: rect.y + rect.h / 2, w: rect.w, h: rect.h };
@@ -257,6 +268,9 @@ export function buildFlowSvg(
       textTop = r.y + pad + ih;
     }
 
+    // A task pie sits in a reserved strip at the bottom-left (matches the on-canvas node badge).
+    const pieReserve = d.progress ? 20 : 0;
+
     const fontSize = Number.parseFloat(d.style?.fontSize ?? "") || 16;
     const lines = d.topic.split("\n").map((l) => l.trim());
     if (d.icons?.length) lines[0] = `${d.icons.join(" ")} ${lines[0] ?? ""}`.trim();
@@ -268,13 +282,14 @@ export function buildFlowSvg(
           nonEmpty,
           r.x + pad,
           textTop,
-          r.y + r.h,
+          r.y + r.h - pieReserve,
           fontSize,
           textColor,
           d.isRoot ? "700" : d.style?.fontWeight,
         ),
       );
     }
+    if (d.progress) parts.push(pieSvg(r.x + pad + 8, r.y + r.h - 12, 8, d.progress.progress));
   }
 
   // Callouts (anchored bubbles, drawn on top): dashed connector + sticky-note bubble + text.

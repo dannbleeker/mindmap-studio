@@ -1,4 +1,5 @@
 import { type CSSProperties, useState } from "react";
+import { ProgressPie } from "./ProgressPie";
 import { type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
@@ -624,35 +625,12 @@ export function InfoPanel({
   const webUrl = link.startsWith("#") ? "" : link;
   const sectionLabel = (text: string) => <div style={PANEL_GROUP_LABEL}>{text}</div>;
 
-  // Task progress: parents with sub-tasks show an auto-rolled-up bar (read-only); a leaf (or an
+  // Task progress: parents with sub-tasks show an auto-rolled-up pie (read-only); a leaf (or an
   // undivided node) gets quarter-step buttons to set its own completion, plus a clear-task control.
   const renderProgress = (n: MapNode) => {
     const info = nodeProgress(n);
     const derived = hasTaskDescendants(n);
     const pct = info ? toPercent(info.progress) : null;
-    const bar = info ? (
-      <span
-        style={{
-          position: "relative",
-          display: "inline-block",
-          width: 56,
-          height: 7,
-          borderRadius: 999,
-          background: "rgba(0,0,0,0.12)",
-          overflow: "hidden",
-          verticalAlign: "middle",
-        }}
-      >
-        <span
-          style={{
-            position: "absolute",
-            inset: "0 auto 0 0",
-            width: `${pct}%`,
-            background: (pct ?? 0) >= 100 ? "#27852f" : "#3b8bd4",
-          }}
-        />
-      </span>
-    ) : null;
     return (
       <>
         {sectionLabel("Progress")}
@@ -666,7 +644,7 @@ export function InfoPanel({
               fontSize: 12,
             }}
           >
-            {bar}
+            {info ? <ProgressPie fraction={info.progress} size={20} /> : null}
             <span style={{ color: "#26215c", fontVariantNumeric: "tabular-nums" }}>
               {pct}% · {info?.done}/{info?.total} done
             </span>
@@ -682,6 +660,7 @@ export function InfoPanel({
               flexWrap: "wrap",
             }}
           >
+            {info ? <ProgressPie fraction={info.progress} size={20} /> : null}
             {[0, 25, 50, 75, 100].map((step) => {
               const active = pct === step;
               return (
@@ -708,7 +687,7 @@ export function InfoPanel({
               <button
                 type="button"
                 onClick={() => onSetProgress(undefined)}
-                title="Clear task status"
+                title="Clear task status (remove the pie)"
                 style={{ ...controlStyle, padding: "1px 7px", fontSize: 12 }}
               >
                 ✕

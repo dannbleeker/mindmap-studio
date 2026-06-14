@@ -8,10 +8,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 ### Added
 
 - **Task progress + roll-up** — mark a topic's completion (0 / 25 / 50 / 75 / 100%) from the **ℹ Info**
-  panel and a small progress bar appears on the node. Parents **roll up automatically**: a branch shows
-  the average across all its sub-tasks plus a done/total count (e.g. *75% · 1/2*), updating live as you
-  tick items off; ✓ marks a finished task. The completion also shows in the **Outline**. It's a clean
-  way to track a plan's status right on the map — lossless in `.json`, ignored by flat exports.
+  panel and a small **completion pie** (MindManager-style — empty / wedge / full) appears on the node.
+  Parents **roll up automatically**: a branch's pie shows the average across all its sub-tasks plus a
+  done/total count (e.g. *75% · 1/2*) in the Info panel, updating live as you tick items off. The
+  completion also shows in the **Outline** and in image exports (PNG/SVG). It's a clean way to track a
+  plan's status right on the map — lossless in `.json`, ignored by flat (outline) exports.
 - **Saved filters** — name the current Power Filter and reuse it across maps. The **🎚 Filter** panel
   grows a **Saved filters** list: type/pick criteria, give it a name, **Save**; click a saved name to
   re-apply it on any map, or **✕** to remove it. Presets persist locally (browser storage) and travel

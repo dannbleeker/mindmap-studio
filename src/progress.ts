@@ -67,3 +67,20 @@ export function hasTaskDescendants(node: MapNode): boolean {
 export function toPercent(fraction: number): number {
   return Math.round(clamp01(fraction) * 100);
 }
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * SVG path `d` for a pie wedge filling `fraction` of a circle, clockwise from 12 o'clock.
+ * Returns "" for fraction ≤ 0 (nothing to fill) or ≥ 1 (the caller draws a full circle instead).
+ * Pure + shared by the on-canvas pie (ProgressPie) and the SVG exporter, so they match. Pure.
+ */
+export function piePath(cx: number, cy: number, r: number, fraction: number): string {
+  const f = clamp01(fraction);
+  if (f <= 0 || f >= 1) return "";
+  const angle = f * 2 * Math.PI;
+  const ex = round2(cx + r * Math.sin(angle));
+  const ey = round2(cy - r * Math.cos(angle));
+  const large = f > 0.5 ? 1 : 0;
+  return `M ${round2(cx)} ${round2(cy - r)} A ${round2(r)} ${round2(r)} 0 ${large} 1 ${ex} ${ey} L ${round2(cx)} ${round2(cy)} Z`;
+}

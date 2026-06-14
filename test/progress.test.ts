@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MapNode } from "../src/model/types";
-import { hasTaskDescendants, nodeProgress, progressMap, toPercent } from "../src/progress";
+import { hasTaskDescendants, nodeProgress, piePath, progressMap, toPercent } from "../src/progress";
 
 // A node helper that defaults children to [].
 const n = (id: string, over: Partial<MapNode> = {}): MapNode => ({
@@ -105,5 +105,23 @@ describe("toPercent", () => {
     expect(toPercent(2 / 3)).toBe(67);
     expect(toPercent(-1)).toBe(0);
     expect(toPercent(9)).toBe(100);
+  });
+});
+
+describe("piePath", () => {
+  it("returns an empty string for nothing (≤0) or a full circle (≥1)", () => {
+    expect(piePath(8, 8, 8, 0)).toBe("");
+    expect(piePath(8, 8, 8, 1)).toBe("");
+    expect(piePath(8, 8, 8, -0.5)).toBe("");
+    expect(piePath(8, 8, 8, 2)).toBe("");
+  });
+
+  it("draws a quarter wedge clockwise from 12 o'clock (small-arc flag)", () => {
+    // 25% → from top (8,0) to 3 o'clock (16,8), small arc, then back to centre.
+    expect(piePath(8, 8, 8, 0.25)).toBe("M 8 0 A 8 8 0 0 1 16 8 L 8 8 Z");
+  });
+
+  it("uses the large-arc flag past the halfway mark", () => {
+    expect(piePath(8, 8, 8, 0.75)).toContain("A 8 8 0 1 1");
   });
 });

@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Board view (Kanban)** — a new **▦ Board** toggle shows your topics grouped into **columns by tag**
+  (a read-only visualisation of the same map — cards don't move or write back). Each card carries its
+  rolled-up **progress pie** and **due date** (red when overdue); **click a card to jump** to that
+  topic on the canvas. Untagged topics gather in a final column. A fast status wall over a tagged map.
 - **File attachments on topics** — attach any file to a topic from the **ℹ Info** panel; a **📎 chip**
   shows on the node and the panel lists each file with its size, a one-click **download**, and a
   remove (✕). Files are stored inline (a data URL, capped at 5 MB each) so they travel with the

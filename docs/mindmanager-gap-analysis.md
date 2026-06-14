@@ -77,7 +77,7 @@ reasonably own** — not "everything MindManager has."
 | Fishbone / Ishikawa | 🧱 | Renderer-ceiling. |
 | Flowchart / concept map (free connectors + shapes) | 🧱 | Beyond a tree renderer. |
 | Funnel / matrix / Venn / onion diagrams | 🧱 / 🚫 | Different diagram engines; arguably out of the mind-map remit. |
-| Kanban board view | ⬜ / 🧱 | Could be a model-driven board view (tags→columns) **without** the canvas renderer — a self-contained alternate view, medium effort. |
+| Kanban board view | ✅ | **▦ Board** — a read-only model-driven view grouping topics into columns by tag (shipped 2026-06-14). |
 | Whiteboard / sticky-note canvas | 🧱 | Free-form canvas, not a tree. |
 | Auto-layout / smart relationship routing | ✅ | mind-elixir auto-lays-out; our boundary/minimap overlays track it. |
 | Per-branch layout override | 🧱 | Tied to the layout-engine ceiling. |
@@ -222,6 +222,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   onto the canvas** → floating topic, and a **⏱ brainstorm timer** — shipped 2026-06-14.
 - **File attachments** — attach any file to a topic (inline data URL, 📎 chip + download in the Info
   panel, capped at 5 MB) — shipped 2026-06-14; more of cluster C / §4.
+- **Board (Kanban) view** — the **▦ Board** toggle: a read-only view grouping topics into columns by
+  tag (cards show progress + due; click to jump) — shipped 2026-06-14 (§2 alternate views).
 - **Saved Power-Filter presets** (name + save a filter, reuse across maps) and **typo-tolerant Find**
   (a fuzzy fallback when nothing matches exactly) shipped 2026-06-14 — completing cluster E
   (navigation polish), alongside the earlier ◎ Focus.

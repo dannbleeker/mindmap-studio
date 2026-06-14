@@ -58,6 +58,8 @@ GitHub Pages).
   **⏱ brainstorm timer** for timeboxed sprints.
 - **File attachments** — attach any file to a topic (**📎 chip** on the node); stored inline so it
   travels with the map, with one-click download.
+- **Board view (Kanban)** — **▦ Board** shows topics grouped into columns by tag (read-only); cards
+  carry progress + due, and clicking one jumps to it on the map.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.

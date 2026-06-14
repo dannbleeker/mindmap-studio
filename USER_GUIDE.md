@@ -186,6 +186,15 @@ notes, including floating topics. Pick a result and it opens that map and focuse
 (if the match is in the current map, it jumps straight there). Handy once the library grows
 into a connected knowledge base.
 
+### Board view (Kanban)
+
+**▦ Board** shows the map's topics as cards grouped into **columns by tag** — one column per tag,
+with everything else gathered in an **Untagged** column. Each card shows its rolled-up
+[progress](#topic-info-panel) and [due date](#topic-info-panel) (red when overdue). It's a
+**read-only** view of the same map — cards don't move and nothing is written back — so it's a quick
+status wall, not a task tracker. **Click a card** to jump to that topic on the canvas. Tag your
+topics (in the **ℹ Info** panel) to give the board its columns.
+
 ### Collapse / expand
 
 **⊟** collapses every branch to a level-1 overview; **⊞** expands the whole tree. **Fit**

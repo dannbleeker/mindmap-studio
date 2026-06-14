@@ -1,5 +1,6 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrainstormTimer } from "./BrainstormTimer";
+import { Kanban } from "./Kanban";
 import { FilterPanel, HistoryPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
 import { buildExample, examples } from "./examples";
 import {
@@ -234,6 +235,7 @@ export function App() {
   // throttle while editing (in `persist`) + on demand; `restoreRev` forces the canvas to re-init
   // when a version is restored in place (same map id, so the doc.id key wouldn't change otherwise).
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [boardOpen, setBoardOpen] = useState(false);
   const [versions, setVersions] = useState<VersionMeta[]>([]);
   const [restoreRev, setRestoreRev] = useState(0);
   const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
@@ -814,6 +816,15 @@ export function App() {
         >
           🕔 History
         </button>
+        <button
+          type="button"
+          onClick={() => setBoardOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={boardOpen}
+          title="Board view — topics grouped into columns by tag (read-only)"
+        >
+          ▦ Board
+        </button>
         <select
           value={doc.id}
           onChange={(e) => switchMap(e.target.value)}
@@ -1331,7 +1342,7 @@ export function App() {
             onClose={() => setHistoryOpen(false)}
           />
         )}
-        <div style={{ flex: 1, minHeight: 0 }}>
+        <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
           <MindMap
             key={`${doc.id}:${restoreRev}`}
             ref={mapRef}
@@ -1348,6 +1359,19 @@ export function App() {
             onSelect={handleSelect}
             onMapLink={(id) => switchMap(id)}
           />
+          {/* Kanban board overlays the canvas (the map stays mounted underneath). */}
+          {boardOpen && (
+            <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
+              <Kanban
+                doc={liveDoc}
+                onPick={(id) => {
+                  setBoardOpen(false);
+                  mapRef.current?.focusNode(id);
+                }}
+                onClose={() => setBoardOpen(false)}
+              />
+            </div>
+          )}
         </div>
       </div>
 

@@ -157,6 +157,26 @@ export function setTopic(doc: MindMapDoc, id: string, topic: string): OpResult {
   return { doc: next };
 }
 
+/**
+ * Set a node's rich-text topic. `rich` is already-sanitised inline HTML (or undefined when the
+ * text carries no formatting); `plain` is its plain-text form, stored on `topic` as the fallback.
+ * Pure — the caller (a browser context) does the DOM sanitising, so this stays node-testable.
+ */
+export function setTopicRich(
+  doc: MindMapDoc,
+  id: string,
+  rich: string | undefined,
+  plain: string,
+): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc) return { doc };
+  loc.node.topic = plain;
+  loc.node.topicRich = rich || undefined;
+  if (!loc.parent) next.title = plain || next.title;
+  return { doc: next };
+}
+
 /** Toggle a node's collapsed state (no-op for a leaf). */
 export function toggleCollapse(doc: MindMapDoc, id: string): OpResult {
   const next = structuredClone(doc);

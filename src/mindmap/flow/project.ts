@@ -65,6 +65,7 @@ export function project(doc: MindMapDoc, palette: string[] = FALLBACK_PALETTE): 
       position: { x: 0, y: 0 },
       data: {
         topic: node.topic,
+        topicRich: node.topicRich,
         note: node.note,
         hyperlink: node.hyperlink,
         image: node.image,

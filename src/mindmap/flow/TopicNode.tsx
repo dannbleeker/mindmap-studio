@@ -1,5 +1,6 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { type CSSProperties, useEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef } from "react";
+import { sanitizeRich } from "../../io/richText";
 import { useEditing } from "./editing";
 import type { TopicNode as TopicNodeT } from "./types";
 
@@ -28,6 +29,7 @@ const chipStyle: CSSProperties = {
 export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
   const {
     topic,
+    topicRich,
     icons,
     tags,
     style,
@@ -42,20 +44,24 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
   const editing = useEditing();
   const isEditing = editing?.editingId === id;
   const editRef = useRef<HTMLDivElement>(null);
+  // Re-sanitise on render too (defence-in-depth: a topicRich could arrive via an imported .json).
+  const richHtml = useMemo(() => (topicRich ? sanitizeRich(topicRich) : null), [topicRich]);
 
   // On entering edit mode: seed the text, focus, and select all (uncontrolled — React must
   // not re-render over the user's keystrokes, so the text is set imperatively, once).
   useEffect(() => {
     if (!isEditing || !editRef.current) return;
     const el = editRef.current;
-    el.textContent = topic;
+    // Seed with the rich HTML so existing formatting stays editable; else plain text.
+    if (richHtml) el.innerHTML = richHtml;
+    else el.textContent = topic;
     el.focus();
     const range = document.createRange();
     range.selectNodeContents(el);
     const sel = window.getSelection();
     sel?.removeAllRanges();
     sel?.addRange(range);
-  }, [isEditing, topic]);
+  }, [isEditing, topic, richHtml]);
 
   const box: CSSProperties = isRoot
     ? {
@@ -120,20 +126,30 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
             className="nodrag nopan"
             style={{ outline: "none", display: "inline-block", minWidth: 16 }}
             onKeyDown={(e) => {
-              const text = editRef.current?.textContent ?? "";
+              // Inline formatting: Ctrl/Cmd + B / I / U (execCommand works in contenteditable).
+              if ((e.ctrlKey || e.metaKey) && /^[biu]$/i.test(e.key)) {
+                e.preventDefault();
+                const k = e.key.toLowerCase();
+                document.execCommand(k === "b" ? "bold" : k === "i" ? "italic" : "underline");
+                return;
+              }
+              const html = editRef.current?.innerHTML ?? "";
               if (e.key === "Enter") {
                 e.preventDefault();
-                editing?.commitAndAdd(id, text, "sibling");
+                editing?.commitAndAdd(id, html, "sibling");
               } else if (e.key === "Tab") {
                 e.preventDefault();
-                editing?.commitAndAdd(id, text, "child");
+                editing?.commitAndAdd(id, html, "child");
               } else if (e.key === "Escape") {
                 e.preventDefault();
                 editing?.cancelEdit();
               }
             }}
-            onBlur={() => editing?.commitEdit(id, editRef.current?.textContent ?? "")}
+            onBlur={() => editing?.commitEdit(id, editRef.current?.innerHTML ?? "")}
           />
+        ) : richHtml ? (
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: richHtml is sanitised in io/richText
+          <span dangerouslySetInnerHTML={{ __html: richHtml }} />
         ) : (
           topic
         )}

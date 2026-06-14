@@ -37,8 +37,14 @@ export interface MapImage {
 
 export interface MapNode {
   id: NodeId;
-  /** Plain text for now; rich text comes in a later phase. */
+  /** Plain-text topic — always kept in sync as the fallback for search, outline, and exports. */
   topic: string;
+  /**
+   * Optional inline rich-text HTML (a sanitised subset: bold/italic/underline/strike + safe
+   * spans) shown on the React Flow canvas. `topic` stays the plain fallback, so every io/*
+   * exporter, search, and the outline are untouched. Lossless in .json; ignored by flat formats.
+   */
+  topicRich?: string;
   note?: string;
   hyperlink?: string;
   image?: MapImage;

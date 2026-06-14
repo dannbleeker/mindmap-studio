@@ -19,7 +19,8 @@ import {
   useRef,
   useState,
 } from "react";
-import type { MindMapDoc } from "../model/types";
+import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
+import type { MapNode, MindMapDoc } from "../model/types";
 import type { LayoutKind, MindMapHandle, MindMapProps } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
 import { BranchEdge } from "./flow/BranchEdge";
@@ -44,7 +45,7 @@ import {
   setHyperlink,
   setImage,
   setNote,
-  setTopic,
+  setTopicRich,
   toggleCollapse,
   toggleIcon,
 } from "./flow/ops";
@@ -211,27 +212,36 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
     [getNodes, apply, sync],
   );
 
-  // Editing API for the topic nodes.
-  const editingApi = useMemo(
-    () => ({
+  // Editing API for the topic nodes. Commits arrive as raw contenteditable HTML; sanitise to a
+  // safe inline subset, derive the plain-text fallback, and store both — topicRich is dropped
+  // when the text carries no formatting, so plain topics stay tidy.
+  const editingApi = useMemo(() => {
+    const parse = (html: string) => {
+      const clean = sanitizeRich(html);
+      return { rich: hasFormatting(clean) ? clean : undefined, plain: richToPlain(clean) };
+    };
+    const changed = (n: MapNode | null, rich: string | undefined, plain: string) =>
+      !!n && (n.topic !== plain || (n.topicRich ?? undefined) !== rich);
+    return {
       editingId,
       beginEdit: (id: string) => setEditingId(id),
       cancelEdit: () => setEditingId(null),
-      commitEdit: (id: string, text: string) => {
+      commitEdit: (id: string, html: string) => {
         setEditingId(null);
         const n = id ? findNode(docRef.current, id) : null;
-        if (n && n.topic !== text) apply(setTopic(docRef.current, id, text));
+        const { rich, plain } = parse(html);
+        if (changed(n, rich, plain)) apply(setTopicRich(docRef.current, id, rich, plain));
       },
-      commitAndAdd: (id: string, text: string, what: "sibling" | "child") => {
+      commitAndAdd: (id: string, html: string, what: "sibling" | "child") => {
         let d = docRef.current;
         const n = findNode(d, id);
-        if (n && n.topic !== text) d = setTopic(d, id, text).doc;
+        const { rich, plain } = parse(html);
+        if (changed(n, rich, plain)) d = setTopicRich(d, id, rich, plain).doc;
         apply(what === "child" ? addChild(d, id) : addSibling(d, id), true);
       },
       toggleCollapse: (id: string) => apply(toggleCollapse(docRef.current, id)),
-    }),
-    [editingId, apply],
-  );
+    };
+  }, [editingId, apply]);
 
   // Keep node selection flags in sync with selectedId (no re-layout).
   useEffect(() => {

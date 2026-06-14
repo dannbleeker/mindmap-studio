@@ -7,6 +7,8 @@ import type { MapImage, NodeStyle } from "../../model/types";
 /** Data carried by a topic node (one per MapNode). */
 export type TopicData = {
   topic: string;
+  /** Inline rich-text HTML (sanitised subset); rendered on the canvas, `topic` is the fallback. */
+  topicRich?: string;
   note?: string;
   hyperlink?: string;
   image?: MapImage;

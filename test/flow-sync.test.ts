@@ -165,6 +165,16 @@ describe("flow fromFlow (React Flow → model)", () => {
     expect(fresh?.side).toBeUndefined();
   });
 
+  it("round-trips a rich-text topic (topicRich)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "rt",
+      title: "Root",
+      root: n("r", "Root", {}, [n("a", "Bold A", { topicRich: "<b>Bold</b> A" })]),
+    };
+    expect(roundTrip(d).root.children[0].topicRich).toBe("<b>Bold</b> A");
+  });
+
   it("leaves links / boundaries / floatingTopics undefined when there are none", () => {
     const back = roundTrip(simpleDoc);
     expect(back.links).toBeUndefined();

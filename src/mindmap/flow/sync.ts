@@ -50,6 +50,7 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
     const prev = prevById.get(id);
     const node: MapNode = { id, topic: data?.topic ?? prev?.topic ?? "", children: [] };
     if (data) {
+      if (data.topicRich) node.topicRich = data.topicRich;
       if (data.icons?.length) node.icons = data.icons;
       if (data.tags?.length) node.tags = data.tags;
       if (data.hyperlink && !isDangerousUrl(data.hyperlink)) node.hyperlink = data.hyperlink;

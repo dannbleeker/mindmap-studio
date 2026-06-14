@@ -8,10 +8,10 @@ export interface EditingApi {
   editingId: string | null;
   /** Enter inline edit for a node. */
   beginEdit: (id: string) => void;
-  /** Commit the edited text and leave edit mode. */
-  commitEdit: (id: string, text: string) => void;
-  /** Commit, then add + edit a sibling (Enter) or child (Tab). */
-  commitAndAdd: (id: string, text: string, what: "sibling" | "child") => void;
+  /** Commit the edited topic (raw contenteditable HTML) and leave edit mode. */
+  commitEdit: (id: string, html: string) => void;
+  /** Commit, then add + edit a sibling (Enter) or child (Tab). `html` is the raw editor HTML. */
+  commitAndAdd: (id: string, html: string, what: "sibling" | "child") => void;
   /** Leave edit mode without saving. */
   cancelEdit: () => void;
   /** Collapse/expand a node from its toggle. */

@@ -23,6 +23,7 @@ import {
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { MapNode, MindMapDoc } from "../model/types";
+import { nextProgressLevel } from "../progress";
 import { type LayoutKind, type MindMapHandle, type MindMapProps, classifyLink } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
 import { BranchEdge } from "./flow/BranchEdge";
@@ -326,6 +327,11 @@ function FlowInner({
         if (link.kind === "node") focusNodeById(link.id);
         else if (link.kind === "map") onMapLinkRef.current?.(link.id);
         else if (!isDangerousUrl(link.url)) window.open(link.url, "_blank", "noopener,noreferrer");
+      },
+      // Click the on-canvas pie to step a leaf task's completion (0→25→50→75→100→0).
+      cycleProgress: (id: string) => {
+        const n = findNode(docRef.current, id);
+        if (n) apply(setProgress(docRef.current, id, nextProgressLevel(n.task?.progress ?? 0)));
       },
     };
   }, [editingId, apply, focusNodeById]);

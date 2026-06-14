@@ -84,3 +84,17 @@ export function piePath(cx: number, cy: number, r: number, fraction: number): st
   const large = f > 0.5 ? 1 : 0;
   return `M ${round2(cx)} ${round2(cy - r)} A ${round2(r)} ${round2(r)} 0 ${large} 1 ${ex} ${ey} L ${round2(cx)} ${round2(cy)} Z`;
 }
+
+/** The quarter-step task levels a click on the pie cycles through. */
+const LEVELS = [0, 0.25, 0.5, 0.75, 1];
+
+/** The next quarter-step level after `cur`, looping 100% → 0%. Pure (drives click-to-cycle). */
+export function nextProgressLevel(cur: number): number {
+  return LEVELS.find((l) => l > clamp01(cur) + 0.001) ?? 0;
+}
+
+/** SVG path `d` for a tick sized to a circle of radius `r` at (cx,cy) — the ✓ shown at 100%. Pure. */
+export function checkPath(cx: number, cy: number, r: number): string {
+  const p = (x: number, y: number) => `${round2(x)} ${round2(y)}`;
+  return `M ${p(cx - 0.42 * r, cy + 0.04 * r)} L ${p(cx - 0.12 * r, cy + 0.34 * r)} L ${p(cx + 0.46 * r, cy - 0.36 * r)}`;
+}

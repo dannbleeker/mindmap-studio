@@ -1,5 +1,5 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
-import { piePath } from "../../progress";
+import { checkPath, piePath } from "../../progress";
 import { taperedRibbonPath } from "./BranchEdge";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
@@ -55,7 +55,10 @@ function pieSvg(cx: number, cy: number, r: number, fraction: number): string {
   const f = Math.max(0, Math.min(1, fraction));
   const fill = f >= 1 ? "#27852f" : "#3b8bd4";
   const base = `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="1"/>`;
-  if (f >= 1) return `${base}<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${fill}"/>`;
+  if (f >= 1) {
+    const tick = `<path d="${checkPath(cx, cy, r)}" fill="none" stroke="#fff" stroke-width="${r2(Math.max(1.2, r * 0.3))}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    return `${base}<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${fill}"/>${tick}`;
+  }
   if (f <= 0) return base;
   return `${base}<path d="${piePath(cx, cy, r, f)}" fill="${fill}"/>`;
 }

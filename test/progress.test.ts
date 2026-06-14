@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { MapNode } from "../src/model/types";
-import { hasTaskDescendants, nodeProgress, piePath, progressMap, toPercent } from "../src/progress";
+import {
+  checkPath,
+  hasTaskDescendants,
+  nextProgressLevel,
+  nodeProgress,
+  piePath,
+  progressMap,
+  toPercent,
+} from "../src/progress";
 
 // A node helper that defaults children to [].
 const n = (id: string, over: Partial<MapNode> = {}): MapNode => ({
@@ -123,5 +131,28 @@ describe("piePath", () => {
 
   it("uses the large-arc flag past the halfway mark", () => {
     expect(piePath(8, 8, 8, 0.75)).toContain("A 8 8 0 1 1");
+  });
+});
+
+describe("nextProgressLevel", () => {
+  it("steps through the quarters and loops 100% → 0%", () => {
+    expect(nextProgressLevel(0)).toBe(0.25);
+    expect(nextProgressLevel(0.25)).toBe(0.5);
+    expect(nextProgressLevel(0.5)).toBe(0.75);
+    expect(nextProgressLevel(0.75)).toBe(1);
+    expect(nextProgressLevel(1)).toBe(0); // wrap
+  });
+
+  it("rounds an off-grid value up to the next quarter", () => {
+    expect(nextProgressLevel(0.1)).toBe(0.25);
+    expect(nextProgressLevel(0.6)).toBe(0.75);
+  });
+});
+
+describe("checkPath", () => {
+  it("returns a 3-point tick path (two segments)", () => {
+    const d = checkPath(8, 8, 8);
+    expect(d.startsWith("M ")).toBe(true);
+    expect((d.match(/L /g) ?? []).length).toBe(2);
   });
 });

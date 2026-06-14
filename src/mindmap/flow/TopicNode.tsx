@@ -30,16 +30,42 @@ const chipStyle: CSSProperties = {
 };
 
 /** A small task-completion pie on the node (MindManager-style); the exact figure lives in the
- *  tooltip + the Info panel, so the canvas stays uncluttered. */
-function ProgressBadge({ info }: { info: ProgressInfo }) {
+ *  tooltip + the Info panel, so the canvas stays uncluttered. When `onCycle` is given (a leaf task,
+ *  not a rolled-up parent) the pie is a button that steps the completion on click. */
+function ProgressBadge({ info, onCycle }: { info: ProgressInfo; onCycle?: () => void }) {
   const pct = toPercent(info.progress);
-  const title = info.derived
-    ? `${info.done} of ${info.total} sub-tasks complete (${pct}%)`
-    : `Task ${pct}% complete`;
+  const pie = (
+    <ProgressPie
+      fraction={info.progress}
+      size={16}
+      title={
+        info.derived
+          ? `${info.done} of ${info.total} sub-tasks complete (${pct}%)`
+          : `Task ${pct}% — click to change`
+      }
+    />
+  );
+  if (!onCycle) return <div style={{ marginTop: 4 }}>{pie}</div>;
   return (
-    <div style={{ marginTop: 4 }}>
-      <ProgressPie fraction={info.progress} size={16} title={title} />
-    </div>
+    <button
+      type="button"
+      className="nodrag nopan"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCycle();
+      }}
+      style={{
+        marginTop: 4,
+        padding: 0,
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        display: "block",
+        lineHeight: 0,
+      }}
+    >
+      {pie}
+    </button>
   );
 }
 
@@ -208,7 +234,12 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
           </span>
         ) : null}
       </span>
-      {progress ? <ProgressBadge info={progress} /> : null}
+      {progress ? (
+        <ProgressBadge
+          info={progress}
+          onCycle={progress.derived ? undefined : () => editing?.cycleProgress(id)}
+        />
+      ) : null}
       {tags?.length ? (
         <div style={{ marginTop: 4, display: "flex", gap: 4, flexWrap: "wrap" }}>
           {tags.map((t) => (

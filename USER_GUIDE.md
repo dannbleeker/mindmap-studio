@@ -84,10 +84,11 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
   Find, the [marker & tag index](#marker--tag-index), and the [Power Filter](#power-filter).
 - **Progress** — set a task's completion with the **0 / 25 / 50 / 75 / 100** buttons (✕ clears it,
   so it stops being a task — the pie disappears). A small **completion pie** (MindManager-style: empty
-  at 0%, a wedge in between, a full disc at 100%) appears on the node, and **parents roll up
-  automatically**: a branch with sub-tasks shows their average plus a *done / total* count (e.g.
-  *75% · 1/2*) and is read-only (marked *auto*). The percentage also shows in the Outline, and the
-  pie is carried into image exports (PNG/SVG).
+  at 0%, a wedge in between, a full disc with a **✓** at 100%) appears on the node. **Click the pie on
+  the node to step its completion** (0 → 25 → 50 → 75 → 100 → 0) without opening this panel. **Parents
+  roll up automatically**: a branch with sub-tasks shows their average plus a *done / total* count
+  (e.g. *75% · 1/2*) and is read-only (marked *auto*, so its pie isn't clickable). The percentage also
+  shows in the Outline, and the pie is carried into image exports (PNG/SVG).
 - **Style** — **Shape** (Box / Rounded / Pill), **Fill**, **Border** (swatch or ✕ for none), **B**
   for bold, **Reset** to clear; font size/colour live here too.
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in

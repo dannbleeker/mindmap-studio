@@ -1,4 +1,4 @@
-import { piePath, toPercent } from "./progress";
+import { checkPath, piePath, toPercent } from "./progress";
 
 // A small task-completion pie (MindManager-style): an outlined circle that fills clockwise to the
 // given fraction — empty at 0%, a wedge in between, a solid disc at 100%. Shared by the on-canvas
@@ -36,6 +36,16 @@ export function ProgressPie({
       <circle cx={cx} cy={cy} r={r} fill="#fff" stroke={TRACK} strokeWidth="1" />
       {full ? <circle cx={cx} cy={cy} r={r} fill={fill} /> : null}
       {!full && pct > 0 ? <path d={piePath(cx, cy, r, fraction)} fill={fill} /> : null}
+      {full ? (
+        <path
+          d={checkPath(cx, cy, r)}
+          fill="none"
+          stroke="#fff"
+          strokeWidth={Math.max(1.2, r * 0.3)}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : null}
     </svg>
   );
 }

@@ -18,6 +18,8 @@ export interface EditingApi {
   toggleCollapse: (id: string) => void;
   /** Follow a node's hyperlink: jump to a topic (#node=), open a map (#map=), or open a URL. */
   openLink: (url: string) => void;
+  /** Advance a node's task completion one quarter-step (clicking its on-canvas pie), looping at 100%. */
+  cycleProgress: (id: string) => void;
 }
 
 export const EditingContext = createContext<EditingApi | null>(null);

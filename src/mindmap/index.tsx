@@ -6,15 +6,17 @@ import type { MindMapProps } from "./contract";
 // this one seam during the mind-elixir → React Flow migration.
 export * from "./contract";
 
-// dev-only runtime override (?engine=flow|elixir or localStorage["mindmap-engine"]) so we
-// can A/B both engines on the same map; prod uses the build-time VITE_CANVAS_ENGINE default.
+// React Flow is the default engine (cutover landed). mind-elixir stays available as a
+// fallback for the soak — set VITE_CANVAS_ENGINE="elixir" to ship it (the rollback), or use
+// the dev-only runtime override (?engine=flow|elixir or localStorage["mindmap-engine"]) to
+// A/B both engines on the same map.
 function pickEngine(): "flow" | "elixir" {
   if (import.meta.env.DEV && typeof window !== "undefined") {
     const q = new URLSearchParams(window.location.search).get("engine");
     const v = q || localStorage.getItem("mindmap-engine");
     if (v === "flow" || v === "elixir") return v;
   }
-  return import.meta.env.VITE_CANVAS_ENGINE === "flow" ? "flow" : "elixir";
+  return import.meta.env.VITE_CANVAS_ENGINE === "elixir" ? "elixir" : "flow";
 }
 
 // Both engines are code-split: whichever is chosen loads as its own chunk, so the heavy

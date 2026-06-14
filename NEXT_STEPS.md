@@ -48,8 +48,11 @@ fallback so flat formats are untouched); **anchored callouts** (`MapNode.callout
 overlay + add via context menu, inline edit, delete; rendered in the SVG export too). Fixed a latent bug:
 the boundary/callout overlays read a live `renderDoc` mirror (updated in `sync()`) instead of the stable
 `doc` prop, so freshly-created boundaries + callouts now appear. **go/no-go #3 met** (parity verified +
-441-node recompute ~1 ms). **Next:** the **cutover** (flip `VITE_CANVAS_ENGINE` default → flow; awaiting
-the go-ahead), then Phase I (remove mind-elixir).
+441-node recompute ~1 ms). **CUTOVER LANDED** — `index.tsx pickEngine()` now defaults to flow (set
+`VITE_CANVAS_ENGINE="elixir"` to roll back; elixir stays bundled as the fallback through the soak, and
+`size-budget.mjs` now guards both `me-tpc` + `.react-flow`). **Next:** soak on prod, then **Phase I** —
+remove mind-elixir + elixir-only modules, re-baseline the bundle, make the `me-tpc` assertion flow-only,
+and the full docs sweep (CLAUDE.md / README / USER_GUIDE / CHANGELOG / features.json / book).
 
 ## MindManager UI-parity work (2026-06-12)
 

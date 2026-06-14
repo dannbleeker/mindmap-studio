@@ -51,3 +51,14 @@ if (!cssText.includes("me-tpc")) {
   process.exit(1);
 }
 console.log("✓ mind-elixir core CSS bundled (me-tpc rules present)");
+
+// React Flow is now the default engine, so its core stylesheet must be bundled too — without
+// it nodes lose their absolute positioning and the canvas collapses. `.react-flow` is a stable,
+// engine-only selector from "@xyflow/react/dist/style.css" (imported in FlowMindMap.tsx).
+if (!cssText.includes(".react-flow")) {
+  console.error(
+    '\n✗ React Flow core CSS missing from the bundle — the default canvas would render unstyled.\n  Check that `import "@xyflow/react/dist/style.css"` is still in src/mindmap/FlowMindMap.tsx.',
+  );
+  process.exit(1);
+}
+console.log("✓ React Flow core CSS bundled (.react-flow rules present)");

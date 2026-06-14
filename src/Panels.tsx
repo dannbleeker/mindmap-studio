@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import type { SelectedNode } from "./mindmap";
 import type { MapNode, NodeStyle } from "./model/types";
 import { renderNote } from "./noteFormat";
@@ -13,6 +13,25 @@ import { controlStyle, inputStyle } from "./ui";
 
 const FILL_SWATCHES = ["#fde2e2", "#e2ecfd", "#e2fbe8", "#fdf3e2", "#efe2fd", "#ececec"];
 const BORDER_SWATCHES = ["#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"];
+
+// Shared chrome for the left-rail panels (Outline, Marker/tag index, Power Filter): a fixed-width
+// flex column with a right divider. One definition so the three panels stay visually identical.
+const PANEL_ASIDE: CSSProperties = {
+  width: 250,
+  flexShrink: 0,
+  display: "flex",
+  flexDirection: "column",
+  borderRight: "1px solid #e2e0d8",
+  background: "#fbfbf9",
+};
+
+// Small-caps section header inside the index + filter panels.
+const PANEL_GROUP_LABEL: CSSProperties = {
+  padding: "8px 10px 2px",
+  fontSize: 11,
+  fontWeight: 700,
+  color: "#8a8780",
+};
 
 const styleBtn = {
   border: "1px solid #cecbf6",
@@ -156,16 +175,7 @@ export function OutlinePanel({
   const rows = outlineRows(root).filter((row) => !q || row.topic.toLowerCase().includes(q));
   const numbers = numbered ? outlineNumbers(root) : undefined;
   return (
-    <aside
-      style={{
-        width: 250,
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
-        borderRight: "1px solid #e2e0d8",
-        background: "#fbfbf9",
-      }}
-    >
+    <aside style={PANEL_ASIDE}>
       <input
         value={filter}
         onChange={(e) => onFilterChange(e.target.value)}
@@ -249,9 +259,7 @@ export function MarkerTagIndex({
     if (entries.length === 0) return null;
     return (
       <div key={label}>
-        <div style={{ padding: "8px 10px 2px", fontSize: 11, fontWeight: 700, color: "#8a8780" }}>
-          {label}
-        </div>
+        <div style={PANEL_GROUP_LABEL}>{label}</div>
         {entries.map(({ key, hits }) => (
           <div key={key}>
             <div style={{ padding: "2px 10px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
@@ -266,16 +274,7 @@ export function MarkerTagIndex({
 
   const empty = markers.length === 0 && tags.length === 0;
   return (
-    <aside
-      style={{
-        width: 250,
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
-        borderRight: "1px solid #e2e0d8",
-        background: "#fbfbf9",
-      }}
-    >
+    <aside style={PANEL_ASIDE}>
       <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
         Markers &amp; tags
       </div>
@@ -340,22 +339,9 @@ export function FilterPanel({
       {key}
     </button>
   );
-  const groupLabel = (label: string) => (
-    <div style={{ padding: "8px 10px 2px", fontSize: 11, fontWeight: 700, color: "#8a8780" }}>
-      {label}
-    </div>
-  );
+  const groupLabel = (label: string) => <div style={PANEL_GROUP_LABEL}>{label}</div>;
   return (
-    <aside
-      style={{
-        width: 250,
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
-        borderRight: "1px solid #e2e0d8",
-        background: "#fbfbf9",
-      }}
-    >
+    <aside style={PANEL_ASIDE}>
       <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
         🎚 Power Filter
       </div>

@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 88,
+  "reviewedThroughChangelogBullets": 89,
   "areas": [
     "editing",
     "notes",
@@ -384,6 +384,15 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "version-history",
+      "name": "Per-map version history (snapshot + restore)",
+      "area": "library",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
     },
     {
       "id": "library-backup",

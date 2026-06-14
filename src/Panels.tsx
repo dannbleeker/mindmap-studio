@@ -9,7 +9,8 @@ import {
   outlineNumbers,
   outlineRows,
 } from "./outline";
-import { controlStyle, inputStyle } from "./ui";
+import type { VersionMeta } from "./store/mapStore";
+import { controlStyle, inputStyle, timeAgo } from "./ui";
 
 const FILL_SWATCHES = ["#fde2e2", "#e2ecfd", "#e2fbe8", "#fdf3e2", "#efe2fd", "#ececec"];
 const BORDER_SWATCHES = ["#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"];
@@ -394,6 +395,93 @@ export function FilterPanel({
         <div style={{ padding: "6px 10px", fontSize: 11, color: "#8a8780" }}>
           Read-only: non-matching topics are dimmed, nothing is removed.
         </div>
+      </div>
+    </aside>
+  );
+}
+
+// Per-map version history: a list of past snapshots (newest first) with a one-click restore, plus
+// an on-demand "Save version now". Snapshots are captured automatically while editing (throttled)
+// and on demand; restoring loads a snapshot back in place (the current state is checkpointed first).
+export function HistoryPanel({
+  versions,
+  onSaveNow,
+  onRestore,
+  onClose,
+}: {
+  versions: VersionMeta[];
+  onSaveNow: () => void;
+  onRestore: (id: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <aside style={PANEL_ASIDE}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "8px 10px 4px",
+          fontSize: 13,
+          fontWeight: 600,
+          color: "#26215c",
+        }}
+      >
+        <span>🕔 History</span>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+        >
+          Close
+        </button>
+      </div>
+      <button
+        type="button"
+        onClick={onSaveNow}
+        style={{ ...controlStyle, margin: "0 10px 6px", padding: "4px 8px", fontSize: 12 }}
+      >
+        ＋ Save version now
+      </button>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {versions.length === 0 ? (
+          <div style={{ padding: "4px 10px", fontSize: 13, color: "#8a8780" }}>
+            No saved versions yet. Snapshots are captured automatically as you edit.
+          </div>
+        ) : (
+          versions.map((v) => (
+            <div
+              key={v.id}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 6,
+                padding: "3px 10px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  color: "#26215c",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+                title={new Date(v.ts).toLocaleString()}
+              >
+                {timeAgo(v.ts)} <span style={{ color: "#8a8780" }}>· {v.nodeCount} topics</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => onRestore(v.id)}
+                style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
+              >
+                Restore
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </aside>
   );

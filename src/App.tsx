@@ -1,5 +1,5 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FilterPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
+import { FilterPanel, HistoryPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
 import { buildExample, examples } from "./examples";
 import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
 import { MARKER_PALETTE } from "./icons";
@@ -30,12 +30,17 @@ import {
 import { type LibraryHit, searchLibrary } from "./search";
 import {
   type MapSummary,
+  type VersionMeta,
   deleteMap,
   getAllMaps,
   getLastOpened,
+  latestVersionDoc,
   listMaps,
+  listVersions,
   loadMap,
+  loadVersion,
   saveMap,
+  saveVersion,
   setLastOpened,
 } from "./store/mapStore";
 import { buildTemplate, templates } from "./templates";
@@ -43,6 +48,9 @@ import { controlStyle, inputStyle } from "./ui";
 import { useFind } from "./useFind";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
+
+// Coalesce rapid edits into roughly one auto-saved version every few minutes per map.
+const SNAPSHOT_THROTTLE_MS = 3 * 60 * 1000;
 
 export function App() {
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
@@ -162,6 +170,13 @@ export function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+  // Version history: a "🕔 History" panel of per-map snapshots. Snapshots are captured on a
+  // throttle while editing (in `persist`) + on demand; `restoreRev` forces the canvas to re-init
+  // when a version is restored in place (same map id, so the doc.id key wouldn't change otherwise).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [versions, setVersions] = useState<VersionMeta[]>([]);
+  const [restoreRev, setRestoreRev] = useState(0);
+  const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
   const [aboutOpen, setAboutOpen] = useState(false);
   const aboutRef = useRef<HTMLDialogElement>(null);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
@@ -228,11 +243,19 @@ export function App() {
   }, []);
 
   const persist = useCallback(
-    async (d: MindMapDoc) => {
+    // `snapshot` is true only on edit-driven saves — opening/switching a map shouldn't create a
+    // version, or pure reloads would spam the history.
+    async (d: MindMapDoc, snapshot = false) => {
       try {
         await saveMap(d);
         await setLastOpened(d.id);
         await refreshMaps();
+        // Throttled auto-snapshot for version history (best-effort, never blocks the save).
+        const last = lastSnapshotByMap.current.get(d.id) ?? 0;
+        if (snapshot && Date.now() - last >= SNAPSHOT_THROTTLE_MS) {
+          lastSnapshotByMap.current.set(d.id, Date.now());
+          saveVersion(d, Date.now()).catch(() => {});
+        }
       } catch {
         // autosave is best-effort
       }
@@ -254,8 +277,66 @@ export function App() {
 
   function scheduleSave() {
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => persist(liveDocRef.current), 500);
+    saveTimer.current = setTimeout(() => persist(liveDocRef.current, true), 500);
   }
+
+  // --- version history ---
+  const refreshVersions = useCallback(async () => {
+    try {
+      setVersions(await listVersions(liveDocRef.current.id));
+    } catch {
+      // best-effort
+    }
+  }, []);
+
+  async function saveVersionNow() {
+    const d = liveDocRef.current;
+    try {
+      const latest = await latestVersionDoc(d.id);
+      if (latest && JSON.stringify(latest) === JSON.stringify(d)) {
+        showHint("No changes since the last version.");
+        return;
+      }
+      await saveVersion(d, Date.now());
+      lastSnapshotByMap.current.set(d.id, Date.now());
+      await refreshVersions();
+      showHint("Version saved.");
+    } catch {
+      showHint("Couldn't save a version.");
+    }
+  }
+
+  async function restoreVersion(id: string) {
+    const v = await loadVersion(id);
+    if (!v) return;
+    if (
+      !window.confirm(
+        "Restore this version? Your current map is saved to history first, so you can undo.",
+      )
+    )
+      return;
+    try {
+      await saveVersion(liveDocRef.current, Date.now()); // checkpoint current before replacing
+      const next: MindMapDoc = { ...structuredClone(v), id: liveDocRef.current.id };
+      liveDocRef.current = next;
+      setLiveDoc(next);
+      setDoc(next);
+      setRestoreRev((r) => r + 1); // remount the canvas (same map id won't otherwise re-init)
+      lastSnapshotByMap.current.set(next.id, Date.now());
+      await saveMap(next);
+      await setLastOpened(next.id);
+      await refreshMaps();
+      await refreshVersions();
+      showHint("Version restored — the previous state is saved in history.");
+    } catch {
+      showHint("Couldn't restore the version.");
+    }
+  }
+
+  // Refresh the history list whenever the panel opens.
+  useEffect(() => {
+    if (historyOpen) refreshVersions();
+  }, [historyOpen, refreshVersions]);
 
   async function parseImport(
     file: File,
@@ -611,6 +692,15 @@ export function App() {
           title="Power Filter: dim topics that don't match a marker / tag / text (read-only)"
         >
           🎚 Filter
+        </button>
+        <button
+          type="button"
+          onClick={() => setHistoryOpen((v) => !v)}
+          style={controlStyle}
+          aria-pressed={historyOpen}
+          title="Version history — restore an earlier snapshot of this map"
+        >
+          🕔 History
         </button>
         <select
           value={doc.id}
@@ -1069,8 +1159,17 @@ export function App() {
             onClose={() => setInfoOpen(false)}
           />
         )}
+        {historyOpen && (
+          <HistoryPanel
+            versions={versions}
+            onSaveNow={saveVersionNow}
+            onRestore={restoreVersion}
+            onClose={() => setHistoryOpen(false)}
+          />
+        )}
         <div style={{ flex: 1, minHeight: 0 }}>
           <MindMap
+            key={`${doc.id}:${restoreRev}`}
             ref={mapRef}
             doc={doc}
             theme={theme.theme}

@@ -45,6 +45,8 @@ GitHub Pages).
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
+- **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
+  capped at 30, stored in IndexedDB, deleted with the map.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.
 - **Relationships** — draw a labelled arrow between two nodes: right-click a node → **Link

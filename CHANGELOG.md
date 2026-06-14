@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Version history** — a **🕔 History** panel keeps per-map snapshots in IndexedDB, so you can roll
+  a map back to an earlier state. Snapshots are captured automatically while you edit (throttled to
+  ~one per few minutes) and on demand via **Save version now**; **Restore** loads a snapshot back in
+  place (your current state is checkpointed first, so a restore is itself undoable). Capped at 30
+  per map (oldest pruned); a map's history is deleted with the map. Fully local — nothing leaves
+  the browser.
 - **More import formats — iThoughts `.itmz`, MindMeister `.mind`, and legacy XMind `content.xml`.**
   iThoughts (a ZIP of `mapdata.xml`) brings in the topic tree, notes, web links, relationships, and
   floating topics; MindMeister (a ZIP of `map.json`) brings in the tree, notes, and links;

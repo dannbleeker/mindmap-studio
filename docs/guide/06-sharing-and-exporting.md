@@ -98,6 +98,18 @@ once.
 > represent leaves you to discover the gaps later, usually at the worst moment. The
 > importer's warnings are a feature: they tell you exactly what to check.
 
+## Going back in time
+
+Exporting a `.json` is a snapshot you take on purpose; **version history** takes them for you. The
+**🕔 History** panel keeps a running list of past states of the current map -- captured quietly as
+you edit (every few minutes, not every keystroke) and whenever you click **Save version now**.
+Each entry shows when it was taken and how big the map was; **Restore** rolls the map back to it.
+The safety net under the safety net: restoring first checkpoints what you have *now*, so even an
+unwanted restore is one click from undone. It's all local (capped at the 30 most recent, kept in
+the browser's database) and travels with nothing -- a private undo that outlives the session, where
+the in-session Undo (Chapter 2) stops at the last reload. Think of Backup as the whole-library
+snapshot and History as the per-map flight recorder.
+
 ## Where your data lives
 
 Nothing in this chapter sends your map anywhere. Exports are files saved to *your*

@@ -47,12 +47,16 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       brainstorm timer.
 - [ ] **E — Navigation polish (cheap wins)** — one-click focus / isolate-branch, saved filters,
       fuzzy search.
-- [ ] **F — Durability** — persistent per-map version history (IndexedDB snapshots).
+- [x] **F — Durability** — persistent per-map version history (IndexedDB snapshots) **shipped
+      2026-06-14** (🕔 History panel: auto + on-demand snapshots, restore-in-place, capped at 30).
 - [ ] **G — Interop fills** — iThoughts (`.itmz`), MindMeister (`.mind`), and legacy XMind
       `content.xml` **shipped 2026-06-14**; remaining: image-bearing `.mmap` (blocked on a real
       sample), a `.mmap` writer, MindMup, and Markmap.
 
-Suggested first pass by value-per-effort: **D + E**, then **A** and **F**; **B / C** are larger bets.
+Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus), **③** (info panel +
+tag editing), **⑦** (Word/Excel import), **G** (interop importers), and **F** (version history).
+Remaining bets: **A** (keyless AI bridge), the rest of **D** (Quick Entry, paste-as-tree, etc.) and
+**E** (saved filters, fuzzy search), and **B / C** (more structures / content depth).
 
 ## Reference
 

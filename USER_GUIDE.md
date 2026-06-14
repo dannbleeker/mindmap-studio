@@ -31,6 +31,7 @@ Left to right:
 | **☰ Outline** | Toggle the [outline panel](#outline-panel) |
 | **📑 Index** | Toggle the [marker & tag index](#marker--tag-index) |
 | **🎚 Filter** | Toggle the [Power Filter](#power-filter) (dim non-matching topics) |
+| **🕔 History** | Toggle [version history](#version-history) — restore an earlier snapshot |
 | **+ New…** | Create a map from a [template](#templates) (Blank, Brainstorm, SWOT, Project, 5 Whys, Decision, Retrospective, Meeting, Pre-mortem) |
 | **(map dropdown)** | Switch between maps in your [library](#the-map-library) |
 | **Delete** | Delete the current map |
@@ -265,6 +266,16 @@ learn a feature by reading one that uses it. Opening one creates a fresh, editab
 Each imported file becomes its own library entry; batch imports report how many were added.
 MindManager stock icons are mapped to the closest **emoji** marker, so an imported map keeps its
 visual cues rather than arriving as bare text.
+
+### Version history
+
+**🕔 History** opens a per-map list of past snapshots, newest first, each labelled with when it
+was taken and its topic count. **Restore** rolls the map back to that snapshot — and because your
+current state is checkpointed first, a restore is itself undoable (just restore the top entry).
+Snapshots are captured **automatically as you edit** (coalesced to about one every few minutes) and
+on demand with **Save version now**. History is capped at the 30 most recent per map (older ones are
+pruned), lives entirely in your browser (IndexedDB), and is deleted along with the map. It's the
+fine-grained companion to **Backup** (which snapshots the *whole library* to a file).
 
 ### Backup & restore
 

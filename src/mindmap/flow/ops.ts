@@ -204,13 +204,14 @@ export function setAllExpanded(doc: MindMapDoc, expanded: boolean): OpResult {
   return { doc: next };
 }
 
-/** Set the note on a node ("" clears it). */
+/** Set the note on a node (empty or whitespace-only clears it). */
 export function setNote(doc: MindMapDoc, id: string, note: string): OpResult {
   const next = structuredClone(doc);
   const loc = locate(next.root, id);
   if (!loc) return { doc };
-  if (note) loc.node.note = note;
-  else loc.node.note = undefined;
+  // A blank or whitespace-only note is "no note" — clear it so the 📝 indicator disappears
+  // (matches the Outline panel, which has always judged notes by their trimmed content).
+  loc.node.note = note.trim() ? note : undefined;
   return { doc: next };
 }
 

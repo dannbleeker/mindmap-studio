@@ -120,6 +120,10 @@ describe("flow ops — content", () => {
     expect(
       findNode(setNote(setNote(base(), "a", "hi").doc, "a", "").doc, "a")?.note,
     ).toBeUndefined();
+    // a whitespace-only note is "no note" — cleared so the 📝 indicator disappears
+    expect(
+      findNode(setNote(setNote(base(), "a", "hi").doc, "a", "   ").doc, "a")?.note,
+    ).toBeUndefined();
     expect(findNode(toggleIcon(base(), "a", "⭐").doc, "a")?.icons).toEqual(["⭐"]);
     expect(
       findNode(toggleIcon(toggleIcon(base(), "a", "⭐").doc, "a", "⭐").doc, "a")?.icons,

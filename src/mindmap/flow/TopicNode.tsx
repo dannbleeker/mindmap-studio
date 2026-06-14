@@ -184,7 +184,7 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
             🔗
           </button>
         ) : null}
-        {note ? (
+        {note?.trim() ? (
           <span title="Has a note" style={{ marginLeft: 4, opacity: 0.55 }}>
             📝
           </span>

@@ -399,6 +399,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **The 📝 note indicator now disappears for empty notes.** A note containing only whitespace
+  cleared the icon in the Outline (which judges notes by trimmed content) but still showed 📝 on
+  the canvas. `setNote` now treats a blank/whitespace-only note as "no note" (cleared), and the
+  canvas indicator is gated on trimmed content too, so the two surfaces agree.
 - **Boundaries / the ⬚ Group button now actually work on the canvas.** The first cut shipped
   on a verified *data* round-trip but the live render was never visually confirmed (it leaned
   on mind-elixir's bracket summary, which only drew a faint `{` on the outer edge, not the

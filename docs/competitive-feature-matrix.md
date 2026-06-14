@@ -217,7 +217,7 @@ Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 - **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.
 - **F — Durability** — ✅ shipped: persistent per-map version history (IndexedDB snapshots).
-- **G — Interop fills** — ✅ iThoughts/.itmz, MindMeister .mind, legacy XMind, XMind export all shipped; remaining: MindMup/Markmap import, image-bearing .mmap, write .mmap.
+- **G — Interop fills** — ✅ iThoughts/.itmz, MindMeister .mind, legacy XMind, XMind export, MindMup/Markmap import all shipped; remaining: image-bearing .mmap, write .mmap.
 
 Most clusters are now shipped. Remaining bets: **A** (keyless AI bridge, deferred), **B** (more
 diagram types — the larger structural builds), and the **C/G** long-tail (LaTeX, MindMup/Markmap, .mmap).

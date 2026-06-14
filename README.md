@@ -19,7 +19,8 @@ GitHub Pages).
   Also opens native `.json` maps (exported from this app) losslessly, and interchanges with
   other tools: `.opml` outlines, **FreeMind/Freeplane `.mm`**, **Mermaid** `mindmap`,
   **XMind `.xmind`** (modern + legacy), **SimpleMind `.smmx`**, **iThoughts `.itmz`**,
-  **MindMeister `.mind`**, and **Word `.docx` / Excel `.xlsx`** outlines.
+  **MindMeister `.mind`**, **MindMup `.mup`**, **Markmap** (`.md`), and **Word `.docx` / Excel
+  `.xlsx`** outlines.
 - **Paste text → map** — turn a pasted outline / bullet list / Markdown into topics (indentation or
   `#` levels set the hierarchy); drop in as a new map or graft under the selected node.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,

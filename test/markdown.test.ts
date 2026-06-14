@@ -60,6 +60,35 @@ describe("markdown io", () => {
     expect(doc.root.children.map((c) => c.topic)).toEqual(["x"]);
   });
 
+  it("builds hierarchy from multi-level headings, with bullets under the current heading", () => {
+    // # root, ## sections, bullets nested below them (the real Markdown/Markmap shape).
+    const doc = fromMarkdown("# Root\n## Branch A\n- Leaf 1\n- Leaf 2\n## Branch B\n### Deep\n- x");
+    expect(doc.title).toBe("Root");
+    expect(shape(doc.root)).toEqual({
+      topic: "Root",
+      children: [
+        {
+          topic: "Branch A",
+          children: [
+            { topic: "Leaf 1", children: [] },
+            { topic: "Leaf 2", children: [] },
+          ],
+        },
+        {
+          topic: "Branch B",
+          children: [{ topic: "Deep", children: [{ topic: "x", children: [] }] }],
+        },
+      ],
+    });
+  });
+
+  it("attaches headings under the root when there is no H1", () => {
+    const doc = fromMarkdown("## A\n## B\n- b1");
+    expect(doc.title).toBe("Untitled map");
+    expect(doc.root.children.map((c) => c.topic)).toEqual(["A", "B"]);
+    expect(doc.root.children[1].children.map((c) => c.topic)).toEqual(["b1"]);
+  });
+
   it("attaches an over-indented bullet (no shallower parent) to the root", () => {
     // A first bullet indented past level 1 has no parent on the stack; it should
     // anchor to the root rather than crash.

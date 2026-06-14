@@ -24,7 +24,7 @@ import { fileToAttachment } from "./io/attachment";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
-import { fromMarkdown, toMarkdown } from "./io/markdown";
+import { toMarkdown } from "./io/markdown";
 import { parseOutline } from "./io/pasteOutline";
 import {
   type LayoutKind,
@@ -488,7 +488,10 @@ export function App() {
   ): Promise<{ doc: MindMapDoc; warnings: string[] }> {
     const name = file.name.toLowerCase();
     if (name.endsWith(".md") || name.endsWith(".markdown")) {
-      return { doc: fromMarkdown(await file.text()), warnings: [] };
+      // Markmap files are Markdown (optionally with a `---` frontmatter block); fromMarkmap strips
+      // any frontmatter then delegates to the Markdown parser, so plain .md still imports fine.
+      const { fromMarkmap } = await import("./io/markmap");
+      return { doc: fromMarkmap(await file.text()), warnings: [] };
     }
     if (name.endsWith(".mmd") || name.endsWith(".mermaid")) {
       const { fromMermaid } = await import("./io/mermaid");
@@ -528,6 +531,10 @@ export function App() {
     if (name.endsWith(".mind")) {
       const { fromMind } = await import("./io/mindmeister");
       return { doc: fromMind(new Uint8Array(await file.arrayBuffer())), warnings: [] };
+    }
+    if (name.endsWith(".mup")) {
+      const { fromMindMup } = await import("./io/mindmup");
+      return { doc: fromMindMup(await file.text()), warnings: [] };
     }
     const { parseMmap } = await importMmap();
     const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
@@ -1168,7 +1175,7 @@ export function App() {
           <input
             id="mmap-input"
             type="file"
-            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind"
+            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup"
             multiple
             onChange={handleFile}
             style={{ display: "none" }}

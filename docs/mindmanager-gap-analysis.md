@@ -164,7 +164,7 @@ they've dropped).
 | Mermaid mindmap | ✅ | Import + export (2026-06-14). |
 | XMind (.xmind) | ✅ | Import (2020+ `content.json` **and** legacy `content.xml`) **and export** (`toXmind`) both ship. |
 | iThoughts (.itmz) / MindMeister (.mind) / SimpleMind (.smmx) | ✅ | All import; `.smmx` also exports. |
-| MindMup / Markmap | ⬜ | Long-tail importers; `.mm`/OPML/Markdown already bridge most. |
+| MindMup / Markmap | ✅ | MindMup `.mup` JSON import; Markmap imports as Markdown (frontmatter-aware). |
 | Office / Project / Outlook / Jira / SharePoint / Teams integrations | 🚫 | Cloud/enterprise integrations. |
 | Native generative AI | 🚫 | MindManager itself ships none (add-ins only); a keyless prompt-bridge approach is the most we'd consider, and AI is deferred. |
 
@@ -231,6 +231,8 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   panel, capped at 5 MB) — shipped 2026-06-14; more of cluster C / §4.
 - **Board (Kanban) view** — the **▦ Board** toggle: a read-only view grouping topics into columns by
   tag (cards show progress + due; click to jump) — shipped 2026-06-14 (§2 alternate views).
+- **MindMup (`.mup`) + Markmap import** — MindMup JSON maps and Markmap Markdown (frontmatter-aware);
+  Markdown import now handles multi-level `#`/`##`/`###` headings too — shipped 2026-06-14 (§8).
 - **Conditional formatting** — the **🎨 Styles** panel: rules that auto-style topics by
   tag / marker / completion (view-only overlay) — shipped 2026-06-14 (§3 styling).
 - **Styles organizer** — named, reusable per-node styles (save a topic's look, apply it to others),
@@ -265,8 +267,8 @@ After this session the in-scope list is short. What's genuinely left:
    offline-precached fonts) for something MindManager doesn't do natively. **Deferred by decision**
    (2026-06-14) on the offline-cache cost.
 6. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
-8. **Interchange long-tail** — **MindMup** + **Markmap** import, **image-bearing `.mmap`** import
-   (blocked on a real sample), and a **`.mmap` writer** (large XSD, high-risk). *(XMind export ships.)*
+8. **Interchange long-tail** — **image-bearing `.mmap`** import (blocked on a real sample) and a
+   **`.mmap` writer** (large XSD, high-risk). *(XMind export + MindMup/Markmap import all ship.)*
 9. **Dedicated mobile UX** — the PWA is responsive-ish but not phone-optimised.
 
 ### Bigger bets (see the cross-tool matrix)

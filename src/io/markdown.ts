@@ -27,15 +27,41 @@ function nextId(): string {
 export function fromMarkdown(md: string): MindMapDoc {
   mdId = 0;
   const root: MapNode = { id: "root", topic: "Untitled map", children: [] };
-  // stack[d] = the node whose children receive a bullet at depth d+1.
-  const stack: MapNode[] = [root];
+  let h1Seen = false;
+  // headings[level] = the node for that markdown heading level (1-based; headings[1] === root).
+  // Used so deeper headings (##, ###) nest correctly — this is what Markmap + real outlines need.
+  const headings: MapNode[] = [];
+  headings[1] = root;
+  // `section` is the node bullets currently hang under (the deepest heading, or the root).
+  let section: MapNode = root;
+  // bulletStack[d] = the node whose children receive a bullet at depth d+1, within the section.
+  let bulletStack: MapNode[] = [root];
 
   for (const raw of md.split(/\r?\n/)) {
     if (!raw.trim()) continue;
 
-    const heading = raw.match(/^#\s+(.*)$/);
+    const heading = raw.match(/^(#{1,6})\s+(.*)$/);
     if (heading) {
-      root.topic = heading[1].trim() || root.topic;
+      const level = heading[1].length;
+      const text = heading[2].trim();
+      if (level === 1 && !h1Seen) {
+        // The first H1 names the root rather than creating a child.
+        h1Seen = true;
+        if (text) root.topic = text;
+        headings.length = 2; // keep [_, root]
+        section = root;
+        bulletStack = [root];
+        continue;
+      }
+      // Any other heading becomes a node under the nearest shallower heading.
+      let parentLevel = level - 1;
+      while (parentLevel >= 1 && !headings[parentLevel]) parentLevel -= 1;
+      const node: MapNode = { id: nextId(), topic: text, children: [] };
+      (headings[parentLevel] ?? root).children.push(node);
+      headings[level] = node;
+      headings.length = level + 1; // forget any deeper headings
+      section = node;
+      bulletStack = [node];
       continue;
     }
 
@@ -43,12 +69,12 @@ export function fromMarkdown(md: string): MindMapDoc {
     if (!bullet) continue;
 
     const indent = bullet[1].replace(/\t/g, "  ").length;
-    const depth = Math.floor(indent / 2) + 1; // top-level bullets sit under root
+    const depth = Math.floor(indent / 2) + 1; // top-level bullets sit under the current section
     const node: MapNode = { id: nextId(), topic: bullet[2].trim(), children: [] };
-    const parent = stack[depth - 1] ?? root;
+    const parent = bulletStack[depth - 1] ?? section;
     parent.children.push(node);
-    stack[depth] = node;
-    stack.length = depth + 1; // forget anything deeper than the current line
+    bulletStack[depth] = node;
+    bulletStack.length = depth + 1; // forget anything deeper than the current line
   }
 
   return {

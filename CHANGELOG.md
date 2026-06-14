@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **More import formats — MindMup (`.mup`) and Markmap.** MindMup's JSON tree imports (rank-ordered
+  children, notes, links — dangerous schemes dropped). Markmap files are Markdown, so they import via
+  **Open files** (`.md`), stripping any `---` frontmatter (its `title:` becomes the map title). As part
+  of this, **Markdown import now understands multi-level headings** (`#` / `##` / `###`) with bullets
+  nested under them — so heading-structured outlines (and Markmap maps) import with their full
+  hierarchy, not just a flat bullet list. (Schema-verified against the documented formats, not yet
+  against real app exports — same caveat as `.smmx`/`.mind`.)
 - **Task priority** — set a topic's priority (**High / Med / Low**) in the **ℹ Info** panel; a small
   coloured chip shows on the node, and the **🎚 Power Filter** can filter by priority. Distinct from
   the emoji priority markers in that it's a structured, filterable value. Stored on `task.priority`.

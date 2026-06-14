@@ -324,7 +324,7 @@ For getting ideas down quickly, three header tools:
 | Format | Notes |
 |---|---|
 | `.mmap` | MindManager export — recovers topics, notes, icons, hyperlinks, relationships, boundaries, floating topics (one-way, lossy by design) |
-| `.md` / `.markdown` | Markdown outline (H1 root + nested bullets) |
+| `.md` / `.markdown` | Markdown outline — `#`/`##`/`###` headings **and** nested bullets (also imports **Markmap** files, stripping any `---` frontmatter; its `title:` becomes the map title) |
 | `.json` | A native MindMap Studio map — **lossless** |
 | `.opml` | OPML outline (Freeplane, OmniOutliner, Workflowy, …) |
 | `.mm` | FreeMind / Freeplane map — topics, links, folded state, and notes |
@@ -333,6 +333,7 @@ For getting ideas down quickly, three header tools:
 | `.smmx` | SimpleMind — topic tree, notes, web links, and relations→cross-links |
 | `.itmz` | iThoughts — topic tree, notes, web links, relationships→cross-links, floating topics |
 | `.mind` | MindMeister — topic tree, notes, and web links from `map.json` |
+| `.mup` | MindMup — JSON map (rank-ordered children, notes, links) |
 | `.docx` | Word — the document's outline (heading styles or indentation) → topic tree, with italic note paragraphs |
 | `.xlsx` | Excel — an indented-outline sheet (first non-empty column = depth, trailing column = note); reads inline + shared strings. Empty-topic rows aren't imported |
 

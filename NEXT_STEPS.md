@@ -23,12 +23,12 @@ to GitHub Pages on every push to `main` — live at
       instances / split view — *high effort/risk* (selection, notes, markers, style all assume one
       active map via `docRef`). Recommendation: do (a) if wanted; defer (b) unless side-by-side
       comparison is needed.
-- [ ] **Interop — remaining formats.** Read support is now broad: `.mmap`, OPML, Markdown, `.json`,
-      FreeMind/Freeplane `.mm`, Mermaid, XMind (modern **and** legacy `content.xml`), SimpleMind
-      `.smmx`, iThoughts `.itmz`, MindMeister `.mind`, Word `.docx`, Excel `.xlsx`. Remaining thin
-      adapters: **MindMup** (JSON), **Markmap** (markdown variant), and on the write side a
-      **`.mmap` writer** + **image-bearing `.mmap`** import (blocked on a real sample). Lower
-      priority — open formats already bridge most tools.
+- [ ] **Interop — remaining formats.** Read support is now broad: `.mmap`, OPML, Markdown (incl.
+      multi-level headings), `.json`, FreeMind/Freeplane `.mm`, Mermaid, XMind (modern **and** legacy
+      `content.xml`, + export), SimpleMind `.smmx`, iThoughts `.itmz`, MindMeister `.mind`, **MindMup
+      `.mup`**, **Markmap**, Word `.docx`, Excel `.xlsx`. Remaining: a **`.mmap` writer** +
+      **image-bearing `.mmap`** import (blocked on a real sample). Lower priority — open formats
+      already bridge most tools.
 
 ## Competitive gap clusters (backlog candidates, 2026-06-14)
 
@@ -51,9 +51,9 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       and typo-tolerant Find all **shipped 2026-06-14**.
 - [x] **F — Durability** — persistent per-map version history (IndexedDB snapshots) **shipped
       2026-06-14** (🕔 History panel: auto + on-demand snapshots, restore-in-place, capped at 30).
-- [ ] **G — Interop fills** — iThoughts (`.itmz`), MindMeister (`.mind`), and legacy XMind
-      `content.xml` **shipped 2026-06-14**; remaining: image-bearing `.mmap` (blocked on a real
-      sample), a `.mmap` writer, MindMup, and Markmap.
+- [x] **G — Interop fills** — iThoughts (`.itmz`), MindMeister (`.mind`), legacy XMind
+      `content.xml`, **MindMup (`.mup`)**, and **Markmap** all **shipped 2026-06-14**; remaining:
+      image-bearing `.mmap` (blocked on a real sample) and a `.mmap` writer (high-risk).
 
 Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus), **③** (info panel +
 tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), **E**

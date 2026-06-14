@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 100,
+  "reviewedThroughChangelogBullets": 101,
   "areas": [
     "editing",
     "notes",
@@ -617,6 +617,24 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "import-mindmup",
+      "name": "Import MindMup (.mup) JSON maps",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "import-markmap",
+      "name": "Import Markmap Markdown (frontmatter + multi-level headings)",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": false,
       "bookExample": false
     },
     {

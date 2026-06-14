@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-14T21:06:32.454Z",
-  "commit": "11f089d",
+  "generatedAt": "2026-06-14T21:38:40.700Z",
+  "commit": "2c32dd8",
   "headline": {
-    "linesTsJs": 19066,
-    "tests": 453,
-    "lineCoveragePct": 46.24,
-    "commits": 297,
+    "linesTsJs": 19377,
+    "tests": 462,
+    "lineCoveragePct": 46.22,
+    "commits": 299,
     "ageDays": 3,
-    "trackedFiles": 191,
+    "trackedFiles": 193,
     "featureManualPct": 100,
-    "featureBookPct": 83.9,
-    "featureExamplePct": 48.4
+    "featureBookPct": 83,
+    "featureExamplePct": 47.9
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 74,
-      "lines": 12057
+      "files": 75,
+      "lines": 12280
     },
     {
       "category": "Unit tests",
-      "files": 57,
-      "lines": 5287
+      "files": 58,
+      "lines": 5375
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 46.24,
-      "covered": 4043,
-      "total": 8743
+      "pct": 46.22,
+      "covered": 4118,
+      "total": 8909
     },
     "statements": {
-      "pct": 46.24,
-      "covered": 4043,
-      "total": 8743
+      "pct": 46.22,
+      "covered": 4118,
+      "total": 8909
     },
     "functions": {
-      "pct": 90.46,
-      "covered": 332,
-      "total": 367
+      "pct": 90.61,
+      "covered": 338,
+      "total": 373
     },
     "branches": {
-      "pct": 82.86,
-      "covered": 1422,
-      "total": 1716
+      "pct": 82.88,
+      "covered": 1448,
+      "total": 1747
     }
   },
   "tests": {
-    "unit": 453,
+    "unit": 462,
     "e2e": 0,
-    "durationMs": 9848,
+    "durationMs": 10101,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2568
+        "ms": 2596
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 177
+        "ms": 162
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 137
+        "ms": 152
       },
       {
         "file": "test/docx-import.test.ts",
-        "ms": 85
+        "ms": 78
       },
       {
-        "file": "test/xlsx.test.ts",
-        "ms": 75
+        "file": "test/mmap.test.ts",
+        "ms": 63
       }
     ]
   },
@@ -107,7 +107,7 @@
       },
       {
         "name": "Panels.tsx",
-        "lines": 1400
+        "lines": 1437
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
@@ -162,7 +162,7 @@
       },
       {
         "file": "Panels.tsx",
-        "commits": 18
+        "commits": 19
       },
       {
         "file": "mindmap/contract.ts",
@@ -183,12 +183,12 @@
       {
         "file": "Panels.tsx",
         "pct": 0,
-        "commits": 18
+        "commits": 19
       },
       {
         "file": "mindmap/flow/TopicNode.tsx",
         "pct": 0,
-        "commits": 15
+        "commits": 16
       },
       {
         "file": "useMapExports.ts",
@@ -208,27 +208,27 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 201.2,
+    "jsGzipKb": 202.2,
     "cssGzipKb": 2.5,
-    "totalGzipKb": 203.7,
-    "entryGzipKb": 89.8,
+    "totalGzipKb": 204.7,
+    "entryGzipKb": 90.4,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 9822,
     "chapters": 11,
-    "appLoc": 12057,
-    "docToCodeRatio": 0.81
+    "appLoc": 12280,
+    "docToCodeRatio": 0.8
   },
   "featureCoverage": {
-    "total": 93,
-    "manual": 93,
+    "total": 94,
+    "manual": 94,
     "manualPct": 100,
     "book": 78,
-    "bookPct": 83.9,
+    "bookPct": 83,
     "bookExample": 45,
-    "bookExamplePct": 48.4,
+    "bookExamplePct": 47.9,
     "byArea": {
       "editing": {
         "total": 10,
@@ -256,8 +256,8 @@
         "book": 1
       },
       "structure": {
-        "total": 7,
-        "manual": 7,
+        "total": 8,
+        "manual": 8,
         "book": 6
       },
       "navigation": {
@@ -312,6 +312,11 @@
         {
           "id": "summary-topics",
           "name": "Summary topics — a labelled bracket beside a branch (side-aware, renamable)",
+          "since": "2026-06-14"
+        },
+        {
+          "id": "node-shapes",
+          "name": "Node shapes — diamond / oval / parallelogram / hexagon / cylinder (flowchart vocabulary), canvas == export",
           "since": "2026-06-14"
         },
         {
@@ -375,22 +380,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 3,
-    "commits": 297,
-    "commits7d": 297,
+    "commits": 299,
+    "commits7d": 299,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 175
+        "count": 176
       },
       {
         "name": "github-actions[bot]",
-        "count": 122
+        "count": 123
       }
     ],
     "churn30d": {
-      "added": 43096,
-      "removed": 11504
+      "added": 43643,
+      "removed": 11711
     },
-    "changelogEntries": 102
+    "changelogEntries": 103
   }
 }

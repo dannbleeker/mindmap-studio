@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-14T08:43:21.189Z",
-  "commit": "39ecdc3",
+  "generatedAt": "2026-06-14T09:16:55.281Z",
+  "commit": "c8cb71a",
   "headline": {
-    "linesTsJs": 11824,
-    "tests": 256,
-    "lineCoveragePct": 51.34,
-    "commits": 220,
+    "linesTsJs": 11981,
+    "tests": 262,
+    "lineCoveragePct": 51.12,
+    "commits": 223,
     "ageDays": 2,
-    "trackedFiles": 152,
+    "trackedFiles": 153,
     "featureManualPct": 100,
     "featureBookPct": 100,
     "featureExamplePct": 73.8
@@ -16,12 +16,12 @@
     {
       "category": "App code (src)",
       "files": 56,
-      "lines": 7152
+      "lines": 7249
     },
     {
       "category": "Unit tests",
-      "files": 38,
-      "lines": 2950
+      "files": 39,
+      "lines": 3010
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 51.34,
-      "covered": 2683,
-      "total": 5225
+      "pct": 51.12,
+      "covered": 2706,
+      "total": 5293
     },
     "statements": {
-      "pct": 51.34,
-      "covered": 2683,
-      "total": 5225
+      "pct": 51.12,
+      "covered": 2706,
+      "total": 5293
     },
     "functions": {
-      "pct": 88.75,
-      "covered": 213,
-      "total": 240
+      "pct": 88.88,
+      "covered": 216,
+      "total": 243
     },
     "branches": {
-      "pct": 84.17,
-      "covered": 787,
-      "total": 935
+      "pct": 84.04,
+      "covered": 811,
+      "total": 965
     }
   },
   "tests": {
-    "unit": 256,
+    "unit": 262,
     "e2e": 0,
-    "durationMs": 5396,
+    "durationMs": 7004,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 1435
+        "ms": 2031
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 146
-      },
-      {
-        "file": "test/mmap.test.ts",
-        "ms": 58
+        "ms": 160
       },
       {
         "file": "test/xlsx.test.ts",
-        "ms": 51
+        "ms": 84
       },
       {
         "file": "test/rich-text.test.ts",
-        "ms": 43
+        "ms": 58
+      },
+      {
+        "file": "test/mmap.test.ts",
+        "ms": 54
       }
     ]
   },
@@ -107,19 +107,19 @@
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 535
+        "lines": 588
       },
       {
         "name": "examples.ts",
         "lines": 468
       },
       {
-        "name": "Panels.tsx",
-        "lines": 343
+        "name": "mindmap/flow/ops.ts",
+        "lines": 367
       },
       {
-        "name": "mindmap/flow/ops.ts",
-        "lines": 329
+        "name": "Panels.tsx",
+        "lines": 343
       }
     ]
   },
@@ -165,8 +165,8 @@
         "commits": 11
       },
       {
-        "file": "import/mmap.ts",
-        "commits": 9
+        "file": "mindmap/FlowMindMap.tsx",
+        "commits": 10
       }
     ],
     "risky": [
@@ -183,7 +183,7 @@
       {
         "file": "mindmap/FlowMindMap.tsx",
         "pct": 0,
-        "commits": 9
+        "commits": 10
       },
       {
         "file": "mindmap/contract.ts",
@@ -208,9 +208,9 @@
     "nonNull": 2
   },
   "bundle": {
-    "jsGzipKb": 180,
+    "jsGzipKb": 180.4,
     "cssGzipKb": 2.5,
-    "totalGzipKb": 182.5,
+    "totalGzipKb": 182.9,
     "entryGzipKb": 78.5,
     "budgetKb": 150,
     "withinBudget": true
@@ -218,8 +218,8 @@
   "docs": {
     "bookWords": 8492,
     "chapters": 11,
-    "appLoc": 7152,
-    "docToCodeRatio": 1.19
+    "appLoc": 7249,
+    "docToCodeRatio": 1.17
   },
   "featureCoverage": {
     "total": 61,
@@ -299,22 +299,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 2,
-    "commits": 220,
-    "commits7d": 220,
+    "commits": 223,
+    "commits7d": 223,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 142
+        "count": 143
       },
       {
         "name": "github-actions[bot]",
-        "count": 78
+        "count": 80
       }
     ],
     "churn30d": {
-      "added": 31969,
-      "removed": 8595
+      "added": 32183,
+      "removed": 8646
     },
-    "changelogEntries": 74
+    "changelogEntries": 75
   }
 }

@@ -7,6 +7,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Draw relationships on the canvas** — right-click a node → **Link to…** → click a
+  target to add a labelled cross-link (double-click a relationship to relabel, right-click
+  to delete). Restores interactive relationship-drawing on the React Flow engine.
 - **Canvas engine → React Flow.** Replaced the mind-elixir renderer with
   **@xyflow/react** (MIT), unlocking first-class, editable **alternate layouts**
   (org-chart down/up, radial, timeline, fishbone), **organic tapered branches**,

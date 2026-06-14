@@ -1,4 +1,11 @@
-import type { Callout, MapImage, MapNode, MindMapDoc, NodeStyle } from "../../model/types";
+import type {
+  Callout,
+  CrossLink,
+  MapImage,
+  MapNode,
+  MindMapDoc,
+  NodeStyle,
+} from "../../model/types";
 
 // Pure tree-edit transforms on the canonical MindMapDoc. Each returns a NEW doc (the input
 // is never mutated) plus, where relevant, the id to select next. This is the model-first
@@ -273,6 +280,37 @@ export function deleteCallout(doc: MindMapDoc, nodeId: string, calloutId: string
   if (!loc?.node.callouts) return { doc };
   const kept = loc.node.callouts.filter((c) => c.id !== calloutId);
   loc.node.callouts = kept.length > 0 ? kept : undefined;
+  return { doc: next };
+}
+
+// --- cross-links (relationship arrows) -------------------------------------
+
+/** Add a labelled cross-link between two distinct, existing nodes (no exact duplicate). */
+export function addLink(doc: MindMapDoc, from: string, to: string, label?: string): OpResult {
+  if (from === to || !findNode(doc, from) || !findNode(doc, to)) return { doc };
+  if ((doc.links ?? []).some((l) => l.from === from && l.to === to)) return { doc };
+  const next = structuredClone(doc);
+  const link: CrossLink = { id: makeId(), from, to, ...(label ? { label } : {}) };
+  next.links = [...(next.links ?? []), link];
+  return { doc: next };
+}
+
+/** Set (or clear, with "") a cross-link's label. */
+export function setLinkLabel(doc: MindMapDoc, id: string, label: string): OpResult {
+  if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.links = (next.links ?? []).map((l) =>
+    l.id === id ? (label ? { ...l, label } : { id: l.id, from: l.from, to: l.to }) : l,
+  );
+  return { doc: next };
+}
+
+/** Remove a cross-link by id (clearing the array when it empties). */
+export function deleteLink(doc: MindMapDoc, id: string): OpResult {
+  if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
+  const next = structuredClone(doc);
+  const kept = (next.links ?? []).filter((l) => l.id !== id);
+  next.links = kept.length > 0 ? kept : undefined;
   return { doc: next };
 }
 

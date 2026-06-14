@@ -38,8 +38,9 @@ GitHub Pages).
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.
-- **Relationships** — imported relationships render as arrows, and arrows you draw round-trip
-  back into the model.
+- **Relationships** — draw a labelled arrow between two nodes: right-click a node → **Link
+  to…**, then click the target (with an optional label). Double-click a relationship to
+  relabel it, right-click to delete. Imported `.mmap` relationships render too.
 - **Boundaries** — a toolbar **⬚ Group** draws a shaded, rounded box around the selected
   branch and its subtree (double-click the box's chip to label it); imported MindManager
   boundaries render the same way, and boundaries you draw round-trip back into the model.

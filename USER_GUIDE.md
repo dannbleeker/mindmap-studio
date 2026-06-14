@@ -168,8 +168,10 @@ live, without losing edits. Image exports inherit the theme, so a dark map expor
 
 ## Relationships, boundaries & callouts
 
-- **Relationships** — draw a labelled arrow between two nodes (right-click → Link). Arrows you
-  draw are saved, and ones imported from `.mmap` are shown.
+- **Relationships** — draw a labelled arrow between two nodes: right-click the first node →
+  **Link to…**, then click the target (you'll be prompted for an optional label). Double-click a
+  relationship to relabel it, right-click it to delete. Drawn and imported (`.mmap`) relationships
+  both persist.
 - **Boundaries** — a shaded, rounded box grouping a node and its subtree. Select a node and
   click **⬚ Group** in the toolbar, then double-click the box's label chip to name it (an
   unlabelled box shows a "Label…" placeholder). Drawn and imported boundaries both round-trip

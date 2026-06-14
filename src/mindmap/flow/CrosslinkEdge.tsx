@@ -1,10 +1,18 @@
-import { EdgeLabelRenderer, type EdgeProps, getBezierPath, useInternalNode } from "@xyflow/react";
+import {
+  BaseEdge,
+  EdgeLabelRenderer,
+  type EdgeProps,
+  getBezierPath,
+  useInternalNode,
+} from "@xyflow/react";
 import { getFloatingPoints } from "./floating";
 import { CROSSLINK_COLOR, CROSSLINK_DASH, CROSSLINK_WIDTH } from "./style";
 import type { FlowEdge } from "./types";
 
 // Cross-link / relationship: a dashed floating bezier with an optional label chip. Floating
-// (border-to-border) so it routes sensibly in any layout, unlike a fixed-handle edge.
+// (border-to-border) so it routes sensibly in any layout, unlike a fixed-handle edge. Rendered
+// via BaseEdge so it carries a wide invisible hit-area — the thin dashed line is easy to
+// double-click (rename) or right-click (delete).
 
 export function CrosslinkEdge({ source, target, label, data }: EdgeProps<FlowEdge>) {
   const s = useInternalNode(source);
@@ -20,12 +28,10 @@ export function CrosslinkEdge({ source, target, label, data }: EdgeProps<FlowEdg
   const color = data?.branchColor ?? CROSSLINK_COLOR;
   return (
     <>
-      <path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth={CROSSLINK_WIDTH}
-        strokeDasharray={CROSSLINK_DASH}
+      <BaseEdge
+        path={path}
+        interactionWidth={20}
+        style={{ stroke: color, strokeWidth: CROSSLINK_WIDTH, strokeDasharray: CROSSLINK_DASH }}
       />
       {label ? (
         <EdgeLabelRenderer>

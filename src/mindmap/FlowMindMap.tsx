@@ -35,8 +35,10 @@ import {
   type OpResult,
   addCallout,
   addChild,
+  addLink,
   addSibling,
   deleteCallout,
+  deleteLink,
   deleteNode,
   findNode,
   groupBranch,
@@ -48,6 +50,7 @@ import {
   setCalloutText,
   setHyperlink,
   setImage,
+  setLinkLabel,
   setNote,
   setTopicRich,
   toggleCollapse,
@@ -97,6 +100,8 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
+  // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
+  const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
   // The current doc, mirrored for render-time consumers (boundary + callout overlays). The
   // canvas is model-first: edits update docRef + RF state via sync(); App keeps the `doc` prop
   // stable during a session, so the overlays must track this live copy, not the prop.
@@ -115,6 +120,8 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   selectedRef.current = selectedId;
   const editingRef = useRef<string | null>(null);
   editingRef.current = editingId;
+  const linkingFromRef = useRef<string | null>(null);
+  linkingFromRef.current = linkingFrom;
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const onSelectRef = useRef(onSelect);
@@ -296,6 +303,10 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
   // Keyboard tree-building (when a node is selected and we're not inline-editing or in a field).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && linkingFromRef.current) {
+        setLinkingFrom(null);
+        return;
+      }
       if (editingRef.current) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName)))
@@ -432,11 +443,20 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
           maxZoom={3}
           fitView
           onNodeClick={(_, node) => {
+            // In "Link to…" mode, the next click on a *different* node completes the relationship.
+            if (linkingFrom && node.id !== linkingFrom) {
+              const label = window.prompt("Relationship label (optional):", "") ?? "";
+              apply(addLink(docRef.current, linkingFrom, node.id, label));
+              setLinkingFrom(null);
+              return;
+            }
+            setLinkingFrom(null);
             setSelectedId(node.id);
             fireSelect(node.id);
             setMenu(null);
           }}
           onPaneClick={() => {
+            setLinkingFrom(null);
             setSelectedId(null);
             fireSelect(null);
             setMenu(null);
@@ -448,6 +468,18 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
             setMenu({ x: e.clientX, y: e.clientY, id: node.id });
           }}
           onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
+          onEdgeDoubleClick={(_, edge) => {
+            if (edge.type !== "crosslink") return;
+            const cur = (docRef.current.links ?? []).find((l) => l.id === edge.id);
+            const label = window.prompt("Relationship label (blank for none):", cur?.label ?? "");
+            if (label !== null) apply(setLinkLabel(docRef.current, edge.id, label));
+          }}
+          onEdgeContextMenu={(e, edge) => {
+            e.preventDefault();
+            if (edge.type !== "crosslink") return;
+            if (window.confirm("Delete this relationship?"))
+              apply(deleteLink(docRef.current, edge.id));
+          }}
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
           <Boundaries boundaries={renderDoc.boundaries ?? []} />
@@ -489,6 +521,7 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
                 ["Add child", () => apply(addChild(docRef.current, menu.id), true)],
                 ["Add sibling", () => apply(addSibling(docRef.current, menu.id), true)],
                 ["Rename", () => setEditingId(menu.id)],
+                ["Link to…", () => setLinkingFrom(menu.id)],
                 ["Add callout", () => apply(addCallout(docRef.current, menu.id))],
                 ["Group in boundary", () => apply(groupBranch(docRef.current, menu.id))],
                 ["Collapse / expand", () => apply(toggleCollapse(docRef.current, menu.id))],
@@ -520,6 +553,26 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
               </li>
             ))}
           </ul>
+        ) : null}
+        {linkingFrom ? (
+          <div
+            style={{
+              position: "absolute",
+              top: 8,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 20,
+              padding: "5px 12px",
+              background: "var(--mm-root-bg, #26215c)",
+              color: "var(--mm-root-color, #fff)",
+              borderRadius: 8,
+              font: "13px system-ui, sans-serif",
+              boxShadow: "0 2px 10px #0004",
+              pointerEvents: "none",
+            }}
+          >
+            Click a target node to draw a relationship · Esc to cancel
+          </div>
         ) : null}
       </div>
     </EditingContext.Provider>

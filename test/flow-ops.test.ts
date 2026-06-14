@@ -11,6 +11,7 @@ import {
   setAllExpanded,
   setBackground,
   setNote,
+  setTags,
   setTopic,
   toggleCollapse,
   toggleIcon,
@@ -134,6 +135,13 @@ describe("flow ops — content", () => {
     expect(findNode(mergeStyle(styled, "a", { background: "" }).doc, "a")?.style).toEqual({
       color: "#000",
     });
+  });
+
+  it("setTags replaces a node's tags and clears them on an empty array", () => {
+    expect(findNode(setTags(base(), "a", ["x", "y"]).doc, "a")?.tags).toEqual(["x", "y"]);
+    expect(
+      findNode(setTags(setTags(base(), "a", ["x"]).doc, "a", []).doc, "a")?.tags,
+    ).toBeUndefined();
   });
 
   it("setBackground sets the per-map background and clears it on empty", () => {

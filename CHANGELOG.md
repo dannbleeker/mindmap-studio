@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Unified topic info panel** — one **ℹ Info** side panel now holds everything you can set on the
+  selected node: its **note** (Markdown editor + preview), **markers** (with the active ones
+  highlighted), **tags** (add/remove — a new editor; tags were previously import-only), **style**
+  (shape/fill/border/bold), and **links** (web / link-to-a-map / jump-to-a-topic). It replaces the
+  separate Notes, Markers, and Style toggles and the Link / Jump toolbar dropdowns.
 - **Per-map canvas background** — a **Canvas** colour control in the toolbar sets the background
   for the current map (overrides the theme); it persists with the map (stored in `meta.background`,
   lossless in `.json`) and carries into the image/PDF export.

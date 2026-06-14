@@ -1,12 +1,5 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  FilterPanel,
-  MarkerBar,
-  MarkerTagIndex,
-  NotesPanel,
-  OutlinePanel,
-  StyleBar,
-} from "./Panels";
+import { FilterPanel, InfoPanel, MarkerTagIndex, OutlinePanel } from "./Panels";
 import { buildExample, examples } from "./examples";
 import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
 import { MARKER_PALETTE } from "./icons";
@@ -24,7 +17,7 @@ import {
 } from "./mindmap";
 import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
-import type { MindMapDoc } from "./model/types";
+import type { MapNode, MindMapDoc } from "./model/types";
 import { outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
@@ -106,12 +99,12 @@ export function App() {
       return {};
     }
   })();
-  const [notesOpen, setNotesOpen] = useState(!!panels0.notesOpen);
   const [outlineOpen, setOutlineOpen] = useState(!!panels0.outlineOpen);
   const [outlineFilter, setOutlineFilter] = useState("");
   const [indexOpen, setIndexOpen] = useState(!!panels0.indexOpen);
-  const [markersOpen, setMarkersOpen] = useState(!!panels0.markersOpen);
-  const [styleOpen, setStyleOpen] = useState(!!panels0.styleOpen);
+  // Unified per-node info panel (note + markers + tags + style + links); replaces the old
+  // separate Notes / Markers / Style bars + the Link / Jump toolbar selects.
+  const [infoOpen, setInfoOpen] = useState(!!panels0.infoOpen);
   // Auto-numbering: show hierarchical outline numbers (1, 1.2, …) on the canvas + outline.
   const [numbered, setNumbered] = useState(!!panels0.numbered);
   // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
@@ -141,6 +134,20 @@ export function App() {
   }, [filterOpen, filterText, filterMarkers, filterTags, liveDoc]);
   // Focus / isolate-branch: session-only, reuses the Power Filter's dim pipeline. Focus wins over
   // the filter as the dim source; both fall back to "no dimming".
+  // The full selected node (for the Info panel's tags / markers / link state); `selected` only
+  // carries id/topic/note, so look the rest up in the live doc.
+  const selectedNode = useMemo<MapNode | null>(() => {
+    if (!selected) return null;
+    const find = (n: MapNode): MapNode | null => {
+      if (n.id === selected.id) return n;
+      for (const c of n.children) {
+        const hit = find(c);
+        if (hit) return hit;
+      }
+      return null;
+    };
+    return find(liveDoc.root) ?? liveDoc.floatingTopics?.map(find).find(Boolean) ?? null;
+  }, [selected, liveDoc]);
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
   const focusLit = useMemo(() => (focus ? focusSet(liveDoc, focus.id) : null), [focus, liveDoc]);
   const litIds = focusLit && focusLit.size > 0 ? focusLit : (filterHits?.lit ?? null);
@@ -469,12 +476,12 @@ export function App() {
     try {
       localStorage.setItem(
         "mindmap-panels",
-        JSON.stringify({ notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen, numbered }),
+        JSON.stringify({ outlineOpen, indexOpen, infoOpen, numbered }),
       );
     } catch {
       // preference is best-effort
     }
-  }, [notesOpen, outlineOpen, indexOpen, markersOpen, styleOpen, numbered]);
+  }, [outlineOpen, indexOpen, infoOpen, numbered]);
 
   // Drive the native <dialog> from React state: showModal() gives us the
   // top-layer backdrop, focus handling, and Escape-to-close for free.
@@ -760,30 +767,12 @@ export function App() {
         </select>
         <button
           type="button"
-          onClick={() => setNotesOpen((v) => !v)}
+          onClick={() => setInfoOpen((v) => !v)}
           style={controlStyle}
-          aria-pressed={notesOpen}
-          title="Show the note editor for the selected node"
+          aria-pressed={infoOpen}
+          title="Topic info: note, markers, tags, style, and links for the selected node"
         >
-          📝 Notes
-        </button>
-        <button
-          type="button"
-          onClick={() => setMarkersOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={markersOpen}
-          title="Show the marker palette"
-        >
-          🏷 Markers
-        </button>
-        <button
-          type="button"
-          onClick={() => setStyleOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={styleOpen}
-          title="Show the style bar (shape, fill, border)"
-        >
-          🎨 Style
+          ℹ Info
         </button>
         <button
           type="button"
@@ -801,60 +790,6 @@ export function App() {
         >
           ⬚ Group
         </button>
-        <select
-          value=""
-          onChange={(e) => {
-            const v = e.target.value;
-            if (!v) return;
-            const url = v === "__none__" ? "" : `${MAP_LINK_PREFIX}${v}`;
-            const ok = mapRef.current?.setSelectedHyperlink(url);
-            showHint(
-              !ok
-                ? "Select a node first, then link it to a map."
-                : v === "__none__"
-                  ? "Link removed from the node."
-                  : "Node linked — click the 🔗 on it to follow.",
-            );
-          }}
-          style={controlStyle}
-          aria-label="Link selected node to a map"
-          title="Link the selected node to another map"
-        >
-          <option value="">🔗 Link…</option>
-          {maps
-            .filter((m) => m.id !== doc.id)
-            .map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.title}
-              </option>
-            ))}
-          <option value="__none__">✕ Remove link</option>
-        </select>
-        <select
-          value=""
-          onChange={(e) => {
-            const v = e.target.value;
-            if (!v) return;
-            const ok = mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${v}`);
-            showHint(
-              ok
-                ? "Jump link set — click the 🔗 on the node to leap to that topic."
-                : "Select a node first, then link it to another topic.",
-            );
-          }}
-          style={controlStyle}
-          aria-label="Link selected node to another topic"
-          title="Link the selected node to another topic in this map (an in-map jump)"
-        >
-          <option value="">↪ Jump to…</option>
-          {outlineRows(liveDoc.root)
-            .filter((row) => row.id !== selected?.id)
-            .map((row) => (
-              <option key={row.id} value={row.id}>
-                {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
-              </option>
-            ))}
-        </select>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}
@@ -1022,25 +957,6 @@ export function App() {
         </output>
       )}
 
-      {markersOpen && (
-        <MarkerBar
-          markers={MARKER_PALETTE}
-          onToggle={(marker) => {
-            const ok = mapRef.current?.toggleSelectedIcon(marker);
-            if (!ok) showHint("Select a node first, then click a marker.");
-          }}
-        />
-      )}
-
-      {styleOpen && (
-        <StyleBar
-          onStyle={(patch) => {
-            const ok = mapRef.current?.setSelectedStyle(patch);
-            if (!ok) showHint("Select a node first, then style it.");
-          }}
-        />
-      )}
-
       {focus && (
         <div
           style={{
@@ -1099,6 +1015,44 @@ export function App() {
             onClear={clearFilter}
           />
         )}
+        {infoOpen && (
+          <InfoPanel
+            selected={selected}
+            node={selectedNode}
+            noteDraft={noteDraft}
+            onNoteChange={onNoteChange}
+            onNoteBlur={flushNote}
+            markers={MARKER_PALETTE}
+            onToggleMarker={(m) => {
+              const ok = mapRef.current?.toggleSelectedIcon(m);
+              if (!ok) showHint("Select a node first, then click a marker.");
+            }}
+            onStyle={(patch) => {
+              const ok = mapRef.current?.setSelectedStyle(patch);
+              if (!ok) showHint("Select a node first, then style it.");
+            }}
+            onAddTag={(t) => {
+              const cur = selectedNode?.tags ?? [];
+              if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);
+            }}
+            onRemoveTag={(t) =>
+              mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
+            }
+            onSetHyperlink={(url) => {
+              const ok = mapRef.current?.setSelectedHyperlink(url);
+              if (!ok) showHint("Select a node first, then add a link.");
+            }}
+            maps={maps.filter((m) => m.id !== doc.id).map((m) => ({ id: m.id, title: m.title }))}
+            onLinkMap={(mapId) =>
+              mapRef.current?.setSelectedHyperlink(`${MAP_LINK_PREFIX}${mapId}`)
+            }
+            jumpTargets={outlineRows(liveDoc.root)
+              .filter((r) => r.id !== selected?.id)
+              .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
+            onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
+            onClose={() => setInfoOpen(false)}
+          />
+        )}
         <div style={{ flex: 1, minHeight: 0 }}>
           <MindMap
             ref={mapRef}
@@ -1117,16 +1071,6 @@ export function App() {
           />
         </div>
       </div>
-
-      {notesOpen && (
-        <NotesPanel
-          selected={selected}
-          value={noteDraft}
-          onChange={onNoteChange}
-          onBlur={flushNote}
-          onClose={() => setNotesOpen(false)}
-        />
-      )}
 
       {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}
 

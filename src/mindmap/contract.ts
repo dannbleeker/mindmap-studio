@@ -36,6 +36,8 @@ export interface MindMapHandle {
   groupBranch: (id: string) => boolean;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
+  /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */
+  setSelectedTags: (tags: string[]) => boolean;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */

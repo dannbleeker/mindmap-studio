@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 85,
+  "reviewedThroughChangelogBullets": 86,
   "areas": [
     "editing",
     "notes",
@@ -87,6 +87,24 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "topic-info-panel",
+      "name": "Unified topic info panel (note/markers/tags/style/links)",
+      "area": "editing",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "tag-editing",
+      "name": "Add / remove tags on a node",
+      "area": "markers",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
     },
     {
       "id": "marker-palette",

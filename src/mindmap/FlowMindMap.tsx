@@ -55,6 +55,7 @@ import {
   setImage,
   setLinkLabel,
   setNote,
+  setTags,
   setTopicRich,
   toggleCollapse,
   toggleIcon,
@@ -516,6 +517,7 @@ function FlowInner({
         return Boolean(findNode(docRef.current, id));
       },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
+      setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
     }),
     [fitView, getNodes, apply, withSelected, focusNodeById],
   );

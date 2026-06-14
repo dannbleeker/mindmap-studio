@@ -21,7 +21,7 @@ GitHub Pages).
   **XMind `.xmind`**, and **SimpleMind `.smmx`**.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   undo/redo (Ctrl+Z / Ctrl+Shift+Z), inline **rich-text** topics (Ctrl+B/I/U), images on
-  nodes, a docked **Notes** editor, and Marker/Style panels for the selected node.
+  nodes, and a unified **ℹ Info** panel (note, markers, tags, style, links) for the selected node.
 - **Find & Replace** — search the map by topic or note (matches focused on the canvas,
   cycling on repeated Enter), and replace the search text across all matching topics.
 - **Library-wide search** — the **🔎 All maps** button searches every map in the library by
@@ -38,9 +38,9 @@ GitHub Pages).
 - **Per-map canvas background** — set a background colour for a map; it persists and exports with it.
 - **Minimap + zoom** — a corner overview with a draggable viewport for panning large maps,
   plus integrated zoom controls (−/+, live %, fit).
-- **Markers** — a click-to-toggle palette of common markers (priority, flag, status, …) on
-  the selected node.
-- **Style** — a per-topic style bar: shape (box/rounded/pill), fill, border, and bold.
+- **Topic info panel** — one **ℹ Info** side panel consolidating the selected node's note,
+  markers (click-to-toggle, with active highlighted), **tags** (add/remove), style
+  (shape/fill/border/bold), and links.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, and fishbone, switchable from the toolbar and remembered per session.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
@@ -49,8 +49,8 @@ GitHub Pages).
 - **Relationships** — draw a labelled arrow between two nodes: right-click a node → **Link
   to…**, then click the target (with an optional label). Double-click a relationship to
   relabel it, right-click to delete. Imported `.mmap` relationships render too.
-- **Links** — give a node a clickable 🔗 to another **topic** in the same map (**↪ Jump to…**),
-  to another **map** (**🔗 Link…**), or to a **web page**; click the 🔗 to follow it.
+- **Links** — from the **ℹ Info** panel, give a node a clickable 🔗 to another **topic** in the
+  same map, to another **map**, or to a **web page**; click the 🔗 to follow it.
 - **Boundaries** — a toolbar **⬚ Group** draws a shaded, rounded box around the selected
   branch and its subtree (double-click the box's chip to label it); imported MindManager
   boundaries render the same way, and boundaries you draw round-trip back into the model.

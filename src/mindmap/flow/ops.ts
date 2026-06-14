@@ -215,6 +215,15 @@ export function setNote(doc: MindMapDoc, id: string, note: string): OpResult {
   return { doc: next };
 }
 
+/** Replace a node's tags (an empty array clears them). */
+export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc) return { doc };
+  loc.node.tags = tags.length > 0 ? tags : undefined;
+  return { doc: next };
+}
+
 /** Set the per-map canvas background colour ("" clears it back to the theme default). */
 export function setBackground(doc: MindMapDoc, color: string): OpResult {
   const next = structuredClone(doc);

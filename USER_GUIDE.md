@@ -40,9 +40,7 @@ Left to right:
 | **1. Numbering** | Toggle [outline numbering](#auto-numbering) (1, 1.2, …) on every topic |
 | **◎ Focus** | [Focus the selected branch](#focus-a-branch) — dim everything else (Esc exits) |
 | **Canvas** | [Per-map background colour](#canvas-background) (overrides the theme) |
-| **📝 Notes** | Toggle the [notes editor](#notes) |
-| **🏷 Markers** | Toggle the [marker palette](#markers) |
-| **🎨 Style** | Toggle the [style bar](#per-topic-styling) |
+| **ℹ Info** | Toggle the [topic info panel](#topic-info-panel) — note, markers, tags, style, links for the selected node |
 | **Find / Replace** | [Search and replace](#find--replace) topics & notes (`/` jumps here) |
 | **Theme** | [Canvas theme](#themes): Light / Dark / Ocean / Sunset |
 | **Layout** | [Layout direction](#layout): Both sides / Right / Left |
@@ -69,35 +67,31 @@ Keyboard-first, just like MindManager:
 Edits you make on the canvas — adding, renaming, moving, restyling — are captured into the map's
 underlying model, so the outline, every export, and the autosave always reflect your latest changes.
 
-### Notes
+### Topic info panel
 
-Open **📝 Notes**, select a node, and write in the docked editor. Notes autosave as you type
-and travel with the map (including the lossless `.json` export). Click **Preview** to render
-the note as **Markdown** — headings (`#`), `**bold**`, `*italic*`, `` `code` ``, `- bullet
-lists`, and `[links](https://…)` are supported. Nodes that have a note show a 📝 in the
-[outline](#outline-panel).
+Select a node and open **ℹ Info** to see and edit everything about it in one side panel — its
+note, markers, tags, style, and links. (This replaces the old separate **Notes**, **Markers**, and
+**Style** toggles.)
 
-### Markers
-
-Open **🏷 Markers** and click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it on the
-selected node. Imported MindManager icons are mapped to these glyphs automatically.
+- **Note** — write in the editor; notes autosave, travel with the map (and the lossless `.json`
+  export), and render as **Markdown** in **Preview** (`#` headings, `**bold**`, `*italic*`,
+  `` `code` ``, `- lists`, `[links](https://…)`). Nodes with a note show a 📝 in the
+  [outline](#outline-panel).
+- **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it; active markers are
+  highlighted. Imported MindManager icons map to these glyphs automatically.
+- **Tags** — type a tag and press **Enter** to add it; click a chip's ✕ to remove it. Tags feed
+  Find, the [marker & tag index](#marker--tag-index), and the [Power Filter](#power-filter).
+- **Style** — **Shape** (Box / Rounded / Pill), **Fill**, **Border** (swatch or ✕ for none), **B**
+  for bold, **Reset** to clear; font size/colour live here too.
+- **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in
+  your library), or **Jump to a topic** (an in-map jump). Click the 🔗 on the node to follow it;
+  **✕ Remove link** clears it. A node holds one link at a time.
 
 ### Images
 
 Click **Image**, pick a picture, and it's attached to the selected node. Images are
 downscaled and stored inside the map (as a data URL), so they stay offline and travel with a
 `.json` export.
-
-### Per-topic styling
-
-Open **🎨 Style** and, with a node selected:
-
-- **Shape** — Box, Rounded, or Pill
-- **Fill** — a swatch, or ✕ for none
-- **Border** — a colour swatch, or ✕ for none
-- **B** — bold; **Reset** clears all styling
-
-(Font size and colour also live in the node editor panel that appears when you select a node.)
 
 ### Rich-text topics
 
@@ -106,22 +100,6 @@ editing a topic, press **Ctrl + B**, **Ctrl + I**, or **Ctrl + U** to bold, ital
 underline — select the characters first, or toggle the format on and keep typing. The
 formatting is saved with the map and travels in the `.json` export. The plain text is always
 kept alongside it, so the outline, Find, and the Markdown/Office exports stay clean and readable.
-
-### Links
-
-Select a node and use the node editor panel's **URL** field to attach a web hyperlink. A linked
-node shows a **🔗** — click it to follow the link (web links open in a new tab).
-
-A node's link can point three ways, all followed by clicking its 🔗:
-
-- **To another topic in this map** — select the node and pick a destination from the **↪ Jump to…**
-  dropdown. Clicking 🔗 leaps to and selects that topic — handy for cross-references on a big map
-  ("see also…") without drawing a relationship line.
-- **To another map** — pick a map from the **🔗 Link…** dropdown to build a connected web of maps.
-  (Pick **✕ Remove link** to clear it.)
-- **To a web page** — any `http(s)` URL in the node editor's URL field.
-
-A node holds one link at a time, so setting a new one replaces the old.
 
 ---
 

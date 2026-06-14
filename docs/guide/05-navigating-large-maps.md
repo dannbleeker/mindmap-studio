@@ -137,9 +137,10 @@ same risk that constrains a plan three branches away. Drawing a relationship lin
 them is one answer (Chapter 4); a **link** is the lighter one. Give a node a link and it
 grows a small **🔗** -- click it and you travel.
 
-A link can point three ways. **↪ Jump to…** points it at another *topic in the same map*, so
-"see also: Budget" becomes one click instead of a hunt -- the canvas leaps to that topic and
-selects it, no line cluttering the picture. **🔗 Link…** points it at *another map* in your
+A link can point three ways, all set from the **ℹ Info** panel. **Jump to a topic** points it at
+another *topic in the same map*, so "see also: Budget" becomes one click instead of a hunt -- the
+canvas leaps to that topic and selects it, no line cluttering the picture. **Link to a map** points
+it at *another map* in your
 library (Chapter 7): a node in your *Strategy* map can open your *Q3 Plan* map, which is how
 you build a small **atlas** instead of one unreadable continent -- a high-level map whose nodes
 are doorways into the detailed maps beneath them. And a plain web URL points it at a page, which

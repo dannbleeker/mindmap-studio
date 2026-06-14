@@ -399,6 +399,183 @@ export function FilterPanel({
   );
 }
 
+// Unified per-node "topic info" panel: one side rail consolidating everything you can set on the
+// selected node — note, markers, tags, style, and links (web / another map / another topic) —
+// replacing the separate Notes / Markers / Style bars and the Link / Jump toolbar selects.
+export function InfoPanel({
+  selected,
+  node,
+  noteDraft,
+  onNoteChange,
+  onNoteBlur,
+  markers,
+  onToggleMarker,
+  onStyle,
+  onAddTag,
+  onRemoveTag,
+  onSetHyperlink,
+  maps,
+  onLinkMap,
+  jumpTargets,
+  onJump,
+  onClose,
+}: {
+  selected: SelectedNode | null;
+  node: MapNode | null;
+  noteDraft: string;
+  onNoteChange: (value: string) => void;
+  onNoteBlur: () => void;
+  markers: readonly string[];
+  onToggleMarker: (marker: string) => void;
+  onStyle: (patch: Partial<NodeStyle>) => void;
+  onAddTag: (tag: string) => void;
+  onRemoveTag: (tag: string) => void;
+  onSetHyperlink: (url: string) => void;
+  maps: { id: string; title: string }[];
+  onLinkMap: (mapId: string) => void;
+  jumpTargets: { id: string; topic: string; depth: number }[];
+  onJump: (id: string) => void;
+  onClose: () => void;
+}) {
+  const [tagInput, setTagInput] = useState("");
+  const link = node?.hyperlink ?? "";
+  // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
+  const webUrl = link.startsWith("#") ? "" : link;
+  const sectionLabel = (text: string) => <div style={PANEL_GROUP_LABEL}>{text}</div>;
+  const aside = (
+    <aside style={{ ...PANEL_ASIDE, width: 280 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "8px 10px 4px",
+          fontSize: 13,
+          fontWeight: 600,
+          color: "#26215c",
+        }}
+      >
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          ℹ {node ? node.topic || "(untitled)" : "Topic info"}
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+        >
+          Close
+        </button>
+      </div>
+      {!node ? (
+        <div style={{ padding: "8px 10px", fontSize: 13, color: "#8a8780" }}>
+          Select a node to see and edit its details.
+        </div>
+      ) : (
+        <div style={{ overflowY: "auto" }}>
+          <StyleBar onStyle={onStyle} />
+          <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
+
+          {sectionLabel("Tags")}
+          <div style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {(node.tags ?? []).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => onRemoveTag(t)}
+                title={`Remove tag "${t}"`}
+                style={{
+                  border: "1px solid #cecbf6",
+                  background: "#fff",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 12,
+                  padding: "1px 6px",
+                  color: "#26215c",
+                }}
+              >
+                {t} ✕
+              </button>
+            ))}
+          </div>
+          <input
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && tagInput.trim()) {
+                onAddTag(tagInput.trim());
+                setTagInput("");
+              }
+            }}
+            placeholder="Add a tag, press Enter"
+            aria-label="Add a tag"
+            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          />
+
+          {sectionLabel("Links")}
+          <input
+            key={`${node.id}:url`}
+            defaultValue={webUrl}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onSetHyperlink((e.target as HTMLInputElement).value.trim());
+            }}
+            onBlur={(e) => {
+              const v = e.target.value.trim();
+              if (v !== webUrl) onSetHyperlink(v);
+            }}
+            placeholder="Web link (https://…)"
+            aria-label="Web link"
+            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          />
+          <select
+            value=""
+            onChange={(e) => e.target.value && onLinkMap(e.target.value)}
+            aria-label="Link to another map"
+            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          >
+            <option value="">🔗 Link to a map…</option>
+            {maps.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.title}
+              </option>
+            ))}
+          </select>
+          <select
+            value=""
+            onChange={(e) => e.target.value && onJump(e.target.value)}
+            aria-label="Jump to another topic"
+            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          >
+            <option value="">↪ Jump to a topic…</option>
+            {jumpTargets.map((row) => (
+              <option key={row.id} value={row.id}>
+                {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+              </option>
+            ))}
+          </select>
+          {link && (
+            <button
+              type="button"
+              onClick={() => onSetHyperlink("")}
+              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12, margin: "0 10px 6px" }}
+            >
+              ✕ Remove link (
+              {link.startsWith("#map=") ? "map" : link.startsWith("#node=") ? "topic" : "web"})
+            </button>
+          )}
+
+          <NotesPanel
+            selected={selected}
+            value={noteDraft}
+            onChange={onNoteChange}
+            onBlur={onNoteBlur}
+          />
+        </div>
+      )}
+    </aside>
+  );
+  return aside;
+}
+
 export function NotesPanel({
   selected,
   value,
@@ -410,7 +587,8 @@ export function NotesPanel({
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
-  onClose: () => void;
+  /** Optional — when omitted (e.g. embedded in the Info panel) the Close button is hidden. */
+  onClose?: () => void;
 }) {
   const [preview, setPreview] = useState(false);
   return (
@@ -445,13 +623,15 @@ export function NotesPanel({
               {preview ? "Edit" : "Preview"}
             </button>
           )}
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
-          >
-            Close
-          </button>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+            >
+              Close
+            </button>
+          )}
         </span>
       </div>
       {selected ? (
@@ -505,9 +685,12 @@ export function NotesPanel({
 
 export function MarkerBar({
   markers,
+  active,
   onToggle,
 }: {
   markers: readonly string[];
+  /** Markers currently on the selected node — highlighted so the bar reflects state. */
+  active?: readonly string[];
   onToggle: (marker: string) => void;
 }) {
   return (
@@ -516,31 +699,36 @@ export function MarkerBar({
         display: "flex",
         alignItems: "center",
         gap: 4,
+        flexWrap: "wrap",
         padding: "6px 16px",
         background: "#f4f3fb",
         borderBottom: "1px solid #e2e0d8",
       }}
     >
       <span style={{ fontSize: 12, color: "#73726c", marginRight: 4 }}>Markers:</span>
-      {markers.map((marker) => (
-        <button
-          key={marker}
-          type="button"
-          onClick={() => onToggle(marker)}
-          title={`Toggle ${marker} on the selected node`}
-          style={{
-            border: "1px solid #cecbf6",
-            background: "#fff",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontSize: 16,
-            lineHeight: 1,
-            padding: "3px 5px",
-          }}
-        >
-          {marker}
-        </button>
-      ))}
+      {markers.map((marker) => {
+        const on = active?.includes(marker);
+        return (
+          <button
+            key={marker}
+            type="button"
+            onClick={() => onToggle(marker)}
+            aria-pressed={on}
+            title={`Toggle ${marker} on the selected node`}
+            style={{
+              border: `1px solid ${on ? "#6c63d6" : "#cecbf6"}`,
+              background: on ? "#e7e4fb" : "#fff",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontSize: 16,
+              lineHeight: 1,
+              padding: "3px 5px",
+            }}
+          >
+            {marker}
+          </button>
+        );
+      })}
     </div>
   );
 }

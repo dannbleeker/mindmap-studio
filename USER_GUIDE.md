@@ -257,6 +257,8 @@ learn a feature by reading one that uses it. Opening one creates a fresh, editab
 | `.mmd` / `.mermaid` | Mermaid `mindmap` text (any node shape; hierarchy by indentation) |
 | `.xmind` | XMind (2020+) — topics, notes, web links, and labels→tags from `content.json` |
 | `.smmx` | SimpleMind — topic tree, notes, web links, and relations→cross-links |
+| `.docx` | Word — the document's outline (heading styles or indentation) → topic tree, with italic note paragraphs |
+| `.xlsx` | Excel — an indented-outline sheet (first non-empty column = depth, trailing column = note); reads inline + shared strings. Empty-topic rows aren't imported |
 
 Each imported file becomes its own library entry; batch imports report how many were added.
 MindManager stock icons are mapped to the closest **emoji** marker, so an imported map keeps its

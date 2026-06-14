@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 86,
+  "reviewedThroughChangelogBullets": 87,
   "areas": [
     "editing",
     "notes",
@@ -417,6 +417,24 @@
       "name": "Import MindManager .mmap (lossy, one-way)",
       "area": "import",
       "since": "2026-06-11",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "import-docx",
+      "name": "Import Word .docx (outline → tree)",
+      "area": "import",
+      "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "import-xlsx",
+      "name": "Import Excel .xlsx (indented outline → tree)",
+      "area": "import",
+      "since": "2026-06-14",
       "manual": true,
       "book": true,
       "bookExample": false

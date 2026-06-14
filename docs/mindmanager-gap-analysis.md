@@ -210,12 +210,13 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
 - **Unified topic info panel** (the **ℹ Info** panel — note + markers + tags + style + links, with
   a new **tag editor**) shipped 2026-06-14 — the second bundle. Replaced the separate
   Notes/Markers/Style toggles + Link/Jump dropdowns.
+- **Word `.docx` + Excel `.xlsx` import** shipped 2026-06-14 — the third bundle (outline → tree;
+  docx round-trips our export and reads heading-styled docs; xlsx decodes inline + shared strings).
 
 ### Next — remaining buildable gaps (in priority order)
 1. **Remaining interchange imports** — **iThoughts (`.itmz`)**, **MindMeister (`.mind`)**, older XMind `content.xml`; plus **image-bearing `.mmap`** (the known binary-blob gap) and a **`.mmap` writer**. The adapter pattern + most formats already exist.
 2. **True summary topics** — roll a sibling range up into its own labelled topic. NB: the original note assumed mind-elixir summaries as the base; post-migration this is now a React Flow + model feature (project a synthesised summary node over a range), so it needs re-scoping.
 3. **Kanban / board view** — a model-driven alternate view (tags → columns). Borders the PM layer; keep it **read-only / tags-as-columns** (a *visualisation*, not task management) to stay in scope, or defer.
-4. **Direct `.docx` / `.xlsx` import** — round out the Office story (export already ships).
 
 ### Bigger bets (see the cross-tool matrix)
 - **AI assist** via a **keyless copy-prompt / paste-result bridge** (paste-to-tree is half-built through OPML/Markdown import) — the biggest category-wide gap; see [`competitive-feature-matrix.md`](competitive-feature-matrix.md) cluster A.

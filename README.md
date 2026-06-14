@@ -18,7 +18,7 @@ GitHub Pages).
   Select multiple files to batch-import a whole folder of maps into the library at once.
   Also opens native `.json` maps (exported from this app) losslessly, and interchanges with
   other tools: `.opml` outlines, **FreeMind/Freeplane `.mm`**, **Mermaid** `mindmap`,
-  **XMind `.xmind`**, and **SimpleMind `.smmx`**.
+  **XMind `.xmind`**, **SimpleMind `.smmx`**, and **Word `.docx` / Excel `.xlsx`** outlines.
 - **Edit** on the canvas — keyboard-first (Enter = sibling, Tab = child), drag-to-reparent,
   undo/redo (Ctrl+Z / Ctrl+Shift+Z), inline **rich-text** topics (Ctrl+B/I/U), images on
   nodes, and a unified **ℹ Info** panel (note, markers, tags, style, links) for the selected node.

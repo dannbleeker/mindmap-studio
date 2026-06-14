@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Import Word `.docx` and Excel `.xlsx`** — round out the Office story (export already shipped).
+  `.docx` reads the document's outline — heading styles (Title / Heading 1/2/3 …) **or** paragraph
+  indentation — into the topic tree (our own `.docx` export round-trips exactly). `.xlsx` reads an
+  indented-outline sheet: each row's first non-empty column sets its depth, a trailing column
+  becomes the note; it decodes inline **and** shared strings, so it reads real Excel files too.
+  Both are in **Open files**. (Caveat: `.xlsx` is outline-based, so a node with an empty topic has
+  no cell to anchor it and isn't imported; styling/images aren't carried.)
 - **Unified topic info panel** — one **ℹ Info** side panel now holds everything you can set on the
   selected node: its **note** (Markdown editor + preview), **markers** (with the active ones
   highlighted), **tags** (add/remove — a new editor; tags were previously import-only), **style**

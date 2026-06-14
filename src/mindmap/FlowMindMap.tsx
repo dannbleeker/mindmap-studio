@@ -1,6 +1,8 @@
 import "@xyflow/react/dist/style.css";
 import {
   Background,
+  Controls,
+  MiniMap,
   ReactFlow,
   ReactFlowProvider,
   useEdgesState,
@@ -393,6 +395,7 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
           nodesConnectable={false}
           deleteKeyCode={null}
           zoomOnDoubleClick={false}
+          colorMode={(theme ?? mindManagerTheme).type}
           proOptions={{ hideAttribution: true }}
           minZoom={0.2}
           maxZoom={3}
@@ -417,6 +420,13 @@ function FlowInner({ doc, theme, direction = "side", onChange, onSelect, ref }: 
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
           <Boundaries boundaries={doc.boundaries ?? []} />
+          <Controls showInteractive={false} />
+          <MiniMap
+            pannable
+            zoomable
+            nodeColor={(node) => (node.data as TopicNodeT["data"])?.branchColor ?? "#bbb"}
+            nodeStrokeWidth={3}
+          />
         </ReactFlow>
         {menu ? (
           <ul

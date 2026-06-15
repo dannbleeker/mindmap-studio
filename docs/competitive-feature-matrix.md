@@ -77,8 +77,7 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 | Comments / discussion | ⛔ | |
 | Presence cursors / follow-presenter | ⛔ | |
 | Idea voting | ❌ | MindMeister, Ayoa (feasible single-user? marginal) |
-| Hosted share link / publish-to-web | 🟡 | export standalone HTML/SVG/deck; no hosted link |
-| Persistent version history + playback | 🟡 | **🕔 History** — per-map IndexedDB snapshots (auto + on-demand, restore-in-place, capped 30); timeline *playback* ❌ |
+| Hosted share link / publish-to-web | ⛔ | needs a backend to host — out of scope by design (no backend) |
 | Permissions / roles / SSO | ⛔ | N/A for local-first |
 
 ## 7. Import / export & integrations
@@ -94,7 +93,7 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 |---|---|---|
 | Presenter view (map + slides) | ❌ | XMind Pitch |
 | Live broadcast / audience-follow | ⛔ | MindMeister, Ayoa (needs backend) |
-| Interactive published web map (filterable) | 🟡 | HTML export is static |
+| Interactive published web map (filterable) | 🟡 | HTML export is static; a self-contained *interactive/filterable* HTML export is client-side-feasible (no backend), but *hosting* a published map isn't |
 | AI pitch video | ❌ | XMind |
 
 ## 9. AI & automation — *the biggest market gap*

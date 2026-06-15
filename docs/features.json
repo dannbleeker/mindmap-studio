@@ -927,7 +927,7 @@
     },
     {
       "id": "mobile-responsive",
-      "name": "Mobile-friendly responsive layout (compact swipeable toolbar + stacked start nav on phones)",
+      "name": "Mobile-friendly responsive layout (compact toolbar + bottom-sheet panels + stacked start nav on phones)",
       "area": "pwa",
       "since": "2026-06-15",
       "manual": true,

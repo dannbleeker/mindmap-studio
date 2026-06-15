@@ -199,7 +199,7 @@ topic entry and `+New` templates already cover fast local capture.)
 | Desktop (Win/Mac) | ✅-equivalent | Installable PWA on any OS; offline. |
 | Web access | ✅ | It's a web app — live at the public URL. |
 | Offline use | ✅ | Service worker + IndexedDB; fully offline. |
-| Mobile companion | 🟡 | Responsive layout ships — compact swipeable toolbar + stacked start-screen nav on phones (2026-06-15); deeper native-grade touch UX (drag-edit, bottom sheets) stays low-priority. |
+| Mobile companion | ✅ | Phone layout ships — compact swipeable toolbar, **bottom-sheet panels** over a full-width canvas, and a stacked start-screen nav (2026-06-15); touch pan / zoom / drag are native to the React Flow canvas. (A separate native app stays out of scope.) |
 | Cloud storage / hosted files / enterprise deployment | 🚫 | Local-first by design. |
 
 ---
@@ -266,15 +266,14 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
 - **Per-branch layout override** (right-click → Branch layout) + **multiple sheets per file** (▦ +Sheet workbook + tab strip + ⤓ Workbook export).
 - **Start screen** (home: capture hero, library, templates, layouts, ⌘K palette); book *Thinking in Maps* grown to cover the structure features.
 - **Cross-map branch copy/paste** (right-click Copy branch / Paste branch here; a persistent clipboard, so it works across maps and assembles manual roll-ups) + **sticky-note topics** (🗒 Note).
-- **Mobile-friendly layout** (compact swipeable editor toolbar + stacked start-screen nav on phones) + **automated multi-map roll-ups** (⤵ bind a node to another map; 🔄 pull its branches in on demand).
+- **Mobile-friendly layout** (compact swipeable editor toolbar + **bottom-sheet side panels** over a full-width canvas + stacked start-screen nav on phones) + **automated multi-map roll-ups** (⤵ bind a node to another map; 🔄 pull its branches in on demand).
 
 ### Remaining buildable gaps (as of 2026-06-15)
 
-The in-scope list is now down to a single low-priority item:
-
-1. **Native-grade mobile polish** — the responsive layout ships (compact swipeable toolbar + stacked
-   start nav); deeper touch-first editing (drag gestures, bottom-sheet panels) would refine it.
-   Low priority.
+**None.** The in-scope MindManager gap is closed — every creation / visualisation / navigation /
+interchange capability the product set out to own now ships (the phone layout was the last piece).
+What remains is all deferred-by-choice (**AI**, **LaTeX**) or intentionally out of scope (**PM,
+collaboration, enterprise, capture**, and a separate native mobile app) — see those sections.
 
 ### Deferred by decision (revisit only on a go/no-go)
 - **AI assist** — a **keyless copy-prompt → paste-result bridge** (paste-to-tree is half-built via
@@ -299,8 +298,8 @@ MindManager), on **navigation** (it ships a minimap MindManager has dropped), on
 privacy** (free, local-first, offline, no account), and on **being genuinely cross-platform**
 from one codebase. The visual-variety gap this doc once led with — layouts, callouts, rich text,
 summary topics, **and the non-tree diagram types** (flowchart / concept map / matrix / Venn / funnel /
-whiteboard) — is now **closed**. The honest summary: the in-scope gap is **effectively closed** — a
-responsive mobile layout ships, and the only remainder is deeper **native-grade mobile polish** (touch
-gestures, bottom sheets), which is low-priority. Everything else left is deferred-by-choice (**AI**,
-**LaTeX**) or intentionally excluded (**PM, collaboration, enterprise, capture**). The roadmap from
-here: a go/no-go on AI, optional native mobile polish, and stay out of the excluded layers.
+whiteboard) — is now **closed**, and so is the phone layout (compact toolbar, bottom-sheet panels,
+top-nav start screen; touch pan / zoom / drag are native). The honest summary: **the in-scope
+MindManager gap is closed.** What's left is all deferred-by-choice (**AI**, **LaTeX**) or
+intentionally excluded (**PM, collaboration, enterprise, capture**, a separate native mobile app).
+The roadmap from here: a go/no-go on AI, and stay out of the excluded layers.

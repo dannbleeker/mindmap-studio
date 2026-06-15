@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import "./mobile.css";
 
 // StrictMode intentionally omitted: its double-invoked effects re-init the canvas
 // engine instance, which muddies headless screenshots used for verification.

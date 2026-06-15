@@ -1550,133 +1550,135 @@ export function App() {
       )}
 
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-        {outlineOpen && (
-          <OutlinePanel
-            root={liveDoc.root}
-            filter={outlineFilter}
-            numbered={numbered}
-            onFilterChange={setOutlineFilter}
-            onPick={(id) => mapRef.current?.focusNode(id)}
-          />
-        )}
-        {indexOpen && (
-          <MarkerTagIndex
-            root={liveDoc.root}
-            floatingTopics={liveDoc.floatingTopics}
-            onPick={(id) => mapRef.current?.focusNode(id)}
-          />
-        )}
-        {filterOpen && (
-          <FilterPanel
-            root={liveDoc.root}
-            floatingTopics={liveDoc.floatingTopics}
-            text={filterText}
-            markers={filterMarkers}
-            tags={filterTags}
-            due={filterDue}
-            priority={filterPriority}
-            matchCount={filterHits?.matches ?? 0}
-            savedFilters={savedFilters}
-            onText={setFilterText}
-            onToggleMarker={(m) => setFilterMarkers((list) => toggle(list, m))}
-            onToggleTag={(t) => setFilterTags((list) => toggle(list, t))}
-            onDue={setFilterDue}
-            onPriority={setFilterPriority}
-            onClear={clearFilter}
-            onSaveFilter={saveCurrentFilter}
-            onApplyFilter={applySavedFilter}
-            onDeleteFilter={deleteSavedFilter}
-          />
-        )}
-        {stylesOpen && (
-          <StylesPanel
-            rules={liveDoc.rules ?? []}
-            markers={MARKER_PALETTE}
-            namedStyles={namedStyles}
-            onAddRule={(rule) => mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])}
-            onDeleteRule={(id) =>
-              mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
-            }
-            onSaveStyle={saveNamedStyle}
-            onApplyStyle={(style) => {
-              const ok = mapRef.current?.setSelectedStyle(style);
-              if (!ok) showHint("Select a topic first, then apply a named style.");
-            }}
-            onDeleteStyle={deleteNamedStyle}
-          />
-        )}
-        {infoOpen && (
-          <InfoPanel
-            selected={selected}
-            node={selectedNode}
-            noteDraft={noteDraft}
-            onNoteChange={onNoteChange}
-            onNoteBlur={flushNote}
-            markers={MARKER_PALETTE}
-            onToggleMarker={(m) => {
-              const ok = mapRef.current?.toggleSelectedIcon(m);
-              if (!ok) showHint("Select a node first, then click a marker.");
-            }}
-            onStyle={(patch) => {
-              const ok = mapRef.current?.setSelectedStyle(patch);
-              if (!ok) showHint("Select a node first, then style it.");
-            }}
-            onAddTag={(t) => {
-              const cur = selectedNode?.tags ?? [];
-              if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);
-            }}
-            onRemoveTag={(t) =>
-              mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
-            }
-            onSetProgress={(progress) => {
-              const ok = mapRef.current?.setSelectedProgress(progress);
-              if (!ok) showHint("Select a node first, then set its progress.");
-            }}
-            onSetDue={(d) => {
-              const ok = mapRef.current?.setSelectedDue(d);
-              if (!ok) showHint("Select a node first, then set a due date.");
-            }}
-            onSetStart={(d) => {
-              const ok = mapRef.current?.setSelectedStart(d);
-              if (!ok) showHint("Select a node first, then set a start date.");
-            }}
-            onSetPriority={(p) => {
-              const ok = mapRef.current?.setSelectedPriority(p);
-              if (!ok) showHint("Select a node first, then set its priority.");
-            }}
-            onAddAttachment={async (file) => {
-              try {
-                const att = await fileToAttachment(file);
-                const ok = mapRef.current?.addSelectedAttachment(att);
-                if (!ok) showHint("Select a node first, then attach a file.");
-              } catch (err) {
-                showHint(err instanceof Error ? err.message : "Could not attach that file.");
+        <div className="mm-panel-host">
+          {outlineOpen && (
+            <OutlinePanel
+              root={liveDoc.root}
+              filter={outlineFilter}
+              numbered={numbered}
+              onFilterChange={setOutlineFilter}
+              onPick={(id) => mapRef.current?.focusNode(id)}
+            />
+          )}
+          {indexOpen && (
+            <MarkerTagIndex
+              root={liveDoc.root}
+              floatingTopics={liveDoc.floatingTopics}
+              onPick={(id) => mapRef.current?.focusNode(id)}
+            />
+          )}
+          {filterOpen && (
+            <FilterPanel
+              root={liveDoc.root}
+              floatingTopics={liveDoc.floatingTopics}
+              text={filterText}
+              markers={filterMarkers}
+              tags={filterTags}
+              due={filterDue}
+              priority={filterPriority}
+              matchCount={filterHits?.matches ?? 0}
+              savedFilters={savedFilters}
+              onText={setFilterText}
+              onToggleMarker={(m) => setFilterMarkers((list) => toggle(list, m))}
+              onToggleTag={(t) => setFilterTags((list) => toggle(list, t))}
+              onDue={setFilterDue}
+              onPriority={setFilterPriority}
+              onClear={clearFilter}
+              onSaveFilter={saveCurrentFilter}
+              onApplyFilter={applySavedFilter}
+              onDeleteFilter={deleteSavedFilter}
+            />
+          )}
+          {stylesOpen && (
+            <StylesPanel
+              rules={liveDoc.rules ?? []}
+              markers={MARKER_PALETTE}
+              namedStyles={namedStyles}
+              onAddRule={(rule) => mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])}
+              onDeleteRule={(id) =>
+                mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
               }
-            }}
-            onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
-            onSetHyperlink={(url) => {
-              const ok = mapRef.current?.setSelectedHyperlink(url);
-              if (!ok) showHint("Select a node first, then add a link.");
-            }}
-            maps={maps.filter((m) => m.id !== doc.id).map((m) => ({ id: m.id, title: m.title }))}
-            onLinkMap={(mapId) =>
-              mapRef.current?.setSelectedHyperlink(`${MAP_LINK_PREFIX}${mapId}`)
-            }
-            jumpTargets={outlineRows(liveDoc.root)
-              .filter((r) => r.id !== selected?.id)
-              .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
-            onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
-            onClose={() => setInfoOpen(false)}
-          />
-        )}
-        {historyOpen && (
-          <HistoryPanel
-            versions={versions}
-            onSaveNow={saveVersionNow}
-            onRestore={restoreVersion}
-            onClose={() => setHistoryOpen(false)}
-          />
-        )}
+              onSaveStyle={saveNamedStyle}
+              onApplyStyle={(style) => {
+                const ok = mapRef.current?.setSelectedStyle(style);
+                if (!ok) showHint("Select a topic first, then apply a named style.");
+              }}
+              onDeleteStyle={deleteNamedStyle}
+            />
+          )}
+          {infoOpen && (
+            <InfoPanel
+              selected={selected}
+              node={selectedNode}
+              noteDraft={noteDraft}
+              onNoteChange={onNoteChange}
+              onNoteBlur={flushNote}
+              markers={MARKER_PALETTE}
+              onToggleMarker={(m) => {
+                const ok = mapRef.current?.toggleSelectedIcon(m);
+                if (!ok) showHint("Select a node first, then click a marker.");
+              }}
+              onStyle={(patch) => {
+                const ok = mapRef.current?.setSelectedStyle(patch);
+                if (!ok) showHint("Select a node first, then style it.");
+              }}
+              onAddTag={(t) => {
+                const cur = selectedNode?.tags ?? [];
+                if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);
+              }}
+              onRemoveTag={(t) =>
+                mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
+              }
+              onSetProgress={(progress) => {
+                const ok = mapRef.current?.setSelectedProgress(progress);
+                if (!ok) showHint("Select a node first, then set its progress.");
+              }}
+              onSetDue={(d) => {
+                const ok = mapRef.current?.setSelectedDue(d);
+                if (!ok) showHint("Select a node first, then set a due date.");
+              }}
+              onSetStart={(d) => {
+                const ok = mapRef.current?.setSelectedStart(d);
+                if (!ok) showHint("Select a node first, then set a start date.");
+              }}
+              onSetPriority={(p) => {
+                const ok = mapRef.current?.setSelectedPriority(p);
+                if (!ok) showHint("Select a node first, then set its priority.");
+              }}
+              onAddAttachment={async (file) => {
+                try {
+                  const att = await fileToAttachment(file);
+                  const ok = mapRef.current?.addSelectedAttachment(att);
+                  if (!ok) showHint("Select a node first, then attach a file.");
+                } catch (err) {
+                  showHint(err instanceof Error ? err.message : "Could not attach that file.");
+                }
+              }}
+              onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
+              onSetHyperlink={(url) => {
+                const ok = mapRef.current?.setSelectedHyperlink(url);
+                if (!ok) showHint("Select a node first, then add a link.");
+              }}
+              maps={maps.filter((m) => m.id !== doc.id).map((m) => ({ id: m.id, title: m.title }))}
+              onLinkMap={(mapId) =>
+                mapRef.current?.setSelectedHyperlink(`${MAP_LINK_PREFIX}${mapId}`)
+              }
+              jumpTargets={outlineRows(liveDoc.root)
+                .filter((r) => r.id !== selected?.id)
+                .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
+              onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
+              onClose={() => setInfoOpen(false)}
+            />
+          )}
+          {historyOpen && (
+            <HistoryPanel
+              versions={versions}
+              onSaveNow={saveVersionNow}
+              onRestore={restoreVersion}
+              onClose={() => setHistoryOpen(false)}
+            />
+          )}
+        </div>
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           {sheets.length > 1 && (
             <div

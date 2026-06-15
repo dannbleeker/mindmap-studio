@@ -488,7 +488,8 @@ that opens in any browser, offline.
 MindMap Studio is an installable PWA: your browser will offer to install it to your desktop /
 home screen, after which it launches in its own window and runs fully offline (the app shell
 is precached). On a **phone** the layout adapts — the editor toolbar becomes a single swipeable
-strip so the canvas fills the screen, and the start screen's rail folds into a top nav.
+strip so the canvas fills the screen, the side panels (Outline, Info, …) open as **bottom sheets**
+over a full-width canvas rather than squeezing it, and the start screen's rail folds into a top nav.
 
 When a new version is deployed, the running app shows a quiet **"A new version is available —
 Refresh now"** prompt; click it to swap to the new build and reload. It never reloads on its

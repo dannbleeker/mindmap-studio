@@ -1,0 +1,36 @@
+/* Mobile-only chrome. The editor is built around inline styles; these rules add the phone behaviours
+   that need media queries (which inline styles can't express). Desktop is untouched. */
+
+/* Editor side panels (Outline / Index / Filter / Styles / Info / History) are 250px flex columns —
+   fine on a wide screen, but on a phone an open panel crushes the canvas. The panels live in one
+   host: transparent on desktop (display:contents → they stay independent flex columns), and a
+   bottom sheet on a phone (fixed + out of flow → the canvas goes full-width and the panel overlays
+   the lower part of the screen, with the toolbar still reachable above it). */
+.mm-panel-host {
+  display: contents;
+}
+
+@media (max-width: 640px) {
+  .mm-panel-host {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 80vh;
+    z-index: 40;
+    background: #fff;
+    border-top: 1px solid #e2e0d8;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.2);
+    overflow: auto;
+  }
+  /* No panel open → the host has no children → don't let an empty sheet block the canvas. */
+  .mm-panel-host:empty {
+    display: none;
+  }
+  /* Each open panel fills the sheet width (overrides its inline 250px column width). */
+  .mm-panel-host > * {
+    width: 100% !important;
+    border-right: none !important;
+  }
+}

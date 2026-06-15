@@ -524,6 +524,50 @@ const concept = (): MindMapDoc =>
     },
   );
 
+// 16 — Whiteboard: free-canvas mode. Every box carries its own position (meta.freeform = true),
+// so it opens as a place-anywhere brainstorm wall — drag any box, shapes + arrows give it meaning.
+const whiteboard = (): MindMapDoc => {
+  const d = doc(
+    "Whiteboard: feature kickoff",
+    node(
+      "wb-root",
+      "Feature kickoff",
+      [
+        leaf("wb-prob", "Problem: slow onboarding", {
+          pos: { x: -260, y: 150 },
+          style: { shape: "rect", background: "#fde2e2" },
+        }),
+        leaf("wb-goal", "Goal: setup < 5 min", {
+          pos: { x: 320, y: 150 },
+          style: { shape: "ellipse", background: "#e2fbe8" },
+        }),
+        leaf("wb-tour", "Idea: guided tour", { pos: { x: -360, y: 320 } }),
+        leaf("wb-tmpl", "Idea: starter templates", { pos: { x: -120, y: 320 } }),
+        leaf("wb-wiz", "Idea: import wizard", { pos: { x: 140, y: 320 } }),
+        leaf("wb-risk", "Risk: scope creep", {
+          pos: { x: 400, y: 320 },
+          style: { shape: "parallelogram", background: "#fdf3e2" },
+        }),
+      ],
+      {
+        pos: { x: 60, y: 0 },
+        note: "Free layout (🧲) is ON — drag any box anywhere. Mix shapes + arrows to make a flowchart, concept map, or brainstorm wall.",
+      },
+    ),
+    {
+      links: [
+        { id: "wl1", from: "wb-prob", to: "wb-goal", label: "we want" },
+        { id: "wl2", from: "wb-goal", to: "wb-tour", label: "via" },
+        { id: "wl3", from: "wb-goal", to: "wb-tmpl", label: "via" },
+        { id: "wl4", from: "wb-goal", to: "wb-wiz", label: "via" },
+        { id: "wl5", from: "wb-wiz", to: "wb-risk", label: "watch" },
+      ],
+    },
+  );
+  d.meta = { ...d.meta, freeform: true };
+  return d;
+};
+
 interface MapExample {
   id: string;
   name: string;
@@ -540,6 +584,7 @@ export const examples: MapExample[] = [
   { id: "swot", name: "SWOT (worked)", build: swot },
   { id: "flowchart", name: "Flowchart (shapes + flow)", build: flowchart },
   { id: "concept", name: "Concept map (linked ideas)", build: concept },
+  { id: "whiteboard", name: "Whiteboard (free layout)", build: whiteboard },
   { id: "runbook", name: "Incident runbook", build: runbook },
   { id: "gtd", name: "GTD natural planning", build: gtd },
   { id: "outline", name: "Talk / content outline", build: outline },

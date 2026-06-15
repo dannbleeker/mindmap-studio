@@ -517,3 +517,49 @@ export function mergeStyle(doc: MindMapDoc, id: string, patch: Partial<NodeStyle
   loc.node.style = Object.keys(merged).length > 0 ? (merged as NodeStyle) : undefined;
   return { doc: next };
 }
+
+// --- free-canvas (whiteboard) mode -----------------------------------------
+
+/** Set a node's explicit free-canvas position (top-left, flow coords). Searches the tree and
+ *  floating topics, so any node can be placed; a no-op (same doc) if the id isn't found. */
+export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): OpResult {
+  const next = structuredClone(doc);
+  const walk = (n: MapNode): boolean => {
+    if (n.id === id) {
+      n.pos = { x, y };
+      return true;
+    }
+    return n.children.some(walk);
+  };
+  let hit = walk(next.root);
+  if (!hit) {
+    for (const f of next.floatingTopics ?? []) {
+      if (walk(f)) {
+        hit = true;
+        break;
+      }
+    }
+  }
+  return { doc: hit ? next : doc };
+}
+
+/** Toggle free-canvas mode. When enabling with a positions map, seed each node's `pos` from it so
+ *  the switch is seamless; disabling clears the flag but keeps positions (for re-enabling). */
+export function setFreeform(
+  doc: MindMapDoc,
+  on: boolean,
+  positions?: Map<string, { x: number; y: number }>,
+): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, freeform: on || undefined };
+  if (on && positions) {
+    const seed = (n: MapNode): void => {
+      const p = positions.get(n.id);
+      if (p) n.pos = { x: p.x, y: p.y };
+      n.children.forEach(seed);
+    };
+    seed(next.root);
+    for (const f of next.floatingTopics ?? []) seed(f);
+  }
+  return { doc: next };
+}

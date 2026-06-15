@@ -35,6 +35,9 @@ export interface MindMapHandle {
   replaceTopics: (query: string, replacement: string) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
   setAllExpanded: (expanded: boolean) => void;
+  /** Toggle free-canvas (whiteboard) mode. Enabling seeds each node's `pos` from its current
+   *  on-screen position, so the switch is seamless; then nodes drag freely instead of re-parenting. */
+  setFreeform: (on: boolean) => void;
   /** Merge a style patch into the selected node ("" / null clears a key); false if none selected. */
   setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
@@ -100,7 +103,10 @@ export type LayoutKind =
   | "radial"
   | "timeline"
   | "fishbone"
-  | "grid";
+  | "grid"
+  // Free-canvas mode is a per-map state (doc.meta.freeform), not a layout the user picks; it's a
+  // LayoutKind so computeLayout has a single positioning entry point.
+  | "freeform";
 
 /** Props the canvas accepts. Kept engine-neutral so the renderer stays swappable behind
  *  the `index.tsx` chooser. */

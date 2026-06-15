@@ -72,6 +72,13 @@ export function computeLayout(
   if (!root) return positions;
   const ctx: Ctx = { nodes, byId, branchChildren, root, size, positions };
 
+  // Free-canvas mode owns positions outright (each node's `pos`), so it bypasses the auto-layouts
+  // and the floating placement entirely.
+  if (kind === "freeform") {
+    layoutFreeform(ctx);
+    return positions;
+  }
+
   switch (kind) {
     case "left":
       layoutHorizontal(ctx, -1, root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []));
@@ -240,6 +247,36 @@ function layoutGrid(ctx: Ctx): void {
   // Title (root) centred above the whole grid.
   const gridW = cols * cellW + (cols - 1) * GRID_GAP;
   place(ctx, root.id, gridW / 2, -rowGap);
+}
+
+// --- freeform / whiteboard (each node at its own `pos`; the user owns positions) -------
+// `pos` is top-left (matching React Flow's node.position), so it's stored verbatim — no centre
+// conversion. A node added after entering freeform has no `pos` yet: fall back to an offset beside
+// its parent (siblings stacked down), or a cascade for a parentless (floating) root. Nodes are in
+// tree order (parents before children), so a parent is always positioned before its children.
+function layoutFreeform(ctx: Ctx): void {
+  const { nodes, branchChildren, size, positions } = ctx;
+  const parentOf = new Map<string, string>();
+  for (const [p, kids] of branchChildren) for (const k of kids) parentOf.set(k, p);
+  const placedKids = new Map<string, number>();
+  let cascade = 0;
+  for (const n of nodes) {
+    const p = n.data.pos;
+    if (p) {
+      positions.set(n.id, { x: p.x, y: p.y });
+      continue;
+    }
+    const parent = parentOf.get(n.id);
+    const pp = parent ? positions.get(parent) : undefined;
+    if (parent && pp) {
+      const k = placedKids.get(parent) ?? 0;
+      placedKids.set(parent, k + 1);
+      positions.set(n.id, { x: pp.x + size(parent).width + 48, y: pp.y + k * 56 });
+    } else {
+      positions.set(n.id, { x: cascade * 60, y: cascade * 60 });
+      cascade += 1;
+    }
+  }
 }
 
 // --- radial (hub: root centred, descendants on rings by depth) -------------

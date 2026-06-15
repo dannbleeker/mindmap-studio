@@ -94,6 +94,9 @@ export interface MapNode {
   children: MapNode[];
   /** For the two-sided radial layout; left undefined = engine decides. */
   side?: "left" | "right";
+  /** Free-canvas position (top-left, in flow coords). Used only when the map is in freeform mode
+   *  (`meta.freeform`); the auto-layouts ignore it. Lossless in .json, ignored by flat exporters. */
+  pos?: { x: number; y: number };
 }
 
 /** A labelled cross-link between two nodes (MindManager "relationship"). */
@@ -150,5 +153,8 @@ export interface MindMapDoc {
     /** Per-map canvas background colour (CSS colour); overrides the theme. Lossless in .json,
      *  ignored by flat exporters; carried into the image/PDF export. */
     background?: string;
+    /** Free-canvas (whiteboard) mode: nodes use their own `pos` instead of an auto-layout, and
+     *  dragging a node moves it freely rather than re-parenting it. */
+    freeform?: boolean;
   };
 }

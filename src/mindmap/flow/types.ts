@@ -20,6 +20,8 @@ export type TopicData = {
   style?: NodeStyle;
   /** Conditional-formatting style (view-only); merged *under* `style` at render. */
   condStyle?: NodeStyle;
+  /** Free-canvas position (top-left) — used by the freeform layout when the map is in that mode. */
+  pos?: { x: number; y: number };
   /** The central topic — distinct styling, no incoming branch. */
   isRoot: boolean;
   /** Depth from the root (root = 0); drives branch tapering. */

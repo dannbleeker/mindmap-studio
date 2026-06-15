@@ -61,9 +61,11 @@ import {
   setBackground,
   setCalloutText,
   setDue,
+  setFreeform,
   setHyperlink,
   setImage,
   setLinkLabel,
+  setNodePos,
   setNote,
   setPriority,
   setProgress,
@@ -197,7 +199,9 @@ function FlowInner({
           ? { width: m.measured.width, height: m.measured.height }
           : est(id);
       };
-      const pos = computeLayout(proj.nodes, proj.edges, sizeOf, directionRef.current);
+      // Free-canvas mode overrides the picked layout: nodes sit at their own `pos`.
+      const kind = newDoc.meta?.freeform ? "freeform" : directionRef.current;
+      const pos = computeLayout(proj.nodes, proj.edges, sizeOf, kind);
       const sel = selectedRef.current;
       const lit = litIdsRef.current;
       setNodes(
@@ -265,9 +269,14 @@ function FlowInner({
     }
   }, [restore]);
 
-  // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back.
+  // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back. In free-canvas
+  // mode a drag instead persists the node's new position (no re-parenting).
   const handleDragStop = useCallback(
     (dragId: string, dropPos: { x: number; y: number }) => {
+      if (docRef.current.meta?.freeform) {
+        apply(setNodePos(docRef.current, dragId, dropPos.x, dropPos.y));
+        return;
+      }
       const all = getNodes();
       const dragged = all.find((n) => n.id === dragId);
       const cx = dropPos.x + (dragged?.measured?.width ?? 0) / 2;
@@ -529,6 +538,16 @@ function FlowInner({
         return res.count;
       },
       setAllExpanded: (expanded) => apply(setAllExpanded(docRef.current, expanded)),
+      setFreeform: (on) => {
+        if (on) {
+          // Seed each node's pos from where it currently sits, so the switch is seamless.
+          const positions = new Map<string, { x: number; y: number }>();
+          for (const n of getNodes()) positions.set(n.id, { x: n.position.x, y: n.position.y });
+          apply(setFreeform(docRef.current, true, positions));
+        } else {
+          apply(setFreeform(docRef.current, false));
+        }
+      },
       setSelectedStyle: (patch) =>
         withSelected((id) => apply(mergeStyle(docRef.current, id, patch))),
       setSelectedHyperlink: (url) =>

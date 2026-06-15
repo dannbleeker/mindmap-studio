@@ -17,6 +17,8 @@ import {
   setAllExpanded,
   setBackground,
   setDue,
+  setFreeform,
+  setNodePos,
   setNote,
   setPriority,
   setProgress,
@@ -270,6 +272,45 @@ describe("flow ops — content", () => {
   });
 });
 
+describe("flow ops — free-canvas (whiteboard) mode", () => {
+  it("setNodePos sets an explicit position on a tree node", () => {
+    const doc = setNodePos(base(), "a1", 120, 80).doc;
+    expect(findNode(doc, "a1")?.pos).toEqual({ x: 120, y: 80 });
+  });
+
+  it("setNodePos also reaches floating topics", () => {
+    const withFloat = addFloatingTopic(base(), "Free").doc;
+    const fid = withFloat.floatingTopics?.[0]?.id as string;
+    const doc = setNodePos(withFloat, fid, 5, 6).doc;
+    expect(doc.floatingTopics?.[0]?.pos).toEqual({ x: 5, y: 6 });
+  });
+
+  it("setNodePos is a no-op (same doc) for an unknown id", () => {
+    const doc = base();
+    expect(setNodePos(doc, "nope", 1, 2).doc).toBe(doc);
+  });
+
+  it("setFreeform on seeds pos from the map + flags meta.freeform", () => {
+    const positions = new Map([
+      ["r", { x: 0, y: 0 }],
+      ["a", { x: 10, y: 10 }],
+      ["a1", { x: 20, y: 20 }],
+    ]);
+    const doc = setFreeform(base(), true, positions).doc;
+    expect(doc.meta?.freeform).toBe(true);
+    expect(findNode(doc, "a")?.pos).toEqual({ x: 10, y: 10 });
+    expect(findNode(doc, "a1")?.pos).toEqual({ x: 20, y: 20 });
+    expect(findNode(doc, "b")?.pos).toBeUndefined(); // not in the map → untouched
+  });
+
+  it("setFreeform off clears the flag but retains positions (for re-enabling)", () => {
+    const on = setFreeform(base(), true, new Map([["a", { x: 9, y: 9 }]])).doc;
+    const off = setFreeform(on, false).doc;
+    expect(off.meta?.freeform).toBeUndefined();
+    expect(findNode(off, "a")?.pos).toEqual({ x: 9, y: 9 });
+  });
+});
+
 describe("flow ops — immutability", () => {
   it("never mutates the input doc", () => {
     const doc = base();
@@ -277,6 +318,8 @@ describe("flow ops — immutability", () => {
     addChild(doc, "a");
     deleteNode(doc, "b");
     setTopic(doc, "a", "Z");
+    setNodePos(doc, "a", 1, 1);
+    setFreeform(doc, true, new Map([["a", { x: 2, y: 2 }]]));
     expect(JSON.stringify(doc)).toBe(snap);
   });
 });

@@ -91,6 +91,7 @@ export function project(
         // Conditional formatting is a separate view-only overlay (merged under `style` at render),
         // so the model + fromFlow stay lossless — nothing bakes into node.style.
         condStyle: conditionalStyle(node, rules, progress.get(node.id)?.progress),
+        pos: node.pos,
         isRoot,
         depth,
         branchColor: color,

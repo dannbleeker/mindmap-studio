@@ -76,19 +76,20 @@ reasonably own** — not "everything MindManager has."
 | Timeline layout | ✅ | Hand-written timeline layout. |
 | Fishbone / Ishikawa | ✅ | Hand-written fishbone layout. |
 | Grid / matrix layout (2×2 SWOT) | ✅ | Tiles the first-level branches into a grid (shipped 2026-06-14). |
-| Flowchart / concept map | 🟡 | **Node shapes** (diamond/oval/parallelogram/hexagon/cylinder) + **directional arrows** + **flowchart & concept-map templates** shipped 2026-06-14. A true **free-connector canvas** (place-anywhere nodes) is still ⬜ — today's are tree-based. |
+| Flowchart / concept map | ✅ | Node shapes + directional arrows + templates (2026-06-14), **plus free-canvas (🧲 Free layout) place-anywhere positioning** (2026-06-15) — so flowcharts and concept maps are now fully free-form, not just tree-shaped. |
 | Funnel / Venn / onion diagrams | ⬜ | Distinct diagram builders; buildable but not started. (Matrix/grid now ✅ as a layout.) |
 | Kanban board view | ✅ | **▦ Board** — a read-only model-driven view grouping topics into columns by tag (shipped 2026-06-14). |
-| Whiteboard / sticky-note canvas | ⬜ | Free-form canvas (not a tree); buildable on React Flow, not started. |
+| Whiteboard / sticky-note canvas | ✅ | **🧲 Free layout** mode — drag any topic anywhere (positions persist); a free-canvas whiteboard (shipped 2026-06-15). |
 | Auto-layout / smart relationship routing | ✅ | Auto-layout per direction; boundary/minimap overlays track it. |
 | Per-branch layout override | ⬜ | A different layout on one branch — not built. |
 
 **Read:** the alternate-layout gap is **closed** — org-chart, timeline, fishbone, radial, and now
-**grid/matrix** all ship with the React Flow engine. The flowchart/concept-map gap is **largely
-closed too**: node shapes (the flowchart vocabulary), directional relationship arrows, and starter
-templates all shipped 2026-06-14, so tree-shaped flowcharts and concept maps are first-class. What
-remains in §2 is the genuinely *free-canvas* families — place-anywhere flowchart/concept map, a
-whiteboard, and the Venn/onion/funnel/brace diagram builders — each its own build.
+**grid/matrix** all ship with the React Flow engine. The flowchart/concept-map gap is **closed too**:
+node shapes (the flowchart vocabulary), directional relationship arrows, and starter templates
+(2026-06-14), plus **🧲 Free layout** free-canvas positioning (2026-06-15) — so flowcharts, concept
+maps, and whiteboards are now all first-class, tree-shaped *or* place-anywhere. The only §2 items
+left are the dedicated **Venn / onion / funnel / brace** diagram builders and a **per-branch layout
+override** — each its own build.
 
 ## 3. Styling & design
 

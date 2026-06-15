@@ -1045,7 +1045,8 @@ export function App() {
           onChange={(e) => changeLayout(e.target.value as LayoutKind)}
           style={controlStyle}
           aria-label="Layout"
-          title="Layout"
+          title={liveDoc.meta?.freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
+          disabled={!!liveDoc.meta?.freeform}
         >
           <optgroup label="Radial">
             <option value="side">Both sides</option>
@@ -1063,6 +1064,15 @@ export function App() {
             <option value="grid">Grid / matrix</option>
           </optgroup>
         </select>
+        <button
+          type="button"
+          onClick={() => mapRef.current?.setFreeform(!liveDoc.meta?.freeform)}
+          style={controlStyle}
+          aria-pressed={!!liveDoc.meta?.freeform}
+          title="Free layout (whiteboard): drag topics anywhere; the auto-layout pauses"
+        >
+          🧲 Free layout
+        </button>
         <button
           type="button"
           onClick={() => setInfoOpen((v) => !v)}

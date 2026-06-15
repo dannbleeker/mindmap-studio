@@ -189,6 +189,20 @@ describe("flow fromFlow (React Flow → model)", () => {
     expect(roundTrip(d).root.children[0].topicRich).toBe("<b>Bold</b> A");
   });
 
+  it("preserves free-canvas positions (pos) by id + the freeform flag", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "fc",
+      title: "Root",
+      meta: { freeform: true },
+      root: n("r", "Root", { pos: { x: 5, y: 6 } }, [n("a", "A", { pos: { x: 30, y: 40 } })]),
+    };
+    const back = roundTrip(d);
+    expect(back.meta?.freeform).toBe(true);
+    expect(back.root.pos).toEqual({ x: 5, y: 6 });
+    expect(back.root.children[0].pos).toEqual({ x: 30, y: 40 });
+  });
+
   it("leaves links / boundaries / floatingTopics undefined when there are none", () => {
     const back = roundTrip(simpleDoc);
     expect(back.links).toBeUndefined();

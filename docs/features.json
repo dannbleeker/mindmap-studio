@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 106,
+  "reviewedThroughChangelogBullets": 107,
   "areas": [
     "editing",
     "notes",
@@ -219,6 +219,15 @@
       "name": "Node shapes — diamond / oval / parallelogram / hexagon / cylinder (flowchart vocabulary), canvas == export",
       "area": "structure",
       "since": "2026-06-14",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "freeform-mode",
+      "name": "Free-canvas / whiteboard mode — 🧲 Free layout: drag nodes anywhere (pos persisted; auto-layout pauses)",
+      "area": "structure",
+      "since": "2026-06-15",
       "manual": true,
       "book": false,
       "bookExample": false

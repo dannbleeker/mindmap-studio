@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Free-canvas (whiteboard) mode** — a **🧲 Free layout** toggle turns any map into a free canvas:
+  drag topics **anywhere** and they stay put (the auto-layout pauses). Combined with node shapes and
+  directional arrows, this gives place-anywhere **flowcharts**, **concept maps**, and **whiteboards**.
+  Enabling **seeds each node's position from where it already sits** (a seamless switch); disabling
+  returns to the auto-layout and **keeps the positions**, so you can flip back and forth. Positions
+  live on the node (`pos`), lossless in `.json`. A new **Whiteboard (free layout)** example ships in
+  **+ New… → Examples**.
 - **Diagram starter templates** — two new entries in **+ New… → Examples** showcase the new
   structures: a **Flowchart** (node shapes mark step types — oval start/end, diamond decision,
   parallelogram I/O — with directional links labelling the branches) and a **Concept map** (ideas

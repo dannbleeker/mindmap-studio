@@ -76,6 +76,10 @@ GitHub Pages).
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, fishbone, and a **grid / matrix** (tiles the first-level branches into a grid — a
   2×2 for SWOT / Eisenhower frames), switchable from the toolbar and remembered per session.
+- **Free-canvas (whiteboard) mode** — **🧲 Free layout** turns any map into a free canvas: drag
+  topics anywhere and they stay (the auto-layout pauses). With shapes + directional arrows it makes
+  place-anywhere flowcharts, concept maps, and whiteboards; positions persist on the node and flip
+  back to auto-layout cleanly.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
   capped at 30, stored in IndexedDB, deleted with the map.

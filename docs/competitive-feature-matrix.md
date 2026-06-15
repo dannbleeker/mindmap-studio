@@ -56,13 +56,13 @@ interchange capability we could reasonably own.
 | Grid / matrix (2×2 SWOT) | ✅ | grid layout tiles branches into a 2×2 |
 | Node shapes (diamond/oval/parallelogram/hexagon/cylinder) | ✅ | flowchart vocabulary, canvas == export |
 | Outline view | ✅ | |
-| Concept map (labelled any-to-any) | 🟡 | directional cross-links + a concept-map template; base is a tree |
-| Flowchart | 🟡 | shapes + directional arrows + a flowchart template; tree-based, not a free canvas |
+| Concept map (labelled any-to-any) | ✅ | directional cross-links + template + free-canvas (🧲 Free layout) place-anywhere |
+| Flowchart | ✅ | shapes + directional arrows + template + free-canvas positioning |
 | Matrix / grid | ✅ | grid / matrix layout (SWOT, Eisenhower) |
 | Brace / bracket map | ❌ | XMind |
 | Venn / onion / swimlane | ❌ | MindManager |
 | Multiple structures per branch | ❌ | XMind "skeletons" |
-| True multi-root / freeform | 🟡 | floating subtrees ≈; not Scapple/Coggle freeform |
+| True multi-root / freeform | ✅ | 🧲 Free layout: drag nodes anywhere (pos persists); floating subtrees too |
 | Networked graph (multiple parents) | ❌ | TheBrain |
 | Loops / cycles | ❌ | Coggle |
 | Infinite freeform canvas | ❌ | Miro, Obsidian Canvas |
@@ -214,7 +214,7 @@ interchange capability we could reasonably own.
 Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
-- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), and **flowchart + concept-map templates** all shipped. Remaining: a true **free-canvas** flowchart/concept map (today's are tree-based), brace map, Venn/onion/swimlane, multiple sheets per file.
+- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, and **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere) all shipped. Remaining: dedicated **brace map**, **Venn/onion/swimlane** builders, and **multiple sheets per file**.
 - **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), file attachments, conditional formatting, styles organizer, task priority shipped; remaining: LaTeX/math (deferred).
 - **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.

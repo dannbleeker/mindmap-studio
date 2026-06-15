@@ -243,6 +243,12 @@ map re-flows into the new shape without losing any edits:
 - **Fishbone** — an Ishikawa cause-and-effect diagram, branches angling into a central spine.
 - **Grid / matrix** — tiles the first-level branches into a grid (four branches → a 2×2), each with
   its subtree beneath it and the root as a title above; the shape of a SWOT or Eisenhower matrix.
+- **🧲 Free layout (whiteboard)** — a toggle (next to the layout picker), not a layout. Turn it on and
+  you can **drag any topic anywhere** — it stays put and the auto-layout pauses. Combined with node
+  shapes and directional arrows, this is how you build a **place-anywhere flowchart, concept map, or
+  whiteboard**. Turning it on keeps everything where it is; turning it off returns to the auto-layout
+  (your positions are remembered, so you can switch back). Try the **Whiteboard (free layout)**
+  example in **+ New…**.
 
 ### Themes
 

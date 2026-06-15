@@ -59,10 +59,12 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
       if (data.style && Object.keys(data.style).length > 0) node.style = data.style;
       if (data.collapsed) node.collapsed = true;
     }
-    // Preserve by id the fields no RF gesture changes.
+    // Preserve by id the fields no RF gesture changes (freeform drags write `pos` via a model op,
+    // not through fromFlow, so it's carried here like task/side).
     if (prev?.side) node.side = prev.side;
     if (prev?.task) node.task = prev.task;
     if (prev?.callouts) node.callouts = prev.callouts;
+    if (prev?.pos) node.pos = prev.pos;
     // Collapsed → its subtree isn't in the projection; restore it verbatim from prevDoc.
     node.children = data?.collapsed
       ? (prev?.children ?? [])

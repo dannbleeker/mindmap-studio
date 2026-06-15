@@ -89,6 +89,30 @@ describe("flow layout (alternate kinds)", () => {
     expect(allFinite(computeLayout(nodes, edges, size, "fishbone"))).toBe(true);
   });
 
+  it("freeform places nodes at their own pos, with a beside-parent fallback for pos-less nodes", () => {
+    const fdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "f",
+      title: "F",
+      meta: { freeform: true },
+      root: {
+        id: "r",
+        topic: "R",
+        pos: { x: 100, y: 100 },
+        children: [
+          { id: "a", topic: "A", pos: { x: 300, y: 140 }, children: [] },
+          { id: "b", topic: "B", children: [] }, // no pos → fallback beside the root
+        ],
+      },
+    };
+    const p = project(fdoc);
+    const pos = computeLayout(p.nodes, p.edges, size, "freeform");
+    expect(pos.get("r")).toEqual({ x: 100, y: 100 }); // verbatim pos (top-left)
+    expect(pos.get("a")).toEqual({ x: 300, y: 140 });
+    // b lacks pos → beside its parent: root x(100) + width(100) + 48 = 248, same y
+    expect(pos.get("b")).toEqual({ x: 248, y: 100 });
+  });
+
   it("grid tiles the root's branches and keeps each branch's subtree below it", () => {
     // 4 branches → a 2×2 matrix (SWOT-shaped)
     const swot: MindMapDoc = {

@@ -67,6 +67,7 @@ import { todayISO } from "./taskDate";
 import { buildTemplate, templates } from "./templates";
 import { controlStyle, inputStyle } from "./ui";
 import { useFind } from "./useFind";
+import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
 
@@ -91,6 +92,9 @@ export function App() {
   // flash; the boot effect flips to "start" only when there's no map to restore (first run / empty
   // library). The "⌂ Start" toolbar button returns here any time. The editor canvas is unchanged.
   const [view, setView] = useState<"start" | "editor">("editor");
+  // Phone-width: the editor toolbar switches to a compact single horizontally-scrollable strip
+  // (the desktop layout wraps into a wall of rows on a narrow screen, burying the canvas).
+  const isMobile = useIsMobile();
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
@@ -901,11 +905,12 @@ export function App() {
         style={{
           display: "flex",
           alignItems: "center",
-          flexWrap: "wrap",
+          flexWrap: isMobile ? "nowrap" : "wrap",
           gap: 6,
           rowGap: 6,
-          padding: "8px 16px",
+          padding: isMobile ? "6px 10px" : "8px 16px",
           borderBottom: "1px solid #e2e0d8",
+          ...(isMobile ? { overflowX: "auto" as const } : {}),
         }}
       >
         <strong style={{ fontSize: 15, marginRight: 4 }}>MindMap Studio</strong>

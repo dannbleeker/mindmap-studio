@@ -199,7 +199,7 @@ topic entry and `+New` templates already cover fast local capture.)
 | Desktop (Win/Mac) | ✅-equivalent | Installable PWA on any OS; offline. |
 | Web access | ✅ | It's a web app — live at the public URL. |
 | Offline use | ✅ | Service worker + IndexedDB; fully offline. |
-| Mobile companion | 🚫 / ⬜ | The PWA is responsive-ish; a dedicated mobile UX is ⬜ but low priority. |
+| Mobile companion | 🟡 | Responsive layout ships — compact swipeable toolbar + stacked start-screen nav on phones (2026-06-15); deeper native-grade touch UX (drag-edit, bottom sheets) stays low-priority. |
 | Cloud storage / hosted files / enterprise deployment | 🚫 | Local-first by design. |
 
 ---
@@ -271,11 +271,12 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
 
 The in-scope list is now down to two items, both minor:
 
-1. **Dedicated mobile / phone UX** — the PWA is responsive-ish but not phone-optimised. The one
-   substantive in-scope item still open (low priority).
-2. **Automated multi-map roll-ups** — pulling subtrees from several library maps into one *on a
+1. **Automated multi-map roll-ups** — pulling subtrees from several library maps into one *on a
    refresh*. Manual roll-ups already ship (copy a branch in one map, paste it into another); an
    automated pull-engine stays niche / low-priority.
+2. **Native-grade mobile polish** — the responsive layout ships (compact swipeable toolbar + stacked
+   start nav); deeper touch-first editing (drag gestures, bottom-sheet panels) would refine it.
+   Low priority.
 
 ### Deferred by decision (revisit only on a go/no-go)
 - **AI assist** — a **keyless copy-prompt → paste-result bridge** (paste-to-tree is half-built via

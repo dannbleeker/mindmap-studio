@@ -668,3 +668,45 @@
     transform: none;
   }
 }
+
+/* --- phones: the fixed 228px rail would crush the content, so stack it into a top nav --- */
+@media (max-width: 640px) {
+  .start {
+    flex-direction: column;
+  }
+  .st-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--st-border);
+    padding: 10px 12px;
+    gap: 8px;
+    overflow-y: visible;
+  }
+  .st-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 4px;
+  }
+  .st-nav-item {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .st-nav-count,
+  .st-foot {
+    display: none; /* count badge + privacy footer are noise on a narrow nav strip */
+  }
+  .st-header {
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .st-kbd {
+    display: none; /* no physical ⌘K on a phone */
+  }
+  .st-content {
+    padding: 18px 16px;
+  }
+  .st-cmdk {
+    width: 92vw;
+  }
+}

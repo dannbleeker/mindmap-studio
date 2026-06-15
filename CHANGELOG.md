@@ -7,6 +7,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Mobile-friendly layout** — on phone-width screens the editor toolbar becomes a single compact,
+  swipeable strip (instead of a wall of wrapped rows), so the canvas fills the screen; and the start
+  screen's side rail folds into a top nav with full-width content. The PWA is now usable on a phone.
 - **Cross-map branch copy/paste** — right-click a branch → **Copy branch**, then right-click any node
   in *any* map → **Paste branch here** (it grafts a re-id'd copy as a child, or drops it in as a
   floating topic when there's no tree parent). The clipboard lives in the browser, so it survives

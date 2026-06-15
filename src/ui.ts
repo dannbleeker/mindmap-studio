@@ -9,6 +9,9 @@ export const controlStyle = {
   borderRadius: 8,
   padding: "6px 10px",
   cursor: "pointer",
+  // Keep size in the mobile single-row toolbar so it scrolls horizontally instead of squishing
+  // (no-op on the desktop wrapping toolbar, where controls keep their size anyway).
+  flexShrink: 0,
 } as const;
 
 export const inputStyle = {
@@ -19,6 +22,7 @@ export const inputStyle = {
   borderRadius: 8,
   padding: "6px 10px",
   width: 130,
+  flexShrink: 0,
 } as const;
 
 /** Human-friendly relative time ("just now", "5 min ago", "2 h ago", "3 d ago", else a date).

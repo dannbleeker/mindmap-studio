@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 115,
+  "reviewedThroughChangelogBullets": 116,
   "areas": [
     "editing",
     "notes",
@@ -920,6 +920,15 @@
       "id": "sticky-notes",
       "name": "Sticky-note topics (🗒 Note — a free-floating amber note)",
       "area": "structure",
+      "since": "2026-06-15",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "mobile-responsive",
+      "name": "Mobile-friendly responsive layout (compact swipeable toolbar + stacked start nav on phones)",
+      "area": "pwa",
       "since": "2026-06-15",
       "manual": true,
       "book": false,

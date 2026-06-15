@@ -1,12 +1,14 @@
-# Mind-mapping tools → MindMap Studio: combined feature matrix
+# Mind-mapping tools → MindMap Studio: feature gaps
 
 _Last updated: 2026-06-15._
 
 A market-wide capability survey across **19 mind-mapping / visual-thinking tools**, combined into
-one feature taxonomy and mapped against MindMap Studio. **This** doc is the broader landscape — what
-the whole category does — and the source for the cross-tool gap clusters at the bottom. (A
-MindManager-specific deep audit once lived alongside it; with its in-scope gaps closed it was folded
-into `NEXT_STEPS.md` and retired.)
+one feature taxonomy and mapped against MindMap Studio. This doc now lists **only the gaps** — what
+the category does that MindMap Studio doesn't (❌) or only partly (🟡) has, plus what's deliberately
+**out of scope** (⛔). Features already shipped (✅) have been pruned; see `CHANGELOG.md` and
+`docs/features.json` for the full shipped set, and the cross-tool gap clusters at the bottom for the
+summary. (A MindManager-specific deep audit once lived alongside it; with its in-scope gaps closed it
+was folded into `NEXT_STEPS.md` and retired.)
 
 Snapshot of 2025/2026 feature sets, compiled from each vendor's product/help pages and reputable
 comparisons. Treat version-specific details as approximate.
@@ -24,83 +26,41 @@ interchange capability we could reasonably own.
 
 | Mark | Meaning |
 |---|---|
-| ✅ | Have it today |
-| 🟡 | Partial / different form |
+| 🟡 | Partial / different form (some of it ships) |
 | ❌ | Missing (and feasible/interesting) |
 | ⛔ | Out of scope by design (PM / collaboration / enterprise) |
+
+Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` / `docs/features.json`.
 
 ---
 
 ## 1. Capture & editing
 | Feature | Status | Notes / who has it |
 |---|---|---|
-| Keyboard tree-building (Tab/Enter/Shift-Tab/Del) | ✅ | |
-| Inline edit (dbl-click / F2) | ✅ | |
-| Drag-to-reparent | ✅ | |
-| Undo / redo | ✅ | in-session snapshot stack |
-| Rich-text + multi-line topics | ✅ | Ctrl+B/I/U |
-| Free-positioned / floating topics | ✅ | |
-| Quick Entry / global capture | ✅ | **Quick add** box in the header (in-app fast capture; not OS-global) |
-| Brainstorm timer / ZEN focus-write | ✅ | **⏱ Brainstorm timer** (3/5/10/15-min timebox) |
 | Voice / audio-memo capture | ❌ | SimpleMind, XMind |
-| Paste text block → structured tree | ✅ | **📋 Paste text** dialog — outline/bullets/Markdown → topics, new map or graft |
-| Drop web link → topic | ✅ | drop a link/text onto the canvas → floating topic (unsafe schemes refused) |
 | Idea bank (capture-then-place) | ❌ | Ayoa |
 
 ## 2. Structure & layout (map types)
 | Feature | Status | Notes |
 |---|---|---|
-| Radial, two-sided, left/right | ✅ | |
-| Org-chart (down/up), tree | ✅ | |
-| Radial/hub, timeline, fishbone | ✅ | |
-| Grid / matrix (2×2 SWOT) | ✅ | grid layout tiles branches into a 2×2 |
-| Node shapes (diamond/oval/parallelogram/hexagon/cylinder) | ✅ | flowchart vocabulary, canvas == export |
-| Outline view | ✅ | |
-| Concept map (labelled any-to-any) | ✅ | directional cross-links + template + free-canvas (🧲 Free layout) place-anywhere |
-| Flowchart | ✅ | shapes + directional arrows + template + free-canvas positioning |
-| Matrix / grid | ✅ | grid / matrix layout (SWOT, Eisenhower) |
-| Brace / bracket map | ✅ | brace-map layout — `{` fork connectors, left-to-right tree |
-| Venn / onion / funnel | ✅ | ◎ Diagram backdrop builder (onion / funnel / Venn 2,3) |
-| Multiple structures per branch | ✅ | per-branch layout — right-click a branch → its own layout kind |
-| True multi-root / freeform | ✅ | 🧲 Free layout: drag nodes anywhere (pos persists); floating subtrees too |
 | Networked graph (multiple parents) | ❌ | TheBrain |
 | Loops / cycles | ❌ | Coggle |
 | Infinite freeform canvas | 🟡 | free node placement ships (🧲 Free layout); a Miro-style canvas of arbitrary objects doesn't |
-| Multiple sheets per file | ✅ | workbook sheets — ▦ +Sheet, sheet tab strip, ⤓ Workbook export/import |
 
 ## 3. Visual styling
 | Feature | Status | Notes |
 |---|---|---|
-| Themes (Light/Dark/Ocean/Sunset) + dark mode | ✅ | |
-| Per-branch palette colour | ✅ | |
-| Per-topic fill/border/shape/bold | ✅ | |
-| Organic tapered branches | ✅ | |
-| Boundaries (filled, labelled) | ✅ | |
-| Relationship lines (labelled, styled) | ✅ | |
-| Callouts | ✅ | |
-| Emoji icons / markers | ✅ | |
-| Images in topics | ✅ | |
-| Topic numbering | ✅ | |
 | Custom fonts / sizes | 🟡 | font **family** picker (Sans / Serif / Mono) + size/colour in the Info panel; no arbitrary/custom font names |
 | Large shape library (cloud/star/diamond…) | 🟡 | flowchart shapes ship (diamond/oval/parallelogram/hexagon/cylinder); a big clip-art / cloud / star library doesn't |
 | Sticker / illustration library | ❌ | XMind, MindNode |
 | Canvas background image/colour | 🟡 | per-map background **colour** ships (the Canvas control); background **image** ❌ |
 | LaTeX / math rendering | ❌ | XMind, Freeplane, Mindomo |
-| Conditional formatting (rules) | ✅ | style-by-rule (tag/marker/completion); not the SmartRules automation engine |
 | Line-jumps on crossing connectors | ❌ | MindManager |
 
 ## 4. Content enrichment
 | Feature | Status | Notes |
 |---|---|---|
-| Notes (Markdown, preview) | ✅ | |
-| Web hyperlinks | ✅ | |
-| In-map jump links + cross-map links | ✅ | |
-| Tags (+ index + filter) | ✅ | |
-| Priority/progress markers w/ data + roll-up | ✅ | task progress 0–100% rolls up to parents (+ emoji markers) |
-| File attachments (arbitrary) | ✅ | inline data-URL files on a topic, capped at 5 MB |
 | Audio / video embed or record | ❌ | Mindomo, Ayoa, SimpleMind |
-| Checkboxes / task checkbox + roll-up | ✅ | task progress (0/25/50/75/100) with done/total roll-up |
-| Dates on topics | ✅ | start/due dates, overdue highlight, due-date filter |
 | Formulas / key-value attributes | ❌ | Freeplane, MindManager |
 | Spreadsheet / Excel data binding | ❌ | MindManager |
 | Embed live webpage / Notion | ❌ | Obsidian, Miro |
@@ -108,17 +68,6 @@ interchange capability we could reasonably own.
 ## 5. Navigation & search
 | Feature | Status | Notes |
 |---|---|---|
-| Outline panel + filter | ✅ | |
-| Find & Replace (+ `/`) | ✅ | |
-| Library-wide search (all maps) | ✅ | |
-| Marker/tag index | ✅ | |
-| Power Filter (dim by marker/tag/text) | ✅ | |
-| Auto-numbering | ✅ | |
-| Minimap + zoom + fit | ✅ | |
-| Collapse / expand all | ✅ | |
-| Focus mode ("show branch only", dim rest) | ✅ | ◎ Focus isolates a branch |
-| Fuzzy / approximate search | ✅ | Find falls back to a typo-tolerant pass |
-| Saved / named filters | ✅ | name + save a Power Filter, reuse across maps |
 | Bookmarks / jump-to-named-node | 🟡 | jump links cover part |
 
 ## 6. Collaboration & sharing
@@ -135,19 +84,14 @@ interchange capability we could reasonably own.
 ## 7. Import / export & integrations
 | Feature | Status | Notes |
 |---|---|---|
-| Import .mmap, OPML, MD, JSON, .mm, Mermaid, XMind, .smmx | ✅ | strong |
-| Import iThoughts, MindMeister, older .xmind, TextBundle, MindMup, Markmap | ✅ | iThoughts (.itmz), MindMeister (.mind), legacy XMind content.xml, TextBundle (.textpack), MindMup (.mup), and Markmap Markdown all ship |
-| Import images from .mmap blobs | ❌ | known gap |
-| Export PNG/SVG/PDF/HTML/DOCX/PPTX/XLSX/deck/MD/OPML/.mm/Mermaid/XMind/.smmx | ✅ | very strong |
-| Write MindManager .mmap | ❌ | |
+| Import images from .mmap blobs | ❌ | known gap (blocked on a real image-bearing sample) |
+| Write MindManager .mmap | ❌ | low-value (open formats already bridge every tool) |
 | App integrations (Drive/Teams/Jira/Zapier/Notion) | ⛔ | mostly by design |
 | Cross-device cloud sync | ⛔ | local-first |
 
 ## 8. Presentation & output
 | Feature | Status | Notes |
 |---|---|---|
-| Presentation / Walk-Through mode | ✅ | |
-| Standalone HTML slide deck + PPTX | ✅ | |
 | Presenter view (map + slides) | ❌ | XMind Pitch |
 | Live broadcast / audience-follow | ⛔ | MindMeister, Ayoa (needs backend) |
 | Interactive published web map (filterable) | 🟡 | HTML export is static |
@@ -166,7 +110,7 @@ interchange capability we could reasonably own.
 
 > A **keyless "copy-prompt → paste-result" bridge** (we already import OPML/Markdown, so
 > paste-a-tree is half-built) or an optional bring-your-own-key path is the only AI direction
-> compatible with a no-backend, privacy-first product.
+> compatible with a no-backend, privacy-first product. **Decided against 2026-06-15** — not worth building.
 
 ## 10. Project / task management
 | Feature | Status | Notes |
@@ -176,9 +120,6 @@ interchange capability we could reasonably own.
 ## 11. Platform & data
 | Feature | Status | Notes |
 |---|---|---|
-| Web app / PWA, offline, installable | ✅ | |
-| Local-first local files, free + open-source | ✅ | |
-| Privacy (no backend / telemetry) + self-update | ✅ | a genuine differentiator |
 | Native desktop app | 🟡 | PWA install; no native shell |
 | Native mobile app | 🟡 | PWA in mobile browser |
 | Cross-device cloud sync | ⛔ | by design |
@@ -215,7 +156,7 @@ Clusters **B–G are shipped** — more structures (node shapes, directional arr
 flowchart + concept-map templates, free-canvas/whiteboard, brace map, onion/funnel/Venn backdrops,
 per-branch layout, multiple sheets, Kanban, summary topics, cross-map copy/paste, sticky notes,
 automated roll-ups), content depth, capture UX, navigation polish, durability, and interop fills
-(see the per-area tables above). What's left is all **deferred or blocked**:
+(see `CHANGELOG.md`). What's left is all **deferred or blocked**:
 
 - **A — AI assist** — the biggest category-wide gap, but **decided against (2026-06-15)**: a
   no-backend, local-first app can only do a keyless copy-prompt → paste-result bridge (or BYO-key),

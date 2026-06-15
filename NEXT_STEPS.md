@@ -41,8 +41,9 @@ no-backend PWA can't and shouldn't chase these.
 ## Reference
 
 - **Competitive feature matrix** — [`docs/competitive-feature-matrix.md`](docs/competitive-feature-matrix.md):
-  the whole-category survey (19 tools) mapped to MindMap Studio, grouped into 11 areas, with the
-  A–G gap clusters (B–G shipped; A — AI — deferred).
+  the cross-tool **gap** list (19 tools surveyed) — what the category does that MindMap Studio
+  doesn't or only partly has, grouped into 11 areas, with the A–G gap clusters (B–G shipped; A — AI —
+  deferred). Shipped (✅) features were pruned out (2026-06-15); see `CHANGELOG.md` for those.
 - **Book worked examples** — every feature is now covered in prose (`book` **100%**); the only
   remaining book dimension is worked examples (`bookExample` ~43% in `docs/features.json`) — optional
   polish: add a worked example to a chapter when a feature genuinely benefits from one.

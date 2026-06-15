@@ -5,10 +5,11 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 ## Status
 
 Phase 1 (Brainstorming MVP) complete, the canvas-engine migration to **@xyflow/react** done (React
-Flow is the only engine), and the **MindManager layouts-and-structures gap is closed** (the A–G
-competitive clusters are done except AI; gap-analysis §2 fully closed). Deployed to GitHub Pages on
-every push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>. See
-`CHANGELOG.md` for all shipped work.
+Flow is the only engine), and the **entire in-scope MindManager gap is now closed** — every
+creation / visualisation / navigation / interchange capability the product set out to own ships,
+including the phone layout. (The detailed MindManager gap-analysis doc has been retired; its
+remaining items are folded in below.) Deployed to GitHub Pages on every push to `main` — live at
+<https://mindmap-studio.struktureretsundfornuft.dk/>. See `CHANGELOG.md` for all shipped work.
 
 ## Open items
 
@@ -33,13 +34,19 @@ every push to `main` — live at <https://mindmap-studio.struktureretsundfornuft
   switching; side-by-side comparison is a large change (selection/notes/style all assume one active
   `docRef`), deferred unless needed.
 
+## Out of scope (by decision — won't build)
+
+Recorded so the decisions don't get re-litigated (folded in from the retired MindManager gap doc): the
+**project-management engine** (Gantt, resources, dependencies, cost, formulas / roll-up dashboards,
+topic properties), **real-time collaboration / publishing / enterprise** (co-editing, comments,
+access control, cloud/Teams hosting), **capture** (Snap-style web/mobile clippers), and a **separate
+native mobile app** (the PWA is responsive — a native app is a different product). A local-first,
+no-backend PWA can't and shouldn't chase these.
+
 ## Reference
 
 - **Competitive feature matrix** — [`docs/competitive-feature-matrix.md`](docs/competitive-feature-matrix.md):
   the whole-category survey (19 tools) mapped to MindMap Studio, grouped into 11 areas, with the
-  A–G gap clusters (B complete; only A — AI — open).
-- **MindManager gap analysis** — [`docs/mindmanager-gap-analysis.md`](docs/mindmanager-gap-analysis.md):
-  the MindManager-specific deep audit. The renderer-ceiling cluster and **all of §2 (layouts &
-  structures)** are closed; it's the MindManager-side record of what shipped.
-- **Book worked examples** — `book` ~80%, `bookExample` ~46% (`docs/features.json`). The recent
+  A–G gap clusters (only A — AI — open).
+- **Book worked examples** — `book` ~85%, `bookExample` ~46% (`docs/features.json`). The recent
   structure features are where to keep growing it (see "Grow the book" above).

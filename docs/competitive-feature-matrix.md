@@ -3,10 +3,10 @@
 _Last updated: 2026-06-14._
 
 A market-wide capability survey across **19 mind-mapping / visual-thinking tools**, combined into
-one feature taxonomy and mapped against MindMap Studio. The companion
-[`mindmanager-gap-analysis.md`](mindmanager-gap-analysis.md) is the deep, MindManager-specific
-audit; **this** doc is the broader landscape — what the whole category does — and the source for
-the cross-tool gap clusters at the bottom.
+one feature taxonomy and mapped against MindMap Studio. **This** doc is the broader landscape — what
+the whole category does — and the source for the cross-tool gap clusters at the bottom. (A
+MindManager-specific deep audit once lived alongside it; with its in-scope gaps closed it was folded
+into `NEXT_STEPS.md` and retired.)
 
 Snapshot of 2025/2026 feature sets, compiled from each vendor's product/help pages and reputable
 comparisons. Treat version-specific details as approximate.

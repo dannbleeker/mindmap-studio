@@ -305,6 +305,14 @@ theme default.
 Every map you create or import is kept in the browser, keyed by name in the **map dropdown**.
 Switch freely; each is autosaved. **Delete** removes the current one.
 
+### Sheets (one file, many maps)
+
+**▦ + Sheet** groups maps into a **workbook**: it turns the current map into the first sheet and
+adds a new one. A **sheet tab strip** then appears above the canvas — click a tab to switch sheets,
+**＋** to add one. **⤓ Workbook** exports all the workbook's sheets to a single `.json`; opening that
+file later brings them back as a grouped workbook. Each sheet is a full map (its own layout, history,
+and export) — sheets just travel together.
+
 ### Templates
 
 **+ New…** offers starter maps: **Blank**, **Brainstorm** (the 5 Ws + How), **SWOT**,

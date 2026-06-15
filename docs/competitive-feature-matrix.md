@@ -66,7 +66,7 @@ interchange capability we could reasonably own.
 | Networked graph (multiple parents) | ❌ | TheBrain |
 | Loops / cycles | ❌ | Coggle |
 | Infinite freeform canvas | ❌ | Miro, Obsidian Canvas |
-| Multiple sheets per file | ❌ | XMind (we have a multi-*map* library instead) |
+| Multiple sheets per file | ✅ | workbook sheets — ▦ +Sheet, sheet tab strip, ⤓ Workbook export/import |
 
 ## 3. Visual styling
 | Feature | Status | Notes |
@@ -214,7 +214,7 @@ interchange capability we could reasonably own.
 Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
-- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere), the **brace-map layout**, and the **◎ Diagram backdrop builders** (onion / funnel / Venn 2,3), and **per-branch layout** all shipped. Remaining: **multiple sheets per file**.
+- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere), the **brace-map layout**, the **◎ Diagram backdrop builders** (onion / funnel / Venn 2,3), **per-branch layout**, and **multiple sheets per file** (workbook sheets) all shipped. **Cluster B is complete.**
 - **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), file attachments, conditional formatting, styles organizer, task priority shipped; remaining: LaTeX/math (deferred).
 - **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.

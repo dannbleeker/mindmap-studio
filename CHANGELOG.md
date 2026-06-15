@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Multiple sheets per file** — group several maps as **sheets** of one workbook. **▦ + Sheet**
+  turns the current map into a workbook and adds a sheet; a **sheet tab strip** appears above the
+  canvas to switch between them, and **⤓ Workbook** exports all the sheets to a single `.json`
+  (re-importing keeps them grouped). Each sheet is a full map — its own layout, history, and export.
 - **Per-branch layout** — right-click a branch → **Branch layout** to lay out just that subtree with
   a different layout (e.g. an org-chart branch inside a radial map). The override subtree is sized as
   one blob in the main pass so it doesn't collide with its siblings, and nested overrides compose.

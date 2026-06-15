@@ -43,8 +43,9 @@ out-of-scope PM + collaboration/cloud pillars. Pick from these to form a concret
       **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart +
       concept-map templates**, and **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes
       anywhere) all shipped. Free-canvas flowcharts, concept maps, and whiteboards are now first-class.
-      The **brace-map layout**, the **◎ Diagram backdrop builders** (onion / funnel / Venn 2,3), and
-      **per-branch layout** ship too. Remaining: **multiple sheets per file**.
+      The **brace-map layout**, the **◎ Diagram backdrop builders** (onion / funnel / Venn 2,3),
+      **per-branch layout**, and **multiple sheets per file** (workbook sheets) ship too. **Cluster B
+      is complete.**
 - [x] **C — Content depth** — task progress + roll-up, start/due dates (overdue + filter), file
       attachments, conditional formatting, the styles organizer, and **task priority** (High/Med/Low
       + priority filter) all **shipped 2026-06-14**. Only **LaTeX/math** remains, deferred by decision
@@ -63,10 +64,10 @@ Shipped 2026-06-14 from the quick-win clusters: **①/④** (background + focus)
 tag editing), **⑦** (Word/Excel import), **G** (interop importers), **F** (version history), **E**
 (saved filters + fuzzy Find), the first slice of **D** (paste text → map), and a good chunk of
 **C** (task progress + roll-up, then start/due dates with overdue + a due-date filter).
-Remaining bets: **A** (keyless AI bridge) and the last of **B** — **multiple sheets per file**.
-(Shapes, arrows, grid, flowchart/concept-map templates, free-canvas / whiteboard mode, the brace-map
-layout, the onion / funnel / Venn backdrop builders, **and per-branch layout** are all done — the
-structure work is essentially complete.)
+Remaining bet: **A** (keyless AI bridge) — the only major open cluster. **Cluster B is fully
+complete** (shapes, arrows, grid, flowchart/concept-map templates, free-canvas / whiteboard mode,
+brace-map layout, onion / funnel / Venn backdrop builders, per-branch layout, and multiple sheets
+per file all shipped).
 
 ## Reference
 

@@ -170,5 +170,8 @@ export interface MindMapDoc {
     /** Free-canvas (whiteboard) mode: nodes use their own `pos` instead of an auto-layout, and
      *  dragging a node moves it freely rather than re-parenting it. */
     freeform?: boolean;
+    /** Workbook id: maps sharing it are sheets of one workbook (a sheet tab strip switches them,
+     *  and they export/import together as one file). */
+    sheetGroup?: string;
   };
 }

@@ -4,12 +4,12 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Status
 
-Phase 1 (Brainstorming MVP) complete, the canvas-engine migration to **@xyflow/react** done (React
-Flow is the only engine), and the **entire in-scope MindManager gap is now closed** — every
-creation / visualisation / navigation / interchange capability the product set out to own ships,
-including the phone layout. (The detailed MindManager gap-analysis doc has been retired; its
-remaining items are folded in below.) Deployed to GitHub Pages on every push to `main` — live at
-<https://mindmap-studio.struktureretsundfornuft.dk/>. See `CHANGELOG.md` for all shipped work.
+Phase 1 (Brainstorming MVP) complete; the canvas engine is **@xyflow/react** (the only one); the
+**entire in-scope MindManager gap is closed**, and the broader cross-tool gap is mostly closed too —
+the competitive matrix is down to **5 partials** plus deferred / out-of-scope items (see Reference).
+The handbook (*Thinking in Maps*) now documents every feature (`book` 100%). Deployed to GitHub
+Pages on every push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>. See
+`CHANGELOG.md` for all shipped work.
 
 ## Open items
 
@@ -45,5 +45,5 @@ no-backend PWA can't and shouldn't chase these.
   doesn't or only partly has, grouped into 11 areas, with the A–G gap clusters (B–G shipped; A — AI —
   deferred). Shipped (✅) features were pruned out (2026-06-15); see `CHANGELOG.md` for those.
 - **Book worked examples** — every feature is now covered in prose (`book` **100%**); the only
-  remaining book dimension is worked examples (`bookExample` ~43% in `docs/features.json`) — optional
+  remaining book dimension is worked examples (`bookExample` ~41% in `docs/features.json`) — optional
   polish: add a worked example to a chapter when a feature genuinely benefits from one.

@@ -151,8 +151,9 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 Clusters **B–G are shipped** — more structures (node shapes, directional arrows, grid/matrix,
 flowchart + concept-map templates, free-canvas/whiteboard, brace map, onion/funnel/Venn backdrops,
 per-branch layout, multiple sheets, Kanban, summary topics, cross-map copy/paste, sticky notes,
-automated roll-ups), content depth, capture UX, navigation polish, durability, and interop fills
-(see `CHANGELOG.md`). What's left is all **deferred or blocked**:
+automated roll-ups, version-history playback, a larger shape library, canvas background images, an
+interactive HTML export), content depth, capture UX, navigation polish, durability, and interop
+fills (see `CHANGELOG.md`). What's left is all **deferred or blocked**:
 
 - **A — AI assist** — the biggest category-wide gap, but **decided against (2026-06-15)**: a
   no-backend, local-first app can only do a keyless copy-prompt → paste-result bridge (or BYO-key),

@@ -38,7 +38,7 @@ const doc: MindMapDoc = {
       },
       // An image node.
       { id: "b", topic: "Picture", image: { url: PNG, width: 64, height: 64 }, children: [] },
-      { id: "c", topic: "Plain", side: "left", children: [] },
+      { id: "c", topic: "Plain", side: "left", style: { fontFamily: "serif" }, children: [] },
     ],
   },
   links: [{ id: "l1", from: "a", to: "c", label: "depends on" }],
@@ -92,6 +92,11 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
 
   it("draws a node border from the style shorthand colour", () => {
     expect(svg).toContain('stroke="#e23"');
+  });
+
+  it("applies a per-topic font family (and defaults to sans-serif)", () => {
+    expect(svg).toContain('font-family="serif"'); // node "c" is styled serif
+    expect(svg).toContain('font-family="sans-serif"'); // unstyled topics keep the default
   });
 
   it("embeds an image node with its data URL", () => {

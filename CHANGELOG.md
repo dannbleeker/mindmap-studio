@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Per-topic font family** — the **🎨 Styles** bar gains a **Font** picker (Sans / Serif / Mono);
+  it applies to the selected topic and carries into the SVG / PNG / PDF / Office exports.
+- **TextBundle / TextPack import** — open a `.textpack` (Bear, Ulysses, iA Writer) and its Markdown
+  (`text.md`) becomes a map via the Markdown importer.
 - **Automated multi-map roll-ups** — bind a node to another library map with **⤵ Roll-up**, then
   **🔄 Roll-ups** pulls that map's branches in as the node's children (a re-id'd mirror, refreshed on
   demand). One map can aggregate several others — the automated cousin of cross-map branch paste.

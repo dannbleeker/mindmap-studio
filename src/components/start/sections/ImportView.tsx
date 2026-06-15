@@ -5,7 +5,7 @@ import type { StartContext } from "../types";
 // Hands files to App's import pipeline via ctx.onImportFiles.
 
 const ACCEPT =
-  ".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup";
+  ".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle";
 
 const FORMATS: { ext: string; name: string }[] = [
   { ext: ".mmap", name: "MindManager" },
@@ -18,6 +18,7 @@ const FORMATS: { ext: string; name: string }[] = [
   { ext: ".itmz", name: "iThoughts" },
   { ext: ".mind", name: "MindMeister" },
   { ext: ".mup", name: "MindMup" },
+  { ext: ".textpack", name: "TextBundle" },
   { ext: ".docx", name: "Word outline" },
   { ext: ".xlsx", name: "Excel outline" },
   { ext: ".json", name: "Native (.json)" },

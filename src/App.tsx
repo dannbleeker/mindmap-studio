@@ -557,6 +557,10 @@ export function App() {
       const { fromMindMup } = await import("./io/mindmup");
       return { doc: fromMindMup(await file.text()), warnings: [] };
     }
+    if (name.endsWith(".textpack") || name.endsWith(".textbundle")) {
+      const { fromTextBundle } = await import("./io/textbundle");
+      return { doc: fromTextBundle(new Uint8Array(await file.arrayBuffer())), warnings: [] };
+    }
     const { parseMmap } = await importMmap();
     const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
     return { doc: result.doc, warnings: result.warnings };
@@ -1429,7 +1433,7 @@ export function App() {
           <input
             id="mmap-input"
             type="file"
-            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup"
+            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
             multiple
             onChange={handleFile}
             style={{ display: "none" }}

@@ -94,6 +94,7 @@ function textBlock(
   fontSize: number,
   color: string,
   weight?: string,
+  fontFamily?: string,
 ): string {
   if (lines.length === 0) return "";
   const lineHeight = fontSize * 1.2;
@@ -101,7 +102,7 @@ function textBlock(
   const firstBaseline = centre - ((lines.length - 1) * lineHeight) / 2;
   const w =
     weight && weight !== "400" && weight !== "normal" ? ` font-weight="${esc(weight)}"` : "";
-  const attrs = `x="${r2(x)}" font-family="sans-serif" font-size="${fontSize}" fill="${esc(color)}"${w}`;
+  const attrs = `x="${r2(x)}" font-family="${esc(fontFamily || "sans-serif")}" font-size="${fontSize}" fill="${esc(color)}"${w}`;
   if (lines.length === 1) {
     return `<text ${attrs} y="${r2(firstBaseline)}">${esc(lines[0])}</text>`;
   }
@@ -388,6 +389,7 @@ export function buildFlowSvg(
           fontSize,
           textColor,
           d.isRoot ? "700" : st?.fontWeight,
+          st?.fontFamily,
         ),
       );
     }

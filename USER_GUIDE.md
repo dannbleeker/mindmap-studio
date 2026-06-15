@@ -129,9 +129,9 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
   export — nothing is uploaded.
 - **Style** — **Shape** (Box / Rounded / Pill, plus the flowchart shapes **diamond** = decision,
   **oval** = start/end, **parallelogram** = input/output, **hexagon** = preparation, **cylinder** =
-  data store), **Fill**, **Border** (swatch or ✕ for none), **B** for bold, **Reset** to clear; font
-  size/colour live here too. The geometric shapes render identically on the canvas and in image
-  exports.
+  data store), **Fill**, **Border** (swatch or ✕ for none), **B** for bold, **Reset** to clear; a
+  **Font** picker (Sans / Serif / Mono) plus font size/colour live here too. Shapes and the chosen
+  font render identically on the canvas and in image exports.
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in
   your library), or **Jump to a topic** (an in-map jump). Click the 🔗 on the node to follow it;
   **✕ Remove link** clears it. A node holds one link at a time.
@@ -420,6 +420,7 @@ For getting ideas down quickly, three header tools:
 | `.itmz` | iThoughts — topic tree, notes, web links, relationships→cross-links, floating topics |
 | `.mind` | MindMeister — topic tree, notes, and web links from `map.json` |
 | `.mup` | MindMup — JSON map (rank-ordered children, notes, links) |
+| `.textpack` | TextBundle / TextPack (Bear, Ulysses, iA Writer) — the bundle's `text.md` → topic tree |
 | `.docx` | Word — the document's outline (heading styles or indentation) → topic tree, with italic note paragraphs |
 | `.xlsx` | Excel — an indented-outline sheet (first non-empty column = depth, trailing column = note); reads inline + shared strings. Empty-topic rows aren't imported |
 

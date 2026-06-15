@@ -176,6 +176,20 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
       >
         <b>B</b>
       </button>
+      {label("Font")}
+      <select
+        value=""
+        onChange={(e) => {
+          if (e.target.value) onStyle({ fontFamily: e.target.value });
+        }}
+        title="Topic font family"
+        style={{ ...styleBtn, padding: "2px 4px", fontSize: 12 }}
+      >
+        <option value="">Font…</option>
+        <option value="sans-serif">Sans</option>
+        <option value="serif">Serif</option>
+        <option value="monospace">Mono</option>
+      </select>
       <button
         type="button"
         style={{ ...styleBtn, fontSize: 12 }}

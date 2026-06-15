@@ -27,6 +27,7 @@ import { nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
 import { type LayoutKind, type MindMapHandle, type MindMapProps, classifyLink } from "./contract";
+import { BackgroundImage } from "./flow/BackgroundImage";
 import { Boundaries } from "./flow/Boundaries";
 import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
@@ -69,6 +70,7 @@ import {
   setBackdrop,
   setBackdropRings,
   setBackground,
+  setBackgroundImage,
   setCalloutText,
   setDue,
   setFreeform,
@@ -594,6 +596,7 @@ function FlowInner({
         return Boolean(findNode(docRef.current, id));
       },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
+      setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
       setSelectedProgress: (progress) =>
@@ -721,6 +724,7 @@ function FlowInner({
           }}
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
+          <BackgroundImage url={renderDoc.meta?.backgroundImage} />
           <DiagramBackdrop backdrop={renderDoc.backdrop} />
           <BraceConnectors braces={braces} />
           <Boundaries boundaries={renderDoc.boundaries ?? []} />

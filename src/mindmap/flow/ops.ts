@@ -368,6 +368,14 @@ export function setBackground(doc: MindMapDoc, color: string): OpResult {
   return { doc: next };
 }
 
+/** Set the per-map canvas background image (a data: URL); "" clears it. The image draws behind
+ *  everything, on top of any background colour. */
+export function setBackgroundImage(doc: MindMapDoc, url: string): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, backgroundImage: url || undefined };
+  return { doc: next };
+}
+
 /** Set a node's hyperlink ("" clears it). */
 export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult {
   const next = structuredClone(doc);

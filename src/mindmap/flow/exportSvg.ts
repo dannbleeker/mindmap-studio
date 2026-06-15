@@ -50,7 +50,9 @@ export type NodeRect = Rect;
 // Exporter-specific spacing: text/image insets inside a node box, and the viewBox margin.
 const PAD = 12;
 const ROOT_PAD = 18;
-const MARGIN = 40;
+/** Padding around the map bounds in the export viewBox; shared with the on-canvas background-image
+ *  layer (BackgroundImage.tsx) so the screen and the export cover the same region — canvas == export. */
+export const EXPORT_MARGIN = 40;
 
 function esc(s: string): string {
   return s
@@ -198,10 +200,10 @@ export function buildFlowSvg(
     maxX = 100;
     maxY = 100;
   }
-  const vbX = minX - MARGIN;
-  const vbY = minY - MARGIN;
-  const vbW = maxX - minX + 2 * MARGIN;
-  const vbH = maxY - minY + 2 * MARGIN;
+  const vbX = minX - EXPORT_MARGIN;
+  const vbY = minY - EXPORT_MARGIN;
+  const vbW = maxX - minX + 2 * EXPORT_MARGIN;
+  const vbH = maxY - minY + 2 * EXPORT_MARGIN;
 
   const parts: string[] = [];
 
@@ -428,5 +430,12 @@ export function buildFlowSvg(
     );
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vbX)} ${r2(vbY)} ${r2(vbW)} ${r2(vbH)}" width="${r2(vbW)}" height="${r2(vbH)}"><rect x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" fill="${esc(pageBg)}"/>${parts.join("")}</svg>`;
+  // Per-map background image (a data: URL): an <image> covering the whole viewBox, on top of the
+  // page-background rect but beneath every node/edge/boundary — mirrors the on-canvas layer so
+  // png/svg/html/pdf all carry it. preserveAspectRatio "slice" = CSS object-fit:cover (canvas == export).
+  const bgImage = doc.meta?.backgroundImage
+    ? `<image x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" href="${esc(doc.meta.backgroundImage)}" preserveAspectRatio="xMidYMid slice"/>`
+    : "";
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vbX)} ${r2(vbY)} ${r2(vbW)} ${r2(vbH)}" width="${r2(vbW)}" height="${r2(vbH)}"><rect x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" fill="${esc(pageBg)}"/>${bgImage}${parts.join("")}</svg>`;
 }

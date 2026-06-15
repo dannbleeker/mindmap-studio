@@ -80,6 +80,27 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(withBg).not.toContain("#faf9f5"); // the theme page bg is overridden
   });
 
+  it("emits a background <image> over the viewBox when meta.backgroundImage is set", () => {
+    const BG =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
+    const withImg = buildFlowSvg({ ...doc, meta: { backgroundImage: BG } }, rects, palette, cssVar);
+    // The exact viewBox the page-bg rect uses, so the image covers the whole map (slice = cover).
+    const vb = withImg.match(/viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/);
+    expect(vb).not.toBeNull();
+    const [, vx, vy, vw, vh] = vb as RegExpMatchArray;
+    expect(withImg).toContain(
+      `<image x="${vx}" y="${vy}" width="${vw}" height="${vh}" href="${BG}" preserveAspectRatio="xMidYMid slice"/>`,
+    );
+    // It sits on top of the page-background rect, beneath the rest (the first node/path).
+    const rectEnd = withImg.indexOf("/>") + 2; // end of the page-bg rect
+    expect(withImg.indexOf(BG)).toBeGreaterThan(rectEnd);
+  });
+
+  it("omits the background <image> when meta.backgroundImage is unset", () => {
+    // No "slice" image anywhere; node images use "meet", so the bg layer is what's gated here.
+    expect(svg).not.toContain('preserveAspectRatio="xMidYMid slice"');
+  });
+
   it("renders every topic as native <text> (no foreignObject)", () => {
     expect(svg).not.toMatch(/foreignObject/);
     expect(svg).toMatch(/<text[^>]*>Root<\/text>/);

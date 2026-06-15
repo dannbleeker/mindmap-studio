@@ -53,7 +53,6 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 | Custom fonts / sizes | 🟡 | font **family** picker (Sans / Serif / Mono) + size/colour in the Info panel; no arbitrary/custom font names |
 | Large shape library (cloud/star/diamond…) | 🟡 | flowchart shapes ship (diamond/oval/parallelogram/hexagon/cylinder); a big clip-art / cloud / star library doesn't |
 | Sticker / illustration library | ❌ | XMind, MindNode |
-| Canvas background image/colour | 🟡 | per-map background **colour** ships (the Canvas control); background **image** ❌ |
 | LaTeX / math rendering | ❌ | XMind, Freeplane, Mindomo |
 | Line-jumps on crossing connectors | ❌ | MindManager |
 

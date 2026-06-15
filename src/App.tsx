@@ -707,6 +707,21 @@ export function App() {
     }
   }
 
+  async function handleBackgroundImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      // Reuse the node-image pipeline (downscale + data URL) so a huge picture can't bloat the doc;
+      // non-image files reject during decode and surface a hint.
+      const { url } = await fileToMapImage(file);
+      mapRef.current?.setBackgroundImage(url);
+      showHint("Background image set for this map.");
+    } catch (err) {
+      showHint(err instanceof Error ? err.message : "Could not set background image");
+    }
+  }
+
   async function switchMap(id: string) {
     if (id === doc.id) return;
     try {
@@ -1212,6 +1227,36 @@ export function App() {
           >
             ✕
           </button>
+          <label
+            title="Set a background image for this map (covers the canvas, behind the topics)"
+            style={{ cursor: "pointer", fontSize: 13, lineHeight: 1 }}
+          >
+            🖼
+            <input
+              type="file"
+              accept="image/*"
+              aria-label="Canvas background image"
+              onChange={handleBackgroundImage}
+              style={{ display: "none" }}
+            />
+          </label>
+          {liveDoc.meta?.backgroundImage ? (
+            <button
+              type="button"
+              onClick={() => mapRef.current?.setBackgroundImage("")}
+              title="Remove the background image"
+              style={{
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                color: "#73726c",
+                fontSize: 12,
+                padding: 0,
+              }}
+            >
+              ✕
+            </button>
+          ) : null}
         </span>
         <select
           value={layout}

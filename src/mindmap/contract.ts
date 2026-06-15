@@ -56,6 +56,9 @@ export interface MindMapHandle {
   groupSummary: (id: string) => boolean;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
+  /** Set the per-map canvas background image (a data: URL); "" clears it. Drawn behind everything,
+   *  on top of the background colour; carried into the image/PDF/HTML exports. */
+  setBackgroundImage: (url: string) => void;
   /** Replace the map's conditional-formatting rules (empty array clears them). */
   setRules: (rules: ConditionalRule[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */

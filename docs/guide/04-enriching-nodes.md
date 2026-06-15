@@ -120,6 +120,15 @@ when you keep many maps -- a faint green wash on the "ideas" map, a warm one on 
 know which map you're in at a glance. The colour saves with the map and follows it into an image or
 PDF export; the **✕** clears it back to the theme.
 
+Right beside it, the **🖼** button goes a step further and lets you drop a whole **image** behind the
+map -- a faint grid, a watermark, a photograph of the whiteboard you're rebuilding, your team's brand
+backdrop. Pick a file and it fills the canvas behind every topic, sitting on top of the background
+colour (so a transparent PNG lets that colour glow through the gaps). The picture is shrunk to a sane
+size and tucked inside the map itself, so the map stays a single portable file you can open offline --
+and, like everything else here, what you see is what you get: the backdrop travels into your SVG, PNG,
+PDF and HTML exports unchanged. Use it sparingly, though; a busy photo behind your topics fights the
+words for attention, and the map is there for the words. The second **✕** lifts the image back off.
+
 ## A note on restraint
 
 Every feature in this chapter can be overused. The test is always the same: *does this

@@ -68,7 +68,7 @@ Left to right:
 | **⊟ / ⊞** | [Collapse / expand all](#collapse--expand) branches |
 | **1. Numbering** | Toggle [outline numbering](#auto-numbering) (1, 1.2, …) on every topic |
 | **◎ Focus** | [Focus the selected branch](#focus-a-branch) — dim everything else (Esc exits) |
-| **Canvas** | [Per-map background colour](#canvas-background) (overrides the theme) |
+| **Canvas** | [Per-map background colour + image](#canvas-background) (overrides the theme) |
 | **ℹ Info** | Toggle the [topic info panel](#topic-info-panel) — note, markers, tags, style, links for the selected node |
 | **Find / Replace** | [Search and replace](#find--replace) topics & notes (`/` jumps here) |
 | **Theme** | [Canvas theme](#themes): Light / Dark / Ocean / Sunset |
@@ -301,6 +301,12 @@ The **Canvas** colour control sets the background for **this map only**, overrid
 canvas colour — handy for colour-coding maps (a green "ideas" map, a red "risks" map) or matching a
 brand. It's saved with the map and carries into the image/PDF export; the **✕** resets it to the
 theme default.
+
+Next to it, the **🖼** button sets a **background image** for the map: pick any image file and it
+fills the canvas behind your topics (sitting on top of the background colour, so a transparent PNG
+lets the colour show through). The picture is downscaled and stored inside the map, so the map stays
+offline and portable, and it carries into every export — SVG, PNG, PDF, and HTML all show the same
+backdrop you see on the canvas. The second **✕** removes the image.
 
 ---
 

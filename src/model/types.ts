@@ -173,6 +173,10 @@ export interface MindMapDoc {
     /** Per-map canvas background colour (CSS colour); overrides the theme. Lossless in .json,
      *  ignored by flat exporters; carried into the image/PDF export. */
     background?: string;
+    /** Per-map canvas background image, stored inline as a data: URL (like node images) so maps
+     *  stay offline + portable. Drawn behind everything, on top of the background colour. Lossless
+     *  in .json, ignored by flat exporters; carried into the image/PDF/HTML export. */
+    backgroundImage?: string;
     /** Free-canvas (whiteboard) mode: nodes use their own `pos` instead of an auto-layout, and
      *  dragging a node moves it freely rather than re-parenting it. */
     freeform?: boolean;

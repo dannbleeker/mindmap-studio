@@ -1086,6 +1086,9 @@ export function App() {
         >
           <option value="">◎ Diagram…</option>
           <option value="onion">Onion (rings)</option>
+          <option value="funnel">Funnel (stages)</option>
+          <option value="venn2">Venn (2 circles)</option>
+          <option value="venn3">Venn (3 circles)</option>
         </select>
         {liveDoc.backdrop ? (
           <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>

@@ -592,6 +592,57 @@ const onionDiagram = (): MindMapDoc => {
   return d;
 };
 
+// 18 — Funnel: stacked stages narrowing toward conversion (a backdrop), stage labels as topics.
+const funnelDiagram = (): MindMapDoc => {
+  const d = doc(
+    "Funnel: sales pipeline",
+    node(
+      "fn-root",
+      "Sales funnel",
+      [
+        leaf("fn-1", "Awareness", { pos: { x: -40, y: -166 } }),
+        leaf("fn-2", "Interest", { pos: { x: -30, y: -62 } }),
+        leaf("fn-3", "Decision", { pos: { x: -34, y: 42 } }),
+        leaf("fn-4", "Action", { pos: { x: -26, y: 148 } }),
+      ],
+      {
+        pos: { x: -46, y: -252 },
+        note: "Stages narrow toward conversion. Use −/+ to change the number of stages.",
+      },
+    ),
+  );
+  d.meta = { ...d.meta, freeform: true };
+  d.backdrop = { kind: "funnel", rings: 4 };
+  return d;
+};
+
+// 19 — Venn (3 circles): the classic trade-off triangle, one topic per region.
+const venn3Diagram = (): MindMapDoc => {
+  const d = doc(
+    "Venn: fast · good · cheap",
+    node(
+      "v3-root",
+      "Pick two",
+      [
+        leaf("v3-a", "Fast", { pos: { x: -20, y: -182 } }),
+        leaf("v3-b", "Good", { pos: { x: -178, y: 104 } }),
+        leaf("v3-c", "Cheap", { pos: { x: 112, y: 104 } }),
+        leaf("v3-ab", "Rushed", { pos: { x: -86, y: -34 } }),
+        leaf("v3-ac", "Pricey", { pos: { x: 28, y: -34 } }),
+        leaf("v3-bc", "Slow", { pos: { x: -28, y: 44 } }),
+        leaf("v3-all", "Unicorn", { pos: { x: -38, y: -8 } }),
+      ],
+      {
+        pos: { x: -54, y: -300 },
+        note: "Three sets, seven regions. Drag a topic into the region it belongs to.",
+      },
+    ),
+  );
+  d.meta = { ...d.meta, freeform: true };
+  d.backdrop = { kind: "venn3" };
+  return d;
+};
+
 interface MapExample {
   id: string;
   name: string;
@@ -610,6 +661,8 @@ export const examples: MapExample[] = [
   { id: "concept", name: "Concept map (linked ideas)", build: concept },
   { id: "whiteboard", name: "Whiteboard (free layout)", build: whiteboard },
   { id: "onion", name: "Onion diagram (rings)", build: onionDiagram },
+  { id: "funnel", name: "Funnel diagram (stages)", build: funnelDiagram },
+  { id: "venn", name: "Venn diagram (3 circles)", build: venn3Diagram },
   { id: "runbook", name: "Incident runbook", build: runbook },
   { id: "gtd", name: "GTD natural planning", build: gtd },
   { id: "outline", name: "Talk / content outline", build: outline },

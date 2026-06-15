@@ -23,4 +23,27 @@ describe("flow backdrop (pure geometry)", () => {
     expect(backdropRings({ kind: "venn2" })).toBe(3);
     expect(backdropRings({ kind: "venn3" })).toBe(7);
   });
+
+  it("funnel draws one trapezoid path per stage + a band-centre anchor each", () => {
+    const g = backdropGeometry({ kind: "funnel", rings: 4 });
+    expect(g.shapes).toHaveLength(4);
+    expect(g.shapes.every((s) => s.type === "path" && (s.d ?? "").startsWith("M "))).toBe(true);
+    expect(g.anchors).toHaveLength(4);
+    // bands stack downward
+    expect(g.anchors[0].y).toBeLessThan(g.anchors[3].y);
+  });
+
+  it("venn2 = two overlapping circles + 3 region anchors (A, B, A∩B at centre)", () => {
+    const g = backdropGeometry({ kind: "venn2" });
+    expect(g.shapes.filter((s) => s.type === "circle")).toHaveLength(2);
+    expect(g.anchors).toHaveLength(3);
+    expect(g.anchors[2]).toEqual({ x: 0, y: 0 }); // intersection at centre
+  });
+
+  it("venn3 = three circles + 7 region anchors (triple overlap at centre)", () => {
+    const g = backdropGeometry({ kind: "venn3" });
+    expect(g.shapes.filter((s) => s.type === "circle")).toHaveLength(3);
+    expect(g.anchors).toHaveLength(7);
+    expect(g.anchors[6]).toEqual({ x: 0, y: 0 }); // A∩B∩C at centre
+  });
 });

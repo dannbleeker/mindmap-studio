@@ -41,6 +41,7 @@ export const BRACE_GAP = 22; // gap between the children's left edge and the bra
 
 // Dedicated diagram backdrop (onion / funnel / Venn frame) drawn behind the topics.
 export const BACKDROP_STROKE = "#9a93d6";
+export const BACKDROP_FILL = "rgba(120,116,210,0.06)"; // faint tint (overlaps blend in Venn)
 
 // Callout (anchored annotation bubble) — sticky-note yellow, readable on light + dark canvases.
 export const CALLOUT_BG = "#fff8c5";

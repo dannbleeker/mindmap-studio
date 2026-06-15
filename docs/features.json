@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 109,
+  "reviewedThroughChangelogBullets": 110,
   "areas": [
     "editing",
     "notes",
@@ -234,7 +234,7 @@
     },
     {
       "id": "diagram-backdrops",
-      "name": "Diagram backdrops — ◎ Diagram builder draws an onion frame (rings ±/remove); drop topics into regions (canvas == export)",
+      "name": "Diagram backdrops — ◎ Diagram builder: onion / funnel / Venn (2,3) frames; drop topics into regions (canvas == export)",
       "area": "structure",
       "since": "2026-06-15",
       "manual": true,

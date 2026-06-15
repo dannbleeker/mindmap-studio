@@ -77,7 +77,7 @@ reasonably own** — not "everything MindManager has."
 | Fishbone / Ishikawa | ✅ | Hand-written fishbone layout. |
 | Grid / matrix layout (2×2 SWOT) | ✅ | Tiles the first-level branches into a grid (shipped 2026-06-14). |
 | Flowchart / concept map | ✅ | Node shapes + directional arrows + templates (2026-06-14), **plus free-canvas (🧲 Free layout) place-anywhere positioning** (2026-06-15) — so flowcharts and concept maps are now fully free-form, not just tree-shaped. |
-| Funnel / Venn / onion diagrams | ⬜ | Distinct diagram builders; buildable but not started. (Matrix/grid now ✅ as a layout.) |
+| Funnel / Venn / onion diagrams | ✅ | **◎ Diagram** backdrop builder — onion (rings), funnel (stages), Venn (2/3 circles); shipped 2026-06-15. (Matrix/grid is ✅ as a layout.) |
 | Kanban board view | ✅ | **▦ Board** — a read-only model-driven view grouping topics into columns by tag (shipped 2026-06-14). |
 | Whiteboard / sticky-note canvas | ✅ | **🧲 Free layout** mode — drag any topic anywhere (positions persist); a free-canvas whiteboard (shipped 2026-06-15). |
 | Auto-layout / smart relationship routing | ✅ | Auto-layout per direction; boundary/minimap overlays track it. |
@@ -86,10 +86,10 @@ reasonably own** — not "everything MindManager has."
 **Read:** the alternate-layout gap is **closed** — org-chart, timeline, fishbone, radial, and now
 **grid/matrix** all ship with the React Flow engine. The flowchart/concept-map gap is **closed too**:
 node shapes (the flowchart vocabulary), directional relationship arrows, and starter templates
-(2026-06-14), plus **🧲 Free layout** free-canvas positioning (2026-06-15) — so flowcharts, concept
-maps, and whiteboards are now all first-class, tree-shaped *or* place-anywhere. The only §2 items
-left are the dedicated **Venn / onion / funnel / brace** diagram builders and a **per-branch layout
-override** — each its own build.
+(2026-06-14), plus **🧲 Free layout** free-canvas positioning, the **brace-map** layout, and the
+**◎ Diagram** backdrop builders (onion / funnel / Venn) (2026-06-15) — so flowcharts, concept maps,
+whiteboards, brace maps, and the funnel/onion/Venn frames are all first-class. The only §2 item left
+is a **per-branch layout override**.
 
 ## 3. Styling & design
 

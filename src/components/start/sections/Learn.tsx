@@ -53,6 +53,32 @@ export function Learn() {
           </div>
         ))}
       </div>
+
+      <div className="st-card" style={{ padding: 18 }}>
+        <h3 style={{ margin: "0 0 6px", fontSize: 15 }}>Go deeper — the book</h3>
+        <p className="st-prose" style={{ marginTop: 0 }}>
+          <strong>Thinking in Maps</strong> is the companion book: the why and how of mapping,
+          worked examples, and every feature in context.
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+          <a
+            className="st-link"
+            href="/Thinking-in-Maps.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read (PDF)
+          </a>
+          <a
+            className="st-link"
+            href="/Thinking-in-Maps.epub"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read (EPUB)
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

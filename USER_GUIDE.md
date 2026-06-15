@@ -41,8 +41,9 @@ place and your editor is never touched:
 - **Layouts** — open a blank map directly in any [layout](#layout) (two-sided, org-chart, radial,
   timeline, fishbone, grid, brace…) or diagram backdrop (onion, funnel, Venn).
 - **Import** — drop in or pick files in any [supported format](#importing).
-- **Learn** — a short primer on mind-mapping principles.
-- **About** — what the app is and how your data stays local.
+- **Learn** — a short primer on mind-mapping principles, with a link to the companion book.
+- **About** — what the app is and how your data stays local, plus links to the **book**
+  (*Thinking in Maps*, PDF + EPUB), the [user guide](#), the dashboard, and the source.
 
 Press **⌘K** (Ctrl-K) anywhere on the Start screen for a **command palette**: type to fuzzy-search
 your maps and the main actions, then Enter to go.

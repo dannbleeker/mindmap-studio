@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T08:40:31.405Z",
-  "commit": "47a4563",
+  "generatedAt": "2026-06-15T09:05:25.019Z",
+  "commit": "cf403a0",
   "headline": {
     "linesTsJs": 22690,
     "tests": 504,
     "lineCoveragePct": 43.64,
-    "commits": 331,
+    "commits": 333,
     "ageDays": 3,
     "trackedFiles": 224,
     "featureManualPct": 100,
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 15,
-      "lines": 1722
+      "lines": 1728
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 504,
     "e2e": 0,
-    "durationMs": 9319,
+    "durationMs": 9964,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2518
+        "ms": 2475
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 158
+        "ms": 172
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 133
+        "ms": 127
       },
       {
         "file": "test/docx-import.test.ts",
-        "ms": 85
+        "ms": 86
       },
       {
-        "file": "test/mmap.test.ts",
-        "ms": 79
+        "file": "test/xlsx.test.ts",
+        "ms": 64
       }
     ]
   },
@@ -375,21 +375,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 3,
-    "commits": 331,
-    "commits7d": 331,
+    "commits": 333,
+    "commits7d": 333,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 192
+        "count": 193
       },
       {
         "name": "github-actions[bot]",
-        "count": 139
+        "count": 140
       }
     ],
     "churn30d": {
-      "added": 48921,
-      "removed": 12757
+      "added": 48976,
+      "removed": 12806
     },
     "changelogEntries": 113
   }

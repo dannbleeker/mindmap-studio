@@ -1,6 +1,6 @@
 # Structuring ideas
 
-### Re-parenting, grouping, and the links a tree can't hold
+### Re-parenting, grouping, diagramming, and the links a tree can't hold
 
 A first draft of a map is rarely in the right shape. A branch you started under *Venue*
 turns out to belong under *Budget*; two ideas you thought were separate turn out to be
@@ -64,6 +64,63 @@ double as a staging area you can rename, grow, and prune while you decide where 
 belongs. Drag one onto a branch and it joins the tree; drag a branch topic out and it
 floats free.
 
+## Summary topics
+
+A boundary draws a box *around* a branch; a **summary** draws a labelled bracket *beside*
+one and says what it adds up to. Select the node at the top of a branch, click **⌐ Summary**,
+and a curly brace appears alongside it with an editable label -- "three options", "Q3 total",
+"needs sign-off". Where a boundary says *these belong together*, a summary says *here's the
+conclusion*. It's side-aware, so on a two-sided map the bracket sits on the outer edge where it
+reads naturally, and double-clicking its label renames it. Reach for a summary when a branch has
+a punchline -- a total, a verdict, a next step -- you want on the page without adding another node.
+
+## A vocabulary of shapes
+
+By default every topic is a soft rectangle, and for most maps that's exactly right -- the
+*words* carry the meaning. But when a map is really a **process or a decision flow**, shape
+becomes meaning. Select a node, open the **🎨 Styles** bar, and you can recast it as a
+**diamond** (a decision -- "approved?"), an **oval** (a start or end point), a **parallelogram**
+(an input or output), a **hexagon** (a preparation step), or a **cylinder** (a data store).
+These are the classic flowchart shapes, and they read instantly to anyone who's seen one: a
+diamond *asks*, an oval *bookends*, a cylinder *stores*. The shape is drawn the same way on the
+canvas and in every export, so a flowchart you build here looks like a flowchart in the PNG, the
+PDF, and the Office decks. Use a shape when the geometry adds information; leave the soft
+rectangle when the word is enough.
+
+## Free-canvas mode
+
+Auto-layout is a gift -- it keeps a growing tree tidy so you never nudge boxes around by hand.
+But some pictures aren't trees, and for those the tidy reflow gets in the way. Toggle
+**🧲 Free layout** and the auto-arranger steps aside: now you can **drag any node anywhere** and
+it stays put, its position saved with the map. This is the mode for a whiteboard-style diagram --
+a system sketch, a seating plan, a freeform cluster of ideas -- where *where* a node sits is part
+of what it means. Switch Free layout off again and the tree snaps back to its automatic shape,
+every hand-placed position still remembered for when you turn it back on. It's the escape hatch
+from the grid, not a replacement for it: most maps want the auto-layout, and the handful that
+don't want it badly.
+
+## Diagram backdrops: onion, funnel, Venn
+
+Sometimes the *frame* carries the idea. The **◎ Diagram** builder drops a geometric backdrop
+behind your topics for you to place them into: an **onion** of concentric rings (core to
+periphery -- values, then strategy, then tactics), a **funnel** of stacked stages narrowing to a
+point (a pipeline, a filtering process; **−/+** changes the stage count), or a **Venn** of two or
+three overlapping circles (what's shared versus what's distinct). The backdrop is pure geometry --
+it pairs naturally with Free layout above, since you're positioning topics into regions by hand --
+and, like shapes, it's drawn identically on screen and in every export, so the diagram you build
+is the diagram you hand out.
+
+## A different layout for one branch
+
+Chapter 5 covers the **Layout** dropdown, which re-flows the *whole* map into an org-chart, a
+timeline, a fishbone, and more. Occasionally a single *branch* wants a different shape from the
+rest -- an org-chart of the team hanging off an otherwise radial strategy map. Right-click the
+branch and choose **Branch layout** to give just that subtree its own arrangement. The override
+is sized as one block in the main layout so it never collides with its siblings, and overrides
+nest -- a branch inside the branch can have its own again. It's a precision tool; most maps never
+need it, but when one section is a fundamentally different kind of thing, this is how you let it
+look like one.
+
 ## Now you try
 
 Open your conference map (or any map with a few branches). Pick a leaf that sits under the
@@ -79,5 +136,11 @@ structure, a different shape on the page; keep whichever frames the map better. 
 branch topic *out* into open space to make it a **floating topic** -- a parking lot for an
 idea you're not ready to place -- and drag it back onto a branch to re-attach it. Structure
 isn't a cage; it's something you reshape as the thinking firms up.
+
+If your map is more diagram than tree, try the diagramming tools too. Cap a branch with a
+**⌐ Summary** that states its punchline. Turn a node into a **diamond** from the 🎨 Styles bar
+and watch the decision read at a glance. Or toggle **🧲 Free layout** and drag a few nodes into a
+shape you choose by hand -- then turn it off and watch the tree snap back, your positions
+remembered. None of these replace the tree; they're there for the maps the tree alone can't draw.
 
 With structure under control, the next chapter makes individual nodes carry more.

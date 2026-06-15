@@ -211,7 +211,7 @@
       "area": "structure",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -220,7 +220,7 @@
       "area": "structure",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -229,7 +229,7 @@
       "area": "structure",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -238,7 +238,7 @@
       "area": "structure",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -436,7 +436,7 @@
       "area": "navigation",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -454,7 +454,7 @@
       "area": "library",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {

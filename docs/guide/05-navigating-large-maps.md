@@ -154,6 +154,21 @@ picking a result opens that map and lands on the node. It's the companion to cro
 links: links are the doorways you placed on purpose, library search is for when you can't
 remember which map a thing is in.
 
+## Sheets: one file, many maps
+
+Cross-map links turn a *library* of separate maps into an atlas. **Sheets** do the opposite:
+they bind several maps into *one file*. Click **▦ + Sheet** and the current map becomes the
+first sheet of a **workbook**; a **sheet tab strip** appears above the canvas, and each tab is a
+complete, independent map -- its own layout, its own history, its own export. Use it when a single
+piece of work has several faces that belong together: a project with a plan, a risk map, and a
+stakeholder map; a workshop with one sheet per exercise. **⤓ Workbook** exports every sheet to a
+single `.json`, and re-importing it keeps them grouped, so the whole set travels as one.
+
+The line between sheets and cross-map links is worth drawing. A **link** is a doorway between maps
+that otherwise live their own lives in the library; **sheets** are maps that are genuinely *parts
+of one document* you want to keep, move, and share as a unit. Reach for a link when the maps are
+independent and occasionally connected; reach for a sheet when they're chapters of the same thing.
+
 ## A working rhythm for big maps
 
 Put together, the loop looks like this: **collapse all** to see the shape, open the
@@ -186,6 +201,8 @@ org-chart, and a timeline -- same nodes, three readings -- and keep whichever ma
 structure clearest. Then **reload the page**: the Outline panel is exactly where you left it,
 because the app remembered your workspace. The goal isn't to memorise the controls; it's to
 feel how much calmer a big map gets when you drive it at the right altitude instead of staring
-at the whole thing at once.
+at the whole thing at once. Finally, if you keep a few maps that are really parts of one project,
+click **▦ + Sheet** to fold them into a single workbook and flip between them on the tab strip --
+then **⤓ Workbook** to save the whole set as one file.
 
 Part 3 turns outward: getting the map off your screen and in front of other people.

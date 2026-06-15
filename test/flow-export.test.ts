@@ -15,6 +15,7 @@ import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
 import { shapePath } from "../src/mindmap/flow/shapes";
 import { CROSSLINK_COLOR } from "../src/mindmap/flow/style";
 import type { MindMapDoc } from "../src/model/types";
+import { STICKERS, stickerImage } from "../src/stickers";
 
 const PNG =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
@@ -123,6 +124,35 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
   it("embeds an image node with its data URL", () => {
     expect(svg).toMatch(/<image[\s>]/);
     expect(svg).toContain("data:image/png;base64,");
+  });
+
+  it("embeds a built-in sticker (SVG data URL) as a node <image> with a positive size", () => {
+    // A sticker is just node.image with a data:image/svg+xml URL, so it must flow through the very
+    // same <image> path as a file image — proving stickers render in every export with no new code.
+    const sticker = stickerImage(STICKERS[0]);
+    const withSticker = buildFlowSvg(
+      {
+        ...doc,
+        root: {
+          ...doc.root,
+          children: [{ id: "s", topic: "Star it", image: sticker, children: [] }],
+        },
+      },
+      new Map<string, NodeRect>([
+        ["r", { x: 400, y: 300, w: 120, h: 50 }],
+        ["s", { x: 600, y: 380, w: 120, h: 120 }],
+      ]),
+      palette,
+      cssVar,
+    );
+    const m = withSticker.match(
+      /<image x="[-\d.]+" y="[-\d.]+" width="([\d.]+)" height="([\d.]+)" href="(data:image\/svg\+xml,[^"]+)"/,
+    );
+    expect(m).not.toBeNull();
+    const [, w, , href] = m as RegExpMatchArray;
+    expect(Number(w)).toBeGreaterThan(0); // sized node → positive image box (shared image math)
+    // …and the href round-trips back to the sticker's own SVG.
+    expect(decodeURIComponent(href.slice("data:image/svg+xml,".length))).toBe(STICKERS[0].svg);
   });
 
   it("draws branch ribbons (filled <path>) and a dashed cross-link", () => {

@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Sticker / illustration library** — the **ℹ Info** panel gains a built-in **Stickers** grid: 20
+  curated, single-accent inline-SVG glyphs (star, heart, check / cross badge, flag, idea, warning,
+  info, speech bubble, thumbs up / down, target, rocket, lock, key, clock, pin, fire, question,
+  arrow) you can drop on the selected node without supplying your own file. Picking one sets that
+  node's **image** to the sticker's data URL, so it reuses the existing node-image pipeline — it
+  paints on the canvas and carries into every SVG / PNG / PDF / HTML export (canvas == export) and is
+  lossless in `.json`.
 - **Interactive HTML export** — a new **.html (interactive)** option saves the whole map as a single
   self-contained file you can email or open locally: a **collapsible, searchable outline** with an
   inlined vanilla-JS runtime (no app, no backend, no CDN — fully offline). Click a topic (or its ▾

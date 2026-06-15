@@ -108,6 +108,11 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
   [outline](#outline-panel).
 - **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it; active markers are
   highlighted. Imported MindManager icons map to these glyphs automatically.
+- **Stickers** — click a sticker in the grid (star, heart, check / cross badge, flag, idea, warning,
+  info, speech bubble, thumbs up / down, target, rocket, lock, key, clock, pin, fire, question, arrow)
+  to drop a built-in illustration on the node — no file needed. A sticker becomes the node's
+  [image](#images), so it shows on the canvas and carries into every export. To swap or remove it,
+  pick another image/sticker (a sticker replaces the node's current picture).
 - **Tags** — type a tag and press **Enter** to add it; click a chip's ✕ to remove it. Tags feed
   Find, the [marker & tag index](#marker--tag-index), and the [Power Filter](#power-filter).
 - **Progress** — set a task's completion with the **0 / 25 / 50 / 75 / 100** buttons (✕ clears it,
@@ -143,6 +148,11 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
 Click **Image**, pick a picture, and it's attached to the selected node. Images are
 downscaled and stored inside the map (as a data URL), so they stay offline and travel with a
 `.json` export.
+
+Don't have a file handy? The **ℹ Info** panel's **Stickers** grid offers 20 built-in inline-SVG
+illustrations (see [Markers / Stickers](#topic-info-panel) above). A sticker *is* the node's image —
+same render, same exports — so it's the quickest way to add a touch of visual meaning without
+supplying your own picture. A node holds one image at a time, so a new image or sticker replaces it.
 
 ### Rich-text topics
 

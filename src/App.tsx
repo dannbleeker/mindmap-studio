@@ -51,6 +51,7 @@ import {
 } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
 import { type LibraryHit, searchLibrary } from "./search";
+import { stickerImage } from "./stickers";
 import {
   type MapSummary,
   type VersionMeta,
@@ -1717,6 +1718,10 @@ export function App() {
               onToggleMarker={(m) => {
                 const ok = mapRef.current?.toggleSelectedIcon(m);
                 if (!ok) showHint("Select a node first, then click a marker.");
+              }}
+              onPickSticker={(s) => {
+                const ok = mapRef.current?.setSelectedImage(stickerImage(s));
+                if (!ok) showHint("Select a node first, then pick a sticker.");
               }}
               onStyle={(patch) => {
                 const ok = mapRef.current?.setSelectedStyle(patch);

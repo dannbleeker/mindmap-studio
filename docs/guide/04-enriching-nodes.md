@@ -52,6 +52,17 @@ A node can hold an **image** -- a screenshot, a logo, a photographed whiteboard,
 Attach one to the selected node and it renders inline on the canvas. An image is worth a
 paragraph of note when the thing you're describing is itself visual.
 
+Sometimes you don't have a file to hand -- you just want a small visual cue: a **star** on the
+idea you're proudest of, a **warning** triangle on the risk, a **flag** on the decision still
+open. For that, the **ℹ Info** panel keeps a built-in grid of **stickers**: twenty clean little
+illustrations -- star, heart, check and cross badges, lightbulb, target, rocket, lock, clock, fire,
+and more -- in one quiet accent colour so they read as a set rather than a circus. Click one and it
+lands on the selected node. Behind the scenes a sticker simply *becomes* that node's image, which is
+the whole trick: it renders on the canvas and travels into every export exactly like a picture you
+supplied yourself, with nothing new to learn. A node holds one image at a time, so picking a new
+sticker (or a real photo) swaps out the last. Used sparingly -- one or two on the nodes that carry
+the most weight -- a sticker pulls the eye to what matters without a word.
+
 ## Attachments: files that travel with the node
 
 An image renders *on* the node; an **attachment** rides along *with* it. From the **ℹ Info**

@@ -16,6 +16,7 @@ import {
 import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import { describeRule } from "./rules";
+import { STICKERS, type Sticker, stickerDataUrl } from "./stickers";
 import type { VersionMeta } from "./store/mapStore";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 
@@ -1024,6 +1025,7 @@ export function InfoPanel({
   onNoteBlur,
   markers,
   onToggleMarker,
+  onPickSticker,
   onStyle,
   onAddTag,
   onRemoveTag,
@@ -1047,6 +1049,7 @@ export function InfoPanel({
   onNoteBlur: () => void;
   markers: readonly string[];
   onToggleMarker: (marker: string) => void;
+  onPickSticker: (sticker: Sticker) => void;
   onStyle: (patch: Partial<NodeStyle>) => void;
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
@@ -1174,6 +1177,7 @@ export function InfoPanel({
         <div style={{ overflowY: "auto" }}>
           <StyleBar onStyle={onStyle} />
           <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
+          <StickerBar stickers={STICKERS} onPick={onPickSticker} />
 
           {sectionLabel("Tags")}
           <div style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -1510,6 +1514,61 @@ export function NotesPanel({
         </div>
       )}
     </div>
+  );
+}
+
+// A grid of built-in inline-SVG stickers; clicking one sets it as the selected node's image (it
+// then flows through the existing node-image render + export pipeline). Lives in the Info panel
+// next to the Markers bar — markers are tiny emoji glyphs, stickers are a larger picture on the node.
+export function StickerBar({
+  stickers,
+  onPick,
+}: {
+  stickers: readonly Sticker[];
+  onPick: (sticker: Sticker) => void;
+}) {
+  return (
+    <>
+      <div style={PANEL_GROUP_LABEL}>Stickers</div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 4,
+          padding: "0 10px 6px",
+        }}
+      >
+        {stickers.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => onPick(s)}
+            title={`Add the ${s.label} sticker to this node`}
+            aria-label={`Add ${s.label} sticker`}
+            style={{
+              width: 30,
+              height: 30,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "1px solid #cecbf6",
+              background: "#fff",
+              borderRadius: 6,
+              cursor: "pointer",
+              padding: 3,
+            }}
+          >
+            <img
+              src={stickerDataUrl(s)}
+              alt=""
+              width={22}
+              height={22}
+              style={{ display: "block" }}
+            />
+          </button>
+        ))}
+      </div>
+    </>
   );
 }
 

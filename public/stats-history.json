@@ -34,13 +34,13 @@
   },
   {
     "date": "2026-06-15",
-    "linesTsJs": 21022,
-    "coveragePct": 48.21,
-    "tests": 491,
-    "bundleKb": 210.2,
+    "linesTsJs": 22624,
+    "coveragePct": 43.86,
+    "tests": 504,
+    "bundleKb": 219.5,
     "mutationScore": null,
     "featureManualPct": 100,
-    "featureBookPct": 79.6,
-    "featureExamplePct": 45.9
+    "featureBookPct": 78.8,
+    "featureExamplePct": 45.5
   }
 ]

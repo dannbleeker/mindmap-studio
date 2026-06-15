@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-06-15T08:13:09.225Z",
-  "commit": "215b5bd",
+  "generatedAt": "2026-06-15T08:28:09.476Z",
+  "commit": "4bd03f1",
   "headline": {
     "linesTsJs": 22690,
     "tests": 504,
     "lineCoveragePct": 43.64,
-    "commits": 324,
+    "commits": 326,
     "ageDays": 3,
     "trackedFiles": 224,
     "featureManualPct": 100,
-    "featureBookPct": 78.8,
+    "featureBookPct": 84.8,
     "featureExamplePct": 45.5
   },
   "code": [
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 15,
-      "lines": 1642
+      "lines": 1722
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 504,
     "e2e": 0,
-    "durationMs": 10971,
+    "durationMs": 11169,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2629
+        "ms": 3253
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 170
+        "ms": 180
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 161
-      },
-      {
-        "file": "test/version-store.test.ts",
-        "ms": 95
+        "ms": 169
       },
       {
         "file": "test/docx-import.test.ts",
-        "ms": 90
+        "ms": 111
+      },
+      {
+        "file": "test/xlsx.test.ts",
+        "ms": 78
       }
     ]
   },
@@ -216,17 +216,17 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 9822,
+    "bookWords": 10825,
     "chapters": 11,
     "appLoc": 15039,
-    "docToCodeRatio": 0.65
+    "docToCodeRatio": 0.72
   },
   "featureCoverage": {
     "total": 99,
     "manual": 99,
     "manualPct": 100,
-    "book": 78,
-    "bookPct": 78.8,
+    "book": 84,
+    "bookPct": 84.8,
     "bookExample": 45,
     "bookExamplePct": 45.5,
     "byArea": {
@@ -258,17 +258,17 @@
       "structure": {
         "total": 10,
         "manual": 10,
-        "book": 6
+        "book": 10
       },
       "navigation": {
         "total": 18,
         "manual": 18,
-        "book": 14
+        "book": 15
       },
       "library": {
         "total": 10,
         "manual": 10,
-        "book": 8
+        "book": 9
       },
       "import": {
         "total": 16,
@@ -295,26 +295,6 @@
       "noManual": [],
       "noBook": [
         {
-          "id": "freeform-mode",
-          "name": "Free-canvas / whiteboard mode — 🧲 Free layout: drag nodes anywhere (pos persisted; auto-layout pauses)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "diagram-backdrops",
-          "name": "Diagram backdrops — ◎ Diagram builder: onion / funnel / Venn (2,3) frames; drop topics into regions (canvas == export)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "per-branch-layout",
-          "name": "Per-branch layout — right-click a branch → Branch layout; its subtree uses its own kind (blob-sized, composes)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "multiple-sheets",
-          "name": "Multiple sheets per file — group maps as workbook sheets (▦ +Sheet, sheet tab strip, ⤓ Workbook export/import)",
-          "since": "2026-06-15"
-        },
-        {
           "id": "start-screen",
           "name": "Start screen (home: capture hero, library, templates, layouts, ⌘K palette)",
           "since": "2026-06-15"
@@ -332,16 +312,6 @@
         {
           "id": "task-dates",
           "name": "Start / due dates with overdue highlighting + a due-date filter",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "summary-topics",
-          "name": "Summary topics — a labelled bracket beside a branch (side-aware, renamable)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "node-shapes",
-          "name": "Node shapes — diamond / oval / parallelogram / hexagon / cylinder (flowchart vocabulary), canvas == export",
           "since": "2026-06-14"
         },
         {
@@ -405,21 +375,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 3,
-    "commits": 324,
-    "commits7d": 324,
+    "commits": 326,
+    "commits7d": 326,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 189
+        "count": 190
       },
       {
         "name": "github-actions[bot]",
-        "count": 135
+        "count": 136
       }
     ],
     "churn30d": {
-      "added": 48742,
-      "removed": 12643
+      "added": 48862,
+      "removed": 12683
     },
     "changelogEntries": 113
   }

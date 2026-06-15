@@ -112,7 +112,7 @@
       "area": "markers",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -121,7 +121,7 @@
       "area": "markers",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -130,7 +130,7 @@
       "area": "markers",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -346,7 +346,7 @@
       "area": "navigation",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -364,7 +364,7 @@
       "area": "navigation",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -571,7 +571,7 @@
       "area": "styling",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -580,7 +580,7 @@
       "area": "styling",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -589,7 +589,7 @@
       "area": "navigation",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -598,7 +598,7 @@
       "area": "notes",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -607,7 +607,7 @@
       "area": "editing",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -616,7 +616,7 @@
       "area": "editing",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -625,7 +625,7 @@
       "area": "editing",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -679,7 +679,7 @@
       "area": "import",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -688,7 +688,7 @@
       "area": "import",
       "since": "2026-06-14",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -904,7 +904,7 @@
       "area": "library",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -913,7 +913,7 @@
       "area": "editing",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -922,7 +922,7 @@
       "area": "structure",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -931,7 +931,7 @@
       "area": "pwa",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -940,7 +940,7 @@
       "area": "library",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -949,7 +949,7 @@
       "area": "styling",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -958,7 +958,7 @@
       "area": "import",
       "since": "2026-06-15",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     }
   ]

@@ -19,6 +19,20 @@ A good habit: build fast and loose first -- get every idea onto the canvas as a 
 wherever -- then spend a second pass dragging things into the structure that emerges.
 Trying to get the hierarchy right while you're still generating ideas slows both down.
 
+## Copy a branch -- here, or in another map
+
+Dragging *moves* a branch; sometimes you want a *copy* -- the same sub-tree in two places, or a
+structure you built in one map reused in another. **Right-click** a topic and choose **Copy
+branch**; then right-click where it should go and choose **Paste branch here** to graft a fresh
+copy -- the node and everything beneath it -- under that parent. Every pasted node gets a new
+identity, so the copy is genuinely independent: edit it and the original doesn't budge.
+
+The quietly useful part is that the clipboard **crosses maps**. Copy a branch in your *Q3 Plan*,
+open your *Q4 Plan*, and paste it in -- a standard checklist, a risk list, a team structure you
+keep re-using no longer has to be rebuilt each time. It's the middle ground between the drag (which
+only moves things within one map) and a full file import (which brings in a whole map): a way to
+carry just the piece you want from one map to the next.
+
 ## Layout direction
 
 By default MindMap Studio balances branches on both sides of the root. For some maps a
@@ -64,6 +78,17 @@ double as a staging area you can rename, grow, and prune while you decide where 
 belongs. Drag one onto a branch and it joins the tree; drag a branch topic out and it
 floats free.
 
+## Sticky notes
+
+A floating topic is still a *topic* -- a node you might grow into a branch. Sometimes you want
+something lighter: a remark on the canvas that isn't part of the structure at all. The **🗒 Note**
+button drops a **sticky note** -- a free-floating amber card you can drag anywhere and type into.
+Use it for the things that hover *around* a map rather than *in* it: a "finish before Friday" to
+yourself, a caption over a cluster, a question for whoever you hand the map to. It's the canvas
+equivalent of a Post-it stuck to the whiteboard -- visible, movable, and plainly a note rather than
+a part of the tree. (For a remark pinned to *one specific node*, reach for a callout instead,
+Chapter 4; the sticky note is the free-floating kind.)
+
 ## Summary topics
 
 A boundary draws a box *around* a branch; a **summary** draws a labelled bracket *beside*
@@ -78,7 +103,7 @@ a punchline -- a total, a verdict, a next step -- you want on the page without a
 
 By default every topic is a soft rectangle, and for most maps that's exactly right -- the
 *words* carry the meaning. But when a map is really a **process or a decision flow**, shape
-becomes meaning. Select a node, open the **🎨 Styles** bar, and you can recast it as a
+becomes meaning. Select a node, open the **Style bar** (in the ℹ Info panel), and you can recast it as a
 **diamond** (a decision -- "approved?"), an **oval** (a start or end point), a **parallelogram**
 (an input or output), a **hexagon** (a preparation step), or a **cylinder** (a data store).
 These are the classic flowchart shapes, and they read instantly to anyone who's seen one: a
@@ -138,9 +163,14 @@ idea you're not ready to place -- and drag it back onto a branch to re-attach it
 isn't a cage; it's something you reshape as the thinking firms up.
 
 If your map is more diagram than tree, try the diagramming tools too. Cap a branch with a
-**⌐ Summary** that states its punchline. Turn a node into a **diamond** from the 🎨 Styles bar
+**⌐ Summary** that states its punchline. Turn a node into a **diamond** from the **Style bar**
 and watch the decision read at a glance. Or toggle **🧲 Free layout** and drag a few nodes into a
 shape you choose by hand -- then turn it off and watch the tree snap back, your positions
 remembered. None of these replace the tree; they're there for the maps the tree alone can't draw.
+
+Two quick reuse moves to finish: **right-click a branch → Copy branch**, then paste it under
+another node -- or even into a *different* map -- and notice the copy is independent of the
+original. And drop a **🗒 sticky note** somewhere with a reminder to yourself: a remark that rides
+*with* the map without becoming part of its tree.
 
 With structure under control, the next chapter makes individual nodes carry more.

@@ -10,6 +10,14 @@ What goes in, what comes out, and what survives the trip. For the day-to-day gui
 - **Markdown** -- the tree as an outline (`#` root, nested bullets). Round-trippable as
   structure; canvas-only detail (colour, arrows) is naturally dropped.
 - **OPML** -- standard outliner interchange. Structure and topics; not canvas styling.
+- **FreeMind / Freeplane (`.mm`)** -- the most widely-read mind-map format: topic tree, links,
+  folded state, and notes. The bridge to most other mind-mappers.
+- **Mermaid (`.mmd`)** -- the `mindmap` text format you embed in Markdown that renders Mermaid
+  (GitHub, GitLab, Notion, many docs tools).
+- **XMind (`.xmind`)** -- the modern (2020+) XMind package: topics, notes, links, tags, floating
+  topics, and relationships.
+- **SimpleMind (`.smmx`)** -- the native SimpleMind format: topic tree, notes, web links,
+  relations, and floating topics.
 - **PNG** -- a raster image of the canvas, for slides and chat.
 - **SVG** -- a vector image: crisp at any zoom, ideal for high-resolution use.
 - **HTML** -- a single self-contained page, openable in any browser.
@@ -29,8 +37,18 @@ What goes in, what comes out, and what survives the trip. For the day-to-day gui
 ## Import formats
 
 - **JSON** (native) -- the lossless round trip of the JSON export.
-- **Markdown** -- any `#`/bullet outline becomes a map.
+- **Markdown** -- any `#`/bullet outline becomes a map, including **Markmap**-flavoured Markdown
+  (YAML frontmatter plus multi-level headings).
 - **OPML** -- outlines from other tools.
+- **FreeMind / Freeplane `.mm`** -- topics, links, folded state, and notes.
+- **Mermaid `.mmd`** -- `mindmap` text; the hierarchy comes from the indentation.
+- **XMind `.xmind`** (2020+) -- topics, notes, web links, and labels (as tags).
+- **SimpleMind `.smmx`** -- topic tree, notes, web links, and relations.
+- **MindMup `.mup`** -- the JSON maps from the browser-based MindMup.
+- **TextBundle / TextPack** (`.textpack`) -- the bundle's Markdown (`text.md`) becomes the map;
+  what Bear, Ulysses, and iA Writer export.
+- **iThoughts `.itmz`**, **MindMeister `.mind`**, **Word `.docx`**, **Excel `.xlsx`** -- topic
+  tree (and notes, where the format carries them).
 - **MindManager `.mmap`** -- one-way, lossy (see below).
 - **Batch import** -- select several files at once to create several maps in one step.
 

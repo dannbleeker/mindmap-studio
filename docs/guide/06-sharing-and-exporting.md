@@ -67,12 +67,16 @@ fastest way to turn a map into words somewhere else. Reach for it when the map w
 The same breadth applies going in. MindMap Studio reads:
 
 - **Native `.json`** -- the lossless round trip of the export above.
-- **Markdown** outlines -- any `#`/bullet structure becomes a map.
+- **Markdown** outlines -- any `#`/bullet structure becomes a map, **Markmap**-flavoured
+  Markdown (YAML frontmatter plus multi-level headings) included.
 - **OPML** -- from other outliners.
 - **FreeMind / Freeplane `.mm`** -- topics, links, folded state, and notes.
 - **Mermaid** `mindmap` text -- any node shape; the hierarchy comes from the indentation.
 - **XMind `.xmind`** (2020+) -- topics, notes, web links, and labels become tags.
 - **SimpleMind `.smmx`** -- topic tree, notes, web links, and relations.
+- **MindMup `.mup`** -- the JSON maps from the browser-based MindMup.
+- **TextBundle / TextPack** (`.textpack`) -- the bundle's Markdown becomes the map; what Bear,
+  Ulysses, and iA Writer export.
 - **MindManager `.mmap`** -- see below.
 
 You can **batch-import** several files at once, which turns a folder of outlines into a

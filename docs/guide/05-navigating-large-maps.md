@@ -112,6 +112,12 @@ It pairs naturally with markers. Flag the risks as you build the map (Chapter 4)
 map is big and the meeting is short, filter to ❗ and read the risks straight off the lit branches.
 The markers are the *input*; the filter is the *question you ask of them later*.
 
+A filter you build often, you shouldn't have to rebuild. **Save** one as a named **preset** and it
+joins a list you re-apply in a click -- "❗ risks", "due this week", "tagged `q3`" -- and because
+presets are kept app-wide, a filter that proves useful on one map is waiting on the next. The Power
+Filter stops being something you set up each time and becomes a set of saved questions you can ask
+of any map.
+
 The filter answers "where is everything matching X?" Its close cousin, **◎ Focus**, answers "show
 me just *this*." Select a node, click Focus, and the map dims to that node's branch and the single
 path back to the centre -- the same spotlight-not-scissors idea, aimed at one branch instead of a
@@ -119,13 +125,28 @@ query. It's how you walk a meeting through section 3 of a forty-node map without
 nodes competing for attention; **Esc** brings them back. Reach for Focus when you know *which* branch
 you mean, and the filter when you're asking the map a question across all of them.
 
+## Board view: the map as columns
+
+A map is a tree; sometimes the question you have is a *board* question -- "what's in each bucket?"
+The **▦ Board** button answers it without changing your map. It reads every topic's **tags** and
+lays the map out as **Kanban columns**, one per tag, each card showing the topic with its
+rolled-up completion and due date. Tag your nodes `todo` / `doing` / `done` (or `backlog` / `now`
+/ `next`) and the very map you think in re-reads as a status wall you can scan.
+
+It's **read-only** -- a lens, not a second copy. The board reads the tags; it doesn't move cards or
+rewrite the tree, and closing it leaves the map exactly as it was. Like the filter and the index,
+it's the same data asked a different question: the tree is how the work is *organised*, the board
+is how it's *progressing*.
+
 ## Find and replace
 
 Press **/** anywhere to jump straight to **Find**. It searches both topics *and* notes,
 so a term you only mentioned in a note is still findable. Matches are highlighted and you
-can step between them. **Replace** turns find into a tidy-up tool: rename a project that
-got called three slightly different things, fix a term you decided to change, all in one
-pass.
+can step between them. Find is also **forgiving**: if what you typed matches nothing exactly, it
+quietly falls back to a typo-tolerant pass, so a half-remembered spelling -- *recieve* for
+*receive* -- still lands you on the node instead of an empty result. **Replace** turns find into a
+tidy-up tool: rename a project that got called three slightly different things, fix a term you
+decided to change, all in one pass.
 
 > The `/`-to-find shortcut is the single most useful key on a big map. When you can't
 > remember where something is, don't hunt -- press `/` and type.
@@ -153,6 +174,22 @@ searches *all* of them at once -- every topic and note, floating topics included
 picking a result opens that map and lands on the node. It's the companion to cross-map
 links: links are the doorways you placed on purpose, library search is for when you can't
 remember which map a thing is in.
+
+## Roll-ups: a node that mirrors another map
+
+Cross-map links are *doorways* -- you click through to the other map. A **roll-up** brings the
+other map's content *to you*. Select a node, pick a source map from the **⤵ Roll-up** menu, and
+that node becomes a live mirror of the source: the source's top-level branches are copied in
+beneath it. Click **🔄 Roll-ups** whenever you like and every roll-up node re-pulls the latest from
+its source, so a high-level map can *aggregate* the maps below it instead of merely pointing at
+them.
+
+This is the automated cousin of copy-paste (Chapter 3): a paste is a one-time snapshot you then own
+and edit; a roll-up stays **bound** to its source and refreshes on command. It's how you build a
+genuine **dashboard map** -- one overview whose branches are the current state of half a dozen
+detail maps -- and keep it current with a click rather than re-copying by hand. Treat a roll-up
+node as a window onto the source, not a place to edit: the mirrored branches are refreshed
+wholesale, so do the editing in the source map and roll it up again.
 
 ## Sheets: one file, many maps
 
@@ -201,7 +238,11 @@ org-chart, and a timeline -- same nodes, three readings -- and keep whichever ma
 structure clearest. Then **reload the page**: the Outline panel is exactly where you left it,
 because the app remembered your workspace. The goal isn't to memorise the controls; it's to
 feel how much calmer a big map gets when you drive it at the right altitude instead of staring
-at the whole thing at once. Finally, if you keep a few maps that are really parts of one project,
+at the whole thing at once. Two more lenses: tag a handful of nodes `todo` / `doing` / `done` and
+hit **▦ Board** to read the same map as columns; and, if you keep an overview map, bind a node to
+another via the **⤵ Roll-up** menu and click **🔄 Roll-ups** to pull its branches in -- a dashboard
+that refreshes itself. Save any filter you liked as a preset while you're at it. Finally, if you
+keep a few maps that are really parts of one project,
 click **▦ + Sheet** to fold them into a single workbook and flip between them on the tab strip --
 then **⤓ Workbook** to save the whole set as one file.
 

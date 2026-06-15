@@ -32,19 +32,62 @@ different icons used once each is just clutter.
 > Markers imported from a MindManager `.mmap` file are mapped to the closest emoji, so a
 > map you bring in from elsewhere keeps its visual cues rather than arriving as bare text.
 
+## Tasks: when a topic is also a job
+
+A marker says *this is urgent*; a **task** says *this is work, and here's where it stands*.
+Open the **ℹ Info** panel and a node can carry three task fields: a **progress** slider (0 to
+100%), a **priority** (high, medium, low), and **start** and **due** dates. Together they turn a
+branch of a plan into something you can actually track.
+
+Progress **rolls up**: set the leaves and a parent shows the average of its children, so the top
+of a branch reports how far the whole thing has come without your doing the sum. Due dates work
+the same way -- a topic past its date is flagged **overdue** on the canvas, so a plan that's
+slipping says so out loud. None of this turns MindMap Studio into a project planner; it makes a
+*map* enough of one that you don't have to leave it to see what's done, what's next, and what's
+late. (Chapter 5's filter and board then let you ask the whole map "what's overdue?" at once.)
+
 ## Images
 
 A node can hold an **image** -- a screenshot, a logo, a photographed whiteboard, a chart.
 Attach one to the selected node and it renders inline on the canvas. An image is worth a
 paragraph of note when the thing you're describing is itself visual.
 
-## Styling: shape, fill, border, bold
+## Attachments: files that travel with the node
 
-Beyond markers, individual nodes can be **styled**: change a node's shape, fill colour,
-border, or weight; bump a topic's font size or colour. Styling earns its keep when it
+An image renders *on* the node; an **attachment** rides along *with* it. From the **ℹ Info**
+panel you can attach a file to the selected topic -- a spec, a contract, a spreadsheet -- and
+it's stored inside the map itself, so it travels in the JSON export and is there even offline,
+one click from downloading again. Reach for an attachment when the source document matters but
+doesn't belong on the canvas: the node says *Vendor contract*, the file *is* the contract, kept
+with the idea it backs up.
+
+## Styling: shape, fill, border, font
+
+Beyond markers, individual nodes can be **styled**: change a node's shape, fill colour, border,
+or weight; bump a topic's font size or colour; and switch its **font family** from the **Font**
+picker -- the default sans-serif, a **serif** for a quieter, document-like topic, or **monospace**
+for code, IDs, and anything that should line up. Styling earns its keep when it
 *encodes* something -- the three "decision" nodes all share a fill, the headline branch
 is bolder than the rest -- and costs you readability when it's merely decorative. Style
 to create a pattern the reader can rely on, not to make the map "pop".
+
+## Styles you can reuse, formatting that follows the data
+
+Hand-styling one node at a time is a scalpel; two features in the **🎨 Styles** panel (the toolbar
+button, not the per-node Style bar above) make styling *systematic*.
+
+A **named style** saves a look so you can reuse it. Dress one node the way you want -- fill,
+border, font, weight -- save it under a name, and from then on a click applies that exact look to
+any selected topic, in this map or any other. "Our decision nodes look like *this*" stops being
+something you redo by hand; the styles you save are kept app-wide, so a visual language you settle
+on follows you across the whole library.
+
+**Conditional formatting** goes further and styles nodes *by what they are*. Write a rule --
+"anything tagged `risk` gets a red border", "anything 100% complete goes grey", "every node with a
+❗ marker turns amber" -- and the map applies it everywhere, live, and keeps applying it as you
+edit. Where a named style is a look you *apply*, a conditional rule is a look that *follows the
+data*: tag a new node `risk` and it goes red without your touching the Style bar. On a big, changing
+map that's the difference between formatting you maintain and formatting that maintains itself.
 
 ## Rich text: emphasis inside a topic
 
@@ -107,6 +150,13 @@ Finally, dress one topic up *inside* its label -- bold the single word that name
 holding the question you still need to answer. Notice how differently the two read: the bold
 word is part of the idea; the callout hovers beside it, plainly a comment on the work rather
 than the work itself.
+
+Finally, make a node carry *work*, not just words. In the **ℹ Info** panel give a topic a **due
+date** and drag its **progress** to half-done -- watch the parent branch show the rolled-up total
+and the canvas flag anything overdue. Then open the **🎨 Styles** panel, write one **conditional
+rule** (tag a node `risk`, have the rule paint it red), and add that tag to a second node: it turns
+red on its own. That's the chapter in miniature -- a node that tracks its own status, and
+formatting that follows the data instead of waiting for your hand.
 
 The next chapter is about the opposite problem: when a map gets big, how do you keep
 finding your way around it?

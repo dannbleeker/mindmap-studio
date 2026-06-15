@@ -35,6 +35,15 @@ trip itinerary, a study map -- to open and adapt rather than build from scratch.
 fastest way to see what a finished map looks like, and to learn a feature by reading one that
 uses it.
 
+## Time-boxing a brainstorm
+
+Ideas come faster under a gentle clock. The **brainstorm timer** in the toolbar is a small
+time-box: pick a length -- a few minutes -- start it, and generate hard until it rings. A divergent
+sprint ("every idea, no judging, go") works far better with a visible countdown than an open-ended
+"let's brainstorm", and a workshop gets a shared rhythm from it: sprint to capture, stop to cluster
+and prune, repeat. It's a nudge rather than a rule -- but the nudge is most of why time-boxing
+works.
+
 ## Walk-through presentation mode
 
 When it's time to present, **Present** enters a focused **walk-through** mode. Instead of
@@ -58,6 +67,14 @@ to capture a thought the instant you have it, "always available, never loading" 
 Because it caches itself, it also **updates itself politely**: when a new version ships, the
 running app shows a small "new version available -- Refresh now" prompt rather than reloading
 under you mid-thought. Click it when you're ready; an in-flight edit is never lost.
+
+## On the device in your hand
+
+Because it's a web app, it goes where you do. On a **phone or tablet** the layout adapts -- the
+toolbar compacts to a scrollable strip and the side panels rise as a **bottom sheet** instead of
+squeezing the canvas -- so you can capture an idea or pull up a map on the move and open it on a
+laptop later. Same app, same maps, sized for the screen you're holding; paired with the offline
+caching above, it makes "the map is wherever I am" simply true.
 
 ## Back up the whole library
 
@@ -84,7 +101,9 @@ Start a new map from the **SWOT** template. It opens with four branches ready to
 <!-- DIAGRAM:swot -->
 
 Pick something real -- a product, a project, a decision -- put it in the centre, and spend
-ten minutes filling each branch. Don't aim for a long list; aim for the *honest* three
+ten minutes filling each branch. (Start the **brainstorm timer** for those ten minutes -- a visible
+countdown makes the sprint sharper than an open-ended "let's fill it in".) Don't aim for a long
+list; aim for the *honest* three
 items per branch. Then look across the four: does an Opportunity answer a Weakness? Does a
 Threat undercut a Strength? Those cross-links are where a SWOT stops being four lists and
 starts being analysis -- draw a **relationship** arrow for each one you find. That move,

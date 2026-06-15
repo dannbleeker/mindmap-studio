@@ -13,11 +13,6 @@ remaining items are folded in below.) Deployed to GitHub Pages on every push to 
 
 ## Open items
 
-- [ ] **Grow the book** further. The recent **structure** features are now covered (summary topics,
-      node shapes, free-canvas, onion/funnel/Venn backdrops, per-branch layout, sheets) — catalogue
-      **manual 100%, book 84.8%** (`docs/features.json`). Remaining book gaps are in *other* areas:
-      task markers (progress/priority/dates), conditional formatting + styles organizer, Kanban,
-      quick-add / drop-link / timer, MindMup + Markmap import, saved filters, fuzzy find, start screen.
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.
@@ -48,5 +43,6 @@ no-backend PWA can't and shouldn't chase these.
 - **Competitive feature matrix** — [`docs/competitive-feature-matrix.md`](docs/competitive-feature-matrix.md):
   the whole-category survey (19 tools) mapped to MindMap Studio, grouped into 11 areas, with the
   A–G gap clusters (B–G shipped; A — AI — deferred).
-- **Book worked examples** — `book` ~85%, `bookExample` ~46% (`docs/features.json`). The recent
-  structure features are where to keep growing it (see "Grow the book" above).
+- **Book worked examples** — every feature is now covered in prose (`book` **100%**); the only
+  remaining book dimension is worked examples (`bookExample` ~43% in `docs/features.json`) — optional
+  polish: add a worked example to a chapter when a feature genuinely benefits from one.

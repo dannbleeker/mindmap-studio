@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Larger node-shape vocabulary** — the **Shape** picker adds six more vector shapes: **trapezoid**
+  (manual operation), **octagon** (stop / limit), **document** (a page with a wavy bottom edge),
+  **callout** (a rounded speech bubble), **star** (highlight), and **cloud** (idea / external system).
+  Like the existing diamond / oval / hexagon / cylinder, each is drawn from the one shared path builder,
+  so it looks identical on the canvas, in the picker icon, and in the SVG / PNG / PDF / Office exports
+  (canvas == export); concave shapes (star, cloud, document, callout) inset their text so labels stay
+  inside the outline.
 - **Per-map canvas background image** — the **Canvas** control gains a **🖼** picker: choose an image
   and it fills the canvas behind every topic (on top of the background colour), downscaled and stored
   inline so the map stays offline + portable. It's saved with the map and carries into the

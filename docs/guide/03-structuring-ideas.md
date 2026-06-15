@@ -107,10 +107,18 @@ becomes meaning. Select a node, open the **Style bar** (in the ℹ Info panel), 
 **diamond** (a decision -- "approved?"), an **oval** (a start or end point), a **parallelogram**
 (an input or output), a **hexagon** (a preparation step), or a **cylinder** (a data store).
 These are the classic flowchart shapes, and they read instantly to anyone who's seen one: a
-diamond *asks*, an oval *bookends*, a cylinder *stores*. The shape is drawn the same way on the
-canvas and in every export, so a flowchart you build here looks like a flowchart in the PNG, the
-PDF, and the Office decks. Use a shape when the geometry adds information; leave the soft
-rectangle when the word is enough.
+diamond *asks*, an oval *bookends*, a cylinder *stores*.
+
+When the five classics aren't quite the picture in your head, the Style bar keeps going. A
+**trapezoid** marks a manual operation; an **octagon** says *stop* or *limit*; a **document** --
+a page with a softly waving bottom edge -- stands for a report or a printed output; a **callout** is
+a rounded speech bubble for an aside or an annotation; a **star** flags the one node that matters
+most; and a **cloud** is the universal shorthand for a loose idea or an external system you don't
+control. The concave ones (the star and the cloud especially) quietly pull their text inward so a
+long label never spills past the outline. Every one of these is drawn the same way on the canvas
+and in every export, so a flowchart you build here looks like a flowchart in the PNG, the PDF, and
+the Office decks. Use a shape when the geometry adds information; leave the soft rectangle when the
+word is enough.
 
 ## Free-canvas mode
 

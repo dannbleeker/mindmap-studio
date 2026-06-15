@@ -25,7 +25,13 @@ export type NodeShape =
   | "diamond"
   | "parallelogram"
   | "hexagon"
-  | "cylinder";
+  | "cylinder"
+  | "trapezoid"
+  | "octagon"
+  | "document"
+  | "callout"
+  | "star"
+  | "cloud";
 
 export interface NodeStyle {
   color?: string;
@@ -35,8 +41,9 @@ export interface NodeStyle {
   fontWeight?: string;
   /** Per-topic shape (CSS border-radius, e.g. "4px" box, "999px" pill). */
   borderRadius?: string;
-  /** Per-topic geometric shape (diamond/ellipse/parallelogram/hexagon/cylinder). When set to
-   *  a geometric shape the node is drawn as an SVG path; otherwise borderRadius rules. */
+  /** Per-topic geometric shape (diamond/ellipse/parallelogram/hexagon/cylinder/trapezoid/
+   *  octagon/document/callout/star/cloud). When set to a geometric shape the node is drawn as
+   *  an SVG path; otherwise borderRadius rules. */
   shape?: NodeShape;
   /** Per-topic outline (CSS border shorthand, e.g. "2px solid #e23"). */
   border?: string;

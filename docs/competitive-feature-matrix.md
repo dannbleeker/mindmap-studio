@@ -51,7 +51,6 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 | Feature | Status | Notes |
 |---|---|---|
 | Custom fonts / sizes | 🟡 | font **family** picker (Sans / Serif / Mono) + size/colour in the Info panel; no arbitrary/custom font names |
-| Large shape library (cloud/star/diamond…) | 🟡 | flowchart shapes ship (diamond/oval/parallelogram/hexagon/cylinder); a big clip-art / cloud / star library doesn't |
 | Sticker / illustration library | ❌ | XMind, MindNode |
 | LaTeX / math rendering | ❌ | XMind, Freeplane, Mindomo |
 | Line-jumps on crossing connectors | ❌ | MindManager |

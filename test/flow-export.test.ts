@@ -178,6 +178,35 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(out).toContain('fill="#fde2e2"');
   });
 
+  it("exports the extended vector shapes (cloud / star / document …) via the same path builder", () => {
+    const shapes = ["trapezoid", "octagon", "document", "callout", "star", "cloud"] as const;
+    const sdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "x",
+      title: "Extended",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: shapes.map((shape, i) => ({
+          id: shape,
+          topic: shape,
+          style: { shape },
+          // alternate sides so the layout rects below stay simple
+          side: i % 2 === 0 ? ("right" as const) : ("left" as const),
+          children: [],
+        })),
+      },
+    };
+    const xrects = new Map<string, NodeRect>([["r", { x: 0, y: 0, w: 100, h: 40 }]]);
+    shapes.forEach((shape, i) => xrects.set(shape, { x: 200, y: i * 70, w: 130, h: 56 }));
+    const out = buildFlowSvg(sdoc, xrects, palette, cssVar);
+    // Each shape lands in the export as the exact path the canvas paints (same builder).
+    for (const shape of shapes) {
+      const r = xrects.get(shape) as NodeRect;
+      expect(out, shape).toContain(`<path d="${shapePath(shape, r.x, r.y, r.w, r.h)}"`);
+    }
+  });
+
   it("draws the diagram backdrop (concentric circles) and extends the viewBox to include it", () => {
     const odoc: MindMapDoc = {
       schemaVersion: 1,

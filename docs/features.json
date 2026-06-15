@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 121,
+  "reviewedThroughChangelogBullets": 122,
   "areas": [
     "editing",
     "notes",
@@ -228,6 +228,15 @@
       "name": "Node shapes — diamond / oval / parallelogram / hexagon / cylinder (flowchart vocabulary), canvas == export",
       "area": "structure",
       "since": "2026-06-14",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "extended-shapes",
+      "name": "Extended vector shapes — trapezoid / octagon / document / callout / star / cloud, from the one shared path builder (canvas == export)",
+      "area": "styling",
+      "since": "2026-06-15",
       "manual": true,
       "book": true,
       "bookExample": false

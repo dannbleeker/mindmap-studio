@@ -127,11 +127,13 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
   panel lists each file with its size, a click-to-**download** link, and a ✕ to remove it. Files are
   stored inline in the map (capped at 5 MB each), so they stay offline and travel with a `.json`
   export — nothing is uploaded.
-- **Style** — **Shape** (Box / Rounded / Pill, plus the flowchart shapes **diamond** = decision,
+- **Style** — **Shape** (Box / Rounded / Pill, plus the vector shapes **diamond** = decision,
   **oval** = start/end, **parallelogram** = input/output, **hexagon** = preparation, **cylinder** =
-  data store), **Fill**, **Border** (swatch or ✕ for none), **B** for bold, **Reset** to clear; a
-  **Font** picker (Sans / Serif / Mono) plus font size/colour live here too. Shapes and the chosen
-  font render identically on the canvas and in image exports.
+  data store, **trapezoid** = manual operation, **octagon** = stop/limit, **document** = report/output,
+  **callout** = speech/annotation, **star** = highlight, **cloud** = idea/external system), **Fill**,
+  **Border** (swatch or ✕ for none), **B** for bold, **Reset** to clear; a **Font** picker
+  (Sans / Serif / Mono) plus font size/colour live here too. Shapes and the chosen font render
+  identically on the canvas and in image exports.
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in
   your library), or **Jump to a topic** (an in-map jump). Click the 🔗 on the node to follow it;
   **✕ Remove link** clears it. A node holds one link at a time.

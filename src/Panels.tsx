@@ -97,6 +97,12 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
     { shape: "parallelogram", title: "Parallelogram (input / output)" },
     { shape: "hexagon", title: "Hexagon (preparation)" },
     { shape: "cylinder", title: "Cylinder (data store)" },
+    { shape: "trapezoid", title: "Trapezoid (manual operation)" },
+    { shape: "octagon", title: "Octagon (stop / limit)" },
+    { shape: "document", title: "Document (report / output)" },
+    { shape: "callout", title: "Callout (speech / annotation)" },
+    { shape: "star", title: "Star (highlight)" },
+    { shape: "cloud", title: "Cloud (idea / external system)" },
   ];
   return (
     <div

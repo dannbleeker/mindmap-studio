@@ -60,7 +60,7 @@ reasonably own** — not "everything MindManager has."
 | Callouts (annotation bubbles) | ✅ | Anchored callout bubbles (React Flow custom node). |
 | Multi-map links / topic-to-other-map | ✅ | Cross-map links (`#map=`), click to hop maps. |
 | Topic-to-topic link **within** a map | ✅ | In-map jump links (`#node=`), plus relationships + cross-map links. |
-| Map roll-ups (pull subtrees from many maps) | 🟡 | Manual roll-ups ship via cross-map branch paste; an automated pull-engine stays niche / low-priority. |
+| Map roll-ups (pull subtrees from many maps) | ✅ | **⤵ Roll-up** binds a node to another map; **🔄 Roll-ups** pulls its branches in (refreshed on demand) — plus manual roll-ups via cross-map branch paste. Shipped 2026-06-15. |
 | Sticky-note topics | ✅ | **🗒 Note** — a free-floating amber note (a floating topic with a sticky style); shipped 2026-06-15. |
 | Object shapes (arrows, chevrons, …) | ✅ | Geometric flowchart shapes ship — diamond / oval / parallelogram / hexagon / cylinder (canvas == export; see §3) — plus directional relationship arrows. A broader clip-art shape *library* stays low-priority. |
 | Auto-numbering of topics | ✅ | A view toggle (1, 1.2, …) on canvas + outline + exports. |
@@ -266,15 +266,13 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
 - **Per-branch layout override** (right-click → Branch layout) + **multiple sheets per file** (▦ +Sheet workbook + tab strip + ⤓ Workbook export).
 - **Start screen** (home: capture hero, library, templates, layouts, ⌘K palette); book *Thinking in Maps* grown to cover the structure features.
 - **Cross-map branch copy/paste** (right-click Copy branch / Paste branch here; a persistent clipboard, so it works across maps and assembles manual roll-ups) + **sticky-note topics** (🗒 Note).
+- **Mobile-friendly layout** (compact swipeable editor toolbar + stacked start-screen nav on phones) + **automated multi-map roll-ups** (⤵ bind a node to another map; 🔄 pull its branches in on demand).
 
 ### Remaining buildable gaps (as of 2026-06-15)
 
-The in-scope list is now down to two items, both minor:
+The in-scope list is now down to a single low-priority item:
 
-1. **Automated multi-map roll-ups** — pulling subtrees from several library maps into one *on a
-   refresh*. Manual roll-ups already ship (copy a branch in one map, paste it into another); an
-   automated pull-engine stays niche / low-priority.
-2. **Native-grade mobile polish** — the responsive layout ships (compact swipeable toolbar + stacked
+1. **Native-grade mobile polish** — the responsive layout ships (compact swipeable toolbar + stacked
    start nav); deeper touch-first editing (drag gestures, bottom-sheet panels) would refine it.
    Low priority.
 
@@ -301,7 +299,8 @@ MindManager), on **navigation** (it ships a minimap MindManager has dropped), on
 privacy** (free, local-first, offline, no account), and on **being genuinely cross-platform**
 from one codebase. The visual-variety gap this doc once led with — layouts, callouts, rich text,
 summary topics, **and the non-tree diagram types** (flowchart / concept map / matrix / Venn / funnel /
-whiteboard) — is now **closed**. The honest summary: in-scope, we trail only on **dedicated mobile
-UX**; everything else left is deferred-by-choice (**AI**, **LaTeX**) or intentionally excluded
-(**PM, collaboration, enterprise, capture**). The roadmap from here: mobile polish if appetite arises,
-a go/no-go on AI, and stay out of the excluded layers.
+whiteboard) — is now **closed**. The honest summary: the in-scope gap is **effectively closed** — a
+responsive mobile layout ships, and the only remainder is deeper **native-grade mobile polish** (touch
+gestures, bottom sheets), which is low-priority. Everything else left is deferred-by-choice (**AI**,
+**LaTeX**) or intentionally excluded (**PM, collaboration, enterprise, capture**). The roadmap from
+here: a go/no-go on AI, optional native mobile polish, and stay out of the excluded layers.

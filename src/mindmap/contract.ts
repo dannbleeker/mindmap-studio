@@ -76,6 +76,8 @@ export interface MindMapHandle {
   addSubtreeToSelected: (nodes: MapNode[]) => boolean;
   /** Add a sticky note — a free-floating topic styled as an amber note card. */
   addStickyNote: () => void;
+  /** Bind the selected node to mirror another map (a roll-up source); "" unbinds. False if none selected. */
+  setSelectedRollup: (mapId: string) => boolean;
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the
    *  current selection so repeated calls add siblings under the same parent. */
   quickAdd: (text: string) => void;

@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 116,
+  "reviewedThroughChangelogBullets": 117,
   "areas": [
     "editing",
     "notes",
@@ -929,6 +929,15 @@
       "id": "mobile-responsive",
       "name": "Mobile-friendly responsive layout (compact swipeable toolbar + stacked start nav on phones)",
       "area": "pwa",
+      "since": "2026-06-15",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "multi-map-rollups",
+      "name": "Automated multi-map roll-ups (bind a node to another map; 🔄 refresh pulls its branches)",
+      "area": "library",
       "since": "2026-06-15",
       "manual": true,
       "book": false,

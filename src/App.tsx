@@ -47,6 +47,7 @@ import {
   checkForUpdate,
   initPwaUpdateToast,
 } from "./pwa/pwaUpdate";
+import { refreshRollups } from "./rollup";
 import { type LibraryHit, searchLibrary } from "./search";
 import {
   type MapSummary,
@@ -685,6 +686,19 @@ export function App() {
     setView("start");
   }
 
+  // Roll-ups: pull the latest from every roll-up node's source map (the automated cousin of
+  // cross-map branch paste). Bind a node via the "⤵ Roll-up" select, then refresh on demand.
+  async function refreshRollupsNow() {
+    const res = await refreshRollups(liveDocRef.current, loadMap);
+    if (res.count === 0) {
+      showHint("No roll-ups yet — pick a source map in the ⤵ Roll-up menu first.");
+      return;
+    }
+    load(res.doc);
+    const miss = res.missing.length ? ` (${res.missing.length} source map missing)` : "";
+    showHint(`Refreshed ${res.count} roll-up${res.count === 1 ? "" : "s"}${miss}.`);
+  }
+
   function duplicateMap() {
     const copy = structuredClone(liveDocRef.current);
     copy.id = crypto.randomUUID();
@@ -1279,6 +1293,43 @@ export function App() {
           title="Add a sticky note (a free-floating amber note topic)"
         >
           🗒 Note
+        </button>
+        <select
+          value=""
+          onChange={(e) => {
+            const v = e.target.value;
+            if (!v) return;
+            const ok = selected?.id
+              ? mapRef.current?.setSelectedRollup(v === "none" ? "" : v)
+              : false;
+            if (!ok) {
+              showHint("Select a node first, then bind it to a roll-up source.");
+              return;
+            }
+            showHint(
+              v === "none" ? "Roll-up unbound." : "Bound — click 🔄 Roll-ups to pull the latest.",
+            );
+          }}
+          style={controlStyle}
+          title="Mirror another map's branches under the selected node (a roll-up source)"
+        >
+          <option value="">⤵ Roll-up…</option>
+          {maps
+            .filter((m) => m.id !== liveDoc.id)
+            .map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.title || "(untitled)"}
+              </option>
+            ))}
+          <option value="none">— Unbind</option>
+        </select>
+        <button
+          type="button"
+          onClick={refreshRollupsNow}
+          style={controlStyle}
+          title="Refresh all roll-ups — pull the latest branches from their source maps"
+        >
+          🔄 Roll-ups
         </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input

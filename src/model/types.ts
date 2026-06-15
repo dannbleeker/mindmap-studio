@@ -100,6 +100,10 @@ export interface MapNode {
   /** Per-branch layout override: this node's subtree lays out with this layout kind (a `LayoutKind`)
    *  instead of the map's. Lossless in .json, ignored by flat exporters. */
   layout?: string;
+  /** Roll-up source: the library map id this node mirrors. On "Refresh roll-ups" the node's children
+   *  are replaced with a fresh copy of that map's branches — so one map can aggregate several others.
+   *  Lossless in .json, ignored by flat exporters. */
+  rollup?: string;
 }
 
 /** A labelled cross-link between two nodes (MindManager "relationship"). */

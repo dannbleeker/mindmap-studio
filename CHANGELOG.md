@@ -7,6 +7,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Automated multi-map roll-ups** — bind a node to another library map with **⤵ Roll-up**, then
+  **🔄 Roll-ups** pulls that map's branches in as the node's children (a re-id'd mirror, refreshed on
+  demand). One map can aggregate several others — the automated cousin of cross-map branch paste.
 - **Mobile-friendly layout** — on phone-width screens the editor toolbar becomes a single compact,
   swipeable strip (instead of a wall of wrapped rows), so the canvas fills the screen; and the start
   screen's side rail folds into a top nav with full-width content. The PWA is now usable on a phone.

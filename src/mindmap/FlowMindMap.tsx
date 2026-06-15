@@ -80,6 +80,7 @@ import {
   setNote,
   setPriority,
   setProgress,
+  setRollup,
   setRules,
   setStart,
   setSummaryLabel,
@@ -608,6 +609,8 @@ function FlowInner({
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
       addStickyNote: () => apply(addStickyNote(docRef.current)),
+      setSelectedRollup: (mapId) =>
+        withSelected((id) => apply(setRollup(docRef.current, id, mapId || undefined))),
       quickAdd: (text) => {
         const t = text.trim();
         if (!t) return;

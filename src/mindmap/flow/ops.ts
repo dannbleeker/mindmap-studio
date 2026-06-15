@@ -647,6 +647,67 @@ export function setNodeLayout(doc: MindMapDoc, id: string, kind: string | undefi
   return { doc: hit ? next : doc };
 }
 
+// --- automated multi-map roll-ups -----------------------------------------
+
+/** Bind (or unbind, with undefined / "") a node to a roll-up source map id. The node's children then
+ *  mirror that map, refreshed by `refreshRollups`. Searches tree + floating; no-op if id not found. */
+export function setRollup(doc: MindMapDoc, id: string, mapId: string | undefined): OpResult {
+  const next = structuredClone(doc);
+  const walk = (n: MapNode): boolean => {
+    if (n.id === id) {
+      n.rollup = mapId || undefined;
+      return true;
+    }
+    return n.children.some(walk);
+  };
+  let hit = walk(next.root);
+  if (!hit) {
+    for (const f of next.floatingTopics ?? []) {
+      if (walk(f)) {
+        hit = true;
+        break;
+      }
+    }
+  }
+  return { doc: hit ? next : doc };
+}
+
+/** Every distinct roll-up source map id referenced in the doc (tree + floating topics). */
+export function collectRollupMapIds(doc: MindMapDoc): string[] {
+  const ids = new Set<string>();
+  const walk = (n: MapNode) => {
+    if (n.rollup) ids.add(n.rollup);
+    n.children.forEach(walk);
+  };
+  walk(doc.root);
+  for (const f of doc.floatingTopics ?? []) walk(f);
+  return [...ids];
+}
+
+/** Replace every roll-up node's children with a fresh copy of its source map's branches. `sources`
+ *  maps a source map id → that map's root children. Pure; re-ids so pulled nodes never clash, and a
+ *  refreshed node isn't recursed into (its subtree is fully managed by the pull). A source missing
+ *  from `sources` leaves that node untouched. Returns the doc + the number of roll-ups refreshed. */
+export function applyRollups(
+  doc: MindMapDoc,
+  sources: Map<string, MapNode[]>,
+): { doc: MindMapDoc; count: number } {
+  const next = structuredClone(doc);
+  let count = 0;
+  const walk = (n: MapNode) => {
+    if (n.rollup && sources.has(n.rollup)) {
+      n.children = (sources.get(n.rollup) ?? []).map(reId);
+      n.collapsed = false;
+      count += 1;
+      return; // the pulled subtree is owned by the roll-up — don't recurse into it
+    }
+    n.children.forEach(walk);
+  };
+  walk(next.root);
+  for (const f of next.floatingTopics ?? []) walk(f);
+  return { doc: count > 0 ? next : doc, count };
+}
+
 /** Toggle free-canvas mode. When enabling with a positions map, seed each node's `pos` from it so
  *  the switch is seamless; disabling clears the flag but keeps positions (for re-enabling). */
 export function setFreeform(

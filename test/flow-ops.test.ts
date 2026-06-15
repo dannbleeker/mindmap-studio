@@ -6,7 +6,9 @@ import {
   addSibling,
   addStickyNote,
   addSubtree,
+  applyRollups,
   clearBackdrop,
+  collectRollupMapIds,
   deleteNode,
   deleteSummary,
   findAnyNode,
@@ -29,6 +31,7 @@ import {
   setNote,
   setPriority,
   setProgress,
+  setRollup,
   setRules,
   setStart,
   setSummaryLabel,
@@ -427,5 +430,49 @@ describe("flow ops — sticky notes", () => {
     const d2 = addStickyNote(d1).doc;
     expect(d2.floatingTopics).toHaveLength(2);
     expect(d2.floatingTopics?.[1]?.pos).not.toEqual(d2.floatingTopics?.[0]?.pos);
+  });
+});
+
+describe("flow ops — roll-ups", () => {
+  it("setRollup binds/unbinds a node to a source map, no-op for an unknown id", () => {
+    const d1 = setRollup(base(), "a", "src-map").doc;
+    expect(findNode(d1, "a")?.rollup).toBe("src-map");
+    expect(findNode(setRollup(d1, "a", "").doc, "a")?.rollup).toBeUndefined();
+    expect(findNode(setRollup(d1, "a", undefined).doc, "a")?.rollup).toBeUndefined();
+    const noNode = base();
+    expect(setRollup(noNode, "ghost", "m").doc).toBe(noNode);
+  });
+
+  it("collectRollupMapIds returns distinct source ids across tree + floating", () => {
+    let d = setRollup(base(), "a", "m1").doc;
+    d = setRollup(d, "b", "m2").doc;
+    d.floatingTopics = [{ id: "f", topic: "F", children: [], rollup: "m1" }];
+    expect(collectRollupMapIds(d).sort()).toEqual(["m1", "m2"]);
+    expect(collectRollupMapIds(base())).toEqual([]);
+  });
+
+  it("applyRollups replaces a roll-up node's children with re-id'd source branches", () => {
+    const d = setRollup(base(), "b", "m1").doc; // b is a leaf
+    const sources = new Map<string, MapNode[]>([
+      [
+        "m1",
+        [
+          { id: "s1", topic: "Pulled A", children: [] },
+          { id: "s2", topic: "Pulled B", children: [] },
+        ],
+      ],
+    ]);
+    const { doc, count } = applyRollups(d, sources);
+    expect(count).toBe(1);
+    const b = findNode(doc, "b");
+    expect(b?.children.map((c) => c.topic)).toEqual(["Pulled A", "Pulled B"]);
+    expect(b?.children[0].id).not.toBe("s1"); // re-id'd
+  });
+
+  it("applyRollups is a no-op (same ref) when no source matches", () => {
+    const d = setRollup(base(), "b", "m1").doc;
+    const { doc, count } = applyRollups(d, new Map());
+    expect(count).toBe(0);
+    expect(doc).toBe(d);
   });
 });

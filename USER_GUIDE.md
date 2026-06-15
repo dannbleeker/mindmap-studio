@@ -353,6 +353,16 @@ nothing). Because the clipboard persists across maps, this is how you **move a b
 into another**, or assemble a roll-up by pasting branches from several maps into one. Each paste is
 re-numbered internally, so you can paste the same branch as many times as you like without clashes.
 
+### Rolling up other maps
+
+A roll-up keeps a node mirroring another map. Select a node, pick a source map from the **⤵ Roll-up**
+menu in the toolbar, then click **🔄 Roll-ups** — the node's children become a fresh copy of that
+map's branches. Click **🔄 Roll-ups** again any time to pull the latest. One map can aggregate
+several others — give each child node a different source — which is the *live* cousin of copy/paste
+above (a paste is a one-off snapshot; a roll-up re-pulls on demand). A roll-up node is a mirror: its
+children are replaced on each refresh, so edit the **source** map, not the pulled copy. Pick
+**— Unbind** in the menu to detach it.
+
 ### Templates
 
 **+ New…** offers starter maps: **Blank**, **Brainstorm** (the 5 Ws + How), **SWOT**,

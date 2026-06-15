@@ -89,6 +89,7 @@ describe("examples gallery", () => {
     expect(anyTopic((n) => !!n.hyperlink)).toBe(true); // hyperlink
     expect(docs.some((d) => !!d.meta?.freeform)).toBe(true); // free-canvas (whiteboard) mode
     expect(anyTopic((n) => !!n.pos)).toBe(true); // free-canvas positions
+    expect(docs.some((d) => !!d.backdrop)).toBe(true); // dedicated diagram backdrop
   });
 
   it("the trip example carries exactly one small embedded image", () => {

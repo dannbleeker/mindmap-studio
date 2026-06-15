@@ -39,6 +39,9 @@ export function summaryLabel(label: string | undefined): string {
 export const BRACE_STROKE = "#6b7280";
 export const BRACE_GAP = 22; // gap between the children's left edge and the brace spine
 
+// Dedicated diagram backdrop (onion / funnel / Venn frame) drawn behind the topics.
+export const BACKDROP_STROKE = "#9a93d6";
+
 // Callout (anchored annotation bubble) — sticky-note yellow, readable on light + dark canvases.
 export const CALLOUT_BG = "#fff8c5";
 export const CALLOUT_STROKE = "#d4a72c";

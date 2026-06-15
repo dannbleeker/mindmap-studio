@@ -251,6 +251,11 @@ map re-flows into the new shape without losing any edits:
   whiteboard**. Turning it on keeps everything where it is; turning it off returns to the auto-layout
   (your positions are remembered, so you can switch back). Try the **Whiteboard (free layout)**
   example in **+ New…**.
+- **◎ Diagram (backdrops)** — adds a geometric **frame** behind your topics and switches to free
+  layout so you drop topics into its regions. Today: the **onion** (concentric rings) — use **−/+**
+  to change the ring count and **✕ Backdrop** to remove it. The region labels are ordinary topics you
+  place on each ring; the frame renders into image exports. (Funnel and Venn frames are on the way.)
+  Try the **Onion diagram** example in **+ New…**.
 
 ### Themes
 

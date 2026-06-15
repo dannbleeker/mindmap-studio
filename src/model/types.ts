@@ -132,6 +132,15 @@ export interface ConditionalRule {
   style: NodeStyle;
 }
 
+/** A dedicated diagram backdrop drawn behind freely-positioned topics (a geometric frame). The
+ *  region labels are ordinary topics placed at the frame's anchors — the backdrop is just the shape. */
+export type BackdropKind = "onion" | "funnel" | "venn2" | "venn3";
+export interface Backdrop {
+  kind: BackdropKind;
+  /** Ring/stage count for onion + funnel (ignored by the fixed venn frames). */
+  rings?: number;
+}
+
 export interface MindMapDoc {
   schemaVersion: 1;
   id: string;
@@ -143,6 +152,8 @@ export interface MindMapDoc {
   rules?: ConditionalRule[];
   /** Summary brackets (a labelled bracket beside a node's subtree). */
   summaries?: Summary[];
+  /** A dedicated diagram backdrop (onion / funnel / Venn) drawn behind freely-positioned topics. */
+  backdrop?: Backdrop;
   /** Top-level topics not attached to the central hierarchy (legends, notes). */
   floatingTopics?: MapNode[];
   theme?: string;

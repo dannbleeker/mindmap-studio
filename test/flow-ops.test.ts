@@ -5,6 +5,7 @@ import {
   addFloatingTopic,
   addSibling,
   addSubtree,
+  clearBackdrop,
   deleteNode,
   deleteSummary,
   findNode,
@@ -15,6 +16,8 @@ import {
   removeAttachment,
   reparent,
   setAllExpanded,
+  setBackdrop,
+  setBackdropRings,
   setBackground,
   setDue,
   setFreeform,
@@ -308,6 +311,24 @@ describe("flow ops — free-canvas (whiteboard) mode", () => {
     const off = setFreeform(on, false).doc;
     expect(off.meta?.freeform).toBeUndefined();
     expect(findNode(off, "a")?.pos).toEqual({ x: 9, y: 9 });
+  });
+});
+
+describe("flow ops — diagram backdrops", () => {
+  it("setBackdrop sets the frame; clearBackdrop removes it", () => {
+    const d = setBackdrop(base(), "onion", 3).doc;
+    expect(d.backdrop).toEqual({ kind: "onion", rings: 3 });
+    expect(clearBackdrop(d).doc.backdrop).toBeUndefined();
+    const noBackdrop = base();
+    expect(clearBackdrop(noBackdrop).doc).toBe(noBackdrop); // no-op returns the same doc
+  });
+
+  it("setBackdropRings clamps to 2..6 and is a no-op for venn", () => {
+    const o = setBackdrop(base(), "onion", 3).doc;
+    expect(setBackdropRings(o, 5).doc.backdrop?.rings).toBe(6);
+    expect(setBackdropRings(o, -5).doc.backdrop?.rings).toBe(2);
+    const v = setBackdrop(base(), "venn2").doc;
+    expect(setBackdropRings(v, 1).doc.backdrop).toEqual({ kind: "venn2" });
   });
 });
 

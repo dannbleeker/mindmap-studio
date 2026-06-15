@@ -568,6 +568,30 @@ const whiteboard = (): MindMapDoc => {
   return d;
 };
 
+// 17 — Onion diagram: a dedicated backdrop (concentric rings) with the ring labels as topics placed
+// on each band. Free-canvas mode is on so you can drag topics between rings.
+const onionDiagram = (): MindMapDoc => {
+  const d = doc(
+    "Onion: stakeholders",
+    node(
+      "on-root",
+      "Stakeholder onion",
+      [
+        leaf("on-core", "Core team", { pos: { x: -34, y: -58 } }),
+        leaf("on-mid", "Close partners", { pos: { x: -48, y: -158 } }),
+        leaf("on-out", "Wider community", { pos: { x: -56, y: -258 } }),
+      ],
+      {
+        pos: { x: -52, y: 24 },
+        note: "Concentric rings = degrees of involvement. Drag topics between rings; use −/+ to add rings.",
+      },
+    ),
+  );
+  d.meta = { ...d.meta, freeform: true };
+  d.backdrop = { kind: "onion", rings: 3 };
+  return d;
+};
+
 interface MapExample {
   id: string;
   name: string;
@@ -585,6 +609,7 @@ export const examples: MapExample[] = [
   { id: "flowchart", name: "Flowchart (shapes + flow)", build: flowchart },
   { id: "concept", name: "Concept map (linked ideas)", build: concept },
   { id: "whiteboard", name: "Whiteboard (free layout)", build: whiteboard },
+  { id: "onion", name: "Onion diagram (rings)", build: onionDiagram },
   { id: "runbook", name: "Incident runbook", build: runbook },
   { id: "gtd", name: "GTD natural planning", build: gtd },
   { id: "outline", name: "Talk / content outline", build: outline },

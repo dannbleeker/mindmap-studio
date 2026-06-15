@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Diagram backdrops — Onion** — a new **◎ Diagram** builder draws a geometric **backdrop** behind
+  your topics and switches to free-canvas mode so you drop topics into its regions. First up: the
+  **onion** (concentric rings) for stakeholder maps and layered models — use **−/+** to change the
+  ring count and **✕ Backdrop** to remove it. The frame is pure geometry shared by the canvas and the
+  image export (canvas == export); region labels are just topics you place on each ring. An **Onion
+  diagram** example ships in **+ New…**. (Funnel and Venn build on the same frame next.)
 - **Brace map layout** — a new **Brace map** layout (under *Diagram*) lays the map as a left-to-right
   tree where each parent joins its children with a **`{` fork brace** — the Thinking-Maps part-whole
   diagram — instead of the tapered branches. The forks are drawn from one geometry shared by the

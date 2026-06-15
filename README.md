@@ -81,6 +81,9 @@ GitHub Pages).
   topics anywhere and they stay (the auto-layout pauses). With shapes + directional arrows it makes
   place-anywhere flowcharts, concept maps, and whiteboards; positions persist on the node and flip
   back to auto-layout cleanly.
+- **Diagram backdrops** — **◎ Diagram** draws a geometric frame behind your topics — an **onion**
+  (concentric rings) today — and switches to free layout so you drop topics into its regions; **−/+**
+  changes the ring count. The frame renders into image exports too.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
 - **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
   capped at 30, stored in IndexedDB, deleted with the map.

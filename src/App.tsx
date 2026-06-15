@@ -36,7 +36,7 @@ import {
 } from "./mindmap";
 import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
-import type { MapNode, MindMapDoc } from "./model/types";
+import type { BackdropKind, MapNode, MindMapDoc } from "./model/types";
 import { outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
@@ -1075,6 +1075,50 @@ export function App() {
         >
           🧲 Free layout
         </button>
+        <select
+          value=""
+          onChange={(e) => {
+            if (e.target.value) mapRef.current?.setBackdrop(e.target.value as BackdropKind);
+          }}
+          style={controlStyle}
+          aria-label="Add a diagram backdrop"
+          title="Add a diagram backdrop (drop topics into its regions)"
+        >
+          <option value="">◎ Diagram…</option>
+          <option value="onion">Onion (rings)</option>
+        </select>
+        {liveDoc.backdrop ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+            {liveDoc.backdrop.kind === "onion" || liveDoc.backdrop.kind === "funnel" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => mapRef.current?.setBackdropRings(-1)}
+                  style={controlStyle}
+                  title="Fewer rings / stages"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  onClick={() => mapRef.current?.setBackdropRings(1)}
+                  style={controlStyle}
+                  title="More rings / stages"
+                >
+                  +
+                </button>
+              </>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => mapRef.current?.clearBackdrop()}
+              style={controlStyle}
+              title="Remove the diagram backdrop"
+            >
+              ✕ Backdrop
+            </button>
+          </span>
+        ) : null}
         <button
           type="button"
           onClick={() => setInfoOpen((v) => !v)}

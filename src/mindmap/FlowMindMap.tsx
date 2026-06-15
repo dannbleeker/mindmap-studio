@@ -31,6 +31,7 @@ import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
+import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { Summaries } from "./flow/Summaries";
 import { TopicNode } from "./flow/TopicNode";
 import { type BraceGroup, computeBraces } from "./flow/brace";
@@ -47,6 +48,7 @@ import {
   addLink,
   addSibling,
   addSubtree,
+  clearBackdrop,
   deleteCallout,
   deleteLink,
   deleteNode,
@@ -60,6 +62,8 @@ import {
   reparent,
   replaceTopics,
   setAllExpanded,
+  setBackdrop,
+  setBackdropRings,
   setBackground,
   setCalloutText,
   setDue,
@@ -562,6 +566,15 @@ function FlowInner({
           apply(setFreeform(docRef.current, false));
         }
       },
+      setBackdrop: (kind) => {
+        // Add the frame and switch to free-canvas mode so topics drag into its regions (one undo).
+        const positions = new Map<string, { x: number; y: number }>();
+        for (const n of getNodes()) positions.set(n.id, { x: n.position.x, y: n.position.y });
+        const withBackdrop = setBackdrop(docRef.current, kind).doc;
+        apply({ doc: setFreeform(withBackdrop, true, positions).doc });
+      },
+      setBackdropRings: (delta) => apply(setBackdropRings(docRef.current, delta)),
+      clearBackdrop: () => apply(clearBackdrop(docRef.current)),
       setSelectedStyle: (patch) =>
         withSelected((id) => apply(mergeStyle(docRef.current, id, patch))),
       setSelectedHyperlink: (url) =>
@@ -699,6 +712,7 @@ function FlowInner({
           }}
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
+          <DiagramBackdrop backdrop={renderDoc.backdrop} />
           <BraceConnectors braces={braces} />
           <Boundaries boundaries={renderDoc.boundaries ?? []} />
           <Summaries

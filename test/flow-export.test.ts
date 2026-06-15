@@ -152,6 +152,22 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(out).toContain('fill="#fde2e2"');
   });
 
+  it("draws the diagram backdrop (concentric circles) and extends the viewBox to include it", () => {
+    const odoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "o",
+      title: "O",
+      backdrop: { kind: "onion", rings: 2 },
+      root: { id: "r", topic: "R", children: [] },
+    };
+    const orects = new Map<string, NodeRect>([["r", { x: -20, y: -20, w: 40, h: 40 }]]);
+    const out = buildFlowSvg(odoc, orects, palette, cssVar);
+    expect((out.match(/<circle /g) ?? []).length).toBe(2); // 2 onion rings
+    expect(out).toContain('stroke="#9a93d6"'); // BACKDROP_STROKE
+    const vbW = Number(out.match(/viewBox="[-\d.]+ [-\d.]+ ([\d.]+) [\d.]+"/)?.[1] ?? 0);
+    expect(vbW).toBeGreaterThanOrEqual(600); // bounds extended to the 600-wide onion
+  });
+
   it("brace mode emits fork connectors (stroked path) and drops the tapered ribbons", () => {
     const bdoc: MindMapDoc = {
       schemaVersion: 1,

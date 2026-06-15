@@ -4,6 +4,7 @@ import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
 import { taperedRibbonPath } from "./BranchEdge";
 import { arrowHeadPath } from "./CrosslinkEdge";
+import { backdropGeometry } from "./backdrop";
 import { type BraceGroup, braceGeometry, bracePath } from "./brace";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
@@ -165,6 +166,7 @@ export function buildFlowSvg(
 ): string {
   const { nodes, edges } = project(doc, palette, numbered);
   const callouts = collectCallouts(doc, rects);
+  const bd = doc.backdrop ? backdropGeometry(doc.backdrop) : null;
   const nodeBg = cssVar["--bgcolor"] ?? "#ffffff";
   const color = cssVar["--color"] ?? "#2c2c2a";
   const rootBg = cssVar["--root-bgcolor"] ?? "#26215c";
@@ -188,6 +190,12 @@ export function buildFlowSvg(
     maxX = Math.max(maxX, c.x + c.w);
     maxY = Math.max(maxY, c.y + c.h);
   }
+  if (bd && bd.shapes.length > 0) {
+    minX = Math.min(minX, bd.bbox.x);
+    minY = Math.min(minY, bd.bbox.y);
+    maxX = Math.max(maxX, bd.bbox.x + bd.bbox.w);
+    maxY = Math.max(maxY, bd.bbox.y + bd.bbox.h);
+  }
   if (!Number.isFinite(minX)) {
     minX = 0;
     minY = 0;
@@ -200,6 +208,17 @@ export function buildFlowSvg(
   const vbH = maxY - minY + 2 * MARGIN;
 
   const parts: string[] = [];
+
+  // Dedicated diagram backdrop (onion / funnel / Venn frame), behind everything else.
+  if (bd) {
+    for (const s of bd.shapes) {
+      parts.push(
+        s.type === "circle"
+          ? `<circle cx="${r2(s.cx ?? 0)}" cy="${r2(s.cy ?? 0)}" r="${r2(s.r ?? 0)}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`
+          : `<path d="${s.d ?? ""}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`,
+      );
+    }
+  }
 
   // Boundaries (behind everything).
   for (const b of doc.boundaries ?? []) {

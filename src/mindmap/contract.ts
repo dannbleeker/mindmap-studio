@@ -1,5 +1,6 @@
 import type { Ref } from "react";
 import type {
+  BackdropKind,
   ConditionalRule,
   MapAttachment,
   MapImage,
@@ -38,6 +39,13 @@ export interface MindMapHandle {
   /** Toggle free-canvas (whiteboard) mode. Enabling seeds each node's `pos` from its current
    *  on-screen position, so the switch is seamless; then nodes drag freely instead of re-parenting. */
   setFreeform: (on: boolean) => void;
+  /** Add a dedicated diagram backdrop (onion / funnel / Venn) and switch to free-canvas mode so
+   *  topics can be dragged into its regions. */
+  setBackdrop: (kind: BackdropKind) => void;
+  /** Add/remove a ring or stage on the current onion/funnel backdrop (no-op for venn). */
+  setBackdropRings: (delta: number) => void;
+  /** Remove the map's diagram backdrop. */
+  clearBackdrop: () => void;
   /** Merge a style patch into the selected node ("" / null clears a key); false if none selected. */
   setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */

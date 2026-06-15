@@ -1,4 +1,5 @@
 import type {
+  BackdropKind,
   Callout,
   ConditionalRule,
   CrossLink,
@@ -541,6 +542,32 @@ export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): O
     }
   }
   return { doc: hit ? next : doc };
+}
+
+// --- dedicated diagram backdrops (onion / funnel / Venn) -------------------
+
+/** Set (or replace) the map's diagram backdrop. */
+export function setBackdrop(doc: MindMapDoc, kind: BackdropKind, rings?: number): OpResult {
+  const next = structuredClone(doc);
+  next.backdrop = rings !== undefined ? { kind, rings } : { kind };
+  return { doc: next };
+}
+
+/** Add/remove a ring or stage on an onion/funnel backdrop (clamped to 2..6); no-op for venn. */
+export function setBackdropRings(doc: MindMapDoc, delta: number): OpResult {
+  const b = doc.backdrop;
+  if (!b || b.kind === "venn2" || b.kind === "venn3") return { doc };
+  const next = structuredClone(doc);
+  if (next.backdrop) next.backdrop.rings = Math.max(2, Math.min(6, (b.rings ?? 3) + delta));
+  return { doc: next };
+}
+
+/** Remove the diagram backdrop. */
+export function clearBackdrop(doc: MindMapDoc): OpResult {
+  if (!doc.backdrop) return { doc };
+  const next = structuredClone(doc);
+  next.backdrop = undefined;
+  return { doc: next };
 }
 
 /** Toggle free-canvas mode. When enabling with a positions map, seed each node's `pos` from it so

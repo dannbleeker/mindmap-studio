@@ -136,6 +136,49 @@ describe("flow layout (alternate kinds)", () => {
     expect(c1.x).not.toBe(c2.x);
   });
 
+  it("per-branch layout composes when overrides nest (org-down branch containing a grid branch)", () => {
+    const odoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "nest",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "ov",
+            topic: "Override",
+            layout: "org-down",
+            children: [
+              {
+                id: "g",
+                topic: "Grid",
+                layout: "grid", // a nested override inside the org-down subtree
+                children: [
+                  { id: "g1", topic: "G1", children: [] },
+                  { id: "g2", topic: "G2", children: [] },
+                  { id: "g3", topic: "G3", children: [] },
+                  { id: "g4", topic: "G4", children: [] },
+                ],
+              },
+              { id: "sib", topic: "Sib", children: [] },
+            ],
+          },
+        ],
+      },
+    };
+    const p = project(odoc);
+    const pos = computeLayout(p.nodes, p.edges, size, "side");
+    expect(allFinite(pos)).toBe(true); // the deep depth-rebase doesn't NaN
+    // org-down at the outer override: its children sit below it
+    expect(pos.get("g")?.y ?? 0).toBeGreaterThan(pos.get("ov")?.y ?? 0);
+    // grid at the inner override: its 4 children span two columns and two rows
+    const gx = new Set(["g1", "g2", "g3", "g4"].map((id) => pos.get(id)?.x));
+    const gy = new Set(["g1", "g2", "g3", "g4"].map((id) => pos.get(id)?.y));
+    expect(gx.size).toBe(2);
+    expect(gy.size).toBe(2);
+  });
+
   it("freeform places nodes at their own pos, with a beside-parent fallback for pos-less nodes", () => {
     const fdoc: MindMapDoc = {
       schemaVersion: 1,

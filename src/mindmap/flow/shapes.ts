@@ -1,4 +1,5 @@
 import type { NodeShape } from "../../model/types";
+import { r2 } from "./geometry";
 
 // Pure node-shape geometry, shared by the on-canvas backdrop (TopicNode), the SVG exporter
 // (exportSvg), and the style-picker icons (Panels) so the screen, the export, and the picker
@@ -19,8 +20,6 @@ const GEOMETRIC: ReadonlySet<string> = new Set([
 export function isGeometric(shape: NodeShape | undefined): shape is NodeShape {
   return shape != null && GEOMETRIC.has(shape);
 }
-
-const r2 = (n: number): number => Math.round(n * 100) / 100;
 
 /** Extra padding (px) so a topic's text stays inside a narrowing shape. */
 export interface ShapeInset {

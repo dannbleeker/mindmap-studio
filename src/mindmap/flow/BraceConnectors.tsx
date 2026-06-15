@@ -1,5 +1,6 @@
 import { ViewportPortal, useNodes } from "@xyflow/react";
-import { type BraceGroup, type Rect, braceGeometry } from "./brace";
+import { type BraceGroup, braceGeometry } from "./brace";
+import type { Rect } from "./geometry";
 import { BRACE_STROKE } from "./style";
 
 // Brace-map connectors: a "{" fork per parent, drawn in flow space via ViewportPortal so it

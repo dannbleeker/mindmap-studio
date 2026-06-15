@@ -7,6 +7,7 @@ import { arrowHeadPath } from "./CrosslinkEdge";
 import { backdropGeometry } from "./backdrop";
 import { type BraceGroup, braceGeometry, bracePath } from "./brace";
 import { type Box, floatingPoints } from "./floating";
+import { type Rect, r2 } from "./geometry";
 import { project } from "./project";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import {
@@ -43,12 +44,8 @@ import {
 // export matches the screen, and it carries arrow + boundary *labels* (which a foreignObject-
 // based export drops).
 
-export interface NodeRect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+/** A node's on-screen box, the export's input (alias of the shared Rect). */
+export type NodeRect = Rect;
 
 // Exporter-specific spacing: text/image insets inside a node box, and the viewBox margin.
 const PAD = 12;
@@ -62,8 +59,6 @@ function esc(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
-
-const r2 = (n: number): number => Math.round(n * 100) / 100;
 
 /** A task-completion pie as an SVG string (mirrors the on-canvas ProgressPie via piePath). */
 function pieSvg(cx: number, cy: number, r: number, fraction: number): string {

@@ -6,10 +6,9 @@ import {
   useInternalNode,
 } from "@xyflow/react";
 import { getFloatingPoints } from "./floating";
+import { r2 } from "./geometry";
 import { CROSSLINK_COLOR, CROSSLINK_DASH, CROSSLINK_WIDTH } from "./style";
 import type { FlowEdge } from "./types";
-
-const r2 = (n: number): number => Math.round(n * 100) / 100;
 
 /** A filled triangle arrowhead with its tip at (tipX,tipY), pointing away from (fromX,fromY).
  *  Shared by the canvas edge and the SVG exporter so a relationship reads directionally in both

@@ -1,17 +1,11 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
+import { type Rect, r2 } from "./geometry";
 import { BRACE_GAP } from "./style";
 
 // Brace-map connectors: a "{" fork joining a parent to its children, the Thinking-Maps brace.
 // Pure geometry shared by the on-canvas overlay (BraceConnectors) and the SVG exporter, so the
 // screen and the export stay identical. A fork is a vertical spine spanning the children's
 // centres, a horizontal stub from the spine to each child, and a tee from the parent to the spine.
-
-export interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
 
 /** One brace group: a parent and the children it forks to (visible children only). */
 export interface BraceGroup {
@@ -27,8 +21,6 @@ export interface BraceGeometry {
   parentTeeY: number;
   stubs: { y: number; fromX: number; toX: number }[];
 }
-
-const r2 = (n: number): number => Math.round(n * 100) / 100;
 
 /** Resolve a parent + its children rects into the fork's line coordinates (flow space). */
 export function braceGeometry(parent: Rect, children: Rect[]): BraceGeometry {

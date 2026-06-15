@@ -1,9 +1,10 @@
 import type { Backdrop } from "../../model/types";
+import { type Rect, r2 } from "./geometry";
 import { BACKDROP_FILL, BACKDROP_STROKE } from "./style";
 
 // Dedicated diagram backdrops (onion / funnel / Venn): a pure geometric frame drawn behind
-// freely-positioned topics. One source of truth shared by the canvas overlay (Backdrop.tsx) and
-// the SVG exporter, so the screen and the export match. Region *labels* are ordinary topics placed
+// freely-positioned topics. One source of truth shared by the canvas overlay (DiagramBackdrop.tsx)
+// and the SVG exporter, so the screen and the export match. Region *labels* are ordinary topics placed
 // at the returned `anchors`, so the frame itself carries no text — only shapes.
 //
 // All coordinates are absolute flow space, centred on the origin; a builder seeds the topics around
@@ -19,13 +20,6 @@ export interface BackdropPrimitive {
   stroke: string;
 }
 
-export interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
 export interface BackdropGeometry {
   shapes: BackdropPrimitive[];
   /** One suggested label position per region (a builder drops a topic at each). */
@@ -35,7 +29,6 @@ export interface BackdropGeometry {
 }
 
 const ONION_R = 300; // outer radius
-const r2 = (n: number): number => Math.round(n * 100) / 100;
 
 /** The number of rings/stages for onion + funnel (clamped to a sane range); venn is fixed by kind. */
 export function backdropRings(b: Backdrop): number {

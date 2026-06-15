@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Interactive HTML export** — a new **.html (interactive)** option saves the whole map as a single
+  self-contained file you can email or open locally: a **collapsible, searchable outline** with an
+  inlined vanilla-JS runtime (no app, no backend, no CDN — fully offline). Click a topic (or its ▾
+  toggle) to fold a branch, **Expand all / Collapse all**, type in the **filter** box to highlight and
+  narrow to matching topics, and **Ctrl/⌘ + scroll** to zoom / drag to pan. Notes render inline; topic
+  text and the embedded tree JSON are escaped, so a map can't inject script. Unlike the existing
+  **.html (standalone)** (an embedded SVG picture), this one is *navigable*.
 - **Larger node-shape vocabulary** — the **Shape** picker adds six more vector shapes: **trapezoid**
   (manual operation), **octagon** (stop / limit), **document** (a page with a wavy bottom edge),
   **callout** (a rounded speech bubble), **star** (highlight), and **cloud** (idea / external system).

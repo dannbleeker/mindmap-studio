@@ -475,6 +475,7 @@ Pick a format from the **⬆ Export…** menu:
 | `.smmx` | SimpleMind — topic tree, notes, web links, relations, plus floating topics |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
+| `.html` (interactive) | A single self-contained HTML file — the map as a **collapsible, searchable** outline: fold branches, filter topics, zoom/pan (no app, no backend, offline) |
 | `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline) |
 | `.docx` | A Word document — the map as an editable, indented outline (opens in Word, LibreOffice, Pages, Google Docs) |
 | `.pptx` | A PowerPoint deck — an overview slide, then one per branch (opens in PowerPoint, Keynote, LibreOffice, Google Slides) |

@@ -50,6 +50,7 @@ export interface MapExports {
   exportPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
+  exportInteractiveHtml: () => Promise<void>;
   exportDeck: () => Promise<void>;
   exportPdf: () => Promise<void>;
   exportDocx: () => Promise<void>;
@@ -135,6 +136,17 @@ export function useMapExports(
       download(
         new Blob([wrapSvgHtml(clean, baseName())], { type: "text/html" }),
         `${baseName()}.html`,
+      );
+    },
+    // Interactive HTML — the whole map as a single self-contained, offline .html
+    // file you can email or open locally: a collapsible, searchable outline with
+    // an inlined vanilla-JS runtime (no SVG, no backend, no CDN). Model-backed and
+    // lazy-loaded so the template + runtime stay out of the entry chunk.
+    async exportInteractiveHtml() {
+      const { buildInteractiveHtml } = await import("./io/interactiveHtml");
+      download(
+        new Blob([buildInteractiveHtml(getDoc())], { type: "text/html" }),
+        `${baseName()}-interactive.html`,
       );
     },
     // Standalone slide deck — the Walk-Through as a shareable, offline .html file.

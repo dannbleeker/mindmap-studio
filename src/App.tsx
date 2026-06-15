@@ -836,6 +836,7 @@ export function App() {
     exportPng,
     exportSvg,
     exportHtml,
+    exportInteractiveHtml,
     exportDeck,
     exportPdf,
     exportDocx,
@@ -1468,6 +1469,7 @@ export function App() {
               xmind: exportXmind,
               smmx: exportSmmx,
               html: exportHtml,
+              ihtml: exportInteractiveHtml,
               deck: exportDeck,
               pdf: exportPdf,
               docx: exportDocx,
@@ -1496,6 +1498,7 @@ export function App() {
           </optgroup>
           <optgroup label="Document">
             <option value="html">.html (standalone)</option>
+            <option value="ihtml">.html (interactive)</option>
             <option value="pdf">.pdf (print)</option>
             <option value="docx">.docx (Word)</option>
             <option value="xlsx">.xlsx (Excel)</option>

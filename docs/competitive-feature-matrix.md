@@ -91,7 +91,6 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 |---|---|---|
 | Presenter view (map + slides) | ❌ | XMind Pitch |
 | Live broadcast / audience-follow | ⛔ | MindMeister, Ayoa (needs backend) |
-| Interactive published web map (filterable) | 🟡 | HTML export is static; a self-contained *interactive/filterable* HTML export is client-side-feasible (no backend), but *hosting* a published map isn't |
 | AI pitch video | ❌ | XMind |
 
 ## 9. AI & automation — *the biggest market gap*

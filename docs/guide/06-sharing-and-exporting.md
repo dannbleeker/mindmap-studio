@@ -35,6 +35,12 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
   a crisp, scalable image that survives zooming.
 - **HTML** -- a self-contained web page of the map, openable in any browser with nothing
   installed.
+- **Interactive HTML** -- the same one-file, opens-anywhere idea, but *navigable* instead of a
+  picture: the map becomes a collapsible, searchable outline. The recipient folds branches by
+  clicking a topic, expands or collapses the whole thing at once, and types in a filter box to
+  highlight and narrow to matching topics (plus Ctrl/⌘-scroll to zoom and drag to pan). It's all
+  one file with the data, styling, and a tiny script inlined -- no app, no server, no internet --
+  so it's the format for handing a *big* map to someone who needs to explore it, not just look at it.
 - **HTML slide deck** -- the walk-through (Chapter 7) as a standalone, navigable
   presentation in a single file: an overview slide, then one per branch, advanced with the
   arrow keys or a click. Hand someone the file and they can present your map with nothing
@@ -51,7 +57,8 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
 - **PDF** (via print) -- a fixed-layout document for sending and printing.
 
 A rule of thumb: **JSON to keep it, Markdown to discuss it, PNG/SVG/HTML to show it,
-the slide deck or PowerPoint to present it, Word or PDF to send it, Excel to crunch it.**
+interactive HTML to let someone explore it, the slide deck or PowerPoint to present it, Word or
+PDF to send it, Excel to crunch it.**
 
 ## Copy the outline
 
@@ -157,7 +164,10 @@ Now get it out as a *picture* and as a *paste*. Export **PNG** (or **SVG** for a
 scalable version) and drop it into a slide or a chat -- notice the labels, icons, arrows and
 boundaries all render, because the image carries real text, not a screenshot. Export to
 **PDF** when it needs to print, or to **Excel** when you want to sort and count the outline
-as a spreadsheet. Finally, when you just need the words somewhere *now*, click **⧉ Copy
+as a spreadsheet. For a big map someone needs to *explore* rather than glance at, export
+**Interactive HTML** and open it: same single offline file, but now you can fold branches and
+type in the filter box to narrow to what matters -- proof the export can carry the *navigation*,
+not just the picture. Finally, when you just need the words somewhere *now*, click **⧉ Copy
 outline** and paste -- no file, no download, just the map as a Markdown outline wherever your
 cursor is. Same map, every door out: a file to keep, a picture to show, a sheet to crunch, a
 paste to drop.

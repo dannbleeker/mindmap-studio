@@ -81,7 +81,7 @@ interchange capability we could reasonably own.
 | Emoji icons / markers | ✅ | |
 | Images in topics | ✅ | |
 | Topic numbering | ✅ | |
-| Custom fonts / sizes | 🟡 | via style; limited UI |
+| Custom fonts / sizes | 🟡 | font **family** picker (Sans / Serif / Mono) + size/colour in the Info panel; no arbitrary/custom font names |
 | Large shape library (cloud/star/diamond…) | 🟡 | flowchart shapes ship (diamond/oval/parallelogram/hexagon/cylinder); a big clip-art / cloud / star library doesn't |
 | Sticker / illustration library | ❌ | XMind, MindNode |
 | Canvas background image/colour | 🟡 | per-map background **colour** ships (the Canvas control); background **image** ❌ |
@@ -136,7 +136,7 @@ interchange capability we could reasonably own.
 | Feature | Status | Notes |
 |---|---|---|
 | Import .mmap, OPML, MD, JSON, .mm, Mermaid, XMind, .smmx | ✅ | strong |
-| Import iThoughts, MindMeister, older .xmind, TextBundle | 🟡 | iThoughts (.itmz), MindMeister (.mind), legacy XMind content.xml all ship; TextBundle ❌ |
+| Import iThoughts, MindMeister, older .xmind, TextBundle, MindMup, Markmap | ✅ | iThoughts (.itmz), MindMeister (.mind), legacy XMind content.xml, TextBundle (.textpack), MindMup (.mup), and Markmap Markdown all ship |
 | Import images from .mmap blobs | ❌ | known gap |
 | Export PNG/SVG/PDF/HTML/DOCX/PPTX/XLSX/deck/MD/OPML/.mm/Mermaid/XMind/.smmx | ✅ | very strong |
 | Write MindManager .mmap | ❌ | |

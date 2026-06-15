@@ -13,12 +13,39 @@ This guide covers everything in the toolbar, top to bottom. For what changed rec
 
 1. `pnpm install`
 2. `pnpm dev` and open the printed URL (dev server `mindmap-dev`, port 5175).
-3. You'll see a sample map (**Q3 Retail Plan**) showing off notes, markers, a relationship
-   arrow, and a boundary. Click around, or start your own with **+ New…**.
+3. On first launch you'll land on the **[Start screen](#the-start-screen)**: capture a new map
+   (type a topic, paste an outline, or open a blank canvas), or pick a template. Once a map is
+   open you're in the editor — click around, then start your own.
 
-Everything autosaves to your browser as you work, and the last map you had open — along with
-the side panels you had open (Notes, Outline, Markers, Style) — is restored next time. It also
-works fully offline and can be installed (see [Install as an app](#install-as-an-app)).
+Everything autosaves to your browser as you work, and the last map you had open — along with the
+side panels you had open (Notes, Outline, Markers, Style) — is restored next time, dropping you
+straight back into the editor. Press **⌂ Start** in the toolbar to return to the Start screen any
+time. It also works fully offline and can be installed (see [Install as an app](#install-as-an-app)).
+
+---
+
+## The Start screen
+
+When no map is open — on a fresh install, or any time you press **⌂ Start** in the toolbar —
+MindMap Studio shows a dedicated home. A left rail switches sections; the main area changes in
+place and your editor is never touched:
+
+- **Start** — a capture hero to make a new map three ways: **type a topic**, **paste an outline**
+  (indentation or `#` levels set the hierarchy), or open a **blank canvas**. Below it sit your most
+  **recent** maps and a few **templates** for a quick start.
+- **All maps** — your whole library as cards or a list, sortable by last-edited, name, or size.
+  Each card's **⋯** menu opens, renames, duplicates, exports, or deletes the map.
+- **Recent** — every map grouped by when you last edited it (Today / Yesterday / Earlier).
+- **Templates** — every [starter map](#templates), each with a thumbnail and a **computed** node
+  count and branch preview. Picking one opens it pre-filled.
+- **Layouts** — open a blank map directly in any [layout](#layout) (two-sided, org-chart, radial,
+  timeline, fishbone, grid, brace…) or diagram backdrop (onion, funnel, Venn).
+- **Import** — drop in or pick files in any [supported format](#importing).
+- **Learn** — a short primer on mind-mapping principles.
+- **About** — what the app is and how your data stays local.
+
+Press **⌘K** (Ctrl-K) anywhere on the Start screen for a **command palette**: type to fuzzy-search
+your maps and the main actions, then Enter to go.
 
 ---
 

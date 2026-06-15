@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Start screen** — a dedicated home that opens when no map is showing (and any time via **⌂ Start**
+  in the toolbar). A left rail navigates **Start / All maps / Recent / Templates / Layouts / Import /
+  Learn / About**; the hero captures a new map three ways (type a topic, paste an outline, or a blank
+  canvas), **Recent** groups your maps by last-edited (Today / Yesterday / Earlier), and **Templates**
+  lists every starter with a thumbnail and **computed** node count + branch pills. **⌘K** opens a
+  command palette over maps and actions. Theme-aware (Light / Dark / Ocean / Sunset) and fully local
+  — the editor canvas is untouched.
 - **Multiple sheets per file** — group several maps as **sheets** of one workbook. **▦ + Sheet**
   turns the current map into a workbook and adds a sheet; a **sheet tab strip** appears above the
   canvas to switch between them, and **⤓ Workbook** exports all the sheets to a single `.json`

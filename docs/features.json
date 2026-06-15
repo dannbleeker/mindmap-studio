@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 112,
+  "reviewedThroughChangelogBullets": 113,
   "areas": [
     "editing",
     "notes",
@@ -896,6 +896,15 @@
       "since": "2026-06-13",
       "manual": true,
       "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "start-screen",
+      "name": "Start screen (home: capture hero, library, templates, layouts, ⌘K palette)",
+      "area": "library",
+      "since": "2026-06-15",
+      "manual": true,
+      "book": false,
       "bookExample": false
     }
   ]

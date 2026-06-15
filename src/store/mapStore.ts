@@ -52,7 +52,10 @@ export interface MapSummary {
 }
 
 export async function saveMap(doc: MindMapDoc): Promise<void> {
-  await (await db()).put("maps", doc, doc.id);
+  // Stamp last-edited so the start screen can group Recent (Today / Yesterday / Earlier). Stamped on
+  // a copy so callers' in-memory docs aren't mutated.
+  const stamped: MindMapDoc = { ...doc, meta: { ...doc.meta, updatedAt: Date.now() } };
+  await (await db()).put("maps", stamped, doc.id);
 }
 
 export async function loadMap(id: string): Promise<MindMapDoc | null> {

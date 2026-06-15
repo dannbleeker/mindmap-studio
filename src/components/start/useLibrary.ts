@@ -1,0 +1,35 @@
+import { useEffect, useState } from "react";
+import { getAllMaps } from "../../store/mapStore";
+import type { MapEntry } from "./MapCard";
+import { docNodeCount } from "./nodeStats";
+
+// Load the whole library as MapEntry[] (id, title, node count, last-edited, sheet group). Re-runs
+// when `rev` changes (bumped after a delete/rename/duplicate). One read serves Home/All maps/Recent.
+
+export function useLibrary(rev: number): MapEntry[] {
+  const [entries, setEntries] = useState<MapEntry[]>([]);
+  // `rev` isn't read inside the effect — it's the explicit re-fetch trigger (bumped after a
+  // delete/rename/duplicate), so it belongs in the deps despite biome's heuristic.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: rev is the re-fetch signal, by design
+  useEffect(() => {
+    let alive = true;
+    getAllMaps()
+      .then((docs) => {
+        if (!alive) return;
+        setEntries(
+          docs.map((d) => ({
+            id: d.id,
+            title: d.title,
+            nodeCount: docNodeCount(d),
+            updatedAt: d.meta?.updatedAt,
+            sheetGroup: d.meta?.sheetGroup,
+          })),
+        );
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [rev]);
+  return entries;
+}

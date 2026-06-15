@@ -10,6 +10,7 @@ import {
   OutlinePanel,
   StylesPanel,
 } from "./Panels";
+import { StartScreen } from "./components/start/StartScreen";
 import { buildExample, examples } from "./examples";
 import {
   type DueMode,
@@ -86,6 +87,10 @@ export function App() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mapRef = useRef<MindMapHandle>(null);
   const [maps, setMaps] = useState<MapSummary[]>([]);
+  // Start screen vs editor. Default to the editor so a returning user's last map restores without a
+  // flash; the boot effect flips to "start" only when there's no map to restore (first run / empty
+  // library). The "⌂ Start" toolbar button returns here any time. The editor canvas is unchanged.
+  const [view, setView] = useState<"start" | "editor">("editor");
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
@@ -581,6 +586,11 @@ export function App() {
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const files = [...(event.target.files ?? [])];
     event.target.value = ""; // allow re-selecting the same files
+    await processFiles(files);
+  }
+
+  /** Import a set of files (shared by the file <input> and the start screen's drop zone). */
+  async function processFiles(files: File[]) {
     if (files.length === 0) return;
     // A single .json that is a whole-library backup restores every map at once.
     if (files.length === 1 && files[0].name.toLowerCase().endsWith(".json")) {
@@ -649,6 +659,26 @@ export function App() {
     } catch {
       // ignore
     }
+  }
+
+  // Open a doc from the start screen in the editor (optionally applying its layout), and switch view.
+  function openFromStart(next: MindMapDoc, nextLayout?: string) {
+    load(next);
+    if (nextLayout) changeLayout(nextLayout as LayoutKind);
+    setView("editor");
+  }
+  async function importFromStart(files: File[]) {
+    await processFiles(files);
+    setView("editor");
+  }
+  // Return to the start screen, flushing the current map first so Recent reflects the latest edit.
+  async function goHome() {
+    try {
+      await saveMap(liveDocRef.current);
+    } catch {
+      // best-effort flush
+    }
+    setView("start");
   }
 
   function duplicateMap() {
@@ -728,13 +758,20 @@ export function App() {
     exportXlsx,
   } = useMapExports(mapRef, () => liveDocRef.current);
 
-  // Restore the last-opened map on startup; fall back to the sample.
+  // Restore the last-opened map on startup straight into the editor. With no prior map (first run /
+  // empty library) land on the start screen instead of an editor full of the sample map.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const lastId = await getLastOpened().catch(() => null);
       const restored = lastId ? await loadMap(lastId).catch(() => null) : null;
-      if (!cancelled) load(restored ?? sampleDoc);
+      if (cancelled) return;
+      if (restored) {
+        load(restored);
+        setView("editor");
+      } else {
+        setView("start");
+      }
     })();
     return () => {
       cancelled = true;
@@ -854,6 +891,10 @@ export function App() {
   const currentGroup = liveDoc.meta?.sheetGroup;
   const sheets = currentGroup ? mapOptions.filter((m) => m.sheetGroup === currentGroup) : [];
 
+  if (view === "start") {
+    return <StartScreen theme={theme} onOpen={openFromStart} onImportFiles={importFromStart} />;
+  }
+
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <header
@@ -868,6 +909,14 @@ export function App() {
         }}
       >
         <strong style={{ fontSize: 15, marginRight: 4 }}>MindMap Studio</strong>
+        <button
+          type="button"
+          onClick={goHome}
+          style={controlStyle}
+          title="Start screen — new maps, templates, library"
+        >
+          ⌂ Start
+        </button>
         <button
           type="button"
           onClick={() => setAboutOpen(true)}

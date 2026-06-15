@@ -12,6 +12,10 @@ GitHub Pages).
 
 ## Features
 
+- **Start screen** — a dedicated home (shown when no map is open, and reachable any time via
+  **⌂ Start**): capture a new map (type a topic, paste an outline, or a blank canvas), reopen
+  **Recent** maps grouped by last-edited, browse **Templates** (with computed node counts) and
+  **Layouts**, import files, or hit **⌘K** for a command palette. Theme-aware and fully local.
 - **Open** `.mmap` (MindManager exports) and `.md` (Markdown outlines) — rendered as a
   MindManager-style map. The `.mmap` importer is field-mapped from the bundled MindManager
   XSD (topic tree, notes, icons, hyperlinks, relationships, boundaries, floating topics).

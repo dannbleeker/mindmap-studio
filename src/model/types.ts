@@ -162,6 +162,8 @@ export interface MindMapDoc {
   theme?: string;
   meta?: {
     createdAt?: string;
+    /** Last-edited time (ms epoch), stamped on every save; drives the start screen's Recent grouping. */
+    updatedAt?: number;
     /** Where this doc came from: "sample" | "mmap" | "markdown" | ... */
     source?: string;
     /** Per-map canvas background colour (CSS colour); overrides the theme. Lossless in .json,

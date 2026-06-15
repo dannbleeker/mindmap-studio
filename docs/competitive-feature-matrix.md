@@ -1,6 +1,6 @@
 # Mind-mapping tools → MindMap Studio: combined feature matrix
 
-_Last updated: 2026-06-14._
+_Last updated: 2026-06-15._
 
 A market-wide capability survey across **19 mind-mapping / visual-thinking tools**, combined into
 one feature taxonomy and mapped against MindMap Studio. **This** doc is the broader landscape — what
@@ -211,15 +211,15 @@ interchange capability we could reasonably own.
 
 ## Cross-tool gap clusters (backlog candidates)
 
-Filtering out ⛔ items, the genuinely interesting gaps cluster as:
+Clusters **B–G are shipped** — more structures (node shapes, directional arrows, grid/matrix,
+flowchart + concept-map templates, free-canvas/whiteboard, brace map, onion/funnel/Venn backdrops,
+per-branch layout, multiple sheets, Kanban, summary topics, cross-map copy/paste, sticky notes,
+automated roll-ups), content depth, capture UX, navigation polish, durability, and interop fills
+(see the per-area tables above). What's left is all **deferred or blocked**:
 
-- **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
-- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere), the **brace-map layout**, the **◎ Diagram backdrop builders** (onion / funnel / Venn 2,3), **per-branch layout**, and **multiple sheets per file** (workbook sheets) all shipped. **Cluster B is complete.**
-- **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), file attachments, conditional formatting, styles organizer, task priority shipped; remaining: LaTeX/math (deferred).
-- **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
-- **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.
-- **F — Durability** — ✅ shipped: persistent per-map version history (IndexedDB snapshots).
-- **G — Interop fills** — ✅ iThoughts/.itmz, MindMeister .mind, legacy XMind, XMind export, MindMup/Markmap import all shipped; remaining: image-bearing .mmap, write .mmap.
-
-Most clusters are now shipped. Remaining bets: **A** (keyless AI bridge, deferred), **B** (more
-diagram types — the larger structural builds), and the **C/G** long-tail (LaTeX, MindMup/Markmap, .mmap).
+- **A — AI assist** — the biggest category-wide gap, but **decided against (2026-06-15)**: a
+  no-backend, local-first app can only do a keyless copy-prompt → paste-result bridge (or BYO-key),
+  which isn't worth building. The manual path — paste an outline / Markdown → map — already exists.
+- **LaTeX / math** (from C) — deferred (heavy KaTeX + ~1 MB offline fonts).
+- **Image-bearing `.mmap` import** (from G) — blocked on a real sample file.
+- **`.mmap` writer** (from G) — low-value (open formats already bridge every tool).

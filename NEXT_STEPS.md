@@ -13,9 +13,6 @@ remaining items are folded in below.) Deployed to GitHub Pages on every push to 
 
 ## Open items
 
-- [ ] **AI assist** — the one remaining major cluster. Only a **keyless copy-prompt → paste-result
-      bridge** (or optional BYO-key) fits the no-backend identity; paste-to-tree is half-built via
-      OPML/Markdown import. Prompt→map, expand-branch, doc/URL→map, summarise. *Needs a go/no-go.*
 - [ ] **Grow the book** further. The recent **structure** features are now covered (summary topics,
       node shapes, free-canvas, onion/funnel/Venn backdrops, per-branch layout, sheets) — catalogue
       **manual 100%, book 84.8%** (`docs/features.json`). Remaining book gaps are in *other* areas:
@@ -27,6 +24,9 @@ remaining items are folded in below.) Deployed to GitHub Pages on every push to 
 
 ## Deferred / blocked (off the active list)
 
+- **AI assist** — **decided against (2026-06-15).** The biggest category-wide gap, but the only fit
+  for a no-backend, local-first app is a keyless copy-prompt → paste-result bridge (or BYO-key),
+  which isn't worth building. The manual path already exists: paste an outline / Markdown → map.
 - **Image-bearing `.mmap` import** — blocked on a real image-bearing sample.
 - **`.mmap` writer** — high-risk, low-value (open formats already bridge every tool).
 - **LaTeX / math** — deferred by decision (heavy KaTeX + ~1 MB offline fonts; not native to MindManager).
@@ -47,6 +47,6 @@ no-backend PWA can't and shouldn't chase these.
 
 - **Competitive feature matrix** — [`docs/competitive-feature-matrix.md`](docs/competitive-feature-matrix.md):
   the whole-category survey (19 tools) mapped to MindMap Studio, grouped into 11 areas, with the
-  A–G gap clusters (only A — AI — open).
+  A–G gap clusters (B–G shipped; A — AI — deferred).
 - **Book worked examples** — `book` ~85%, `bookExample` ~46% (`docs/features.json`). The recent
   structure features are where to keep growing it (see "Grow the book" above).

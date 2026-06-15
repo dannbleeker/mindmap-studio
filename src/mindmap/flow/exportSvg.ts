@@ -8,6 +8,7 @@ import { backdropGeometry } from "./backdrop";
 import { type BraceGroup, braceGeometry, bracePath } from "./brace";
 import { type Box, floatingPoints } from "./floating";
 import { type Rect, r2 } from "./geometry";
+import { type HopSegment, hopPath } from "./lineJumps";
 import { project } from "./project";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import {
@@ -289,6 +290,33 @@ export function buildFlowSvg(
     );
   }
 
+  // Line-jumps: when on, every relationship line is drawn as its chord with semicircular hops cut
+  // in at crossings — from the shared helper the canvas edge also uses (canvas == export). Build all
+  // relationship chords up front, in the same crosslink order the canvas sees (doc.links order, the
+  // order project() emits them), so the deterministic hopper choice matches the screen.
+  const lineJumps = Boolean(doc.meta?.lineJumps);
+  const hopSegments: HopSegment[] = [];
+  if (lineJumps) {
+    let order = 0;
+    for (const e of edges) {
+      if (!e.data?.crosslink) continue;
+      const sr = rects.get(e.source);
+      const tr = rects.get(e.target);
+      if (!sr || !tr) continue;
+      const { sx, sy, tx, ty } = floatingPoints(boxOf(sr), boxOf(tr));
+      hopSegments.push({
+        id: e.id,
+        order: order++,
+        sx,
+        sy,
+        tx,
+        ty,
+        fromId: e.source,
+        toId: e.target,
+      });
+    }
+  }
+
   // Edges.
   for (const e of edges) {
     const sr = rects.get(e.source);
@@ -296,10 +324,17 @@ export function buildFlowSvg(
     if (!sr || !tr) continue;
     const { sx, sy, tx, ty } = floatingPoints(boxOf(sr), boxOf(tr));
     if (e.data?.crosslink) {
-      const mx = (sx + tx) / 2;
       const clColor = e.data.branchColor ?? CROSSLINK_COLOR;
+      // Hopped chord when line-jumps is on; otherwise the gentle S-bezier.
+      const self = lineJumps ? hopSegments.find((seg) => seg.id === e.id) : undefined;
+      const linePath = self
+        ? hopPath(self, hopSegments)
+        : (() => {
+            const mx = (sx + tx) / 2;
+            return `M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}`;
+          })();
       parts.push(
-        `<path d="M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}" fill="none" stroke="${clColor}" stroke-width="${CROSSLINK_WIDTH}" stroke-dasharray="${CROSSLINK_DASH}"/>`,
+        `<path d="${linePath}" fill="none" stroke="${clColor}" stroke-width="${CROSSLINK_WIDTH}" stroke-dasharray="${CROSSLINK_DASH}"/>`,
         // Directional arrowhead at the target — same builder the canvas uses, so the relationship
         // reads as flow in exports too.
         `<path d="${arrowHeadPath(tx, ty, sx, sy)}" fill="${clColor}"/>`,

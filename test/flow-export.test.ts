@@ -174,6 +174,47 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     );
   });
 
+  it("line-jumps: draws a hop arc on exactly one crossing relationship (canvas == export)", () => {
+    // Four nodes at the corners of a square; two diagonal relationships cross in the middle.
+    const ldoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "lj",
+      title: "LJ",
+      meta: { lineJumps: true },
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "tl", topic: "TL", children: [] },
+          { id: "tr", topic: "TR", children: [] },
+          { id: "bl", topic: "BL", children: [] },
+          { id: "br", topic: "BR", children: [] },
+        ],
+      },
+      links: [
+        { id: "d1", from: "tl", to: "br" }, // ↘
+        { id: "d2", from: "tr", to: "bl" }, // ↙ — crosses d1
+      ],
+    };
+    const lrects = new Map<string, NodeRect>([
+      ["r", { x: 240, y: 240, w: 40, h: 20 }],
+      ["tl", { x: 0, y: 0, w: 80, h: 40 }],
+      ["tr", { x: 440, y: 0, w: 80, h: 40 }],
+      ["bl", { x: 0, y: 440, w: 80, h: 40 }],
+      ["br", { x: 440, y: 440, w: 80, h: 40 }],
+    ]);
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    // Exactly one relationship hops (one elliptical-arc command on a dashed line).
+    const hopLines =
+      out.match(
+        /<path d="[^"]*A [^"]*" fill="none" stroke="[^"]*" stroke-width="[^"]*" stroke-dasharray=/g,
+      ) ?? [];
+    expect(hopLines).toHaveLength(1);
+    // …and turning the flag off removes the hop (plain S-bezier relationships).
+    const off = buildFlowSvg({ ...ldoc, meta: {} }, lrects, palette, cssVar);
+    expect(off).not.toMatch(/<path d="[^"]*A [^"]*" fill="none"[^>]*stroke-dasharray=/);
+  });
+
   it("draws the boundary box and carries its label (dropped by the old export)", () => {
     // a rounded boundary rect + its chip text
     expect(svg).toMatch(/<rect[^>]*rx="16"[^>]*stroke="#8b87e0"/);

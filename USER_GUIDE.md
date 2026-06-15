@@ -67,6 +67,7 @@ Left to right:
 | **Fit** | Scale + center the map in the viewport |
 | **⊟ / ⊞** | [Collapse / expand all](#collapse--expand) branches |
 | **1. Numbering** | Toggle [outline numbering](#auto-numbering) (1, 1.2, …) on every topic |
+| **⌒ Line jumps** | Toggle [line-jumps](#relationships-boundaries--callouts) — a hop where two relationship arrows cross |
 | **◎ Focus** | [Focus the selected branch](#focus-a-branch) — dim everything else (Esc exits) |
 | **Canvas** | [Per-map background colour + image](#canvas-background) (overrides the theme) |
 | **ℹ Info** | Toggle the [topic info panel](#topic-info-panel) — note, markers, tags, style, links for the selected node |
@@ -329,6 +330,11 @@ backdrop you see on the canvas. The second **✕** removes the image.
   prompted for an optional label). Double-click a relationship to relabel it, right-click it to
   delete. Drawn and imported (`.mmap`) relationships both persist, and the arrow direction carries
   into image exports.
+  - **Line jumps** — on a busy map where relationship arrows cross each other, click **⌒ Line jumps**
+    in the toolbar. Wherever two relationships cross, one of them draws a small semicircular **hop**
+    over the other, so the lines clearly *pass over* rather than appear to join (you get one bump per
+    crossing, never two). It's a per-map setting, saved with the map, and the hops are drawn into
+    every image export exactly as they appear on the canvas.
 - **Boundaries** — a shaded, rounded box grouping a node and its subtree. Select a node and
   click **⬚ Group** in the toolbar, then double-click the box's label chip to name it (an
   unlabelled box shows a "Label…" placeholder). Drawn and imported boundaries both round-trip

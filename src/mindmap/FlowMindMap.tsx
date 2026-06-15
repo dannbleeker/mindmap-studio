@@ -76,6 +76,7 @@ import {
   setFreeform,
   setHyperlink,
   setImage,
+  setLineJumps,
   setLinkLabel,
   setNodeLayout,
   setNodePos,
@@ -597,6 +598,7 @@ function FlowInner({
       },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),
+      setLineJumps: (on) => apply(setLineJumps(docRef.current, on)),
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
       setSelectedProgress: (progress) =>

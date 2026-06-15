@@ -56,6 +56,9 @@ export type EdgeData = {
   branchColor: string;
   /** true = a cross-link/relationship (dashed), false = a parent→child branch. */
   crosslink: boolean;
+  /** Line-jumps on (per-map meta.lineJumps): a crosslink draws its line as a chord with semicircular
+   *  hops where it crosses another crosslink. Carried on crosslink edges so CrosslinkEdge can decide. */
+  lineJumps?: boolean;
   /** Dimmed by the read-only Power Filter (an endpoint isn't lit); view-only opacity. */
   dimmed?: boolean;
 };

@@ -59,6 +59,8 @@ export interface MindMapHandle {
   /** Set the per-map canvas background image (a data: URL); "" clears it. Drawn behind everything,
    *  on top of the background colour; carried into the image/PDF/HTML exports. */
   setBackgroundImage: (url: string) => void;
+  /** Toggle line-jumps: draw a hop where two relationship lines cross (per-map, lossless in .json). */
+  setLineJumps: (on: boolean) => void;
   /** Replace the map's conditional-formatting rules (empty array clears them). */
   setRules: (rules: ConditionalRule[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */

@@ -52,7 +52,6 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 |---|---|---|
 | Custom fonts / sizes | 🟡 | font **family** picker (Sans / Serif / Mono) + size/colour in the Info panel; no arbitrary/custom font names |
 | LaTeX / math rendering | ❌ | XMind, Freeplane, Mindomo |
-| Line-jumps on crossing connectors | ❌ | MindManager |
 
 ## 4. Content enrichment
 | Feature | Status | Notes |

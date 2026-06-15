@@ -376,6 +376,13 @@ export function setBackgroundImage(doc: MindMapDoc, url: string): OpResult {
   return { doc: next };
 }
 
+/** Toggle line-jumps: draw a hop where two relationship lines cross (false clears the flag). */
+export function setLineJumps(doc: MindMapDoc, on: boolean): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, lineJumps: on || undefined };
+  return { doc: next };
+}
+
 /** Set a node's hyperlink ("" clears it). */
 export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult {
   const next = structuredClone(doc);

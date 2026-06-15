@@ -190,5 +190,9 @@ export interface MindMapDoc {
     /** Workbook id: maps sharing it are sheets of one workbook (a sheet tab strip switches them,
      *  and they export/import together as one file). */
     sheetGroup?: string;
+    /** Line-jumps: draw a small semicircular "hop" where two relationship lines cross, so the
+     *  crossing reads as "passes over", not "joins" (MindManager convention). Off by default.
+     *  Lossless in .json, ignored by flat exporters; carried into the image/PDF/HTML export. */
+    lineJumps?: boolean;
   };
 }

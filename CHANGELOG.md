@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Line-jumps on crossing connectors** — a per-map **⌒ Line jumps** toolbar toggle (off by default,
+  stored as `meta.lineJumps`, lossless in `.json`). When on, wherever two **relationship** arrows
+  cross, exactly **one** of them draws a small semicircular **hop** over the other — so a busy concept
+  map reads as lines *passing over*, not joining (the MindManager convention). The hopper is chosen
+  deterministically (one bump per crossing, never two), crossings are detected on each relationship's
+  straight endpoint **chord**, and a line crossed several times gets a hop at each crossing in order.
+  The hop geometry comes from one shared pure helper (`flow/lineJumps.ts`) used by **both** the live
+  canvas relationship edge and the SVG exporter, so the same crossings produce the same hops on screen
+  and in every PNG / SVG / PDF / HTML export (canvas == export).
 - **Presenter view (map + slides)** — the **▶ Present** overlay gains a **Presenter view** toggle (a
   button in the control bar, or press **P**) that opens a presenter sidebar beside the live slide
   without changing what the audience sees. The sidebar shows three things: the current branch's

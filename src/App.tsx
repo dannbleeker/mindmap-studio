@@ -1171,6 +1171,15 @@ export function App() {
         </button>
         <button
           type="button"
+          onClick={() => mapRef.current?.setLineJumps(!liveDoc.meta?.lineJumps)}
+          style={controlStyle}
+          aria-pressed={!!liveDoc.meta?.lineJumps}
+          title="Toggle line-jumps — draw a hop where two relationship arrows cross, so they read as passing over (not joining)"
+        >
+          ⌒ Line jumps
+        </button>
+        <button
+          type="button"
           onClick={() => selected && setFocus({ id: selected.id, topic: selected.topic })}
           style={controlStyle}
           disabled={!selected}

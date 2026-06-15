@@ -68,6 +68,14 @@ information on the page.
 > the other. An arrow is the right answer for genuine cross-links; it's the wrong answer
 > for a hierarchy you just haven't tidied yet.
 
+Once you have a few of these arrows, some of them will inevitably cross. Where two lines
+overlap, the eye can't tell whether they pass over each other or join -- and a false junction
+quietly tells the wrong story. Turn on **⌒ Line jumps** in the toolbar and the problem
+disappears: at every crossing, one of the two arrows lifts into a small **hop** over the other,
+the way a well-drawn wiring diagram or transit map keeps its lines legible. It's a per-map
+switch, so leave it off for sparse maps and flick it on the moment your arrows start to tangle;
+either way the hops are baked into your exports exactly as you see them on screen.
+
 ## Floating topics
 
 Not everything has to connect to the root. A **floating topic** is a node (or small

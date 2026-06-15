@@ -139,6 +139,7 @@ export function project(
   }
 
   // Cross-links: dashed, labelled relationship edges (floating custom edge).
+  const lineJumps = Boolean(doc.meta?.lineJumps);
   for (const link of doc.links ?? []) {
     edges.push({
       id: link.id,
@@ -146,7 +147,7 @@ export function project(
       target: link.to,
       type: "crosslink",
       label: link.label,
-      data: { depth: 0, branchColor: CROSSLINK_COLOR, crosslink: true },
+      data: { depth: 0, branchColor: CROSSLINK_COLOR, crosslink: true, lineJumps },
     });
   }
 

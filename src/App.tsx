@@ -1264,6 +1264,17 @@ export function App() {
         >
           ⊐ Summary
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            mapRef.current?.addStickyNote();
+            showHint("Sticky note added — a free-floating topic you can drag anywhere.");
+          }}
+          style={controlStyle}
+          title="Add a sticky note (a free-floating amber note topic)"
+        >
+          🗒 Note
+        </button>
         <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <input
             value={query}

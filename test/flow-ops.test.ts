@@ -4,15 +4,18 @@ import {
   addChild,
   addFloatingTopic,
   addSibling,
+  addStickyNote,
   addSubtree,
   clearBackdrop,
   deleteNode,
   deleteSummary,
+  findAnyNode,
   findNode,
   groupSummary,
   indent,
   mergeStyle,
   outdent,
+  pasteBranch,
   removeAttachment,
   reparent,
   setAllExpanded,
@@ -34,7 +37,7 @@ import {
   toggleCollapse,
   toggleIcon,
 } from "../src/mindmap/flow/ops";
-import type { MindMapDoc } from "../src/model/types";
+import type { MapNode, MindMapDoc } from "../src/model/types";
 
 const base = (): MindMapDoc => ({
   schemaVersion: 1,
@@ -352,5 +355,77 @@ describe("flow ops — immutability", () => {
     setNodePos(doc, "a", 1, 1);
     setFreeform(doc, true, new Map([["a", { x: 2, y: 2 }]]));
     expect(JSON.stringify(doc)).toBe(snap);
+  });
+});
+
+describe("flow ops — copy/paste branch", () => {
+  it("findAnyNode finds tree nodes and floating-topic nodes", () => {
+    const doc = base();
+    doc.floatingTopics = [
+      { id: "f", topic: "F", children: [{ id: "f1", topic: "F1", children: [] }] },
+    ];
+    expect(findAnyNode(doc, "a1")?.topic).toBe("A1"); // in the tree
+    expect(findAnyNode(doc, "f1")?.topic).toBe("F1"); // inside a floating topic
+    expect(findAnyNode(doc, "nope")).toBeNull();
+  });
+
+  it("pasteBranch grafts a re-id'd copy under a tree node and expands it", () => {
+    const src = findNode(base(), "a") as MapNode; // A with A1, A2
+    const { doc, selectId } = pasteBranch(base(), "b", src);
+    const b = findNode(doc, "b");
+    expect(b?.children).toHaveLength(1);
+    expect(b?.children[0].topic).toBe("A");
+    expect(b?.children[0].id).not.toBe("a"); // re-id'd, no clash
+    expect(b?.children[0].children.map((c) => c.topic)).toEqual(["A1", "A2"]);
+    expect(selectId).toBe(b?.children[0].id);
+  });
+
+  it("pasteBranch with no/unknown parent drops the copy in as a floating topic", () => {
+    const src = findNode(base(), "b") as MapNode;
+    expect(pasteBranch(base(), null, src).doc.floatingTopics?.[0]?.topic).toBe("B");
+    expect(pasteBranch(base(), "ghost", src).doc.floatingTopics?.[0]?.topic).toBe("B");
+  });
+
+  it("pasteBranch re-ids every node so repeated pastes never collide", () => {
+    const src = findNode(base(), "a") as MapNode;
+    const once = pasteBranch(base(), "b", src);
+    const twice = pasteBranch(once.doc, "b", src);
+    const ids = new Set<string>();
+    const count = (n: MapNode): number => {
+      ids.add(n.id);
+      return 1 + n.children.reduce((s, c) => s + count(c), 0);
+    };
+    const total = count(twice.doc.root);
+    expect(ids.size).toBe(total); // every id is unique (no clash across two pastes)
+  });
+
+  it("pasteBranch mutates neither the input doc nor the source node", () => {
+    const doc = base();
+    const src = findNode(base(), "a") as MapNode;
+    const docSnap = JSON.stringify(doc);
+    const srcSnap = JSON.stringify(src);
+    pasteBranch(doc, "b", src);
+    expect(JSON.stringify(doc)).toBe(docSnap);
+    expect(JSON.stringify(src)).toBe(srcSnap);
+  });
+});
+
+describe("flow ops — sticky notes", () => {
+  it("addStickyNote adds an amber floating topic with a position", () => {
+    const { doc, selectId } = addStickyNote(base());
+    expect(doc.floatingTopics).toHaveLength(1);
+    const note = doc.floatingTopics?.[0];
+    expect(note?.topic).toBe("Note");
+    expect(note?.style?.background).toBe("#fef3c7");
+    expect(note?.pos).toBeDefined();
+    expect(selectId).toBe(note?.id);
+  });
+
+  it("addStickyNote takes custom text and staggers successive notes", () => {
+    const d1 = addStickyNote(base(), "Idea").doc;
+    expect(d1.floatingTopics?.[0]?.topic).toBe("Idea");
+    const d2 = addStickyNote(d1).doc;
+    expect(d2.floatingTopics).toHaveLength(2);
+    expect(d2.floatingTopics?.[1]?.pos).not.toEqual(d2.floatingTopics?.[0]?.pos);
   });
 });

@@ -74,6 +74,8 @@ export interface MindMapHandle {
   removeSelectedAttachment: (index: number) => boolean;
   /** Graft a forest of nodes (e.g. parsed from pasted text) under the selected node; false if none. */
   addSubtreeToSelected: (nodes: MapNode[]) => boolean;
+  /** Add a sticky note — a free-floating topic styled as an amber note card. */
+  addStickyNote: () => void;
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the
    *  current selection so repeated calls add siblings under the same parent. */
   quickAdd: (text: string) => void;

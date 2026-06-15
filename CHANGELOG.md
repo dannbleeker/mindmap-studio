@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Cross-map branch copy/paste** — right-click a branch → **Copy branch**, then right-click any node
+  in *any* map → **Paste branch here** (it grafts a re-id'd copy as a child, or drops it in as a
+  floating topic when there's no tree parent). The clipboard lives in the browser, so it survives
+  switching maps — move a branch from one map into another, or assemble a roll-up by pasting branches
+  from several maps into one.
+- **Sticky-note topics** — **🗒 Note** drops a free-floating amber note onto the canvas; it's a
+  floating topic underneath, so it edits, drags (in free-canvas mode), exports, and round-trips like
+  any other topic.
 - **Start screen** — a dedicated home that opens when no map is showing (and any time via **⌂ Start**
   in the toolbar). A left rail navigates **Start / All maps / Recent / Templates / Layouts / Import /
   Learn / About**; the hero captures a new map three ways (type a topic, paste an outline, or a blank

@@ -325,6 +325,9 @@ theme default.
 - **Floating topics** — detached topics imported from `.mmap` appear in a "Floating topics"
   branch; edit them like any node (rename, add, remove, or drag in/out of the tree) and the
   changes are saved.
+- **Sticky notes** — click **🗒 Note** in the toolbar to drop a free-floating **amber note** on the
+  canvas. It's a floating topic underneath, so you rename it, drag it (in **🧲 Free layout**), and it
+  exports and round-trips like any topic — handy for captions, reminders, and legends.
 
 ---
 
@@ -340,6 +343,15 @@ adds a new one. A **sheet tab strip** then appears above the canvas — click a 
 **＋** to add one. **⤓ Workbook** exports all the workbook's sheets to a single `.json`; opening that
 file later brings them back as a grouped workbook. Each sheet is a full map (its own layout, history,
 and export) — sheets just travel together.
+
+### Copying a branch between maps
+
+Right-click a branch → **Copy branch** to copy it (the whole subtree) to a clipboard kept in your
+browser. Then — in the *same map or any other* — right-click where you want it → **Paste branch
+here**: it grafts a fresh copy under that node (or drops it in as a floating topic if you paste onto
+nothing). Because the clipboard persists across maps, this is how you **move a branch from one map
+into another**, or assemble a roll-up by pasting branches from several maps into one. Each paste is
+re-numbered internally, so you can paste the same branch as many times as you like without clashes.
 
 ### Templates
 

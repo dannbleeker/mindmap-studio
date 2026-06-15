@@ -60,11 +60,11 @@ reasonably own** — not "everything MindManager has."
 | Callouts (annotation bubbles) | ✅ | Anchored callout bubbles (React Flow custom node). |
 | Multi-map links / topic-to-other-map | ✅ | Cross-map links (`#map=`), click to hop maps. |
 | Topic-to-topic link **within** a map | ✅ | In-map jump links (`#node=`), plus relationships + cross-map links. |
-| Map roll-ups (pull subtrees from many maps) | ⬜ / 🚫-ish | Feasible against the local library, but niche; low priority. |
-| Sticky-note topics | ⬜ | A free-floating note style; overlaps floating topics. Minor. |
+| Map roll-ups (pull subtrees from many maps) | 🟡 | Manual roll-ups ship via cross-map branch paste; an automated pull-engine stays niche / low-priority. |
+| Sticky-note topics | ✅ | **🗒 Note** — a free-floating amber note (a floating topic with a sticky style); shipped 2026-06-15. |
 | Object shapes (arrows, chevrons, …) | ✅ | Geometric flowchart shapes ship — diamond / oval / parallelogram / hexagon / cylinder (canvas == export; see §3) — plus directional relationship arrows. A broader clip-art shape *library* stays low-priority. |
 | Auto-numbering of topics | ✅ | A view toggle (1, 1.2, …) on canvas + outline + exports. |
-| Cut/copy/paste branches across maps | 🟡 | Within-map editing is full; cross-map branch paste is ⬜. |
+| Cut/copy/paste branches across maps | ✅ | Right-click **Copy branch** / **Paste branch here**; a persistent (localStorage) clipboard, so it works across maps (shipped 2026-06-15). |
 
 ## 2. Layouts & visualization
 
@@ -265,16 +265,17 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
 - **Brace map** layout + the **◎ Diagram backdrops** (onion / funnel / Venn 2,3).
 - **Per-branch layout override** (right-click → Branch layout) + **multiple sheets per file** (▦ +Sheet workbook + tab strip + ⤓ Workbook export).
 - **Start screen** (home: capture hero, library, templates, layouts, ⌘K palette); book *Thinking in Maps* grown to cover the structure features.
+- **Cross-map branch copy/paste** (right-click Copy branch / Paste branch here; a persistent clipboard, so it works across maps and assembles manual roll-ups) + **sticky-note topics** (🗒 Note).
 
 ### Remaining buildable gaps (as of 2026-06-15)
 
-The in-scope list is now down to a handful of minor items:
+The in-scope list is now down to two items, both minor:
 
 1. **Dedicated mobile / phone UX** — the PWA is responsive-ish but not phone-optimised. The one
    substantive in-scope item still open (low priority).
-2. **Cross-map branch copy/paste** + **multi-map roll-ups** (pull subtrees from several library
-   maps). Sheets already cover "one file, many maps"; this is the cross-*map* case. Niche.
-3. **Sticky-note topics** — a free-floating note style; overlaps floating topics + free-canvas. Minor.
+2. **Automated multi-map roll-ups** — pulling subtrees from several library maps into one *on a
+   refresh*. Manual roll-ups already ship (copy a branch in one map, paste it into another); an
+   automated pull-engine stays niche / low-priority.
 
 ### Deferred by decision (revisit only on a go/no-go)
 - **AI assist** — a **keyless copy-prompt → paste-result bridge** (paste-to-tree is half-built via

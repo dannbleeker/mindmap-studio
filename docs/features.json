@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 113,
+  "reviewedThroughChangelogBullets": 115,
   "areas": [
     "editing",
     "notes",
@@ -902,6 +902,24 @@
       "id": "start-screen",
       "name": "Start screen (home: capture hero, library, templates, layouts, ⌘K palette)",
       "area": "library",
+      "since": "2026-06-15",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cross-map-branch-paste",
+      "name": "Cross-map branch copy/paste (right-click Copy branch / Paste branch here; persistent clipboard)",
+      "area": "editing",
+      "since": "2026-06-15",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "sticky-notes",
+      "name": "Sticky-note topics (🗒 Note — a free-floating amber note)",
+      "area": "structure",
       "since": "2026-06-15",
       "manual": true,
       "book": false,

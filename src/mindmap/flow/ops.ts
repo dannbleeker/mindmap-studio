@@ -60,6 +60,17 @@ export function findNode(doc: MindMapDoc, id: string): MapNode | null {
   return locate(doc.root, id)?.node ?? null;
 }
 
+/** Find a node by id anywhere in the doc — the central tree OR inside a floating topic's subtree. */
+export function findAnyNode(doc: MindMapDoc, id: string): MapNode | null {
+  const inTree = locate(doc.root, id)?.node;
+  if (inTree) return inTree;
+  for (const f of doc.floatingTopics ?? []) {
+    const found = locate(f, id)?.node;
+    if (found) return found;
+  }
+  return null;
+}
+
 // --- structural edits ------------------------------------------------------
 
 /** Add an empty sibling after `id` (a root gets a child, since it has no sibling). */
@@ -243,6 +254,24 @@ export function addSubtree(doc: MindMapDoc, parentId: string, nodes: MapNode[]):
   return { doc: next, selectId: grafted[0]?.id };
 }
 
+/** Paste a copied branch: graft it (re-id'd) under `parentId` when that's a tree node, otherwise
+ *  drop it in as a floating topic. Always inserts — the cross-map branch paste. Re-ids so the same
+ *  clipboard branch can be pasted repeatedly (and across maps) without id clashes. */
+export function pasteBranch(doc: MindMapDoc, parentId: string | null, node: MapNode): OpResult {
+  const next = structuredClone(doc);
+  const fresh = reId(node);
+  if (parentId) {
+    const loc = locate(next.root, parentId);
+    if (loc) {
+      loc.node.children.push(fresh);
+      loc.node.collapsed = false;
+      return { doc: next, selectId: fresh.id };
+    }
+  }
+  next.floatingTopics = [...(next.floatingTopics ?? []), fresh];
+  return { doc: next, selectId: fresh.id };
+}
+
 /** Add a detached floating topic (e.g. a link dropped onto the canvas), optionally with a link. */
 export function addFloatingTopic(doc: MindMapDoc, topic: string, hyperlink?: string): OpResult {
   const next = structuredClone(doc);
@@ -251,6 +280,31 @@ export function addFloatingTopic(doc: MindMapDoc, topic: string, hyperlink?: str
     topic,
     children: [],
     ...(hyperlink ? { hyperlink } : {}),
+  };
+  next.floatingTopics = [...(next.floatingTopics ?? []), node];
+  return { doc: next, selectId: node.id };
+}
+
+/** The look of a sticky note — an amber card with square corners. A sticky note is just a floating
+ *  topic carrying this style, so it renders + exports through the normal per-topic style path. */
+const STICKY_NOTE_STYLE: NodeStyle = {
+  background: "#fef3c7",
+  border: "1px solid #fcd34d",
+  color: "#713f12",
+  borderRadius: "2px",
+};
+
+/** Add a sticky note: a free-floating topic styled as an amber note card. New notes stagger so
+ *  they don't stack exactly (the offset matters only in free-canvas mode; auto-layouts ignore it). */
+export function addStickyNote(doc: MindMapDoc, text = "Note"): OpResult {
+  const next = structuredClone(doc);
+  const n = (next.floatingTopics ?? []).length;
+  const node: MapNode = {
+    id: makeId(),
+    topic: text,
+    children: [],
+    style: { ...STICKY_NOTE_STYLE },
+    pos: { x: 40 + n * 24, y: 40 + n * 24 },
   };
   next.floatingTopics = [...(next.floatingTopics ?? []), node];
   return { doc: next, selectId: node.id };

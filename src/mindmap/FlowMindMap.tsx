@@ -24,6 +24,7 @@ import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { nextProgressLevel } from "../progress";
+import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
 import { type LayoutKind, type MindMapHandle, type MindMapProps, classifyLink } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
@@ -47,17 +48,20 @@ import {
   addFloatingTopic,
   addLink,
   addSibling,
+  addStickyNote,
   addSubtree,
   clearBackdrop,
   deleteCallout,
   deleteLink,
   deleteNode,
   deleteSummary,
+  findAnyNode,
   findNode,
   groupBranch,
   groupSummary,
   mergeStyle,
   outdent,
+  pasteBranch,
   removeAttachment,
   reparent,
   replaceTopics,
@@ -603,6 +607,7 @@ function FlowInner({
         withSelected((id) => apply(removeAttachment(docRef.current, id, index))),
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
+      addStickyNote: () => apply(addStickyNote(docRef.current)),
       quickAdd: (text) => {
         const t = text.trim();
         if (!t) return;
@@ -787,19 +792,36 @@ function FlowInner({
               minWidth: 168,
             }}
           >
-            {(
-              [
-                ["Add child", () => apply(addChild(docRef.current, menu.id), true)],
-                ["Add sibling", () => apply(addSibling(docRef.current, menu.id), true)],
-                ["Rename", () => setEditingId(menu.id)],
-                ["Link to…", () => setLinkingFrom(menu.id)],
-                ["Add callout", () => apply(addCallout(docRef.current, menu.id))],
-                ["Group in boundary", () => apply(groupBranch(docRef.current, menu.id))],
-                ["Summarize branch", () => apply(groupSummary(docRef.current, menu.id))],
-                ["Collapse / expand", () => apply(toggleCollapse(docRef.current, menu.id))],
-                ["Delete", () => apply(deleteNode(docRef.current, menu.id))],
-              ] as const
-            ).map(([label, fn]) => (
+            {(() => {
+              const id = menu.id;
+              const items: [string, () => void][] = [
+                ["Add child", () => apply(addChild(docRef.current, id), true)],
+                ["Add sibling", () => apply(addSibling(docRef.current, id), true)],
+                ["Rename", () => setEditingId(id)],
+                ["Link to…", () => setLinkingFrom(id)],
+                ["Add callout", () => apply(addCallout(docRef.current, id))],
+                ["Group in boundary", () => apply(groupBranch(docRef.current, id))],
+                ["Summarize branch", () => apply(groupSummary(docRef.current, id))],
+                [
+                  "Copy branch",
+                  () => {
+                    const n = findAnyNode(docRef.current, id);
+                    if (n) setBranch(structuredClone(n));
+                  },
+                ],
+              ];
+              // Cross-map paste: show only when the branch clipboard has something (it persists in
+              // localStorage, so a branch copied in another map shows up here too).
+              const clip = getBranch();
+              if (clip)
+                items.push([
+                  "Paste branch here",
+                  () => apply(pasteBranch(docRef.current, id, clip)),
+                ]);
+              items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
+              items.push(["Delete", () => apply(deleteNode(docRef.current, id))]);
+              return items;
+            })().map(([label, fn]) => (
               <li key={label}>
                 <button
                   type="button"

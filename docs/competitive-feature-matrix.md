@@ -61,7 +61,7 @@ interchange capability we could reasonably own.
 | Matrix / grid | ✅ | grid / matrix layout (SWOT, Eisenhower) |
 | Brace / bracket map | ✅ | brace-map layout — `{` fork connectors, left-to-right tree |
 | Venn / onion / funnel | ✅ | ◎ Diagram backdrop builder (onion / funnel / Venn 2,3) |
-| Multiple structures per branch | ❌ | XMind "skeletons" |
+| Multiple structures per branch | ✅ | per-branch layout — right-click a branch → its own layout kind |
 | True multi-root / freeform | ✅ | 🧲 Free layout: drag nodes anywhere (pos persists); floating subtrees too |
 | Networked graph (multiple parents) | ❌ | TheBrain |
 | Loops / cycles | ❌ | Coggle |
@@ -214,7 +214,7 @@ interchange capability we could reasonably own.
 Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
-- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere), the **brace-map layout**, and the **◎ Diagram backdrop builders** (onion / funnel / Venn 2,3) all shipped. Remaining: **multiple sheets per file**.
+- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere), the **brace-map layout**, and the **◎ Diagram backdrop builders** (onion / funnel / Venn 2,3), and **per-branch layout** all shipped. Remaining: **multiple sheets per file**.
 - **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), file attachments, conditional formatting, styles organizer, task priority shipped; remaining: LaTeX/math (deferred).
 - **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.

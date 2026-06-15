@@ -98,6 +98,44 @@ describe("flow layout (alternate kinds)", () => {
     expect(pos.get("a1")?.x ?? 0).toBeGreaterThan(pos.get("a")?.x ?? 0);
   });
 
+  it("per-branch layout: a branch with a layout override uses its own kind, not the map's", () => {
+    const odoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "o",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "ov",
+            topic: "Override",
+            layout: "org-down", // children should go BELOW, siblings spread horizontally
+            children: [
+              { id: "ov1", topic: "C1", children: [] },
+              { id: "ov2", topic: "C2", children: [] },
+            ],
+          },
+          { id: "sib", topic: "Sibling", children: [] },
+        ],
+      },
+    };
+    const p = project(odoc);
+    const pos = computeLayout(p.nodes, p.edges, size, "side"); // map = two-sided (horizontal)
+    expect(allFinite(pos)).toBe(true);
+    const ov = pos.get("ov");
+    const c1 = pos.get("ov1");
+    const c2 = pos.get("ov2");
+    if (!ov || !c1 || !c2) throw new Error("missing positions");
+    // org-down: both children below the override root...
+    expect(c1.y).toBeGreaterThan(ov.y);
+    expect(c2.y).toBeGreaterThan(ov.y);
+    // ...on the same row (≈ equal y) and spread horizontally (distinct x) — the override's shape,
+    // not the map's "side" shape (which would stack them vertically in one column).
+    expect(Math.abs(c1.y - c2.y)).toBeLessThan(30);
+    expect(c1.x).not.toBe(c2.x);
+  });
+
   it("freeform places nodes at their own pos, with a beside-parent fallback for pos-less nodes", () => {
     const fdoc: MindMapDoc = {
       schemaVersion: 1,

@@ -92,6 +92,7 @@ export function project(
         // so the model + fromFlow stay lossless — nothing bakes into node.style.
         condStyle: conditionalStyle(node, rules, progress.get(node.id)?.progress),
         pos: node.pos,
+        layout: node.layout,
         isRoot,
         depth,
         branchColor: color,

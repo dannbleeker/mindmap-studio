@@ -76,7 +76,9 @@ GitHub Pages).
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
   timeline, fishbone, a **grid / matrix** (tiles the first-level branches into a grid — a
   2×2 for SWOT / Eisenhower frames), and a **brace map** (left-to-right tree with `{` fork
-  connectors), switchable from the toolbar and remembered per session.
+  connectors), switchable from the toolbar and remembered per session. **Per-branch layout**:
+  right-click a branch → *Branch layout* to give just that subtree a different layout (e.g. an
+  org-chart branch inside a radial map).
 - **Free-canvas (whiteboard) mode** — **🧲 Free layout** turns any map into a free canvas: drag
   topics anywhere and they stay (the auto-layout pauses). With shapes + directional arrows it makes
   place-anywhere flowcharts, concept maps, and whiteboards; positions persist on the node and flip

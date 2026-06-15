@@ -65,6 +65,7 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
     if (prev?.task) node.task = prev.task;
     if (prev?.callouts) node.callouts = prev.callouts;
     if (prev?.pos) node.pos = prev.pos;
+    if (prev?.layout) node.layout = prev.layout;
     // Collapsed → its subtree isn't in the projection; restore it verbatim from prevDoc.
     node.children = data?.collapsed
       ? (prev?.children ?? [])

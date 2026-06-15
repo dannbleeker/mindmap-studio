@@ -71,6 +71,7 @@ import {
   setHyperlink,
   setImage,
   setLinkLabel,
+  setNodeLayout,
   setNodePos,
   setNote,
   setPriority,
@@ -823,6 +824,30 @@ function FlowInner({
                 </button>
               </li>
             ))}
+            <li style={{ padding: "5px 10px", borderTop: "1px solid #eceafb", marginTop: 2 }}>
+              <label style={{ fontSize: 12, color: "#73726c", display: "block" }}>
+                Branch layout{" "}
+                <select
+                  defaultValue={findNode(docRef.current, menu.id)?.layout ?? ""}
+                  onChange={(e) => {
+                    apply(setNodeLayout(docRef.current, menu.id, e.target.value || undefined));
+                    setMenu(null);
+                  }}
+                  style={{ font: "inherit", marginTop: 2 }}
+                >
+                  <option value="">Default (map)</option>
+                  <option value="org-down">Org chart ↓</option>
+                  <option value="org-up">Org chart ↑</option>
+                  <option value="right">Right</option>
+                  <option value="left">Left</option>
+                  <option value="radial">Radial</option>
+                  <option value="timeline">Timeline</option>
+                  <option value="fishbone">Fishbone</option>
+                  <option value="grid">Grid</option>
+                  <option value="brace">Brace</option>
+                </select>
+              </label>
+            </li>
           </ul>
         ) : null}
         {linkingFrom ? (

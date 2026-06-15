@@ -22,6 +22,8 @@ export type TopicData = {
   condStyle?: NodeStyle;
   /** Free-canvas position (top-left) — used by the freeform layout when the map is in that mode. */
   pos?: { x: number; y: number };
+  /** Per-branch layout override (a LayoutKind); this node's subtree lays out with it. */
+  layout?: string;
   /** The central topic — distinct styling, no incoming branch. */
   isRoot: boolean;
   /** Depth from the root (root = 0); drives branch tapering. */

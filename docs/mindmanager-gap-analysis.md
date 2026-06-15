@@ -81,15 +81,16 @@ reasonably own** — not "everything MindManager has."
 | Kanban board view | ✅ | **▦ Board** — a read-only model-driven view grouping topics into columns by tag (shipped 2026-06-14). |
 | Whiteboard / sticky-note canvas | ✅ | **🧲 Free layout** mode — drag any topic anywhere (positions persist); a free-canvas whiteboard (shipped 2026-06-15). |
 | Auto-layout / smart relationship routing | ✅ | Auto-layout per direction; boundary/minimap overlays track it. |
-| Per-branch layout override | ⬜ | A different layout on one branch — not built. |
+| Per-branch layout override | ✅ | Right-click a branch → **Branch layout**; the subtree uses its own kind (blob-sized so it stays clear of siblings). Shipped 2026-06-15. |
 
 **Read:** the alternate-layout gap is **closed** — org-chart, timeline, fishbone, radial, and now
 **grid/matrix** all ship with the React Flow engine. The flowchart/concept-map gap is **closed too**:
 node shapes (the flowchart vocabulary), directional relationship arrows, and starter templates
 (2026-06-14), plus **🧲 Free layout** free-canvas positioning, the **brace-map** layout, and the
 **◎ Diagram** backdrop builders (onion / funnel / Venn) (2026-06-15) — so flowcharts, concept maps,
-whiteboards, brace maps, and the funnel/onion/Venn frames are all first-class. The only §2 item left
-is a **per-branch layout override**.
+whiteboards, brace maps, and the funnel/onion/Venn frames are all first-class — and **per-branch
+layout** (a different layout on one branch) shipped 2026-06-15. **§2 (layouts & structures) is now
+fully closed.**
 
 ## 3. Styling & design
 

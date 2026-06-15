@@ -21,6 +21,7 @@ import {
   setBackground,
   setDue,
   setFreeform,
+  setNodeLayout,
   setNodePos,
   setNote,
   setPriority,
@@ -291,6 +292,15 @@ describe("flow ops — free-canvas (whiteboard) mode", () => {
   it("setNodePos is a no-op (same doc) for an unknown id", () => {
     const doc = base();
     expect(setNodePos(doc, "nope", 1, 2).doc).toBe(doc);
+  });
+
+  it("setNodeLayout sets a per-branch layout override and clears it on undefined / empty", () => {
+    const d1 = setNodeLayout(base(), "a", "org-down").doc;
+    expect(findNode(d1, "a")?.layout).toBe("org-down");
+    expect(findNode(setNodeLayout(d1, "a", undefined).doc, "a")?.layout).toBeUndefined();
+    expect(findNode(setNodeLayout(d1, "a", "").doc, "a")?.layout).toBeUndefined();
+    const noNode = base();
+    expect(setNodeLayout(noNode, "nope", "grid").doc).toBe(noNode); // no-op for unknown id
   });
 
   it("setFreeform on seeds pos from the map + flags meta.freeform", () => {

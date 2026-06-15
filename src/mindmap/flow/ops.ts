@@ -570,6 +570,29 @@ export function clearBackdrop(doc: MindMapDoc): OpResult {
   return { doc: next };
 }
 
+/** Per-branch layout: set (or clear, with undefined / "") a node's subtree layout override.
+ *  Searches the tree and floating topics; a no-op (same doc) if the id isn't found. */
+export function setNodeLayout(doc: MindMapDoc, id: string, kind: string | undefined): OpResult {
+  const next = structuredClone(doc);
+  const walk = (n: MapNode): boolean => {
+    if (n.id === id) {
+      n.layout = kind || undefined;
+      return true;
+    }
+    return n.children.some(walk);
+  };
+  let hit = walk(next.root);
+  if (!hit) {
+    for (const f of next.floatingTopics ?? []) {
+      if (walk(f)) {
+        hit = true;
+        break;
+      }
+    }
+  }
+  return { doc: hit ? next : doc };
+}
+
 /** Toggle free-canvas mode. When enabling with a positions map, seed each node's `pos` from it so
  *  the switch is seamless; disabling clears the flag but keeps positions (for re-enabling). */
 export function setFreeform(

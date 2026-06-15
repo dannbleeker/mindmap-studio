@@ -245,6 +245,10 @@ map re-flows into the new shape without losing any edits:
   its subtree beneath it and the root as a title above; the shape of a SWOT or Eisenhower matrix.
 - **Brace map** — a left-to-right tree where each parent joins its children with a `{` fork brace
   (the Thinking-Maps part-whole diagram) instead of the curved branches.
+- **Per-branch layout** — right-click any branch → **Branch layout** and pick a kind to lay out just
+  that subtree differently from the rest of the map (e.g. an org-chart branch inside a radial map);
+  pick **Default (map)** to clear it. The subtree is kept clear of its siblings, and the choice
+  travels with the map.
 - **🧲 Free layout (whiteboard)** — a toggle (next to the layout picker), not a layout. Turn it on and
   you can **drag any topic anywhere** — it stays put and the auto-layout pauses. Combined with node
   shapes and directional arrows, this is how you build a **place-anywhere flowchart, concept map, or

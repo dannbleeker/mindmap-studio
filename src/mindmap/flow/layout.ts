@@ -49,7 +49,123 @@ interface Ctx {
   positions: Map<string, Point>;
 }
 
+/** Lay out the nodes for `kind`. A node carrying a `data.layout` override lays its OWN subtree out
+ *  with that kind (sized as a single blob in the main pass) — the per-branch-layout feature. With
+ *  no overrides this is exactly computeLayoutPlain, so the common path can't regress. */
 export function computeLayout(
+  nodes: TopicNode[],
+  edges: FlowEdge[],
+  sizeOf: SizeOf = () => DEFAULT_SIZE,
+  kind: LayoutKind = "side",
+): Map<string, Point> {
+  const overrideRoots =
+    kind === "freeform"
+      ? []
+      : nodes.filter((n) => n.data.layout && !n.data.isRoot && n.data.layout !== kind);
+  return overrideRoots.length === 0
+    ? computeLayoutPlain(nodes, edges, sizeOf, kind)
+    : computeLayoutComposite(nodes, edges, sizeOf, kind, overrideRoots);
+}
+
+// Per-branch layout: each override root lays its subtree out with its own kind; the main pass
+// reserves a single blob sized to that sub-layout's bounding box, then the subtree is translated
+// onto the blob. Naturally recursive (a nested override is resolved by the sub-call) and additive
+// (zero effect when nothing carries an override).
+function computeLayoutComposite(
+  nodes: TopicNode[],
+  edges: FlowEdge[],
+  sizeOf: SizeOf,
+  kind: LayoutKind,
+  overrideRoots: TopicNode[],
+): Map<string, Point> {
+  const sizeFn: SizeOf = (id) => {
+    const s = sizeOf(id);
+    return { width: s.width || DEFAULT_SIZE.width, height: s.height || DEFAULT_SIZE.height };
+  };
+  const childrenOf = new Map<string, string[]>();
+  for (const e of edges) {
+    if (e.data?.crosslink) continue;
+    const arr = childrenOf.get(e.source);
+    if (arr) arr.push(e.target);
+    else childrenOf.set(e.source, [e.target]);
+  }
+  const subtreeIds = (rootId: string): Set<string> => {
+    const out = new Set<string>();
+    const walk = (id: string): void => {
+      out.add(id);
+      for (const c of childrenOf.get(id) ?? []) walk(c);
+    };
+    walk(rootId);
+    return out;
+  };
+
+  const excluded = new Set<string>(); // override-subtree descendants (the roots stay in the main pass)
+  const subs = new Map<
+    string,
+    { pos: Map<string, Point>; minX: number; minY: number; w: number; h: number }
+  >();
+  for (const orNode of overrideRoots) {
+    const ids = subtreeIds(orNode.id);
+    for (const id of ids) if (id !== orNode.id) excluded.add(id);
+    // Sub-layout the subtree as its own little map: rebase depth so the override root is depth 0
+    // (the layouts index by depth from 0), flag it isRoot, and consume its override.
+    const baseDepth = orNode.data.depth;
+    const subNodes = nodes
+      .filter((n) => ids.has(n.id))
+      .map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          depth: n.data.depth - baseDepth,
+          ...(n.id === orNode.id ? { isRoot: true, layout: undefined } : {}),
+        },
+      }));
+    const subEdges = edges.filter((e) => ids.has(e.source) && ids.has(e.target));
+    const pos = computeLayout(subNodes, subEdges, sizeOf, orNode.data.layout as LayoutKind);
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
+    for (const [id, p] of pos) {
+      const s = sizeFn(id);
+      minX = Math.min(minX, p.x);
+      minY = Math.min(minY, p.y);
+      maxX = Math.max(maxX, p.x + s.width);
+      maxY = Math.max(maxY, p.y + s.height);
+    }
+    if (!Number.isFinite(minX)) {
+      minX = 0;
+      minY = 0;
+      maxX = 0;
+      maxY = 0;
+    }
+    subs.set(orNode.id, { pos, minX, minY, w: maxX - minX, h: maxY - minY });
+  }
+
+  // Main pass: drop the override descendants; size each override root as its blob; lay out normally.
+  const mainNodes = nodes
+    .filter((n) => !excluded.has(n.id))
+    .map((n) => (subs.has(n.id) ? { ...n, data: { ...n.data, layout: undefined } } : n));
+  const mainEdges = edges.filter((e) => !excluded.has(e.source) && !excluded.has(e.target));
+  const mainSizeOf: SizeOf = (id) => {
+    const sub = subs.get(id);
+    return sub ? { width: sub.w, height: sub.h } : sizeOf(id);
+  };
+  const mainPos = computeLayout(mainNodes, mainEdges, mainSizeOf, kind);
+
+  // Translate each sub-layout so its bbox top-left lands on the blob the main pass reserved.
+  const out = new Map<string, Point>(mainPos);
+  for (const [rootId, sub] of subs) {
+    const anchor = mainPos.get(rootId);
+    if (!anchor) continue;
+    const tx = anchor.x - sub.minX;
+    const ty = anchor.y - sub.minY;
+    for (const [id, p] of sub.pos) out.set(id, { x: p.x + tx, y: p.y + ty });
+  }
+  return out;
+}
+
+function computeLayoutPlain(
   nodes: TopicNode[],
   edges: FlowEdge[],
   sizeOf: SizeOf = () => DEFAULT_SIZE,

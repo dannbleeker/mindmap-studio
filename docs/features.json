@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 110,
+  "reviewedThroughChangelogBullets": 111,
   "areas": [
     "editing",
     "notes",
@@ -429,6 +429,15 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "per-branch-layout",
+      "name": "Per-branch layout — right-click a branch → Branch layout; its subtree uses its own kind (blob-sized, composes)",
+      "area": "navigation",
+      "since": "2026-06-15",
+      "manual": true,
+      "book": false,
+      "bookExample": false
     },
     {
       "id": "multi-map-library",

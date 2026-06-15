@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Per-branch layout** — right-click a branch → **Branch layout** to lay out just that subtree with
+  a different layout (e.g. an org-chart branch inside a radial map). The override subtree is sized as
+  one blob in the main pass so it doesn't collide with its siblings, and nested overrides compose.
+  Stored on the node, lossless in `.json`; the export matches the screen.
 - **Diagram backdrops — Funnel + Venn** — the **◎ Diagram** builder now also draws a **funnel**
   (stacked stages narrowing to a conversion; **−/+** changes the stage count) and **Venn** frames
   (**2** or **3** overlapping circles). Like the onion, they're pure geometry shared by the canvas

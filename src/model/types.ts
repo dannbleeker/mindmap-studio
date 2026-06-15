@@ -97,6 +97,9 @@ export interface MapNode {
   /** Free-canvas position (top-left, in flow coords). Used only when the map is in freeform mode
    *  (`meta.freeform`); the auto-layouts ignore it. Lossless in .json, ignored by flat exporters. */
   pos?: { x: number; y: number };
+  /** Per-branch layout override: this node's subtree lays out with this layout kind (a `LayoutKind`)
+   *  instead of the map's. Lossless in .json, ignored by flat exporters. */
+  layout?: string;
 }
 
 /** A labelled cross-link between two nodes (MindManager "relationship"). */

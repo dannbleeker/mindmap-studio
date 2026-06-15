@@ -123,6 +123,12 @@ the browser's database) and travels with nothing -- a private undo that outlives
 the in-session Undo (Chapter 2) stops at the last reload. Think of Backup as the whole-library
 snapshot and History as the per-map flight recorder.
 
+There's also a **▶ Play timeline** button: instead of eyeballing the list, play the snapshots back
+in order and *watch* the map grow on the canvas -- step frame by frame, drag the scrubber to any
+point, or let it auto-play. It's read-only while you watch, so nothing changes until you pick a
+frame and hit **Restore this** (or **Exit**, or Esc, to drop back to the live map). On a map you've
+been building for weeks, it's a quietly satisfying way to see how the thinking took shape.
+
 ## Where your data lives
 
 Nothing in this chapter sends your map anywhere. Exports are files saved to *your*

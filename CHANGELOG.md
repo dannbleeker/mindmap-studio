@@ -7,6 +7,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Version-history timeline playback** — the **🕔 History** panel gains a **▶ Play timeline**
+  button: step, scrub, or auto-play through a map's saved snapshots and watch it evolve on the
+  canvas (read-only), then **Restore this** at any frame, or **Exit** (Esc) back to the live map.
 - **Per-topic font family** — the **🎨 Styles** bar gains a **Font** picker (Sans / Serif / Mono);
   it applies to the selected topic and carries into the SVG / PNG / PDF / Office exports.
 - **TextBundle / TextPack import** — open a `.textpack` (Bear, Ulysses, iA Writer) and its Markdown

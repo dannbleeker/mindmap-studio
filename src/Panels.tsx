@@ -587,11 +587,13 @@ export function FilterPanel({
 export function HistoryPanel({
   versions,
   onSaveNow,
+  onPlay,
   onRestore,
   onClose,
 }: {
   versions: VersionMeta[];
   onSaveNow: () => void;
+  onPlay: () => void;
   onRestore: (id: string) => void;
   onClose: () => void;
 }) {
@@ -623,6 +625,19 @@ export function HistoryPanel({
         style={{ ...controlStyle, margin: "0 10px 6px", padding: "4px 8px", fontSize: 12 }}
       >
         ＋ Save version now
+      </button>
+      <button
+        type="button"
+        onClick={onPlay}
+        disabled={versions.length < 2}
+        title={
+          versions.length < 2
+            ? "Save at least two versions to play the timeline"
+            : "Play the map's history as a timeline"
+        }
+        style={{ ...controlStyle, margin: "0 10px 8px", padding: "4px 8px", fontSize: 12 }}
+      >
+        ▶ Play timeline
       </button>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {versions.length === 0 ? (
@@ -665,6 +680,98 @@ export function HistoryPanel({
         )}
       </div>
     </aside>
+  );
+}
+
+/** The bottom overlay controls for version-history timeline playback (state lives in App). */
+export function PlaybackBar({
+  index,
+  count,
+  playing,
+  label,
+  onPlayPause,
+  onStep,
+  onSeek,
+  onRestore,
+  onExit,
+}: {
+  index: number;
+  count: number;
+  playing: boolean;
+  label: string;
+  onPlayPause: () => void;
+  onStep: (delta: number) => void;
+  onSeek: (index: number) => void;
+  onRestore: () => void;
+  onExit: () => void;
+}) {
+  const btn = { ...controlStyle, padding: "2px 9px", fontSize: 13 } as const;
+  return (
+    <div
+      role="toolbar"
+      aria-label="History playback"
+      style={{
+        position: "absolute",
+        left: "50%",
+        bottom: 16,
+        transform: "translateX(-50%)",
+        zIndex: 11,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 12px",
+        background: "rgba(255,255,255,0.95)",
+        border: "1px solid #d9d7ea",
+        borderRadius: 12,
+        boxShadow: "0 6px 24px rgba(31,27,77,0.18)",
+        maxWidth: "min(560px, calc(100% - 24px))",
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => onStep(-1)}
+        disabled={index <= 0}
+        style={btn}
+        title="Previous version"
+        aria-label="Previous version"
+      >
+        ⏮
+      </button>
+      <button
+        type="button"
+        onClick={onPlayPause}
+        style={btn}
+        aria-label={playing ? "Pause" : "Play"}
+      >
+        {playing ? "⏸" : "▶"}
+      </button>
+      <button
+        type="button"
+        onClick={() => onStep(1)}
+        disabled={index >= count - 1}
+        style={btn}
+        title="Next version"
+        aria-label="Next version"
+      >
+        ⏭
+      </button>
+      <input
+        type="range"
+        min={0}
+        max={Math.max(0, count - 1)}
+        value={index}
+        onChange={(e) => onSeek(Number(e.target.value))}
+        aria-label="Version timeline"
+        style={{ flex: 1, minWidth: 90, accentColor: "#6c63d8" }}
+      />
+      <span style={{ fontSize: 12, color: "#73726c", whiteSpace: "nowrap" }}>{label}</span>
+      <button type="button" onClick={onRestore} style={btn} title="Restore this version">
+        Restore this
+      </button>
+      <button type="button" onClick={onExit} style={btn} title="Exit playback (Esc)">
+        Exit
+      </button>
+    </div>
   );
 }
 

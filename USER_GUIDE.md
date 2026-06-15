@@ -438,6 +438,12 @@ on demand with **Save version now**. History is capped at the 30 most recent per
 pruned), lives entirely in your browser (IndexedDB), and is deleted along with the map. It's the
 fine-grained companion to **Backup** (which snapshots the *whole library* to a file).
 
+**▶ Play timeline** turns that list into a playback: it shows each snapshot on the canvas in order,
+oldest to newest, so you can *watch* the map evolve. A control bar gives you play/pause, step
+(⏮ / ⏭), and a scrubber to jump to any point; playback is **read-only**, so nothing changes until
+you click **Restore this** at the frame you want — or **Exit** (or press **Esc**) to return to the
+live map. Needs at least two saved versions.
+
 ### Backup & restore
 
 **⬇ Backup** saves your entire library — every map — into a single `mindmap-library.json`.

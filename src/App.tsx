@@ -8,6 +8,7 @@ import {
   MarkerTagIndex,
   type NamedStyle,
   OutlinePanel,
+  PlaybackBar,
   StylesPanel,
 } from "./Panels";
 import { StartScreen } from "./components/start/StartScreen";
@@ -20,6 +21,7 @@ import {
   focusSet,
   isFilterActive,
 } from "./filter";
+import { clampIndex, nextPlaybackIndex, togglePlay } from "./historyPlayback";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
 import { fileToMapImage } from "./io/image";
@@ -52,12 +54,14 @@ import { type LibraryHit, searchLibrary } from "./search";
 import {
   type MapSummary,
   type VersionMeta,
+  type VersionSnapshot,
   deleteMap,
   getAllMaps,
   getLastOpened,
   latestVersionDoc,
   listMaps,
   listVersions,
+  loadAllVersions,
   loadMap,
   loadVersion,
   saveMap,
@@ -66,7 +70,7 @@ import {
 } from "./store/mapStore";
 import { todayISO } from "./taskDate";
 import { buildTemplate, templates } from "./templates";
-import { controlStyle, inputStyle } from "./ui";
+import { controlStyle, inputStyle, timeAgo } from "./ui";
 import { useFind } from "./useFind";
 import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
@@ -301,6 +305,13 @@ export function App() {
   const [stylesOpen, setStylesOpen] = useState(false);
   const [versions, setVersions] = useState<VersionMeta[]>([]);
   const [restoreRev, setRestoreRev] = useState(0);
+  // Version-history timeline playback: when non-null, the canvas shows snaps[index]
+  // read-only instead of the live doc, stepped/scrubbed via the PlaybackBar.
+  const [playback, setPlayback] = useState<{
+    snaps: VersionSnapshot[];
+    index: number;
+    playing: boolean;
+  } | null>(null);
   const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
   const [aboutOpen, setAboutOpen] = useState(false);
   const aboutRef = useRef<HTMLDialogElement>(null);
@@ -461,6 +472,43 @@ export function App() {
       showHint("Couldn't restore the version.");
     }
   }
+
+  // --- version-history timeline playback ---
+  async function startPlayback() {
+    try {
+      const snaps = await loadAllVersions(liveDocRef.current.id);
+      if (snaps.length < 2) {
+        showHint("Save at least two versions to play the timeline.");
+        return;
+      }
+      setPlayback({ snaps, index: 0, playing: true });
+    } catch {
+      showHint("Couldn't load the history for playback.");
+    }
+  }
+
+  // Advance one frame per tick while playing; stop at the newest snapshot (don't loop).
+  useEffect(() => {
+    if (!playback?.playing) return;
+    const t = setInterval(() => {
+      setPlayback((p) => {
+        if (!p) return p;
+        const nxt = nextPlaybackIndex(p.index, p.snaps.length);
+        return nxt === null ? { ...p, playing: false } : { ...p, index: nxt };
+      });
+    }, 1100);
+    return () => clearInterval(t);
+  }, [playback?.playing]);
+
+  // Esc exits playback (matching the presentation overlay).
+  useEffect(() => {
+    if (!playback) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPlayback(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [playback]);
 
   // Refresh the history list whenever the panel opens.
   useEffect(() => {
@@ -1678,6 +1726,7 @@ export function App() {
             <HistoryPanel
               versions={versions}
               onSaveNow={saveVersionNow}
+              onPlay={startPlayback}
               onRestore={restoreVersion}
               onClose={() => setHistoryOpen(false)}
             />
@@ -1737,14 +1786,15 @@ export function App() {
           )}
           <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
             <MindMap
-              key={`${doc.id}:${restoreRev}`}
+              key={playback ? `pb:${playback.index}` : `${doc.id}:${restoreRev}`}
               ref={mapRef}
-              doc={doc}
+              doc={playback ? playback.snaps[playback.index].doc : doc}
               theme={theme.theme}
               direction={layout}
               numbered={numbered}
-              litIds={litIds}
+              litIds={playback ? null : litIds}
               onChange={(d) => {
+                if (playback) return; // read-only while reviewing history
                 liveDocRef.current = d;
                 setLiveDoc(d);
                 scheduleSave();
@@ -1764,6 +1814,40 @@ export function App() {
                   onClose={() => setBoardOpen(false)}
                 />
               </div>
+            )}
+            {/* Version-history timeline playback overlay (the canvas above shows the snapshot). */}
+            {playback && (
+              <PlaybackBar
+                index={playback.index}
+                count={playback.snaps.length}
+                playing={playback.playing}
+                label={`${playback.index + 1} / ${playback.snaps.length} · ${timeAgo(
+                  playback.snaps[playback.index].ts,
+                )}`}
+                onPlayPause={() =>
+                  setPlayback((p) =>
+                    p ? { ...p, ...togglePlay(p.index, p.snaps.length, p.playing) } : p,
+                  )
+                }
+                onStep={(delta) =>
+                  setPlayback((p) =>
+                    p
+                      ? { ...p, index: clampIndex(p.index + delta, p.snaps.length), playing: false }
+                      : p,
+                  )
+                }
+                onSeek={(i) =>
+                  setPlayback((p) =>
+                    p ? { ...p, index: clampIndex(i, p.snaps.length), playing: false } : p,
+                  )
+                }
+                onRestore={() => {
+                  const id = playback.snaps[playback.index].id;
+                  setPlayback(null);
+                  void restoreVersion(id);
+                }}
+                onExit={() => setPlayback(null)}
+              />
             )}
           </div>
         </div>

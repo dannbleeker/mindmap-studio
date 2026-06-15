@@ -100,6 +100,11 @@ export interface VersionMeta {
   nodeCount: number;
 }
 
+/** A version's metadata plus its full doc — the source for timeline playback. */
+export interface VersionSnapshot extends VersionMeta {
+  doc: MindMapDoc;
+}
+
 function docNodeCount(doc: MindMapDoc): number {
   const walk = (n: MapNode): number => 1 + n.children.reduce((sum, c) => sum + walk(c), 0);
   return walk(doc.root) + (doc.floatingTopics ?? []).reduce((sum, f) => sum + walk(f), 0);
@@ -125,6 +130,14 @@ export async function listVersions(mapId: string): Promise<VersionMeta[]> {
   return recs
     .map((r) => ({ id: r.id, ts: r.ts, title: r.title, nodeCount: r.nodeCount }))
     .sort((a, b) => b.ts - a.ts);
+}
+
+/** A map's snapshots with their docs, oldest first — the source for timeline playback. */
+export async function loadAllVersions(mapId: string): Promise<VersionSnapshot[]> {
+  const recs = await (await db()).getAllFromIndex("versions", "by-map", mapId);
+  return recs
+    .map((r) => ({ id: r.id, ts: r.ts, title: r.title, nodeCount: r.nodeCount, doc: r.doc }))
+    .sort((a, b) => a.ts - b.ts);
 }
 
 export async function loadVersion(id: string): Promise<MindMapDoc | null> {

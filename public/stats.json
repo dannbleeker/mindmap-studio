@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T04:25:13.185Z",
-  "commit": "5ca1ca6",
+  "generatedAt": "2026-06-15T04:33:55.040Z",
+  "commit": "ae9d03b",
   "headline": {
-    "linesTsJs": 20485,
-    "tests": 484,
-    "lineCoveragePct": 47.56,
-    "commits": 311,
+    "linesTsJs": 20651,
+    "tests": 487,
+    "lineCoveragePct": 48.26,
+    "commits": 313,
     "ageDays": 3,
     "trackedFiles": 199,
     "featureManualPct": 100,
@@ -16,12 +16,12 @@
     {
       "category": "App code (src)",
       "files": 79,
-      "lines": 13085
+      "lines": 13228
     },
     {
       "category": "Unit tests",
       "files": 60,
-      "lines": 5678
+      "lines": 5701
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 47.56,
-      "covered": 4512,
-      "total": 9486
+      "pct": 48.26,
+      "covered": 4644,
+      "total": 9621
     },
     "statements": {
-      "pct": 47.56,
-      "covered": 4512,
-      "total": 9486
+      "pct": 48.26,
+      "covered": 4644,
+      "total": 9621
     },
     "functions": {
-      "pct": 91,
-      "covered": 364,
-      "total": 400
+      "pct": 91.19,
+      "covered": 373,
+      "total": 409
     },
     "branches": {
-      "pct": 82.89,
-      "covered": 1541,
-      "total": 1859
+      "pct": 83.02,
+      "covered": 1555,
+      "total": 1873
     }
   },
   "tests": {
-    "unit": 484,
+    "unit": 487,
     "e2e": 0,
-    "durationMs": 9587,
+    "durationMs": 9749,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2273
+        "ms": 2203
+      },
+      {
+        "file": "test/timeAgo.test.ts",
+        "ms": 274
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 178
+        "ms": 176
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 119
+        "ms": 115
       },
       {
         "file": "test/docx-import.test.ts",
-        "ms": 71
-      },
-      {
-        "file": "test/xmind.test.ts",
-        "ms": 61
+        "ms": 74
       }
     ]
   },
@@ -103,7 +103,7 @@
     "biggestFiles": [
       {
         "name": "App.tsx",
-        "lines": 1788
+        "lines": 1791
       },
       {
         "name": "Panels.tsx",
@@ -115,7 +115,7 @@
       },
       {
         "name": "examples.ts",
-        "lines": 624
+        "lines": 677
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 87
+        "commits": 88
       },
       {
         "file": "mindmap/MindMap.tsx",
@@ -173,7 +173,7 @@
       {
         "file": "App.tsx",
         "pct": 0,
-        "commits": 87
+        "commits": 88
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
@@ -208,18 +208,18 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 205.7,
+    "jsGzipKb": 206.5,
     "cssGzipKb": 2.5,
-    "totalGzipKb": 208.2,
-    "entryGzipKb": 91.9,
+    "totalGzipKb": 209,
+    "entryGzipKb": 92.3,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 9822,
     "chapters": 11,
-    "appLoc": 13085,
-    "docToCodeRatio": 0.75
+    "appLoc": 13228,
+    "docToCodeRatio": 0.74
   },
   "featureCoverage": {
     "total": 96,
@@ -301,7 +301,7 @@
         },
         {
           "id": "diagram-backdrops",
-          "name": "Diagram backdrops — ◎ Diagram builder draws an onion frame (rings ±/remove); drop topics into regions (canvas == export)",
+          "name": "Diagram backdrops — ◎ Diagram builder: onion / funnel / Venn (2,3) frames; drop topics into regions (canvas == export)",
           "since": "2026-06-15"
         },
         {
@@ -390,22 +390,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 3,
-    "commits": 311,
-    "commits7d": 311,
+    "commits": 313,
+    "commits7d": 313,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 182
+        "count": 183
       },
       {
         "name": "github-actions[bot]",
-        "count": 129
+        "count": 130
       }
     ],
     "churn30d": {
-      "added": 45262,
-      "removed": 12116
+      "added": 45532,
+      "removed": 12208
     },
-    "changelogEntries": 109
+    "changelogEntries": 110
   }
 }

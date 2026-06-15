@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T08:04:25.249Z",
-  "commit": "2fc9a99",
+  "generatedAt": "2026-06-15T08:13:09.225Z",
+  "commit": "215b5bd",
   "headline": {
-    "linesTsJs": 22624,
+    "linesTsJs": 22690,
     "tests": 504,
-    "lineCoveragePct": 43.86,
-    "commits": 322,
+    "lineCoveragePct": 43.64,
+    "commits": 324,
     "ageDays": 3,
     "trackedFiles": 224,
     "featureManualPct": 100,
@@ -16,7 +16,7 @@
     {
       "category": "App code (src)",
       "files": 102,
-      "lines": 14973
+      "lines": 15039
     },
     {
       "category": "Unit tests",
@@ -41,14 +41,14 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 43.86,
+      "pct": 43.64,
       "covered": 4814,
-      "total": 10975
+      "total": 11030
     },
     "statements": {
-      "pct": 43.86,
+      "pct": 43.64,
       "covered": 4814,
-      "total": 10975
+      "total": 11030
     },
     "functions": {
       "pct": 87.5,
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 504,
     "e2e": 0,
-    "durationMs": 10212,
+    "durationMs": 10971,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2234
+        "ms": 2629
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 173
+        "ms": 170
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 130
+        "ms": 161
+      },
+      {
+        "file": "test/version-store.test.ts",
+        "ms": 95
       },
       {
         "file": "test/docx-import.test.ts",
-        "ms": 77
-      },
-      {
-        "file": "test/xlsx.test.ts",
-        "ms": 71
+        "ms": 90
       }
     ]
   },
@@ -208,18 +208,18 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 214.8,
+    "jsGzipKb": 215.3,
     "cssGzipKb": 4.7,
-    "totalGzipKb": 219.5,
-    "entryGzipKb": 99.8,
+    "totalGzipKb": 220,
+    "entryGzipKb": 100.3,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 9822,
     "chapters": 11,
-    "appLoc": 14973,
-    "docToCodeRatio": 0.66
+    "appLoc": 15039,
+    "docToCodeRatio": 0.65
   },
   "featureCoverage": {
     "total": 99,
@@ -405,21 +405,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 3,
-    "commits": 322,
-    "commits7d": 322,
+    "commits": 324,
+    "commits7d": 324,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 188
+        "count": 189
       },
       {
         "name": "github-actions[bot]",
-        "count": 134
+        "count": 135
       }
     ],
     "churn30d": {
-      "added": 48601,
-      "removed": 12574
+      "added": 48742,
+      "removed": 12643
     },
     "changelogEntries": 113
   }

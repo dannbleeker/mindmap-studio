@@ -15,9 +15,11 @@ every push to `main` — live at <https://mindmap-studio.struktureretsundfornuft
 - [ ] **AI assist** — the one remaining major cluster. Only a **keyless copy-prompt → paste-result
       bridge** (or optional BYO-key) fits the no-backend identity; paste-to-tree is half-built via
       OPML/Markdown import. Prompt→map, expand-branch, doc/URL→map, summarise. *Needs a go/no-go.*
-- [ ] **Grow the book** to cover the recent structure features — node shapes, directional arrows,
-      grid/brace layouts, the onion/funnel/Venn backdrops, free-canvas mode, per-branch layout, and
-      sheets. Catalogue is **manual 100% but book ~80%** (`docs/features.json`).
+- [ ] **Grow the book** further. The recent **structure** features are now covered (summary topics,
+      node shapes, free-canvas, onion/funnel/Venn backdrops, per-branch layout, sheets) — catalogue
+      **manual 100%, book 84.8%** (`docs/features.json`). Remaining book gaps are in *other* areas:
+      task markers (progress/priority/dates), conditional formatting + styles organizer, Kanban,
+      quick-add / drop-link / timer, MindMup + Markmap import, saved filters, fuzzy find, start screen.
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.

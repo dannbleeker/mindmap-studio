@@ -1,6 +1,6 @@
 # MindManager → MindMap Studio: feature gap analysis
 
-_Last updated: 2026-06-14._
+_Last updated: 2026-06-15._
 
 > **Update (2026-06-14): the renderer-ceiling cluster is RESOLVED.** The canvas engine was
 > migrated from mind-elixir to **React Flow** (mind-elixir now removed), which shipped the
@@ -62,7 +62,7 @@ reasonably own** — not "everything MindManager has."
 | Topic-to-topic link **within** a map | ✅ | In-map jump links (`#node=`), plus relationships + cross-map links. |
 | Map roll-ups (pull subtrees from many maps) | ⬜ / 🚫-ish | Feasible against the local library, but niche; low priority. |
 | Sticky-note topics | ⬜ | A free-floating note style; overlaps floating topics. Minor. |
-| Object shapes (arrows, chevrons, …) | 🟡 | We ship box / rounded / pill shapes; richer shape libraries are renderer-limited (🧱). |
+| Object shapes (arrows, chevrons, …) | ✅ | Geometric flowchart shapes ship — diamond / oval / parallelogram / hexagon / cylinder (canvas == export; see §3) — plus directional relationship arrows. A broader clip-art shape *library* stays low-priority. |
 | Auto-numbering of topics | ✅ | A view toggle (1, 1.2, …) on canvas + outline + exports. |
 | Cut/copy/paste branches across maps | 🟡 | Within-map editing is full; cross-map branch paste is ⬜. |
 
@@ -258,32 +258,37 @@ Everything 🚫 is intentionally excluded. Ranked by value ÷ effort, and reconc
   overdue, a **Due date** option in the Power Filter, carried into image exports) shipped 2026-06-14 —
   more of cluster C. Stored on `task.start`/`task.due`; lossless in `.json`.
 
-### Remaining buildable gaps (as of 2026-06-14, in rough priority order)
+**2026-06-15 wave — the diagram & structure clusters that closed §2:**
+- **Node shapes** — geometric flowchart vocabulary (diamond / oval / parallelogram / hexagon / cylinder), canvas == export.
+- **Grid / matrix layout** (2×2 SWOT) + **directional relationship arrows** + **flowchart / concept-map** starter templates.
+- **Free-canvas / whiteboard mode** (🧲 Free layout — drag anywhere, positions persist).
+- **Brace map** layout + the **◎ Diagram backdrops** (onion / funnel / Venn 2,3).
+- **Per-branch layout override** (right-click → Branch layout) + **multiple sheets per file** (▦ +Sheet workbook + tab strip + ⤓ Workbook export).
+- **Start screen** (home: capture hero, library, templates, layouts, ⌘K palette); book *Thinking in Maps* grown to cover the structure features.
 
-After this session the in-scope list is short. What's genuinely left:
+### Remaining buildable gaps (as of 2026-06-15)
 
-1. **More diagram types** — a **flowchart / true concept map** (free connectors + place-anywhere
-   nodes, beyond the tree) and **matrix / Venn / onion / funnel** diagrams. Each is its own builder;
-   multi-day. (React Flow makes them *possible* now — no longer renderer-blocked — just not small.)
-3. **Free-form whiteboard / sticky-note canvas** — place notes anywhere, not in a tree.
-4. **Richer node shapes** (diamond / hexagon / chevron …) and **per-branch layout override** — both
-   need clip-path/geometry + export work to avoid clipping text.
-5. **LaTeX / math rendering** in topics/notes — the one heavy item: needs KaTeX (large JS + ~1 MB of
-   offline-precached fonts) for something MindManager doesn't do natively. **Deferred by decision**
-   (2026-06-14) on the offline-cache cost.
-6. **Cross-map branch copy/paste** + multi-map roll-ups; **sticky-note topics** (minor).
-8. **Interchange long-tail** — **image-bearing `.mmap`** import (blocked on a real sample) and a
-   **`.mmap` writer** (large XSD, high-risk). *(XMind export + MindMup/Markmap import all ship.)*
-9. **Dedicated mobile UX** — the PWA is responsive-ish but not phone-optimised.
+The in-scope list is now down to a handful of minor items:
 
-### Bigger bets (see the cross-tool matrix)
-- **AI assist** via a **keyless copy-prompt / paste-result bridge** (paste-to-tree is half-built
-  through OPML/Markdown import + Paste-text) — the biggest category-wide gap, deliberately **deferred**;
-  see [`competitive-feature-matrix.md`](competitive-feature-matrix.md) cluster A.
-- **More structures** (flowchart, true concept map, matrix, Venn/funnel) — cluster B.
+1. **Dedicated mobile / phone UX** — the PWA is responsive-ish but not phone-optimised. The one
+   substantive in-scope item still open (low priority).
+2. **Cross-map branch copy/paste** + **multi-map roll-ups** (pull subtrees from several library
+   maps). Sheets already cover "one file, many maps"; this is the cross-*map* case. Niche.
+3. **Sticky-note topics** — a free-floating note style; overlaps floating topics + free-canvas. Minor.
 
-> For the **full market landscape** (all 19 tools, not just MindManager) and the A–G gap
-> clusters, see [`competitive-feature-matrix.md`](competitive-feature-matrix.md).
+### Deferred by decision (revisit only on a go/no-go)
+- **AI assist** — a **keyless copy-prompt → paste-result bridge** (paste-to-tree is half-built via
+  OPML/Markdown import + Paste-text). The biggest category-wide gap; see
+  [`competitive-feature-matrix.md`](competitive-feature-matrix.md) cluster A.
+- **LaTeX / math** in topics/notes — needs KaTeX (large JS + ~1 MB of offline-precached fonts) for
+  something MindManager doesn't do natively. Deferred on the offline-cache cost.
+
+### Blocked / low-value interchange long-tail
+- **Image-bearing `.mmap`** import — blocked on a real image-bearing sample file.
+- **`.mmap` writer** — large XSD, high-risk, low value (open formats already bridge every tool).
+
+> For the **full market landscape** (all 19 tools, not just MindManager) and the A–G gap clusters,
+> see [`competitive-feature-matrix.md`](competitive-feature-matrix.md).
 
 ## Where MindMap Studio already leads
 
@@ -292,8 +297,9 @@ ahead of MindManager on **open interchange** (it reads/writes `.mmap`, OPML, Mar
 FreeMind, Mermaid, XMind, JSON, plus Office/image/HTML export — more open formats than
 MindManager), on **navigation** (it ships a minimap MindManager has dropped), on **price +
 privacy** (free, local-first, offline, no account), and on **being genuinely cross-platform**
-from one codebase. The visual-variety gap that this doc once led with (layouts, callouts,
-rich text, summary topics) is **closed**. The honest summary now: we trail only on a few **non-tree
-diagram types** (flowchart / concept map / matrix / Venn / funnel) and we intentionally don't play in
-**PM, collaboration, and enterprise**. The roadmap that follows: build the remaining diagram types as
-the appetite arises, and stay out of the two excluded layers.
+from one codebase. The visual-variety gap this doc once led with — layouts, callouts, rich text,
+summary topics, **and the non-tree diagram types** (flowchart / concept map / matrix / Venn / funnel /
+whiteboard) — is now **closed**. The honest summary: in-scope, we trail only on **dedicated mobile
+UX**; everything else left is deferred-by-choice (**AI**, **LaTeX**) or intentionally excluded
+(**PM, collaboration, enterprise, capture**). The roadmap from here: mobile polish if appetite arises,
+a go/no-go on AI, and stay out of the excluded layers.

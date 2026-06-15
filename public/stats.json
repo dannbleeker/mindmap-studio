@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-06-15T10:54:24.548Z",
-  "commit": "9caa89c",
+  "generatedAt": "2026-06-15T12:03:49.052Z",
+  "commit": "c6d1896",
   "headline": {
     "linesTsJs": 23303,
     "tests": 526,
     "lineCoveragePct": 43.88,
-    "commits": 349,
+    "commits": 351,
     "ageDays": 3,
     "trackedFiles": 231,
     "featureManualPct": 100,
-    "featureBookPct": 80,
+    "featureBookPct": 100,
     "featureExamplePct": 42.9
   },
   "code": [
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 14,
-      "lines": 1423
+      "lines": 1611
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 526,
     "e2e": 0,
-    "durationMs": 9755,
+    "durationMs": 10296,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 2518
+        "ms": 3127
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 163
+        "ms": 180
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 126
+        "ms": 123
+      },
+      {
+        "file": "test/mmap.test.ts",
+        "ms": 75
       },
       {
         "file": "test/docx-import.test.ts",
-        "ms": 80
-      },
-      {
-        "file": "test/timeAgo.test.ts",
-        "ms": 66
+        "ms": 74
       }
     ]
   },
@@ -216,39 +216,39 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 10825,
+    "bookWords": 13115,
     "chapters": 11,
     "appLoc": 15389,
-    "docToCodeRatio": 0.7
+    "docToCodeRatio": 0.85
   },
   "featureCoverage": {
     "total": 105,
     "manual": 105,
     "manualPct": 100,
-    "book": 84,
-    "bookPct": 80,
+    "book": 105,
+    "bookPct": 100,
     "bookExample": 45,
     "bookExamplePct": 42.9,
     "byArea": {
       "editing": {
         "total": 11,
         "manual": 11,
-        "book": 7
+        "book": 11
       },
       "notes": {
         "total": 3,
         "manual": 3,
-        "book": 2
+        "book": 3
       },
       "markers": {
         "total": 6,
         "manual": 6,
-        "book": 3
+        "book": 6
       },
       "styling": {
         "total": 7,
         "manual": 7,
-        "book": 4
+        "book": 7
       },
       "images": {
         "total": 1,
@@ -258,22 +258,22 @@
       "structure": {
         "total": 11,
         "manual": 11,
-        "book": 10
+        "book": 11
       },
       "navigation": {
         "total": 18,
         "manual": 18,
-        "book": 15
+        "book": 18
       },
       "library": {
         "total": 11,
         "manual": 11,
-        "book": 9
+        "book": 11
       },
       "import": {
         "total": 17,
         "manual": 17,
-        "book": 14
+        "book": 17
       },
       "export": {
         "total": 15,
@@ -288,138 +288,32 @@
       "pwa": {
         "total": 4,
         "manual": 4,
-        "book": 3
+        "book": 4
       }
     },
     "gaps": {
       "noManual": [],
-      "noBook": [
-        {
-          "id": "start-screen",
-          "name": "Start screen (home: capture hero, library, templates, layouts, ⌘K palette)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "cross-map-branch-paste",
-          "name": "Cross-map branch copy/paste (right-click Copy branch / Paste branch here; persistent clipboard)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "sticky-notes",
-          "name": "Sticky-note topics (🗒 Note — a free-floating amber note)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "mobile-responsive",
-          "name": "Mobile-friendly responsive layout (compact toolbar + bottom-sheet panels + stacked start nav on phones)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "multi-map-rollups",
-          "name": "Automated multi-map roll-ups (bind a node to another map; 🔄 refresh pulls its branches)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "per-topic-font-family",
-          "name": "Per-topic font family (Sans / Serif / Mono picker in the Styles bar; canvas == export)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "import-textbundle",
-          "name": "Import TextBundle / TextPack (.textpack — Bear / Ulysses / iA Writer Markdown)",
-          "since": "2026-06-15"
-        },
-        {
-          "id": "task-progress",
-          "name": "Task progress (0–100%) with automatic parent roll-up",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "task-priority",
-          "name": "Task priority (High/Med/Low) with a priority filter",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "task-dates",
-          "name": "Start / due dates with overdue highlighting + a due-date filter",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "saved-filters",
-          "name": "Saved Power Filter presets (named, reusable across maps)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "fuzzy-find",
-          "name": "Typo-tolerant Find (fuzzy fallback)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "styles-organizer",
-          "name": "Styles organizer (save + reuse named node styles)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "conditional-formatting",
-          "name": "Conditional formatting (auto-style by tag / marker / completion)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "kanban-board",
-          "name": "Board view (Kanban) — topics grouped into columns by tag (read-only)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "file-attachments",
-          "name": "File attachments on topics (inline, downloadable)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "quick-add",
-          "name": "Quick add box (rapid topic capture from the header)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "drop-link",
-          "name": "Drop a link/text onto the canvas → floating topic",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "brainstorm-timer",
-          "name": "Brainstorm timer (timeboxed idea sprints)",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "import-mindmup",
-          "name": "Import MindMup (.mup) JSON maps",
-          "since": "2026-06-14"
-        },
-        {
-          "id": "import-markmap",
-          "name": "Import Markmap Markdown (frontmatter + multi-level headings)",
-          "since": "2026-06-14"
-        }
-      ]
+      "noBook": []
     }
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 3,
-    "commits": 349,
-    "commits7d": 349,
+    "commits": 351,
+    "commits7d": 351,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 201
+        "count": 202
       },
       {
         "name": "github-actions[bot]",
-        "count": 148
+        "count": 149
       }
     ],
     "churn30d": {
-      "added": 50321,
-      "removed": 13639
+      "added": 50622,
+      "removed": 13746
     },
     "changelogEntries": 119
   }

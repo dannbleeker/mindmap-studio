@@ -56,6 +56,28 @@ Presenting from the map itself -- rather than a deck exported from it -- keeps t
 single source of truth live. A question sends you to a different branch; an idea from the
 room becomes a node on the spot. The map is the slides *and* the working document.
 
+### Presenter view: what only you see
+
+A slide is for the room. But you, the presenter, usually want more in front of you: the
+point you meant to make, where you are in the running order, and what's coming next. Press
+**P** (or click **Presenter view** in the control bar) and a sidebar opens beside the slide
+with exactly that -- visible to you, invisible to the audience, who still see only the slide.
+
+Three things live in that sidebar. Your **speaker notes** come first: whatever you wrote in
+the current branch's note (Chapter 4) shows here, formatted, so your talking points travel
+with the map instead of on a separate sheet -- and if a slide has no note, it simply says so.
+Below that, **Next up** names the slide you're about to advance to, so you can set up the
+transition before you make it -- or see "End of map" and know to land the close. Last is the
+**Agenda**: the map of your whole talk, every slide in order with the current one lit and a
+"3 / 8" marker for your place in it. It's not just a readout -- click any line to jump
+straight there, which is how you handle the question that belongs three branches away and the
+"can you go back to that one?" without losing your footing.
+
+It all sits on one screen -- there's no second window to wrangle -- and toggling it changes
+nothing for the room. Press **P** again to hide it. The habit worth forming: before you
+present, drop a sentence or two into the note on each branch you'll speak to. When the lights
+are on you, your script is already there.
+
 ## It works offline, and it installs
 
 MindMap Studio is a **progressive web app**. The first time you load it, it caches its

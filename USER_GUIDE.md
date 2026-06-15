@@ -503,6 +503,23 @@ file — for pasting into an email, chat, or doc.
 branch with its nested points. Navigate with **Prev / Next**, the **arrow keys**, and **Esc**
 to exit.
 
+### Presenter view
+
+Click **Presenter view** in the control bar (or press **P**) to turn on a presenter sidebar
+beside the live slide — what *you* see while the audience still sees only the slide. It shows:
+
+- **Speaker notes** — the current branch's [note](#notes), rendered as Markdown (or a quiet
+  "No notes for this slide." when there isn't one). Write your talking points in the note and
+  they're waiting for you here.
+- **Next up** — the heading of the slide you're about to advance to (or "End of map" on the last
+  one), so you can land the transition.
+- **Agenda** — the map of your whole talk: every slide (the overview plus each branch) in order,
+  with a **3 / 8**-style position indicator and the current slide highlighted. Click any item to
+  jump straight to that slide.
+
+It's a single-screen layout (no second window to manage), and the toggle only changes *your* view
+— the audience slide is untouched. Press **P** again to hide it.
+
 To share the same walk-through without the app, export it as a **slide deck** — the
 `.html (slide deck)` option in the **⬆ Export…** menu saves a standalone, navigable HTML file
 that opens in any browser, offline.

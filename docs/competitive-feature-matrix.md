@@ -88,7 +88,6 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 ## 8. Presentation & output
 | Feature | Status | Notes |
 |---|---|---|
-| Presenter view (map + slides) | ❌ | XMind Pitch |
 | Live broadcast / audience-follow | ⛔ | MindMeister, Ayoa (needs backend) |
 | AI pitch video | ❌ | XMind |
 

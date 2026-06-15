@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Presenter view (map + slides)** — the **▶ Present** overlay gains a **Presenter view** toggle (a
+  button in the control bar, or press **P**) that opens a presenter sidebar beside the live slide
+  without changing what the audience sees. The sidebar shows three things: the current branch's
+  **speaker notes** (its `note`, rendered as Markdown through the same safe note renderer — escaped,
+  no XSS — with a muted "No notes for this slide." when empty), a **Next up** peek at the next slide's
+  heading (or "End of map" on the last slide), and an **Agenda** — a compact list of every slide (the
+  overview plus each branch) with a **3 / 8**-style position indicator, the current slide highlighted,
+  and **click-to-jump** to any slide. Single-screen by design (no second-monitor popup); the toggle is
+  presenter-only chrome and defaults off each session.
 - **Sticker / illustration library** — the **ℹ Info** panel gains a built-in **Stickers** grid: 20
   curated, single-accent inline-SVG glyphs (star, heart, check / cross badge, flag, idea, warning,
   info, speech bubble, thumbs up / down, target, rocket, lock, key, clock, pin, fire, question,

@@ -89,6 +89,15 @@ describe("flow layout (alternate kinds)", () => {
     expect(allFinite(computeLayout(nodes, edges, size, "fishbone"))).toBe(true);
   });
 
+  it("brace lays out as a left-to-right tree (children right of root, deeper further right)", () => {
+    const pos = computeLayout(nodes, edges, size, "brace");
+    expect(allFinite(pos)).toBe(true);
+    const rx = pos.get("r")?.x ?? 0;
+    expect(pos.get("a")?.x ?? 0).toBeGreaterThan(rx);
+    expect(pos.get("c")?.x ?? 0).toBeGreaterThan(rx);
+    expect(pos.get("a1")?.x ?? 0).toBeGreaterThan(pos.get("a")?.x ?? 0);
+  });
+
   it("freeform places nodes at their own pos, with a beside-parent fallback for pos-less nodes", () => {
     const fdoc: MindMapDoc = {
       schemaVersion: 1,

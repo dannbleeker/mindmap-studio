@@ -27,11 +27,13 @@ import { nextProgressLevel } from "../progress";
 import { todayISO } from "../taskDate";
 import { type LayoutKind, type MindMapHandle, type MindMapProps, classifyLink } from "./contract";
 import { Boundaries } from "./flow/Boundaries";
+import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { Summaries } from "./flow/Summaries";
 import { TopicNode } from "./flow/TopicNode";
+import { type BraceGroup, computeBraces } from "./flow/brace";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
 import { createHistory, record, redo as redoHistory, undo as undoHistory } from "./flow/history";
@@ -212,11 +214,16 @@ function FlowInner({
           data: lit ? { ...n.data, dimmed: !lit.has(n.id) } : n.data,
         })),
       );
+      // Brace map hides the tapered branch ribbons (the "{" forks replace them); cross-links stay.
+      const brace = kind === "brace";
       setEdges(
-        lit
+        lit || brace
           ? proj.edges.map((e) => ({
               ...e,
-              data: { ...(e.data as EdgeData), dimmed: !(lit.has(e.source) && lit.has(e.target)) },
+              ...(brace && !e.data?.crosslink ? { hidden: true } : {}),
+              data: lit
+                ? { ...(e.data as EdgeData), dimmed: !(lit.has(e.source) && lit.has(e.target)) }
+                : e.data,
             }))
           : proj.edges,
       );
@@ -368,6 +375,12 @@ function FlowInner({
     for (const f of renderDoc.floatingTopics ?? []) walk(f);
     return out;
   }, [renderDoc]);
+
+  // Brace-map fork connectors — only in the brace layout; positions resolve in the overlay.
+  const braces = useMemo<BraceGroup[]>(
+    () => (direction === "brace" ? computeBraces(renderDoc) : []),
+    [direction, renderDoc],
+  );
 
   // Keep node selection flags in sync with selectedId (no re-layout).
   useEffect(() => {
@@ -523,6 +536,7 @@ function FlowInner({
           cssVar,
           numberedRef.current,
           todayISO(),
+          directionRef.current === "brace" ? computeBraces(docRef.current) : undefined,
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
@@ -685,6 +699,7 @@ function FlowInner({
           }}
         >
           <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
+          <BraceConnectors braces={braces} />
           <Boundaries boundaries={renderDoc.boundaries ?? []} />
           <Summaries
             summaries={renderDoc.summaries ?? []}

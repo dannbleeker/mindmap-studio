@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Brace map layout** — a new **Brace map** layout (under *Diagram*) lays the map as a left-to-right
+  tree where each parent joins its children with a **`{` fork brace** — the Thinking-Maps part-whole
+  diagram — instead of the tapered branches. The forks are drawn from one geometry shared by the
+  canvas and the image export (canvas == export).
 - **Free-canvas (whiteboard) mode** — a **🧲 Free layout** toggle turns any map into a free canvas:
   drag topics **anywhere** and they stay put (the auto-layout pauses). Combined with node shapes and
   directional arrows, this gives place-anywhere **flowcharts**, **concept maps**, and **whiteboards**.

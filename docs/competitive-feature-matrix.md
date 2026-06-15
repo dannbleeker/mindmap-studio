@@ -59,7 +59,7 @@ interchange capability we could reasonably own.
 | Concept map (labelled any-to-any) | ✅ | directional cross-links + template + free-canvas (🧲 Free layout) place-anywhere |
 | Flowchart | ✅ | shapes + directional arrows + template + free-canvas positioning |
 | Matrix / grid | ✅ | grid / matrix layout (SWOT, Eisenhower) |
-| Brace / bracket map | ❌ | XMind |
+| Brace / bracket map | ✅ | brace-map layout — `{` fork connectors, left-to-right tree |
 | Venn / onion / swimlane | ❌ | MindManager |
 | Multiple structures per branch | ❌ | XMind "skeletons" |
 | True multi-root / freeform | ✅ | 🧲 Free layout: drag nodes anywhere (pos persists); floating subtrees too |
@@ -214,7 +214,7 @@ interchange capability we could reasonably own.
 Filtering out ⛔ items, the genuinely interesting gaps cluster as:
 
 - **A — AI assist** — the single biggest market shift; we're ~the only tool here with *none*. Only a **keyless copy-prompt/paste-result bridge** (or optional BYO-key) fits the no-backend identity. Paste-to-tree is half-built via OPML/Markdown import.
-- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, and **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere) all shipped. Remaining: dedicated **brace map**, **Venn/onion/swimlane** builders, and **multiple sheets per file**.
+- **B — More structures** — ✅ Kanban board, summary topics, **node shapes** (diamond/oval/parallelogram/hexagon/cylinder), **directional relationship arrows**, **grid/matrix layout** (2×2 SWOT), **flowchart + concept-map templates**, **free-canvas / whiteboard mode** (🧲 Free layout — drag nodes anywhere), and the **brace-map layout** all shipped. Remaining: the **Venn / onion / funnel** backdrop builders and **multiple sheets per file**.
 - **C — Content depth** — ✅ task progress + roll-up, start/due dates (overdue + filter), file attachments, conditional formatting, styles organizer, task priority shipped; remaining: LaTeX/math (deferred).
 - **D — Capture UX (cheap wins)** — ✅ shipped: Quick add, paste-text → map, drop-link-as-topic, brainstorm timer.
 - **E — Navigation polish (cheap wins)** — ✅ shipped: focus/isolate-branch, saved filters, fuzzy search.

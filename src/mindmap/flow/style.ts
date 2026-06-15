@@ -34,6 +34,11 @@ export function summaryLabel(label: string | undefined): string {
   return label?.trim() ? label : "Summary";
 }
 
+// Brace map connector — a "{" fork joining a parent to its children (the brace-map layout).
+// Slate grey so it reads as structure, distinct from the green summary bracket.
+export const BRACE_STROKE = "#6b7280";
+export const BRACE_GAP = 22; // gap between the children's left edge and the brace spine
+
 // Callout (anchored annotation bubble) — sticky-note yellow, readable on light + dark canvases.
 export const CALLOUT_BG = "#fff8c5";
 export const CALLOUT_STROKE = "#d4a72c";

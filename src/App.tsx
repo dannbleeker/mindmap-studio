@@ -108,6 +108,7 @@ export function App() {
       "timeline",
       "fishbone",
       "grid",
+      "brace",
     ];
     try {
       // A ?layout= query param wins (shareable layout links); else the persisted choice.
@@ -1062,6 +1063,7 @@ export function App() {
             <option value="timeline">Timeline</option>
             <option value="fishbone">Fishbone</option>
             <option value="grid">Grid / matrix</option>
+            <option value="brace">Brace map</option>
           </optgroup>
         </select>
         <button

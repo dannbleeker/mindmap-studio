@@ -74,8 +74,9 @@ GitHub Pages).
 - **Styles organizer** — save a topic's look as a **named style** and reuse it on others (in the same
   **🎨 Styles** panel); persists across maps.
 - **Layouts** — beyond the two-sided map: all-left / all-right, org-chart (down/up), radial,
-  timeline, fishbone, and a **grid / matrix** (tiles the first-level branches into a grid — a
-  2×2 for SWOT / Eisenhower frames), switchable from the toolbar and remembered per session.
+  timeline, fishbone, a **grid / matrix** (tiles the first-level branches into a grid — a
+  2×2 for SWOT / Eisenhower frames), and a **brace map** (left-to-right tree with `{` fork
+  connectors), switchable from the toolbar and remembered per session.
 - **Free-canvas (whiteboard) mode** — **🧲 Free layout** turns any map into a free canvas: drag
   topics anywhere and they stay (the auto-layout pauses). With shapes + directional arrows it makes
   place-anywhere flowcharts, concept maps, and whiteboards; positions persist on the node and flip

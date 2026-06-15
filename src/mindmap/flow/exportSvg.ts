@@ -4,6 +4,7 @@ import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
 import { taperedRibbonPath } from "./BranchEdge";
 import { arrowHeadPath } from "./CrosslinkEdge";
+import { type BraceGroup, braceGeometry, bracePath } from "./brace";
 import { type Box, floatingPoints } from "./floating";
 import { project } from "./project";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
@@ -15,6 +16,7 @@ import {
   BOUNDARY_PAD,
   BOUNDARY_RADIUS,
   BOUNDARY_STROKE,
+  BRACE_STROKE,
   CALLOUT_BG,
   CALLOUT_STROKE,
   CALLOUT_TEXT,
@@ -159,6 +161,7 @@ export function buildFlowSvg(
   cssVar: Record<string, string>,
   numbered = false,
   today = "",
+  braces?: BraceGroup[],
 ): string {
   const { nodes, edges } = project(doc, palette, numbered);
   const callouts = collectCallouts(doc, rects);
@@ -290,9 +293,22 @@ export function buildFlowSvg(
           `<text x="${r2((sx + tx) / 2)}" y="${r2((sy + ty) / 2 - 4)}" text-anchor="middle" font-family="sans-serif" font-size="12" fill="${clColor}">${esc(label)}</text>`,
         );
       }
-    } else {
+    } else if (!braces) {
+      // Brace map replaces the tapered ribbons with "{" forks (drawn below), so skip them here.
       const path = taperedRibbonPath(sx, sy, tx, ty, e.data?.depth ?? 1);
       parts.push(`<path d="${path}" fill="${e.data?.branchColor ?? "#999"}"/>`);
+    }
+  }
+
+  // Brace-map fork connectors (one per parent), from the shared geometry — canvas == export.
+  if (braces) {
+    for (const b of braces) {
+      const parent = rects.get(b.parentId);
+      const kids = b.childIds.map((id) => rects.get(id)).filter((rr): rr is NodeRect => !!rr);
+      if (!parent || kids.length === 0) continue;
+      parts.push(
+        `<path d="${bracePath(braceGeometry(parent, kids))}" fill="none" stroke="${BRACE_STROKE}" stroke-width="2"/>`,
+      );
     }
   }
 

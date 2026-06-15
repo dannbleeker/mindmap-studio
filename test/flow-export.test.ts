@@ -152,6 +152,34 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(out).toContain('fill="#fde2e2"');
   });
 
+  it("brace mode emits fork connectors (stroked path) and drops the tapered ribbons", () => {
+    const bdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "br",
+      title: "B",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", children: [] },
+          { id: "c", topic: "C", children: [] },
+        ],
+      },
+    };
+    const brects = new Map<string, NodeRect>([
+      ["r", { x: 0, y: 50, w: 100, h: 40 }],
+      ["a", { x: 200, y: 0, w: 80, h: 40 }],
+      ["c", { x: 200, y: 100, w: 80, h: 40 }],
+    ]);
+    const braces = [{ parentId: "r", childIds: ["a", "c"] }];
+    const filled = (s: string) =>
+      (s.match(/<path d="[^"]*" fill="#[0-9a-f]{3,8}"\/>/gi) ?? []).length;
+    const withRibbons = buildFlowSvg(bdoc, brects, palette, cssVar);
+    const withBraces = buildFlowSvg(bdoc, brects, palette, cssVar, false, "", braces);
+    expect(withBraces).toContain('stroke="#6b7280"'); // the fork
+    expect(filled(withBraces)).toBeLessThan(filled(withRibbons)); // ribbons gone in brace mode
+  });
+
   it("draws a summary bracket (path) + its label, side-aware", () => {
     // Isolated doc so the shared-doc path count above stays branch+crosslink only.
     const withSummary = buildFlowSvg(

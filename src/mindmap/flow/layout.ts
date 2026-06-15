@@ -104,6 +104,10 @@ export function computeLayout(
     case "grid":
       layoutGrid(ctx);
       break;
+    case "brace":
+      // A brace map is a left-to-right tidy tree; the "{" fork connectors replace the ribbons.
+      layoutHorizontal(ctx, 1, root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []));
+      break;
     default:
       layoutSide(ctx);
   }

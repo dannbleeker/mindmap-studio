@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 107,
+  "reviewedThroughChangelogBullets": 108,
   "areas": [
     "editing",
     "notes",
@@ -414,7 +414,7 @@
     },
     {
       "id": "alternate-layouts",
-      "name": "Alternate layouts (org-chart, radial, timeline, fishbone, grid/matrix)",
+      "name": "Alternate layouts (org-chart, radial, timeline, fishbone, grid/matrix, brace map)",
       "area": "navigation",
       "since": "2026-06-14",
       "manual": true,

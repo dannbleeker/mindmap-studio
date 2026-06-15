@@ -65,7 +65,7 @@ interchange capability we could reasonably own.
 | True multi-root / freeform | ✅ | 🧲 Free layout: drag nodes anywhere (pos persists); floating subtrees too |
 | Networked graph (multiple parents) | ❌ | TheBrain |
 | Loops / cycles | ❌ | Coggle |
-| Infinite freeform canvas | ❌ | Miro, Obsidian Canvas |
+| Infinite freeform canvas | 🟡 | free node placement ships (🧲 Free layout); a Miro-style canvas of arbitrary objects doesn't |
 | Multiple sheets per file | ✅ | workbook sheets — ▦ +Sheet, sheet tab strip, ⤓ Workbook export/import |
 
 ## 3. Visual styling
@@ -82,7 +82,7 @@ interchange capability we could reasonably own.
 | Images in topics | ✅ | |
 | Topic numbering | ✅ | |
 | Custom fonts / sizes | 🟡 | via style; limited UI |
-| Large shape library (cloud/star/diamond…) | 🟡 | box/rounded/pill only |
+| Large shape library (cloud/star/diamond…) | 🟡 | flowchart shapes ship (diamond/oval/parallelogram/hexagon/cylinder); a big clip-art / cloud / star library doesn't |
 | Sticker / illustration library | ❌ | XMind, MindNode |
 | Canvas background image/colour | 🟡 | per-map background **colour** ships (the Canvas control); background **image** ❌ |
 | LaTeX / math rendering | ❌ | XMind, Freeplane, Mindomo |

@@ -525,6 +525,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   pixel-identical. Strictly behaviour-preserving — every control renders and behaves the same;
   `App.tsx` drops ~500 lines and the toolbar is now one self-contained component the upcoming UX
   redesign can restructure in isolation.
+- **Controlled `<Dialog>` wrapper (internal).** The three native `<dialog>` modals (About, Search-all,
+  Paste-text) now render through one controlled `src/components/Dialog.tsx` that owns the
+  `showModal()` / `close()` mechanic, the native `close` event, and Escape-to-close — replacing the
+  three hand-rolled `useEffect`s in `App.tsx`. Each dialog passes `open` / `onClose`, with its on-open
+  side effects (focus the first field, lazy-load the searchable library) supplied via an `onOpen`
+  callback. Behaviour-identical — same modal open/close, same content, same per-dialog look (the Paste
+  sheet keeps its shadow-less surface).
 - **Design-token + UI-primitive layer (internal).** The editor chrome's ad-hoc inline styles now
   draw from a single named palette + scales (`src/design/tokens.ts`: `colors`, `space`, `radius`,
   `fontSize`, `fontWeight`) through a small set of reusable primitives (`src/design/primitives.tsx`:

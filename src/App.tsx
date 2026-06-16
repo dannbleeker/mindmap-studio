@@ -10,6 +10,7 @@ import {
   PlaybackBar,
   StylesPanel,
 } from "./Panels";
+import { Dialog } from "./components/Dialog";
 import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
 import {
@@ -313,15 +314,12 @@ export function App() {
   } | null>(null);
   const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
   const [aboutOpen, setAboutOpen] = useState(false);
-  const aboutRef = useRef<HTMLDialogElement>(null);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
   const [libDocs, setLibDocs] = useState<MindMapDoc[]>([]);
   const [libQuery, setLibQuery] = useState("");
-  const searchRef = useRef<HTMLDialogElement>(null);
   // "Paste text → map": parse a pasted outline into topics, as a new map or under the selection.
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState("");
-  const pasteRef = useRef<HTMLDialogElement>(null);
   const pendingFocus = useRef<string | null>(null);
   const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
@@ -904,44 +902,9 @@ export function App() {
     }
   }, [outlineOpen, indexOpen, infoOpen, numbered]);
 
-  // Drive the native <dialog> from React state: showModal() gives us the
-  // top-layer backdrop, focus handling, and Escape-to-close for free.
-  useEffect(() => {
-    const el = aboutRef.current;
-    if (!el) return;
-    if (aboutOpen && !el.open) el.showModal();
-    else if (!aboutOpen && el.open) el.close();
-  }, [aboutOpen]);
-
-  // "Paste text" dialog (same native-<dialog> pattern).
-  useEffect(() => {
-    const el = pasteRef.current;
-    if (!el) return;
-    if (pasteOpen && !el.open) {
-      el.showModal();
-      el.querySelector("textarea")?.focus();
-    } else if (!pasteOpen && el.open) {
-      el.close();
-    }
-  }, [pasteOpen]);
-
-  // Library-wide search dialog (same native-<dialog> pattern). On open, load every map
-  // — with the live current map merged over its saved copy — so search sees latest edits.
-  useEffect(() => {
-    const el = searchRef.current;
-    if (!el) return;
-    if (searchAllOpen && !el.open) {
-      el.showModal();
-      el.querySelector("input")?.focus();
-      (async () => {
-        const all = await getAllMaps().catch(() => [] as MindMapDoc[]);
-        const live = liveDocRef.current;
-        setLibDocs([live, ...all.filter((d) => d.id !== live.id)]);
-      })();
-    } else if (!searchAllOpen && el.open) {
-      el.close();
-    }
-  }, [searchAllOpen]);
+  // The native-<dialog> modal mechanic (showModal()/close() + Escape-to-close) now lives in
+  // <Dialog>; the three dialogs below pass `open`/`onClose`, with their on-open side effects
+  // (focus the first field, lazy-load the searchable library) supplied via `onOpen`.
 
   // After a cross-map jump, focus the target node once the new map has re-rendered (two
   // frames lets the canvas finish layout + fit). focusNode is a no-op if the id isn't found.
@@ -1411,14 +1374,21 @@ export function App() {
 
       {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}
 
-      {/* Search all maps — native <dialog>, same modal semantics as About. */}
-      <dialog
-        ref={searchRef}
-        aria-label="Search all maps"
+      {/* Search all maps — controlled <Dialog>; on open, load every map (live current map merged over
+          its saved copy) so search sees the latest edits, then focus the query field. */}
+      <Dialog
+        open={searchAllOpen}
         onClose={() => setSearchAllOpen(false)}
+        onOpen={() => {
+          (document.querySelector('input[aria-label="Search query"]') as HTMLInputElement)?.focus();
+          (async () => {
+            const all = await getAllMaps().catch(() => [] as MindMapDoc[]);
+            const live = liveDocRef.current;
+            setLibDocs([live, ...all.filter((d) => d.id !== live.id)]);
+          })();
+        }}
+        ariaLabel="Search all maps"
         style={{
-          border: "none",
-          borderRadius: 12,
           boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
           padding: "18px 20px",
           maxWidth: 520,
@@ -1492,16 +1462,14 @@ export function App() {
               </ul>
             );
           })()}
-      </dialog>
+      </Dialog>
 
-      {/* About — native <dialog>: modal semantics, focus trap and Esc handled by the browser. */}
-      <dialog
-        ref={aboutRef}
-        aria-label="About MindMap Studio"
+      {/* About — controlled <Dialog>; the browser handles modal semantics, focus trap and Esc. */}
+      <Dialog
+        open={aboutOpen}
         onClose={() => setAboutOpen(false)}
+        ariaLabel="About MindMap Studio"
         style={{
-          border: "none",
-          borderRadius: 12,
           boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
           padding: "22px 24px",
           maxWidth: 440,
@@ -1588,13 +1556,21 @@ export function App() {
             Check for updates
           </button>
         </div>
-      </dialog>
+      </Dialog>
 
-      {/* Paste text → map — native <dialog>, same modal semantics as About. */}
-      <dialog
-        ref={pasteRef}
+      {/* Paste text → map — controlled <Dialog>; focus the textarea on open. (No drop shadow here —
+          the original Paste dialog had none, so cancel the shared base shadow.) */}
+      <Dialog
+        open={pasteOpen}
         onClose={() => setPasteOpen(false)}
-        style={{ border: "none", borderRadius: 12, padding: 0, width: "min(560px, 92vw)" }}
+        onOpen={() =>
+          (
+            document.querySelector(
+              'textarea[aria-label="Paste outline text"]',
+            ) as HTMLTextAreaElement
+          )?.focus()
+        }
+        style={{ padding: 0, width: "min(560px, 92vw)" }}
       >
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
           <strong style={{ color: "#26215c" }}>Paste text → topics</strong>
@@ -1652,7 +1628,7 @@ export function App() {
             </span>
           </div>
         </div>
-      </dialog>
+      </Dialog>
     </div>
   );
 }

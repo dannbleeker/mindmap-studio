@@ -517,6 +517,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Toolbar extracted from `App.tsx` (internal).** The ~580-line editor `<header>` (the ~50 nav /
+  panel / map / canvas / layout / find / export controls) moved into a single prop-driven
+  `src/components/Toolbar.tsx`, grouped into logical prop buckets (`nav` / `panels` / `map` /
+  `canvas` / `find` / `io`) plus the canvas handle ref. The inline `controlStyle` / `inputStyle`
+  buttons were swapped onto the Phase-C `Button` / `Select` / `Input` primitives where the swap is
+  pixel-identical. Strictly behaviour-preserving — every control renders and behaves the same;
+  `App.tsx` drops ~500 lines and the toolbar is now one self-contained component the upcoming UX
+  redesign can restructure in isolation.
 - **Design-token + UI-primitive layer (internal).** The editor chrome's ad-hoc inline styles now
   draw from a single named palette + scales (`src/design/tokens.ts`: `colors`, `space`, `radius`,
   `fontSize`, `fontWeight`) through a small set of reusable primitives (`src/design/primitives.tsx`:

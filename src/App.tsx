@@ -1,5 +1,4 @@
 import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BrainstormTimer } from "./BrainstormTimer";
 import { Kanban } from "./Kanban";
 import {
   FilterPanel,
@@ -11,8 +10,8 @@ import {
   PlaybackBar,
   StylesPanel,
 } from "./Panels";
+import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
-import { buildExample, examples } from "./examples";
 import {
   type DueMode,
   type FilterCriteria,
@@ -37,9 +36,8 @@ import {
   NODE_LINK_PREFIX,
   type SelectedNode,
 } from "./mindmap";
-import { canvasThemes } from "./mindmap/theme";
 import { sampleDoc } from "./model/sampleMap";
-import type { BackdropKind, MapNode, MindMapDoc } from "./model/types";
+import type { MapNode, MindMapDoc } from "./model/types";
 import { outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
@@ -70,7 +68,7 @@ import {
   setLastOpened,
 } from "./store/mapStore";
 import { todayISO } from "./taskDate";
-import { buildTemplate, templates } from "./templates";
+import { buildTemplate } from "./templates";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 import { useFind } from "./useFind";
 import { useIsMobile } from "./useIsMobile";
@@ -984,592 +982,88 @@ export function App() {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          flexWrap: isMobile ? "nowrap" : "wrap",
-          gap: 6,
-          rowGap: 6,
-          padding: isMobile ? "6px 10px" : "8px 16px",
-          borderBottom: "1px solid #e2e0d8",
-          ...(isMobile ? { overflowX: "auto" as const } : {}),
+      <Toolbar
+        isMobile={isMobile}
+        mapRef={mapRef}
+        nav={{
+          goHome,
+          openAbout: () => setAboutOpen(true),
+          openSearchAll: () => setSearchAllOpen(true),
+          openPaste: () => setPasteOpen(true),
         }}
-      >
-        <strong style={{ fontSize: 15, marginRight: 4 }}>MindMap Studio</strong>
-        <button
-          type="button"
-          onClick={goHome}
-          style={controlStyle}
-          title="Start screen — new maps, templates, library"
-        >
-          ⌂ Start
-        </button>
-        <button
-          type="button"
-          onClick={() => setAboutOpen(true)}
-          style={controlStyle}
-          title="About MindMap Studio — version, license, credits"
-        >
-          About
-        </button>
-        <button
-          type="button"
-          onClick={() => setSearchAllOpen(true)}
-          style={controlStyle}
-          title="Search across every map in your library"
-        >
-          🔎 All maps
-        </button>
-        <button
-          type="button"
-          onClick={() => setOutlineOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={outlineOpen}
-          title="Toggle the outline panel"
-        >
-          ☰ Outline
-        </button>
-        <button
-          type="button"
-          onClick={() => setIndexOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={indexOpen}
-          title="Toggle the markers & tags index"
-        >
-          📑 Index
-        </button>
-        <button
-          type="button"
-          onClick={toggleFilter}
-          style={controlStyle}
-          aria-pressed={filterOpen}
-          title="Power Filter: dim topics that don't match a marker / tag / text (read-only)"
-        >
-          🎚 Filter
-        </button>
-        <button
-          type="button"
-          onClick={() => setStylesOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={stylesOpen}
-          title="Conditional formatting — auto-style topics by tag / marker / completion"
-        >
-          🎨 Styles
-        </button>
-        <button
-          type="button"
-          onClick={() => setHistoryOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={historyOpen}
-          title="Version history — restore an earlier snapshot of this map"
-        >
-          🕔 History
-        </button>
-        <button
-          type="button"
-          onClick={() => setBoardOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={boardOpen}
-          title="Board view — topics grouped into columns by tag (read-only)"
-        >
-          ▦ Board
-        </button>
-        <select
-          value={doc.id}
-          onChange={(e) => switchMap(e.target.value)}
-          style={controlStyle}
-          aria-label="Open map"
-        >
-          {mapOptions.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.title}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={addSheet}
-          style={controlStyle}
-          title="Add a sheet to this file (maps in a workbook share a sheet tab strip + export together)"
-        >
-          ▦ + Sheet
-        </button>
-        <select
-          value=""
-          onChange={(e) => {
-            const v = e.target.value;
-            if (v) load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
-          }}
-          style={controlStyle}
-          aria-label="New map from a template or example"
-          title="New map (pick a blank template or a worked example)"
-        >
-          <option value="">+ New…</option>
-          <optgroup label="Templates">
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Examples">
-            {examples.map((e) => (
-              <option key={e.id} value={`ex:${e.id}`}>
-                {e.name}
-              </option>
-            ))}
-          </optgroup>
-        </select>
-        <button
-          type="button"
-          onClick={duplicateMap}
-          style={controlStyle}
-          title="Duplicate the current map"
-        >
-          Duplicate
-        </button>
-        <button type="button" onClick={deleteCurrent} style={controlStyle}>
-          Delete
-        </button>
-        <button
-          type="button"
-          onClick={() => setPresentDoc(liveDocRef.current)}
-          style={controlStyle}
-        >
-          ▶ Present
-        </button>
-        <button type="button" onClick={() => mapRef.current?.fit()} style={controlStyle}>
-          Fit
-        </button>
-        <button
-          type="button"
-          onClick={() => mapRef.current?.setAllExpanded(false)}
-          style={controlStyle}
-          aria-label="Collapse all branches"
-          title="Collapse all branches"
-        >
-          ⊟
-        </button>
-        <button
-          type="button"
-          onClick={() => mapRef.current?.setAllExpanded(true)}
-          style={controlStyle}
-          aria-label="Expand all branches"
-          title="Expand all branches"
-        >
-          ⊞
-        </button>
-        <button
-          type="button"
-          onClick={() => setNumbered((v) => !v)}
-          style={controlStyle}
-          aria-pressed={numbered}
-          title="Toggle outline numbering (1, 1.2, 1.2.3 …) on topics"
-        >
-          1. Numbering
-        </button>
-        <button
-          type="button"
-          onClick={() => mapRef.current?.setLineJumps(!liveDoc.meta?.lineJumps)}
-          style={controlStyle}
-          aria-pressed={!!liveDoc.meta?.lineJumps}
-          title="Toggle line-jumps — draw a hop where two relationship arrows cross, so they read as passing over (not joining)"
-        >
-          ⌒ Line jumps
-        </button>
-        <button
-          type="button"
-          onClick={() => selected && setFocus({ id: selected.id, topic: selected.topic })}
-          style={controlStyle}
-          disabled={!selected}
-          title="Focus the selected branch — dim everything off it (Esc to exit)"
-        >
-          ◎ Focus
-        </button>
-        <label style={controlStyle}>
-          Image
-          <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
-        </label>
-        <select
-          value={theme.id}
-          onChange={(e) => setThemeId(e.target.value)}
-          style={controlStyle}
-          aria-label="Canvas theme"
-          title="Canvas style / theme"
-        >
-          {canvasThemes.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-        <span
-          style={{ ...controlStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
-          title="Canvas background colour for this map (overrides the theme)"
-        >
-          Canvas
-          <input
-            type="color"
-            aria-label="Canvas background colour"
-            value={liveDoc.meta?.background || "#ffffff"}
-            onChange={(e) => mapRef.current?.setBackground(e.target.value)}
-            style={{
-              width: 22,
-              height: 18,
-              border: "none",
-              background: "none",
-              padding: 0,
-              cursor: "pointer",
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => mapRef.current?.setBackground("")}
-            title="Reset background to the theme default"
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: "#73726c",
-              fontSize: 12,
-              padding: 0,
-            }}
-          >
-            ✕
-          </button>
-          <label
-            title="Set a background image for this map (covers the canvas, behind the topics)"
-            style={{ cursor: "pointer", fontSize: 13, lineHeight: 1 }}
-          >
-            🖼
-            <input
-              type="file"
-              accept="image/*"
-              aria-label="Canvas background image"
-              onChange={handleBackgroundImage}
-              style={{ display: "none" }}
-            />
-          </label>
-          {liveDoc.meta?.backgroundImage ? (
-            <button
-              type="button"
-              onClick={() => mapRef.current?.setBackgroundImage("")}
-              title="Remove the background image"
-              style={{
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                color: "#73726c",
-                fontSize: 12,
-                padding: 0,
-              }}
-            >
-              ✕
-            </button>
-          ) : null}
-        </span>
-        <select
-          value={layout}
-          onChange={(e) => changeLayout(e.target.value as LayoutKind)}
-          style={controlStyle}
-          aria-label="Layout"
-          title={liveDoc.meta?.freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
-          disabled={!!liveDoc.meta?.freeform}
-        >
-          <optgroup label="Radial">
-            <option value="side">Both sides</option>
-            <option value="right">Right</option>
-            <option value="left">Left</option>
-            <option value="radial">Radial / hub</option>
-          </optgroup>
-          <optgroup label="Tree">
-            <option value="org-down">Org chart ↓</option>
-            <option value="org-up">Org chart ↑</option>
-          </optgroup>
-          <optgroup label="Diagram">
-            <option value="timeline">Timeline</option>
-            <option value="fishbone">Fishbone</option>
-            <option value="grid">Grid / matrix</option>
-            <option value="brace">Brace map</option>
-          </optgroup>
-        </select>
-        <button
-          type="button"
-          onClick={() => mapRef.current?.setFreeform(!liveDoc.meta?.freeform)}
-          style={controlStyle}
-          aria-pressed={!!liveDoc.meta?.freeform}
-          title="Free layout (whiteboard): drag topics anywhere; the auto-layout pauses"
-        >
-          🧲 Free layout
-        </button>
-        <select
-          value=""
-          onChange={(e) => {
-            if (e.target.value) mapRef.current?.setBackdrop(e.target.value as BackdropKind);
-          }}
-          style={controlStyle}
-          aria-label="Add a diagram backdrop"
-          title="Add a diagram backdrop (drop topics into its regions)"
-        >
-          <option value="">◎ Diagram…</option>
-          <option value="onion">Onion (rings)</option>
-          <option value="funnel">Funnel (stages)</option>
-          <option value="venn2">Venn (2 circles)</option>
-          <option value="venn3">Venn (3 circles)</option>
-        </select>
-        {liveDoc.backdrop ? (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
-            {liveDoc.backdrop.kind === "onion" || liveDoc.backdrop.kind === "funnel" ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => mapRef.current?.setBackdropRings(-1)}
-                  style={controlStyle}
-                  title="Fewer rings / stages"
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  onClick={() => mapRef.current?.setBackdropRings(1)}
-                  style={controlStyle}
-                  title="More rings / stages"
-                >
-                  +
-                </button>
-              </>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => mapRef.current?.clearBackdrop()}
-              style={controlStyle}
-              title="Remove the diagram backdrop"
-            >
-              ✕ Backdrop
-            </button>
-          </span>
-        ) : null}
-        <button
-          type="button"
-          onClick={() => setInfoOpen((v) => !v)}
-          style={controlStyle}
-          aria-pressed={infoOpen}
-          title="Topic info: note, markers, tags, style, and links for the selected node"
-        >
-          ℹ Info
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const id = selected?.id;
-            const ok = id ? mapRef.current?.groupBranch(id) : false;
-            showHint(
-              ok
-                ? "Branch grouped — double-click the boundary's label chip to rename it."
-                : "Select a node first, then group its branch.",
-            );
-          }}
-          style={controlStyle}
-          title="Draw a boundary around the selected branch (a visual group)"
-        >
-          ⬚ Group
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const id = selected?.id;
-            const ok = id ? mapRef.current?.groupSummary(id) : false;
-            showHint(
-              ok
-                ? "Summary added — double-click its label to rename (or empty it to remove)."
-                : "Select a node first, then summarise its branch.",
-            );
-          }}
-          style={controlStyle}
-          title="Add a labelled summary bracket beside the selected branch"
-        >
-          ⊐ Summary
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            mapRef.current?.addStickyNote();
-            showHint("Sticky note added — a free-floating topic you can drag anywhere.");
-          }}
-          style={controlStyle}
-          title="Add a sticky note (a free-floating amber note topic)"
-        >
-          🗒 Note
-        </button>
-        <select
-          value=""
-          onChange={(e) => {
-            const v = e.target.value;
-            if (!v) return;
-            const ok = selected?.id
-              ? mapRef.current?.setSelectedRollup(v === "none" ? "" : v)
-              : false;
-            if (!ok) {
-              showHint("Select a node first, then bind it to a roll-up source.");
-              return;
-            }
-            showHint(
-              v === "none" ? "Roll-up unbound." : "Bound — click 🔄 Roll-ups to pull the latest.",
-            );
-          }}
-          style={controlStyle}
-          title="Mirror another map's branches under the selected node (a roll-up source)"
-        >
-          <option value="">⤵ Roll-up…</option>
-          {maps
-            .filter((m) => m.id !== liveDoc.id)
-            .map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.title || "(untitled)"}
-              </option>
-            ))}
-          <option value="none">— Unbind</option>
-        </select>
-        <button
-          type="button"
-          onClick={refreshRollupsNow}
-          style={controlStyle}
-          title="Refresh all roll-ups — pull the latest branches from their source maps"
-        >
-          🔄 Roll-ups
-        </button>
-        <form onSubmit={runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Find…"
-            aria-label="Find node"
-            style={{ ...inputStyle, width: 100 }}
-          />
-          <input
-            value={replaceWith}
-            onChange={(e) => setReplaceWith(e.target.value)}
-            placeholder="Replace…"
-            aria-label="Replace with"
-            style={{ ...inputStyle, width: 100 }}
-          />
-          <button
-            type="button"
-            onClick={runReplace}
-            style={{ ...controlStyle, padding: "6px 8px" }}
-            title="Replace the find text in every matching topic"
-          >
-            Replace all
-          </button>
-          {matchInfo && <span style={{ fontSize: 11, color: "#73726c" }}>{matchInfo}</span>}
-        </form>
-        <span style={{ width: 1, height: 22, background: "#e2e0d8", margin: "0 2px" }} />
-        <select
-          value=""
-          onChange={(e) => {
-            const fn = {
-              json: exportJson,
-              md: exportMarkdown,
-              opml: exportOpml,
-              png: exportPng,
-              svg: exportSvg,
-              mermaid: exportMermaid,
-              mm: exportFreemind,
-              xmind: exportXmind,
-              smmx: exportSmmx,
-              html: exportHtml,
-              ihtml: exportInteractiveHtml,
-              deck: exportDeck,
-              pdf: exportPdf,
-              docx: exportDocx,
-              pptx: exportPptx,
-              xlsx: exportXlsx,
-            }[e.target.value];
-            fn?.();
-          }}
-          style={controlStyle}
-          aria-label="Export the map"
-          title="Export the map"
-        >
-          <option value="">⬆ Export…</option>
-          <optgroup label="Data &amp; outline">
-            <option value="json">.json (lossless)</option>
-            <option value="md">.md (Markdown)</option>
-            <option value="opml">.opml (outline)</option>
-            <option value="mm">.mm (FreeMind/Freeplane)</option>
-            <option value="mermaid">.mmd (Mermaid)</option>
-            <option value="xmind">.xmind (XMind)</option>
-            <option value="smmx">.smmx (SimpleMind)</option>
-          </optgroup>
-          <optgroup label="Image">
-            <option value="png">.png (image)</option>
-            <option value="svg">.svg (vector)</option>
-          </optgroup>
-          <optgroup label="Document">
-            <option value="html">.html (standalone)</option>
-            <option value="ihtml">.html (interactive)</option>
-            <option value="pdf">.pdf (print)</option>
-            <option value="docx">.docx (Word)</option>
-            <option value="xlsx">.xlsx (Excel)</option>
-          </optgroup>
-          <optgroup label="Presentation">
-            <option value="deck">.html (slide deck)</option>
-            <option value="pptx">.pptx (PowerPoint)</option>
-          </optgroup>
-        </select>
-        <button
-          type="button"
-          onClick={exportLibrary}
-          style={controlStyle}
-          title="Back up every map to one .json file (restore by opening it)"
-        >
-          ⬇ Backup
-        </button>
-        <button
-          type="button"
-          onClick={copyOutline}
-          style={controlStyle}
-          title="Copy the map as a Markdown outline to the clipboard"
-        >
-          ⧉ Copy outline
-        </button>
-        <label style={controlStyle}>
-          Open files
-          <input
-            id="mmap-input"
-            type="file"
-            accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
-            multiple
-            onChange={handleFile}
-            style={{ display: "none" }}
-          />
-        </label>
-        <button
-          type="button"
-          onClick={() => setPasteOpen(true)}
-          style={controlStyle}
-          title="Paste an outline, bullet list, or Markdown and turn it into topics"
-        >
-          📋 Paste text
-        </button>
-        <input
-          placeholder="Quick add… ⏎"
-          aria-label="Quick add topic"
-          title="Type a topic and press Enter to add it under the selected node (or the central topic). Keeps focus for rapid capture."
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const v = e.currentTarget.value.trim();
-              if (v) {
-                mapRef.current?.quickAdd(v);
-                e.currentTarget.value = "";
-              }
-            }
-          }}
-          style={{ ...inputStyle, width: 130 }}
-        />
-        <BrainstormTimer />
-      </header>
+        panels={{
+          outlineOpen,
+          setOutlineOpen,
+          indexOpen,
+          setIndexOpen,
+          filterOpen,
+          toggleFilter,
+          stylesOpen,
+          setStylesOpen,
+          historyOpen,
+          setHistoryOpen,
+          boardOpen,
+          setBoardOpen,
+          infoOpen,
+          setInfoOpen,
+          numbered,
+          setNumbered,
+        }}
+        map={{
+          doc,
+          liveDoc,
+          maps,
+          mapOptions,
+          switchMap,
+          addSheet,
+          load,
+          duplicateMap,
+          deleteCurrent,
+          present: () => setPresentDoc(liveDocRef.current),
+          refreshRollupsNow,
+        }}
+        canvas={{
+          theme,
+          setThemeId,
+          layout,
+          changeLayout,
+          selected,
+          setFocus,
+          handleImage,
+          handleBackgroundImage,
+        }}
+        find={{
+          query,
+          setQuery,
+          replaceWith,
+          setReplaceWith,
+          matchInfo,
+          runSearch,
+          runReplace,
+        }}
+        io={{
+          exportJson,
+          exportMarkdown,
+          exportMermaid,
+          exportXmind,
+          exportSmmx,
+          exportOpml,
+          exportFreemind,
+          exportPng,
+          exportSvg,
+          exportHtml,
+          exportInteractiveHtml,
+          exportDeck,
+          exportPdf,
+          exportDocx,
+          exportPptx,
+          exportXlsx,
+          exportLibrary,
+          copyOutline,
+          handleFile,
+        }}
+        showHint={showHint}
+      />
 
       {error && (
         <div

@@ -245,6 +245,292 @@ describe("StyleBar", () => {
     // the diamond shape picker is present (asserted by its title/accessible name)
     expect(screen.getByRole("button", { name: /Diamond/ })).toBeTruthy();
   });
+
+  it("fires onStyle callback when a shape button is clicked", async () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} />);
+    const diamondBtn = screen.getByRole("button", { name: /Diamond/ });
+    await userEvent.click(diamondBtn);
+    expect(onStyle).toHaveBeenCalledWith({ shape: "diamond" });
+  });
+
+  it("renders fill and border color swatches", () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} />);
+    expect(screen.getByText("Fill")).toBeTruthy();
+    expect(screen.getByText("Border")).toBeTruthy();
+  });
+
+  it("renders the bold text toggle button", () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} />);
+    // Bold button has a "B" icon with accessible text
+    const boldButtons = screen.getAllByRole("button", { name: "B" });
+    expect(boldButtons.length).toBeGreaterThan(0);
+  });
+
+  it("fires onStyle when bold button is clicked", async () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} />);
+    const boldBtn = screen.getByRole("button", { name: "B" });
+    await userEvent.click(boldBtn);
+    expect(onStyle).toHaveBeenCalledWith(expect.objectContaining({ fontWeight: expect.any(String) }));
+  });
+});
+
+describe("OutlinePanel (interaction)", () => {
+  it("calls onPick when a topic row is clicked", async () => {
+    const onPick = vi.fn();
+    render(<OutlinePanel root={sampleRoot()} filter="" onFilterChange={noop} onPick={onPick} />);
+    const researchBtn = screen.getByRole("button", { name: /Research/ });
+    await userEvent.click(researchBtn);
+    expect(onPick).toHaveBeenCalledWith("a");
+  });
+
+  it("shows depth indicators (indentation) for nested topics", () => {
+    render(<OutlinePanel root={sampleRoot()} filter="" onFilterChange={noop} onPick={noop} />);
+    // Surveys is nested under Research, so it should appear after Research
+    const buttons = screen.getAllByRole("button");
+    const researchIdx = buttons.findIndex((b) => b.textContent?.includes("Research"));
+    const surveysIdx = buttons.findIndex((b) => b.textContent?.includes("Surveys"));
+    expect(surveysIdx).toBeGreaterThan(researchIdx);
+  });
+});
+
+describe("MarkerTagIndex (interaction)", () => {
+  it("calls onPick when a marker/tag row is clicked", async () => {
+    const onPick = vi.fn();
+    render(<MarkerTagIndex root={sampleRoot()} onPick={onPick} />);
+    // Click any of the Research buttons (appears under both Markers and Tags)
+    const researchButtons = screen.getAllByRole("button", { name: /Research/ });
+    await userEvent.click(researchButtons[0]);
+    expect(onPick).toHaveBeenCalledWith("a");
+  });
+});
+
+describe("FilterPanel (interaction)", () => {
+  it("calls onClear when the Clear button is clicked", async () => {
+    const onClear = vi.fn();
+    render(
+      <FilterPanel
+        root={sampleRoot()}
+        text="research"
+        markers={[]}
+        tags={[]}
+        due=""
+        priority={0}
+        matchCount={3}
+        savedFilters={[]}
+        onText={noop}
+        onToggleMarker={noop}
+        onToggleTag={noop}
+        onDue={noop}
+        onPriority={noop}
+        onClear={onClear}
+        onSaveFilter={noop}
+        onApplyFilter={noop}
+        onDeleteFilter={noop}
+      />,
+    );
+    const clearBtn = screen.getByRole("button", { name: "Clear" });
+    await userEvent.click(clearBtn);
+    expect(onClear).toHaveBeenCalled();
+  });
+
+  it("calls onToggleMarker when a marker chip is clicked", async () => {
+    const onToggleMarker = vi.fn();
+    render(
+      <FilterPanel
+        root={sampleRoot()}
+        text=""
+        markers={[]}
+        tags={[]}
+        due=""
+        priority={0}
+        matchCount={0}
+        savedFilters={[]}
+        onText={noop}
+        onToggleMarker={onToggleMarker}
+        onToggleTag={noop}
+        onDue={noop}
+        onPriority={noop}
+        onClear={noop}
+        onSaveFilter={noop}
+        onApplyFilter={noop}
+        onDeleteFilter={noop}
+      />,
+    );
+    // The sample map has a ⭐ marker
+    const markerChips = screen.getAllByRole("button", { name: "⭐" });
+    if (markerChips.length > 0) {
+      await userEvent.click(markerChips[0]);
+      expect(onToggleMarker).toHaveBeenCalledWith("⭐");
+    }
+  });
+
+  it("calls onDue when the due date filter changes", async () => {
+    const onDue = vi.fn();
+    render(
+      <FilterPanel
+        root={sampleRoot()}
+        text=""
+        markers={[]}
+        tags={[]}
+        due=""
+        priority={0}
+        matchCount={0}
+        savedFilters={[]}
+        onText={noop}
+        onToggleMarker={noop}
+        onToggleTag={noop}
+        onDue={onDue}
+        onPriority={noop}
+        onClear={noop}
+        onSaveFilter={noop}
+        onApplyFilter={noop}
+        onDeleteFilter={noop}
+      />,
+    );
+    const dueSelect = screen.getByLabelText("Filter by due date") as HTMLSelectElement;
+    await userEvent.selectOptions(dueSelect, "overdue");
+    expect(onDue).toHaveBeenCalledWith("overdue");
+  });
+});
+
+describe("InfoPanel (interaction)", () => {
+  const selected: SelectedNode = { id: "a", topic: "Research", note: "interview users" };
+  const node = sampleRoot().children[0];
+
+  const renderInfo = (sel: SelectedNode | null, n: MapNode | null) => {
+    const onNoteChange = vi.fn();
+    const onClose = vi.fn();
+    const result = render(
+      <InfoPanel
+        selected={sel}
+        node={n}
+        noteDraft={n?.note ?? ""}
+        onNoteChange={onNoteChange}
+        onNoteBlur={noop}
+        markers={["⭐", "🚩"]}
+        onToggleMarker={noop}
+        onPickSticker={noop}
+        onStyle={noop}
+        onAddTag={noop}
+        onRemoveTag={noop}
+        onSetProgress={noop}
+        onSetDue={noop}
+        onSetStart={noop}
+        onSetPriority={noop}
+        onAddAttachment={noop}
+        onRemoveAttachment={noop}
+        onSetHyperlink={noop}
+        maps={[]}
+        onLinkMap={noop}
+        jumpTargets={[]}
+        onJump={noop}
+        onClose={onClose}
+      />,
+    );
+    return { result, onNoteChange, onClose };
+  };
+
+  it("calls onClose when the Close button is clicked", async () => {
+    const { onClose } = renderInfo(selected, node);
+    const closeBtn = screen.getByRole("button", { name: /Close/ });
+    await userEvent.click(closeBtn);
+    expect(onClose).toHaveBeenCalled();
+  });
+});
+
+describe("StylesPanel (interaction)", () => {
+  it("shows an empty state message when there are no rules or styles", () => {
+    render(
+      <StylesPanel
+        rules={[]}
+        markers={["⭐"]}
+        namedStyles={[]}
+        onAddRule={noop}
+        onDeleteRule={noop}
+        onSaveStyle={noop}
+        onApplyStyle={noop}
+        onDeleteStyle={noop}
+      />,
+    );
+    expect(screen.getByText(/Styles/)).toBeTruthy();
+    expect(screen.getByText("Conditional formatting")).toBeTruthy();
+  });
+
+  it("displays multiple named styles in a list", () => {
+    const named = [
+      { id: "s1", name: "Highlight", style: { background: "#ff0" } },
+      { id: "s2", name: "Bold Red", style: { background: "#f00", fontWeight: "bold" } },
+    ];
+    render(
+      <StylesPanel
+        rules={[]}
+        markers={[]}
+        namedStyles={named}
+        onAddRule={noop}
+        onDeleteRule={noop}
+        onSaveStyle={noop}
+        onApplyStyle={noop}
+        onDeleteStyle={noop}
+      />,
+    );
+    expect(screen.getByText("Highlight")).toBeTruthy();
+    expect(screen.getByText("Bold Red")).toBeTruthy();
+  });
+
+  it("calls onApplyStyle with the style object when a named style is clicked", async () => {
+    const onApplyStyle = vi.fn();
+    const named = [{ id: "s1", name: "Highlight", style: { background: "#ff0" } }];
+    render(
+      <StylesPanel
+        rules={[]}
+        markers={[]}
+        namedStyles={named}
+        onAddRule={noop}
+        onDeleteRule={noop}
+        onSaveStyle={noop}
+        onApplyStyle={onApplyStyle}
+        onDeleteStyle={noop}
+      />,
+    );
+    const highlightRow = screen.getByRole("button", { name: "Highlight" });
+    await userEvent.click(highlightRow);
+    expect(onApplyStyle).toHaveBeenCalledWith({ background: "#ff0" });
+  });
+});
+
+describe("HistoryPanel (interaction)", () => {
+  it("calls onSaveNow when the 'Save version now' button is clicked", async () => {
+    const onSaveNow = vi.fn();
+    render(
+      <HistoryPanel versions={[]} onSaveNow={onSaveNow} onPlay={noop} onRestore={noop} onClose={noop} />,
+    );
+    const saveBtn = screen.getByRole("button", { name: /Save version now/ });
+    await userEvent.click(saveBtn);
+    expect(onSaveNow).toHaveBeenCalled();
+  });
+
+  it("calls onRestore when a Restore button is clicked", async () => {
+    const onRestore = vi.fn();
+    render(
+      <HistoryPanel
+        versions={[
+          { id: "v1", ts: Date.now(), title: "Saved", nodeCount: 4 },
+          { id: "v2", ts: Date.now() - 60_000, title: "Earlier", nodeCount: 3 },
+        ]}
+        onSaveNow={noop}
+        onPlay={noop}
+        onRestore={onRestore}
+        onClose={noop}
+      />,
+    );
+    const restoreButtons = screen.getAllByRole("button", { name: "Restore" });
+    await userEvent.click(restoreButtons[0]);
+    expect(onRestore).toHaveBeenCalledWith("v1");
+  });
 });
 
 // Interaction smoke: confirm the panels are actually wired to their callbacks. These also pin the

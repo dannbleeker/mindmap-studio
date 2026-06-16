@@ -4,18 +4,14 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Status
 
-Phase 1 (Brainstorming MVP) complete; the canvas engine is **@xyflow/react** (the only one). The
-**competitive gap-closing effort is concluded by decision (2026-06-16)** — MindMap Studio is
-**feature-complete for its scope** (local-first, offline, single-user, free); the remaining
-competitive gaps are surveyed and **not pursued** (recorded under Reference). The handbook (*Thinking in Maps*)
-documents every feature (`book` 100%). Deployed to GitHub Pages on every push to `main` — live at
-<https://mindmap-studio.struktureretsundfornuft.dk/>. See `CHANGELOG.md` for all shipped work.
-
-The **foundation-hardening run is complete (2026-06-16)** — the prep before the editor/UX redesign:
-coverage **~44% → ~55%** with a real component/hook test net (`@testing-library/react`), `App.tsx`
-trimmed **2,165 → ~1,520** lines, a design-token + UI-primitive layer (`src/design/*`), `<Toolbar>`
-and `<Dialog>` extracted, panel/filter state lifted into `usePanels()`, and the canvas memoised — all
-behaviour-preserving. The chrome is now token-driven and component-shaped, ready to be reshaped.
+Phase 1 (Brainstorming MVP) complete; canvas engine is **@xyflow/react**. MindMap Studio is
+**feature-complete for its scope** (local-first, offline, single-user, free) — the competitive
+gap-closing effort is **concluded by decision (2026-06-16)**; remaining gaps are surveyed, not
+pursued (see Reference). The handbook documents every feature (`book` 100%), and the
+**foundation-hardening run (2026-06-16)** prepped the chrome for the editor/UX redesign (design
+tokens + primitives, `<Toolbar>` / `<Dialog>` / `usePanels()` extracted, canvas memoised, coverage
+~44%→~55%) — all in `CHANGELOG.md`. Deployed to GitHub Pages on every push to `main` — live at
+<https://mindmap-studio.struktureretsundfornuft.dk/>.
 
 ## Open items
 

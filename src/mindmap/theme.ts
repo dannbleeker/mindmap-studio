@@ -1,27 +1,30 @@
-// MindManager-flavoured canvas theme.
+// Default canvas theme — the warm-cream + emerald brand language (matches the editor chrome + Start
+// screen as of the 2026-06 redesign).
 //
-// `palette` is the important bit: the canvas colours each main branch (and its
-// descendants) by cycling this palette from the root outward — exactly the
-// MindManager "coloured branch" identity. The cssVar block rounds the topic
-// shapes and fattens the connectors to push the look closer to MindManager.
+// `palette` is the important bit: the canvas colours each main branch (and its descendants) by
+// cycling this palette from the root outward (the "coloured branch" identity). The root is the
+// emerald brand accent; the branches are the warm support palette shared with the chrome's MiniMap.
+// `exportSvg` is handed this same palette + cssVar, so the screen and every PNG/SVG/PDF/Office export
+// stay byte-faithful (canvas == export). The cssVar block rounds the topic shapes and fattens the
+// connectors.
 export const mindManagerTheme = {
-  name: "MindManager-ish",
+  name: "Light",
   type: "light" as const,
-  palette: ["#E8593C", "#3B8BD4", "#27500A", "#BA7517", "#72243E", "#0C447C", "#993C1D"],
+  palette: ["#c2701a", "#3f6fb0", "#1b8a5e", "#b23b6a", "#8a6d2f", "#6a5acd"],
   cssVar: {
-    "--main-color": "#2c2c2a",
+    "--main-color": "#23211c",
     "--main-bgcolor": "#faf9f5",
-    "--color": "#2c2c2a",
+    "--color": "#23211c",
     "--bgcolor": "#ffffff",
-    "--selected": "#7f77dd",
+    "--selected": "#1b8a5e",
     "--root-color": "#ffffff",
-    "--root-bgcolor": "#26215c",
+    "--root-bgcolor": "#1b8a5e",
     "--root-radius": "26px",
     "--main-radius": "16px",
     "--topic-padding": "8px",
     "--line-width": "3px",
     "--main-line-width": "4px",
-    "--line-color": "#b4b2a9",
+    "--line-color": "#cbc7bd",
   },
 };
 
@@ -29,7 +32,7 @@ export const mindManagerTheme = {
 // surfaces and dimmed connectors. Useful for on-screen presentation, and image
 // exports inherit it. Topic shapes/sizing stay identical to the light theme.
 export const mindManagerDarkTheme = {
-  name: "MindManager-ish dark",
+  name: "Dark",
   type: "dark" as const,
   palette: mindManagerTheme.palette,
   cssVar: {
@@ -38,9 +41,9 @@ export const mindManagerDarkTheme = {
     "--main-bgcolor": "#1d1c22",
     "--color": "#e8e6df",
     "--bgcolor": "#2a2930",
-    "--selected": "#9c95f0",
+    "--selected": "#37b07e",
     "--root-color": "#ffffff",
-    "--root-bgcolor": "#4a437f",
+    "--root-bgcolor": "#15714d",
     "--line-color": "#56545e",
   },
 };

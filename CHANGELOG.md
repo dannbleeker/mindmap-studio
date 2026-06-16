@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Canvas palette → brand (redesign phase 2, start)** — the default **Light** and **Dark** canvas
+  themes are retuned to the warm-cream + **emerald** brand language: emerald **root** node and the
+  warm support branch palette (amber / blue / emerald / magenta / olive / violet) shared with the
+  chrome, replacing the old indigo-root + MindManager-red palette. Because `exportSvg` is handed the
+  same palette + cssVars as the live canvas, every PNG / SVG / PDF / Office export stays
+  byte-faithful (**canvas == export** — verified: the exported SVG carries the emerald root and warm
+  branch colours, no stale palette). Ocean / Sunset themes are unchanged. (Node-card detailing, badges
+  and the inline popover are later phase-2 increments.)
+
 - **Editor chrome redesign (phase 1 of 2)** — the editor adopts the warm-cream + emerald visual
   language already shipped on the Start screen. A new **56px icon rail** (brand → Start, find, insert
   image, paste, about) sits beside a **two-row top bar**: row 1 is file/identity (Start, map switcher,

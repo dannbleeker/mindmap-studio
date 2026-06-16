@@ -4,12 +4,12 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Status
 
-Phase 1 (Brainstorming MVP) complete; the canvas engine is **@xyflow/react** (the only one); the
-**entire in-scope MindManager gap is closed**, and the broader cross-tool gap is mostly closed too —
-the competitive matrix is down to **5 partials** plus deferred / out-of-scope items (see Reference).
-The handbook (*Thinking in Maps*) now documents every feature (`book` 100%). Deployed to GitHub
-Pages on every push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>. See
-`CHANGELOG.md` for all shipped work.
+Phase 1 (Brainstorming MVP) complete; the canvas engine is **@xyflow/react** (the only one). The
+**competitive gap-closing effort is concluded by decision (2026-06-16)** — MindMap Studio is
+**feature-complete for its scope** (local-first, offline, single-user, free); the remaining
+competitive-matrix gaps are reference-only, **not a backlog**. The handbook (*Thinking in Maps*)
+documents every feature (`book` 100%). Deployed to GitHub Pages on every push to `main` — live at
+<https://mindmap-studio.struktureretsundfornuft.dk/>. See `CHANGELOG.md` for all shipped work.
 
 ## Open items
 

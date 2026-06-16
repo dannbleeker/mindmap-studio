@@ -1,6 +1,6 @@
 # Mind-mapping tools → MindMap Studio: feature gaps
 
-_Last updated: 2026-06-15._
+_Last updated: 2026-06-16._
 
 A market-wide capability survey across **19 mind-mapping / visual-thinking tools**, combined into
 one feature taxonomy and mapped against MindMap Studio. This doc now lists **only the gaps** — what
@@ -9,6 +9,11 @@ the category does that MindMap Studio doesn't (❌) or only partly (🟡) has, p
 `docs/features.json` for the full shipped set, and the cross-tool gap clusters at the bottom for the
 summary. (A MindManager-specific deep audit once lived alongside it; with its in-scope gaps closed it
 was folded into `NEXT_STEPS.md` and retired.)
+
+> **Decision (2026-06-16): the gap-closing effort is concluded.** MindMap Studio is considered
+> **feature-complete for its scope** (local-first, offline, single-user, free). The gaps below are
+> **not being pursued** — this doc is kept as competitive-awareness reference, **not a backlog**.
+> The ⛔ rows were never in scope; the remaining ❌ / 🟡 rows are feasible but deliberately deprioritised.
 
 Snapshot of 2025/2026 feature sets, compiled from each vendor's product/help pages and reputable
 comparisons. Treat version-specific details as approximate.

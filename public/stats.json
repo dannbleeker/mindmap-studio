@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-16T07:36:38.084Z",
-  "commit": "4e5f673",
+  "generatedAt": "2026-06-16T10:27:49.229Z",
+  "commit": "6cb718d",
   "headline": {
     "linesTsJs": 27762,
     "tests": 689,
     "lineCoveragePct": 55.8,
-    "commits": 404,
+    "commits": 406,
     "ageDays": 4,
     "trackedFiles": 253,
     "featureManualPct": 100,
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 689,
     "e2e": 0,
-    "durationMs": 15872,
+    "durationMs": 14944,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 3974
+        "ms": 3244
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 2432
+        "ms": 2623
+      },
+      {
+        "file": "test/timeAgo.test.ts",
+        "ms": 219
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 164
+        "ms": 160
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 120
-      },
-      {
-        "file": "test/hooks.test.tsx",
-        "ms": 90
+        "ms": 154
       }
     ]
   },
@@ -299,21 +299,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 4,
-    "commits": 404,
-    "commits7d": 404,
+    "commits": 406,
+    "commits7d": 406,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 224
+        "count": 225
       },
       {
         "name": "github-actions[bot]",
-        "count": 180
+        "count": 181
       }
     ],
     "churn30d": {
-      "added": 58028,
-      "removed": 16575
+      "added": 58093,
+      "removed": 16644
     },
     "changelogEntries": 132
   }

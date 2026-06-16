@@ -128,4 +128,56 @@ describe("MindMeister .mind import", () => {
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids.every((id) => id.startsWith("mm"))).toBe(true);
   });
+
+  it("accepts a link in { href } object form (fallback to href)", () => {
+    const hrefFixture = {
+      map_version: "2",
+      root: {
+        title: "Root",
+        link: { href: "https://example.com/via-href" },
+        children: [],
+      },
+    };
+    const doc = fromMind(makeMind(hrefFixture));
+    expect(doc.root.hyperlink).toBe("https://example.com/via-href");
+  });
+
+  it("accepts a note in { content } object form (fallback to content)", () => {
+    const contentFixture = {
+      map_version: "2",
+      root: {
+        title: "Root",
+        note: { content: "Note via content field" },
+        children: [],
+      },
+    };
+    const doc = fromMind(makeMind(contentFixture));
+    expect(doc.root.note).toBe("Note via content field");
+  });
+
+  it("prefers url over href when both exist in link object", () => {
+    const preferUrlFixture = {
+      map_version: "2",
+      root: {
+        title: "Root",
+        link: { url: "https://example.com/url", href: "https://example.com/href" },
+        children: [],
+      },
+    };
+    const doc = fromMind(makeMind(preferUrlFixture));
+    expect(doc.root.hyperlink).toBe("https://example.com/url");
+  });
+
+  it("prefers text over content when both exist in note object", () => {
+    const preferTextFixture = {
+      map_version: "2",
+      root: {
+        title: "Root",
+        note: { text: "Note via text", content: "Note via content" },
+        children: [],
+      },
+    };
+    const doc = fromMind(makeMind(preferTextFixture));
+    expect(doc.root.note).toBe("Note via text");
+  });
 });

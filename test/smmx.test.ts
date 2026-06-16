@@ -41,6 +41,127 @@ describe("SimpleMind .smmx import", () => {
   it("throws on a zip without document/mindmap.xml", () => {
     expect(() => fromSmmx(zipSync({ "x.txt": strToU8("hi") }))).toThrow(/mindmap\.xml/);
   });
+
+  it("handles malformed XML gracefully (missing root topic)", () => {
+    const malformed = `<?xml version="1.0" encoding="UTF-8"?>
+<simplemind-mindmaps>
+<mindmap>
+<meta><title text="Bad Map"/></meta>
+<topics>
+<topic id="1" parent="0" text="Child"/>
+</topics>
+</mindmap>
+</simplemind-mindmaps>`;
+    expect(() => fromSmmx(makeSmmx(malformed))).not.toThrow();
+  });
+
+  it("throws when topics array is empty (no central topic)", () => {
+    const empty = `<?xml version="1.0" encoding="UTF-8"?>
+<simplemind-mindmaps>
+<mindmap>
+<meta><title text="Empty"/></meta>
+<topics/>
+</mindmap>
+</simplemind-mindmaps>`;
+    expect(() => fromSmmx(makeSmmx(empty))).toThrow(/no topics/i);
+  });
+
+  it("handles topic with missing parent attribute (treated as root if parent=-1)", () => {
+    const missingParent = `<?xml version="1.0" encoding="UTF-8"?>
+<simplemind-mindmaps>
+<mindmap>
+<meta><title text="MissingParent"/></meta>
+<topics>
+<topic id="0" parent="-1" text="Root"/>
+<topic id="1" parent="0" text="Child"/>
+</topics>
+</mindmap>
+</simplemind-mindmaps>`;
+    expect(() => fromSmmx(makeSmmx(missingParent))).not.toThrow();
+    const doc = fromSmmx(makeSmmx(missingParent));
+    expect(doc.root.topic).toBe("Root");
+  });
+});
+
+describe("SimpleMind .smmx export (branch coverage)", () => {
+  it("exports a floating topic as a separate parent=-1 root", () => {
+    const docWithFloat: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "With Float",
+      root: {
+        id: "r",
+        topic: "Central",
+        children: [],
+      },
+      floatingTopics: [{ id: "f1", topic: "Legend", children: [] }],
+    };
+    const back = fromSmmx(toSmmx(docWithFloat));
+    expect(back.floatingTopics?.length).toBe(1);
+    expect(back.floatingTopics?.[0].topic).toBe("Legend");
+  });
+
+  it("handles doc with empty children array", () => {
+    const sparse: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "Sparse",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [],
+      },
+    };
+    const back = fromSmmx(toSmmx(sparse));
+    expect(back.root.children.length).toBe(0);
+  });
+
+  it("exports multiple relations as separate relation elements", () => {
+    const multiLink: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "MultiLink",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          { id: "a", topic: "A", children: [] },
+          { id: "b", topic: "B", children: [] },
+          { id: "c", topic: "C", children: [] },
+        ],
+      },
+      links: [
+        { id: "l1", from: "a", to: "b", label: "rel1" },
+        { id: "l2", from: "b", to: "c", label: "rel2" },
+      ],
+    };
+    const back = fromSmmx(toSmmx(multiLink));
+    expect(back.links?.length).toBe(2);
+  });
+
+  it("handles topic with both note and hyperlink", () => {
+    const richNode: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "Rich",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          {
+            id: "a",
+            topic: "Rich",
+            note: "A note",
+            hyperlink: "https://example.com/",
+            children: [],
+          },
+        ],
+      },
+    };
+    const back = fromSmmx(toSmmx(richNode));
+    expect(back.root.children[0].note).toBe("A note");
+    expect(back.root.children[0].hyperlink).toBe("https://example.com/");
+  });
 });
 
 const doc: MindMapDoc = {

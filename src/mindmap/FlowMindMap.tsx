@@ -20,6 +20,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { colors } from "../design/tokens";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
@@ -792,9 +793,9 @@ function FlowInner({
                 font: "12px system-ui, sans-serif",
                 padding: "2px 8px",
                 borderRadius: 6,
-                border: "1px solid #cfcfe0",
-                background: "var(--mm-node-bg, #fff)",
-                color: "var(--mm-color, #222)",
+                border: `1px solid ${colors.menu.border}`,
+                background: `var(--mm-node-bg, ${colors.menu.fallbackBg})`,
+                color: `var(--mm-color, ${colors.menu.fallbackColor})`,
                 cursor: "pointer",
                 boxShadow: "0 1px 3px #0002",
               }}
@@ -814,9 +815,9 @@ function FlowInner({
               margin: 0,
               padding: 4,
               listStyle: "none",
-              background: "var(--mm-node-bg, #fff)",
-              color: "var(--mm-color, #222)",
-              border: "1px solid #cfcfe0",
+              background: `var(--mm-node-bg, ${colors.menu.fallbackBg})`,
+              color: `var(--mm-color, ${colors.menu.fallbackColor})`,
+              border: `1px solid ${colors.menu.border}`,
               borderRadius: 8,
               boxShadow: "0 4px 14px #0003",
               font: "13px system-ui, sans-serif",
@@ -877,8 +878,14 @@ function FlowInner({
                 </button>
               </li>
             ))}
-            <li style={{ padding: "5px 10px", borderTop: "1px solid #eceafb", marginTop: 2 }}>
-              <label style={{ fontSize: 12, color: "#73726c", display: "block" }}>
+            <li
+              style={{
+                padding: "5px 10px",
+                borderTop: `1px solid ${colors.menu.separator}`,
+                marginTop: 2,
+              }}
+            >
+              <label style={{ fontSize: 12, color: colors.muted, display: "block" }}>
                 Branch layout{" "}
                 <select
                   defaultValue={findNode(docRef.current, menu.id)?.layout ?? ""}
@@ -912,8 +919,8 @@ function FlowInner({
               transform: "translateX(-50%)",
               zIndex: 20,
               padding: "5px 12px",
-              background: "var(--mm-root-bg, #26215c)",
-              color: "var(--mm-root-color, #fff)",
+              background: `var(--mm-root-bg, ${colors.menu.linkBg})`,
+              color: `var(--mm-root-color, ${colors.menu.linkColor})`,
               borderRadius: 8,
               font: "13px system-ui, sans-serif",
               boxShadow: "0 2px 10px #0004",

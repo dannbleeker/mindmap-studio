@@ -1,5 +1,7 @@
 import { type CSSProperties, useState } from "react";
 import { ProgressPie } from "./ProgressPie";
+import { Button, Chip, Input, Panel, PanelSection, Select } from "./design/primitives";
+import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { formatBytes } from "./io/attachment";
 import type { SelectedNode } from "./mindmap";
@@ -20,38 +22,61 @@ import { STICKERS, type Sticker, stickerDataUrl } from "./stickers";
 import type { VersionMeta } from "./store/mapStore";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 
-const FILL_SWATCHES = ["#fde2e2", "#e2ecfd", "#e2fbe8", "#fdf3e2", "#efe2fd", "#ececec"];
-const BORDER_SWATCHES = ["#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"];
+// The per-topic fill/border swatch palettes live in the design tokens now (shared with the rest of
+// the chrome). Aliased here so the StyleBar + StylesPanel call-sites read unchanged.
+const FILL_SWATCHES = colors.fillSwatches;
+const BORDER_SWATCHES = colors.borderSwatches;
 
-// Shared chrome for the left-rail panels (Outline, Marker/tag index, Power Filter): a fixed-width
-// flex column with a right divider. One definition so the three panels stay visually identical.
-const PANEL_ASIDE: CSSProperties = {
-  width: 250,
-  flexShrink: 0,
-  display: "flex",
-  flexDirection: "column",
-  borderRight: "1px solid #e2e0d8",
-  background: "#fbfbf9",
-};
-
-// Small-caps section header inside the index + filter panels.
-const PANEL_GROUP_LABEL: CSSProperties = {
-  padding: "8px 10px 2px",
-  fontSize: 11,
-  fontWeight: 700,
-  color: "#8a8780",
-};
-
+// Small icon-button look for the StyleBar shape/font controls (a compact white control). One-off to
+// this bar, but its values come from the tokens so it stays in step with the rest of the chrome.
 const styleBtn = {
-  border: "1px solid #cecbf6",
-  background: "#fff",
-  borderRadius: 6,
+  border: `1px solid ${colors.controlBorder}`,
+  background: colors.white,
+  borderRadius: radius.md,
   cursor: "pointer",
-  fontSize: 14,
+  fontSize: fontSize.lg,
   lineHeight: 1,
-  padding: "2px 6px",
-  color: "#26215c",
+  padding: `${space.xxs}px ${space.md}px`,
+  color: colors.text,
 } as const;
+
+// A clickable list row inside the rail panels (outline rows, index jump targets, saved-filter +
+// named-style rows): a full-width, left-aligned, single-line-ellipsised transparent button. Callers
+// add their own padding (depth indent / variant). One object so the rows stay visually identical.
+const listRow: CSSProperties = {
+  display: "block",
+  width: "100%",
+  textAlign: "left",
+  border: "none",
+  background: "transparent",
+  cursor: "pointer",
+  fontSize: fontSize.md,
+  color: colors.text,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};
+
+// The horizontal control strip at the top of the Info panel (the StyleBar + MarkerBar): a wrapping
+// flex row on a faint lilac surface with a divider below. Shared so both bars sit identically.
+const barRow: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: space.xs,
+  flexWrap: "wrap",
+  padding: `${space.md}px ${space.xxxl}px`,
+  background: colors.surfaceBar,
+  borderBottom: `1px solid ${colors.border}`,
+};
+
+// The bold ink title at the top of a rail panel (Markers & tags / Power Filter / Styles). The
+// History + Info panels use a flex variant of this (title + a Close button) inline.
+const panelTitle: CSSProperties = {
+  padding: `${space.lg}px ${space.xl}px ${space.sm}px`,
+  fontSize: fontSize.md,
+  fontWeight: fontWeight.semibold,
+  color: colors.text,
+};
 
 // Per-topic styling bar: shape, fill, border, bold — applied to the selected node.
 export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => void }) {
@@ -64,8 +89,8 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
       style={{
         width: 18,
         height: 18,
-        borderRadius: 4,
-        border: "1px solid #cecbf6",
+        borderRadius: radius.xs,
+        border: `1px solid ${colors.controlBorder}`,
         background: color,
         cursor: "pointer",
         padding: 0,
@@ -73,7 +98,9 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
     />
   );
   const label = (text: string) => (
-    <span style={{ fontSize: 12, color: "#73726c", margin: "0 2px 0 6px" }}>{text}</span>
+    <span style={{ fontSize: fontSize.sm, color: colors.muted, margin: "0 2px 0 6px" }}>
+      {text}
+    </span>
   );
   // A mini preview of each geometric shape, drawn from the very same path builder the canvas and
   // exporter use — so the picker icon always matches what lands on the node.
@@ -106,17 +133,7 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
     { shape: "cloud", title: "Cloud (idea / external system)" },
   ];
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 3,
-        flexWrap: "wrap",
-        padding: "6px 16px",
-        background: "#f4f3fb",
-        borderBottom: "1px solid #e2e0d8",
-      }}
-    >
+    <div style={barRow}>
       {label("Shape")}
       <button
         type="button"
@@ -240,13 +257,13 @@ export function OutlinePanel({
   const rows = outlineRows(root).filter((row) => !q || row.topic.toLowerCase().includes(q));
   const numbers = numbered ? outlineNumbers(root) : undefined;
   return (
-    <aside style={PANEL_ASIDE}>
-      <input
+    <Panel>
+      <Input
         value={filter}
         onChange={(e) => onFilterChange(e.target.value)}
         placeholder="Filter outline…"
         aria-label="Filter outline"
-        style={{ ...inputStyle, width: "auto", margin: "8px 10px 4px" }}
+        style={{ width: "auto", margin: "8px 10px 4px" }}
       />
       <div style={{ overflowY: "auto", padding: "4px 0 8px" }}>
         {rows.map((row) => (
@@ -256,31 +273,23 @@ export function OutlinePanel({
             onClick={() => onPick(row.id)}
             title={row.topic}
             style={{
-              display: "block",
-              width: "100%",
-              textAlign: "left",
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              fontSize: 13,
-              color: "#26215c",
+              ...listRow,
               padding: "3px 10px",
               paddingLeft: 10 + row.depth * 14,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
             }}
           >
             {row.hasNote ? "📝 " : ""}
             {numbers?.get(row.id) ? `${numbers.get(row.id)} ` : ""}
             {row.topic || "(untitled)"}
             {row.progress !== undefined ? (
-              <span style={{ marginLeft: 6, fontSize: 11, color: "#8a8780" }}>{row.progress}%</span>
+              <span style={{ marginLeft: 6, fontSize: fontSize.xs, color: colors.faint }}>
+                {row.progress}%
+              </span>
             ) : null}
           </button>
         ))}
       </div>
-    </aside>
+    </Panel>
   );
 }
 
@@ -304,20 +313,7 @@ export function MarkerTagIndex({
       type="button"
       onClick={() => onPick(hit.id)}
       title={hit.topic}
-      style={{
-        display: "block",
-        width: "100%",
-        textAlign: "left",
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        fontSize: 13,
-        color: "#26215c",
-        padding: "2px 10px 2px 24px",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}
+      style={{ ...listRow, padding: "2px 10px 2px 24px" }}
     >
       {hit.topic || "(untitled)"}
     </button>
@@ -327,11 +323,21 @@ export function MarkerTagIndex({
     if (entries.length === 0) return null;
     return (
       <div key={label}>
-        <div style={PANEL_GROUP_LABEL}>{label}</div>
+        <PanelSection>{label}</PanelSection>
         {entries.map(({ key, hits }) => (
           <div key={key}>
-            <div style={{ padding: "2px 10px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
-              {key} <span style={{ color: "#8a8780", fontWeight: 400 }}>({hits.length})</span>
+            <div
+              style={{
+                padding: "2px 10px",
+                fontSize: fontSize.md,
+                fontWeight: fontWeight.semibold,
+                color: colors.text,
+              }}
+            >
+              {key}{" "}
+              <span style={{ color: colors.faint, fontWeight: fontWeight.normal }}>
+                ({hits.length})
+              </span>
             </div>
             {hits.map((hit) => jump(hit, key))}
           </div>
@@ -342,20 +348,18 @@ export function MarkerTagIndex({
 
   const empty = markers.length === 0 && tags.length === 0;
   return (
-    <aside style={PANEL_ASIDE}>
-      <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
-        Markers &amp; tags
-      </div>
+    <Panel>
+      <div style={panelTitle}>Markers &amp; tags</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {empty ? (
-          <div style={{ padding: "4px 10px", fontSize: 13, color: "#8a8780" }}>
+          <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
             No markers or tags in this map yet.
           </div>
         ) : null}
         {group("Markers", markers)}
         {group("Tags", tags)}
       </div>
-    </aside>
+    </Panel>
   );
 }
 
@@ -406,57 +410,39 @@ export function FilterPanel({
     text.trim().length > 0 || markers.length > 0 || tags.length > 0 || due !== "" || priority > 0;
   const [saveName, setSaveName] = useState("");
   const chip = (key: string, selected: boolean, onClick: () => void) => (
-    <button
-      key={key}
-      type="button"
-      onClick={onClick}
-      aria-pressed={selected}
-      style={{
-        border: `1px solid ${selected ? "#6c63d6" : "#cecbf6"}`,
-        background: selected ? "#6c63d6" : "#fff",
-        color: selected ? "#fff" : "#26215c",
-        borderRadius: 6,
-        cursor: "pointer",
-        fontSize: 13,
-        lineHeight: 1.4,
-        padding: "2px 7px",
-      }}
-    >
+    <Chip key={key} selected={selected} onClick={onClick}>
       {key}
-    </button>
+    </Chip>
   );
-  const groupLabel = (label: string) => <div style={PANEL_GROUP_LABEL}>{label}</div>;
   return (
-    <aside style={PANEL_ASIDE}>
-      <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
-        🎚 Power Filter
-      </div>
+    <Panel>
+      <div style={panelTitle}>🎚 Power Filter</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
-        <input
+        <Input
           value={text}
           onChange={(e) => onText(e.target.value)}
           placeholder="Filter by text…"
           aria-label="Filter by text"
-          style={{ ...inputStyle, width: "auto", margin: "4px 10px" }}
+          style={{ width: "auto", margin: "4px 10px" }}
         />
-        {groupLabel("Due date")}
-        <select
+        <PanelSection>Due date</PanelSection>
+        <Select
           value={due}
           onChange={(e) => onDue(e.target.value as DueMode)}
           aria-label="Filter by due date"
-          style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          style={{ width: "auto", margin: "0 10px 4px" }}
         >
           <option value="">Any</option>
           <option value="dated">Has a date</option>
           <option value="overdue">Overdue</option>
           <option value="soon">Due ≤ 7 days</option>
-        </select>
-        {groupLabel("Priority")}
-        <select
+        </Select>
+        <PanelSection>Priority</PanelSection>
+        <Select
           value={priority}
           onChange={(e) => onPriority(Number(e.target.value))}
           aria-label="Filter by priority"
-          style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+          style={{ width: "auto", margin: "0 10px 4px" }}
         >
           <option value={0}>Any</option>
           {PRIORITY_LEVELS.map((p) => (
@@ -464,10 +450,10 @@ export function FilterPanel({
               {PRIORITY_LABEL[p]}
             </option>
           ))}
-        </select>
+        </Select>
         {markerEntries.length > 0 ? (
           <>
-            {groupLabel("Markers")}
+            <PanelSection>Markers</PanelSection>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
               {markerEntries.map((e) =>
                 chip(e.key, markers.includes(e.key), () => onToggleMarker(e.key)),
@@ -477,7 +463,7 @@ export function FilterPanel({
         ) : null}
         {tagEntries.length > 0 ? (
           <>
-            {groupLabel("Tags")}
+            <PanelSection>Tags</PanelSection>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
               {tagEntries.map((e) => chip(e.key, tags.includes(e.key), () => onToggleTag(e.key)))}
             </div>
@@ -490,26 +476,26 @@ export function FilterPanel({
             justifyContent: "space-between",
             gap: 6,
             padding: "10px 10px 2px",
-            fontSize: 12,
-            color: "#73726c",
+            fontSize: fontSize.sm,
+            color: colors.muted,
           }}
         >
           <span>
             {active ? `${matchCount} match${matchCount === 1 ? "" : "es"}` : "Showing all"}
           </span>
           {active ? (
-            <button type="button" onClick={onClear} style={{ ...controlStyle, padding: "2px 8px" }}>
+            <Button onClick={onClear} style={{ padding: "2px 8px" }}>
               Clear
-            </button>
+            </Button>
           ) : null}
         </div>
-        <div style={{ padding: "6px 10px", fontSize: 11, color: "#8a8780" }}>
+        <div style={{ padding: "6px 10px", fontSize: fontSize.xs, color: colors.faint }}>
           Read-only: non-matching topics are dimmed, nothing is removed.
         </div>
 
-        {groupLabel("Saved filters")}
+        <PanelSection>Saved filters</PanelSection>
         {savedFilters.length === 0 ? (
-          <div style={{ padding: "0 10px 4px", fontSize: 12, color: "#8a8780" }}>
+          <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
             Save a filter to reuse it across maps.
           </div>
         ) : (
@@ -528,8 +514,8 @@ export function FilterPanel({
                   border: "none",
                   background: "transparent",
                   cursor: "pointer",
-                  fontSize: 13,
-                  color: "#26215c",
+                  fontSize: fontSize.md,
+                  color: colors.text,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -546,8 +532,8 @@ export function FilterPanel({
                   border: "none",
                   background: "transparent",
                   cursor: "pointer",
-                  color: "#8a8780",
-                  fontSize: 12,
+                  color: colors.faint,
+                  fontSize: fontSize.sm,
                 }}
               >
                 ✕
@@ -557,7 +543,7 @@ export function FilterPanel({
         )}
         {active ? (
           <div style={{ display: "flex", gap: 4, padding: "4px 10px 8px" }}>
-            <input
+            <Input
               value={saveName}
               onChange={(e) => setSaveName(e.target.value)}
               onKeyDown={(e) => {
@@ -568,23 +554,22 @@ export function FilterPanel({
               }}
               placeholder="Name this filter…"
               aria-label="Save filter name"
-              style={{ ...inputStyle, width: "auto", flex: 1 }}
+              style={{ width: "auto", flex: 1 }}
             />
-            <button
-              type="button"
+            <Button
               disabled={!saveName.trim()}
               onClick={() => {
                 onSaveFilter(saveName.trim());
                 setSaveName("");
               }}
-              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+              style={{ padding: "2px 8px", fontSize: fontSize.sm }}
             >
               Save
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>
-    </aside>
+    </Panel>
   );
 }
 
@@ -605,36 +590,27 @@ export function HistoryPanel({
   onClose: () => void;
 }) {
   return (
-    <aside style={PANEL_ASIDE}>
+    <Panel>
       <div
         style={{
+          ...panelTitle,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "8px 10px 4px",
-          fontSize: 13,
-          fontWeight: 600,
-          color: "#26215c",
         }}
       >
         <span>🕔 History</span>
-        <button
-          type="button"
-          onClick={onClose}
-          style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
-        >
+        <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
           Close
-        </button>
+        </Button>
       </div>
-      <button
-        type="button"
+      <Button
         onClick={onSaveNow}
-        style={{ ...controlStyle, margin: "0 10px 6px", padding: "4px 8px", fontSize: 12 }}
+        style={{ margin: "0 10px 6px", padding: "4px 8px", fontSize: fontSize.sm }}
       >
         ＋ Save version now
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
         onClick={onPlay}
         disabled={versions.length < 2}
         title={
@@ -642,13 +618,13 @@ export function HistoryPanel({
             ? "Save at least two versions to play the timeline"
             : "Play the map's history as a timeline"
         }
-        style={{ ...controlStyle, margin: "0 10px 8px", padding: "4px 8px", fontSize: 12 }}
+        style={{ margin: "0 10px 8px", padding: "4px 8px", fontSize: fontSize.sm }}
       >
         ▶ Play timeline
-      </button>
+      </Button>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {versions.length === 0 ? (
-          <div style={{ padding: "4px 10px", fontSize: 13, color: "#8a8780" }}>
+          <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
             No saved versions yet. Snapshots are captured automatically as you edit.
           </div>
         ) : (
@@ -665,28 +641,27 @@ export function HistoryPanel({
             >
               <span
                 style={{
-                  fontSize: 13,
-                  color: "#26215c",
+                  fontSize: fontSize.md,
+                  color: colors.text,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                 }}
                 title={new Date(v.ts).toLocaleString()}
               >
-                {timeAgo(v.ts)} <span style={{ color: "#8a8780" }}>· {v.nodeCount} topics</span>
+                {timeAgo(v.ts)} <span style={{ color: colors.faint }}>· {v.nodeCount} topics</span>
               </span>
-              <button
-                type="button"
+              <Button
                 onClick={() => onRestore(v.id)}
-                style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
+                style={{ padding: "1px 8px", fontSize: fontSize.sm }}
               >
                 Restore
-              </button>
+              </Button>
             </div>
           ))
         )}
       </div>
-    </aside>
+    </Panel>
   );
 }
 
@@ -712,7 +687,7 @@ export function PlaybackBar({
   onRestore: () => void;
   onExit: () => void;
 }) {
-  const btn = { ...controlStyle, padding: "2px 9px", fontSize: 13 } as const;
+  const btn: CSSProperties = { padding: "2px 9px", fontSize: fontSize.md };
   return (
     <div
       role="toolbar"
@@ -728,14 +703,13 @@ export function PlaybackBar({
         gap: 8,
         padding: "8px 12px",
         background: "rgba(255,255,255,0.95)",
-        border: "1px solid #d9d7ea",
-        borderRadius: 12,
+        border: `1px solid ${colors.playbackBorder}`,
+        borderRadius: radius.xl,
         boxShadow: "0 6px 24px rgba(31,27,77,0.18)",
         maxWidth: "min(560px, calc(100% - 24px))",
       }}
     >
-      <button
-        type="button"
+      <Button
         onClick={() => onStep(-1)}
         disabled={index <= 0}
         style={btn}
@@ -743,17 +717,11 @@ export function PlaybackBar({
         aria-label="Previous version"
       >
         ⏮
-      </button>
-      <button
-        type="button"
-        onClick={onPlayPause}
-        style={btn}
-        aria-label={playing ? "Pause" : "Play"}
-      >
+      </Button>
+      <Button onClick={onPlayPause} style={btn} aria-label={playing ? "Pause" : "Play"}>
         {playing ? "⏸" : "▶"}
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
         onClick={() => onStep(1)}
         disabled={index >= count - 1}
         style={btn}
@@ -761,7 +729,7 @@ export function PlaybackBar({
         aria-label="Next version"
       >
         ⏭
-      </button>
+      </Button>
       <input
         type="range"
         min={0}
@@ -769,15 +737,17 @@ export function PlaybackBar({
         value={index}
         onChange={(e) => onSeek(Number(e.target.value))}
         aria-label="Version timeline"
-        style={{ flex: 1, minWidth: 90, accentColor: "#6c63d8" }}
+        style={{ flex: 1, minWidth: 90, accentColor: colors.accentSlider }}
       />
-      <span style={{ fontSize: 12, color: "#73726c", whiteSpace: "nowrap" }}>{label}</span>
-      <button type="button" onClick={onRestore} style={btn} title="Restore this version">
+      <span style={{ fontSize: fontSize.sm, color: colors.muted, whiteSpace: "nowrap" }}>
+        {label}
+      </span>
+      <Button onClick={onRestore} style={btn} title="Restore this version">
         Restore this
-      </button>
-      <button type="button" onClick={onExit} style={btn} title="Exit playback (Esc)">
+      </Button>
+      <Button onClick={onExit} style={btn} title="Exit playback (Esc)">
         Exit
-      </button>
+      </Button>
     </div>
   );
 }
@@ -816,7 +786,6 @@ export function StylesPanel({
   const [value, setValue] = useState("");
   const [fill, setFill] = useState("");
   const [border, setBorder] = useState("");
-  const groupLabel = (text: string) => <div style={PANEL_GROUP_LABEL}>{text}</div>;
   const add = () => {
     if (kind !== "completed" && !value.trim()) return;
     if (!fill && !border) return;
@@ -834,14 +803,14 @@ export function StylesPanel({
     setBorder("");
   };
   const swatchRow = (
-    colors: string[],
+    swatches: readonly string[],
     selected: string,
     onPick: (c: string) => void,
     label: string,
   ) => (
     <div style={{ display: "flex", alignItems: "center", gap: 3, padding: "0 10px 4px" }}>
-      <span style={{ fontSize: 12, color: "#73726c", width: 44 }}>{label}</span>
-      {colors.map((c) => (
+      <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>{label}</span>
+      {swatches.map((c) => (
         <button
           key={c}
           type="button"
@@ -850,8 +819,9 @@ export function StylesPanel({
           style={{
             width: 18,
             height: 18,
-            borderRadius: 4,
-            border: selected === c ? "2px solid #26215c" : "1px solid #cecbf6",
+            borderRadius: radius.xs,
+            border:
+              selected === c ? `2px solid ${colors.text}` : `1px solid ${colors.controlBorder}`,
             background: c,
             cursor: "pointer",
             padding: 0,
@@ -860,14 +830,21 @@ export function StylesPanel({
       ))}
     </div>
   );
+  // The small colour preview shown beside each rule / named style (the fill+border chip).
+  const previewSwatch = (style: NodeStyle): CSSProperties => ({
+    width: 16,
+    height: 16,
+    borderRadius: radius.xs,
+    flexShrink: 0,
+    background: style.background ?? colors.white,
+    border: style.border ?? `1px solid ${colors.controlBorder}`,
+  });
   return (
-    <aside style={PANEL_ASIDE}>
-      <div style={{ padding: "8px 10px 4px", fontSize: 13, fontWeight: 600, color: "#26215c" }}>
-        🎨 Styles
-      </div>
+    <Panel>
+      <div style={panelTitle}>🎨 Styles</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
-        {groupLabel("Conditional formatting")}
-        <div style={{ padding: "0 10px 4px", fontSize: 12, color: "#8a8780" }}>
+        <PanelSection>Conditional formatting</PanelSection>
+        <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
           Auto-style topics by tag, marker, or completion. Manual styling still wins.
         </div>
         {rules.map((r) => (
@@ -875,55 +852,49 @@ export function StylesPanel({
             key={r.id}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "2px 10px" }}
           >
-            <span
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: 4,
-                flexShrink: 0,
-                background: r.style.background ?? "#fff",
-                border: r.style.border ?? "1px solid #cecbf6",
-              }}
-            />
-            <span style={{ flex: 1, fontSize: 12, color: "#26215c" }}>{describeRule(r)}</span>
-            <button
-              type="button"
+            <span style={previewSwatch(r.style)} />
+            <span style={{ flex: 1, fontSize: fontSize.sm, color: colors.text }}>
+              {describeRule(r)}
+            </span>
+            <Button
               onClick={() => onDeleteRule(r.id)}
               title="Remove rule"
-              style={{ ...controlStyle, padding: "0 6px", fontSize: 12 }}
+              style={{ padding: "0 6px", fontSize: fontSize.sm }}
             >
               ✕
-            </button>
+            </Button>
           </div>
         ))}
-        <div style={{ borderTop: "1px solid #e2e0d8", margin: "6px 10px", paddingTop: 6 }} />
+        <div
+          style={{ borderTop: `1px solid ${colors.border}`, margin: "6px 10px", paddingTop: 6 }}
+        />
         <div style={{ display: "flex", gap: 4, padding: "0 10px 4px", alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: "#73726c", width: 44 }}>When</span>
-          <select
+          <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>When</span>
+          <Select
             value={kind}
             onChange={(e) => setKind(e.target.value as ConditionalRule["kind"])}
             aria-label="Rule condition"
-            style={{ ...inputStyle, width: "auto", flex: 1 }}
+            style={{ width: "auto", flex: 1 }}
           >
             <option value="tag">has tag</option>
             <option value="marker">has marker</option>
             <option value="completed">is completed</option>
-          </select>
+          </Select>
         </div>
         {kind === "tag" ? (
-          <input
+          <Input
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="tag name"
             aria-label="Rule tag"
-            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+            style={{ width: "auto", margin: "0 10px 4px" }}
           />
         ) : kind === "marker" ? (
-          <select
+          <Select
             value={value}
             onChange={(e) => setValue(e.target.value)}
             aria-label="Rule marker"
-            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+            style={{ width: "auto", margin: "0 10px 4px" }}
           >
             <option value="">Pick a marker…</option>
             {markers.map((m) => (
@@ -931,20 +902,16 @@ export function StylesPanel({
                 {m}
               </option>
             ))}
-          </select>
+          </Select>
         ) : null}
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}
-        <button
-          type="button"
-          onClick={add}
-          style={{ ...controlStyle, margin: "4px 10px", fontSize: 12 }}
-        >
+        <Button onClick={add} style={{ margin: "4px 10px", fontSize: fontSize.sm }}>
           + Add rule
-        </button>
+        </Button>
 
-        {groupLabel("Named styles")}
-        <div style={{ padding: "0 10px 4px", fontSize: 12, color: "#8a8780" }}>
+        <PanelSection>Named styles</PanelSection>
+        <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
           Save the selected topic's look, then reuse it on others.
         </div>
         {namedStyles.map((s) => (
@@ -952,16 +919,7 @@ export function StylesPanel({
             key={s.id}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "2px 10px" }}
           >
-            <span
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: 4,
-                flexShrink: 0,
-                background: s.style.background ?? "#fff",
-                border: s.style.border ?? "1px solid #cecbf6",
-              }}
-            />
+            <span style={previewSwatch(s.style)} />
             <button
               type="button"
               onClick={() => onApplyStyle(s.style)}
@@ -972,45 +930,43 @@ export function StylesPanel({
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                fontSize: 12,
-                color: "#26215c",
+                fontSize: fontSize.sm,
+                color: colors.text,
               }}
             >
               {s.name}
             </button>
-            <button
-              type="button"
+            <Button
               onClick={() => onDeleteStyle(s.id)}
               title="Remove named style"
-              style={{ ...controlStyle, padding: "0 6px", fontSize: 12 }}
+              style={{ padding: "0 6px", fontSize: fontSize.sm }}
             >
               ✕
-            </button>
+            </Button>
           </div>
         ))}
         <div style={{ display: "flex", gap: 4, padding: "2px 10px" }}>
-          <input
+          <Input
             value={styleName}
             onChange={(e) => setStyleName(e.target.value)}
             placeholder="Name this style…"
             aria-label="Name this style"
-            style={{ ...inputStyle, width: "auto", flex: 1 }}
+            style={{ width: "auto", flex: 1 }}
           />
-          <button
-            type="button"
+          <Button
             onClick={() => {
               if (styleName.trim()) {
                 onSaveStyle(styleName.trim());
                 setStyleName("");
               }
             }}
-            style={{ ...controlStyle, fontSize: 12 }}
+            style={{ fontSize: fontSize.sm }}
           >
             Save
-          </button>
+          </Button>
         </div>
       </div>
-    </aside>
+    </Panel>
   );
 }
 
@@ -1070,7 +1026,7 @@ export function InfoPanel({
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
   const webUrl = link.startsWith("#") ? "" : link;
-  const sectionLabel = (text: string) => <div style={PANEL_GROUP_LABEL}>{text}</div>;
+  const sectionLabel = (text: string) => <PanelSection>{text}</PanelSection>;
 
   // Task progress: parents with sub-tasks show an auto-rolled-up pie (read-only); a leaf (or an
   // undivided node) gets quarter-step buttons to set its own completion, plus a clear-task control.
@@ -1092,10 +1048,10 @@ export function InfoPanel({
             }}
           >
             {info ? <ProgressPie fraction={info.progress} size={20} /> : null}
-            <span style={{ color: "#26215c", fontVariantNumeric: "tabular-nums" }}>
+            <span style={{ color: colors.text, fontVariantNumeric: "tabular-nums" }}>
               {pct}% · {info?.done}/{info?.total} done
             </span>
-            <span style={{ color: "#8a8780" }}>(auto)</span>
+            <span style={{ color: colors.faint }}>(auto)</span>
           </div>
         ) : (
           <div
@@ -1111,34 +1067,31 @@ export function InfoPanel({
             {[0, 25, 50, 75, 100].map((step) => {
               const active = pct === step;
               return (
-                <button
+                <Button
                   key={step}
-                  type="button"
+                  active={active}
                   onClick={() => onSetProgress(step / 100)}
                   title={`Set task to ${step}% complete`}
                   style={{
-                    ...controlStyle,
                     padding: "1px 7px",
-                    fontSize: 12,
+                    fontSize: fontSize.sm,
                     fontVariantNumeric: "tabular-nums",
-                    background: active ? "#26215c" : "#fff",
-                    color: active ? "#fff" : "#26215c",
-                    borderColor: active ? "#26215c" : undefined,
+                    // Inactive steps are white (not the default lilac control fill).
+                    ...(active ? null : { background: colors.white, color: colors.text }),
                   }}
                 >
                   {step}
-                </button>
+                </Button>
               );
             })}
             {info ? (
-              <button
-                type="button"
+              <Button
                 onClick={() => onSetProgress(undefined)}
                 title="Clear task status (remove the pie)"
-                style={{ ...controlStyle, padding: "1px 7px", fontSize: 12 }}
+                style={{ padding: "1px 7px", fontSize: fontSize.sm }}
               >
                 ✕
-              </button>
+              </Button>
             ) : null}
           </div>
         )}
@@ -1146,31 +1099,24 @@ export function InfoPanel({
     );
   };
   const aside = (
-    <aside style={{ ...PANEL_ASIDE, width: 280 }}>
+    <Panel width={280}>
       <div
         style={{
+          ...panelTitle,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "8px 10px 4px",
-          fontSize: 13,
-          fontWeight: 600,
-          color: "#26215c",
         }}
       >
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           ℹ {node ? node.topic || "(untitled)" : "Topic info"}
         </span>
-        <button
-          type="button"
-          onClick={onClose}
-          style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
-        >
+        <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
           Close
-        </button>
+        </Button>
       </div>
       {!node ? (
-        <div style={{ padding: "8px 10px", fontSize: 13, color: "#8a8780" }}>
+        <div style={{ padding: "8px 10px", fontSize: fontSize.md, color: colors.faint }}>
           Select a node to see and edit its details.
         </div>
       ) : (
@@ -1188,20 +1134,20 @@ export function InfoPanel({
                 onClick={() => onRemoveTag(t)}
                 title={`Remove tag "${t}"`}
                 style={{
-                  border: "1px solid #cecbf6",
-                  background: "#fff",
-                  borderRadius: 6,
+                  border: `1px solid ${colors.controlBorder}`,
+                  background: colors.white,
+                  borderRadius: radius.md,
                   cursor: "pointer",
-                  fontSize: 12,
+                  fontSize: fontSize.sm,
                   padding: "1px 6px",
-                  color: "#26215c",
+                  color: colors.text,
                 }}
               >
                 {t} ✕
               </button>
             ))}
           </div>
-          <input
+          <Input
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => {
@@ -1212,7 +1158,7 @@ export function InfoPanel({
             }}
             placeholder="Add a tag, press Enter"
             aria-label="Add a tag"
-            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+            style={{ width: "auto", margin: "0 10px 4px" }}
           />
 
           {renderProgress(node)}
@@ -1225,12 +1171,13 @@ export function InfoPanel({
               alignItems: "center",
               gap: 6,
               flexWrap: "wrap",
-              fontSize: 12,
-              color: "#73726c",
+              fontSize: fontSize.sm,
+              color: colors.muted,
             }}
           >
             <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
               Start
+              {/* Native input (not the Input primitive) so it stays nested in its label. */}
               <input
                 key={`${node.id}:start`}
                 type="date"
@@ -1266,34 +1213,32 @@ export function InfoPanel({
             {PRIORITY_LEVELS.map((p) => {
               const active = node.task?.priority === p;
               return (
-                <button
+                <Button
                   key={p}
-                  type="button"
                   onClick={() => onSetPriority(p)}
                   title={`${PRIORITY_LABEL[p]} priority`}
                   style={{
-                    ...controlStyle,
                     padding: "1px 8px",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    background: active ? PRIORITY_COLOR[p] : "#fff",
-                    color: active ? "#fff" : PRIORITY_COLOR[p],
+                    fontSize: fontSize.sm,
+                    fontWeight: fontWeight.semibold,
+                    // Priority uses its own colour scale, not the chrome accent.
+                    background: active ? PRIORITY_COLOR[p] : colors.white,
+                    color: active ? colors.white : PRIORITY_COLOR[p],
                     borderColor: PRIORITY_COLOR[p],
                   }}
                 >
                   {PRIORITY_LABEL[p]}
-                </button>
+                </Button>
               );
             })}
             {node.task?.priority ? (
-              <button
-                type="button"
+              <Button
                 onClick={() => onSetPriority(undefined)}
                 title="Clear priority"
-                style={{ ...controlStyle, padding: "1px 7px", fontSize: 12 }}
+                style={{ padding: "1px 7px", fontSize: fontSize.sm }}
               >
                 ✕
-              </button>
+              </Button>
             ) : null}
           </div>
 
@@ -1302,14 +1247,14 @@ export function InfoPanel({
             {(node.attachments ?? []).map((a, i) => (
               <div
                 key={`${a.name}:${i}`}
-                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: fontSize.sm }}
               >
                 <a
                   href={a.dataUrl}
                   download={a.name}
                   title={`Download ${a.name}`}
                   style={{
-                    color: "#26215c",
+                    color: colors.text,
                     flex: 1,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -1318,19 +1263,23 @@ export function InfoPanel({
                 >
                   📎 {a.name}
                 </a>
-                <span style={{ color: "#8a8780" }}>{formatBytes(a.size)}</span>
-                <button
-                  type="button"
+                <span style={{ color: colors.faint }}>{formatBytes(a.size)}</span>
+                <Button
                   onClick={() => onRemoveAttachment(i)}
                   title="Remove attachment"
-                  style={{ ...controlStyle, padding: "1px 6px", fontSize: 12 }}
+                  style={{ padding: "1px 6px", fontSize: fontSize.sm }}
                 >
                   ✕
-                </button>
+                </Button>
               </div>
             ))}
             <label
-              style={{ ...controlStyle, fontSize: 12, cursor: "pointer", textAlign: "center" }}
+              style={{
+                ...controlStyle,
+                fontSize: fontSize.sm,
+                cursor: "pointer",
+                textAlign: "center",
+              }}
             >
               + Attach file
               <input
@@ -1346,7 +1295,7 @@ export function InfoPanel({
           </div>
 
           {sectionLabel("Links")}
-          <input
+          <Input
             key={`${node.id}:url`}
             defaultValue={webUrl}
             onKeyDown={(e) => {
@@ -1358,13 +1307,13 @@ export function InfoPanel({
             }}
             placeholder="Web link (https://…)"
             aria-label="Web link"
-            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+            style={{ width: "auto", margin: "0 10px 4px" }}
           />
-          <select
+          <Select
             value=""
             onChange={(e) => e.target.value && onLinkMap(e.target.value)}
             aria-label="Link to another map"
-            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+            style={{ width: "auto", margin: "0 10px 4px" }}
           >
             <option value="">🔗 Link to a map…</option>
             {maps.map((m) => (
@@ -1372,12 +1321,12 @@ export function InfoPanel({
                 {m.title}
               </option>
             ))}
-          </select>
-          <select
+          </Select>
+          <Select
             value=""
             onChange={(e) => e.target.value && onJump(e.target.value)}
             aria-label="Jump to another topic"
-            style={{ ...inputStyle, width: "auto", margin: "0 10px 4px" }}
+            style={{ width: "auto", margin: "0 10px 4px" }}
           >
             <option value="">↪ Jump to a topic…</option>
             {jumpTargets.map((row) => (
@@ -1385,16 +1334,15 @@ export function InfoPanel({
                 {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
               </option>
             ))}
-          </select>
+          </Select>
           {link && (
-            <button
-              type="button"
+            <Button
               onClick={() => onSetHyperlink("")}
-              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12, margin: "0 10px 6px" }}
+              style={{ padding: "2px 8px", fontSize: fontSize.sm, margin: "0 10px 6px" }}
             >
               ✕ Remove link (
               {link.startsWith("#map=") ? "map" : link.startsWith("#node=") ? "topic" : "web"})
-            </button>
+            </Button>
           )}
 
           <NotesPanel
@@ -1405,7 +1353,7 @@ export function InfoPanel({
           />
         </div>
       )}
-    </aside>
+    </Panel>
   );
   return aside;
 }
@@ -1433,8 +1381,8 @@ export function NotesPanel({
         flexDirection: "column",
         gap: 6,
         padding: "8px 16px",
-        borderTop: "1px solid #e2e0d8",
-        background: "#fbfbf9",
+        borderTop: `1px solid ${colors.border}`,
+        background: colors.surface,
       }}
     >
       <div
@@ -1442,29 +1390,24 @@ export function NotesPanel({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          fontSize: 12,
-          color: "#73726c",
+          fontSize: fontSize.sm,
+          color: colors.muted,
         }}
       >
         <span>📝 Note{selected ? ` — ${selected.topic}` : ""} · Markdown</span>
         <span style={{ display: "flex", gap: 6 }}>
           {selected && (
-            <button
-              type="button"
+            <Button
               onClick={() => setPreview((p) => !p)}
-              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
+              style={{ padding: "2px 8px", fontSize: fontSize.sm }}
             >
               {preview ? "Edit" : "Preview"}
-            </button>
+            </Button>
           )}
           {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              style={{ ...controlStyle, padding: "2px 8px", fontSize: 12 }}
-            >
+            <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
               Close
-            </button>
+            </Button>
           )}
         </span>
       </div>
@@ -1479,12 +1422,12 @@ export function NotesPanel({
             style={{
               flex: 1,
               overflowY: "auto",
-              border: "1px solid #cecbf6",
-              borderRadius: 8,
+              border: `1px solid ${colors.controlBorder}`,
+              borderRadius: radius.lg,
               padding: "2px 10px",
-              fontSize: 13,
-              color: "#26215c",
-              background: "#fff",
+              fontSize: fontSize.md,
+              color: colors.text,
+              background: colors.white,
             }}
           />
         ) : (
@@ -1497,18 +1440,24 @@ export function NotesPanel({
             style={{
               flex: 1,
               resize: "none",
-              border: "1px solid #cecbf6",
-              borderRadius: 8,
+              border: `1px solid ${colors.controlBorder}`,
+              borderRadius: radius.lg,
               padding: 8,
-              fontSize: 13,
+              fontSize: fontSize.md,
               fontFamily: "inherit",
-              color: "#26215c",
+              color: colors.text,
             }}
           />
         )
       ) : (
         <div
-          style={{ flex: 1, display: "flex", alignItems: "center", color: "#999", fontSize: 13 }}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            color: colors.placeholder,
+            fontSize: fontSize.md,
+          }}
         >
           Select a node to add or edit its note.
         </div>
@@ -1529,7 +1478,7 @@ export function StickerBar({
 }) {
   return (
     <>
-      <div style={PANEL_GROUP_LABEL}>Stickers</div>
+      <PanelSection>Stickers</PanelSection>
       <div
         style={{
           display: "flex",
@@ -1551,9 +1500,9 @@ export function StickerBar({
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              border: "1px solid #cecbf6",
-              background: "#fff",
-              borderRadius: 6,
+              border: `1px solid ${colors.controlBorder}`,
+              background: colors.white,
+              borderRadius: radius.md,
               cursor: "pointer",
               padding: 3,
             }}
@@ -1583,18 +1532,8 @@ export function MarkerBar({
   onToggle: (marker: string) => void;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-        flexWrap: "wrap",
-        padding: "6px 16px",
-        background: "#f4f3fb",
-        borderBottom: "1px solid #e2e0d8",
-      }}
-    >
-      <span style={{ fontSize: 12, color: "#73726c", marginRight: 4 }}>Markers:</span>
+    <div style={{ ...barRow, gap: 4 }}>
+      <span style={{ fontSize: fontSize.sm, color: colors.muted, marginRight: 4 }}>Markers:</span>
       {markers.map((marker) => {
         const on = active?.includes(marker);
         return (
@@ -1605,11 +1544,11 @@ export function MarkerBar({
             aria-pressed={on}
             title={`Toggle ${marker} on the selected node`}
             style={{
-              border: `1px solid ${on ? "#6c63d6" : "#cecbf6"}`,
-              background: on ? "#e7e4fb" : "#fff",
-              borderRadius: 6,
+              border: `1px solid ${on ? colors.accent : colors.controlBorder}`,
+              background: on ? colors.accentTint : colors.white,
+              borderRadius: radius.md,
               cursor: "pointer",
-              fontSize: 16,
+              fontSize: fontSize.xl,
               lineHeight: 1,
               padding: "3px 5px",
             }}

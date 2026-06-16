@@ -1,29 +1,9 @@
 // Shared inline styles for the toolbar controls, used by App and the panels.
-
-export const controlStyle = {
-  fontSize: 13,
-  fontWeight: 600,
-  color: "#26215c",
-  border: "1px solid #cecbf6",
-  background: "#eeedfe",
-  borderRadius: 8,
-  padding: "6px 10px",
-  cursor: "pointer",
-  // Keep size in the mobile single-row toolbar so it scrolls horizontally instead of squishing
-  // (no-op on the desktop wrapping toolbar, where controls keep their size anyway).
-  flexShrink: 0,
-} as const;
-
-export const inputStyle = {
-  fontSize: 13,
-  color: "#26215c",
-  border: "1px solid #cecbf6",
-  background: "#fff",
-  borderRadius: 8,
-  padding: "6px 10px",
-  width: 130,
-  flexShrink: 0,
-} as const;
+//
+// The control/input style objects now live with the UI primitives (src/design/primitives.tsx),
+// built from the design tokens — re-exported here so the App toolbar's existing `from "./ui"`
+// imports keep working unchanged. Same computed style; the values just have names now.
+export { controlStyle, inputStyle } from "./design/primitives";
 
 /** Human-friendly relative time ("just now", "5 min ago", "2 h ago", "3 d ago", else a date).
  *  `now` is injectable for deterministic tests. Used by the version-history list. */

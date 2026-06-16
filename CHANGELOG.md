@@ -517,6 +517,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Design-token + UI-primitive layer (internal).** The editor chrome's ad-hoc inline styles now
+  draw from a single named palette + scales (`src/design/tokens.ts`: `colors`, `space`, `radius`,
+  `fontSize`, `fontWeight`) through a small set of reusable primitives (`src/design/primitives.tsx`:
+  `Button` with an `active`/`disabled` variant, `Input`, `Select`, `Chip`, `Panel`, `PanelSection`).
+  `src/ui.ts` (`controlStyle`/`inputStyle`), `src/Panels.tsx` (the rail panels + style/marker bars),
+  and the `src/mindmap/FlowMindMap.tsx` context menu were migrated onto them. Strictly
+  behaviour-preserving — the values are the exact current ones, so every panel, control, and menu
+  renders pixel-identical; this is the building-block layer the upcoming UX redesign sits on.
 - **Canvas render perf (internal).** The React Flow building blocks are now wrapped in `React.memo`
   — `TopicNode`, `BranchEdge`, `CrosslinkEdge`, and the `ViewportPortal` overlays (`Boundaries`,
   `Callouts`, `Summaries`, `BraceConnectors`, `DiagramBackdrop`) — so a large map stops re-rendering

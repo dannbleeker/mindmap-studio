@@ -35,7 +35,10 @@ Recorded so the decisions don't get re-litigated (folded in from the retired Min
 **project-management engine** (Gantt, resources, dependencies, cost, formulas / roll-up dashboards,
 topic properties), **real-time collaboration / publishing / enterprise** (co-editing, comments,
 access control, cloud/Teams hosting), **capture** (Snap-style web/mobile clippers), and a **separate
-native mobile app** (the PWA is responsive — a native app is a different product). A local-first,
+native mobile app** (the PWA is responsive — a native app is a different product). Also out by
+design (2026-06-16): a **networked / multi-parent graph** — the model is a single-parent, **acyclic
+tree**; cross-node links live in the relationship-arrow layer, and a TheBrain-style graph would
+re-architect the product (cyclic *connectors* already ship as relationships). A local-first,
 no-backend PWA can't and shouldn't chase these.
 
 ## Reference

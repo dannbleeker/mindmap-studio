@@ -28,7 +28,7 @@ interchange capability we could reasonably own.
 |---|---|
 | 🟡 | Partial / different form (some of it ships) |
 | ❌ | Missing (and feasible/interesting) |
-| ⛔ | Out of scope by design (PM / collaboration / enterprise) |
+| ⛔ | Out of scope by design (PM / collaboration / enterprise / core-model) |
 
 Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` / `docs/features.json`.
 
@@ -43,8 +43,8 @@ Shipped ✅ capabilities have been removed from this doc — see `CHANGELOG.md` 
 ## 2. Structure & layout (map types)
 | Feature | Status | Notes |
 |---|---|---|
-| Networked graph (multiple parents) | ❌ | TheBrain |
-| Loops / cycles | ❌ | Coggle |
+| Networked graph (multiple parents) | ⛔ | **out of scope by design (2026-06-16)** — the tree is intentionally single-parent + acyclic; cross-node connections live in the relationship-arrow layer. A true multi-parent graph (TheBrain) would re-architect the product into a knowledge graph. |
+| Loops / cycles | ⛔ | the tree hierarchy is acyclic by design; cyclic *connectors* already ship as relationship arrows (`A→B→C→A`) — only the structural tree-loop is out. |
 | Infinite freeform canvas | 🟡 | free node placement ships (🧲 Free layout); a Miro-style canvas of arbitrary objects doesn't |
 
 ## 3. Visual styling

@@ -7,7 +7,7 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 Phase 1 (Brainstorming MVP) complete; the canvas engine is **@xyflow/react** (the only one). The
 **competitive gap-closing effort is concluded by decision (2026-06-16)** — MindMap Studio is
 **feature-complete for its scope** (local-first, offline, single-user, free); the remaining
-competitive-matrix gaps are reference-only, **not a backlog**. The handbook (*Thinking in Maps*)
+competitive gaps are surveyed and **not pursued** (recorded under Reference). The handbook (*Thinking in Maps*)
 documents every feature (`book` 100%). Deployed to GitHub Pages on every push to `main` — live at
 <https://mindmap-studio.struktureretsundfornuft.dk/>. See `CHANGELOG.md` for all shipped work.
 
@@ -43,10 +43,14 @@ no-backend PWA can't and shouldn't chase these.
 
 ## Reference
 
-- **Competitive feature matrix** — [`docs/competitive-feature-matrix.md`](docs/competitive-feature-matrix.md):
-  the cross-tool **gap** list (19 tools surveyed) — what the category does that MindMap Studio
-  doesn't or only partly has, grouped into 11 areas, with the A–G gap clusters (B–G shipped; A — AI —
-  deferred). Shipped (✅) features were pruned out (2026-06-15); see `CHANGELOG.md` for those.
+- **Competitive gaps (19-tool survey — concluded 2026-06-16).** The standalone cross-tool comparison
+  doc has been retired and folded in here. The category was surveyed across 19 mind-mapping tools; the
+  B–G gap clusters shipped (see `CHANGELOG.md`) and the rest is decided. Feasible-but-deprioritised
+  gaps, recorded for awareness only (**not a backlog**): voice / audio-memo capture, idea bank
+  (capture-then-place), audio / video embed on a node, formulas / key-value attributes, spreadsheet
+  data binding, embed-a-live-webpage, idea voting, arbitrary custom fonts, named bookmarks, native
+  desktop / mobile shells, and an infinite Miro-style object canvas. The decided / blocked ones are
+  under *Deferred* and *Out of scope* above.
 - **Book worked examples** — every feature is now covered in prose (`book` **100%**); the only
-  remaining book dimension is worked examples (`bookExample` ~41% in `docs/features.json`) — optional
+  remaining book dimension is worked examples (`bookExample` ~54% in `docs/features.json`) — optional
   polish: add a worked example to a chapter when a feature genuinely benefits from one.

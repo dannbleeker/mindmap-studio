@@ -1,5 +1,5 @@
 import { ViewportPortal, useNodes } from "@xyflow/react";
-import { type CSSProperties, memo, useMemo, useState } from "react";
+import { type CSSProperties, memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Callout } from "../../model/types";
 import { CALLOUT_BG, CALLOUT_STROKE, CALLOUT_TEXT } from "./style";
 
@@ -35,6 +35,50 @@ interface PlacedCallout {
   callout: Callout;
   left: number;
   top: number;
+}
+
+/** The inline editor for a callout bubble. Split out so a mount-time `useEffect` can focus the
+ *  textarea (the bubble the user just opened) without an `autoFocus` attribute — same UX, no a11y
+ *  lint suppression. It mounts only while that bubble is being edited. */
+function CalloutEditor({
+  initialText,
+  onCommit,
+  onCancel,
+}: {
+  initialText: string;
+  onCommit: (text: string) => void;
+  onCancel: () => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    ref.current?.focus();
+  }, []);
+  return (
+    <textarea
+      ref={ref}
+      defaultValue={initialText}
+      rows={2}
+      style={{
+        width: 150,
+        border: "none",
+        background: "transparent",
+        outline: "none",
+        resize: "none",
+        font: "inherit",
+        color: "inherit",
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          onCommit((e.target as HTMLTextAreaElement).value);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          onCancel();
+        }
+      }}
+      onBlur={(e) => onCommit(e.target.value)}
+    />
+  );
 }
 
 function Callouts({
@@ -102,34 +146,13 @@ function Callouts({
             </svg>
             <div style={BUBBLE}>
               {editing ? (
-                <textarea
-                  // biome-ignore lint/a11y/noAutofocus: focus the bubble the user just opened to edit
-                  autoFocus
-                  defaultValue={callout.text}
-                  rows={2}
-                  style={{
-                    width: 150,
-                    border: "none",
-                    background: "transparent",
-                    outline: "none",
-                    resize: "none",
-                    font: "inherit",
-                    color: "inherit",
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      onCommit(nodeId, callout.id, (e.target as HTMLTextAreaElement).value);
-                      setEditingId(null);
-                    } else if (e.key === "Escape") {
-                      e.preventDefault();
-                      setEditingId(null);
-                    }
-                  }}
-                  onBlur={(e) => {
-                    onCommit(nodeId, callout.id, e.target.value);
+                <CalloutEditor
+                  initialText={callout.text}
+                  onCommit={(text) => {
+                    onCommit(nodeId, callout.id, text);
                     setEditingId(null);
                   }}
+                  onCancel={() => setEditingId(null)}
                 />
               ) : (
                 <>

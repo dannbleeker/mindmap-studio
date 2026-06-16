@@ -11,8 +11,18 @@ competitive gaps are surveyed and **not pursued** (recorded under Reference). Th
 documents every feature (`book` 100%). Deployed to GitHub Pages on every push to `main` — live at
 <https://mindmap-studio.struktureretsundfornuft.dk/>. See `CHANGELOG.md` for all shipped work.
 
+The **foundation-hardening run is complete (2026-06-16)** — the prep before the editor/UX redesign:
+coverage **~44% → ~55%** with a real component/hook test net (`@testing-library/react`), `App.tsx`
+trimmed **2,165 → ~1,520** lines, a design-token + UI-primitive layer (`src/design/*`), `<Toolbar>`
+and `<Dialog>` extracted, panel/filter state lifted into `usePanels()`, and the canvas memoised — all
+behaviour-preserving. The chrome is now token-driven and component-shaped, ready to be reshaped.
+
 ## Open items
 
+- [ ] **UX redesign of the canvas/editor chrome (menus / toolbars / inspectors).** The next planned
+      effort: restructure the editor shell — a proper menu system (nested menus + keyboard nav on the
+      Phase-C primitives), a reorganised toolbar, and cleaner inspector/panel layout — now that the
+      chrome is extracted into token-driven components with a regression test net behind it.
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.

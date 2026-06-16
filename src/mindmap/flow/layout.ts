@@ -247,6 +247,30 @@ function tidy(
   return out;
 }
 
+/** Run one tidy tree from `rootId` and place each node along a depth axis. The shared core of the
+ *  horizontal / vertical / two-sided tree layouts: `tidy` gives each node a (breadth, depth); we
+ *  place it at the per-depth centre (`axisCenters[depth]`, times `sign`) on the major axis and at its
+ *  breadth on the cross axis — `orientation` picks which axis is which. `depthFallback` supplies the
+ *  major-axis value when a depth has no centre (each caller passes the same fallback it used inline).
+ *  Pure: it only writes through `place(ctx, …)`, exactly as the inlined loops did. */
+function layoutTidyTree(
+  ctx: Ctx,
+  rootId: string,
+  childrenOf: (id: string) => string[],
+  breadthSlot: number,
+  axisCenters: number[],
+  orientation: "horizontal" | "vertical",
+  sign: 1 | -1,
+  depthFallback: (depth: number) => number,
+): void {
+  const breadth = tidy(rootId, childrenOf, breadthSlot);
+  for (const [id, b] of breadth) {
+    const major = sign * (axisCenters[b.depth] ?? depthFallback(b.depth));
+    if (orientation === "horizontal") place(ctx, id, major, b.breadth);
+    else place(ctx, id, b.breadth, major);
+  }
+}
+
 /** Cumulative centre offset per depth, sized to the widest extent at each depth. */
 function depthCenters(maxExtent: number[], gap: number): number[] {
   const centers: number[] = [0];
@@ -285,17 +309,20 @@ function layoutSide(ctx: Ctx): void {
     [right, 1],
     [left, -1],
   ] as const) {
-    const breadth = tidy(
+    layoutTidyTree(
+      ctx,
       root.id,
       (id) => (id === root.id ? kidsOnSide : (branchChildren.get(id) ?? [])),
       slot,
+      colX,
+      "horizontal",
+      sign,
+      (depth) => depth * 200,
     );
-    for (const [id, b] of breadth) {
-      if (id === root.id) place(ctx, root.id, 0, 0);
-      else place(ctx, id, sign * (colX[b.depth] ?? b.depth * 200), b.breadth);
-    }
   }
-  if (kids.length === 0) place(ctx, root.id, 0, 0);
+  // The root is shared by both side-passes; pin it at the origin (it's also where the breadth-0
+  // root lands, so this only makes the intent explicit and covers the no-children case).
+  place(ctx, root.id, 0, 0);
 }
 
 // --- left / right (single-sided horizontal tidy tree) ----------------------
@@ -303,12 +330,16 @@ function layoutHorizontal(ctx: Ctx, sign: 1 | -1, rootKids: string[]): void {
   const { root, branchChildren } = ctx;
   const maxH = Math.max(DEFAULT_SIZE.height, ...maxExtentAtDepth(ctx, "h"));
   const colX = depthCenters(maxExtentAtDepth(ctx, "w"), COL_GAP);
-  const breadth = tidy(
+  layoutTidyTree(
+    ctx,
     root.id,
     (id) => (id === root.id ? rootKids : (branchChildren.get(id) ?? [])),
     maxH + ROW_GAP,
+    colX,
+    "horizontal",
+    sign,
+    () => 0,
   );
-  for (const [id, b] of breadth) place(ctx, id, sign * (colX[b.depth] ?? 0), b.breadth);
 }
 
 // --- org-down / org-up (vertical tidy tree) --------------------------------
@@ -317,12 +348,16 @@ function layoutVertical(ctx: Ctx, sign: 1 | -1): void {
   const maxW = Math.max(DEFAULT_SIZE.width, ...maxExtentAtDepth(ctx, "w"));
   const rowY = depthCenters(maxExtentAtDepth(ctx, "h"), VROW_GAP);
   const kids = root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []);
-  const breadth = tidy(
+  layoutTidyTree(
+    ctx,
     root.id,
     (id) => (id === root.id ? kids : (branchChildren.get(id) ?? [])),
     maxW + VCOL_GAP,
+    rowY,
+    "vertical",
+    sign,
+    () => 0,
   );
-  for (const [id, b] of breadth) place(ctx, id, b.breadth, sign * (rowY[b.depth] ?? 0));
 }
 
 // --- grid / matrix (root's branches tiled in a grid; SWOT / 2x2 / Eisenhower) ----------

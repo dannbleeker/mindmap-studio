@@ -13,15 +13,9 @@ import {
 import { Dialog } from "./components/Dialog";
 import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
-import {
-  type DueMode,
-  type FilterCriteria,
-  type SavedFilter,
-  filterResult,
-  focusSet,
-  isFilterActive,
-} from "./filter";
+import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
 import { clampIndex, nextPlaybackIndex, togglePlay } from "./historyPlayback";
+import { usePanels } from "./hooks/usePanels";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
 import { fileToMapImage } from "./io/image";
@@ -149,59 +143,11 @@ export function App() {
   // Notes editor: tracks the selected node and a debounced draft of its note.
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
-  // Remember which panels were open last time (workspace layout).
-  const panels0 = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("mindmap-panels") ?? "{}");
-    } catch {
-      return {};
-    }
-  })();
-  const [outlineOpen, setOutlineOpen] = useState(!!panels0.outlineOpen);
+  // Panel open/close + Power-Filter + saved-filter presets (with their localStorage persistence) all
+  // live in usePanels; App threads `panels` into <Toolbar> and `filter`/`savedFilters` into the
+  // FilterPanel. Auto-numbering (`panels.numbered`) draws hierarchical outline numbers on the canvas.
+  const { panels, filter, savedFilters } = usePanels();
   const [outlineFilter, setOutlineFilter] = useState("");
-  const [indexOpen, setIndexOpen] = useState(!!panels0.indexOpen);
-  // Unified per-node info panel (note + markers + tags + style + links); replaces the old
-  // separate Notes / Markers / Style bars + the Link / Jump toolbar selects.
-  const [infoOpen, setInfoOpen] = useState(!!panels0.infoOpen);
-  // Auto-numbering: show hierarchical outline numbers (1, 1.2, …) on the canvas + outline.
-  const [numbered, setNumbered] = useState(!!panels0.numbered);
-  // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filterText, setFilterText] = useState("");
-  const [filterMarkers, setFilterMarkers] = useState<string[]>([]);
-  const [filterTags, setFilterTags] = useState<string[]>([]);
-  const [filterDue, setFilterDue] = useState<DueMode>("");
-  const [filterPriority, setFilterPriority] = useState(0);
-  const clearFilter = () => {
-    setFilterText("");
-    setFilterMarkers([]);
-    setFilterTags([]);
-    setFilterDue("");
-    setFilterPriority(0);
-  };
-  // Toggling the panel off also clears the filter, so dimming can't outlive a visible control.
-  const toggleFilter = () =>
-    setFilterOpen((open) => {
-      if (open) clearFilter();
-      return !open;
-    });
-  const toggle = (list: string[], value: string) =>
-    list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
-  // Saved Power-Filter presets, persisted app-wide (a saved "❗" filter is reusable across maps).
-  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("mindmap-saved-filters") ?? "[]");
-    } catch {
-      return [];
-    }
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem("mindmap-saved-filters", JSON.stringify(savedFilters));
-    } catch {
-      // preference is best-effort
-    }
-  }, [savedFilters]);
   // Named styles ("styles organizer"), persisted app-wide so a look is reusable across maps.
   const [namedStyles, setNamedStyles] = useState<NamedStyle[]>(() => {
     try {
@@ -230,43 +176,15 @@ export function App() {
   };
   const deleteNamedStyle = (id: string) =>
     setNamedStyles((prev) => prev.filter((s) => s.id !== id));
-  const saveCurrentFilter = (name: string) => {
-    const criteria: FilterCriteria = {
-      text: filterText,
-      markers: filterMarkers,
-      tags: filterTags,
-      due: filterDue,
-      priority: filterPriority || undefined,
-    };
-    if (!name.trim() || !isFilterActive(criteria)) return;
-    // Replace any existing preset with the same name, then add.
-    setSavedFilters((prev) => [
-      ...prev.filter((f) => f.name !== name.trim()),
-      { id: crypto.randomUUID(), name: name.trim(), criteria },
-    ]);
-  };
-  const applySavedFilter = (criteria: FilterCriteria) => {
-    setFilterText(criteria.text);
-    setFilterMarkers([...criteria.markers]);
-    setFilterTags([...criteria.tags]);
-    setFilterDue(criteria.due ?? "");
-    setFilterPriority(criteria.priority ?? 0);
-  };
-  const deleteSavedFilter = (id: string) =>
-    setSavedFilters((prev) => prev.filter((f) => f.id !== id));
-  // Memoised so the canvas only re-dims when the map or the criteria actually change. The
-  // criteria object is built inside so the deps stay plain primitives (no per-render object).
+  // Memoised so the canvas only re-dims when the map or the criteria actually change. The deps stay
+  // plain primitives/arrays (the individual filter fields), so a fresh `filter.criteria` object each
+  // render doesn't needlessly recompute — only an actual field change does.
+  const { text, markers, tags, due, priority } = filter;
   const filterHits = useMemo(() => {
-    const criteria: FilterCriteria = {
-      text: filterText,
-      markers: filterMarkers,
-      tags: filterTags,
-      due: filterDue,
-      priority: filterPriority || undefined,
-    };
-    if (!filterOpen || !isFilterActive(criteria)) return null;
+    const criteria: FilterCriteria = { text, markers, tags, due, priority: priority || undefined };
+    if (!panels.filterOpen || !isFilterActive(criteria)) return null;
     return filterResult(liveDoc, criteria, todayISO());
-  }, [filterOpen, filterText, filterMarkers, filterTags, filterDue, filterPriority, liveDoc]);
+  }, [panels.filterOpen, text, markers, tags, due, priority, liveDoc]);
   // Focus / isolate-branch: session-only, reuses the Power Filter's dim pipeline. Focus wins over
   // the filter as the dim source; both fall back to "no dimming".
   // The full selected node (for the Info panel's tags / markers / link state); `selected` only
@@ -297,12 +215,10 @@ export function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  // Version history: a "🕔 History" panel of per-map snapshots. Snapshots are captured on a
-  // throttle while editing (in `persist`) + on demand; `restoreRev` forces the canvas to re-init
-  // when a version is restored in place (same map id, so the doc.id key wouldn't change otherwise).
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [boardOpen, setBoardOpen] = useState(false);
-  const [stylesOpen, setStylesOpen] = useState(false);
+  // Version history: a "🕔 History" panel of per-map snapshots (open/close in usePanels). Snapshots
+  // are captured on a throttle while editing (in `persist`) + on demand; `restoreRev` forces the
+  // canvas to re-init when a version is restored in place (same map id, so the doc.id key wouldn't
+  // change otherwise).
   const [versions, setVersions] = useState<VersionMeta[]>([]);
   const [restoreRev, setRestoreRev] = useState(0);
   // Version-history timeline playback: when non-null, the canvas shows snaps[index]
@@ -509,8 +425,8 @@ export function App() {
 
   // Refresh the history list whenever the panel opens.
   useEffect(() => {
-    if (historyOpen) refreshVersions();
-  }, [historyOpen, refreshVersions]);
+    if (panels.historyOpen) refreshVersions();
+  }, [panels.historyOpen, refreshVersions]);
 
   // --- paste text → map ---
   function pasteAsNewMap() {
@@ -890,18 +806,6 @@ export function App() {
     }
   }, []);
 
-  // Persist the open-panel layout so the workspace is restored next time.
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "mindmap-panels",
-        JSON.stringify({ outlineOpen, indexOpen, infoOpen, numbered }),
-      );
-    } catch {
-      // preference is best-effort
-    }
-  }, [outlineOpen, indexOpen, infoOpen, numbered]);
-
   // The native-<dialog> modal mechanic (showModal()/close() + Escape-to-close) now lives in
   // <Dialog>; the three dialogs below pass `open`/`onClose`, with their on-open side effects
   // (focus the first field, lazy-load the searchable library) supplied via `onOpen`.
@@ -954,24 +858,7 @@ export function App() {
           openSearchAll: () => setSearchAllOpen(true),
           openPaste: () => setPasteOpen(true),
         }}
-        panels={{
-          outlineOpen,
-          setOutlineOpen,
-          indexOpen,
-          setIndexOpen,
-          filterOpen,
-          toggleFilter,
-          stylesOpen,
-          setStylesOpen,
-          historyOpen,
-          setHistoryOpen,
-          boardOpen,
-          setBoardOpen,
-          infoOpen,
-          setInfoOpen,
-          numbered,
-          setNumbered,
-        }}
+        panels={panels}
         map={{
           doc,
           liveDoc,
@@ -1118,45 +1005,45 @@ export function App() {
 
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
         <div className="mm-panel-host">
-          {outlineOpen && (
+          {panels.outlineOpen && (
             <OutlinePanel
               root={liveDoc.root}
               filter={outlineFilter}
-              numbered={numbered}
+              numbered={panels.numbered}
               onFilterChange={setOutlineFilter}
               onPick={(id) => mapRef.current?.focusNode(id)}
             />
           )}
-          {indexOpen && (
+          {panels.indexOpen && (
             <MarkerTagIndex
               root={liveDoc.root}
               floatingTopics={liveDoc.floatingTopics}
               onPick={(id) => mapRef.current?.focusNode(id)}
             />
           )}
-          {filterOpen && (
+          {panels.filterOpen && (
             <FilterPanel
               root={liveDoc.root}
               floatingTopics={liveDoc.floatingTopics}
-              text={filterText}
-              markers={filterMarkers}
-              tags={filterTags}
-              due={filterDue}
-              priority={filterPriority}
+              text={filter.text}
+              markers={filter.markers}
+              tags={filter.tags}
+              due={filter.due}
+              priority={filter.priority}
               matchCount={filterHits?.matches ?? 0}
-              savedFilters={savedFilters}
-              onText={setFilterText}
-              onToggleMarker={(m) => setFilterMarkers((list) => toggle(list, m))}
-              onToggleTag={(t) => setFilterTags((list) => toggle(list, t))}
-              onDue={setFilterDue}
-              onPriority={setFilterPriority}
-              onClear={clearFilter}
-              onSaveFilter={saveCurrentFilter}
-              onApplyFilter={applySavedFilter}
-              onDeleteFilter={deleteSavedFilter}
+              savedFilters={savedFilters.list}
+              onText={filter.setText}
+              onToggleMarker={filter.toggleMarker}
+              onToggleTag={filter.toggleTag}
+              onDue={filter.setDue}
+              onPriority={filter.setPriority}
+              onClear={filter.clear}
+              onSaveFilter={savedFilters.save}
+              onApplyFilter={savedFilters.apply}
+              onDeleteFilter={savedFilters.remove}
             />
           )}
-          {stylesOpen && (
+          {panels.stylesOpen && (
             <StylesPanel
               rules={liveDoc.rules ?? []}
               markers={MARKER_PALETTE}
@@ -1173,7 +1060,7 @@ export function App() {
               onDeleteStyle={deleteNamedStyle}
             />
           )}
-          {infoOpen && (
+          {panels.infoOpen && (
             <InfoPanel
               selected={selected}
               node={selectedNode}
@@ -1238,16 +1125,16 @@ export function App() {
                 .filter((r) => r.id !== selected?.id)
                 .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
               onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
-              onClose={() => setInfoOpen(false)}
+              onClose={() => panels.setInfoOpen(false)}
             />
           )}
-          {historyOpen && (
+          {panels.historyOpen && (
             <HistoryPanel
               versions={versions}
               onSaveNow={saveVersionNow}
               onPlay={startPlayback}
               onRestore={restoreVersion}
-              onClose={() => setHistoryOpen(false)}
+              onClose={() => panels.setHistoryOpen(false)}
             />
           )}
         </div>
@@ -1310,7 +1197,7 @@ export function App() {
               doc={playback ? playback.snaps[playback.index].doc : doc}
               theme={theme.theme}
               direction={layout}
-              numbered={numbered}
+              numbered={panels.numbered}
               litIds={playback ? null : litIds}
               onChange={(d) => {
                 if (playback) return; // read-only while reviewing history
@@ -1322,15 +1209,15 @@ export function App() {
               onMapLink={(id) => switchMap(id)}
             />
             {/* Kanban board overlays the canvas (the map stays mounted underneath). */}
-            {boardOpen && (
+            {panels.boardOpen && (
               <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
                 <Kanban
                   doc={liveDoc}
                   onPick={(id) => {
-                    setBoardOpen(false);
+                    panels.setBoardOpen(false);
                     mapRef.current?.focusNode(id);
                   }}
-                  onClose={() => setBoardOpen(false)}
+                  onClose={() => panels.setBoardOpen(false)}
                 />
               </div>
             )}

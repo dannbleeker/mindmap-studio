@@ -1,8 +1,7 @@
-// Shared inline styles for the toolbar controls, used by App and the panels.
-//
-// The control/input style objects now live with the UI primitives (src/design/primitives.tsx),
-// built from the design tokens — re-exported here so the App toolbar's existing `from "./ui"`
-// imports keep working unchanged. Same computed style; the values just have names now.
+// Back-compat shim for the shared toolbar-control styles. The control/input style objects now live
+// with the UI primitives (src/design/primitives.tsx), built from the design tokens — re-exported
+// here so the existing `from "./ui"` imports across App and the panels keep working unchanged. Same
+// computed style; the values just have names now.
 export { controlStyle, inputStyle } from "./design/primitives";
 
 /** Human-friendly relative time ("just now", "5 min ago", "2 h ago", "3 d ago", else a date).

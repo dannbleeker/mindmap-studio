@@ -517,6 +517,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Panel/filter state extracted into `usePanels()` + tech-debt sweep (internal).** The eight
+  side-panel open/close toggles (outline / index / info / filter / styles / history / board /
+  numbered) with their `mindmap-panels` persistence, the read-only Power Filter (text / markers /
+  tags / due / priority + the clear/toggle rules and the "closing Filter clears it" behaviour), and
+  the saved-filter presets (`mindmap-saved-filters`, add / apply / delete) all moved out of `App.tsx`
+  into a single `src/hooks/usePanels.ts`, returned as a grouped `{ panels, filter, savedFilters }`
+  object and unit-tested with `renderHook`. Behaviour-preserving — the persistence keys, defaults, and
+  every rule are unchanged. Alongside it: the **callout** inline editor swapped its `autoFocus`
+  attribute for a `useRef` + mount `useEffect(focus)` (same UX, one fewer a11y lint suppression), and
+  the repeated d3-hierarchy tidy-tree placement in `mindmap/flow/layout.ts` was folded into one
+  `layoutTidyTree(…)` helper shared by the side / left / right / org-down / org-up / brace layouts
+  (verified byte-identical positions against the prior code). `App.tsx` drops to ~1,520 lines; this
+  closes the foundation-hardening run (coverage **~44% → ~55%**, `App.tsx` **2,165 → ~1,520**, design
+  tokens + primitives + `<Toolbar>`/`<Dialog>` extracted, the canvas memoised) ahead of the UX
+  redesign.
 - **Toolbar extracted from `App.tsx` (internal).** The ~580-line editor `<header>` (the ~50 nav /
   panel / map / canvas / layout / find / export controls) moved into a single prop-driven
   `src/components/Toolbar.tsx`, grouped into logical prop buckets (`nav` / `panels` / `map` /

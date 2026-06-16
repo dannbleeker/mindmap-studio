@@ -1,0 +1,235 @@
+import { useEffect, useState } from "react";
+import { type DueMode, type FilterCriteria, type SavedFilter, isFilterActive } from "../filter";
+
+// Panel + filter UI state for the editor, extracted from App.tsx (behaviour-preserving). Owns:
+//   • the eight side-panel open/close toggles (outline / index / info / filter / styles / history /
+//     board / numbered) and the "mindmap-panels" persistence of the durable four,
+//   • the read-only Power Filter (text / markers / tags / due / priority) and its clear/toggle rules,
+//   • the saved Power-Filter presets ("mindmap-saved-filters", add / apply / delete).
+// App calls this once and threads the grouped result into <Toolbar> and the panels. Keeping it here
+// (a) shrinks App's body and (b) gives the upcoming UX redesign one place to own panel/filter state.
+
+const PANELS_KEY = "mindmap-panels";
+const SAVED_FILTERS_KEY = "mindmap-saved-filters";
+
+/** The persisted slice of panel state (the durable panels — the rest are session-only). */
+interface PersistedPanels {
+  outlineOpen?: boolean;
+  indexOpen?: boolean;
+  infoOpen?: boolean;
+  numbered?: boolean;
+}
+
+function readPersistedPanels(): PersistedPanels {
+  try {
+    return JSON.parse(localStorage.getItem(PANELS_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+function readSavedFilters(): SavedFilter[] {
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_FILTERS_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+/** Toggle membership of `value` in `list` (used for the marker/tag multi-selects). */
+function toggleIn(list: string[], value: string): string[] {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
+
+export interface PanelsState {
+  outlineOpen: boolean;
+  setOutlineOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  indexOpen: boolean;
+  setIndexOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  infoOpen: boolean;
+  setInfoOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  filterOpen: boolean;
+  /** Toggle the Filter panel; closing it also clears the active filter (see `toggleFilter`). */
+  toggleFilter: () => void;
+  stylesOpen: boolean;
+  setStylesOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  historyOpen: boolean;
+  setHistoryOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  boardOpen: boolean;
+  setBoardOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  numbered: boolean;
+  setNumbered: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export interface FilterState {
+  text: string;
+  setText: React.Dispatch<React.SetStateAction<string>>;
+  markers: string[];
+  setMarkers: React.Dispatch<React.SetStateAction<string[]>>;
+  tags: string[];
+  setTags: React.Dispatch<React.SetStateAction<string[]>>;
+  due: DueMode;
+  setDue: React.Dispatch<React.SetStateAction<DueMode>>;
+  priority: number;
+  setPriority: React.Dispatch<React.SetStateAction<number>>;
+  /** Reset every Power-Filter field to its empty value (doesn't close the panel). */
+  clear: () => void;
+  /** Toggle a marker on/off in the marker multi-select. */
+  toggleMarker: (marker: string) => void;
+  /** Toggle a tag on/off in the tag multi-select. */
+  toggleTag: (tag: string) => void;
+  /** The live criteria object built from the current fields (a fresh object each call). */
+  criteria: FilterCriteria;
+}
+
+export interface SavedFiltersState {
+  list: SavedFilter[];
+  /** Save the current filter under `name` (no-op for a blank name or an inactive filter). */
+  save: (name: string) => void;
+  /** Load a preset's criteria into the live filter fields. */
+  apply: (criteria: FilterCriteria) => void;
+  /** Delete the preset with this id. */
+  remove: (id: string) => void;
+}
+
+export interface UsePanels {
+  panels: PanelsState;
+  filter: FilterState;
+  savedFilters: SavedFiltersState;
+}
+
+/** Build the live Power-Filter criteria from the raw fields (priority 0 → undefined, as before). */
+function buildCriteria(
+  text: string,
+  markers: string[],
+  tags: string[],
+  due: DueMode,
+  priority: number,
+): FilterCriteria {
+  return { text, markers, tags, due, priority: priority || undefined };
+}
+
+export function usePanels(): UsePanels {
+  // Durable panels restore from "mindmap-panels"; the rest start closed each session.
+  const persisted = readPersistedPanels();
+  const [outlineOpen, setOutlineOpen] = useState(!!persisted.outlineOpen);
+  const [indexOpen, setIndexOpen] = useState(!!persisted.indexOpen);
+  const [infoOpen, setInfoOpen] = useState(!!persisted.infoOpen);
+  const [numbered, setNumbered] = useState(!!persisted.numbered);
+  // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [stylesOpen, setStylesOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [boardOpen, setBoardOpen] = useState(false);
+
+  // Persist the open-panel layout (only the durable four) so the workspace restores next time.
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        PANELS_KEY,
+        JSON.stringify({ outlineOpen, indexOpen, infoOpen, numbered }),
+      );
+    } catch {
+      // preference is best-effort
+    }
+  }, [outlineOpen, indexOpen, infoOpen, numbered]);
+
+  // --- Power Filter ---
+  const [filterText, setFilterText] = useState("");
+  const [filterMarkers, setFilterMarkers] = useState<string[]>([]);
+  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [filterDue, setFilterDue] = useState<DueMode>("");
+  const [filterPriority, setFilterPriority] = useState(0);
+
+  const clearFilter = () => {
+    setFilterText("");
+    setFilterMarkers([]);
+    setFilterTags([]);
+    setFilterDue("");
+    setFilterPriority(0);
+  };
+  // Toggling the panel off also clears the filter, so dimming can't outlive a visible control.
+  const toggleFilter = () =>
+    setFilterOpen((open) => {
+      if (open) clearFilter();
+      return !open;
+    });
+
+  // --- Saved Power-Filter presets (persisted app-wide, reusable across maps) ---
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>(readSavedFilters);
+  useEffect(() => {
+    try {
+      localStorage.setItem(SAVED_FILTERS_KEY, JSON.stringify(savedFilters));
+    } catch {
+      // preference is best-effort
+    }
+  }, [savedFilters]);
+
+  const saveCurrentFilter = (name: string) => {
+    const criteria = buildCriteria(
+      filterText,
+      filterMarkers,
+      filterTags,
+      filterDue,
+      filterPriority,
+    );
+    if (!name.trim() || !isFilterActive(criteria)) return;
+    // Replace any existing preset with the same name, then add.
+    setSavedFilters((prev) => [
+      ...prev.filter((f) => f.name !== name.trim()),
+      { id: crypto.randomUUID(), name: name.trim(), criteria },
+    ]);
+  };
+  const applySavedFilter = (criteria: FilterCriteria) => {
+    setFilterText(criteria.text);
+    setFilterMarkers([...criteria.markers]);
+    setFilterTags([...criteria.tags]);
+    setFilterDue(criteria.due ?? "");
+    setFilterPriority(criteria.priority ?? 0);
+  };
+  const deleteSavedFilter = (id: string) =>
+    setSavedFilters((prev) => prev.filter((f) => f.id !== id));
+
+  return {
+    panels: {
+      outlineOpen,
+      setOutlineOpen,
+      indexOpen,
+      setIndexOpen,
+      infoOpen,
+      setInfoOpen,
+      filterOpen,
+      toggleFilter,
+      stylesOpen,
+      setStylesOpen,
+      historyOpen,
+      setHistoryOpen,
+      boardOpen,
+      setBoardOpen,
+      numbered,
+      setNumbered,
+    },
+    filter: {
+      text: filterText,
+      setText: setFilterText,
+      markers: filterMarkers,
+      setMarkers: setFilterMarkers,
+      tags: filterTags,
+      setTags: setFilterTags,
+      due: filterDue,
+      setDue: setFilterDue,
+      priority: filterPriority,
+      setPriority: setFilterPriority,
+      clear: clearFilter,
+      toggleMarker: (marker) => setFilterMarkers((list) => toggleIn(list, marker)),
+      toggleTag: (tag) => setFilterTags((list) => toggleIn(list, tag)),
+      criteria: buildCriteria(filterText, filterMarkers, filterTags, filterDue, filterPriority),
+    },
+    savedFilters: {
+      list: savedFilters,
+      save: saveCurrentFilter,
+      apply: applySavedFilter,
+      remove: deleteSavedFilter,
+    },
+  };
+}

@@ -3,7 +3,9 @@ import {
   Background,
   Controls,
   MiniMap,
+  NodeToolbar,
   Panel,
+  Position,
   ReactFlow,
   ReactFlowProvider,
   useEdgesState,
@@ -20,6 +22,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { EditorIcon, type EditorIconName } from "../components/EditorIcons";
 import { colors } from "../design/tokens";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
@@ -122,6 +125,43 @@ function themeVars(theme: MindMapProps["theme"]): CSSProperties {
     "--mm-line-color": v["--line-color"],
     background: v["--main-bgcolor"],
   } as CSSProperties;
+}
+
+/** One button in the inline node popover (the on-selection quick-action toolbar). */
+function PopBtn({
+  icon,
+  label,
+  danger,
+  onClick,
+}: {
+  icon: EditorIconName;
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="nodrag nopan"
+      title={label}
+      aria-label={label}
+      onClick={onClick}
+      style={{
+        width: 30,
+        height: 30,
+        borderRadius: 7,
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        color: danger ? "#b23b3a" : colors.muted,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <EditorIcon name={icon} size={16} />
+    </button>
+  );
 }
 
 function FlowInner({
@@ -774,6 +814,63 @@ function FlowInner({
             onCommit={handleCommitCallout}
             onDelete={handleDeleteCallout}
           />
+          {/* Inline contextual popover — quick structural actions above the selected node. Uses the
+              same internal handlers as the keyboard + right-click menu, and React Flow's NodeToolbar
+              for node-tracked positioning (stays put through pan/zoom). Hidden while inline-editing. */}
+          {selectedId && editingId !== selectedId
+            ? (() => {
+                const sid = selectedId;
+                const sel = findAnyNode(renderDoc, sid);
+                const isRootSel = sid === renderDoc.root.id;
+                const hasKids = (sel?.children?.length ?? 0) > 0;
+                return (
+                  <NodeToolbar nodeId={sid} isVisible position={Position.Top} offset={10}>
+                    <div
+                      className="nodrag nopan"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        background: colors.white,
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: 11,
+                        padding: 4,
+                        boxShadow: "0 10px 30px rgba(40,30,16,0.18)",
+                      }}
+                    >
+                      <PopBtn
+                        icon="child"
+                        label="Add child"
+                        onClick={() => apply(addChild(docRef.current, sid), true)}
+                      />
+                      {!isRootSel ? (
+                        <PopBtn
+                          icon="plus"
+                          label="Add sibling"
+                          onClick={() => apply(addSibling(docRef.current, sid), true)}
+                        />
+                      ) : null}
+                      <PopBtn icon="text" label="Rename" onClick={() => setEditingId(sid)} />
+                      {hasKids ? (
+                        <PopBtn
+                          icon="minus"
+                          label="Collapse / expand"
+                          onClick={() => apply(toggleCollapse(docRef.current, sid))}
+                        />
+                      ) : null}
+                      {!isRootSel ? (
+                        <PopBtn
+                          icon="trash"
+                          label="Delete"
+                          danger
+                          onClick={() => apply(deleteNode(docRef.current, sid))}
+                        />
+                      ) : null}
+                    </div>
+                  </NodeToolbar>
+                );
+              })()
+            : null}
           <Controls showInteractive={false} />
           {minimapOpen ? (
             <MiniMap

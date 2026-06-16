@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Inline node popover (redesign phase 2, complete)** — selecting a topic now shows a small
+  quick-action toolbar floating just above it (via React Flow's `NodeToolbar`, so it tracks the node
+  through pan/zoom): **Add child**, **Add sibling**, **Rename**, **Collapse/expand**, **Delete** —
+  sibling/delete hidden on the root, collapse only when the node has children. It calls the exact same
+  internal handlers as the keyboard shortcuts and the right-click menu (no new model surface), and
+  hides while a node is being inline-edited. This completes the editor redesign (chrome + canvas).
+
 - **Canvas palette → brand (redesign phase 2, start)** — the default **Light** and **Dark** canvas
   themes are retuned to the warm-cream + **emerald** brand language: emerald **root** node and the
   warm support branch palette (amber / blue / emerald / magenta / olive / violet) shared with the

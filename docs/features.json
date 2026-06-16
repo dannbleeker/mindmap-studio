@@ -113,7 +113,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "task-priority",
@@ -131,7 +131,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "marker-palette",
@@ -230,7 +230,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "node-shapes",
@@ -239,7 +239,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "extended-shapes",
@@ -257,7 +257,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "diagram-backdrops",
@@ -383,7 +383,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "find-replace",
@@ -491,7 +491,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "templates",
@@ -626,7 +626,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "kanban-board",
@@ -635,7 +635,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "file-attachments",
@@ -653,7 +653,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "drop-link",
@@ -671,7 +671,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-json",
@@ -932,7 +932,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "pwa-offline",
@@ -968,7 +968,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "cross-map-branch-paste",
@@ -977,7 +977,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "sticky-notes",
@@ -986,7 +986,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "mobile-responsive",
@@ -1004,7 +1004,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "per-topic-font-family",

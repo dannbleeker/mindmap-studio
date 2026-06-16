@@ -133,8 +133,9 @@ more than the lists themselves, is the thinking.
 
 Then rehearse the room. **Duplicate** the map so you can experiment freely, switch back to
 the original from the map switcher, and hit **Present**: walk-through frames each branch in
-turn -- arrow keys to move, the room's attention following yours, one branch at a time. When
-you're done, run a **library backup** -- one file holding every map, the belt to local
+turn -- arrow keys to move, the room's attention following yours, one branch at a time. Press **P**
+to flip on the **presenter view** -- your speaker notes, the next slide, and the agenda on your side
+of the screen only, the room still seeing just the slide. When you're done, run a **library backup** -- one file holding every map, the belt to local
 storage's braces -- and, if you haven't already, **install** the app to your desktop so it's
 one click away and runs with no network.
 

@@ -17,9 +17,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   custom properties, mirroring the Start screen's `--st-*` system, with a fixed emerald accent. Every
   control the previous toolbar had was **re-homed, not removed** (all 16 export formats, all 10
   layouts, all 7 side panels, backdrops, roll-ups, group/summary/sticky-note, free layout, line-jumps,
-  numbering, focus, sheets, backup, copy-outline, import). The canvas renderer is unchanged (its
-  restyle is phase 2). No web fonts are loaded (offline-first); the mono stack prefers JetBrains Mono
-  if installed.
+  numbering, focus, sheets, backup, copy-outline, import). The **Topic inspector** moves to a
+  **right-side panel** that **auto-opens when a node is selected** and shows a **map overview**
+  (topics / branches / task progress) when nothing is — and the side panels (Outline / Filter /
+  Styles / History / Index / Info) are retuned to the same warm-cream + emerald palette. The canvas
+  renderer is unchanged (its restyle is phase 2). No web fonts are loaded (offline-first); the mono
+  stack prefers JetBrains Mono if installed.
 - **Line-jumps on crossing connectors** — a per-map **⌒ Line jumps** toolbar toggle (off by default,
   stored as `meta.lineJumps`, lossless in `.json`). When on, wherever two **relationship** arrows
   cross, exactly **one** of them draws a small semicircular **hop** over the other — so a busy concept

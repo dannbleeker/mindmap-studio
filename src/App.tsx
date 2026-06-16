@@ -12,6 +12,7 @@ import {
 } from "./Panels";
 import { Dialog } from "./components/Dialog";
 import { IconRail } from "./components/IconRail";
+import { MapStats } from "./components/MapStats";
 import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
 import "./design/editor.css";
@@ -204,6 +205,12 @@ export function App() {
     };
     return find(liveDoc.root) ?? liveDoc.floatingTopics?.map(find).find(Boolean) ?? null;
   }, [selected, liveDoc]);
+  // Auto-show the right-side inspector when a node is selected (the redesign's auto-show behaviour).
+  // Closing it (its ✕) only re-hides until the next selection, since this keys on the selection id.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on selection id; setInfoOpen is a stable state setter.
+  useEffect(() => {
+    if (selected) panels.setInfoOpen(true);
+  }, [selected?.id]);
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
   const focusLit = useMemo(() => (focus ? focusSet(liveDoc, focus.id) : null), [focus, liveDoc]);
   const litIds = focusLit && focusLit.size > 0 ? focusLit : (filterHits?.lit ?? null);
@@ -1073,76 +1080,6 @@ export function App() {
                 onDeleteStyle={deleteNamedStyle}
               />
             )}
-            {panels.infoOpen && (
-              <InfoPanel
-                selected={selected}
-                node={selectedNode}
-                noteDraft={noteDraft}
-                onNoteChange={onNoteChange}
-                onNoteBlur={flushNote}
-                markers={MARKER_PALETTE}
-                onToggleMarker={(m) => {
-                  const ok = mapRef.current?.toggleSelectedIcon(m);
-                  if (!ok) showHint("Select a node first, then click a marker.");
-                }}
-                onPickSticker={(s) => {
-                  const ok = mapRef.current?.setSelectedImage(stickerImage(s));
-                  if (!ok) showHint("Select a node first, then pick a sticker.");
-                }}
-                onStyle={(patch) => {
-                  const ok = mapRef.current?.setSelectedStyle(patch);
-                  if (!ok) showHint("Select a node first, then style it.");
-                }}
-                onAddTag={(t) => {
-                  const cur = selectedNode?.tags ?? [];
-                  if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);
-                }}
-                onRemoveTag={(t) =>
-                  mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
-                }
-                onSetProgress={(progress) => {
-                  const ok = mapRef.current?.setSelectedProgress(progress);
-                  if (!ok) showHint("Select a node first, then set its progress.");
-                }}
-                onSetDue={(d) => {
-                  const ok = mapRef.current?.setSelectedDue(d);
-                  if (!ok) showHint("Select a node first, then set a due date.");
-                }}
-                onSetStart={(d) => {
-                  const ok = mapRef.current?.setSelectedStart(d);
-                  if (!ok) showHint("Select a node first, then set a start date.");
-                }}
-                onSetPriority={(p) => {
-                  const ok = mapRef.current?.setSelectedPriority(p);
-                  if (!ok) showHint("Select a node first, then set its priority.");
-                }}
-                onAddAttachment={async (file) => {
-                  try {
-                    const att = await fileToAttachment(file);
-                    const ok = mapRef.current?.addSelectedAttachment(att);
-                    if (!ok) showHint("Select a node first, then attach a file.");
-                  } catch (err) {
-                    showHint(err instanceof Error ? err.message : "Could not attach that file.");
-                  }
-                }}
-                onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
-                onSetHyperlink={(url) => {
-                  const ok = mapRef.current?.setSelectedHyperlink(url);
-                  if (!ok) showHint("Select a node first, then add a link.");
-                }}
-                maps={maps
-                  .filter((m) => m.id !== doc.id)
-                  .map((m) => ({ id: m.id, title: m.title }))}
-                onLinkMap={(mapId) =>
-                  mapRef.current?.setSelectedHyperlink(`${MAP_LINK_PREFIX}${mapId}`)
-                }
-                jumpTargets={outlineRows(liveDoc.root)
-                  .filter((r) => r.id !== selected?.id)
-                  .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
-                onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
-                onClose={() => panels.setInfoOpen(false)}
-              />
-            )}
             {panels.historyOpen && (
               <HistoryPanel
                 versions={versions}
@@ -1276,6 +1213,79 @@ export function App() {
               )}
             </div>
           </div>
+          {panels.infoOpen &&
+            (selected ? (
+              <InfoPanel
+                selected={selected}
+                node={selectedNode}
+                noteDraft={noteDraft}
+                onNoteChange={onNoteChange}
+                onNoteBlur={flushNote}
+                markers={MARKER_PALETTE}
+                onToggleMarker={(mk) => {
+                  const ok = mapRef.current?.toggleSelectedIcon(mk);
+                  if (!ok) showHint("Select a node first, then click a marker.");
+                }}
+                onPickSticker={(s) => {
+                  const ok = mapRef.current?.setSelectedImage(stickerImage(s));
+                  if (!ok) showHint("Select a node first, then pick a sticker.");
+                }}
+                onStyle={(patch) => {
+                  const ok = mapRef.current?.setSelectedStyle(patch);
+                  if (!ok) showHint("Select a node first, then style it.");
+                }}
+                onAddTag={(t) => {
+                  const cur = selectedNode?.tags ?? [];
+                  if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);
+                }}
+                onRemoveTag={(t) =>
+                  mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
+                }
+                onSetProgress={(progress) => {
+                  const ok = mapRef.current?.setSelectedProgress(progress);
+                  if (!ok) showHint("Select a node first, then set its progress.");
+                }}
+                onSetDue={(d) => {
+                  const ok = mapRef.current?.setSelectedDue(d);
+                  if (!ok) showHint("Select a node first, then set a due date.");
+                }}
+                onSetStart={(d) => {
+                  const ok = mapRef.current?.setSelectedStart(d);
+                  if (!ok) showHint("Select a node first, then set a start date.");
+                }}
+                onSetPriority={(p) => {
+                  const ok = mapRef.current?.setSelectedPriority(p);
+                  if (!ok) showHint("Select a node first, then set its priority.");
+                }}
+                onAddAttachment={async (file) => {
+                  try {
+                    const att = await fileToAttachment(file);
+                    const ok = mapRef.current?.addSelectedAttachment(att);
+                    if (!ok) showHint("Select a node first, then attach a file.");
+                  } catch (err) {
+                    showHint(err instanceof Error ? err.message : "Could not attach that file.");
+                  }
+                }}
+                onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
+                onSetHyperlink={(url) => {
+                  const ok = mapRef.current?.setSelectedHyperlink(url);
+                  if (!ok) showHint("Select a node first, then add a link.");
+                }}
+                maps={maps
+                  .filter((mm) => mm.id !== doc.id)
+                  .map((mm) => ({ id: mm.id, title: mm.title }))}
+                onLinkMap={(mapId) =>
+                  mapRef.current?.setSelectedHyperlink(`${MAP_LINK_PREFIX}${mapId}`)
+                }
+                jumpTargets={outlineRows(liveDoc.root)
+                  .filter((r) => r.id !== selected?.id)
+                  .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
+                onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
+                onClose={() => panels.setInfoOpen(false)}
+              />
+            ) : (
+              <MapStats doc={liveDoc} />
+            ))}
         </div>
       </div>
 

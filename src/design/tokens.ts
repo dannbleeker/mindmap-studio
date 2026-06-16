@@ -61,38 +61,40 @@ export function editorThemeVars(theme: CanvasTheme): CSSProperties {
   } as CSSProperties;
 }
 
-/** Semantic colours for the chrome. Grouped by role; the swatch arrays are the styling pickers. */
+/** Semantic colours for the side panels (Outline / Filter / Styles / History / Index / Info).
+ *  Retuned to the warm-cream + emerald language of the redesign so the panels harmonise with the new
+ *  chrome. These are static light values (the panels were never dark-adaptive); the theme-reactive
+ *  chrome uses the `--ed-*` tokens above. Grouped by role; the swatch arrays are the styling pickers. */
 export const colors = {
   /** Primary ink — topic/panel text, control labels. */
-  text: "#26215c",
+  text: "#23211c",
   /** Muted label text (section sub-labels, inline field labels). */
-  muted: "#73726c",
+  muted: "#5c574e",
   /** Fainter secondary text (counts, hints, empty-state copy). */
-  faint: "#8a8780",
+  faint: "#938d81",
   /** Placeholder / disabled-ish copy in the notes editor empty states. */
-  placeholder: "#999",
+  placeholder: "#b6b0a4",
 
   /** Divider / border between panel regions and below the marker/style bars. */
-  border: "#e2e0d8",
+  border: "#e7e4dc",
   /** Control border (buttons, inputs, chips, swatch frames). */
-  controlBorder: "#cecbf6",
+  controlBorder: "#e7e4dc",
 
   /** Panel aside background. */
-  surface: "#fbfbf9",
-  /** Marker/Style bar background (a faint lilac strip inside the Info panel). */
-  surfaceBar: "#f4f3fb",
+  surface: "#ffffff",
+  /** Marker/Style bar background (a faint warm strip inside the Info panel). */
+  surfaceBar: "#f4f2ec",
   /** Plain white surface (inputs, swatch buttons, the "off" chip). */
   white: "#fff",
 
   /** Control fill (the toolbar button look). */
-  controlBg: "#eeedfe",
-  /** Accent — active chip background + border, the lit toggle state. */
-  accent: "#6c63d6",
-  /** Accent used as the history-timeline range slider tint (kept distinct: it was authored a
-   *  shade off the chip accent and we preserve the exact pixel). */
-  accentSlider: "#6c63d8",
-  /** Active marker chip background (a soft accent tint, distinct from the solid accent fill). */
-  accentTint: "#e7e4fb",
+  controlBg: "#f4f2ec",
+  /** Accent — active chip background + border, the lit toggle state (emerald). */
+  accent: "#1b8a5e",
+  /** Accent used as the history-timeline range slider tint. */
+  accentSlider: "#1b8a5e",
+  /** Active marker chip background (a soft emerald tint, distinct from the solid accent fill). */
+  accentTint: "#e3f1ea",
 
   /** Context-menu chrome (FlowMindMap right-click menu + linking banner). */
   menu: {

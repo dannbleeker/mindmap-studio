@@ -25,6 +25,7 @@ export default defineConfig({
       ["test/panels.test.tsx", "jsdom"],
       ["test/hooks.test.tsx", "jsdom"],
       ["test/usePanels.test.ts", "jsdom"],
+      ["test/dashboard.test.ts", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.

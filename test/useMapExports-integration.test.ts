@@ -1,7 +1,7 @@
 // useMapExports integration tests: verify export handlers call the correct formatters
 // with the right arguments. Tests the plumbing without requiring jsdom Blob/URL mocking.
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import { serializeDoc } from "../src/io/json";
 import { toMarkdown } from "../src/io/markdown";
 import { toMermaid } from "../src/io/mermaid";

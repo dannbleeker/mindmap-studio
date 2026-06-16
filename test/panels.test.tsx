@@ -274,7 +274,9 @@ describe("StyleBar", () => {
     render(<StyleBar onStyle={onStyle} />);
     const boldBtn = screen.getByRole("button", { name: "B" });
     await userEvent.click(boldBtn);
-    expect(onStyle).toHaveBeenCalledWith(expect.objectContaining({ fontWeight: expect.any(String) }));
+    expect(onStyle).toHaveBeenCalledWith(
+      expect.objectContaining({ fontWeight: expect.any(String) }),
+    );
   });
 });
 
@@ -506,7 +508,13 @@ describe("HistoryPanel (interaction)", () => {
   it("calls onSaveNow when the 'Save version now' button is clicked", async () => {
     const onSaveNow = vi.fn();
     render(
-      <HistoryPanel versions={[]} onSaveNow={onSaveNow} onPlay={noop} onRestore={noop} onClose={noop} />,
+      <HistoryPanel
+        versions={[]}
+        onSaveNow={onSaveNow}
+        onPlay={noop}
+        onRestore={noop}
+        onClose={noop}
+      />,
     );
     const saveBtn = screen.getByRole("button", { name: /Save version now/ });
     await userEvent.click(saveBtn);

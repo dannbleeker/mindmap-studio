@@ -2,7 +2,7 @@
 // Pure functions with no dependencies — tests validate edge cases in box arithmetic.
 
 import { describe, expect, it } from "vitest";
-import { floatingPoints, type Box } from "../src/mindmap/flow/floating";
+import { type Box, floatingPoints } from "../src/mindmap/flow/floating";
 
 describe("floatingPoints (border-to-border geometry)", () => {
   it("connects two well-separated boxes", () => {

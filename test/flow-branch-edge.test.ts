@@ -1,7 +1,7 @@
 // Branch edge: tapered ribbon path between two points with depth-based width.
 // Pure geometry + React component wrapping. Tests validate path generation and memoization.
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { taperedRibbonPath } from "../src/mindmap/flow/BranchEdge";
 
 describe("taperedRibbonPath (tapered ribbon geometry)", () => {

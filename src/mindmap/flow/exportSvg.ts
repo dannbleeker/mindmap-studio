@@ -3,7 +3,7 @@ import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
 import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
 import { taperedRibbonPath } from "./BranchEdge";
-import { arrowHeadPath } from "./CrosslinkEdge";
+import { arrowHeadPath } from "./arrowhead";
 import { backdropGeometry } from "./backdrop";
 import { type BraceGroup, braceGeometry, bracePath } from "./brace";
 import { type Box, floatingPoints } from "./floating";

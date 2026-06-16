@@ -17,8 +17,18 @@ export default defineConfig({
     },
   },
   test: {
+    // Default to `node` — the pure-logic + store tests don't need a DOM and run faster without one.
+    // Component/hook tests opt into jsdom per-file via environmentMatchGlobs below (the panels/hooks
+    // need a DOM + the polyfills in test/setup.ts).
     environment: "node",
-    include: ["test/**/*.test.ts"],
+    environmentMatchGlobs: [
+      ["test/panels.test.tsx", "jsdom"],
+      ["test/hooks.test.tsx", "jsdom"],
+    ],
+    // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
+    // takes effect for the jsdom tests.
+    setupFiles: ["test/setup.ts"],
+    include: ["test/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
       // Cover all app source; the canvas/React UI is verified in-browser rather

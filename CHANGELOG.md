@@ -517,6 +517,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Component/hook test safety net (internal).** Added `@testing-library/react` (+ `/dom` +
+  `/user-event`) and a jsdom test setup (`test/setup.ts`, polyfilling `ResizeObserver`,
+  `matchMedia`, `IntersectionObserver`) wired through `vitest.config.ts` — `node` stays the default
+  environment; component/hook specs opt into jsdom per-file. New **render + interaction smoke tests**
+  for every left-rail panel (`Outline`, `Marker/tag index`, `Filter`, `Styles`, `Info`, `History`,
+  `StyleBar`) assert user-visible text/roles (so they survive a later panel refactor), and
+  **`renderHook` tests** cover `useFind`, `useMapExports`, `useTheme`, and `useIsMobile`. The pure
+  relationship-arrowhead geometry is extracted from `CrosslinkEdge.tsx` into
+  `mindmap/flow/arrowhead.ts` (behaviour-preserving — the canvas edge and the SVG exporter share the
+  one byte-identical builder) and unit-tested alongside `taperedRibbonPath` + `floating.ts`. Coverage
+  fill for `io/attachment.ts`, `io/image.ts` (`fileToMapImage` via mocked Image + canvas),
+  `store/mapStore.ts` (`getAllMaps`/`listMaps`/cold-boot/concurrency), and the remaining `flow/ops.ts`
+  branches. Statement/line coverage **~44% → ~55%**; suite now 742 tests. No behaviour change.
 - **Hardening pass.** The PDF book builder now measures text through a `safeWidth`
   helper (mirroring `safeDraw`), so a glyph that slips past `pdfText` can never throw at
   the width step — the build degrades to the ASCII fallback instead of failing. The pure

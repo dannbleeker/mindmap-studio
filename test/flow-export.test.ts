@@ -10,7 +10,7 @@
 // that survives the export pipeline unchanged.
 import { describe, expect, it } from "vitest";
 import { sanitizeSvg } from "../src/io/svgSanitize";
-import { arrowHeadPath } from "../src/mindmap/flow/CrosslinkEdge";
+import { arrowHeadPath } from "../src/mindmap/flow/arrowhead";
 import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
 import { shapePath } from "../src/mindmap/flow/shapes";
 import { CROSSLINK_COLOR } from "../src/mindmap/flow/style";

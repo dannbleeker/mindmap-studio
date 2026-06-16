@@ -7,34 +7,11 @@ import {
   useInternalNode,
   useNodes,
 } from "@xyflow/react";
+import { arrowHeadPath } from "./arrowhead";
 import { type Box, floatingPoints, getFloatingPoints } from "./floating";
-import { r2 } from "./geometry";
 import { type HopSegment, hopPath } from "./lineJumps";
 import { CROSSLINK_COLOR, CROSSLINK_DASH, CROSSLINK_WIDTH } from "./style";
 import type { EdgeData, FlowEdge } from "./types";
-
-/** A filled triangle arrowhead with its tip at (tipX,tipY), pointing away from (fromX,fromY).
- *  Shared by the canvas edge and the SVG exporter so a relationship reads directionally in both
- *  — the flowchart / concept-map connector. Returns an SVG path `d`. */
-export function arrowHeadPath(
-  tipX: number,
-  tipY: number,
-  fromX: number,
-  fromY: number,
-  size = 9,
-): string {
-  const dx = tipX - fromX;
-  const dy = tipY - fromY;
-  const len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len;
-  const uy = dy / len;
-  const bx = tipX - ux * size; // base centre, `size` back from the tip
-  const by = tipY - uy * size;
-  const px = -uy; // perpendicular
-  const py = ux;
-  const w = size * 0.55;
-  return `M ${r2(tipX)} ${r2(tipY)} L ${r2(bx + px * w)} ${r2(by + py * w)} L ${r2(bx - px * w)} ${r2(by - py * w)} Z`;
-}
 
 /** A live React Flow node's on-screen box (top-left + size → centre + size). This app has no
  *  sub-flow parenting, so `position` is already absolute — matching the exporter's rects. */

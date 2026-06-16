@@ -3,18 +3,39 @@ import { describe, expect, it } from "vitest";
 import type { MindMapDoc } from "../src/model/types";
 import {
   deleteMap,
+  getAllMaps,
   getLastOpened,
+  latestVersionDoc,
   listMaps,
   loadMap,
   saveMap,
+  saveVersion,
   setLastOpened,
 } from "../src/store/mapStore";
 
-const docOf = (id: string, title: string): MindMapDoc => ({
+const docOf = (id: string, title: string, sheetGroup?: string): MindMapDoc => ({
   schemaVersion: 1,
   id,
   title,
   root: { id: "r", topic: title, children: [{ id: "c", topic: "child", children: [] }] },
+  ...(sheetGroup ? { meta: { sheetGroup } } : {}),
+});
+
+// fake-indexeddb gives this file its own fresh database; tests within it share that DB and run in
+// source order. The cold-boot assertions below rely on running before anything is written, so they
+// come first.
+describe("mapStore — cold boot", () => {
+  it("getLastOpened returns null before anything has been opened", async () => {
+    expect(await getLastOpened()).toBeNull();
+  });
+
+  it("getAllMaps returns an empty list on a fresh store", async () => {
+    expect(await getAllMaps()).toEqual([]);
+  });
+
+  it("latestVersionDoc returns null for a map with no snapshots", async () => {
+    expect(await latestVersionDoc("never-saved")).toBeNull();
+  });
 });
 
 describe("mapStore", () => {
@@ -23,6 +44,13 @@ describe("mapStore", () => {
     const back = await loadMap("m1");
     expect(back?.title).toBe("First");
     expect(back?.root.children.map((c) => c.topic)).toEqual(["child"]);
+  });
+
+  it("stamps meta.updatedAt on save without mutating the caller's doc", async () => {
+    const doc = docOf("m1b", "Stamped");
+    await saveMap(doc);
+    expect(doc.meta?.updatedAt).toBeUndefined(); // caller's object is untouched
+    expect((await loadMap("m1b"))?.meta?.updatedAt).toBeTypeOf("number");
   });
 
   it("returns null for an unknown id", async () => {
@@ -46,5 +74,79 @@ describe("mapStore", () => {
   it("remembers the last-opened map", async () => {
     await setLastOpened("m1");
     expect(await getLastOpened()).toBe("m1");
+  });
+});
+
+describe("mapStore — getAllMaps / listMaps", () => {
+  it("getAllMaps returns the full docs that were saved", async () => {
+    await saveMap(docOf("g1", "Gamma"));
+    await saveMap(docOf("g2", "Delta"));
+    const all = await getAllMaps();
+    const byId = new Map(all.map((d) => [d.id, d]));
+    expect(byId.get("g1")?.root.topic).toBe("Gamma"); // full doc, not just a summary
+    expect(byId.get("g2")?.root.children).toHaveLength(1);
+  });
+
+  it("getAllMaps reflects deletions", async () => {
+    await saveMap(docOf("g3", "Temp"));
+    expect((await getAllMaps()).some((d) => d.id === "g3")).toBe(true);
+    await deleteMap("g3");
+    expect((await getAllMaps()).some((d) => d.id === "g3")).toBe(false);
+  });
+
+  it("listMaps sorts by title and carries each map's sheetGroup", async () => {
+    await saveMap(docOf("s-c", "Zeta", "wb-1"));
+    await saveMap(docOf("s-a", "Acme", "wb-1"));
+    await saveMap(docOf("s-b", "Mid")); // no sheet group
+    const list = await listMaps();
+    // titles are in ascending order across the whole library
+    const titles = list.map((m) => m.title);
+    const sorted = [...titles].sort((a, b) => a.localeCompare(b));
+    expect(titles).toEqual(sorted);
+    // sheetGroup is propagated (and absent when the map has none)
+    expect(list.find((m) => m.id === "s-a")?.sheetGroup).toBe("wb-1");
+    expect(list.find((m) => m.id === "s-c")?.sheetGroup).toBe("wb-1");
+    expect(list.find((m) => m.id === "s-b")?.sheetGroup).toBeUndefined();
+  });
+});
+
+describe("mapStore — latestVersionDoc edge cases", () => {
+  it("returns the newest snapshot's doc regardless of save order", async () => {
+    // Save out of order: the later timestamp must win even though it was written first.
+    await saveVersion(docOf("lv", "Newer"), 5000);
+    await saveVersion(docOf("lv", "Older"), 1000);
+    expect((await latestVersionDoc("lv"))?.title).toBe("Newer");
+  });
+
+  it("does not bleed across maps (each map's latest is its own)", async () => {
+    await saveVersion(docOf("lvA", "A-latest"), 2000);
+    await saveVersion(docOf("lvB", "B-latest"), 9000);
+    expect((await latestVersionDoc("lvA"))?.title).toBe("A-latest");
+    expect((await latestVersionDoc("lvB"))?.title).toBe("B-latest");
+  });
+});
+
+describe("mapStore — concurrency", () => {
+  it("handles concurrent saveMap + saveVersion without losing writes", async () => {
+    const doc = docOf("cc", "Concurrent");
+    // Fire a map save and several version snapshots at once; all must land.
+    await Promise.all([
+      saveMap(doc),
+      saveVersion(docOf("cc", "v1"), 1000),
+      saveVersion(docOf("cc", "v2"), 2000),
+      saveVersion(docOf("cc", "v3"), 3000),
+    ]);
+    expect((await loadMap("cc"))?.title).toBe("Concurrent");
+    expect((await latestVersionDoc("cc"))?.title).toBe("v3"); // newest snapshot is intact
+  });
+
+  it("parallel saveMap calls for distinct ids all persist", async () => {
+    await Promise.all([
+      saveMap(docOf("p1", "P1")),
+      saveMap(docOf("p2", "P2")),
+      saveMap(docOf("p3", "P3")),
+    ]);
+    const ids = (await getAllMaps()).map((d) => d.id);
+    expect(ids).toEqual(expect.arrayContaining(["p1", "p2", "p3"]));
   });
 });

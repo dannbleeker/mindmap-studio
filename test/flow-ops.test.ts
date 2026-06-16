@@ -13,6 +13,7 @@ import {
   deleteSummary,
   findAnyNode,
   findNode,
+  groupBranch,
   groupSummary,
   indent,
   mergeStyle,
@@ -20,12 +21,17 @@ import {
   pasteBranch,
   removeAttachment,
   reparent,
+  replaceTopics,
   setAllExpanded,
   setBackdrop,
   setBackdropRings,
   setBackground,
+  setBackgroundImage,
   setDue,
   setFreeform,
+  setHyperlink,
+  setImage,
+  setLineJumps,
   setNodeLayout,
   setNodePos,
   setNote,
@@ -37,6 +43,7 @@ import {
   setSummaryLabel,
   setTags,
   setTopic,
+  setTopicRich,
   toggleCollapse,
   toggleIcon,
 } from "../src/mindmap/flow/ops";
@@ -474,5 +481,193 @@ describe("flow ops — roll-ups", () => {
     const { doc, count } = applyRollups(d, new Map());
     expect(count).toBe(0);
     expect(doc).toBe(d);
+  });
+});
+
+describe("flow ops — reparent edge cases", () => {
+  it("inserts at an explicit index among the destination's children", () => {
+    // Move b under a at index 1, between a1 and a2.
+    const { doc } = reparent(base(), "b", "a", 1);
+    expect(kids(doc, "a")).toEqual(["a1", "b", "a2"]);
+    expect(kids(doc, "r")).toEqual(["a"]);
+  });
+
+  it("appends to the end when no index is given", () => {
+    const { doc } = reparent(base(), "b", "a");
+    expect(kids(doc, "a")).toEqual(["a1", "a2", "b"]);
+  });
+
+  it("expands a collapsed destination so the moved node is visible", () => {
+    const start = base();
+    const a = findNode(start, "a");
+    if (a) (a as { collapsed?: boolean }).collapsed = true;
+    expect(findNode(reparent(start, "b", "a").doc, "a")?.collapsed).toBe(false);
+  });
+
+  it("is a no-op (same doc) when reparenting a node onto itself", () => {
+    const d = base();
+    expect(reparent(d, "a", "a").doc).toBe(d);
+  });
+
+  it("is a no-op for an unknown destination, or moving the root", () => {
+    const d = base();
+    expect(reparent(d, "a", "ghost").doc).toBe(d); // unknown new parent
+    expect(reparent(d, "r", "a").doc).toBe(d); // the root has no parent to detach from
+  });
+});
+
+describe("flow ops — deleteNode cascade", () => {
+  // A richer doc: links + boundaries + summaries that all reference the branch being deleted, so
+  // every prune path runs in one delete.
+  const withRelations = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "Root",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        {
+          id: "a",
+          topic: "A",
+          children: [{ id: "a1", topic: "A1", children: [] }],
+          callouts: [{ id: "co", text: "note", dx: 10, dy: 0 }],
+        },
+        { id: "b", topic: "B", children: [] },
+      ],
+    },
+    links: [
+      { id: "l1", from: "a", to: "b" }, // touches the deleted branch → pruned
+      { id: "l2", from: "a1", to: "b" }, // touches a descendant → pruned
+    ],
+    boundaries: [
+      { id: "bd1", nodeIds: ["a", "a1"], label: "all-doomed" }, // empties → dropped
+      { id: "bd2", nodeIds: ["a1", "b"], label: "partial" }, // keeps b
+    ],
+    summaries: [{ id: "su1", nodeIds: ["a", "b"], label: "s" }], // keeps b
+  });
+
+  it("prunes links touching the removed subtree (root or descendant endpoints)", () => {
+    const { doc } = deleteNode(withRelations(), "a");
+    // Both links referenced a or a1, so all are removed. (deleteNode filters links in place — it
+    // leaves an empty array rather than dropping the key, unlike boundaries/summaries below.)
+    expect(doc.links).toEqual([]);
+  });
+
+  it("trims boundary member ids and drops a boundary that empties", () => {
+    const { doc } = deleteNode(withRelations(), "a");
+    // bd1 (all members in the deleted branch) is gone; bd2 keeps only b.
+    expect(doc.boundaries).toHaveLength(1);
+    expect(doc.boundaries?.[0]).toMatchObject({ id: "bd2", nodeIds: ["b"] });
+  });
+
+  it("trims summary member ids the same way (keeps the surviving node)", () => {
+    const { doc } = deleteNode(withRelations(), "a");
+    expect(doc.summaries).toHaveLength(1);
+    expect(doc.summaries?.[0]).toMatchObject({ id: "su1", nodeIds: ["b"] });
+  });
+
+  it("removes the node's own callouts along with the node (they live on it)", () => {
+    const { doc } = deleteNode(withRelations(), "a");
+    expect(findNode(doc, "a")).toBeNull();
+  });
+
+  it("selects a sensible neighbour after delete (next sibling, else previous, else parent)", () => {
+    // delete a → next sibling b is selected
+    expect(deleteNode(withRelations(), "a").selectId).toBe("b");
+    // delete the last child → previous sibling is selected
+    expect(deleteNode(withRelations(), "b").selectId).toBe("a");
+    // delete an only-child → the parent is selected
+    expect(deleteNode(withRelations(), "a1").selectId).toBe("a");
+  });
+});
+
+describe("flow ops — content fill (hyperlink / image / rich text / meta toggles)", () => {
+  it("setHyperlink sets a URL and clears it on empty", () => {
+    const set = setHyperlink(base(), "a", "https://example.com").doc;
+    expect(findNode(set, "a")?.hyperlink).toBe("https://example.com");
+    expect(findNode(setHyperlink(set, "a", "").doc, "a")?.hyperlink).toBeUndefined();
+    const d = base();
+    expect(setHyperlink(d, "ghost", "x").doc).toBe(d); // unknown id → same doc, unchanged
+  });
+
+  it("setImage attaches an image to a node", () => {
+    const img = { url: "data:image/png;base64,AA==", width: 100, height: 80 };
+    expect(findNode(setImage(base(), "a", img).doc, "a")?.image).toEqual(img);
+  });
+
+  it("setTopicRich stores rich HTML + plain fallback, and clears rich when empty", () => {
+    const set = setTopicRich(base(), "a", "<b>A</b>", "A").doc;
+    expect(findNode(set, "a")?.topicRich).toBe("<b>A</b>");
+    expect(findNode(set, "a")?.topic).toBe("A"); // plain fallback kept in sync
+    // empty rich → topicRich dropped, plain still set
+    const plainOnly = setTopicRich(base(), "a", "", "Just text").doc;
+    expect(findNode(plainOnly, "a")?.topicRich).toBeUndefined();
+    expect(findNode(plainOnly, "a")?.topic).toBe("Just text");
+  });
+
+  it("setTopicRich on the root keeps the doc title in sync with the plain text", () => {
+    expect(setTopicRich(base(), "r", "<i>New</i>", "New").doc.title).toBe("New");
+  });
+
+  it("setLineJumps toggles the per-map flag (false clears it)", () => {
+    expect(setLineJumps(base(), true).doc.meta?.lineJumps).toBe(true);
+    expect(setLineJumps(setLineJumps(base(), true).doc, false).doc.meta?.lineJumps).toBeUndefined();
+  });
+
+  it("setBackgroundImage sets a data URL and clears it on empty", () => {
+    const url = "data:image/png;base64,BB==";
+    expect(setBackgroundImage(base(), url).doc.meta?.backgroundImage).toBe(url);
+    expect(
+      setBackgroundImage(setBackgroundImage(base(), url).doc, "").doc.meta?.backgroundImage,
+    ).toBeUndefined();
+  });
+});
+
+describe("flow ops — groupBranch + replaceTopics", () => {
+  it("groupBranch appends a filled boundary around a node and its whole subtree", () => {
+    const before = base().boundaries?.length ?? 0; // base() already carries one boundary
+    const { doc, selectId } = groupBranch(base(), "a"); // a has a1, a2
+    expect(doc.boundaries).toHaveLength(before + 1);
+    expect(doc.boundaries?.at(-1)?.nodeIds.sort()).toEqual(["a", "a1", "a2"]);
+    expect(selectId).toBe("a");
+  });
+
+  it("groupBranch is a no-op for an unknown id", () => {
+    const d = base();
+    expect(groupBranch(d, "ghost").doc).toBe(d);
+  });
+
+  it("replaceTopics replaces case-insensitively across the tree and counts changes", () => {
+    // base topics: Root, A, A1, A2, B — replace every 'a' (case-insensitive).
+    const { doc, count } = replaceTopics(base(), "a", "X");
+    // "A"→"X", "A1"→"X1", "A2"→"X2"; "Root" has no 'a'; "B" none → 3 changed
+    expect(count).toBe(3);
+    expect(findNode(doc, "a")?.topic).toBe("X");
+    expect(findNode(doc, "a1")?.topic).toBe("X1");
+  });
+
+  it("replaceTopics updates the doc title when the root topic changes", () => {
+    const { doc, count } = replaceTopics(base(), "Root", "Trunk");
+    expect(count).toBe(1);
+    expect(doc.title).toBe("Trunk");
+    expect(doc.root.topic).toBe("Trunk");
+  });
+
+  it("replaceTopics is a no-op (same doc, count 0) for an empty query or no match", () => {
+    const d = base();
+    expect(replaceTopics(d, "", "x")).toEqual({ doc: d, count: 0 });
+    const noMatch = replaceTopics(d, "zzzz", "x");
+    expect(noMatch.count).toBe(0);
+    expect(noMatch.doc).toBe(d);
+  });
+
+  it("replaceTopics treats the query literally (regex metacharacters are escaped)", () => {
+    const dotty = structuredClone(base());
+    const a = findNode(dotty, "a");
+    if (a) a.topic = "a.b";
+    const { doc, count } = replaceTopics(dotty, "a.b", "Z");
+    expect(count).toBe(1); // only the literal "a.b", not "a<any>b"
+    expect(findNode(doc, "a")?.topic).toBe("Z");
   });
 });

@@ -7,6 +7,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Editor chrome redesign (phase 1 of 2)** — the editor adopts the warm-cream + emerald visual
+  language already shipped on the Start screen. A new **56px icon rail** (brand → Start, find, insert
+  image, paste, about) sits beside a **two-row top bar**: row 1 is file/identity (Start, map switcher,
+  **+ New**, **All maps**, find/replace, **Export**, **More**), row 2 is view/edit/canvas grouped into
+  labelled dropdown menus (**Panels**, **Insert**, **Canvas**) plus the structure cluster, layout
+  picker, quick-add and the brainstorm timer. The chrome is **theme-reactive** — surfaces and ink
+  track the active canvas theme (Light / Dark / Ocean / Sunset) via `editorThemeVars()` → `--ed-*`
+  custom properties, mirroring the Start screen's `--st-*` system, with a fixed emerald accent. Every
+  control the previous toolbar had was **re-homed, not removed** (all 16 export formats, all 10
+  layouts, all 7 side panels, backdrops, roll-ups, group/summary/sticky-note, free layout, line-jumps,
+  numbering, focus, sheets, backup, copy-outline, import). The canvas renderer is unchanged (its
+  restyle is phase 2). No web fonts are loaded (offline-first); the mono stack prefers JetBrains Mono
+  if installed.
 - **Line-jumps on crossing connectors** — a per-map **⌒ Line jumps** toolbar toggle (off by default,
   stored as `meta.lineJumps`, lossless in `.json`). When on, wherever two **relationship** arrows
   cross, exactly **one** of them draws a small semicircular **hop** over the other — so a busy concept
@@ -517,6 +530,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Dashboard load + contract tests (internal).** `public/dashboard.html` (the live GitHub + CI-metrics
+  page built from `public/stats.json` / `public/stats-history.json`) had no automated coverage;
+  `test/dashboard.test.ts` now guards that it loads, in three passes: **structure** (every id the inline
+  script drives exists in the markup, Chart.js stays SRI-pinned, both data sources are wired to
+  `window` `load`), **contract** (the committed `stats.json` / `stats-history.json` carry every field the
+  dashboard reads — so a `build-stats.mjs` key rename fails CI instead of silently rendering "—"), and
+  **behaviour** (the real inline script runs in jsdom against the real DOM — filling the metrics from the
+  committed data, rendering the live repo pulse from stubbed GitHub responses, and degrading to the
+  pending banner + "live fetch unavailable" note when the network is down).
 - **Panel/filter state extracted into `usePanels()` + tech-debt sweep (internal).** The eight
   side-panel open/close toggles (outline / index / info / filter / styles / history / board /
   numbered) with their `mindmap-panels` persistence, the read-only Power Filter (text / markers /

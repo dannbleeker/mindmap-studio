@@ -8,6 +8,58 @@
 // Note on scope: the *canvas* (topic nodes, edges, theme cssVars) has its own theme system in
 // src/mindmap/theme.ts, and the start screen has src/components/start/tokens.ts. Those are
 // deliberately separate palettes — this file is only the surrounding chrome.
+//
+// ── Editor redesign (warm-cream + emerald, theme-reactive) ───────────────────
+// The static `colors` object below is the *legacy* chrome palette (cool lilac). The redesigned
+// editor chrome (icon rail, two-row top bar, inspector) instead consumes the `--ed-*` custom
+// properties emitted by `editorThemeVars()` — the exact same pattern the shipped start screen uses
+// (`startThemeVars` → `--st-*`), so Light / Dark / Ocean / Sunset all stay legible from one source.
+// The emerald brand accent is fixed across themes to match the start screen.
+
+import type { CSSProperties } from "react";
+import type { CanvasTheme } from "../mindmap/theme";
+
+/** Emerald brand accent — fixed across all canvas themes (matches the start screen). */
+export const EDITOR_ACCENT = "#1b8a5e";
+export const EDITOR_ACCENT_HOVER = "#15714d";
+
+/** UI font stacks — system sans (matches index.html) + a mono stack that prefers JetBrains Mono if
+ *  the user has it installed but never loads a web font (the product is offline-first). Mirrors the
+ *  start screen's stacks so the editor and start screen read as one product. */
+export const EDITOR_FONT_SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+export const EDITOR_FONT_MONO = '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+
+/** Build the `--ed-*` custom properties for the `.mm-editor` root from the active canvas theme.
+ *  Surfaces + ink track the theme's cssVars (so dark themes stay legible); chrome-only tokens branch
+ *  on the theme's light/dark type; the emerald accent is constant. Consumed by editor.css + the
+ *  redesigned chrome components. */
+export function editorThemeVars(theme: CanvasTheme): CSSProperties {
+  const v = theme.theme.cssVar;
+  const dark = theme.theme.type === "dark";
+  const page = v["--main-bgcolor"] ?? (dark ? "#1d1c22" : "#faf9f5");
+  const card = v["--bgcolor"] ?? (dark ? "#2a2930" : "#ffffff");
+  const ink = v["--main-color"] ?? (dark ? "#e8e6df" : "#23211c");
+  return {
+    "--ed-page": page,
+    "--ed-card": card,
+    "--ed-sidebar": dark ? "#16151d" : "#f4f2ec",
+    "--ed-border": dark ? "rgba(255,255,255,0.11)" : "#e7e4dc",
+    "--ed-divider": dark ? "rgba(255,255,255,0.06)" : "#efece4",
+    "--ed-ink": ink,
+    "--ed-ink2": dark ? "#bdb8ad" : "#5c574e",
+    "--ed-muted": dark ? "#8f8a80" : "#938d81",
+    "--ed-faint": dark ? "#6d695f" : "#b6b0a4",
+    "--ed-accent": EDITOR_ACCENT,
+    "--ed-accent-hover": EDITOR_ACCENT_HOVER,
+    "--ed-accent-tint": dark ? "rgba(27,138,94,0.18)" : "rgba(27,138,94,0.10)",
+    "--ed-accent-ring": "rgba(27,138,94,0.30)",
+    "--ed-danger": "#b23b3a",
+    "--ed-shadow": dark ? "0 6px 22px rgba(0,0,0,0.38)" : "0 6px 22px rgba(40,30,16,0.08)",
+    "--ed-shadow-pop": dark ? "0 12px 32px rgba(0,0,0,0.5)" : "0 12px 32px rgba(40,30,16,0.18)",
+    "--ed-font-sans": EDITOR_FONT_SANS,
+    "--ed-font-mono": EDITOR_FONT_MONO,
+  } as CSSProperties;
+}
 
 /** Semantic colours for the chrome. Grouped by role; the swatch arrays are the styling pickers. */
 export const colors = {

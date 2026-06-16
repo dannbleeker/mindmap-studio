@@ -1,7 +1,13 @@
-import type { ChangeEvent, FormEvent, RefObject } from "react";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+  type RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { BrainstormTimer } from "../BrainstormTimer";
-import { Button, Input, Select } from "../design/primitives";
-import { colors } from "../design/tokens";
 import { buildExample, examples } from "../examples";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import { canvasThemes } from "../mindmap/theme";
@@ -9,18 +15,17 @@ import type { CanvasTheme } from "../mindmap/theme";
 import type { BackdropKind, MindMapDoc } from "../model/types";
 import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, templates } from "../templates";
-import { controlStyle } from "../ui";
+import { EditorIcon, type EditorIconName } from "./EditorIcons";
 
-// The editor toolbar — the `<header>` extracted from App.tsx, unchanged in behaviour. Every control
-// is driven by props grouped into logical buckets (nav / panels / map / canvas / find / io) plus the
-// canvas handle ref (the stable seam the controls call through). This is a pure prop-driven view:
-// it owns no state of its own (BrainstormTimer is self-contained), so the upcoming UX redesign can
-// restructure it in one file without touching the App's orchestration. The inline `controlStyle` /
-// `inputStyle` buttons were swapped for the Button / Select / Input primitives where the swap is
-// pixel-identical; the few bespoke controls (canvas-colour cluster, backdrop ring stepper, find form,
-// sheet-style buttons) keep their inline styles.
+// The redesigned editor top bar — a two-row chrome in the warm-cream + emerald language (see
+// design/editor.css, .mm-topbar*). Row 1 is file/identity (Start, map switcher, New, Find, Export,
+// More); row 2 is view/edit/canvas, grouped into labelled dropdown menus so every existing control
+// keeps a home without a wall of buttons. The component is still a pure prop-driven view: it owns no
+// model state (the menus' open/close + BrainstormTimer are local UI only), and the ToolbarProps
+// contract is unchanged from the previous toolbar, so App's wiring is untouched. Nothing the old
+// toolbar could do was dropped — controls were re-homed, not removed.
 
-/** Show/hide flags + setters for the left-rail panels and the canvas-numbering toggle. */
+/** Show/hide flags + setters for the side panels and the canvas-numbering toggle. */
 export interface ToolbarPanels {
   outlineOpen: boolean;
   setOutlineOpen: (fn: (v: boolean) => boolean) => void;
@@ -66,7 +71,7 @@ export interface ToolbarCanvas {
   setFocus: (focus: { id: string; topic: string }) => void;
   /** Per-node image picker (the "Image" label control). */
   handleImage: (event: ChangeEvent<HTMLInputElement>) => void;
-  /** Per-map canvas background image picker (the "🖼" control in the Canvas cluster). */
+  /** Per-map canvas background image picker. */
   handleBackgroundImage: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -105,11 +110,10 @@ export interface ToolbarIo {
 }
 
 export interface ToolbarProps {
-  /** Phone-width: a single horizontally-scrollable strip instead of the wrapping desktop rows. */
+  /** Phone-width: rows scroll horizontally instead of wrapping. */
   isMobile: boolean;
   /** The canvas handle — most canvas controls are thin `mapRef.current?.X()` calls. */
   mapRef: RefObject<MindMapHandle | null>;
-  /** Top-level navigation / dialogs. */
   nav: {
     goHome: () => void;
     openAbout: () => void;
@@ -121,8 +125,135 @@ export interface ToolbarProps {
   canvas: ToolbarCanvas;
   find: ToolbarFind;
   io: ToolbarIo;
-  /** Transient hint toast (used by the group/summary/note/roll-up/sticker actions). */
+  /** Transient hint toast (used by the group/summary/note/roll-up actions). */
   showHint: (message: string) => void;
+}
+
+// ── primitives ───────────────────────────────────────────────────────────────
+function TBtn({
+  icon,
+  label,
+  text,
+  active,
+  danger,
+  ghost,
+  primary,
+  disabled,
+  onClick,
+}: {
+  icon?: EditorIconName;
+  label: string;
+  text?: string;
+  active?: boolean;
+  danger?: boolean;
+  ghost?: boolean;
+  primary?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+}) {
+  const cls = [
+    "mm-tbtn",
+    icon && !text ? "mm-tbtn-icon" : "",
+    danger ? "mm-tbtn-danger" : "",
+    ghost ? "mm-tbtn-ghost" : "",
+    primary ? "mm-tbtn-primary" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return (
+    <button
+      type="button"
+      className={cls}
+      title={label}
+      aria-label={text ? undefined : label}
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {icon && <EditorIcon name={icon} size={17} />}
+      {text}
+    </button>
+  );
+}
+
+/** A dropdown menu anchored to a trigger button; closes on outside-click or Escape. */
+function Menu({
+  icon,
+  label,
+  align = "left",
+  children,
+}: {
+  icon?: EditorIconName;
+  label: string;
+  align?: "left" | "right";
+  children: (close: () => void) => ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("keydown", onKey, true);
+    };
+  }, [open]);
+  return (
+    <div className="mm-menu-wrap" ref={ref}>
+      <button
+        type="button"
+        className="mm-tbtn mm-tbtn-ghost"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title={label}
+        onClick={() => setOpen((o) => !o)}
+      >
+        {icon && <EditorIcon name={icon} size={16} />}
+        {label}
+        <EditorIcon name="chevron" size={13} />
+      </button>
+      {open && (
+        <div
+          className="mm-menu"
+          role="menu"
+          style={align === "left" ? { left: 0, right: "auto" } : undefined}
+        >
+          {children(() => setOpen(false))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MenuItem({
+  icon,
+  label,
+  danger,
+  onClick,
+}: {
+  icon?: EditorIconName;
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      className={danger ? "mm-menu-item mm-menu-item-danger" : "mm-menu-item"}
+      onClick={onClick}
+    >
+      {icon && <EditorIcon name={icon} size={15} />}
+      {label}
+    </button>
+  );
 }
 
 export function Toolbar({
@@ -137,520 +268,635 @@ export function Toolbar({
   showHint,
 }: ToolbarProps) {
   const { liveDoc, doc } = map;
+  const m = () => mapRef.current;
+
+  const EXPORTS: { group: string; items: [string, () => void][] }[] = [
+    {
+      group: "Data & outline",
+      items: [
+        [".json (lossless)", io.exportJson],
+        [".md (Markdown)", io.exportMarkdown],
+        [".opml (outline)", io.exportOpml],
+        [".mm (FreeMind/Freeplane)", io.exportFreemind],
+        [".mmd (Mermaid)", io.exportMermaid],
+        [".xmind (XMind)", io.exportXmind],
+        [".smmx (SimpleMind)", io.exportSmmx],
+      ],
+    },
+    {
+      group: "Image",
+      items: [
+        [".png (image)", io.exportPng],
+        [".svg (vector)", io.exportSvg],
+      ],
+    },
+    {
+      group: "Document",
+      items: [
+        [".html (standalone)", io.exportHtml],
+        [".html (interactive)", io.exportInteractiveHtml],
+        [".pdf (print)", io.exportPdf],
+        [".docx (Word)", io.exportDocx],
+        [".xlsx (Excel)", io.exportXlsx],
+      ],
+    },
+    {
+      group: "Presentation",
+      items: [
+        [".html (slide deck)", io.exportDeck],
+        [".pptx (PowerPoint)", io.exportPptx],
+      ],
+    },
+  ];
+
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        flexWrap: isMobile ? "nowrap" : "wrap",
-        gap: 6,
-        rowGap: 6,
-        padding: isMobile ? "6px 10px" : "8px 16px",
-        borderBottom: `1px solid ${colors.border}`,
-        ...(isMobile ? { overflowX: "auto" as const } : {}),
-      }}
-    >
-      <strong style={{ fontSize: 15, marginRight: 4 }}>MindMap Studio</strong>
-      <Button onClick={nav.goHome} title="Start screen — new maps, templates, library">
-        ⌂ Start
-      </Button>
-      <Button onClick={nav.openAbout} title="About MindMap Studio — version, license, credits">
-        About
-      </Button>
-      <Button onClick={nav.openSearchAll} title="Search across every map in your library">
-        🔎 All maps
-      </Button>
-      <Button
-        onClick={() => panels.setOutlineOpen((v) => !v)}
-        aria-pressed={panels.outlineOpen}
-        title="Toggle the outline panel"
-      >
-        ☰ Outline
-      </Button>
-      <Button
-        onClick={() => panels.setIndexOpen((v) => !v)}
-        aria-pressed={panels.indexOpen}
-        title="Toggle the markers & tags index"
-      >
-        📑 Index
-      </Button>
-      <Button
-        onClick={panels.toggleFilter}
-        aria-pressed={panels.filterOpen}
-        title="Power Filter: dim topics that don't match a marker / tag / text (read-only)"
-      >
-        🎚 Filter
-      </Button>
-      <Button
-        onClick={() => panels.setStylesOpen((v) => !v)}
-        aria-pressed={panels.stylesOpen}
-        title="Conditional formatting — auto-style topics by tag / marker / completion"
-      >
-        🎨 Styles
-      </Button>
-      <Button
-        onClick={() => panels.setHistoryOpen((v) => !v)}
-        aria-pressed={panels.historyOpen}
-        title="Version history — restore an earlier snapshot of this map"
-      >
-        🕔 History
-      </Button>
-      <Button
-        onClick={() => panels.setBoardOpen((v) => !v)}
-        aria-pressed={panels.boardOpen}
-        title="Board view — topics grouped into columns by tag (read-only)"
-      >
-        ▦ Board
-      </Button>
-      <Select
-        value={doc.id}
-        onChange={(e) => map.switchMap(e.target.value)}
-        style={controlStyle}
-        aria-label="Open map"
-      >
-        {map.mapOptions.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.title}
-          </option>
-        ))}
-      </Select>
-      <Button
-        onClick={map.addSheet}
-        title="Add a sheet to this file (maps in a workbook share a sheet tab strip + export together)"
-      >
-        ▦ + Sheet
-      </Button>
-      <Select
-        value=""
-        onChange={(e) => {
-          const v = e.target.value;
-          if (v) map.load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
-        }}
-        style={controlStyle}
-        aria-label="New map from a template or example"
-        title="New map (pick a blank template or a worked example)"
-      >
-        <option value="">+ New…</option>
-        <optgroup label="Templates">
-          {templates.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
+    <header className="mm-topbar">
+      {/* ── Row 1 — file / identity ── */}
+      <div className="mm-topbar-row mm-topbar-row1">
+        <TBtn
+          icon="home"
+          label="Start screen — new maps, templates, library"
+          onClick={nav.goHome}
+        />
+        <span className="mm-crumb">Maps /</span>
+        <select
+          className="mm-select"
+          value={doc.id}
+          onChange={(e) => map.switchMap(e.target.value)}
+          aria-label="Open map"
+          title="Switch map"
+          style={{ fontWeight: 700, maxWidth: 220 }}
+        >
+          {map.mapOptions.map((mm) => (
+            <option key={mm.id} value={mm.id}>
+              {mm.title || "(untitled)"}
             </option>
           ))}
-        </optgroup>
-        <optgroup label="Examples">
-          {examples.map((e) => (
-            <option key={e.id} value={`ex:${e.id}`}>
-              {e.name}
-            </option>
-          ))}
-        </optgroup>
-      </Select>
-      <Button onClick={map.duplicateMap} title="Duplicate the current map">
-        Duplicate
-      </Button>
-      <Button onClick={map.deleteCurrent}>Delete</Button>
-      <Button onClick={map.present}>▶ Present</Button>
-      <Button onClick={() => mapRef.current?.fit()}>Fit</Button>
-      <Button
-        onClick={() => mapRef.current?.setAllExpanded(false)}
-        aria-label="Collapse all branches"
-        title="Collapse all branches"
-      >
-        ⊟
-      </Button>
-      <Button
-        onClick={() => mapRef.current?.setAllExpanded(true)}
-        aria-label="Expand all branches"
-        title="Expand all branches"
-      >
-        ⊞
-      </Button>
-      <Button
-        onClick={() => panels.setNumbered((v) => !v)}
-        aria-pressed={panels.numbered}
-        title="Toggle outline numbering (1, 1.2, 1.2.3 …) on topics"
-      >
-        1. Numbering
-      </Button>
-      <Button
-        onClick={() => mapRef.current?.setLineJumps(!liveDoc.meta?.lineJumps)}
-        aria-pressed={!!liveDoc.meta?.lineJumps}
-        title="Toggle line-jumps — draw a hop where two relationship arrows cross, so they read as passing over (not joining)"
-      >
-        ⌒ Line jumps
-      </Button>
-      <Button
-        onClick={() =>
-          canvas.selected &&
-          canvas.setFocus({ id: canvas.selected.id, topic: canvas.selected.topic })
-        }
-        disabled={!canvas.selected}
-        title="Focus the selected branch — dim everything off it (Esc to exit)"
-      >
-        ◎ Focus
-      </Button>
-      <label style={controlStyle}>
-        Image
-        <input
-          type="file"
-          accept="image/*"
-          onChange={canvas.handleImage}
-          style={{ display: "none" }}
-        />
-      </label>
-      <Select
-        value={canvas.theme.id}
-        onChange={(e) => canvas.setThemeId(e.target.value)}
-        style={controlStyle}
-        aria-label="Canvas theme"
-        title="Canvas style / theme"
-      >
-        {canvasThemes.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.name}
-          </option>
-        ))}
-      </Select>
-      <span
-        style={{ ...controlStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
-        title="Canvas background colour for this map (overrides the theme)"
-      >
-        Canvas
-        <input
-          type="color"
-          aria-label="Canvas background colour"
-          value={liveDoc.meta?.background || "#ffffff"}
-          onChange={(e) => mapRef.current?.setBackground(e.target.value)}
-          style={{
-            width: 22,
-            height: 18,
-            border: "none",
-            background: "none",
-            padding: 0,
-            cursor: "pointer",
+        </select>
+        <select
+          className="mm-select"
+          value=""
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v) map.load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
           }}
+          aria-label="New map from a template or example"
+          title="New map (blank template or worked example)"
+        >
+          <option value="">+ New…</option>
+          <optgroup label="Templates">
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Examples">
+            {examples.map((e) => (
+              <option key={e.id} value={`ex:${e.id}`}>
+                {e.name}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+        <TBtn
+          icon="search"
+          label="Search across every map"
+          text="All maps"
+          ghost
+          onClick={nav.openSearchAll}
         />
-        <button
-          type="button"
-          onClick={() => mapRef.current?.setBackground("")}
-          title="Reset background to the theme default"
-          style={{
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            color: colors.muted,
-            fontSize: 12,
-            padding: 0,
-          }}
-        >
-          ✕
-        </button>
-        <label
-          title="Set a background image for this map (covers the canvas, behind the topics)"
-          style={{ cursor: "pointer", fontSize: 13, lineHeight: 1 }}
-        >
-          🖼
-          <input
-            type="file"
-            accept="image/*"
-            aria-label="Canvas background image"
-            onChange={canvas.handleBackgroundImage}
-            style={{ display: "none" }}
-          />
-        </label>
-        {liveDoc.meta?.backgroundImage ? (
-          <button
-            type="button"
-            onClick={() => mapRef.current?.setBackgroundImage("")}
-            title="Remove the background image"
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: colors.muted,
-              fontSize: 12,
-              padding: 0,
-            }}
-          >
-            ✕
-          </button>
-        ) : null}
-      </span>
-      <Select
-        value={canvas.layout}
-        onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
-        style={controlStyle}
-        aria-label="Layout"
-        title={liveDoc.meta?.freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
-        disabled={!!liveDoc.meta?.freeform}
-      >
-        <optgroup label="Radial">
-          <option value="side">Both sides</option>
-          <option value="right">Right</option>
-          <option value="left">Left</option>
-          <option value="radial">Radial / hub</option>
-        </optgroup>
-        <optgroup label="Tree">
-          <option value="org-down">Org chart ↓</option>
-          <option value="org-up">Org chart ↑</option>
-        </optgroup>
-        <optgroup label="Diagram">
-          <option value="timeline">Timeline</option>
-          <option value="fishbone">Fishbone</option>
-          <option value="grid">Grid / matrix</option>
-          <option value="brace">Brace map</option>
-        </optgroup>
-      </Select>
-      <Button
-        onClick={() => mapRef.current?.setFreeform(!liveDoc.meta?.freeform)}
-        aria-pressed={!!liveDoc.meta?.freeform}
-        title="Free layout (whiteboard): drag topics anywhere; the auto-layout pauses"
-      >
-        🧲 Free layout
-      </Button>
-      <Select
-        value=""
-        onChange={(e) => {
-          if (e.target.value) mapRef.current?.setBackdrop(e.target.value as BackdropKind);
-        }}
-        style={controlStyle}
-        aria-label="Add a diagram backdrop"
-        title="Add a diagram backdrop (drop topics into its regions)"
-      >
-        <option value="">◎ Diagram…</option>
-        <option value="onion">Onion (rings)</option>
-        <option value="funnel">Funnel (stages)</option>
-        <option value="venn2">Venn (2 circles)</option>
-        <option value="venn3">Venn (3 circles)</option>
-      </Select>
-      {liveDoc.backdrop ? (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
-          {liveDoc.backdrop.kind === "onion" || liveDoc.backdrop.kind === "funnel" ? (
-            <>
-              <Button
-                onClick={() => mapRef.current?.setBackdropRings(-1)}
-                title="Fewer rings / stages"
-              >
-                −
-              </Button>
-              <Button
-                onClick={() => mapRef.current?.setBackdropRings(1)}
-                title="More rings / stages"
-              >
-                +
-              </Button>
-            </>
-          ) : null}
-          <Button
-            onClick={() => mapRef.current?.clearBackdrop()}
-            title="Remove the diagram backdrop"
-          >
-            ✕ Backdrop
-          </Button>
+        <span className="mm-saved">
+          <span className="mm-saved-dot" /> Saved locally
         </span>
-      ) : null}
-      <Button
-        onClick={() => panels.setInfoOpen((v) => !v)}
-        aria-pressed={panels.infoOpen}
-        title="Topic info: note, markers, tags, style, and links for the selected node"
-      >
-        ℹ Info
-      </Button>
-      <Button
-        onClick={() => {
-          const id = canvas.selected?.id;
-          const ok = id ? mapRef.current?.groupBranch(id) : false;
-          showHint(
-            ok
-              ? "Branch grouped — double-click the boundary's label chip to rename it."
-              : "Select a node first, then group its branch.",
-          );
-        }}
-        title="Draw a boundary around the selected branch (a visual group)"
-      >
-        ⬚ Group
-      </Button>
-      <Button
-        onClick={() => {
-          const id = canvas.selected?.id;
-          const ok = id ? mapRef.current?.groupSummary(id) : false;
-          showHint(
-            ok
-              ? "Summary added — double-click its label to rename (or empty it to remove)."
-              : "Select a node first, then summarise its branch.",
-          );
-        }}
-        title="Add a labelled summary bracket beside the selected branch"
-      >
-        ⊐ Summary
-      </Button>
-      <Button
-        onClick={() => {
-          mapRef.current?.addStickyNote();
-          showHint("Sticky note added — a free-floating topic you can drag anywhere.");
-        }}
-        title="Add a sticky note (a free-floating amber note topic)"
-      >
-        🗒 Note
-      </Button>
-      <Select
-        value=""
-        onChange={(e) => {
-          const v = e.target.value;
-          if (!v) return;
-          const ok = canvas.selected?.id
-            ? mapRef.current?.setSelectedRollup(v === "none" ? "" : v)
-            : false;
-          if (!ok) {
-            showHint("Select a node first, then bind it to a roll-up source.");
-            return;
-          }
-          showHint(
-            v === "none" ? "Roll-up unbound." : "Bound — click 🔄 Roll-ups to pull the latest.",
-          );
-        }}
-        style={controlStyle}
-        title="Mirror another map's branches under the selected node (a roll-up source)"
-      >
-        <option value="">⤵ Roll-up…</option>
-        {map.maps
-          .filter((m) => m.id !== liveDoc.id)
-          .map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.title || "(untitled)"}
-            </option>
-          ))}
-        <option value="none">— Unbind</option>
-      </Select>
-      <Button
-        onClick={map.refreshRollupsNow}
-        title="Refresh all roll-ups — pull the latest branches from their source maps"
-      >
-        🔄 Roll-ups
-      </Button>
-      <form onSubmit={find.runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <Input
-          value={find.query}
-          onChange={(e) => find.setQuery(e.target.value)}
-          placeholder="Find…"
-          aria-label="Find node"
-          style={{ width: 100 }}
-        />
-        <Input
-          value={find.replaceWith}
-          onChange={(e) => find.setReplaceWith(e.target.value)}
-          placeholder="Replace…"
-          aria-label="Replace with"
-          style={{ width: 100 }}
-        />
-        <Button
-          onClick={find.runReplace}
-          style={{ padding: "6px 8px" }}
-          title="Replace the find text in every matching topic"
-        >
-          Replace all
-        </Button>
-        {find.matchInfo && (
-          <span style={{ fontSize: 11, color: colors.muted }}>{find.matchInfo}</span>
-        )}
-      </form>
-      <span style={{ width: 1, height: 22, background: colors.border, margin: "0 2px" }} />
-      <Select
-        value=""
-        onChange={(e) => {
-          const fn = {
-            json: io.exportJson,
-            md: io.exportMarkdown,
-            opml: io.exportOpml,
-            png: io.exportPng,
-            svg: io.exportSvg,
-            mermaid: io.exportMermaid,
-            mm: io.exportFreemind,
-            xmind: io.exportXmind,
-            smmx: io.exportSmmx,
-            html: io.exportHtml,
-            ihtml: io.exportInteractiveHtml,
-            deck: io.exportDeck,
-            pdf: io.exportPdf,
-            docx: io.exportDocx,
-            pptx: io.exportPptx,
-            xlsx: io.exportXlsx,
-          }[e.target.value];
-          fn?.();
-        }}
-        style={controlStyle}
-        aria-label="Export the map"
-        title="Export the map"
-      >
-        <option value="">⬆ Export…</option>
-        <optgroup label="Data &amp; outline">
-          <option value="json">.json (lossless)</option>
-          <option value="md">.md (Markdown)</option>
-          <option value="opml">.opml (outline)</option>
-          <option value="mm">.mm (FreeMind/Freeplane)</option>
-          <option value="mermaid">.mmd (Mermaid)</option>
-          <option value="xmind">.xmind (XMind)</option>
-          <option value="smmx">.smmx (SimpleMind)</option>
-        </optgroup>
-        <optgroup label="Image">
-          <option value="png">.png (image)</option>
-          <option value="svg">.svg (vector)</option>
-        </optgroup>
-        <optgroup label="Document">
-          <option value="html">.html (standalone)</option>
-          <option value="ihtml">.html (interactive)</option>
-          <option value="pdf">.pdf (print)</option>
-          <option value="docx">.docx (Word)</option>
-          <option value="xlsx">.xlsx (Excel)</option>
-        </optgroup>
-        <optgroup label="Presentation">
-          <option value="deck">.html (slide deck)</option>
-          <option value="pptx">.pptx (PowerPoint)</option>
-        </optgroup>
-      </Select>
-      <Button
-        onClick={io.exportLibrary}
-        title="Back up every map to one .json file (restore by opening it)"
-      >
-        ⬇ Backup
-      </Button>
-      <Button onClick={io.copyOutline} title="Copy the map as a Markdown outline to the clipboard">
-        ⧉ Copy outline
-      </Button>
-      <label style={controlStyle}>
-        Open files
-        <input
-          id="mmap-input"
-          type="file"
-          accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
-          multiple
-          onChange={io.handleFile}
-          style={{ display: "none" }}
-        />
-      </label>
-      <Button
-        onClick={nav.openPaste}
-        title="Paste an outline, bullet list, or Markdown and turn it into topics"
-      >
-        📋 Paste text
-      </Button>
-      <Input
-        placeholder="Quick add… ⏎"
-        aria-label="Quick add topic"
-        title="Type a topic and press Enter to add it under the selected node (or the central topic). Keeps focus for rapid capture."
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            const v = e.currentTarget.value.trim();
-            if (v) {
-              mapRef.current?.quickAdd(v);
-              e.currentTarget.value = "";
+        <span className="mm-grow" />
+        <form onSubmit={find.runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <input
+            className="mm-input"
+            value={find.query}
+            onChange={(e) => find.setQuery(e.target.value)}
+            placeholder="Find…"
+            aria-label="Find node"
+            style={{ width: 96 }}
+          />
+          <input
+            className="mm-input"
+            value={find.replaceWith}
+            onChange={(e) => find.setReplaceWith(e.target.value)}
+            placeholder="Replace…"
+            aria-label="Replace with"
+            style={{ width: 96 }}
+          />
+          <TBtn
+            label="Replace the find text in every matching topic"
+            text="Replace all"
+            ghost
+            onClick={find.runReplace}
+          />
+          {find.matchInfo && (
+            <span style={{ fontSize: 11, color: "var(--ed-muted)" }}>{find.matchInfo}</span>
+          )}
+        </form>
+        <Menu icon="export" label="Export" align="right">
+          {(close) => (
+            <>
+              {EXPORTS.map((g) => (
+                <div key={g.group}>
+                  <div className="mm-menu-label">{g.group}</div>
+                  {g.items.map(([lbl, fn]) => (
+                    <MenuItem
+                      key={lbl}
+                      label={lbl}
+                      onClick={() => {
+                        fn();
+                        close();
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </>
+          )}
+        </Menu>
+        <Menu icon="dots" label="More" align="right">
+          {(close) => (
+            <>
+              <div className="mm-menu-label">Map</div>
+              <MenuItem
+                icon="present"
+                label="Present"
+                onClick={() => {
+                  map.present();
+                  close();
+                }}
+              />
+              <MenuItem
+                icon="copy"
+                label="Duplicate map"
+                onClick={() => {
+                  map.duplicateMap();
+                  close();
+                }}
+              />
+              <MenuItem
+                icon="grid"
+                label="Add sheet to workbook"
+                onClick={() => {
+                  map.addSheet();
+                  close();
+                }}
+              />
+              <MenuItem
+                icon="trash"
+                label="Delete map"
+                danger
+                onClick={() => {
+                  map.deleteCurrent();
+                  close();
+                }}
+              />
+              <div className="mm-menu-sep" />
+              <div className="mm-menu-label">Import / backup</div>
+              <label className="mm-menu-item">
+                <EditorIcon name="import" size={15} /> Open files…
+                <input
+                  id="mmap-input"
+                  type="file"
+                  accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
+                  multiple
+                  onChange={(e) => {
+                    io.handleFile(e);
+                    close();
+                  }}
+                  style={{ display: "none" }}
+                />
+              </label>
+              <MenuItem
+                icon="paste"
+                label="Paste text → topics"
+                onClick={() => {
+                  nav.openPaste();
+                  close();
+                }}
+              />
+              <MenuItem
+                icon="copy"
+                label="Copy outline to clipboard"
+                onClick={() => {
+                  io.copyOutline();
+                  close();
+                }}
+              />
+              <MenuItem
+                icon="export"
+                label="Back up whole library"
+                onClick={() => {
+                  io.exportLibrary();
+                  close();
+                }}
+              />
+              <div className="mm-menu-sep" />
+              <MenuItem
+                icon="help"
+                label="About MindMap Studio"
+                onClick={() => {
+                  nav.openAbout();
+                  close();
+                }}
+              />
+            </>
+          )}
+        </Menu>
+      </div>
+
+      {/* ── Row 2 — view / edit / canvas ── */}
+      <div className={`mm-topbar-row mm-topbar-row2${isMobile ? "" : " mm-wrap"}`}>
+        <Menu icon="layers" label="Panels">
+          {() => (
+            <>
+              <div className="mm-menu-label">Side panels</div>
+              <PanelToggle
+                label="Outline"
+                icon="layers"
+                on={panels.outlineOpen}
+                onClick={() => panels.setOutlineOpen((v) => !v)}
+              />
+              <PanelToggle
+                label="Markers & tags index"
+                icon="grid"
+                on={panels.indexOpen}
+                onClick={() => panels.setIndexOpen((v) => !v)}
+              />
+              <PanelToggle
+                label="Power Filter"
+                icon="filter"
+                on={panels.filterOpen}
+                onClick={panels.toggleFilter}
+              />
+              <PanelToggle
+                label="Conditional styles"
+                icon="palette"
+                on={panels.stylesOpen}
+                onClick={() => panels.setStylesOpen((v) => !v)}
+              />
+              <PanelToggle
+                label="Version history"
+                icon="history"
+                on={panels.historyOpen}
+                onClick={() => panels.setHistoryOpen((v) => !v)}
+              />
+              <PanelToggle
+                label="Board (Kanban)"
+                icon="board"
+                on={panels.boardOpen}
+                onClick={() => panels.setBoardOpen((v) => !v)}
+              />
+              <PanelToggle
+                label="Topic info / inspector"
+                icon="note"
+                on={panels.infoOpen}
+                onClick={() => panels.setInfoOpen((v) => !v)}
+              />
+            </>
+          )}
+        </Menu>
+        <span className="mm-vdiv" />
+        <div className="mm-cluster">
+          <TBtn icon="fit" label="Fit map to screen" onClick={() => m()?.fit()} />
+          <TBtn
+            icon="minus"
+            label="Collapse all branches"
+            onClick={() => m()?.setAllExpanded(false)}
+          />
+          <TBtn icon="plus" label="Expand all branches" onClick={() => m()?.setAllExpanded(true)} />
+          <TBtn
+            icon="balance"
+            label="Focus the selected branch (dim the rest)"
+            disabled={!canvas.selected}
+            onClick={() =>
+              canvas.selected &&
+              canvas.setFocus({ id: canvas.selected.id, topic: canvas.selected.topic })
             }
-          }
-        }}
-        style={{ width: 130 }}
-      />
-      <BrainstormTimer />
+          />
+          <TBtn
+            icon="check"
+            label="Outline numbering (1, 1.2, 1.2.3…)"
+            active={panels.numbered}
+            onClick={() => panels.setNumbered((v) => !v)}
+          />
+          <TBtn
+            icon="link"
+            label="Line jumps where relationships cross"
+            active={!!liveDoc.meta?.lineJumps}
+            onClick={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
+          />
+        </div>
+        <span className="mm-vdiv" />
+        <Menu icon="plus" label="Insert">
+          {(close) => (
+            <>
+              <MenuItem
+                icon="note"
+                label="Sticky note"
+                onClick={() => {
+                  m()?.addStickyNote();
+                  showHint("Sticky note added — drag it anywhere.");
+                  close();
+                }}
+              />
+              <MenuItem
+                icon="layers"
+                label="Group branch (boundary)"
+                onClick={() => {
+                  const id = canvas.selected?.id;
+                  const ok = id ? m()?.groupBranch(id) : false;
+                  showHint(
+                    ok
+                      ? "Branch grouped — double-click the label to rename."
+                      : "Select a node first, then group its branch.",
+                  );
+                  close();
+                }}
+              />
+              <MenuItem
+                icon="balance"
+                label="Summary bracket"
+                onClick={() => {
+                  const id = canvas.selected?.id;
+                  const ok = id ? m()?.groupSummary(id) : false;
+                  showHint(
+                    ok
+                      ? "Summary added — double-click its label to rename."
+                      : "Select a node first, then summarise its branch.",
+                  );
+                  close();
+                }}
+              />
+              <label className="mm-menu-item">
+                <EditorIcon name="image" size={15} /> Image on selected node…
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    canvas.handleImage(e);
+                    close();
+                  }}
+                  style={{ display: "none" }}
+                />
+              </label>
+              <div className="mm-menu-sep" />
+              <div className="mm-menu-label">Roll-up (mirror another map)</div>
+              <div style={{ padding: "2px 6px" }}>
+                <select
+                  className="mm-select"
+                  style={{ width: "100%" }}
+                  value=""
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (!v) return;
+                    const ok = canvas.selected?.id
+                      ? m()?.setSelectedRollup(v === "none" ? "" : v)
+                      : false;
+                    showHint(
+                      !ok
+                        ? "Select a node first, then bind a roll-up source."
+                        : v === "none"
+                          ? "Roll-up unbound."
+                          : "Bound — refresh to pull the latest.",
+                    );
+                    close();
+                  }}
+                  aria-label="Bind roll-up source"
+                >
+                  <option value="">Bind source map…</option>
+                  {map.maps
+                    .filter((mm) => mm.id !== liveDoc.id)
+                    .map((mm) => (
+                      <option key={mm.id} value={mm.id}>
+                        {mm.title || "(untitled)"}
+                      </option>
+                    ))}
+                  <option value="none">— Unbind</option>
+                </select>
+              </div>
+              <MenuItem
+                icon="history"
+                label="Refresh all roll-ups"
+                onClick={() => {
+                  map.refreshRollupsNow();
+                  close();
+                }}
+              />
+            </>
+          )}
+        </Menu>
+        <Menu icon="palette" label="Canvas">
+          {(close) => (
+            <>
+              <div className="mm-menu-label">Theme</div>
+              <div style={{ padding: "2px 6px" }}>
+                <select
+                  className="mm-select"
+                  style={{ width: "100%" }}
+                  value={canvas.theme.id}
+                  onChange={(e) => canvas.setThemeId(e.target.value)}
+                  aria-label="Canvas theme"
+                >
+                  {canvasThemes.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mm-menu-label">Background</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 10px" }}>
+                <input
+                  type="color"
+                  aria-label="Canvas background colour"
+                  value={liveDoc.meta?.background || "#ffffff"}
+                  onChange={(e) => m()?.setBackground(e.target.value)}
+                  style={{
+                    width: 28,
+                    height: 22,
+                    border: "none",
+                    background: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
+                />
+                <button
+                  type="button"
+                  className="mm-tbtn"
+                  style={{ height: 26 }}
+                  onClick={() => m()?.setBackground("")}
+                >
+                  Reset
+                </button>
+                <label
+                  className="mm-tbtn"
+                  style={{ height: 26, cursor: "pointer" }}
+                  title="Background image"
+                >
+                  <EditorIcon name="image" size={15} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    aria-label="Canvas background image"
+                    onChange={(e) => {
+                      canvas.handleBackgroundImage(e);
+                      close();
+                    }}
+                    style={{ display: "none" }}
+                  />
+                </label>
+                {liveDoc.meta?.backgroundImage ? (
+                  <button
+                    type="button"
+                    className="mm-tbtn"
+                    style={{ height: 26 }}
+                    onClick={() => m()?.setBackgroundImage("")}
+                  >
+                    Clear img
+                  </button>
+                ) : null}
+              </div>
+              <div className="mm-menu-sep" />
+              <PanelToggle
+                label="Free layout (whiteboard)"
+                icon="hand"
+                on={!!liveDoc.meta?.freeform}
+                onClick={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
+              />
+              <div className="mm-menu-label">Diagram backdrop</div>
+              <div style={{ padding: "2px 6px" }}>
+                <select
+                  className="mm-select"
+                  style={{ width: "100%" }}
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) m()?.setBackdrop(e.target.value as BackdropKind);
+                  }}
+                  aria-label="Add a diagram backdrop"
+                >
+                  <option value="">Add backdrop…</option>
+                  <option value="onion">Onion (rings)</option>
+                  <option value="funnel">Funnel (stages)</option>
+                  <option value="venn2">Venn (2 circles)</option>
+                  <option value="venn3">Venn (3 circles)</option>
+                </select>
+              </div>
+              {liveDoc.backdrop ? (
+                <div style={{ display: "flex", gap: 6, padding: "4px 10px" }}>
+                  {liveDoc.backdrop.kind === "onion" || liveDoc.backdrop.kind === "funnel" ? (
+                    <>
+                      <button
+                        type="button"
+                        className="mm-tbtn"
+                        style={{ height: 26 }}
+                        onClick={() => m()?.setBackdropRings(-1)}
+                      >
+                        − ring
+                      </button>
+                      <button
+                        type="button"
+                        className="mm-tbtn"
+                        style={{ height: 26 }}
+                        onClick={() => m()?.setBackdropRings(1)}
+                      >
+                        + ring
+                      </button>
+                    </>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="mm-tbtn"
+                    style={{ height: 26 }}
+                    onClick={() => {
+                      m()?.clearBackdrop();
+                      close();
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : null}
+            </>
+          )}
+        </Menu>
+        <span className="mm-grow" />
+        <span className="mm-eyebrow">Layout</span>
+        <select
+          className="mm-select"
+          value={canvas.layout}
+          onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
+          aria-label="Layout"
+          title={liveDoc.meta?.freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
+          disabled={!!liveDoc.meta?.freeform}
+        >
+          <optgroup label="Radial">
+            <option value="side">Both sides</option>
+            <option value="right">Right</option>
+            <option value="left">Left</option>
+            <option value="radial">Radial / hub</option>
+          </optgroup>
+          <optgroup label="Tree">
+            <option value="org-down">Org chart ↓</option>
+            <option value="org-up">Org chart ↑</option>
+          </optgroup>
+          <optgroup label="Diagram">
+            <option value="timeline">Timeline</option>
+            <option value="fishbone">Fishbone</option>
+            <option value="grid">Grid / matrix</option>
+            <option value="brace">Brace map</option>
+          </optgroup>
+        </select>
+        <span className="mm-vdiv" />
+        <input
+          className="mm-input"
+          placeholder="Quick add… ⏎"
+          aria-label="Quick add topic"
+          title="Type a topic and press Enter to add it under the selection (or the central topic)."
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const v = e.currentTarget.value.trim();
+              if (v) {
+                m()?.quickAdd(v);
+                e.currentTarget.value = "";
+              }
+            }
+          }}
+          style={{ width: 130 }}
+        />
+        <BrainstormTimer />
+      </div>
     </header>
+  );
+}
+
+function PanelToggle({
+  label,
+  icon,
+  on,
+  onClick,
+}: {
+  label: string;
+  icon: EditorIconName;
+  on: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitemcheckbox"
+      aria-checked={on}
+      className="mm-menu-item"
+      onClick={onClick}
+      style={on ? { color: "var(--ed-accent)", background: "var(--ed-accent-tint)" } : undefined}
+    >
+      <EditorIcon name={icon} size={15} />
+      {label}
+      {on && <EditorIcon name="check" size={14} />}
+    </button>
   );
 }

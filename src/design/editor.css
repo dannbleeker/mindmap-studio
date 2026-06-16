@@ -1,0 +1,397 @@
+/* editor.css — redesigned editor chrome (icon rail, two-row top bar, inspector, map-stats).
+ *
+ * Consumes the `--ed-*` custom properties emitted by editorThemeVars() on the `.mm-editor` root, so
+ * the whole chrome re-themes with the canvas theme (Light / Dark / Ocean / Sunset). The warm-cream
+ * surfaces + emerald accent match the shipped start screen, so the editor and start screen read as
+ * one product. The canvas itself keeps its own theme system (mindmap/theme.ts) — untouched here.
+ */
+
+.mm-editor {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  background: var(--ed-page);
+  color: var(--ed-ink);
+  font-family: var(--ed-font-sans);
+}
+
+.mm-editor-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mm-editor *,
+.mm-editor *::before,
+.mm-editor *::after {
+  box-sizing: border-box;
+}
+
+.mm-mono {
+  font-family: var(--ed-font-mono);
+}
+
+/* ── Icon rail ────────────────────────────────────────────────────────────── */
+.mm-rail {
+  width: 56px;
+  flex-shrink: 0;
+  background: var(--ed-sidebar);
+  border-right: 1px solid var(--ed-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 11px 0;
+  gap: 4px;
+}
+
+.mm-rail-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  background: transparent;
+  color: var(--ed-muted);
+  font-family: inherit;
+}
+.mm-rail-btn:hover {
+  background: rgba(127, 119, 90, 0.1);
+  color: var(--ed-ink);
+}
+.mm-rail-btn[aria-pressed="true"] {
+  background: var(--ed-accent-tint);
+  color: var(--ed-accent);
+}
+.mm-rail-sep {
+  width: 22px;
+  height: 1px;
+  background: var(--ed-border);
+  margin: 2px 0 6px;
+}
+.mm-rail-spacer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+.mm-rail-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  margin-top: 4px;
+  background: var(--ed-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+/* ── Top bar (two rows) ───────────────────────────────────────────────────── */
+.mm-topbar {
+  flex-shrink: 0;
+  background: var(--ed-card);
+  border-bottom: 1px solid var(--ed-border);
+}
+.mm-topbar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+}
+.mm-topbar-row1 {
+  height: 48px;
+  border-bottom: 1px solid var(--ed-divider);
+}
+.mm-topbar-row2 {
+  height: 50px;
+  gap: 6px;
+  overflow-x: auto;
+}
+.mm-topbar-row2.mm-wrap {
+  height: auto;
+  flex-wrap: wrap;
+  row-gap: 6px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.mm-crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ed-faint);
+  font-family: var(--ed-font-mono);
+  flex-shrink: 0;
+}
+.mm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ed-ink);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: text;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  padding: 0 2px;
+  max-width: 320px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.mm-title-input {
+  border-bottom: 2px solid var(--ed-accent);
+  min-width: 120px;
+}
+.mm-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--ed-muted);
+  flex-shrink: 0;
+}
+.mm-saved-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 6px;
+  background: var(--ed-accent);
+}
+.mm-grow {
+  flex: 1;
+}
+
+/* generic toolbar button (icon or icon+label) */
+.mm-tbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--ed-ink2);
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.mm-tbtn:hover {
+  background: rgba(127, 119, 90, 0.08);
+  color: var(--ed-ink);
+}
+.mm-tbtn[aria-pressed="true"] {
+  background: var(--ed-accent-tint);
+  color: var(--ed-accent);
+}
+.mm-tbtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.mm-tbtn-icon {
+  padding: 0;
+  width: 32px;
+}
+.mm-tbtn-danger:hover {
+  background: rgba(178, 59, 58, 0.1);
+  color: var(--ed-danger);
+}
+.mm-tbtn-ghost {
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+}
+.mm-tbtn-ghost:hover {
+  border-color: var(--ed-faint);
+}
+.mm-tbtn-primary {
+  background: var(--ed-accent);
+  color: #fff;
+}
+.mm-tbtn-primary:hover {
+  background: var(--ed-accent-hover);
+  color: #fff;
+}
+
+.mm-vdiv {
+  width: 1px;
+  height: 22px;
+  background: var(--ed-divider);
+  flex-shrink: 0;
+}
+.mm-cluster {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.mm-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ed-faint);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-family: var(--ed-font-mono);
+}
+
+/* native select styled as a toolbar control */
+.mm-select {
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  color: var(--ed-ink2);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 0 8px;
+  cursor: pointer;
+}
+.mm-input {
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  color: var(--ed-ink);
+  font-size: 12.5px;
+  font-family: inherit;
+  padding: 0 10px;
+  outline: none;
+}
+.mm-input:focus {
+  border-color: var(--ed-accent);
+  box-shadow: 0 0 0 3px var(--ed-accent-ring);
+}
+
+/* ── Dropdown / popover menu ──────────────────────────────────────────────── */
+.mm-menu-wrap {
+  position: relative;
+}
+.mm-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 60;
+  min-width: 200px;
+  background: var(--ed-card);
+  border: 1px solid var(--ed-border);
+  border-radius: 12px;
+  box-shadow: var(--ed-shadow-pop);
+  padding: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.mm-menu-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ed-faint);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-family: var(--ed-font-mono);
+  padding: 8px 10px 4px;
+}
+.mm-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--ed-ink);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mm-menu-item:hover {
+  background: var(--ed-page);
+}
+.mm-menu-item-danger {
+  color: var(--ed-danger);
+}
+.mm-menu-item-danger:hover {
+  background: rgba(178, 59, 58, 0.09);
+}
+.mm-menu-sep {
+  height: 1px;
+  background: var(--ed-divider);
+  margin: 4px 2px;
+}
+
+/* ── Inspector / MapStats (right panel) ───────────────────────────────────── */
+.mm-inspector {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--ed-card);
+  border-left: 1px solid var(--ed-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mm-inspector-head {
+  flex-shrink: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ed-divider);
+}
+.mm-inspector-path {
+  font-size: 11px;
+  color: var(--ed-faint);
+  font-family: var(--ed-font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mm-inspector-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.mm-stat-grid {
+  display: flex;
+  gap: 10px;
+}
+.mm-stat {
+  flex: 1;
+  background: var(--ed-page);
+  border: 1px solid var(--ed-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.mm-stat-num {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ed-ink);
+  letter-spacing: -0.03em;
+  font-family: var(--ed-font-mono);
+  line-height: 1;
+}
+.mm-stat-label {
+  font-size: 11.5px;
+  color: var(--ed-muted);
+  margin-top: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-editor * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

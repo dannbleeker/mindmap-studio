@@ -11,8 +11,11 @@ import {
   StylesPanel,
 } from "./Panels";
 import { Dialog } from "./components/Dialog";
+import { IconRail } from "./components/IconRail";
 import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
+import "./design/editor.css";
+import { editorThemeVars } from "./design/tokens";
 import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
 import { clampIndex, nextPlaybackIndex, togglePlay } from "./historyPlayback";
 import { usePanels } from "./hooks/usePanels";
@@ -848,413 +851,430 @@ export function App() {
   }
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Toolbar
-        isMobile={isMobile}
-        mapRef={mapRef}
-        nav={{
-          goHome,
-          openAbout: () => setAboutOpen(true),
-          openSearchAll: () => setSearchAllOpen(true),
-          openPaste: () => setPasteOpen(true),
-        }}
-        panels={panels}
-        map={{
-          doc,
-          liveDoc,
-          maps,
-          mapOptions,
-          switchMap,
-          addSheet,
-          load,
-          duplicateMap,
-          deleteCurrent,
-          present: () => setPresentDoc(liveDocRef.current),
-          refreshRollupsNow,
-        }}
-        canvas={{
-          theme,
-          setThemeId,
-          layout,
-          changeLayout,
-          selected,
-          setFocus,
-          handleImage,
-          handleBackgroundImage,
-        }}
-        find={{
-          query,
-          setQuery,
-          replaceWith,
-          setReplaceWith,
-          matchInfo,
-          runSearch,
-          runReplace,
-        }}
-        io={{
-          exportJson,
-          exportMarkdown,
-          exportMermaid,
-          exportXmind,
-          exportSmmx,
-          exportOpml,
-          exportFreemind,
-          exportPng,
-          exportSvg,
-          exportHtml,
-          exportInteractiveHtml,
-          exportDeck,
-          exportPdf,
-          exportDocx,
-          exportPptx,
-          exportXlsx,
-          exportLibrary,
-          copyOutline,
-          handleFile,
-        }}
-        showHint={showHint}
+    <div className="mm-editor" style={editorThemeVars(theme)}>
+      <IconRail
+        onHome={goHome}
+        onFind={() =>
+          document.querySelector<HTMLInputElement>('input[aria-label="Find node"]')?.focus()
+        }
+        onImage={handleImage}
+        onPaste={() => setPasteOpen(true)}
+        onAbout={() => setAboutOpen(true)}
       />
-
-      {error && (
-        <div
-          role="alert"
-          style={{
-            padding: "8px 16px",
-            background: "#fcebeb",
-            color: "#791f1f",
-            fontSize: 13,
-            borderBottom: "1px solid #f7c1c1",
+      <div className="mm-editor-main">
+        <Toolbar
+          isMobile={isMobile}
+          mapRef={mapRef}
+          nav={{
+            goHome,
+            openAbout: () => setAboutOpen(true),
+            openSearchAll: () => setSearchAllOpen(true),
+            openPaste: () => setPasteOpen(true),
           }}
-        >
-          Import failed: {error}
-        </div>
-      )}
-
-      {warnings.length > 0 && (
-        <output
-          style={{
-            display: "block",
-            padding: "8px 16px",
-            background: "#faeeda",
-            color: "#633806",
-            fontSize: 13,
-            borderBottom: "1px solid #fac775",
+          panels={panels}
+          map={{
+            doc,
+            liveDoc,
+            maps,
+            mapOptions,
+            switchMap,
+            addSheet,
+            load,
+            duplicateMap,
+            deleteCurrent,
+            present: () => setPresentDoc(liveDocRef.current),
+            refreshRollupsNow,
           }}
-        >
-          Imported with {warnings.length} note{warnings.length > 1 ? "s" : ""}: {warnings[0]}
-          {warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ""}
-        </output>
-      )}
-
-      {toast && (
-        <output
-          aria-live="polite"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "8px 16px",
-            background: toast.kind === "success" ? "#eafaf0" : "#eef2fc",
-            color: "#26215c",
-            fontSize: 13,
-            borderBottom: "1px solid #cecbf6",
+          canvas={{
+            theme,
+            setThemeId,
+            layout,
+            changeLayout,
+            selected,
+            setFocus,
+            handleImage,
+            handleBackgroundImage,
           }}
-        >
-          <span>{toast.message}</span>
-          {toast.action && (
+          find={{
+            query,
+            setQuery,
+            replaceWith,
+            setReplaceWith,
+            matchInfo,
+            runSearch,
+            runReplace,
+          }}
+          io={{
+            exportJson,
+            exportMarkdown,
+            exportMermaid,
+            exportXmind,
+            exportSmmx,
+            exportOpml,
+            exportFreemind,
+            exportPng,
+            exportSvg,
+            exportHtml,
+            exportInteractiveHtml,
+            exportDeck,
+            exportPdf,
+            exportDocx,
+            exportPptx,
+            exportXlsx,
+            exportLibrary,
+            copyOutline,
+            handleFile,
+          }}
+          showHint={showHint}
+        />
+
+        {error && (
+          <div
+            role="alert"
+            style={{
+              padding: "8px 16px",
+              background: "#fcebeb",
+              color: "#791f1f",
+              fontSize: 13,
+              borderBottom: "1px solid #f7c1c1",
+            }}
+          >
+            Import failed: {error}
+          </div>
+        )}
+
+        {warnings.length > 0 && (
+          <output
+            style={{
+              display: "block",
+              padding: "8px 16px",
+              background: "#faeeda",
+              color: "#633806",
+              fontSize: 13,
+              borderBottom: "1px solid #fac775",
+            }}
+          >
+            Imported with {warnings.length} note{warnings.length > 1 ? "s" : ""}: {warnings[0]}
+            {warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ""}
+          </output>
+        )}
+
+        {toast && (
+          <output
+            aria-live="polite"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "8px 16px",
+              background: toast.kind === "success" ? "#eafaf0" : "#eef2fc",
+              color: "#26215c",
+              fontSize: 13,
+              borderBottom: "1px solid #cecbf6",
+            }}
+          >
+            <span>{toast.message}</span>
+            {toast.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  toast.action?.run();
+                  setToast(null);
+                }}
+                style={{ ...controlStyle, padding: "4px 12px" }}
+              >
+                {toast.action.label}
+              </button>
+            )}
+          </output>
+        )}
+
+        {focus && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              padding: "4px 12px",
+              background: "#efe9ff",
+              borderBottom: "1px solid #cecbf6",
+              fontSize: 13,
+              color: "#26215c",
+            }}
+          >
+            <span>
+              ◎ Focusing branch: <strong>{focus.topic || "(untitled)"}</strong>
+            </span>
             <button
               type="button"
-              onClick={() => {
-                toast.action?.run();
-                setToast(null);
-              }}
-              style={{ ...controlStyle, padding: "4px 12px" }}
+              onClick={() => setFocus(null)}
+              style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
             >
-              {toast.action.label}
+              Show all (Esc)
             </button>
-          )}
-        </output>
-      )}
+          </div>
+        )}
 
-      {focus && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 10,
-            padding: "4px 12px",
-            background: "#efe9ff",
-            borderBottom: "1px solid #cecbf6",
-            fontSize: 13,
-            color: "#26215c",
-          }}
-        >
-          <span>
-            ◎ Focusing branch: <strong>{focus.topic || "(untitled)"}</strong>
-          </span>
-          <button
-            type="button"
-            onClick={() => setFocus(null)}
-            style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
-          >
-            Show all (Esc)
-          </button>
-        </div>
-      )}
-
-      <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-        <div className="mm-panel-host">
-          {panels.outlineOpen && (
-            <OutlinePanel
-              root={liveDoc.root}
-              filter={outlineFilter}
-              numbered={panels.numbered}
-              onFilterChange={setOutlineFilter}
-              onPick={(id) => mapRef.current?.focusNode(id)}
-            />
-          )}
-          {panels.indexOpen && (
-            <MarkerTagIndex
-              root={liveDoc.root}
-              floatingTopics={liveDoc.floatingTopics}
-              onPick={(id) => mapRef.current?.focusNode(id)}
-            />
-          )}
-          {panels.filterOpen && (
-            <FilterPanel
-              root={liveDoc.root}
-              floatingTopics={liveDoc.floatingTopics}
-              text={filter.text}
-              markers={filter.markers}
-              tags={filter.tags}
-              due={filter.due}
-              priority={filter.priority}
-              matchCount={filterHits?.matches ?? 0}
-              savedFilters={savedFilters.list}
-              onText={filter.setText}
-              onToggleMarker={filter.toggleMarker}
-              onToggleTag={filter.toggleTag}
-              onDue={filter.setDue}
-              onPriority={filter.setPriority}
-              onClear={filter.clear}
-              onSaveFilter={savedFilters.save}
-              onApplyFilter={savedFilters.apply}
-              onDeleteFilter={savedFilters.remove}
-            />
-          )}
-          {panels.stylesOpen && (
-            <StylesPanel
-              rules={liveDoc.rules ?? []}
-              markers={MARKER_PALETTE}
-              namedStyles={namedStyles}
-              onAddRule={(rule) => mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])}
-              onDeleteRule={(id) =>
-                mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
-              }
-              onSaveStyle={saveNamedStyle}
-              onApplyStyle={(style) => {
-                const ok = mapRef.current?.setSelectedStyle(style);
-                if (!ok) showHint("Select a topic first, then apply a named style.");
-              }}
-              onDeleteStyle={deleteNamedStyle}
-            />
-          )}
-          {panels.infoOpen && (
-            <InfoPanel
-              selected={selected}
-              node={selectedNode}
-              noteDraft={noteDraft}
-              onNoteChange={onNoteChange}
-              onNoteBlur={flushNote}
-              markers={MARKER_PALETTE}
-              onToggleMarker={(m) => {
-                const ok = mapRef.current?.toggleSelectedIcon(m);
-                if (!ok) showHint("Select a node first, then click a marker.");
-              }}
-              onPickSticker={(s) => {
-                const ok = mapRef.current?.setSelectedImage(stickerImage(s));
-                if (!ok) showHint("Select a node first, then pick a sticker.");
-              }}
-              onStyle={(patch) => {
-                const ok = mapRef.current?.setSelectedStyle(patch);
-                if (!ok) showHint("Select a node first, then style it.");
-              }}
-              onAddTag={(t) => {
-                const cur = selectedNode?.tags ?? [];
-                if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);
-              }}
-              onRemoveTag={(t) =>
-                mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
-              }
-              onSetProgress={(progress) => {
-                const ok = mapRef.current?.setSelectedProgress(progress);
-                if (!ok) showHint("Select a node first, then set its progress.");
-              }}
-              onSetDue={(d) => {
-                const ok = mapRef.current?.setSelectedDue(d);
-                if (!ok) showHint("Select a node first, then set a due date.");
-              }}
-              onSetStart={(d) => {
-                const ok = mapRef.current?.setSelectedStart(d);
-                if (!ok) showHint("Select a node first, then set a start date.");
-              }}
-              onSetPriority={(p) => {
-                const ok = mapRef.current?.setSelectedPriority(p);
-                if (!ok) showHint("Select a node first, then set its priority.");
-              }}
-              onAddAttachment={async (file) => {
-                try {
-                  const att = await fileToAttachment(file);
-                  const ok = mapRef.current?.addSelectedAttachment(att);
-                  if (!ok) showHint("Select a node first, then attach a file.");
-                } catch (err) {
-                  showHint(err instanceof Error ? err.message : "Could not attach that file.");
-                }
-              }}
-              onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
-              onSetHyperlink={(url) => {
-                const ok = mapRef.current?.setSelectedHyperlink(url);
-                if (!ok) showHint("Select a node first, then add a link.");
-              }}
-              maps={maps.filter((m) => m.id !== doc.id).map((m) => ({ id: m.id, title: m.title }))}
-              onLinkMap={(mapId) =>
-                mapRef.current?.setSelectedHyperlink(`${MAP_LINK_PREFIX}${mapId}`)
-              }
-              jumpTargets={outlineRows(liveDoc.root)
-                .filter((r) => r.id !== selected?.id)
-                .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
-              onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
-              onClose={() => panels.setInfoOpen(false)}
-            />
-          )}
-          {panels.historyOpen && (
-            <HistoryPanel
-              versions={versions}
-              onSaveNow={saveVersionNow}
-              onPlay={startPlayback}
-              onRestore={restoreVersion}
-              onClose={() => panels.setHistoryOpen(false)}
-            />
-          )}
-        </div>
-        <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-          {sheets.length > 1 && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                padding: "4px 12px",
-                background: "#f4f3fb",
-                borderBottom: "1px solid #e2e0d8",
-                overflowX: "auto",
-                flexShrink: 0,
-              }}
-            >
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#8a8780", marginRight: 2 }}>
-                SHEETS
-              </span>
-              {sheets.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => switchMap(s.id)}
-                  aria-pressed={s.id === doc.id}
-                  style={{
-                    ...controlStyle,
-                    padding: "2px 10px",
-                    fontWeight: s.id === doc.id ? 700 : 400,
-                    background: s.id === doc.id ? "#fff" : "transparent",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {s.title || "(untitled)"}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={addSheet}
-                style={{ ...controlStyle, padding: "2px 8px" }}
-                title="Add a sheet"
-              >
-                ＋
-              </button>
-              <button
-                type="button"
-                onClick={exportWorkbook}
-                style={{ ...controlStyle, padding: "2px 8px", marginLeft: "auto" }}
-                title="Export this workbook (all sheets) as one .json"
-              >
-                ⤓ Workbook
-              </button>
-            </div>
-          )}
-          <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
-            <MindMap
-              key={playback ? `pb:${playback.index}` : `${doc.id}:${restoreRev}`}
-              ref={mapRef}
-              doc={playback ? playback.snaps[playback.index].doc : doc}
-              theme={theme.theme}
-              direction={layout}
-              numbered={panels.numbered}
-              litIds={playback ? null : litIds}
-              onChange={(d) => {
-                if (playback) return; // read-only while reviewing history
-                liveDocRef.current = d;
-                setLiveDoc(d);
-                scheduleSave();
-              }}
-              onSelect={handleSelect}
-              onMapLink={(id) => switchMap(id)}
-            />
-            {/* Kanban board overlays the canvas (the map stays mounted underneath). */}
-            {panels.boardOpen && (
-              <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
-                <Kanban
-                  doc={liveDoc}
-                  onPick={(id) => {
-                    panels.setBoardOpen(false);
-                    mapRef.current?.focusNode(id);
-                  }}
-                  onClose={() => panels.setBoardOpen(false)}
-                />
-              </div>
-            )}
-            {/* Version-history timeline playback overlay (the canvas above shows the snapshot). */}
-            {playback && (
-              <PlaybackBar
-                index={playback.index}
-                count={playback.snaps.length}
-                playing={playback.playing}
-                label={`${playback.index + 1} / ${playback.snaps.length} · ${timeAgo(
-                  playback.snaps[playback.index].ts,
-                )}`}
-                onPlayPause={() =>
-                  setPlayback((p) =>
-                    p ? { ...p, ...togglePlay(p.index, p.snaps.length, p.playing) } : p,
-                  )
-                }
-                onStep={(delta) =>
-                  setPlayback((p) =>
-                    p
-                      ? { ...p, index: clampIndex(p.index + delta, p.snaps.length), playing: false }
-                      : p,
-                  )
-                }
-                onSeek={(i) =>
-                  setPlayback((p) =>
-                    p ? { ...p, index: clampIndex(i, p.snaps.length), playing: false } : p,
-                  )
-                }
-                onRestore={() => {
-                  const id = playback.snaps[playback.index].id;
-                  setPlayback(null);
-                  void restoreVersion(id);
-                }}
-                onExit={() => setPlayback(null)}
+        <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+          <div className="mm-panel-host">
+            {panels.outlineOpen && (
+              <OutlinePanel
+                root={liveDoc.root}
+                filter={outlineFilter}
+                numbered={panels.numbered}
+                onFilterChange={setOutlineFilter}
+                onPick={(id) => mapRef.current?.focusNode(id)}
               />
             )}
+            {panels.indexOpen && (
+              <MarkerTagIndex
+                root={liveDoc.root}
+                floatingTopics={liveDoc.floatingTopics}
+                onPick={(id) => mapRef.current?.focusNode(id)}
+              />
+            )}
+            {panels.filterOpen && (
+              <FilterPanel
+                root={liveDoc.root}
+                floatingTopics={liveDoc.floatingTopics}
+                text={filter.text}
+                markers={filter.markers}
+                tags={filter.tags}
+                due={filter.due}
+                priority={filter.priority}
+                matchCount={filterHits?.matches ?? 0}
+                savedFilters={savedFilters.list}
+                onText={filter.setText}
+                onToggleMarker={filter.toggleMarker}
+                onToggleTag={filter.toggleTag}
+                onDue={filter.setDue}
+                onPriority={filter.setPriority}
+                onClear={filter.clear}
+                onSaveFilter={savedFilters.save}
+                onApplyFilter={savedFilters.apply}
+                onDeleteFilter={savedFilters.remove}
+              />
+            )}
+            {panels.stylesOpen && (
+              <StylesPanel
+                rules={liveDoc.rules ?? []}
+                markers={MARKER_PALETTE}
+                namedStyles={namedStyles}
+                onAddRule={(rule) => mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])}
+                onDeleteRule={(id) =>
+                  mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
+                }
+                onSaveStyle={saveNamedStyle}
+                onApplyStyle={(style) => {
+                  const ok = mapRef.current?.setSelectedStyle(style);
+                  if (!ok) showHint("Select a topic first, then apply a named style.");
+                }}
+                onDeleteStyle={deleteNamedStyle}
+              />
+            )}
+            {panels.infoOpen && (
+              <InfoPanel
+                selected={selected}
+                node={selectedNode}
+                noteDraft={noteDraft}
+                onNoteChange={onNoteChange}
+                onNoteBlur={flushNote}
+                markers={MARKER_PALETTE}
+                onToggleMarker={(m) => {
+                  const ok = mapRef.current?.toggleSelectedIcon(m);
+                  if (!ok) showHint("Select a node first, then click a marker.");
+                }}
+                onPickSticker={(s) => {
+                  const ok = mapRef.current?.setSelectedImage(stickerImage(s));
+                  if (!ok) showHint("Select a node first, then pick a sticker.");
+                }}
+                onStyle={(patch) => {
+                  const ok = mapRef.current?.setSelectedStyle(patch);
+                  if (!ok) showHint("Select a node first, then style it.");
+                }}
+                onAddTag={(t) => {
+                  const cur = selectedNode?.tags ?? [];
+                  if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);
+                }}
+                onRemoveTag={(t) =>
+                  mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
+                }
+                onSetProgress={(progress) => {
+                  const ok = mapRef.current?.setSelectedProgress(progress);
+                  if (!ok) showHint("Select a node first, then set its progress.");
+                }}
+                onSetDue={(d) => {
+                  const ok = mapRef.current?.setSelectedDue(d);
+                  if (!ok) showHint("Select a node first, then set a due date.");
+                }}
+                onSetStart={(d) => {
+                  const ok = mapRef.current?.setSelectedStart(d);
+                  if (!ok) showHint("Select a node first, then set a start date.");
+                }}
+                onSetPriority={(p) => {
+                  const ok = mapRef.current?.setSelectedPriority(p);
+                  if (!ok) showHint("Select a node first, then set its priority.");
+                }}
+                onAddAttachment={async (file) => {
+                  try {
+                    const att = await fileToAttachment(file);
+                    const ok = mapRef.current?.addSelectedAttachment(att);
+                    if (!ok) showHint("Select a node first, then attach a file.");
+                  } catch (err) {
+                    showHint(err instanceof Error ? err.message : "Could not attach that file.");
+                  }
+                }}
+                onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
+                onSetHyperlink={(url) => {
+                  const ok = mapRef.current?.setSelectedHyperlink(url);
+                  if (!ok) showHint("Select a node first, then add a link.");
+                }}
+                maps={maps
+                  .filter((m) => m.id !== doc.id)
+                  .map((m) => ({ id: m.id, title: m.title }))}
+                onLinkMap={(mapId) =>
+                  mapRef.current?.setSelectedHyperlink(`${MAP_LINK_PREFIX}${mapId}`)
+                }
+                jumpTargets={outlineRows(liveDoc.root)
+                  .filter((r) => r.id !== selected?.id)
+                  .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
+                onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
+                onClose={() => panels.setInfoOpen(false)}
+              />
+            )}
+            {panels.historyOpen && (
+              <HistoryPanel
+                versions={versions}
+                onSaveNow={saveVersionNow}
+                onPlay={startPlayback}
+                onRestore={restoreVersion}
+                onClose={() => panels.setHistoryOpen(false)}
+              />
+            )}
+          </div>
+          <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+            {sheets.length > 1 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "4px 12px",
+                  background: "#f4f3fb",
+                  borderBottom: "1px solid #e2e0d8",
+                  overflowX: "auto",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#8a8780", marginRight: 2 }}>
+                  SHEETS
+                </span>
+                {sheets.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => switchMap(s.id)}
+                    aria-pressed={s.id === doc.id}
+                    style={{
+                      ...controlStyle,
+                      padding: "2px 10px",
+                      fontWeight: s.id === doc.id ? 700 : 400,
+                      background: s.id === doc.id ? "#fff" : "transparent",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {s.title || "(untitled)"}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSheet}
+                  style={{ ...controlStyle, padding: "2px 8px" }}
+                  title="Add a sheet"
+                >
+                  ＋
+                </button>
+                <button
+                  type="button"
+                  onClick={exportWorkbook}
+                  style={{ ...controlStyle, padding: "2px 8px", marginLeft: "auto" }}
+                  title="Export this workbook (all sheets) as one .json"
+                >
+                  ⤓ Workbook
+                </button>
+              </div>
+            )}
+            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+              <MindMap
+                key={playback ? `pb:${playback.index}` : `${doc.id}:${restoreRev}`}
+                ref={mapRef}
+                doc={playback ? playback.snaps[playback.index].doc : doc}
+                theme={theme.theme}
+                direction={layout}
+                numbered={panels.numbered}
+                litIds={playback ? null : litIds}
+                onChange={(d) => {
+                  if (playback) return; // read-only while reviewing history
+                  liveDocRef.current = d;
+                  setLiveDoc(d);
+                  scheduleSave();
+                }}
+                onSelect={handleSelect}
+                onMapLink={(id) => switchMap(id)}
+              />
+              {/* Kanban board overlays the canvas (the map stays mounted underneath). */}
+              {panels.boardOpen && (
+                <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
+                  <Kanban
+                    doc={liveDoc}
+                    onPick={(id) => {
+                      panels.setBoardOpen(false);
+                      mapRef.current?.focusNode(id);
+                    }}
+                    onClose={() => panels.setBoardOpen(false)}
+                  />
+                </div>
+              )}
+              {/* Version-history timeline playback overlay (the canvas above shows the snapshot). */}
+              {playback && (
+                <PlaybackBar
+                  index={playback.index}
+                  count={playback.snaps.length}
+                  playing={playback.playing}
+                  label={`${playback.index + 1} / ${playback.snaps.length} · ${timeAgo(
+                    playback.snaps[playback.index].ts,
+                  )}`}
+                  onPlayPause={() =>
+                    setPlayback((p) =>
+                      p ? { ...p, ...togglePlay(p.index, p.snaps.length, p.playing) } : p,
+                    )
+                  }
+                  onStep={(delta) =>
+                    setPlayback((p) =>
+                      p
+                        ? {
+                            ...p,
+                            index: clampIndex(p.index + delta, p.snaps.length),
+                            playing: false,
+                          }
+                        : p,
+                    )
+                  }
+                  onSeek={(i) =>
+                    setPlayback((p) =>
+                      p ? { ...p, index: clampIndex(i, p.snaps.length), playing: false } : p,
+                    )
+                  }
+                  onRestore={() => {
+                    const id = playback.snaps[playback.index].id;
+                    setPlayback(null);
+                    void restoreVersion(id);
+                  }}
+                  onExit={() => setPlayback(null)}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -3,12 +3,14 @@ import {
   addAttachment,
   addChild,
   addFloatingTopic,
+  addLink,
   addSibling,
   addStickyNote,
   addSubtree,
   applyRollups,
   clearBackdrop,
   collectRollupMapIds,
+  deleteLink,
   deleteNode,
   deleteSummary,
   findAnyNode,
@@ -32,6 +34,7 @@ import {
   setHyperlink,
   setImage,
   setLineJumps,
+  setLinkLabel,
   setNodeLayout,
   setNodePos,
   setNote,
@@ -669,5 +672,107 @@ describe("flow ops — groupBranch + replaceTopics", () => {
     const { doc, count } = replaceTopics(dotty, "a.b", "Z");
     expect(count).toBe(1); // only the literal "a.b", not "a<any>b"
     expect(findNode(doc, "a")?.topic).toBe("Z");
+  });
+});
+
+describe("flow ops — cross-links (relationships)", () => {
+  it("addLink creates a cross-link between two distinct nodes", () => {
+    const { doc } = addLink(base(), "a", "b");
+    expect(doc.links).toHaveLength(2); // original "l" + new link
+    expect(doc.links?.[1]).toMatchObject({ from: "a", to: "b" });
+  });
+
+  it("addLink rejects self-links (from === to)", () => {
+    const d = base();
+    expect(addLink(d, "a", "a").doc).toBe(d);
+  });
+
+  it("addLink rejects links with non-existent nodes", () => {
+    const d = base();
+    expect(addLink(d, "ghost", "a").doc).toBe(d);
+    expect(addLink(d, "a", "ghost").doc).toBe(d);
+  });
+
+  it("addLink rejects duplicate links (exact from→to already exists)", () => {
+    const d = base(); // has link "a1" → "b"
+    expect(addLink(d, "a1", "b").doc).toBe(d);
+  });
+
+  it("addLink includes an optional label", () => {
+    const { doc } = addLink(base(), "a", "b", "depends on");
+    expect(doc.links?.[1]?.label).toBe("depends on");
+  });
+
+  it("addLink omits the label field when not provided", () => {
+    const { doc } = addLink(base(), "a", "b");
+    expect(doc.links?.[1]).not.toHaveProperty("label");
+  });
+
+  it("setLinkLabel updates an existing link's label", () => {
+    const { doc } = setLinkLabel(base(), "l", "new label");
+    expect(findNode(doc, "a")?.topic).toBe("A"); // verify doc structure unchanged
+    expect(doc.links?.[0]?.label).toBe("new label");
+  });
+
+  it("setLinkLabel clears a label when passed an empty string", () => {
+    const { doc } = setLinkLabel(base(), "l", "");
+    // Clearing removes the label field entirely
+    expect(doc.links?.[0]).toEqual({ id: "l", from: "a1", to: "b" });
+  });
+
+  it("setLinkLabel is a no-op for a non-existent link id", () => {
+    const d = base();
+    expect(setLinkLabel(d, "ghost", "label").doc).toBe(d);
+  });
+
+  it("deleteLink removes a cross-link by id", () => {
+    const { doc } = deleteLink(base(), "l");
+    expect(doc.links).toBeUndefined();
+  });
+
+  it("deleteLink clears the links array when it becomes empty", () => {
+    const { doc } = deleteLink(base(), "l");
+    expect(doc.links).toBeUndefined();
+  });
+
+  it("deleteLink is a no-op for a non-existent link id", () => {
+    const d = base();
+    expect(deleteLink(d, "ghost").doc).toBe(d);
+  });
+});
+
+describe("flow ops — grouping (boundaries & summaries)", () => {
+  it("groupBranch with deeply nested children collects the entire subtree", () => {
+    const deep = (): MindMapDoc => ({
+      schemaVersion: 1,
+      id: "d",
+      title: "Deep",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          {
+            id: "l1",
+            topic: "Level 1",
+            children: [
+              {
+                id: "l2",
+                topic: "Level 2",
+                children: [
+                  {
+                    id: "l3",
+                    topic: "Level 3",
+                    children: [{ id: "l4", topic: "Level 4", children: [] }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const { doc } = groupBranch(deep(), "l1");
+    // Boundary should include l1 and all descendants (l2, l3, l4)
+    expect(doc.boundaries?.[0]?.nodeIds).toEqual(["l1", "l2", "l3", "l4"]);
   });
 });

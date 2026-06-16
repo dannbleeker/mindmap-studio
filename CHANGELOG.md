@@ -18,7 +18,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   emerald elevation, branch/leaf cards get a lighter 1.5px branch border + warm shadow and a tighter
   radius (11) — with the radii and border mirrored in `exportSvg.ts` so the screen and exports stay
   identical (verified: root rx 14 = canvas 14px, branch rx 11 = canvas 11px, border 1.5 = 1.5).
-  (On-canvas status/priority badges and the inline popover are later phase-2 increments.)
+  A **branded selection ring** (the node's branch colour, emerald for the root, + a soft glow)
+  replaces React Flow's faint default — canvas-only, so no export impact. The priority / progress /
+  due badges and tapered branch ribbons already matched the mock. (The inline contextual popover —
+  which needs new add-child/delete canvas handles — is a deferred, separately-scoped increment.)
 
 - **Editor chrome redesign (phase 1 of 2)** — the editor adopts the warm-cream + emerald visual
   language already shipped on the Start screen. A new **56px icon rail** (brand → Start, find, insert

@@ -78,7 +78,7 @@ function ProgressBadge({ info, onCycle }: { info: ProgressInfo; onCycle?: () => 
 // topic/style/progress edits — so the default shallow compare re-renders exactly when needed and
 // skips the rest. Inline-edit + collapse arrive via the `useEditing()` context, which memo never
 // blocks, so editing state still re-renders correctly.
-function TopicNodeImpl({ id, data }: NodeProps<TopicNodeT>) {
+function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const {
     topic,
     topicRich,
@@ -165,6 +165,9 @@ function TopicNodeImpl({ id, data }: NodeProps<TopicNodeT>) {
           textDecoration: style?.textDecoration,
         };
 
+  // Selection-ring colour: the node's branch colour, emerald for the root.
+  const ringColor = isRoot ? "#1b8a5e" : branchColor;
+
   return (
     <div
       style={{
@@ -173,11 +176,16 @@ function TopicNodeImpl({ id, data }: NodeProps<TopicNodeT>) {
         boxSizing: "border-box",
         maxWidth: 320,
         lineHeight: 1.35,
-        boxShadow: geom
-          ? "none"
-          : isRoot
-            ? "0 6px 18px rgba(27,138,94,0.30)"
-            : "0 2px 8px rgba(40,30,16,0.10)",
+        // Selected: a branded ring (node's branch colour, emerald for the root) + soft glow — the
+        // redesign's selection treatment, replacing React Flow's faint default. Canvas-only (exports
+        // never render selection), so it carries no canvas==export risk.
+        boxShadow: selected
+          ? `0 0 0 2px ${ringColor}, 0 0 0 6px ${ringColor}33, 0 8px 22px rgba(40,30,16,0.16)`
+          : geom
+            ? "none"
+            : isRoot
+              ? "0 6px 18px rgba(27,138,94,0.30)"
+              : "0 2px 8px rgba(40,30,16,0.10)",
         // Read-only Power Filter: fade nodes that aren't on a path to a match.
         opacity: dimmed ? 0.22 : 1,
         transition: "opacity 0.15s ease",

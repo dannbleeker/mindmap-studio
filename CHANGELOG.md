@@ -517,6 +517,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Canvas render perf (internal).** The React Flow building blocks are now wrapped in `React.memo`
+  — `TopicNode`, `BranchEdge`, `CrosslinkEdge`, and the `ViewportPortal` overlays (`Boundaries`,
+  `Callouts`, `Summaries`, `BraceConnectors`, `DiagramBackdrop`) — so a large map stops re-rendering
+  every node/edge/overlay on unrelated state changes (selection, hover, menus, panning). Selection
+  highlight, Power-Filter dimming, drag, and inline editing still update correctly (the producer mints
+  fresh `data` only when content changes; editing flows through context, which memo never blocks). The
+  per-item bbox math in the overlays is `useMemo`'d on `(nodes, items)`, and `CrosslinkEdge`'s
+  **line-jump** crossing scan (an O(relationships²) pass that previously re-ran on every render) is
+  memoised on the real inputs `(nodes, edges, id, lineJumps)` — it still recomputes the moment a node
+  moves or a relationship is added/removed, but caches every other render. Behaviour-preserving;
+  canvas == export is unchanged.
 - **Component/hook test safety net (internal).** Added `@testing-library/react` (+ `/dom` +
   `/user-event`) and a jsdom test setup (`test/setup.ts`, polyfilling `ResizeObserver`,
   `matchMedia`, `IntersectionObserver`) wired through `vitest.config.ts` — `node` stays the default

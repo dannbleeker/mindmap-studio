@@ -1,5 +1,5 @@
 import { ViewportPortal, useNodes } from "@xyflow/react";
-import type { CSSProperties } from "react";
+import { type CSSProperties, memo, useMemo } from "react";
 import type { Boundary } from "../../model/types";
 import {
   BOUNDARY_FILL,
@@ -31,52 +31,81 @@ const chip: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-export function Boundaries({ boundaries }: { boundaries: Boundary[] }) {
+/** One boundary box, resolved to its padded bbox in flow space. */
+interface BoundaryBox {
+  id: string;
+  label: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+function Boundaries({ boundaries }: { boundaries: readonly Boundary[] }) {
   const nodes = useNodes();
-  if (boundaries.length === 0) return null;
-  const byId = new Map(nodes.map((n) => [n.id, n]));
+  // Resolve each boundary's bbox once per node/boundary change instead of on every parent re-render
+  // (panning, selection, menus, …). `nodes` gets a fresh reference whenever a member moves, so the
+  // boxes still track drags live — same output, just not recomputed when nothing geometric changed.
+  const boxes = useMemo<BoundaryBox[]>(() => {
+    if (boundaries.length === 0) return [];
+    const byId = new Map(nodes.map((n) => [n.id, n]));
+    const out: BoundaryBox[] = [];
+    for (const b of boundaries) {
+      let minX = Number.POSITIVE_INFINITY;
+      let minY = Number.POSITIVE_INFINITY;
+      let maxX = Number.NEGATIVE_INFINITY;
+      let maxY = Number.NEGATIVE_INFINITY;
+      let found = 0;
+      for (const id of b.nodeIds) {
+        const n = byId.get(id);
+        if (!n) continue;
+        const w = n.measured?.width ?? 0;
+        const h = n.measured?.height ?? 0;
+        minX = Math.min(minX, n.position.x);
+        minY = Math.min(minY, n.position.y);
+        maxX = Math.max(maxX, n.position.x + w);
+        maxY = Math.max(maxY, n.position.y + h);
+        found += 1;
+      }
+      if (found === 0) continue;
+      out.push({
+        id: b.id,
+        label: boundaryLabel(b.label),
+        left: minX - BOUNDARY_PAD,
+        top: minY - BOUNDARY_PAD,
+        width: maxX - minX + 2 * BOUNDARY_PAD,
+        height: maxY - minY + 2 * BOUNDARY_PAD,
+      });
+    }
+    return out;
+  }, [nodes, boundaries]);
+
+  if (boxes.length === 0) return null;
 
   return (
     <ViewportPortal>
-      {boundaries.map((b) => {
-        let minX = Number.POSITIVE_INFINITY;
-        let minY = Number.POSITIVE_INFINITY;
-        let maxX = Number.NEGATIVE_INFINITY;
-        let maxY = Number.NEGATIVE_INFINITY;
-        let found = 0;
-        for (const id of b.nodeIds) {
-          const n = byId.get(id);
-          if (!n) continue;
-          const w = n.measured?.width ?? 0;
-          const h = n.measured?.height ?? 0;
-          minX = Math.min(minX, n.position.x);
-          minY = Math.min(minY, n.position.y);
-          maxX = Math.max(maxX, n.position.x + w);
-          maxY = Math.max(maxY, n.position.y + h);
-          found += 1;
-        }
-        if (found === 0) return null;
-        const label = boundaryLabel(b.label);
-        return (
-          <div
-            key={b.id}
-            style={{
-              position: "absolute",
-              left: minX - BOUNDARY_PAD,
-              top: minY - BOUNDARY_PAD,
-              width: maxX - minX + 2 * BOUNDARY_PAD,
-              height: maxY - minY + 2 * BOUNDARY_PAD,
-              boxSizing: "border-box",
-              border: `1.5px solid ${BOUNDARY_STROKE}`,
-              background: BOUNDARY_FILL,
-              borderRadius: BOUNDARY_RADIUS,
-              pointerEvents: "none",
-            }}
-          >
-            {label ? <div style={chip}>{label}</div> : null}
-          </div>
-        );
-      })}
+      {boxes.map((b) => (
+        <div
+          key={b.id}
+          style={{
+            position: "absolute",
+            left: b.left,
+            top: b.top,
+            width: b.width,
+            height: b.height,
+            boxSizing: "border-box",
+            border: `1.5px solid ${BOUNDARY_STROKE}`,
+            background: BOUNDARY_FILL,
+            borderRadius: BOUNDARY_RADIUS,
+            pointerEvents: "none",
+          }}
+        >
+          {b.label ? <div style={chip}>{b.label}</div> : null}
+        </div>
+      ))}
     </ViewportPortal>
   );
 }
+
+const MemoBoundaries = memo(Boundaries);
+export { MemoBoundaries as Boundaries };

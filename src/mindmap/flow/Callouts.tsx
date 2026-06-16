@@ -1,5 +1,5 @@
 import { ViewportPortal, useNodes } from "@xyflow/react";
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, memo, useMemo, useState } from "react";
 import type { Callout } from "../../model/types";
 import { CALLOUT_BG, CALLOUT_STROKE, CALLOUT_TEXT } from "./style";
 
@@ -29,7 +29,15 @@ const BUBBLE: CSSProperties = {
   whiteSpace: "pre-wrap",
 };
 
-export function Callouts({
+/** A callout resolved to its anchored position in flow space. */
+interface PlacedCallout {
+  nodeId: string;
+  callout: Callout;
+  left: number;
+  top: number;
+}
+
+function Callouts({
   items,
   onCommit,
   onDelete,
@@ -40,18 +48,33 @@ export function Callouts({
 }) {
   const nodes = useNodes();
   const [editingId, setEditingId] = useState<string | null>(null);
-  if (items.length === 0) return null;
-  const byId = new Map(nodes.map((n) => [n.id, n]));
+  // Resolve each callout's anchor once per node/item change, not on every parent re-render (and not
+  // when only `editingId` flips). `nodes` is a fresh reference whenever an anchor node moves, so the
+  // bubbles still follow drags live — identical placement, just no redundant per-render math.
+  const placed = useMemo<PlacedCallout[]>(() => {
+    if (items.length === 0) return [];
+    const byId = new Map(nodes.map((n) => [n.id, n]));
+    const out: PlacedCallout[] = [];
+    for (const { nodeId, callout } of items) {
+      const n = byId.get(nodeId);
+      if (!n) continue;
+      const w = n.measured?.width ?? 0;
+      const h = n.measured?.height ?? 0;
+      out.push({
+        nodeId,
+        callout,
+        left: n.position.x + w + callout.dx,
+        top: n.position.y + h / 2 + callout.dy,
+      });
+    }
+    return out;
+  }, [nodes, items]);
+
+  if (placed.length === 0) return null;
 
   return (
     <ViewportPortal>
-      {items.map(({ nodeId, callout }) => {
-        const n = byId.get(nodeId);
-        if (!n) return null;
-        const w = n.measured?.width ?? 0;
-        const h = n.measured?.height ?? 0;
-        const left = n.position.x + w + callout.dx;
-        const top = n.position.y + h / 2 + callout.dy;
+      {placed.map(({ nodeId, callout, left, top }) => {
         const editing = editingId === callout.id;
         return (
           <div
@@ -138,3 +161,6 @@ export function Callouts({
     </ViewportPortal>
   );
 }
+
+const MemoCallouts = memo(Callouts);
+export { MemoCallouts as Callouts };

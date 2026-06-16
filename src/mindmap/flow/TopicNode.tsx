@@ -1,5 +1,5 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { type CSSProperties, useEffect, useMemo, useRef } from "react";
+import { type CSSProperties, memo, useEffect, useMemo, useRef } from "react";
 import { Chip, DateChip } from "../../Chip";
 import { ProgressPie } from "../../ProgressPie";
 import { sanitizeRich } from "../../io/richText";
@@ -72,7 +72,13 @@ function ProgressBadge({ info, onCycle }: { info: ProgressInfo; onCycle?: () => 
   );
 }
 
-export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
+// Memoised: React Flow re-renders every visible node whenever the node array changes (e.g. an
+// unrelated node moves or selection shifts). The producer (project/sync in FlowMindMap) only mints
+// a fresh `data` object when this node's content actually changes — selection, Power-Filter dimming,
+// topic/style/progress edits — so the default shallow compare re-renders exactly when needed and
+// skips the rest. Inline-edit + collapse arrive via the `useEditing()` context, which memo never
+// blocks, so editing state still re-renders correctly.
+function TopicNodeImpl({ id, data }: NodeProps<TopicNodeT>) {
   const {
     topic,
     topicRich,
@@ -369,3 +375,5 @@ export function TopicNode({ id, data }: NodeProps<TopicNodeT>) {
     </div>
   );
 }
+
+export const TopicNode = memo(TopicNodeImpl);

@@ -22,7 +22,7 @@ import {
 } from "react";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
-import type { MapNode, MindMapDoc } from "../model/types";
+import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
 import { nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
@@ -105,6 +105,11 @@ import { mindManagerTheme } from "./theme";
 
 const nodeTypes = { topic: TopicNode };
 const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
+
+// Shared empty arrays so the boundary/summary overlays get a stable prop ref when the doc has none
+// (a fresh `[]` each render would defeat their React.memo). Frozen to flag them as never-mutated.
+const EMPTY_BOUNDARIES: readonly Boundary[] = Object.freeze([]);
+const EMPTY_SUMMARIES: readonly Summary[] = Object.freeze([]);
 
 function themeVars(theme: MindMapProps["theme"]): CSSProperties {
   const v = (theme ?? mindManagerTheme).cssVar;
@@ -393,6 +398,38 @@ function FlowInner({
   const braces = useMemo<BraceGroup[]>(
     () => (direction === "brace" ? computeBraces(renderDoc) : []),
     [direction, renderDoc],
+  );
+
+  // Stable array refs for the boundary + summary overlays: the raw `?? []` fallback would mint a new
+  // empty array on every render and defeat those components' React.memo. When the doc actually has
+  // boundaries/summaries the ref is already stable (same doc → same array), so this only pins the
+  // empty-case identity. The overlays are memoised, so a stable ref lets them skip unrelated renders.
+  const boundaries = renderDoc.boundaries ?? EMPTY_BOUNDARIES;
+  const summaries = renderDoc.summaries ?? EMPTY_SUMMARIES;
+
+  // Stable overlay callbacks (deps: the stable `apply`) so the memoised Summaries/Callouts aren't
+  // re-rendered by a fresh inline closure every render. Each reads docRef.current for live state.
+  const handleRenameSummary = useCallback(
+    (sid: string) => {
+      const current = (docRef.current.summaries ?? []).find((s) => s.id === sid);
+      const next = window.prompt("Summary label (leave empty to remove):", current?.label ?? "");
+      if (next === null) return; // cancelled
+      apply(
+        next.trim()
+          ? setSummaryLabel(docRef.current, sid, next)
+          : deleteSummary(docRef.current, sid),
+      );
+    },
+    [apply],
+  );
+  const handleCommitCallout = useCallback(
+    (nid: string, cid: string, text: string) =>
+      apply(setCalloutText(docRef.current, nid, cid, text)),
+    [apply],
+  );
+  const handleDeleteCallout = useCallback(
+    (nid: string, cid: string) => apply(deleteCallout(docRef.current, nid, cid)),
+    [apply],
   );
 
   // Keep node selection flags in sync with selectedId (no re-layout).
@@ -729,27 +766,12 @@ function FlowInner({
           <BackgroundImage url={renderDoc.meta?.backgroundImage} />
           <DiagramBackdrop backdrop={renderDoc.backdrop} />
           <BraceConnectors braces={braces} />
-          <Boundaries boundaries={renderDoc.boundaries ?? []} />
-          <Summaries
-            summaries={renderDoc.summaries ?? []}
-            onRename={(sid) => {
-              const current = (docRef.current.summaries ?? []).find((s) => s.id === sid);
-              const next = window.prompt(
-                "Summary label (leave empty to remove):",
-                current?.label ?? "",
-              );
-              if (next === null) return; // cancelled
-              apply(
-                next.trim()
-                  ? setSummaryLabel(docRef.current, sid, next)
-                  : deleteSummary(docRef.current, sid),
-              );
-            }}
-          />
+          <Boundaries boundaries={boundaries} />
+          <Summaries summaries={summaries} onRename={handleRenameSummary} />
           <Callouts
             items={calloutItems}
-            onCommit={(nid, cid, text) => apply(setCalloutText(docRef.current, nid, cid, text))}
-            onDelete={(nid, cid) => apply(deleteCallout(docRef.current, nid, cid))}
+            onCommit={handleCommitCallout}
+            onDelete={handleDeleteCallout}
           />
           <Controls showInteractive={false} />
           {minimapOpen ? (

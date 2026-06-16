@@ -1,4 +1,5 @@
 import { ViewportPortal } from "@xyflow/react";
+import { memo } from "react";
 import type { Backdrop } from "../../model/types";
 import { backdropGeometry } from "./backdrop";
 
@@ -6,7 +7,9 @@ import { backdropGeometry } from "./backdrop";
 // space via ViewportPortal so it pans/zooms with the map. Pure frame — region labels are ordinary
 // topics. Geometry comes from ./backdrop so the SVG export matches.
 
-export function DiagramBackdrop({ backdrop }: { backdrop: Backdrop | undefined }) {
+// Memoised: the `backdrop` prop is a stable reference straight off the live doc, so this re-renders
+// only when the backdrop actually changes — not on every pan/selection/menu re-render of the canvas.
+function DiagramBackdrop({ backdrop }: { backdrop: Backdrop | undefined }) {
   if (!backdrop) return null;
   const { shapes, bbox } = backdropGeometry(backdrop);
   if (shapes.length === 0) return null;
@@ -44,3 +47,6 @@ export function DiagramBackdrop({ backdrop }: { backdrop: Backdrop | undefined }
     </ViewportPortal>
   );
 }
+
+const MemoDiagramBackdrop = memo(DiagramBackdrop);
+export { MemoDiagramBackdrop as DiagramBackdrop };

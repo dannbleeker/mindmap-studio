@@ -1,4 +1,5 @@
 import { type EdgeProps, useInternalNode } from "@xyflow/react";
+import { memo } from "react";
 import { getFloatingPoints } from "./floating";
 import type { FlowEdge } from "./types";
 
@@ -42,7 +43,11 @@ export function taperedRibbonPath(
   ].join(" ");
 }
 
-export function BranchEdge({ source, target, data }: EdgeProps<FlowEdge>) {
+// Memoised: React Flow re-renders every edge when the edge array changes. The geometry tracks live
+// node movement through `useInternalNode` (a store subscription memo never blocks), so memo only
+// skips the redundant re-renders driven by unrelated parent state — the props (`source`/`target`/
+// `data`) shallow-compare equal except when colour/depth/dimming actually change.
+function BranchEdgeImpl({ source, target, data }: EdgeProps<FlowEdge>) {
   const s = useInternalNode(source);
   const t = useInternalNode(target);
   if (!s || !t) return null;
@@ -58,3 +63,5 @@ export function BranchEdge({ source, target, data }: EdgeProps<FlowEdge>) {
     />
   );
 }
+
+export const BranchEdge = memo(BranchEdgeImpl);

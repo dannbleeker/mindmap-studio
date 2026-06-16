@@ -7,6 +7,7 @@ import {
   useInternalNode,
   useNodes,
 } from "@xyflow/react";
+import { memo, useMemo } from "react";
 import { arrowHeadPath } from "./arrowhead";
 import { type Box, floatingPoints, getFloatingPoints } from "./floating";
 import { type HopSegment, hopPath } from "./lineJumps";
@@ -56,13 +57,29 @@ function collectSegments(
 // wide bezier hit-area + arrowhead + label are unchanged (the gentle curve keeps the hit-area within
 // reach of the chord), so rename/delete still work.
 
-export function CrosslinkEdge({ id, source, target, label, data }: EdgeProps<FlowEdge>) {
+function CrosslinkEdgeImpl({ id, source, target, label, data }: EdgeProps<FlowEdge>) {
   const s = useInternalNode(source);
   const t = useInternalNode(target);
   // Subscribe to all nodes + edges so the hops re-compute live as ANY node moves or a relationship
   // is added/removed (not just when THIS edge's own endpoints move).
   const nodes = useNodes();
   const edges = useEdges<FlowEdge>();
+  const lineJumps = data?.lineJumps;
+  // Line-jumps are O(nodes) to build the box map + O(crosslinks²) to scan crossings — far too much
+  // to redo on every render (every parent re-render, hover, selection change). React Flow hands us a
+  // fresh `nodes` array reference whenever any node moves (drag) or is added/removed, and a fresh
+  // `edges` array when relationships change, so keying the memo on (nodes, edges, id, lineJumps)
+  // recomputes exactly when the geometry that feeds the hops actually changes — and caches every
+  // other render. Identical output to the previous per-render compute; just not repeated needlessly.
+  const hopPathStr = useMemo(() => {
+    if (!lineJumps) return null;
+    const nodeBox = new Map<string, Box>();
+    for (const n of nodes) nodeBox.set(n.id, boxOfNode(n));
+    const crosslinks = edges.filter((e) => (e.data as EdgeData | undefined)?.crosslink);
+    const segs = collectSegments(crosslinks, nodeBox);
+    const self = segs.find((seg) => seg.id === id);
+    return self ? hopPath(self, segs) : null;
+  }, [nodes, edges, id, lineJumps]);
   if (!s || !t) return null;
   const { sx, sy, tx, ty } = getFloatingPoints(s, t);
   // The bezier carries the wide invisible hit-area (and is the visible line when line-jumps is off).
@@ -75,15 +92,7 @@ export function CrosslinkEdge({ id, source, target, label, data }: EdgeProps<Flo
   const color = data?.branchColor ?? CROSSLINK_COLOR;
   const dimOpacity = data?.dimmed ? 0.12 : 1;
 
-  let visiblePath = bezier;
-  if (data?.lineJumps) {
-    const nodeBox = new Map<string, Box>();
-    for (const n of nodes) nodeBox.set(n.id, boxOfNode(n));
-    const crosslinks = edges.filter((e) => (e.data as EdgeData | undefined)?.crosslink);
-    const segs = collectSegments(crosslinks, nodeBox);
-    const self = segs.find((seg) => seg.id === id);
-    if (self) visiblePath = hopPath(self, segs);
-  }
+  const visiblePath = hopPathStr ?? bezier;
 
   return (
     <>
@@ -120,3 +129,8 @@ export function CrosslinkEdge({ id, source, target, label, data }: EdgeProps<Flo
     </>
   );
 }
+
+// Memoised: like the other flow components, the props shallow-compare equal across unrelated parent
+// re-renders, while the live geometry (node movement, relationship add/remove, line-jump recompute)
+// flows through the store-subscribing hooks + the useMemo above — neither of which memo blocks.
+export const CrosslinkEdge = memo(CrosslinkEdgeImpl);

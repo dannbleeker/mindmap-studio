@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-16T03:50:48.213Z",
-  "commit": "5ad191e",
+  "generatedAt": "2026-06-16T05:11:14.693Z",
+  "commit": "246da19",
   "headline": {
-    "linesTsJs": 25521,
-    "tests": 581,
-    "lineCoveragePct": 44.32,
-    "commits": 390,
+    "linesTsJs": 26801,
+    "tests": 674,
+    "lineCoveragePct": 54.9,
+    "commits": 392,
     "ageDays": 4,
-    "trackedFiles": 241,
+    "trackedFiles": 247,
     "featureManualPct": 100,
     "featureBookPct": 100,
     "featureExamplePct": 54.5
@@ -15,13 +15,13 @@
   "code": [
     {
       "category": "App code (src)",
-      "files": 112,
-      "lines": 16882
+      "files": 113,
+      "lines": 16887
     },
     {
       "category": "Unit tests",
-      "files": 69,
-      "lines": 6917
+      "files": 74,
+      "lines": 8192
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 44.32,
-      "covered": 5408,
-      "total": 12202
+      "pct": 54.9,
+      "covered": 6700,
+      "total": 12203
     },
     "statements": {
-      "pct": 44.32,
-      "covered": 5408,
-      "total": 12202
+      "pct": 54.9,
+      "covered": 6700,
+      "total": 12203
     },
     "functions": {
-      "pct": 87.08,
-      "covered": 418,
-      "total": 480
+      "pct": 82.72,
+      "covered": 479,
+      "total": 579
     },
     "branches": {
-      "pct": 83.91,
-      "covered": 1831,
-      "total": 2182
+      "pct": 84.18,
+      "covered": 2018,
+      "total": 2397
     }
   },
   "tests": {
-    "unit": 581,
+    "unit": 674,
     "e2e": 0,
-    "durationMs": 11402,
+    "durationMs": 15070,
     "slowest": [
       {
         "file": "test/book-build.test.ts",
-        "ms": 3411
+        "ms": 3157
       },
       {
-        "file": "test/pptx.test.ts",
-        "ms": 207
+        "file": "test/panels.test.tsx",
+        "ms": 2806
       },
       {
         "file": "test/xlsx-import.test.ts",
-        "ms": 131
+        "ms": 153
       },
       {
-        "file": "test/docx-import.test.ts",
-        "ms": 77
+        "file": "test/pptx.test.ts",
+        "ms": 152
       },
       {
-        "file": "test/xlsx.test.ts",
-        "ms": 71
+        "file": "test/hooks.test.tsx",
+        "ms": 105
       }
     ]
   },
@@ -99,7 +99,7 @@
   },
   "footprint": {
     "depsProd": 7,
-    "depsDev": 18,
+    "depsDev": 21,
     "biggestFiles": [
       {
         "name": "App.tsx",
@@ -143,7 +143,7 @@
         "pct": 0
       },
       {
-        "file": "Panels.tsx",
+        "file": "components/start/CaptureCard.tsx",
         "pct": 0
       }
     ],
@@ -181,19 +181,19 @@
         "commits": 33
       },
       {
-        "file": "Panels.tsx",
-        "pct": 0,
-        "commits": 23
-      },
-      {
         "file": "mindmap/flow/TopicNode.tsx",
         "pct": 0,
         "commits": 16
       },
       {
         "file": "useMapExports.ts",
-        "pct": 0,
+        "pct": 36.6,
         "commits": 14
+      },
+      {
+        "file": "mindmap/flow/CrosslinkEdge.tsx",
+        "pct": 0,
+        "commits": 8
       }
     ]
   },
@@ -208,7 +208,7 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 225.7,
+    "jsGzipKb": 225.8,
     "cssGzipKb": 4.9,
     "totalGzipKb": 230.7,
     "entryGzipKb": 107.9,
@@ -218,7 +218,7 @@
   "docs": {
     "bookWords": 14240,
     "chapters": 11,
-    "appLoc": 16882,
+    "appLoc": 16887,
     "docToCodeRatio": 0.84
   },
   "featureCoverage": {
@@ -299,22 +299,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 4,
-    "commits": 390,
-    "commits7d": 390,
+    "commits": 392,
+    "commits7d": 392,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 217
+        "count": 218
       },
       {
         "name": "github-actions[bot]",
-        "count": 173
+        "count": 174
       }
     ],
     "churn30d": {
-      "added": 53847,
-      "removed": 14833
+      "added": 55311,
+      "removed": 14882
     },
-    "changelogEntries": 126
+    "changelogEntries": 127
   }
 }

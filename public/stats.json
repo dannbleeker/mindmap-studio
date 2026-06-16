@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-16T20:55:49.480Z",
-  "commit": "76352e3",
+  "generatedAt": "2026-06-16T21:11:49.804Z",
+  "commit": "870605e",
   "headline": {
-    "linesTsJs": 30015,
+    "linesTsJs": 30018,
     "tests": 790,
     "lineCoveragePct": 53.05,
-    "commits": 415,
+    "commits": 417,
     "ageDays": 5,
     "trackedFiles": 262,
     "featureManualPct": 100,
@@ -16,7 +16,7 @@
     {
       "category": "App code (src)",
       "files": 122,
-      "lines": 18476
+      "lines": 18479
     },
     {
       "category": "Unit tests",
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 790,
     "e2e": 0,
-    "durationMs": 18467,
+    "durationMs": 18225,
     "slowest": [
       {
         "file": "test/panels.test.tsx",
-        "ms": 5561
+        "ms": 5523
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3566
+        "ms": 3576
       },
       {
         "file": "test/dashboard.test.ts",
-        "ms": 682
+        "ms": 663
       },
       {
         "file": "test/pptx.test.ts",
-        "ms": 162
+        "ms": 147
       },
       {
-        "file": "test/xlsx-import.test.ts",
-        "ms": 136
+        "file": "test/hooks.test.tsx",
+        "ms": 143
       }
     ]
   },
@@ -211,14 +211,14 @@
     "jsGzipKb": 230.9,
     "cssGzipKb": 5.9,
     "totalGzipKb": 236.7,
-    "entryGzipKb": 112.7,
+    "entryGzipKb": 112.6,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 14240,
     "chapters": 11,
-    "appLoc": 18476,
+    "appLoc": 18479,
     "docToCodeRatio": 0.77
   },
   "featureCoverage": {
@@ -299,22 +299,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 5,
-    "commits": 415,
-    "commits7d": 415,
+    "commits": 417,
+    "commits7d": 417,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 232
+        "count": 233
       },
       {
         "name": "github-actions[bot]",
-        "count": 183
+        "count": 184
       }
     ],
     "churn30d": {
-      "added": 61855,
-      "removed": 17730
+      "added": 61924,
+      "removed": 17787
     },
-    "changelogEntries": 134
+    "changelogEntries": 135
   }
 }

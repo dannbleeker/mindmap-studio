@@ -135,9 +135,9 @@ function TopicNodeImpl({ id, data }: NodeProps<TopicNodeT>) {
 
   const box: CSSProperties = isRoot
     ? {
-        background: "var(--mm-root-bg, #26215c)",
+        background: "var(--mm-root-bg, #1b8a5e)",
         color: "var(--mm-root-color, #ffffff)",
-        borderRadius: 26,
+        borderRadius: 14,
         padding: "8px 18px",
         fontWeight: 700,
         border: "none",
@@ -154,10 +154,10 @@ function TopicNodeImpl({ id, data }: NodeProps<TopicNodeT>) {
           textDecoration: style?.textDecoration,
         }
       : {
-          background: style?.background ?? "var(--mm-node-bg, #faf9f5)",
-          color: style?.color ?? "var(--mm-color, #2c2c2a)",
-          border: style?.border ?? `2px solid ${branchColor}`,
-          borderRadius: style?.borderRadius ?? "16px",
+          background: style?.background ?? "var(--mm-node-bg, #ffffff)",
+          color: style?.color ?? "var(--mm-color, #23211c)",
+          border: style?.border ?? `1.5px solid ${branchColor}`,
+          borderRadius: style?.borderRadius ?? "11px",
           padding: "6px 12px",
           fontSize: style?.fontSize,
           fontWeight: style?.fontWeight,
@@ -173,7 +173,11 @@ function TopicNodeImpl({ id, data }: NodeProps<TopicNodeT>) {
         boxSizing: "border-box",
         maxWidth: 320,
         lineHeight: 1.35,
-        boxShadow: geom ? "none" : "0 1px 2px rgba(0,0,0,0.12)",
+        boxShadow: geom
+          ? "none"
+          : isRoot
+            ? "0 6px 18px rgba(27,138,94,0.30)"
+            : "0 2px 8px rgba(40,30,16,0.10)",
         // Read-only Power Filter: fade nodes that aren't on a path to a match.
         opacity: dimmed ? 0.22 : 1,
         transition: "opacity 0.15s ease",

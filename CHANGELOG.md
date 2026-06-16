@@ -13,8 +13,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   chrome, replacing the old indigo-root + MindManager-red palette. Because `exportSvg` is handed the
   same palette + cssVars as the live canvas, every PNG / SVG / PDF / Office export stays
   byte-faithful (**canvas == export** — verified: the exported SVG carries the emerald root and warm
-  branch colours, no stale palette). Ocean / Sunset themes are unchanged. (Node-card detailing, badges
-  and the inline popover are later phase-2 increments.)
+  branch colours, no stale palette). Ocean / Sunset themes are unchanged. **Node cards** are also
+  detailed to match the mock — the root is a rounded **card** (radius 14, not a pill) with a soft
+  emerald elevation, branch/leaf cards get a lighter 1.5px branch border + warm shadow and a tighter
+  radius (11) — with the radii and border mirrored in `exportSvg.ts` so the screen and exports stay
+  identical (verified: root rx 14 = canvas 14px, branch rx 11 = canvas 11px, border 1.5 = 1.5).
+  (On-canvas status/priority badges and the inline popover are later phase-2 increments.)
 
 - **Editor chrome redesign (phase 1 of 2)** — the editor adopts the warm-cream + emerald visual
   language already shipped on the Start screen. A new **56px icon rail** (brand → Start, find, insert

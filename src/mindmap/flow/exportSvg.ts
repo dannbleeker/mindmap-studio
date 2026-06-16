@@ -374,10 +374,11 @@ export function buildFlowSvg(
     const pad = d.isRoot ? ROOT_PAD : PAD;
     const fill = d.isRoot ? rootBg : (st?.background ?? nodeBg);
     const textColor = d.isRoot ? rootColor : (st?.color ?? color);
-    const radius = d.isRoot ? 22 : Number.parseFloat(st?.borderRadius ?? "16") || 16;
+    // Card radii + default branch border match the canvas TopicNode (canvas == export).
+    const radius = d.isRoot ? 14 : Number.parseFloat(st?.borderRadius ?? "11") || 11;
     const border = d.isRoot
       ? null
-      : (parseBorder(st?.border) ?? { width: 2, color: d.branchColor });
+      : (parseBorder(st?.border) ?? { width: 1.5, color: d.branchColor });
     const strokeAttr = border
       ? ` stroke="${esc(border.color)}" stroke-width="${border.width}"`
       : "";

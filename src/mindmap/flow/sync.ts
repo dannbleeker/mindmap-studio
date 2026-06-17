@@ -66,6 +66,10 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
     if (prev?.callouts) node.callouts = prev.callouts;
     if (prev?.pos) node.pos = prev.pos;
     if (prev?.layout) node.layout = prev.layout;
+    // Per-node timestamps aren't in TopicData (never rendered) — carry by id, only when present, so
+    // a timestamp-free doc round-trips to itself (never invent them here).
+    if (prev?.createdAt !== undefined) node.createdAt = prev.createdAt;
+    if (prev?.modifiedAt !== undefined) node.modifiedAt = prev.modifiedAt;
     // Collapsed → its subtree isn't in the projection; restore it verbatim from prevDoc.
     node.children = data?.collapsed
       ? (prev?.children ?? [])

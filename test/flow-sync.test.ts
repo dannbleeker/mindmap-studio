@@ -68,6 +68,24 @@ describe("flow fromFlow (React Flow → model)", () => {
     expect(back.root.children.find((c) => c.id === "b")?.task).toEqual({ priority: 1 });
   });
 
+  it("carries per-node timestamps by id, and never invents them for a timestamp-free doc", () => {
+    // A node with timestamps round-trips them...
+    const stamped: MindMapDoc = {
+      schemaVersion: 1,
+      id: "ts",
+      title: "Root",
+      root: n("r", "Root", {}, [n("a", "Alpha", { createdAt: 111, modifiedAt: 222 }, [])]),
+    };
+    const a = roundTrip(stamped).root.children.find((c) => c.id === "a");
+    expect(a?.createdAt).toBe(111);
+    expect(a?.modifiedAt).toBe(222);
+    // ...and a timestamp-free node stays timestamp-free (the exact-equality round-trip above relies
+    // on fromFlow never stamping).
+    const back = roundTrip(simpleDoc).root.children[0];
+    expect(back.createdAt).toBeUndefined();
+    expect(back.modifiedAt).toBeUndefined();
+  });
+
   it("preserves an explicit node side, and omits it where there was none", () => {
     const back = roundTrip(doc);
     expect(back.root.children.find((c) => c.id === "a")?.side).toBe("right");

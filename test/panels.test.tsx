@@ -206,11 +206,13 @@ describe("InfoPanel", () => {
     fields?: SelectionFields,
     backlinks: Backlink[] = [],
     onFollowBacklink: (id: string) => void = noop,
+    times?: string,
   ) =>
     render(
       <InfoPanel
         selected={sel}
         selectedCount={count}
+        times={times}
         fields={fields}
         openNoteNonce={nonce}
         width={300}
@@ -253,6 +255,23 @@ describe("InfoPanel", () => {
     expect(screen.getByRole("tab", { name: "Details" })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Style" })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Notes" })).toBeTruthy();
+  });
+
+  it("renders the created/modified times line when provided, and omits it when empty", () => {
+    const { unmount } = renderInfo(
+      selected,
+      node,
+      undefined,
+      undefined,
+      undefined,
+      [],
+      noop,
+      "created 2h ago · modified 1h ago",
+    );
+    expect(screen.getByText("created 2h ago · modified 1h ago")).toBeTruthy();
+    unmount();
+    renderInfo(selected, node); // no times → line absent
+    expect(screen.queryByText(/created .* ago/)).toBeNull();
   });
 
   it("opens on the Details tab (tags / dates / priority / links); the note editor is not mounted yet", () => {

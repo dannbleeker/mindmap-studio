@@ -111,6 +111,13 @@ export interface MapNode {
    *  are replaced with a fresh copy of that map's branches — so one map can aggregate several others.
    *  Lossless in .json, ignored by flat exporters. */
   rollup?: string;
+  /** Created (ms epoch), stamped when the node is born. Lossless in .json, ignored by flat exporters
+   *  and never drawn on the canvas; shown in the inspector facts line. Optional → pre-timestamp maps
+   *  are valid and backfill `createdAt` on their first content edit. */
+  createdAt?: number;
+  /** Last content-edit time (ms epoch), bumped on any content/property edit (not pure restructuring).
+   *  Lossless in .json, ignored by flat exporters; shown in the inspector facts line. */
+  modifiedAt?: number;
 }
 
 /** A labelled cross-link between two nodes (MindManager "relationship"). The optional style fields

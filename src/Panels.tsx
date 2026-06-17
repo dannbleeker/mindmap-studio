@@ -1067,6 +1067,7 @@ export function InfoPanel({
   onResize,
   breadcrumb,
   facts,
+  times,
 }: {
   selected: SelectedNode | null;
   /** Number of nodes selected on the canvas; >1 puts the panel in bulk-edit mode. */
@@ -1083,6 +1084,8 @@ export function InfoPanel({
   breadcrumb?: string;
   /** Quick-facts line (outline no · depth · children · note size). */
   facts?: string;
+  /** Second facts line: created / modified times (only when the node carries them). */
+  times?: string;
   node: MapNode | null;
   noteDraft: string;
   onNoteChange: (value: string) => void;
@@ -1239,7 +1242,7 @@ export function InfoPanel({
             ›
           </button>
         </div>
-        {node && !multi && (breadcrumb || facts) ? (
+        {node && !multi && (breadcrumb || facts || times) ? (
           <div style={{ marginTop: 4 }}>
             {breadcrumb ? (
               <div className="mm-inspector-path" title={breadcrumb}>
@@ -1249,6 +1252,11 @@ export function InfoPanel({
             {facts ? (
               <div className="mm-inspector-path" style={{ marginTop: 1 }}>
                 {facts}
+              </div>
+            ) : null}
+            {times ? (
+              <div className="mm-inspector-path" style={{ marginTop: 1 }}>
+                {times}
               </div>
             ) : null}
           </div>

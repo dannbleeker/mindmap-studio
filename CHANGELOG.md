@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Per-node timestamps.** Every topic now tracks when it was **created** and **last edited**; both
+  show in the inspector's quick-facts line (e.g. *created 2h ago · modified just now*) and are saved
+  losslessly in the `.json`. Editing a topic's content (text, note, style, task, tags, markers,
+  links, …) updates *modified*; pure restructuring (moving/collapsing) doesn't. They're never drawn
+  on the canvas or in image / PDF exports.
+
 - **Diagram-backdrop controls in the inspector.** When the map has an onion / funnel / Venn
   backdrop, the Map panel shows a **Backdrop** section — add or remove a **ring / stage** (onion &
   funnel) and **Remove** the backdrop — so you can adjust it without opening the toolbar's Canvas

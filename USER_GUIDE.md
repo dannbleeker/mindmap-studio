@@ -108,7 +108,9 @@ one is focused. **Minimize** it with the **›** button to collapse it to a thin
 on the right edge (click the strip's ℹ to bring it back) — minimizing sticks, so selecting other
 nodes won't reopen it; re-expanding shows whatever node is selected then. **Drag the panel's left
 edge to resize it** (the width is remembered); the header shows the topic's path (Root › Branch …)
-and a facts line — outline number, depth, child count, and note size.
+and a facts line — outline number, depth, child count, and note size — plus, once a topic has been
+created or edited, a **created / last-edited** line. (Those times are saved in the map's `.json` but
+never drawn on the canvas or in image / PDF exports.)
 
 **Edit several topics at once.** Select multiple topics — **Shift/Ctrl/⌘-click** to add to the
 selection, or **drag a box** across the empty canvas — and the inspector switches to bulk mode (an

@@ -31,6 +31,29 @@ function makeId(): string {
     : `n-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`;
 }
 
+// The ONE clock the ops use to stamp node timestamps (createdAt/modifiedAt). Hidden behind a seam —
+// like makeId hides crypto — so tests can freeze it (`__setOpsClock`) and stay deterministic.
+let opsClock = () => Date.now();
+/** Test-only: inject a fixed clock so timestamp-stamping ops are deterministic. */
+export function __setOpsClock(fn: () => number): void {
+  opsClock = fn;
+}
+/** Test-only: restore the real clock. */
+export function __resetOpsClock(): void {
+  opsClock = () => Date.now();
+}
+
+/** Stamp a freshly-born node: createdAt = modifiedAt = t. */
+function birth(n: MapNode, t: number): void {
+  n.createdAt = t;
+  n.modifiedAt = t;
+}
+/** Mark a node content-edited at t (backfilling createdAt for pre-timestamp nodes). */
+function touch(n: MapNode, t: number): void {
+  if (n.createdAt === undefined) n.createdAt = t;
+  n.modifiedAt = t;
+}
+
 interface Located {
   node: MapNode;
   parent: MapNode | null;
@@ -132,6 +155,7 @@ export function addSibling(doc: MindMapDoc, id: string): OpResult {
   if (!loc) return { doc };
   if (!loc.parent) return addChild(doc, id);
   const sib: MapNode = { id: makeId(), topic: "", children: [] };
+  birth(sib, opsClock());
   loc.parent.children.splice(loc.index + 1, 0, sib);
   return { doc: next, selectId: sib.id };
 }
@@ -142,6 +166,7 @@ export function addChild(doc: MindMapDoc, id: string): OpResult {
   const loc = locate(next.root, id);
   if (!loc) return { doc };
   const child: MapNode = { id: makeId(), topic: "", children: [] };
+  birth(child, opsClock());
   loc.node.children.push(child);
   loc.node.collapsed = false;
   return { doc: next, selectId: child.id };
@@ -234,6 +259,7 @@ export function setTopic(doc: MindMapDoc, id: string, topic: string): OpResult {
   if (!loc) return { doc };
   loc.node.topic = topic;
   if (!loc.parent) next.title = topic || next.title;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -254,6 +280,7 @@ export function setTopicRich(
   loc.node.topic = plain;
   loc.node.topicRich = rich || undefined;
   if (!loc.parent) next.title = plain || next.title;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -285,12 +312,16 @@ export function setNote(doc: MindMapDoc, id: string, note: string): OpResult {
   // A blank or whitespace-only note is "no note" — clear it so the 📝 indicator disappears
   // (matches the Outline panel, which has always judged notes by their trimmed content).
   loc.node.note = note.trim() ? note : undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
-/** Deep-clone a subtree with fresh ids (so grafted/pasted nodes never collide with existing ones). */
+/** Deep-clone a subtree with fresh ids (so grafted/pasted nodes never collide with existing ones).
+ *  Re-id'd nodes are newly born, so each gets created = modified = now. */
 function reId(node: MapNode): MapNode {
-  return { ...node, id: makeId(), children: node.children.map(reId) };
+  const cloned: MapNode = { ...node, id: makeId(), children: node.children.map(reId) };
+  birth(cloned, opsClock());
+  return cloned;
 }
 
 /** Graft a forest of nodes (e.g. parsed from pasted text) as children of a node; expands it.
@@ -333,6 +364,7 @@ export function addFloatingTopic(doc: MindMapDoc, topic: string, hyperlink?: str
     children: [],
     ...(hyperlink ? { hyperlink } : {}),
   };
+  birth(node, opsClock());
   next.floatingTopics = [...(next.floatingTopics ?? []), node];
   return { doc: next, selectId: node.id };
 }
@@ -358,6 +390,7 @@ export function addStickyNote(doc: MindMapDoc, text = "Note"): OpResult {
     style: { ...STICKY_NOTE_STYLE },
     pos: { x: 40 + n * 24, y: 40 + n * 24 },
   };
+  birth(node, opsClock());
   next.floatingTopics = [...(next.floatingTopics ?? []), node];
   return { doc: next, selectId: node.id };
 }
@@ -368,6 +401,7 @@ export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   const loc = locate(next.root, id);
   if (!loc) return { doc };
   loc.node.tags = tags.length > 0 ? tags : undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -381,6 +415,7 @@ function patchTask(doc: MindMapDoc, id: string, patch: Partial<TaskInfo>): OpRes
   for (const [k, v] of Object.entries({ ...(loc.node.task ?? {}), ...patch }))
     if (v !== undefined && v !== "") (merged as Record<string, unknown>)[k] = v;
   loc.node.task = Object.keys(merged).length > 0 ? merged : undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -441,6 +476,7 @@ export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult
   const loc = locate(next.root, id);
   if (!loc) return { doc };
   loc.node.hyperlink = url || undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -450,6 +486,7 @@ export function addAttachment(doc: MindMapDoc, id: string, attachment: MapAttach
   const loc = locate(next.root, id);
   if (!loc) return { doc };
   loc.node.attachments = [...(loc.node.attachments ?? []), attachment];
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -460,6 +497,7 @@ export function removeAttachment(doc: MindMapDoc, id: string, index: number): Op
   if (!loc?.node.attachments) return { doc };
   const kept = loc.node.attachments.filter((_, i) => i !== index);
   loc.node.attachments = kept.length > 0 ? kept : undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -469,6 +507,7 @@ export function setImage(doc: MindMapDoc, id: string, image: MapImage): OpResult
   const loc = locate(next.root, id);
   if (!loc) return { doc };
   loc.node.image = image;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -482,6 +521,7 @@ export function toggleIcon(doc: MindMapDoc, id: string, icon: string): OpResult 
   if (i >= 0) icons.splice(i, 1);
   else icons.push(icon);
   loc.node.icons = icons.length > 0 ? icons : undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -495,6 +535,7 @@ export function addCallout(doc: MindMapDoc, nodeId: string): OpResult {
   const callouts = loc.node.callouts ?? [];
   const callout: Callout = { id: makeId(), text: "Note", dx: 48, dy: -28 + callouts.length * 46 };
   loc.node.callouts = [...callouts, callout];
+  touch(loc.node, opsClock());
   return { doc: next, selectId: nodeId };
 }
 
@@ -510,6 +551,7 @@ export function setCalloutText(
   const callout = loc?.node.callouts?.find((c) => c.id === calloutId);
   if (!callout) return { doc };
   callout.text = text;
+  if (loc) touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -520,6 +562,7 @@ export function deleteCallout(doc: MindMapDoc, nodeId: string, calloutId: string
   if (!loc?.node.callouts) return { doc };
   const kept = loc.node.callouts.filter((c) => c.id !== calloutId);
   loc.node.callouts = kept.length > 0 ? kept : undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -679,6 +722,7 @@ export function mergeStyle(doc: MindMapDoc, id: string, patch: Partial<NodeStyle
     else merged[k] = v;
   }
   loc.node.style = Object.keys(merged).length > 0 ? (merged as NodeStyle) : undefined;
+  touch(loc.node, opsClock());
   return { doc: next };
 }
 
@@ -691,6 +735,7 @@ export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): O
   const walk = (n: MapNode): boolean => {
     if (n.id === id) {
       n.pos = { x, y };
+      touch(n, opsClock());
       return true;
     }
     return n.children.some(walk);
@@ -740,6 +785,7 @@ export function setNodeLayout(doc: MindMapDoc, id: string, kind: string | undefi
   const walk = (n: MapNode): boolean => {
     if (n.id === id) {
       n.layout = kind || undefined;
+      touch(n, opsClock());
       return true;
     }
     return n.children.some(walk);
@@ -765,6 +811,7 @@ export function setRollup(doc: MindMapDoc, id: string, mapId: string | undefined
   const walk = (n: MapNode): boolean => {
     if (n.id === id) {
       n.rollup = mapId || undefined;
+      touch(n, opsClock());
       return true;
     }
     return n.children.some(walk);

@@ -224,7 +224,7 @@ export function App() {
   // Inspector header breadcrumb (ancestor path) + quick-facts line (outline number, depth, child
   // count, note size). Memoised so the whole-tree outline-number walk only reruns on doc/selection.
   const inspectorInfo = useMemo(() => {
-    if (!selected || !selectedNode) return { breadcrumb: "", facts: "" };
+    if (!selected || !selectedNode) return { breadcrumb: "", facts: "", times: "" };
     const path = nodePath(liveDoc, selected.id);
     const breadcrumb = (path?.ancestors ?? []).map((a) => a.topic || "(untitled)").join(" › ");
     const outlineNo = outlineNumbers(liveDoc.root).get(selected.id);
@@ -238,7 +238,14 @@ export function App() {
     ]
       .filter(Boolean)
       .join(" · ");
-    return { breadcrumb, facts };
+    // Created / modified (when the node carries them) — a second, fainter facts line via timeAgo.
+    const times = [
+      selectedNode.createdAt ? `created ${timeAgo(selectedNode.createdAt)}` : null,
+      selectedNode.modifiedAt ? `modified ${timeAgo(selectedNode.modifiedAt)}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    return { breadcrumb, facts, times };
   }, [selected, selectedNode, liveDoc]);
   // Topics that point AT the selected node (incoming #node= links + relationship edges) — the
   // inspector's "Linked from" jumps. Memoised on the live doc + selection so it doesn't re-walk the
@@ -1300,6 +1307,7 @@ export function App() {
                 onResize={panels.setInspectorWidth}
                 breadcrumb={inspectorInfo.breadcrumb}
                 facts={inspectorInfo.facts}
+                times={inspectorInfo.times}
                 node={selectedNode}
                 noteDraft={noteDraft}
                 onNoteChange={onNoteChange}

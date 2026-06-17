@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  __resetOpsClock,
+  __setOpsClock,
   addAttachment,
   addChild,
   addFloatingTopic,
@@ -80,6 +82,11 @@ const base = (): MindMapDoc => ({
 });
 
 const kids = (doc: MindMapDoc, id: string) => findNode(doc, id)?.children.map((c) => c.id) ?? [];
+
+// Freeze the ops clock so timestamp-stamping ops (create/content) are deterministic across the suite.
+const CLOCK = 1_700_000_000_000;
+beforeEach(() => __setOpsClock(() => CLOCK));
+afterEach(() => __resetOpsClock());
 
 describe("flow ops — structural", () => {
   it("addSibling inserts after the target under the same parent", () => {
@@ -855,5 +862,56 @@ describe("selectionFields", () => {
     const f = selectionFields(d, ["a", fid, "ghost"]);
     expect(f.count).toBe(2); // "ghost" doesn't resolve → not counted
     expect(f.mixed.priority).toBe(true); // 1 vs 3
+  });
+});
+
+describe("flow ops — node timestamps", () => {
+  it("stamps a freshly-created node with createdAt === modifiedAt === clock", () => {
+    const { doc, selectId } = addChild(base(), "a");
+    const n = findNode(doc, selectId as string);
+    expect(n?.createdAt).toBe(CLOCK);
+    expect(n?.modifiedAt).toBe(CLOCK);
+  });
+
+  it("addSibling / addFloatingTopic / addStickyNote all birth with the clock", () => {
+    const sib = addSibling(base(), "a1");
+    expect(findNode(sib.doc, sib.selectId as string)?.createdAt).toBe(CLOCK);
+    const fl = addFloatingTopic(base(), "F");
+    expect(fl.doc.floatingTopics?.[0]?.modifiedAt).toBe(CLOCK);
+    const sticky = addStickyNote(base());
+    expect(sticky.doc.floatingTopics?.[0]?.createdAt).toBe(CLOCK);
+  });
+
+  it("a content edit bumps modifiedAt and preserves createdAt", () => {
+    const created = addChild(base(), "a");
+    const id = created.selectId as string;
+    __setOpsClock(() => CLOCK + 5000);
+    const n = findNode(setNote(created.doc, id, "hi").doc, id);
+    expect(n?.createdAt).toBe(CLOCK); // unchanged
+    expect(n?.modifiedAt).toBe(CLOCK + 5000); // bumped
+  });
+
+  it("backfills createdAt when a pre-timestamp node is first edited", () => {
+    // base() nodes carry no timestamps until touched.
+    expect(findNode(base(), "a")?.createdAt).toBeUndefined();
+    const n = findNode(setNote(base(), "a", "hi").doc, "a");
+    expect(n?.createdAt).toBe(CLOCK);
+    expect(n?.modifiedAt).toBe(CLOCK);
+  });
+
+  it("structural ops (indent/reparent/toggleCollapse) do NOT bump modifiedAt", () => {
+    const seeded = setNote(base(), "a1", "x").doc; // a1.modifiedAt = CLOCK
+    __setOpsClock(() => CLOCK + 9000);
+    const moved = indent(seeded, "a2").doc; // structural move of a2 under a1
+    expect(findNode(moved, "a1")?.modifiedAt).toBe(CLOCK); // a1 not bumped
+    expect(findNode(moved, "a2")?.modifiedAt).toBeUndefined(); // a2 never had one
+  });
+
+  it("re-id'd grafts (subtree/paste) are born now, not carrying the source's timestamp", () => {
+    const src: MapNode = { id: "x", topic: "X", createdAt: 1, modifiedAt: 1, children: [] };
+    const { doc, selectId } = addSubtree(base(), "b", [src]);
+    const graft = findNode(doc, selectId as string);
+    expect(graft?.createdAt).toBe(CLOCK);
+    expect(graft?.modifiedAt).toBe(CLOCK);
   });
 });

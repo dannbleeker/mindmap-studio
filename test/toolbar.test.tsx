@@ -29,7 +29,7 @@ function mockHandle(): MindMapHandle {
   });
 }
 
-function setup(over: { selected?: SelectedNode | null } = {}) {
+function setup(over: { selected?: SelectedNode | null; isMobile?: boolean } = {}) {
   const handle = mockHandle();
   const mapRef = createRef<MindMapHandle>() as RefObject<MindMapHandle | null>;
   mapRef.current = handle;
@@ -123,7 +123,7 @@ function setup(over: { selected?: SelectedNode | null } = {}) {
   const showHint = vi.fn();
   render(
     <Toolbar
-      isMobile={false}
+      isMobile={over.isMobile ?? false}
       mapRef={mapRef}
       nav={nav}
       panels={panels}
@@ -342,5 +342,15 @@ describe("Toolbar — menu a11y parity net", () => {
     expect(checks.length).toBeGreaterThanOrEqual(6);
     // All side panels start closed in the mocked props → every checkbox reads unchecked.
     for (const c of checks) expect(c.getAttribute("aria-checked")).toBe("false");
+  });
+
+  it("renders + works in mobile mode (rows scroll instead of wrapping)", async () => {
+    const t = setup({ isMobile: true });
+    // The grouped controls are all still present and wired in the single-row mobile layout.
+    expect(screen.getByRole("button", { name: /fit map/i })).toBeTruthy();
+    expect(screen.getByLabelText("Quick add topic")).toBeTruthy();
+    await u.click(screen.getByRole("button", { name: /^export/i }));
+    await u.click(screen.getByRole("menuitem", { name: /\.json/i }));
+    expect(t.io.exportJson).toHaveBeenCalled();
   });
 });

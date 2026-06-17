@@ -329,77 +329,80 @@ export function Toolbar({
             <span style={{ fontSize: 11, color: "var(--ed-muted)" }}>{find.matchInfo}</span>
           )}
         </form>
-        <Menu trigger={menuTrigger("export", "Export")} triggerTitle="Export" align="right">
-          {EXPORTS.map((g) => (
-            <div key={g.group}>
-              <MenuLabel>{g.group}</MenuLabel>
-              {g.items.map(([lbl, fn]) => (
-                <MenuItem key={lbl} label={lbl} onSelect={fn} />
-              ))}
-            </div>
-          ))}
-        </Menu>
-        <Menu trigger={menuTrigger("dots", "More")} triggerTitle="More" align="right">
-          {(close) => (
-            <>
-              <MenuLabel>Map</MenuLabel>
-              <MenuItem icon={mi("present")} label="Present" onSelect={() => map.present()} />
-              <MenuItem
-                icon={mi("copy")}
-                label="Duplicate map"
-                onSelect={() => map.duplicateMap()}
-              />
-              <MenuItem
-                icon={mi("grid")}
-                label="Add sheet to workbook"
-                onSelect={() => map.addSheet()}
-              />
-              <MenuItem
-                icon={mi("trash")}
-                label="Delete map"
-                danger
-                onSelect={() => map.deleteCurrent()}
-              />
-              <MenuSeparator />
-              <MenuLabel>Import / backup</MenuLabel>
-              <label className="mm-menu-item">
-                <EditorIcon name="import" size={15} /> Open files…
-                <input
-                  id="mmap-input"
-                  type="file"
-                  accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
-                  multiple
-                  onChange={(e) => {
-                    io.handleFile(e);
-                    close();
-                  }}
-                  style={{ display: "none" }}
+        {/* Export + More menus — output / overflow group. */}
+        <div className="mm-cluster">
+          <Menu trigger={menuTrigger("export", "Export")} triggerTitle="Export" align="right">
+            {EXPORTS.map((g) => (
+              <div key={g.group}>
+                <MenuLabel>{g.group}</MenuLabel>
+                {g.items.map(([lbl, fn]) => (
+                  <MenuItem key={lbl} label={lbl} onSelect={fn} />
+                ))}
+              </div>
+            ))}
+          </Menu>
+          <Menu trigger={menuTrigger("dots", "More")} triggerTitle="More" align="right">
+            {(close) => (
+              <>
+                <MenuLabel>Map</MenuLabel>
+                <MenuItem icon={mi("present")} label="Present" onSelect={() => map.present()} />
+                <MenuItem
+                  icon={mi("copy")}
+                  label="Duplicate map"
+                  onSelect={() => map.duplicateMap()}
                 />
-              </label>
-              <MenuItem
-                icon={mi("paste")}
-                label="Paste text → topics"
-                onSelect={() => nav.openPaste()}
-              />
-              <MenuItem
-                icon={mi("copy")}
-                label="Copy outline to clipboard"
-                onSelect={() => io.copyOutline()}
-              />
-              <MenuItem
-                icon={mi("export")}
-                label="Back up whole library"
-                onSelect={() => io.exportLibrary()}
-              />
-              <MenuSeparator />
-              <MenuItem
-                icon={mi("help")}
-                label="About MindMap Studio"
-                onSelect={() => nav.openAbout()}
-              />
-            </>
-          )}
-        </Menu>
+                <MenuItem
+                  icon={mi("grid")}
+                  label="Add sheet to workbook"
+                  onSelect={() => map.addSheet()}
+                />
+                <MenuItem
+                  icon={mi("trash")}
+                  label="Delete map"
+                  danger
+                  onSelect={() => map.deleteCurrent()}
+                />
+                <MenuSeparator />
+                <MenuLabel>Import / backup</MenuLabel>
+                <label className="mm-menu-item">
+                  <EditorIcon name="import" size={15} /> Open files…
+                  <input
+                    id="mmap-input"
+                    type="file"
+                    accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
+                    multiple
+                    onChange={(e) => {
+                      io.handleFile(e);
+                      close();
+                    }}
+                    style={{ display: "none" }}
+                  />
+                </label>
+                <MenuItem
+                  icon={mi("paste")}
+                  label="Paste text → topics"
+                  onSelect={() => nav.openPaste()}
+                />
+                <MenuItem
+                  icon={mi("copy")}
+                  label="Copy outline to clipboard"
+                  onSelect={() => io.copyOutline()}
+                />
+                <MenuItem
+                  icon={mi("export")}
+                  label="Back up whole library"
+                  onSelect={() => io.exportLibrary()}
+                />
+                <MenuSeparator />
+                <MenuItem
+                  icon={mi("help")}
+                  label="About MindMap Studio"
+                  onSelect={() => nav.openAbout()}
+                />
+              </>
+            )}
+          </Menu>
+        </div>
       </div>
 
       {/* ── Row 2 — view / edit / canvas ── */}
@@ -462,6 +465,7 @@ export function Toolbar({
           />
         </Menu>
         <span className="mm-vdiv" />
+        {/* View group — fit / collapse / expand / focus the tree. */}
         <div className="mm-cluster">
           <TBtn icon="fit" label="Fit map to screen" onClick={() => m()?.fit()} />
           <TBtn
@@ -479,6 +483,10 @@ export function Toolbar({
               canvas.setFocus({ id: canvas.selected.id, topic: canvas.selected.topic })
             }
           />
+        </div>
+        <span className="mm-vdiv" />
+        {/* Overlay-toggle group — outline numbering / line-jumps (view-only switches). */}
+        <div className="mm-cluster">
           <TBtn
             icon="check"
             label="Outline numbering (1, 1.2, 1.2.3…)"
@@ -493,237 +501,242 @@ export function Toolbar({
           />
         </div>
         <span className="mm-vdiv" />
-        <Menu trigger={menuTrigger("plus", "Insert")} triggerTitle="Insert">
-          {(close) => (
-            <>
-              <MenuItem
-                icon={mi("note")}
-                label="Sticky note"
-                onSelect={() => {
-                  m()?.addStickyNote();
-                  showHint("Sticky note added — drag it anywhere.");
-                }}
-              />
-              <MenuItem
-                icon={mi("layers")}
-                label="Group branch (boundary)"
-                disabled={!canvas.selected}
-                title={canvas.selected ? undefined : "Select a topic first to group its branch"}
-                onSelect={() => {
-                  const id = canvas.selected?.id;
-                  const ok = id ? m()?.groupBranch(id) : false;
-                  showHint(
-                    ok
-                      ? "Branch grouped — double-click the label to rename."
-                      : "Select a node first, then group its branch.",
-                  );
-                }}
-              />
-              <MenuItem
-                icon={mi("balance")}
-                label="Summary bracket"
-                disabled={!canvas.selected}
-                title={canvas.selected ? undefined : "Select a topic first to summarise its branch"}
-                onSelect={() => {
-                  const id = canvas.selected?.id;
-                  const ok = id ? m()?.groupSummary(id) : false;
-                  showHint(
-                    ok
-                      ? "Summary added — double-click its label to rename."
-                      : "Select a node first, then summarise its branch.",
-                  );
-                }}
-              />
-              <label className="mm-menu-item">
-                <EditorIcon name="image" size={15} /> Image on selected node…
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    canvas.handleImage(e);
-                    close();
+        {/* Insert + Canvas menus — content/styling group. */}
+        <div className="mm-cluster">
+          <Menu trigger={menuTrigger("plus", "Insert")} triggerTitle="Insert">
+            {(close) => (
+              <>
+                <MenuItem
+                  icon={mi("note")}
+                  label="Sticky note"
+                  onSelect={() => {
+                    m()?.addStickyNote();
+                    showHint("Sticky note added — drag it anywhere.");
                   }}
-                  style={{ display: "none" }}
                 />
-              </label>
-              <MenuSeparator />
-              <MenuLabel>Roll-up (mirror another map)</MenuLabel>
-              <div style={{ padding: "2px 6px" }}>
-                <select
-                  className="mm-select"
-                  style={{ width: "100%" }}
-                  value=""
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (!v) return;
-                    const ok = canvas.selected?.id
-                      ? m()?.setSelectedRollup(v === "none" ? "" : v)
-                      : false;
+                <MenuItem
+                  icon={mi("layers")}
+                  label="Group branch (boundary)"
+                  disabled={!canvas.selected}
+                  title={canvas.selected ? undefined : "Select a topic first to group its branch"}
+                  onSelect={() => {
+                    const id = canvas.selected?.id;
+                    const ok = id ? m()?.groupBranch(id) : false;
                     showHint(
-                      !ok
-                        ? "Select a node first, then bind a roll-up source."
-                        : v === "none"
-                          ? "Roll-up unbound."
-                          : "Bound — refresh to pull the latest.",
+                      ok
+                        ? "Branch grouped — double-click the label to rename."
+                        : "Select a node first, then group its branch.",
                     );
-                    close();
-                  }}
-                  aria-label="Bind roll-up source"
-                >
-                  <option value="">Bind source map…</option>
-                  {map.maps
-                    .filter((mm) => mm.id !== liveDoc.id)
-                    .map((mm) => (
-                      <option key={mm.id} value={mm.id}>
-                        {mm.title || "(untitled)"}
-                      </option>
-                    ))}
-                  <option value="none">— Unbind</option>
-                </select>
-              </div>
-              <MenuItem
-                icon={mi("history")}
-                label="Refresh all roll-ups"
-                onSelect={() => map.refreshRollupsNow()}
-              />
-            </>
-          )}
-        </Menu>
-        <Menu trigger={menuTrigger("palette", "Canvas")} triggerTitle="Canvas">
-          {(close) => (
-            <>
-              <MenuLabel>Theme</MenuLabel>
-              <div style={{ padding: "2px 6px" }}>
-                <select
-                  className="mm-select"
-                  style={{ width: "100%" }}
-                  value={canvas.theme.id}
-                  onChange={(e) => canvas.setThemeId(e.target.value)}
-                  aria-label="Canvas theme"
-                >
-                  {canvasThemes.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <MenuLabel>Background</MenuLabel>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 10px" }}>
-                <input
-                  type="color"
-                  aria-label="Canvas background colour"
-                  value={liveDoc.meta?.background || "#ffffff"}
-                  onChange={(e) => m()?.setBackground(e.target.value)}
-                  style={{
-                    width: 28,
-                    height: 22,
-                    border: "none",
-                    background: "none",
-                    padding: 0,
-                    cursor: "pointer",
                   }}
                 />
-                <button
-                  type="button"
-                  className="mm-tbtn"
-                  style={{ height: 26 }}
-                  onClick={() => m()?.setBackground("")}
-                >
-                  Reset
-                </button>
-                <label
-                  className="mm-tbtn"
-                  style={{ height: 26, cursor: "pointer" }}
-                  title="Background image"
-                >
-                  <EditorIcon name="image" size={15} />
+                <MenuItem
+                  icon={mi("balance")}
+                  label="Summary bracket"
+                  disabled={!canvas.selected}
+                  title={
+                    canvas.selected ? undefined : "Select a topic first to summarise its branch"
+                  }
+                  onSelect={() => {
+                    const id = canvas.selected?.id;
+                    const ok = id ? m()?.groupSummary(id) : false;
+                    showHint(
+                      ok
+                        ? "Summary added — double-click its label to rename."
+                        : "Select a node first, then summarise its branch.",
+                    );
+                  }}
+                />
+                <label className="mm-menu-item">
+                  <EditorIcon name="image" size={15} /> Image on selected node…
                   <input
                     type="file"
                     accept="image/*"
-                    aria-label="Canvas background image"
                     onChange={(e) => {
-                      canvas.handleBackgroundImage(e);
+                      canvas.handleImage(e);
                       close();
                     }}
                     style={{ display: "none" }}
                   />
                 </label>
-                {liveDoc.meta?.backgroundImage ? (
-                  <button
-                    type="button"
-                    className="mm-tbtn"
-                    style={{ height: 26 }}
-                    onClick={() => m()?.setBackgroundImage("")}
-                  >
-                    Clear img
-                  </button>
-                ) : null}
-              </div>
-              <MenuSeparator />
-              <MenuCheckboxItem
-                icon={mi("hand")}
-                label="Free layout (whiteboard)"
-                checked={!!liveDoc.meta?.freeform}
-                trailing={mi("check")}
-                onSelect={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
-              />
-              <MenuLabel>Diagram backdrop</MenuLabel>
-              <div style={{ padding: "2px 6px" }}>
-                <select
-                  className="mm-select"
-                  style={{ width: "100%" }}
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) m()?.setBackdrop(e.target.value as BackdropKind);
-                  }}
-                  aria-label="Add a diagram backdrop"
-                >
-                  <option value="">Add backdrop…</option>
-                  <option value="onion">Onion (rings)</option>
-                  <option value="funnel">Funnel (stages)</option>
-                  <option value="venn2">Venn (2 circles)</option>
-                  <option value="venn3">Venn (3 circles)</option>
-                </select>
-              </div>
-              {liveDoc.backdrop ? (
-                <div style={{ display: "flex", gap: 6, padding: "4px 10px" }}>
-                  {liveDoc.backdrop.kind === "onion" || liveDoc.backdrop.kind === "funnel" ? (
-                    <>
-                      <button
-                        type="button"
-                        className="mm-tbtn"
-                        style={{ height: 26 }}
-                        onClick={() => m()?.setBackdropRings(-1)}
-                      >
-                        − ring
-                      </button>
-                      <button
-                        type="button"
-                        className="mm-tbtn"
-                        style={{ height: 26 }}
-                        onClick={() => m()?.setBackdropRings(1)}
-                      >
-                        + ring
-                      </button>
-                    </>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="mm-tbtn"
-                    style={{ height: 26 }}
-                    onClick={() => {
-                      m()?.clearBackdrop();
+                <MenuSeparator />
+                <MenuLabel>Roll-up (mirror another map)</MenuLabel>
+                <div style={{ padding: "2px 6px" }}>
+                  <select
+                    className="mm-select"
+                    style={{ width: "100%" }}
+                    value=""
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (!v) return;
+                      const ok = canvas.selected?.id
+                        ? m()?.setSelectedRollup(v === "none" ? "" : v)
+                        : false;
+                      showHint(
+                        !ok
+                          ? "Select a node first, then bind a roll-up source."
+                          : v === "none"
+                            ? "Roll-up unbound."
+                            : "Bound — refresh to pull the latest.",
+                      );
                       close();
                     }}
+                    aria-label="Bind roll-up source"
                   >
-                    Remove
-                  </button>
+                    <option value="">Bind source map…</option>
+                    {map.maps
+                      .filter((mm) => mm.id !== liveDoc.id)
+                      .map((mm) => (
+                        <option key={mm.id} value={mm.id}>
+                          {mm.title || "(untitled)"}
+                        </option>
+                      ))}
+                    <option value="none">— Unbind</option>
+                  </select>
                 </div>
-              ) : null}
-            </>
-          )}
-        </Menu>
+                <MenuItem
+                  icon={mi("history")}
+                  label="Refresh all roll-ups"
+                  onSelect={() => map.refreshRollupsNow()}
+                />
+              </>
+            )}
+          </Menu>
+          <Menu trigger={menuTrigger("palette", "Canvas")} triggerTitle="Canvas">
+            {(close) => (
+              <>
+                <MenuLabel>Theme</MenuLabel>
+                <div style={{ padding: "2px 6px" }}>
+                  <select
+                    className="mm-select"
+                    style={{ width: "100%" }}
+                    value={canvas.theme.id}
+                    onChange={(e) => canvas.setThemeId(e.target.value)}
+                    aria-label="Canvas theme"
+                  >
+                    {canvasThemes.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <MenuLabel>Background</MenuLabel>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 10px" }}>
+                  <input
+                    type="color"
+                    aria-label="Canvas background colour"
+                    value={liveDoc.meta?.background || "#ffffff"}
+                    onChange={(e) => m()?.setBackground(e.target.value)}
+                    style={{
+                      width: 28,
+                      height: 22,
+                      border: "none",
+                      background: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="mm-tbtn"
+                    style={{ height: 26 }}
+                    onClick={() => m()?.setBackground("")}
+                  >
+                    Reset
+                  </button>
+                  <label
+                    className="mm-tbtn"
+                    style={{ height: 26, cursor: "pointer" }}
+                    title="Background image"
+                  >
+                    <EditorIcon name="image" size={15} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      aria-label="Canvas background image"
+                      onChange={(e) => {
+                        canvas.handleBackgroundImage(e);
+                        close();
+                      }}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                  {liveDoc.meta?.backgroundImage ? (
+                    <button
+                      type="button"
+                      className="mm-tbtn"
+                      style={{ height: 26 }}
+                      onClick={() => m()?.setBackgroundImage("")}
+                    >
+                      Clear img
+                    </button>
+                  ) : null}
+                </div>
+                <MenuSeparator />
+                <MenuCheckboxItem
+                  icon={mi("hand")}
+                  label="Free layout (whiteboard)"
+                  checked={!!liveDoc.meta?.freeform}
+                  trailing={mi("check")}
+                  onSelect={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
+                />
+                <MenuLabel>Diagram backdrop</MenuLabel>
+                <div style={{ padding: "2px 6px" }}>
+                  <select
+                    className="mm-select"
+                    style={{ width: "100%" }}
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) m()?.setBackdrop(e.target.value as BackdropKind);
+                    }}
+                    aria-label="Add a diagram backdrop"
+                  >
+                    <option value="">Add backdrop…</option>
+                    <option value="onion">Onion (rings)</option>
+                    <option value="funnel">Funnel (stages)</option>
+                    <option value="venn2">Venn (2 circles)</option>
+                    <option value="venn3">Venn (3 circles)</option>
+                  </select>
+                </div>
+                {liveDoc.backdrop ? (
+                  <div style={{ display: "flex", gap: 6, padding: "4px 10px" }}>
+                    {liveDoc.backdrop.kind === "onion" || liveDoc.backdrop.kind === "funnel" ? (
+                      <>
+                        <button
+                          type="button"
+                          className="mm-tbtn"
+                          style={{ height: 26 }}
+                          onClick={() => m()?.setBackdropRings(-1)}
+                        >
+                          − ring
+                        </button>
+                        <button
+                          type="button"
+                          className="mm-tbtn"
+                          style={{ height: 26 }}
+                          onClick={() => m()?.setBackdropRings(1)}
+                        >
+                          + ring
+                        </button>
+                      </>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="mm-tbtn"
+                      style={{ height: 26 }}
+                      onClick={() => {
+                        m()?.clearBackdrop();
+                        close();
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </Menu>
+        </div>
         <span className="mm-grow" />
         <span className="mm-eyebrow">Layout</span>
         <select

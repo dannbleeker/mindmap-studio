@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **"Linked from" backlinks in the inspector.** The Details tab now lists every topic that points
+  *at* the selected one — via a **topic-jump link** (`↪`) or an incoming **relationship** edge (`↬`,
+  with its label) — and each is a one-click jump that selects and centres that source topic. It
+  appears only when something actually links in, complementing the existing outgoing **Links**
+  section (so you can navigate a map's connections in both directions).
+
 - **Bulk edit shows "Mixed" instead of one topic's value.** When several selected topics disagree on
   a task field — **progress, dates, or priority** — the inspector now leaves that control blank and
   tags it *Mixed*, rather than silently showing (and, on the next edit, overwriting everything with)

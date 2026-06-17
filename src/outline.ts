@@ -1,4 +1,5 @@
-import type { MapNode } from "./model/types";
+import { classifyLink } from "./mindmap/contract";
+import type { MapNode, MindMapDoc } from "./model/types";
 import { progressMap, toPercent } from "./progress";
 
 export interface OutlineRow {
@@ -64,6 +65,49 @@ export function markerTagIndex(
   const sorted = (m: Map<string, IndexHit[]>): IndexEntry[] =>
     [...m.keys()].sort().map((key) => ({ key, hits: m.get(key) ?? [] }));
   return { markers: sorted(markers), tags: sorted(tags) };
+}
+
+/** One incoming reference to a node, for the inspector's "Linked from" section. */
+export interface Backlink {
+  /** The source node that points at the target. */
+  id: string;
+  topic: string;
+  /** How it points: a `#node=` topic hyperlink, or a relationship (cross-link) edge. */
+  kind: "hyperlink" | "relationship";
+  /** The relationship edge's label, when set (relationship kind only). */
+  label?: string;
+}
+
+// Find every topic that points AT `targetId` — via a `#node=` hyperlink or a relationship edge
+// whose `to` is the target. Walks the central tree + every floating topic; self-references are
+// excluded. Pure + deterministic (sorted by topic, then kind); the inspector renders these as
+// clickable "Linked from" jumps. A node can appear twice (once per kind) when it both links and
+// relates to the target.
+export function backlinksFor(doc: MindMapDoc, targetId: string): Backlink[] {
+  const byId = new Map<string, MapNode>();
+  const walk = (n: MapNode) => {
+    byId.set(n.id, n);
+    for (const c of n.children) walk(c);
+  };
+  walk(doc.root);
+  for (const f of doc.floatingTopics ?? []) walk(f);
+
+  const out: Backlink[] = [];
+  // Topic hyperlinks (#node=<target>) — incoming "jump" references.
+  for (const n of byId.values()) {
+    if (n.id === targetId || !n.hyperlink) continue;
+    const link = classifyLink(n.hyperlink);
+    if (link.kind === "node" && link.id === targetId) {
+      out.push({ id: n.id, topic: n.topic, kind: "hyperlink" });
+    }
+  }
+  // Relationship edges that point at the target ("what points AT me"); from===target is outgoing.
+  for (const l of doc.links ?? []) {
+    if (l.to !== targetId || l.from === targetId) continue;
+    const src = byId.get(l.from);
+    if (src) out.push({ id: l.from, topic: src.topic, kind: "relationship", label: l.label });
+  }
+  return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
 }
 
 // Hierarchical outline numbers (1, 1.2, 1.2.3, …) for every node *below* the root — the root

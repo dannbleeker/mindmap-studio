@@ -165,6 +165,9 @@ left-drag, pan with the middle or right mouse button; scroll still zooms.)*
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in
   your library), or **Jump to a topic** (an in-map jump). Click the 🔗 on the node to follow it;
   **✕ Remove link** clears it. A node holds one link at a time.
+- **Linked from** — the reverse view: every topic that points *at* this one, via a topic-jump link
+  (`↪`) or an incoming relationship arrow (`↬`, with its label). Each row is a one-click jump that
+  selects and centres that source topic. The section appears only when something links in.
 
 ### Images
 

@@ -41,7 +41,7 @@ import { nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
 import { noteCounts } from "./noteFormat";
-import { outlineNumbers, outlineRows } from "./outline";
+import { backlinksFor, outlineNumbers, outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
   type ToastAction,
@@ -235,6 +235,13 @@ export function App() {
       .join(" · ");
     return { breadcrumb, facts };
   }, [selected, selectedNode, liveDoc]);
+  // Topics that point AT the selected node (incoming #node= links + relationship edges) — the
+  // inspector's "Linked from" jumps. Memoised on the live doc + selection so it doesn't re-walk the
+  // tree on every render; rename of a source stays correct because liveDoc is a dependency.
+  const backlinks = useMemo(
+    () => (selected ? backlinksFor(liveDoc, selected.id) : []),
+    [selected, liveDoc],
+  );
   // Auto-show the right-side inspector when a node is selected (the redesign's auto-show behaviour).
   // Sticky minimize wins: if the user has collapsed the inspector to its strip, selecting another
   // node does NOT force it back open (selectedNode still updates, so re-expanding shows the new node).
@@ -1326,6 +1333,8 @@ export function App() {
                   .filter((r) => r.id !== selected?.id)
                   .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
                 onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
+                backlinks={backlinks}
+                onFollowBacklink={(id) => mapRef.current?.focusNode(id)}
                 onMinimize={() => {
                   panels.setInfoOpen(false);
                   panels.setInfoMinimized(true);

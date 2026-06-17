@@ -17,6 +17,7 @@ import {
 } from "../src/Panels";
 import type { SelectedNode, SelectionFields } from "../src/mindmap";
 import type { MapNode } from "../src/model/types";
+import type { Backlink } from "../src/outline";
 
 // A small but representative tree: a root with two children, one carrying a marker, a tag, a note,
 // and task progress — so the index/outline panels have real content to render.
@@ -203,6 +204,8 @@ describe("InfoPanel", () => {
     count?: number,
     nonce?: number,
     fields?: SelectionFields,
+    backlinks: Backlink[] = [],
+    onFollowBacklink: (id: string) => void = noop,
   ) =>
     render(
       <InfoPanel
@@ -233,6 +236,8 @@ describe("InfoPanel", () => {
         onLinkMap={noop}
         jumpTargets={[]}
         onJump={noop}
+        backlinks={backlinks}
+        onFollowBacklink={onFollowBacklink}
         onMinimize={noop}
       />,
     );
@@ -325,6 +330,33 @@ describe("InfoPanel", () => {
     });
     expect((screen.getByLabelText("Due date") as HTMLInputElement).value).toBe("2026-07-01");
     expect(screen.queryByText("Mixed")).toBeNull();
+  });
+
+  it("omits the 'Linked from' section when nothing points at the node", () => {
+    renderInfo(selected, node);
+    expect(screen.queryByText("Linked from")).toBeNull();
+  });
+
+  it("lists incoming backlinks and follows one on click (navigation, not onJump)", async () => {
+    const onFollow = vi.fn();
+    const backlinks: Backlink[] = [
+      { id: "src1", topic: "Roadmap", kind: "hyperlink" },
+      { id: "src2", topic: "Risk", kind: "relationship", label: "blocks" },
+    ];
+    renderInfo(selected, node, undefined, undefined, undefined, backlinks, onFollow);
+    expect(screen.getByText("Linked from")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Roadmap/ })).toBeTruthy();
+    // The relationship row carries its edge label.
+    expect(screen.getByText(/blocks/)).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: /Risk/ }));
+    expect(onFollow).toHaveBeenCalledWith("src2");
+  });
+
+  it("hides 'Linked from' in bulk mode (per-item, single-topic only)", () => {
+    renderInfo(selected, node, 3, undefined, undefined, [
+      { id: "src1", topic: "Roadmap", kind: "hyperlink" },
+    ]);
+    expect(screen.queryByText("Linked from")).toBeNull();
   });
 
   it("opens on the Notes tab when openNoteNonce is set (the node 📝 click target)", () => {
@@ -528,6 +560,8 @@ describe("InfoPanel (interaction)", () => {
         onLinkMap={noop}
         jumpTargets={[]}
         onJump={noop}
+        backlinks={[]}
+        onFollowBacklink={noop}
         onMinimize={onMinimize}
       />,
     );

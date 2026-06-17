@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { MapNode } from "../src/model/types";
-import { markerTagIndex, outlineNumbers, outlineRows } from "../src/outline";
+import type { MapNode, MindMapDoc } from "../src/model/types";
+import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "../src/outline";
 
 const root: MapNode = {
   id: "r",
@@ -96,5 +96,45 @@ describe("outlineNumbers", () => {
 
   it("returns an empty map for a childless root", () => {
     expect(outlineNumbers({ id: "x", topic: "Bare", children: [] }).size).toBe(0);
+  });
+});
+
+const linkDoc = (): MindMapDoc => ({
+  schemaVersion: 1,
+  id: "d",
+  title: "Root",
+  root: {
+    id: "r",
+    topic: "Root",
+    children: [
+      { id: "a", topic: "Alpha", hyperlink: "#node=b", children: [] }, // → b (hyperlink)
+      { id: "b", topic: "Beta", hyperlink: "#node=b", children: [] }, // self-link → excluded
+      { id: "c", topic: "Gamma", hyperlink: "#map=other", children: [] }, // map link → ignored
+      { id: "e", topic: "Epsilon", hyperlink: "https://x.test", children: [] }, // external → ignored
+    ],
+  },
+  floatingTopics: [{ id: "f", topic: "Float", hyperlink: "#node=b", children: [] }], // → b (hyperlink)
+  links: [
+    { id: "l1", from: "c", to: "b", label: "blocks" }, // relationship pointing AT b
+    { id: "l2", from: "b", to: "a" }, // outgoing from b → NOT a backlink to b
+  ],
+});
+
+describe("backlinksFor", () => {
+  it("collects #node= hyperlinks + relationship edges that point AT the target (tree + floating)", () => {
+    // Sorted by topic, then kind: Alpha (hyperlink) < Float (hyperlink) < Gamma (relationship).
+    expect(backlinksFor(linkDoc(), "b")).toEqual([
+      { id: "a", topic: "Alpha", kind: "hyperlink" },
+      { id: "f", topic: "Float", kind: "hyperlink" },
+      { id: "c", topic: "Gamma", kind: "relationship", label: "blocks" },
+    ]);
+  });
+
+  it("ignores #map= / external hyperlinks, self-links, and outgoing edges; [] when nothing points in", () => {
+    expect(backlinksFor(linkDoc(), "e")).toEqual([]); // nothing points at Epsilon
+    // Only the b→a edge points at Alpha (no label); the #map= / external links never count.
+    expect(backlinksFor(linkDoc(), "a")).toEqual([
+      { id: "b", topic: "Beta", kind: "relationship" },
+    ]);
   });
 });

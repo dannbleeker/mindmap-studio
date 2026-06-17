@@ -21,6 +21,7 @@ import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
 import type { ConditionalRule, MapNode, NodeShape, NodeStyle } from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
 import {
+  type Backlink,
   type IndexEntry,
   type IndexHit,
   markerTagIndex,
@@ -1059,6 +1060,8 @@ export function InfoPanel({
   onLinkMap,
   jumpTargets,
   onJump,
+  backlinks,
+  onFollowBacklink,
   onMinimize,
   width,
   onResize,
@@ -1101,6 +1104,11 @@ export function InfoPanel({
   onLinkMap: (mapId: string) => void;
   jumpTargets: { id: string; topic: string; depth: number }[];
   onJump: (id: string) => void;
+  /** Topics that point AT the selected node (incoming #node= links + relationship edges). */
+  backlinks: Backlink[];
+  /** Navigate to a backlink's source node (focus + select it) — distinct from onJump, which creates
+   *  an outgoing link. */
+  onFollowBacklink: (id: string) => void;
   onMinimize: () => void;
 }) {
   const [tagInput, setTagInput] = useState("");
@@ -1569,6 +1577,52 @@ export function InfoPanel({
                               : "web"}
                           )
                         </Button>
+                      )}
+
+                      {backlinks.length > 0 && (
+                        <>
+                          {sectionLabel("Linked from")}
+                          <div
+                            style={{
+                              padding: "0 10px 6px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            {backlinks.map((b) => (
+                              <button
+                                key={`${b.kind}:${b.id}`}
+                                type="button"
+                                onClick={() => onFollowBacklink(b.id)}
+                                title={`Go to "${b.topic || "(untitled)"}"`}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  textAlign: "left",
+                                  border: "none",
+                                  background: "transparent",
+                                  cursor: "pointer",
+                                  fontSize: fontSize.sm,
+                                  color: "var(--ed-ink)",
+                                  padding: "2px 4px",
+                                  borderRadius: radius.md,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                <span style={{ color: "var(--ed-faint)" }}>
+                                  {b.kind === "relationship" ? "↬ " : "↪ "}
+                                </span>
+                                {b.topic || "(untitled)"}
+                                {b.label ? (
+                                  <span style={{ color: "var(--ed-faint)" }}> — {b.label}</span>
+                                ) : null}
+                              </button>
+                            ))}
+                          </div>
+                        </>
                       )}
                     </>
                   )}

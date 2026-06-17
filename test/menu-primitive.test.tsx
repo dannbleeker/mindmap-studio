@@ -182,3 +182,29 @@ describe("ContextMenu viewport clamping", () => {
     expect(menu.style.top).toBe("60px");
   });
 });
+
+describe("bottom-sheet (mobile) mode", () => {
+  it("Menu opens as a sheet (mm-menu-sheet) with no inline anchor position", async () => {
+    render(
+      <Menu trigger="Tools" triggerTitle="Tools" sheet>
+        <MenuItem label="Alpha" onSelect={() => {}} />
+      </Menu>,
+    );
+    await u.click(screen.getByRole("button", { name: "Tools" }));
+    const menu = screen.getByRole("menu");
+    expect(menu.className).toContain("mm-menu-sheet");
+    expect(menu.style.top).toBe(""); // CSS-positioned, not anchored
+    expect(menu.style.left).toBe("");
+  });
+
+  it("ContextMenu renders as a sheet (mm-menu-sheet) with no inline position", () => {
+    render(
+      <ContextMenu x={10} y={10} onClose={() => {}} sheet>
+        <MenuItem label="A" onSelect={() => {}} />
+      </ContextMenu>,
+    );
+    const menu = screen.getByRole("menu");
+    expect(menu.className).toContain("mm-menu-sheet");
+    expect(menu.style.position).toBe("");
+  });
+});

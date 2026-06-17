@@ -31,6 +31,7 @@ import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
 import { nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
+import { useIsMobile } from "../useIsMobile";
 import {
   type LayoutKind,
   type MindMapHandle,
@@ -204,6 +205,7 @@ function FlowInner({
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
+  const isMobile = useIsMobile();
   const projected = useMemo(() => project(doc, palette, numbered), [doc, palette, numbered]);
   const initialNodes = useMemo(() => {
     const pos = computeLayout(
@@ -1292,6 +1294,7 @@ function FlowInner({
             y={menu.y}
             onClose={() => setMenu(null)}
             menuAriaLabel="Topic actions"
+            sheet={isMobile}
           >
             {(() => {
               const id = menu.id;

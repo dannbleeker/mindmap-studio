@@ -331,7 +331,12 @@ export function Toolbar({
         </form>
         {/* Export + More menus — output / overflow group. */}
         <div className="mm-cluster">
-          <Menu trigger={menuTrigger("export", "Export")} triggerTitle="Export" align="right">
+          <Menu
+            trigger={menuTrigger("export", "Export")}
+            triggerTitle="Export"
+            align="right"
+            sheet={isMobile}
+          >
             {EXPORTS.map((g) => (
               <div key={g.group}>
                 <MenuLabel>{g.group}</MenuLabel>
@@ -341,7 +346,12 @@ export function Toolbar({
               </div>
             ))}
           </Menu>
-          <Menu trigger={menuTrigger("dots", "More")} triggerTitle="More" align="right">
+          <Menu
+            trigger={menuTrigger("dots", "More")}
+            triggerTitle="More"
+            align="right"
+            sheet={isMobile}
+          >
             {(close) => (
               <>
                 <MenuLabel>Map</MenuLabel>
@@ -407,7 +417,7 @@ export function Toolbar({
 
       {/* ── Row 2 — view / edit / canvas ── */}
       <div className={`mm-topbar-row mm-topbar-row2${isMobile ? "" : " mm-wrap"}`}>
-        <Menu trigger={menuTrigger("layers", "Panels")} triggerTitle="Panels">
+        <Menu trigger={menuTrigger("layers", "Panels")} triggerTitle="Panels" sheet={isMobile}>
           <MenuLabel>Side panels</MenuLabel>
           <MenuCheckboxItem
             icon={mi("layers")}
@@ -503,7 +513,7 @@ export function Toolbar({
         <span className="mm-vdiv" />
         {/* Insert + Canvas menus — content/styling group. */}
         <div className="mm-cluster">
-          <Menu trigger={menuTrigger("plus", "Insert")} triggerTitle="Insert">
+          <Menu trigger={menuTrigger("plus", "Insert")} triggerTitle="Insert" sheet={isMobile}>
             {(close) => (
               <>
                 <MenuItem
@@ -601,7 +611,7 @@ export function Toolbar({
               </>
             )}
           </Menu>
-          <Menu trigger={menuTrigger("palette", "Canvas")} triggerTitle="Canvas">
+          <Menu trigger={menuTrigger("palette", "Canvas")} triggerTitle="Canvas" sheet={isMobile}>
             {(close) => (
               <>
                 <MenuLabel>Theme</MenuLabel>

@@ -365,6 +365,7 @@ export function Menu({
   triggerAriaLabel,
   align = "left",
   menuAriaLabel,
+  sheet = false,
   children,
 }: {
   /** Inner content of the trigger button (icon + label + chevron). */
@@ -374,6 +375,8 @@ export function Menu({
   triggerAriaLabel?: string;
   align?: "left" | "right";
   menuAriaLabel?: string;
+  /** Phone layout: open as a full-width bottom sheet instead of an anchored popover. */
+  sheet?: boolean;
   /** Popup content, or a render-prop given `close` for leaf controls that close imperatively. */
   children: ReactNode | ((close: () => void) => ReactNode);
 }) {
@@ -387,6 +390,7 @@ export function Menu({
   // bottom, and slide left if it would overflow the right edge. Uses the menu's measured size once
   // it's mounted (a no-op first pass before that), so a useLayoutEffect re-runs it after open.
   const reposition = useCallback(() => {
+    if (sheet) return; // bottom-sheet mode is CSS-positioned, not anchored
     const b = btnRef.current;
     if (!b) return;
     const tr = b.getBoundingClientRect();
@@ -403,7 +407,7 @@ export function Menu({
     if (mw && left + mw > window.innerWidth) left = window.innerWidth - mw - margin;
     if (left < margin) left = margin;
     setPos({ top, left });
-  }, [align]);
+  }, [align, sheet]);
 
   const close = useCallback((restoreFocus = true) => {
     setOpen(false);
@@ -470,13 +474,13 @@ export function Menu({
       >
         {trigger}
       </button>
-      {open && pos && (
+      {open && (sheet || pos) && (
         <div
-          className="mm-menu"
+          className={sheet ? "mm-menu mm-menu-sheet" : "mm-menu"}
           role="menu"
           aria-label={menuAriaLabel}
           ref={menuRef}
-          style={pos}
+          style={sheet ? undefined : (pos ?? undefined)}
           onKeyDown={onMenuKeyDown}
         >
           <MenuCtx.Provider value={{ close: () => close(true) }}>
@@ -588,12 +592,15 @@ export function ContextMenu({
   y,
   onClose,
   menuAriaLabel,
+  sheet = false,
   children,
 }: {
   x: number;
   y: number;
   onClose: () => void;
   menuAriaLabel?: string;
+  /** Phone layout: render as a full-width bottom sheet instead of a point-anchored popover. */
+  sheet?: boolean;
   children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -608,6 +615,7 @@ export function ContextMenu({
   // Clamp the point into the viewport using the menu's measured size — so a right-click near the
   // bottom/right edge stays fully on-screen (before paint, so it never flashes off-edge).
   useLayoutEffect(() => {
+    if (sheet) return; // bottom-sheet mode is CSS-positioned
     const mr = menuRef.current?.getBoundingClientRect();
     const mw = mr?.width ?? 0;
     const mh = mr?.height ?? 0;
@@ -619,7 +627,7 @@ export function ContextMenu({
     if (mw && left + mw > window.innerWidth)
       left = Math.max(margin, window.innerWidth - mw - margin);
     setPos({ top, left });
-  }, [x, y]);
+  }, [x, y, sheet]);
 
   // Close on Escape or a pointerdown outside the menu (capture, so it beats other handlers).
   useEffect(() => {
@@ -639,12 +647,12 @@ export function ContextMenu({
 
   return (
     <div
-      className="mm-menu"
+      className={sheet ? "mm-menu mm-menu-sheet" : "mm-menu"}
       role="menu"
       aria-label={menuAriaLabel}
       data-mm-menu
       ref={menuRef}
-      style={{ position: "fixed", top: pos.top, left: pos.left }}
+      style={sheet ? undefined : { position: "fixed", top: pos.top, left: pos.left }}
       onKeyDown={(e) => roveMenuKey(e, menuRef, onClose)}
     >
       <MenuCtx.Provider value={{ close: onClose }}>

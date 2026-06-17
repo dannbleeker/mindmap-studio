@@ -10,13 +10,15 @@ import {
   PlaybackBar,
   StylesPanel,
 } from "./Panels";
+import { CommandPalette } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
 import { EdgeInspector } from "./components/EdgeInspector";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
 import { MapPanel } from "./components/MapPanel";
 import { OverlayInspector } from "./components/OverlayInspector";
-import { Toolbar } from "./components/Toolbar";
+import { Toolbar, type ToolbarProps } from "./components/Toolbar";
+import { buildEditorCommands } from "./components/editorCommands";
 import { StartScreen } from "./components/start/StartScreen";
 import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
@@ -323,6 +325,19 @@ export function App() {
   const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
   const [aboutOpen, setAboutOpen] = useState(false);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
+  // In-editor ⌘K command palette (the Start screen has its own). Cmd/Ctrl+K opens it.
+  const [cmdkOpen, setCmdkOpen] = useState(false);
+  useEffect(() => {
+    if (view !== "editor") return;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCmdkOpen(true);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [view]);
   const [libDocs, setLibDocs] = useState<MindMapDoc[]>([]);
   const [libQuery, setLibQuery] = useState("");
   // "Paste text → map": parse a pasted outline into topics, as a new map or under the selection.
@@ -935,6 +950,66 @@ export function App() {
   const currentGroup = liveDoc.meta?.sheetGroup;
   const sheets = currentGroup ? mapOptions.filter((m) => m.sheetGroup === currentGroup) : [];
 
+  // The toolbar prop groups, built once and shared with both <Toolbar> and the ⌘K command registry
+  // (buildEditorCommands) so the two surfaces can't drift — one source of truth for editor actions.
+  const toolbarProps: ToolbarProps = {
+    isMobile,
+    mapRef,
+    nav: {
+      goHome,
+      openAbout: () => setAboutOpen(true),
+      openSearchAll: () => setSearchAllOpen(true),
+      openPaste: () => setPasteOpen(true),
+    },
+    panels,
+    map: {
+      doc,
+      liveDoc,
+      maps,
+      mapOptions,
+      switchMap,
+      addSheet,
+      load,
+      duplicateMap,
+      deleteCurrent,
+      present: () => setPresentDoc(liveDocRef.current),
+      refreshRollupsNow,
+    },
+    canvas: {
+      theme,
+      setThemeId,
+      layout,
+      changeLayout,
+      selected,
+      setFocus,
+      handleImage,
+      handleBackgroundImage,
+    },
+    find: { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace },
+    io: {
+      exportJson,
+      exportMarkdown,
+      exportMermaid,
+      exportXmind,
+      exportSmmx,
+      exportOpml,
+      exportFreemind,
+      exportPng,
+      exportSvg,
+      exportHtml,
+      exportInteractiveHtml,
+      exportDeck,
+      exportPdf,
+      exportDocx,
+      exportPptx,
+      exportXlsx,
+      exportLibrary,
+      copyOutline,
+      handleFile,
+    },
+    showHint,
+  };
+
   if (view === "start") {
     return <StartScreen theme={theme} onOpen={openFromStart} onImportFiles={importFromStart} />;
   }
@@ -951,71 +1026,7 @@ export function App() {
         onAbout={() => setAboutOpen(true)}
       />
       <div className="mm-editor-main">
-        <Toolbar
-          isMobile={isMobile}
-          mapRef={mapRef}
-          nav={{
-            goHome,
-            openAbout: () => setAboutOpen(true),
-            openSearchAll: () => setSearchAllOpen(true),
-            openPaste: () => setPasteOpen(true),
-          }}
-          panels={panels}
-          map={{
-            doc,
-            liveDoc,
-            maps,
-            mapOptions,
-            switchMap,
-            addSheet,
-            load,
-            duplicateMap,
-            deleteCurrent,
-            present: () => setPresentDoc(liveDocRef.current),
-            refreshRollupsNow,
-          }}
-          canvas={{
-            theme,
-            setThemeId,
-            layout,
-            changeLayout,
-            selected,
-            setFocus,
-            handleImage,
-            handleBackgroundImage,
-          }}
-          find={{
-            query,
-            setQuery,
-            replaceWith,
-            setReplaceWith,
-            matchInfo,
-            runSearch,
-            runReplace,
-          }}
-          io={{
-            exportJson,
-            exportMarkdown,
-            exportMermaid,
-            exportXmind,
-            exportSmmx,
-            exportOpml,
-            exportFreemind,
-            exportPng,
-            exportSvg,
-            exportHtml,
-            exportInteractiveHtml,
-            exportDeck,
-            exportPdf,
-            exportDocx,
-            exportPptx,
-            exportXlsx,
-            exportLibrary,
-            copyOutline,
-            handleFile,
-          }}
-          showHint={showHint}
-        />
+        <Toolbar {...toolbarProps} />
 
         {error && (
           <div
@@ -1716,6 +1727,15 @@ export function App() {
           </div>
         </div>
       </Dialog>
+
+      {/* In-editor ⌘K command palette — every toolbar action as a searchable command. */}
+      {cmdkOpen && (
+        <CommandPalette
+          commands={buildEditorCommands(toolbarProps)}
+          onClose={() => setCmdkOpen(false)}
+          placeholder="Search commands…"
+        />
+      )}
     </div>
   );
 }

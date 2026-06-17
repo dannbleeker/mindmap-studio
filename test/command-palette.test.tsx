@@ -1,0 +1,86 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import { type Command, CommandPalette } from "../src/components/CommandPalette";
+
+// The generic ⌘K palette (shared by the Start screen + the editor): fuzzy search, arrow/Enter nav,
+// Esc/click-outside close, disabled commands hidden, optional query-derived command.
+
+const u = userEvent.setup();
+
+function cmds(over: Partial<Command>[] = []): Command[] {
+  const base: Command[] = [
+    { id: "fit", label: "Fit map to screen", kind: "view", run: () => {} },
+    { id: "present", label: "Present", kind: "map", run: () => {} },
+    { id: "group", label: "Group branch", kind: "insert", run: () => {}, enabled: false },
+  ];
+  return [...base, ...(over as Command[])];
+}
+
+describe("CommandPalette (generic)", () => {
+  it("lists enabled commands, hides disabled ones, and runs + closes on click", async () => {
+    const onClose = vi.fn();
+    const run = vi.fn();
+    render(
+      <CommandPalette
+        commands={[
+          { id: "a", label: "Alpha", kind: "view", run },
+          { id: "b", label: "Bravo", kind: "view", run: () => {}, enabled: false },
+        ]}
+        onClose={onClose}
+      />,
+    );
+    expect(screen.getByText("Alpha")).toBeTruthy();
+    expect(screen.queryByText("Bravo")).toBeNull(); // disabled → hidden
+    await u.click(screen.getByText("Alpha"));
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("filters by a subsequence query", async () => {
+    render(<CommandPalette commands={cmds()} onClose={vi.fn()} />);
+    await u.type(screen.getByPlaceholderText(/search commands/i), "prsnt");
+    expect(screen.getByText("Present")).toBeTruthy();
+    expect(screen.queryByText("Fit map to screen")).toBeNull();
+  });
+
+  it("runs the active result with ArrowDown + Enter", async () => {
+    const run = vi.fn();
+    render(
+      <CommandPalette
+        commands={[
+          { id: "a", label: "Alpha", kind: "view", run: () => {} },
+          { id: "b", label: "Bravo", kind: "view", run },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    const input = screen.getByPlaceholderText(/search commands/i);
+    fireEvent.keyDown(input, { key: "ArrowDown" }); // active: Bravo
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it("prepends a query-derived command", async () => {
+    const run = vi.fn();
+    render(
+      <CommandPalette
+        commands={cmds()}
+        onClose={vi.fn()}
+        makeQueryCommand={(q) =>
+          q ? { id: "q", label: `Create "${q}"`, kind: "create", run } : null
+        }
+      />,
+    );
+    await u.type(screen.getByPlaceholderText(/search commands/i), "xyz");
+    await u.click(screen.getByText('Create "xyz"'));
+    expect(run).toHaveBeenCalled();
+  });
+
+  it("closes on Escape", () => {
+    const onClose = vi.fn();
+    render(<CommandPalette commands={cmds()} onClose={onClose} />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).toHaveBeenCalled();
+  });
+});

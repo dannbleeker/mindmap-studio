@@ -333,6 +333,29 @@ describe("FlowMindMap canvas", () => {
     expect(onChange).toHaveBeenCalled();
   });
 
+  it("context menu is keyboard-accessible: focus-first, roving, and arrows don't edit the tree", () => {
+    const { container, onChange } = mount();
+    run(() => fireEvent.contextMenu(nodeEl(container, "a")));
+    const menu = openMenu() as HTMLElement;
+    expect(menu).toBeTruthy();
+    // The ContextMenu focuses its first item on open, so it's immediately keyboard-drivable.
+    const first = within(menu).getByRole("menuitem", { name: "Add child" });
+    expect(document.activeElement).toBe(first);
+    // ArrowDown roves to the next item — and crucially the canvas keymap (Enter/Tab/Delete add/remove
+    // nodes) is gated while a menu button is focused, so arrow-keying the menu must NOT mutate the doc.
+    const before = onChange.mock.calls.length;
+    run(() => fireEvent.keyDown(document.activeElement as HTMLElement, { key: "ArrowDown" }));
+    expect(document.activeElement).toBe(
+      within(menu).getByRole("menuitem", { name: "Add sibling" }),
+    );
+    run(() => fireEvent.keyDown(document.activeElement as HTMLElement, { key: "ArrowDown" }));
+    run(() => fireEvent.keyDown(document.activeElement as HTMLElement, { key: "ArrowUp" }));
+    expect(onChange.mock.calls.length).toBe(before); // no node added or removed
+    // Escape closes the menu (handled by the ContextMenu primitive, not a FlowMindMap effect).
+    run(() => fireEvent.keyDown(document, { key: "Escape" }));
+    expect(openMenu()).toBeNull();
+  });
+
   it("selects on node click, shows the quick-action popover, and deselects on pane click", () => {
     const { container, onSelect, onChange } = mount();
     const sel = (id: string) => run(() => fireEvent.click(nodeEl(container, id)));

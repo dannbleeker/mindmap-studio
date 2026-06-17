@@ -312,6 +312,42 @@ export function Tabs({
 const FOCUSABLE_IN_MENU =
   'button:not([disabled]), a[href], select:not([disabled]), input:not([disabled]), [tabindex="0"]';
 
+/** The roving-focus targets inside a menu popup, in DOM order (every focusable, incl. embedded
+ *  selects). Shared by Menu + ContextMenu so their keyboard nav is identical. */
+const menuItemsOf = (root: HTMLElement | null): HTMLElement[] =>
+  root ? Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_IN_MENU)) : [];
+
+/** The shared roving handler: Arrow/Home/End move focus among items (wrap, skip disabled); Tab
+ *  closes. Returns true if it handled the key. */
+function roveMenuKey(
+  e: React.KeyboardEvent,
+  menuRef: React.RefObject<HTMLElement | null>,
+  closeOnTab: () => void,
+): void {
+  if (e.key === "Tab") {
+    closeOnTab();
+    return;
+  }
+  if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Home" && e.key !== "End") return;
+  const list = menuItemsOf(menuRef.current);
+  if (list.length === 0) return;
+  e.preventDefault();
+  const cur = list.indexOf(document.activeElement as HTMLElement);
+  const next =
+    e.key === "Home"
+      ? 0
+      : e.key === "End"
+        ? list.length - 1
+        : e.key === "ArrowDown"
+          ? cur < 0
+            ? 0
+            : (cur + 1) % list.length
+          : cur <= 0
+            ? list.length - 1
+            : cur - 1;
+  list[next]?.focus();
+}
+
 const MenuCtx = createContext<{ close: () => void } | null>(null);
 
 export function Menu({
@@ -376,18 +412,10 @@ export function Menu({
     };
   }, [open, place, close]);
 
-  const items = useCallback(
-    () =>
-      menuRef.current
-        ? Array.from(menuRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_IN_MENU))
-        : [],
-    [],
-  );
-
   // On open, move focus into the menu (first focusable item) — keyboard users land inside.
   useEffect(() => {
-    if (open) items()[0]?.focus();
-  }, [open, items]);
+    if (open) menuItemsOf(menuRef.current)[0]?.focus();
+  }, [open]);
 
   const onTriggerKeyDown = (e: React.KeyboardEvent) => {
     if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
@@ -397,30 +425,8 @@ export function Menu({
     }
   };
 
-  const onMenuKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Tab") {
-      setOpen(false); // let focus move out of the menu naturally
-      return;
-    }
-    if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Home" && e.key !== "End") return;
-    const list = items();
-    if (list.length === 0) return;
-    e.preventDefault();
-    const cur = list.indexOf(document.activeElement as HTMLElement);
-    const next =
-      e.key === "Home"
-        ? 0
-        : e.key === "End"
-          ? list.length - 1
-          : e.key === "ArrowDown"
-            ? cur < 0
-              ? 0
-              : (cur + 1) % list.length
-            : cur <= 0
-              ? list.length - 1
-              : cur - 1;
-    list[next]?.focus();
-  };
+  // Tab from inside the menu closes it WITHOUT restoring focus (so focus moves out naturally).
+  const onMenuKeyDown = (e: React.KeyboardEvent) => roveMenuKey(e, menuRef, () => setOpen(false));
 
   return (
     <div className="mm-menu-wrap" ref={wrapRef}>
@@ -545,4 +551,63 @@ export function MenuLabel({ children }: { children: ReactNode }) {
 /** A horizontal rule between menu groups (decorative, matching the original `.mm-menu-sep` div). */
 export function MenuSeparator() {
   return <div className="mm-menu-sep" />;
+}
+
+// ── ContextMenu (point-anchored) ──────────────────────────────────────────────
+// The right-click menu variant of the primitive: no trigger button — the caller renders it at a
+// viewport point {x,y} and clears it via `onClose`. Same role="menu" + roving keyboard + focus-first
+// + Escape/click-outside/Tab close as Menu, so the canvas context menu gets the dropdowns' a11y. It
+// carries `data-mm-menu` so any host-side "click outside the menu" guard still recognises it. Items
+// use MenuItem/MenuSeparator exactly as in a Menu (the close comes from `onClose`).
+export function ContextMenu({
+  x,
+  y,
+  onClose,
+  menuAriaLabel,
+  children,
+}: {
+  x: number;
+  y: number;
+  onClose: () => void;
+  menuAriaLabel?: string;
+  children: ReactNode | ((close: () => void) => ReactNode);
+}) {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Focus the first item on mount so the menu is immediately keyboard-drivable.
+  useEffect(() => {
+    menuItemsOf(menuRef.current)[0]?.focus();
+  }, []);
+
+  // Close on Escape or a pointerdown outside the menu (capture, so it beats other handlers).
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) onClose();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("keydown", onKey, true);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="mm-menu"
+      role="menu"
+      aria-label={menuAriaLabel}
+      data-mm-menu
+      ref={menuRef}
+      style={{ position: "fixed", top: y, left: x }}
+      onKeyDown={(e) => roveMenuKey(e, menuRef, onClose)}
+    >
+      <MenuCtx.Provider value={{ close: onClose }}>
+        {typeof children === "function" ? children(onClose) : children}
+      </MenuCtx.Provider>
+    </div>
+  );
 }

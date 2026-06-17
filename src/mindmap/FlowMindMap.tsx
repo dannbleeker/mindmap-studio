@@ -23,6 +23,7 @@ import {
   useState,
 } from "react";
 import { EditorIcon, type EditorIconName } from "../components/EditorIcons";
+import { ContextMenu, MenuItem, MenuSeparator } from "../design/primitives";
 import { colors } from "../design/tokens";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
@@ -817,23 +818,7 @@ function FlowInner({
     return () => document.removeEventListener("keydown", onKey);
   }, [apply, undoAction, redoAction]);
 
-  // Close the context menu on any click/Escape outside it.
-  useEffect(() => {
-    if (!menu) return;
-    const onDown = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement)?.closest?.("[data-mm-menu]")) setMenu(null);
-    };
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenu(null);
-    };
-    const t = setTimeout(() => document.addEventListener("mousedown", onDown), 0);
-    document.addEventListener("keydown", onEsc);
-    return () => {
-      clearTimeout(t);
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onEsc);
-    };
-  }, [menu]);
+  // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 
   const withSelected = useCallback((fn: (id: string) => void): boolean => {
     const id = selectedRef.current;
@@ -1302,28 +1287,15 @@ function FlowInner({
           </Panel>
         </ReactFlow>
         {menu ? (
-          <ul
-            data-mm-menu
-            style={{
-              position: "fixed",
-              left: menu.x,
-              top: menu.y,
-              zIndex: 20,
-              margin: 0,
-              padding: 4,
-              listStyle: "none",
-              background: `var(--mm-node-bg, ${colors.menu.fallbackBg})`,
-              color: `var(--mm-color, ${colors.menu.fallbackColor})`,
-              border: `1px solid ${colors.menu.border}`,
-              borderRadius: 8,
-              boxShadow: "0 4px 14px #0003",
-              font: "13px system-ui, sans-serif",
-              minWidth: 168,
-            }}
+          <ContextMenu
+            x={menu.x}
+            y={menu.y}
+            onClose={() => setMenu(null)}
+            menuAriaLabel="Topic actions"
           >
             {(() => {
               const id = menu.id;
-              const items: [string, () => void][] = [
+              const items: [string, () => void, boolean?][] = [
                 ["Add child", () => apply(addChild(docRef.current, id), true)],
                 ["Add sibling", () => apply(addSibling(docRef.current, id), true)],
                 ["Rename", () => setEditingId(id)],
@@ -1348,64 +1320,43 @@ function FlowInner({
                   () => apply(pasteBranch(docRef.current, id, clip)),
                 ]);
               items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
-              items.push(["Delete", () => apply(deleteNode(docRef.current, id))]);
-              return items;
-            })().map(([label, fn]) => (
-              <li key={label}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    fn();
-                    setMenu(null);
-                  }}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    textAlign: "left",
-                    padding: "5px 10px",
-                    border: "none",
-                    background: "transparent",
-                    color: "inherit",
-                    cursor: "pointer",
-                    borderRadius: 5,
-                    font: "inherit",
-                  }}
-                >
-                  {label}
-                </button>
-              </li>
-            ))}
-            <li
-              style={{
-                padding: "5px 10px",
-                borderTop: `1px solid ${colors.menu.separator}`,
-                marginTop: 2,
-              }}
-            >
-              <label style={{ fontSize: 12, color: colors.muted, display: "block" }}>
-                Branch layout{" "}
-                <select
-                  defaultValue={findNode(docRef.current, menu.id)?.layout ?? ""}
-                  onChange={(e) => {
-                    apply(setNodeLayout(docRef.current, menu.id, e.target.value || undefined));
-                    setMenu(null);
-                  }}
-                  style={{ font: "inherit", marginTop: 2 }}
-                >
-                  <option value="">Default (map)</option>
-                  <option value="org-down">Org chart ↓</option>
-                  <option value="org-up">Org chart ↑</option>
-                  <option value="right">Right</option>
-                  <option value="left">Left</option>
-                  <option value="radial">Radial</option>
-                  <option value="timeline">Timeline</option>
-                  <option value="fishbone">Fishbone</option>
-                  <option value="grid">Grid</option>
-                  <option value="brace">Brace</option>
-                </select>
-              </label>
-            </li>
-          </ul>
+              items.push(["Delete", () => apply(deleteNode(docRef.current, id)), true]);
+              return (
+                <>
+                  {items.map(([label, fn, danger]) => (
+                    <MenuItem key={label} label={label} danger={danger} onSelect={fn} />
+                  ))}
+                  <MenuSeparator />
+                  <label
+                    className="mm-menu-label"
+                    style={{ display: "block", textTransform: "none", letterSpacing: 0 }}
+                  >
+                    Branch layout
+                    <select
+                      className="mm-select"
+                      defaultValue={findNode(docRef.current, menu.id)?.layout ?? ""}
+                      onChange={(e) => {
+                        apply(setNodeLayout(docRef.current, menu.id, e.target.value || undefined));
+                        setMenu(null);
+                      }}
+                      style={{ width: "100%", marginTop: 4 }}
+                    >
+                      <option value="">Default (map)</option>
+                      <option value="org-down">Org chart ↓</option>
+                      <option value="org-up">Org chart ↑</option>
+                      <option value="right">Right</option>
+                      <option value="left">Left</option>
+                      <option value="radial">Radial</option>
+                      <option value="timeline">Timeline</option>
+                      <option value="fishbone">Fishbone</option>
+                      <option value="grid">Grid</option>
+                      <option value="brace">Brace</option>
+                    </select>
+                  </label>
+                </>
+              );
+            })()}
+          </ContextMenu>
         ) : null}
         {linkingFrom ? (
           <div

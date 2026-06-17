@@ -1,5 +1,13 @@
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode, Ref } from "react";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { colors, fontSize, fontWeight, radius, space } from "./tokens";
 
 // Reusable chrome primitives, built from the design tokens. Each one's *default* rendered output is
@@ -370,20 +378,31 @@ export function Menu({
   children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const place = useCallback(() => {
+  // Anchor below the trigger, then clamp into the viewport: flip above if it would overflow the
+  // bottom, and slide left if it would overflow the right edge. Uses the menu's measured size once
+  // it's mounted (a no-op first pass before that), so a useLayoutEffect re-runs it after open.
+  const reposition = useCallback(() => {
     const b = btnRef.current;
     if (!b) return;
-    const r = b.getBoundingClientRect();
-    setPos(
-      align === "left"
-        ? { top: r.bottom + 4, left: r.left }
-        : { top: r.bottom + 4, right: window.innerWidth - r.right },
-    );
+    const tr = b.getBoundingClientRect();
+    const mr = menuRef.current?.getBoundingClientRect();
+    const mw = mr?.width ?? 0;
+    const mh = mr?.height ?? 0;
+    const margin = 4;
+    let top = tr.bottom + margin;
+    if (mh && top + mh > window.innerHeight) {
+      const above = tr.top - mh - margin;
+      top = above >= margin ? above : Math.max(margin, window.innerHeight - mh - margin);
+    }
+    let left = align === "left" ? tr.left : tr.right - mw;
+    if (mw && left + mw > window.innerWidth) left = window.innerWidth - mw - margin;
+    if (left < margin) left = margin;
+    setPos({ top, left });
   }, [align]);
 
   const close = useCallback((restoreFocus = true) => {
@@ -402,15 +421,20 @@ export function Menu({
     };
     document.addEventListener("pointerdown", onDown, true);
     document.addEventListener("keydown", onKey, true);
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
     return () => {
       document.removeEventListener("pointerdown", onDown, true);
       document.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
     };
-  }, [open, place, close]);
+  }, [open, reposition, close]);
+
+  // Once the menu is mounted, re-clamp using its real measured size (before paint, so no flicker).
+  useLayoutEffect(() => {
+    if (open) reposition();
+  }, [open, reposition]);
 
   // On open, move focus into the menu (first focusable item) — keyboard users land inside.
   useEffect(() => {
@@ -420,7 +444,7 @@ export function Menu({
   const onTriggerKeyDown = (e: React.KeyboardEvent) => {
     if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
       e.preventDefault();
-      place();
+      reposition();
       setOpen(true);
     }
   };
@@ -439,7 +463,7 @@ export function Menu({
         title={triggerTitle}
         aria-label={triggerAriaLabel}
         onClick={() => {
-          if (!open) place();
+          if (!open) reposition();
           setOpen((o) => !o);
         }}
         onKeyDown={onTriggerKeyDown}
@@ -573,11 +597,29 @@ export function ContextMenu({
   children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
+  // Start at the requested point; clamp into the viewport once measured (below).
+  const [pos, setPos] = useState({ top: y, left: x });
 
   // Focus the first item on mount so the menu is immediately keyboard-drivable.
   useEffect(() => {
     menuItemsOf(menuRef.current)[0]?.focus();
   }, []);
+
+  // Clamp the point into the viewport using the menu's measured size — so a right-click near the
+  // bottom/right edge stays fully on-screen (before paint, so it never flashes off-edge).
+  useLayoutEffect(() => {
+    const mr = menuRef.current?.getBoundingClientRect();
+    const mw = mr?.width ?? 0;
+    const mh = mr?.height ?? 0;
+    const margin = 4;
+    let top = y;
+    let left = x;
+    if (mh && top + mh > window.innerHeight)
+      top = Math.max(margin, window.innerHeight - mh - margin);
+    if (mw && left + mw > window.innerWidth)
+      left = Math.max(margin, window.innerWidth - mw - margin);
+    setPos({ top, left });
+  }, [x, y]);
 
   // Close on Escape or a pointerdown outside the menu (capture, so it beats other handlers).
   useEffect(() => {
@@ -602,7 +644,7 @@ export function ContextMenu({
       aria-label={menuAriaLabel}
       data-mm-menu
       ref={menuRef}
-      style={{ position: "fixed", top: y, left: x }}
+      style={{ position: "fixed", top: pos.top, left: pos.left }}
       onKeyDown={(e) => roveMenuKey(e, menuRef, onClose)}
     >
       <MenuCtx.Provider value={{ close: onClose }}>

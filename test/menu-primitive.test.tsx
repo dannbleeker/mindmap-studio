@@ -4,8 +4,9 @@
 // Enter to activate, Escape to close + restore focus, click-outside, and the checkbox semantics.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  ContextMenu,
   Menu,
   MenuCheckboxItem,
   MenuItem,
@@ -134,5 +135,50 @@ describe("Menu primitive", () => {
     await u.click(screen.getByRole("menuitem", { name: "Gamma" }));
     expect(onGamma).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole("menu")).toBeNull();
+  });
+});
+
+describe("ContextMenu viewport clamping", () => {
+  const origRect = HTMLElement.prototype.getBoundingClientRect;
+  const origW = window.innerWidth;
+  const origH = window.innerHeight;
+  const setViewport = (w: number, h: number) => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: w });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: h });
+  };
+  const setMenuRect = (w: number, h: number) => {
+    HTMLElement.prototype.getBoundingClientRect = function rect() {
+      return { width: w, height: h, top: 0, left: 0, right: w, bottom: h, x: 0, y: 0, toJSON() {} };
+    } as () => DOMRect;
+  };
+  afterEach(() => {
+    HTMLElement.prototype.getBoundingClientRect = origRect;
+    setViewport(origW, origH);
+  });
+
+  it("clamps a bottom-right point so the menu stays fully on-screen", () => {
+    setViewport(800, 600);
+    setMenuRect(200, 300);
+    render(
+      <ContextMenu x={750} y={500} onClose={() => {}}>
+        <MenuItem label="A" onSelect={() => {}} />
+      </ContextMenu>,
+    );
+    const menu = screen.getByRole("menu");
+    expect(menu.style.left).toBe("596px"); // 800 - 200 - 4
+    expect(menu.style.top).toBe("296px"); // 600 - 300 - 4
+  });
+
+  it("leaves a point that already fits unchanged", () => {
+    setViewport(800, 600);
+    setMenuRect(120, 90);
+    render(
+      <ContextMenu x={50} y={60} onClose={() => {}}>
+        <MenuItem label="A" onSelect={() => {}} />
+      </ContextMenu>,
+    );
+    const menu = screen.getByRole("menu");
+    expect(menu.style.left).toBe("50px");
+    expect(menu.style.top).toBe("60px");
   });
 });

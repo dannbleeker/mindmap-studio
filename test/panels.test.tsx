@@ -197,10 +197,11 @@ describe("InfoPanel", () => {
   const selected: SelectedNode = { id: "a", topic: "Research", note: "interview users" };
   const node = sampleRoot().children[0];
 
-  const renderInfo = (sel: SelectedNode | null, n: MapNode | null) =>
+  const renderInfo = (sel: SelectedNode | null, n: MapNode | null, count?: number) =>
     render(
       <InfoPanel
         selected={sel}
+        selectedCount={count}
         node={n}
         noteDraft={n?.note ?? ""}
         onNoteChange={noop}
@@ -265,6 +266,28 @@ describe("InfoPanel", () => {
     expect(screen.getByText("Shape")).toBeTruthy();
     expect(screen.getByText(/Stickers/)).toBeTruthy();
     expect(screen.queryByText("Tags")).toBeNull();
+  });
+
+  it("enters bulk mode for a multi-selection (banner shown, per-item editors hidden, no Notes tab)", () => {
+    renderInfo(selected, node, 3);
+    expect(screen.getByText(/3 topics selected/)).toBeTruthy();
+    expect(screen.queryByRole("tab", { name: "Notes" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "Details" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Style" })).toBeTruthy();
+    // Details (default) keeps the value-setting editors that fold across a set…
+    expect(screen.getByText("Dates")).toBeTruthy();
+    expect(screen.getByText("Priority")).toBeTruthy();
+    // …but hides the per-item ones.
+    expect(screen.queryByText("Tags")).toBeNull();
+    expect(screen.queryByText("Attachments")).toBeNull();
+    expect(screen.queryByText("Links")).toBeNull();
+  });
+
+  it("bulk Style tab keeps the style bar but hides per-item markers + stickers", async () => {
+    renderInfo(selected, node, 3);
+    await userEvent.click(screen.getByRole("tab", { name: "Style" }));
+    expect(screen.getByText("Shape")).toBeTruthy(); // StyleBar applies to all
+    expect(screen.queryByText(/Stickers/)).toBeNull(); // per-item sticker grid hidden
   });
 });
 

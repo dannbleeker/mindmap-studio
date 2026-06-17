@@ -172,6 +172,7 @@ function FlowInner({
   litIds = null,
   onChange,
   onSelect,
+  onSelectionCount,
   onMapLink,
   ref,
 }: MindMapProps) {
@@ -190,6 +191,10 @@ function FlowInner({
   const [nodes, setNodes, onNodesChange] = useNodesState<TopicNodeT>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>(projected.edges);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Multi-selection: this set drives the canvas selection flags; `selectedId` is the anchor (the
+  // last-touched node) that every single-node behaviour — keyboard, popover, per-item edits — keeps
+  // using. For a single selection the set is just {anchor}.
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
@@ -232,6 +237,8 @@ function FlowInner({
   litIdsRef.current = litIds;
   const selectedRef = useRef<string | null>(null);
   selectedRef.current = selectedId;
+  const selectedIdsRef = useRef<Set<string>>(selectedIds);
+  selectedIdsRef.current = selectedIds;
   const editingRef = useRef<string | null>(null);
   editingRef.current = editingId;
   const linkingFromRef = useRef<string | null>(null);
@@ -250,7 +257,12 @@ function FlowInner({
     (newDoc: MindMapDoc, nextSelected?: string | null) => {
       docRef.current = newDoc;
       setRenderDoc(newDoc);
-      if (nextSelected !== undefined) selectedRef.current = nextSelected;
+      // A structural op passes its result node as the next anchor → selection collapses to it. A
+      // bulk edit passes nothing → the multi-selection set is preserved across the re-render.
+      if (nextSelected !== undefined) {
+        selectedRef.current = nextSelected;
+        selectedIdsRef.current = nextSelected ? new Set([nextSelected]) : new Set();
+      }
       const proj = project(newDoc, paletteRef.current, numberedRef.current);
       const est = estimateSizeOf(proj.nodes);
       const measured = getNodes();
@@ -263,13 +275,13 @@ function FlowInner({
       // Free-canvas mode overrides the picked layout: nodes sit at their own `pos`.
       const kind = newDoc.meta?.freeform ? "freeform" : directionRef.current;
       const pos = computeLayout(proj.nodes, proj.edges, sizeOf, kind);
-      const sel = selectedRef.current;
+      const selIds = selectedIdsRef.current;
       const lit = litIdsRef.current;
       setNodes(
         proj.nodes.map((n) => ({
           ...n,
           position: pos.get(n.id) ?? { x: 0, y: 0 },
-          selected: n.id === sel,
+          selected: selIds.has(n.id),
           data: lit ? { ...n.data, dimmed: !lit.has(n.id) } : n.data,
         })),
       );
@@ -295,6 +307,32 @@ function FlowInner({
     onSelectRef.current?.(n ? { id: n.id, topic: n.topic, note: n.note ?? "" } : null);
   }, []);
 
+  // Collapse the selection to a single anchor (the single-select path), or clear it (id = null).
+  const selectOnly = useCallback((id: string | null) => {
+    setSelectedId(id);
+    setSelectedIds(id ? new Set([id]) : new Set());
+  }, []);
+
+  // Mirror React Flow's own selection (marquee drag-select + Shift/Ctrl-click) into our set. Guarded
+  // by a set-equality check so the round-trip with the selection-flag effect can't loop: once the
+  // flags match the set, RF re-fires this with the same ids and we bail.
+  const onSelectionChange = useCallback(
+    ({ nodes: selNodes }: { nodes: { id: string }[] }) => {
+      const ids = new Set(selNodes.map((n) => n.id));
+      const cur = selectedIdsRef.current;
+      if (ids.size === cur.size && [...ids].every((x) => cur.has(x))) return;
+      setSelectedIds(ids);
+      // Keep the anchor if it's still selected, else adopt the most-recently-selected node.
+      const anchor =
+        selectedRef.current && ids.has(selectedRef.current)
+          ? selectedRef.current
+          : (selNodes[selNodes.length - 1]?.id ?? null);
+      setSelectedId(anchor);
+      fireSelect(anchor);
+    },
+    [fireSelect],
+  );
+
   // Apply a pure op: persist + re-render; optionally enter edit on the resulting node.
   const apply = useCallback(
     (result: OpResult, edit = false) => {
@@ -304,12 +342,12 @@ function FlowInner({
         onChangeRef.current?.(result.doc);
       }
       if (result.selectId !== undefined) {
-        setSelectedId(result.selectId);
+        selectOnly(result.selectId);
         fireSelect(result.selectId);
         if (edit) setEditingId(result.selectId);
       }
     },
-    [sync, fireSelect],
+    [sync, fireSelect, selectOnly],
   );
 
   // Undo/redo restore a snapshot without recording it.
@@ -370,13 +408,13 @@ function FlowInner({
     (id: string) => {
       const n = getNodes().find((m) => m.id === id);
       if (!n) return;
-      setSelectedId(id);
+      selectOnly(id);
       fireSelect(id);
       const w = n.measured?.width ?? 0;
       const h = n.measured?.height ?? 0;
       setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: 300 });
     },
-    [getNodes, fireSelect, setCenter],
+    [getNodes, fireSelect, setCenter, selectOnly],
   );
 
   // Editing API for the topic nodes. Commits arrive as raw contenteditable HTML; sanitise to a
@@ -473,14 +511,23 @@ function FlowInner({
     [apply],
   );
 
-  // Keep node selection flags in sync with selectedId (no re-layout).
+  // Keep node selection flags in sync with the selection set (no re-layout). Drives the highlight
+  // for app-side selection changes (click, keyboard, focus); React Flow's own marquee/Ctrl-click
+  // round-trips through onSelectionChange, which the equality guard there keeps from looping.
   useEffect(() => {
     setNodes((nds) =>
       nds.map((n) =>
-        n.selected === (n.id === selectedId) ? n : { ...n, selected: n.id === selectedId },
+        n.selected === selectedIds.has(n.id) ? n : { ...n, selected: selectedIds.has(n.id) },
       ),
     );
-  }, [selectedId, setNodes]);
+  }, [selectedIds, setNodes]);
+
+  // Report the selection count up (the inspector switches to bulk mode when >1).
+  const onSelectionCountRef = useRef(onSelectionCount);
+  onSelectionCountRef.current = onSelectionCount;
+  useEffect(() => {
+    onSelectionCountRef.current?.(selectedIds.size);
+  }, [selectedIds]);
 
   // Re-layout on a live layout-kind change (initial mount is already laid out).
   const firstRun = useRef(true);
@@ -603,6 +650,22 @@ function FlowInner({
     return true;
   }, []);
 
+  // Fold a pure op over every selected node and commit the result as ONE undo step. Used by the
+  // value-setting bulk edits (style / progress / dates / priority) — for a single selection this is
+  // identical to the old single-node path (the set is {anchor}). Per-item edits (note / image /
+  // hyperlink / attachments / tags / markers) stay on `withSelected` (the anchor only).
+  const withSelectedAll = useCallback(
+    (op: (doc: MindMapDoc, id: string) => OpResult): boolean => {
+      const ids = [...selectedIdsRef.current];
+      if (ids.length === 0) return false;
+      let doc = docRef.current;
+      for (const id of ids) doc = op(doc, id).doc;
+      if (doc !== docRef.current) apply({ doc });
+      return true;
+    },
+    [apply],
+  );
+
   useImperativeHandle(
     ref,
     (): MindMapHandle => ({
@@ -662,8 +725,7 @@ function FlowInner({
       },
       setBackdropRings: (delta) => apply(setBackdropRings(docRef.current, delta)),
       clearBackdrop: () => apply(clearBackdrop(docRef.current)),
-      setSelectedStyle: (patch) =>
-        withSelected((id) => apply(mergeStyle(docRef.current, id, patch))),
+      setSelectedStyle: (patch) => withSelectedAll((doc, id) => mergeStyle(doc, id, patch)),
       setSelectedHyperlink: (url) =>
         withSelected((id) => apply(setHyperlink(docRef.current, id, url))),
       groupBranch: (id) => {
@@ -680,11 +742,11 @@ function FlowInner({
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
       setSelectedProgress: (progress) =>
-        withSelected((id) => apply(setProgress(docRef.current, id, progress))),
-      setSelectedDue: (due) => withSelected((id) => apply(setDue(docRef.current, id, due))),
-      setSelectedStart: (start) => withSelected((id) => apply(setStart(docRef.current, id, start))),
+        withSelectedAll((doc, id) => setProgress(doc, id, progress)),
+      setSelectedDue: (due) => withSelectedAll((doc, id) => setDue(doc, id, due)),
+      setSelectedStart: (start) => withSelectedAll((doc, id) => setStart(doc, id, start)),
       setSelectedPriority: (priority) =>
-        withSelected((id) => apply(setPriority(docRef.current, id, priority))),
+        withSelectedAll((doc, id) => setPriority(doc, id, priority)),
       addSelectedAttachment: (attachment) =>
         withSelected((id) => apply(addAttachment(docRef.current, id, attachment))),
       removeSelectedAttachment: (index) =>
@@ -703,7 +765,7 @@ function FlowInner({
         apply({ doc: res.doc });
       },
     }),
-    [fitView, getNodes, apply, withSelected, focusNodeById],
+    [fitView, getNodes, apply, withSelected, withSelectedAll, focusNodeById],
   );
 
   return (
@@ -764,7 +826,14 @@ function FlowInner({
           minZoom={0.2}
           maxZoom={3}
           fitView
-          onNodeClick={(_, node) => {
+          // Drag the empty canvas to rubber-band a multi-selection; pan with the middle/right
+          // button (selectionOnDrag claims the left button). Shift/Ctrl/Cmd-click extends.
+          selectionOnDrag
+          panOnDrag={[1, 2]}
+          selectionKeyCode={null}
+          multiSelectionKeyCode={["Shift", "Meta", "Control"]}
+          onSelectionChange={onSelectionChange}
+          onNodeClick={(ev, node) => {
             // In "Link to…" mode, the next click on a *different* node completes the relationship.
             if (linkingFrom && node.id !== linkingFrom) {
               const label = window.prompt("Relationship label (optional):", "") ?? "";
@@ -773,19 +842,22 @@ function FlowInner({
               return;
             }
             setLinkingFrom(null);
-            setSelectedId(node.id);
-            fireSelect(node.id);
             setMenu(null);
+            // A modified click extends the selection — React Flow toggles it and we mirror the
+            // result via onSelectionChange; a plain click is a single (anchor) select.
+            if (ev.shiftKey || ev.metaKey || ev.ctrlKey) return;
+            selectOnly(node.id);
+            fireSelect(node.id);
           }}
           onPaneClick={() => {
             setLinkingFrom(null);
-            setSelectedId(null);
+            selectOnly(null);
             fireSelect(null);
             setMenu(null);
           }}
           onNodeContextMenu={(e, node) => {
             e.preventDefault();
-            setSelectedId(node.id);
+            selectOnly(node.id);
             fireSelect(node.id);
             setMenu({ x: e.clientX, y: e.clientY, id: node.id });
           }}

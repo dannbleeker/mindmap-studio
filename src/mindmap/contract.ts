@@ -132,8 +132,10 @@ export interface MindMapProps {
   doc: MindMapDoc;
   /** Fires after every canvas edit with the updated canonical doc. */
   onChange?: (doc: MindMapDoc) => void;
-  /** Fires when the canvas selection changes (for the Notes panel). */
+  /** Fires when the canvas selection changes (for the Notes panel). Reports the anchor node. */
   onSelect?: (selected: SelectedNode | null) => void;
+  /** Fires when the number of selected nodes changes (the inspector enters bulk mode when >1). */
+  onSelectionCount?: (count: number) => void;
   /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
   onMapLink?: (mapId: string) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */

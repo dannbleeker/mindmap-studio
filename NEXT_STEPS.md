@@ -19,8 +19,11 @@ tokens + primitives, `<Toolbar>` / `<Dialog>` / `usePanels()` extracted, canvas 
       effort: restructure the editor shell — a proper menu system (nested menus + keyboard nav on the
       Phase-C primitives), a reorganised toolbar, and cleaner inspector/panel layout — now that the
       chrome is extracted into token-driven components with a regression test net behind it.
-      *First slice landed (2026-06-17): the Topic-info panel is now tabbed (Details / Style / Notes)
-      on a reusable `Tabs` primitive; menus + toolbar restructure still open.*
+      *Inspector slice landed (2026-06-17): tabbed Topic-info panel (Details / Style / Notes) on a
+      reusable `Tabs` primitive, a WYSIWYG note editor, minimize-to-strip, and multi-select bulk
+      editing (shape/fill/border/font/progress/dates/priority across a selection). Still open: the
+      menu/toolbar restructure, and **bulk markers + tags** (deferred — they need set-semantics
+      rather than the per-node toggle/array, so they stay single-topic for now).*
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.

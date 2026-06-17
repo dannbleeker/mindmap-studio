@@ -147,6 +147,8 @@ export function App() {
   }
   // Notes editor: tracks the selected node and a debounced draft of its note.
   const [selected, setSelected] = useState<SelectedNode | null>(null);
+  // How many nodes are selected on the canvas (the inspector switches to bulk mode when >1).
+  const [selectedCount, setSelectedCount] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
   // Panel open/close + Power-Filter + saved-filter presets (with their localStorage persistence) all
   // live in usePanels; App threads `panels` into <Toolbar> and `filter`/`savedFilters` into the
@@ -1160,6 +1162,7 @@ export function App() {
                   scheduleSave();
                 }}
                 onSelect={handleSelect}
+                onSelectionCount={setSelectedCount}
                 onMapLink={(id) => switchMap(id)}
               />
               {/* Kanban board overlays the canvas (the map stays mounted underneath). */}
@@ -1219,6 +1222,7 @@ export function App() {
             selected ? (
               <InfoPanel
                 selected={selected}
+                selectedCount={selectedCount}
                 node={selectedNode}
                 noteDraft={noteDraft}
                 onNoteChange={onNoteChange}

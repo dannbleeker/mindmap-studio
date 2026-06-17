@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Multi-select + bulk editing** — select several topics at once (**Shift/Ctrl/⌘-click** to extend,
+  or **drag a box** on the empty canvas) and change them together from the inspector: **shape, fill,
+  border, font/bold, progress, dates and priority** apply across the whole selection in a single undo
+  step. The inspector shows an *"N topics selected"* banner and hides the per-item editors (notes,
+  markers, tags, stickers, attachments, links) — those stay single-topic. A plain click (or any
+  structural edit) collapses back to one. Because the canvas now rubber-band-selects on left-drag,
+  **panning moves to the middle/right mouse button** (scroll still zooms). Built on an anchor + a
+  selection set, so existing single-topic keyboard / popover / linking behaviour is unchanged.
+
 - **Minimize / restore the topic inspector** — the right-hand inspector can now collapse to a thin
   strip on the canvas edge (the header's **›** button) and re-expand from that strip's ℹ button,
   reclaiming canvas width without losing the panel. Minimizing is **sticky**: selecting other nodes

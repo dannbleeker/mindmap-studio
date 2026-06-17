@@ -997,6 +997,7 @@ const INFO_TABS: readonly TabItem[] = [
 
 export function InfoPanel({
   selected,
+  selectedCount,
   node,
   noteDraft,
   onNoteChange,
@@ -1021,6 +1022,8 @@ export function InfoPanel({
   onMinimize,
 }: {
   selected: SelectedNode | null;
+  /** Number of nodes selected on the canvas; >1 puts the panel in bulk-edit mode. */
+  selectedCount?: number;
   node: MapNode | null;
   noteDraft: string;
   onNoteChange: (value: string) => void;
@@ -1046,6 +1049,12 @@ export function InfoPanel({
 }) {
   const [tagInput, setTagInput] = useState("");
   const [tab, setTab] = useState<InfoTab>("details");
+  // Bulk mode: >1 node selected. Only the value-setting editors that apply cleanly across a set are
+  // shown (shape/colour/font, progress, dates, priority); per-item editors (notes, markers, tags,
+  // stickers, attachments, links) are hidden — they stay single-node, edited by selecting one topic.
+  const multi = (selectedCount ?? 0) > 1;
+  const tabs = multi ? INFO_TABS.filter((t) => t.id !== "notes") : INFO_TABS;
+  const activeTab: InfoTab = multi && tab === "notes" ? "details" : tab;
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
   const webUrl = link.startsWith("#") ? "" : link;
@@ -1150,12 +1159,12 @@ export function InfoPanel({
       ) : (
         <>
           <Tabs
-            tabs={INFO_TABS}
-            active={tab}
+            tabs={tabs}
+            active={activeTab}
             onChange={(id) => setTab(id as InfoTab)}
             ariaLabel="Topic info sections"
           />
-          {tab === "notes" ? (
+          {activeTab === "notes" ? (
             <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
               <NotesPanel
                 selected={selected}
@@ -1166,50 +1175,75 @@ export function InfoPanel({
             </div>
           ) : (
             <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-              {tab === "style" && (
+              {multi && (
+                <div
+                  style={{
+                    margin: "8px 10px 2px",
+                    padding: "6px 10px",
+                    borderRadius: radius.md,
+                    background: colors.accentTint,
+                    color: colors.text,
+                    fontSize: fontSize.sm,
+                    fontWeight: fontWeight.semibold,
+                  }}
+                >
+                  {selectedCount} topics selected — changes apply to all
+                </div>
+              )}
+              {activeTab === "style" && (
                 <>
                   <StyleBar onStyle={onStyle} />
-                  <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
-                  <StickerBar stickers={STICKERS} onPick={onPickSticker} />
+                  {!multi && (
+                    <>
+                      <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
+                      <StickerBar stickers={STICKERS} onPick={onPickSticker} />
+                    </>
+                  )}
                 </>
               )}
-              {tab === "details" && (
+              {activeTab === "details" && (
                 <>
-                  {sectionLabel("Tags")}
-                  <div style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}>
-                    {(node.tags ?? []).map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => onRemoveTag(t)}
-                        title={`Remove tag "${t}"`}
-                        style={{
-                          border: `1px solid ${colors.controlBorder}`,
-                          background: colors.white,
-                          borderRadius: radius.md,
-                          cursor: "pointer",
-                          fontSize: fontSize.sm,
-                          padding: "1px 6px",
-                          color: colors.text,
-                        }}
+                  {!multi && (
+                    <>
+                      {sectionLabel("Tags")}
+                      <div
+                        style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}
                       >
-                        {t} ✕
-                      </button>
-                    ))}
-                  </div>
-                  <Input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && tagInput.trim()) {
-                        onAddTag(tagInput.trim());
-                        setTagInput("");
-                      }
-                    }}
-                    placeholder="Add a tag, press Enter"
-                    aria-label="Add a tag"
-                    style={{ width: "auto", margin: "0 10px 4px" }}
-                  />
+                        {(node.tags ?? []).map((t) => (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => onRemoveTag(t)}
+                            title={`Remove tag "${t}"`}
+                            style={{
+                              border: `1px solid ${colors.controlBorder}`,
+                              background: colors.white,
+                              borderRadius: radius.md,
+                              cursor: "pointer",
+                              fontSize: fontSize.sm,
+                              padding: "1px 6px",
+                              color: colors.text,
+                            }}
+                          >
+                            {t} ✕
+                          </button>
+                        ))}
+                      </div>
+                      <Input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && tagInput.trim()) {
+                            onAddTag(tagInput.trim());
+                            setTagInput("");
+                          }
+                        }}
+                        placeholder="Add a tag, press Enter"
+                        aria-label="Add a tag"
+                        style={{ width: "auto", margin: "0 10px 4px" }}
+                      />
+                    </>
+                  )}
 
                   {renderProgress(node)}
 
@@ -1292,125 +1326,133 @@ export function InfoPanel({
                     ) : null}
                   </div>
 
-                  {sectionLabel("Attachments")}
-                  <div
-                    style={{
-                      padding: "0 10px 6px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 4,
-                    }}
-                  >
-                    {(node.attachments ?? []).map((a, i) => (
+                  {!multi && (
+                    <>
+                      {sectionLabel("Attachments")}
                       <div
-                        key={`${a.name}:${i}`}
                         style={{
+                          padding: "0 10px 6px",
                           display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                          fontSize: fontSize.sm,
+                          flexDirection: "column",
+                          gap: 4,
                         }}
                       >
-                        <a
-                          href={a.dataUrl}
-                          download={a.name}
-                          title={`Download ${a.name}`}
+                        {(node.attachments ?? []).map((a, i) => (
+                          <div
+                            key={`${a.name}:${i}`}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              fontSize: fontSize.sm,
+                            }}
+                          >
+                            <a
+                              href={a.dataUrl}
+                              download={a.name}
+                              title={`Download ${a.name}`}
+                              style={{
+                                color: colors.text,
+                                flex: 1,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              📎 {a.name}
+                            </a>
+                            <span style={{ color: colors.faint }}>{formatBytes(a.size)}</span>
+                            <Button
+                              onClick={() => onRemoveAttachment(i)}
+                              title="Remove attachment"
+                              style={{ padding: "1px 6px", fontSize: fontSize.sm }}
+                            >
+                              ✕
+                            </Button>
+                          </div>
+                        ))}
+                        <label
                           style={{
-                            color: colors.text,
-                            flex: 1,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            ...controlStyle,
+                            fontSize: fontSize.sm,
+                            cursor: "pointer",
+                            textAlign: "center",
                           }}
                         >
-                          📎 {a.name}
-                        </a>
-                        <span style={{ color: colors.faint }}>{formatBytes(a.size)}</span>
-                        <Button
-                          onClick={() => onRemoveAttachment(i)}
-                          title="Remove attachment"
-                          style={{ padding: "1px 6px", fontSize: fontSize.sm }}
-                        >
-                          ✕
-                        </Button>
+                          + Attach file
+                          <input
+                            type="file"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) onAddAttachment(f);
+                              e.target.value = "";
+                            }}
+                            style={{ display: "none" }}
+                          />
+                        </label>
                       </div>
-                    ))}
-                    <label
-                      style={{
-                        ...controlStyle,
-                        fontSize: fontSize.sm,
-                        cursor: "pointer",
-                        textAlign: "center",
-                      }}
-                    >
-                      + Attach file
-                      <input
-                        type="file"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) onAddAttachment(f);
-                          e.target.value = "";
-                        }}
-                        style={{ display: "none" }}
-                      />
-                    </label>
-                  </div>
 
-                  {sectionLabel("Links")}
-                  <Input
-                    key={`${node.id}:url`}
-                    defaultValue={webUrl}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter")
-                        onSetHyperlink((e.target as HTMLInputElement).value.trim());
-                    }}
-                    onBlur={(e) => {
-                      const v = e.target.value.trim();
-                      if (v !== webUrl) onSetHyperlink(v);
-                    }}
-                    placeholder="Web link (https://…)"
-                    aria-label="Web link"
-                    style={{ width: "auto", margin: "0 10px 4px" }}
-                  />
-                  <Select
-                    value=""
-                    onChange={(e) => e.target.value && onLinkMap(e.target.value)}
-                    aria-label="Link to another map"
-                    style={{ width: "auto", margin: "0 10px 4px" }}
-                  >
-                    <option value="">🔗 Link to a map…</option>
-                    {maps.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.title}
-                      </option>
-                    ))}
-                  </Select>
-                  <Select
-                    value=""
-                    onChange={(e) => e.target.value && onJump(e.target.value)}
-                    aria-label="Jump to another topic"
-                    style={{ width: "auto", margin: "0 10px 4px" }}
-                  >
-                    <option value="">↪ Jump to a topic…</option>
-                    {jumpTargets.map((row) => (
-                      <option key={row.id} value={row.id}>
-                        {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
-                      </option>
-                    ))}
-                  </Select>
-                  {link && (
-                    <Button
-                      onClick={() => onSetHyperlink("")}
-                      style={{ padding: "2px 8px", fontSize: fontSize.sm, margin: "0 10px 6px" }}
-                    >
-                      ✕ Remove link (
-                      {link.startsWith("#map=")
-                        ? "map"
-                        : link.startsWith("#node=")
-                          ? "topic"
-                          : "web"}
-                      )
-                    </Button>
+                      {sectionLabel("Links")}
+                      <Input
+                        key={`${node.id}:url`}
+                        defaultValue={webUrl}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter")
+                            onSetHyperlink((e.target as HTMLInputElement).value.trim());
+                        }}
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v !== webUrl) onSetHyperlink(v);
+                        }}
+                        placeholder="Web link (https://…)"
+                        aria-label="Web link"
+                        style={{ width: "auto", margin: "0 10px 4px" }}
+                      />
+                      <Select
+                        value=""
+                        onChange={(e) => e.target.value && onLinkMap(e.target.value)}
+                        aria-label="Link to another map"
+                        style={{ width: "auto", margin: "0 10px 4px" }}
+                      >
+                        <option value="">🔗 Link to a map…</option>
+                        {maps.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.title}
+                          </option>
+                        ))}
+                      </Select>
+                      <Select
+                        value=""
+                        onChange={(e) => e.target.value && onJump(e.target.value)}
+                        aria-label="Jump to another topic"
+                        style={{ width: "auto", margin: "0 10px 4px" }}
+                      >
+                        <option value="">↪ Jump to a topic…</option>
+                        {jumpTargets.map((row) => (
+                          <option key={row.id} value={row.id}>
+                            {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+                          </option>
+                        ))}
+                      </Select>
+                      {link && (
+                        <Button
+                          onClick={() => onSetHyperlink("")}
+                          style={{
+                            padding: "2px 8px",
+                            fontSize: fontSize.sm,
+                            margin: "0 10px 6px",
+                          }}
+                        >
+                          ✕ Remove link (
+                          {link.startsWith("#map=")
+                            ? "map"
+                            : link.startsWith("#node=")
+                              ? "topic"
+                              : "web"}
+                          )
+                        </Button>
+                      )}
+                    </>
                   )}
                 </>
               )}

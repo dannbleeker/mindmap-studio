@@ -107,6 +107,14 @@ priority, attachments, links), **Style** (shape / fill / border / font, markers,
 on the right edge (click the strip's ℹ to bring it back) — minimizing sticks, so selecting other
 nodes won't reopen it; re-expanding shows whatever node is selected then.
 
+**Edit several topics at once.** Select multiple topics — **Shift/Ctrl/⌘-click** to add to the
+selection, or **drag a box** across the empty canvas — and the inspector switches to bulk mode (an
+"N topics selected" banner). Changes to **shape, fill, border, font/bold, progress, dates and
+priority** apply to every selected topic at once (a single undo reverts them all); the per-item
+editors (notes, markers, tags, stickers, attachments, links) are hidden — select a single topic to
+edit those. A plain click clears the multi-selection. *(Because the canvas now box-selects on a
+left-drag, pan with the middle or right mouse button; scroll still zooms.)*
+
 - **Note** — write in the **WYSIWYG** editor: a formatting toolbar (**bold**, *italic*,
   ~~strikethrough~~, bulleted list, numbered list) and inline formatting as you type — no raw markup
   to read. The note box fills the inspector's height. Notes autosave, travel with the map (and the

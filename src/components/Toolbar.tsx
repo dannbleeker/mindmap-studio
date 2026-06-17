@@ -507,6 +507,8 @@ export function Toolbar({
               <MenuItem
                 icon={mi("layers")}
                 label="Group branch (boundary)"
+                disabled={!canvas.selected}
+                title={canvas.selected ? undefined : "Select a topic first to group its branch"}
                 onSelect={() => {
                   const id = canvas.selected?.id;
                   const ok = id ? m()?.groupBranch(id) : false;
@@ -520,6 +522,8 @@ export function Toolbar({
               <MenuItem
                 icon={mi("balance")}
                 label="Summary bracket"
+                disabled={!canvas.selected}
+                title={canvas.selected ? undefined : "Select a topic first to summarise its branch"}
                 onSelect={() => {
                   const id = canvas.selected?.id;
                   const ok = id ? m()?.groupSummary(id) : false;

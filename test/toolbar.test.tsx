@@ -264,6 +264,25 @@ describe("Toolbar — row 2 (view/edit/canvas)", () => {
     expect(t.map.refreshRollupsNow).toHaveBeenCalled();
   });
 
+  it("Insert: Group/Summary are disabled (with a why-tooltip) when nothing is selected", async () => {
+    setup(); // no selection
+    await u.click(screen.getByRole("button", { name: /^insert/i }));
+    const group = screen.getByRole("menuitem", { name: /group branch/i });
+    const summary = screen.getByRole("menuitem", { name: /summary bracket/i });
+    expect(group).toHaveProperty("disabled", true);
+    expect(summary).toHaveProperty("disabled", true);
+    expect(group.getAttribute("title")).toMatch(/select a topic first/i);
+  });
+
+  it("Insert: Group/Summary are enabled and fire on the selection", async () => {
+    const t = setup({ selected: { id: "n1", topic: "N", note: "" } });
+    await u.click(screen.getByRole("button", { name: /^insert/i }));
+    const group = screen.getByRole("menuitem", { name: /group branch/i });
+    expect(group).toHaveProperty("disabled", false);
+    await u.click(group);
+    expect(t.handle.groupBranch).toHaveBeenCalledWith("n1");
+  });
+
   it("Canvas menu: theme select + background reset", async () => {
     const t = setup();
     await u.click(screen.getByRole("button", { name: /^canvas/i }));

@@ -280,9 +280,12 @@
   position: relative;
 }
 .mm-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
+  /* Fixed (not absolute) so the dropdown escapes the toolbar row's overflow clip
+     (.mm-topbar-row2 sets overflow-x:auto for horizontal scroll, which coerces
+     overflow-y and would crop an absolutely-positioned child). Coordinates are
+     supplied inline from the trigger button's rect. No transformed ancestor exists
+     above the toolbar, so fixed resolves against the viewport. */
+  position: fixed;
   z-index: 60;
   min-width: 200px;
   background: var(--ed-card);

@@ -744,6 +744,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Toolbar dropdown menus (Panels / Insert / Canvas) no longer open as an invisible sliver.**
+  Row 2 of the toolbar sets `overflow-x: auto` for horizontal scrolling, which per CSS coerces
+  `overflow-y` too — so the absolutely-positioned dropdown was clipped to the ~50px toolbar row and
+  effectively didn't show. The shared `Menu` now renders the dropdown as `position: fixed` with
+  coordinates computed from the trigger button's rect, so it escapes the row's overflow clip on both
+  desktop and mobile. Not a z-index issue (the menu already sat at z-index 60); clipping ignores
+  z-index. The close-on-outside-click logic is unchanged — the menu stays a DOM child of its wrapper.
 - **The 📝 note indicator now disappears for empty notes.** A note containing only whitespace
   cleared the icon in the Outline (which judges notes by trimmed content) but still showed 📝 on
   the canvas. `setNote` now treats a blank/whitespace-only note as "no note" (cleared), and the

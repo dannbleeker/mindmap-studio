@@ -3,6 +3,7 @@ import {
   type FormEvent,
   type ReactNode,
   type RefObject,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -189,7 +190,20 @@ function Menu({
   children: (close: () => void) => ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  // Fixed-positioned menu coordinates, computed from the trigger button on open.
+  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const place = useCallback(() => {
+    const b = btnRef.current;
+    if (!b) return;
+    const r = b.getBoundingClientRect();
+    setPos(
+      align === "left"
+        ? { top: r.bottom + 4, left: r.left }
+        : { top: r.bottom + 4, right: window.innerWidth - r.right },
+    );
+  }, [align]);
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
@@ -200,31 +214,33 @@ function Menu({
     };
     document.addEventListener("pointerdown", onDown, true);
     document.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", place);
     return () => {
       document.removeEventListener("pointerdown", onDown, true);
       document.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("resize", place);
     };
-  }, [open]);
+  }, [open, place]);
   return (
     <div className="mm-menu-wrap" ref={ref}>
       <button
+        ref={btnRef}
         type="button"
         className="mm-tbtn mm-tbtn-ghost"
         aria-haspopup="menu"
         aria-expanded={open}
         title={label}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          if (!open) place();
+          setOpen((o) => !o);
+        }}
       >
         {icon && <EditorIcon name={icon} size={16} />}
         {label}
         <EditorIcon name="chevron" size={13} />
       </button>
-      {open && (
-        <div
-          className="mm-menu"
-          role="menu"
-          style={align === "left" ? { left: 0, right: "auto" } : undefined}
-        >
+      {open && pos && (
+        <div className="mm-menu" role="menu" style={pos}>
           {children(() => setOpen(false))}
         </div>
       )}

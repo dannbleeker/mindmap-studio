@@ -103,7 +103,8 @@ Select a node and open **ℹ Info** to see and edit everything about it in one s
 note, markers, tags, style, and links. (This replaces the old separate **Notes**, **Markers**, and
 **Style** toggles.) The panel is organised into three tabs: **Details** (tags, progress, dates,
 priority, attachments, links), **Style** (shape / fill / border / font, markers, stickers), and
-**Notes** (the Markdown editor). **Minimize** it with the **›** button to collapse it to a thin strip
+**Notes** (the Markdown editor) — move between the tabs with the **←/→** (and **Home/End**) keys once
+one is focused. **Minimize** it with the **›** button to collapse it to a thin strip
 on the right edge (click the strip's ℹ to bring it back) — minimizing sticks, so selecting other
 nodes won't reopen it; re-expanding shows whatever node is selected then. **Drag the panel's left
 edge to resize it** (the width is remembered); the header shows the topic's path (Root › Branch …)

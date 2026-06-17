@@ -226,21 +226,45 @@ export interface TabItem {
   title?: string;
 }
 
-/** A segmented tab strip. `active` is the selected tab id; `onChange` fires with the clicked id.
- *  The caller renders the matching tab body itself (this is just the selector). */
+/** Stable id prefix for a tab/tabpanel pair (so a panel can set aria-labelledby back to its tab). */
+export const tabId = (base: string, id: string) => `${base}-tab-${id}`;
+export const tabPanelId = (base: string, id: string) => `${base}-panel-${id}`;
+
+/** A segmented tab strip (WAI-ARIA tablist with roving tabindex + arrow/Home/End keys). `active` is
+ *  the selected tab id; `onChange` fires with the chosen id. `idBase` ties each tab to its panel via
+ *  aria-controls (the caller wraps each body in role="tabpanel" id={tabPanelId(idBase, id)}). The
+ *  caller renders the matching tab body itself (this is just the selector). */
 export function Tabs({
   tabs,
   active,
   onChange,
   ariaLabel,
+  idBase,
   style,
 }: {
   tabs: readonly TabItem[];
   active: string;
   onChange: (id: string) => void;
   ariaLabel: string;
+  idBase: string;
   style?: CSSProperties;
 }) {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const isArrow = e.key === "ArrowRight" || e.key === "ArrowLeft";
+    if (!isArrow && e.key !== "Home" && e.key !== "End") return;
+    e.preventDefault();
+    const idx = tabs.findIndex((x) => x.id === active);
+    const next =
+      e.key === "Home"
+        ? 0
+        : e.key === "End"
+          ? tabs.length - 1
+          : (idx + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    const nt = tabs[next];
+    if (!nt) return;
+    onChange(nt.id);
+    (e.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
+  };
   return (
     <div
       className="mm-prim-tablist"
@@ -255,9 +279,13 @@ export function Tabs({
             key={t.id}
             type="button"
             role="tab"
+            id={tabId(idBase, t.id)}
             aria-selected={selected}
+            aria-controls={tabPanelId(idBase, t.id)}
+            tabIndex={selected ? 0 : -1}
             title={t.title}
             onClick={() => onChange(t.id)}
+            onKeyDown={onKeyDown}
             className="mm-prim-tab"
             style={{ ...TAB_BASE, ...(selected ? TAB_SELECTED : null) }}
           >

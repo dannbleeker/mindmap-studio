@@ -599,6 +599,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Denser inspector rows + keyboard-accessible tabs.** The Details tab's single-value fields
+  (**Progress, Dates, Priority**) now render as compact *label-left / control-right* rows instead of a
+  full-width section header above a stacked control block, so more fits without scrolling (the control
+  cluster wraps under the label only when it's too wide, e.g. the two date pickers in a narrow panel).
+  The inspector's **Details / Style / Notes** tab strip is now a proper WAI-ARIA tablist with a
+  **roving tab-stop** and **←/→ + Home/End** keyboard navigation, and each tab is tied to its panel
+  via `aria-controls` / `aria-labelledby`. Purely a layout + a11y change — the controls themselves are
+  unchanged.
+
 - **The Topic-info inspector now matches the rest of the chrome and re-themes.** It was a light-only
   280px panel with a right-hand border (a left-rail idiom) that stayed white in Dark / Ocean / Sunset;
   it now uses the same themed `.mm-inspector` shell as the map-overview panel — 300px, border on the

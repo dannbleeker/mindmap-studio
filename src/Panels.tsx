@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { ProgressPie } from "./ProgressPie";
 import { InspectorResizer } from "./components/InspectorResizer";
 import {
@@ -10,6 +10,8 @@ import {
   Select,
   type TabItem,
   Tabs,
+  tabId,
+  tabPanelId,
 } from "./design/primitives";
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
@@ -87,6 +89,36 @@ const panelTitle: CSSProperties = {
   fontWeight: fontWeight.semibold,
   color: colors.text,
 };
+
+// A compact label-left / control-right row for single-value Info-panel fields (denser than a
+// full-width section header + a stacked control block). Controls wrap under the label if tight.
+function PropRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: space.lg,
+        flexWrap: "wrap",
+        padding: `${space.xs}px ${space.xl}px`,
+      }}
+    >
+      <span
+        style={{
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.bold,
+          color: "var(--ed-faint)",
+        }}
+      >
+        {label}
+      </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 // Per-topic styling bar: shape, fill, border, bold — applied to the selected node.
 export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => void }) {
@@ -1091,12 +1123,10 @@ export function InfoPanel({
     const derived = hasTaskDescendants(n);
     const pct = info ? toPercent(info.progress) : null;
     return (
-      <>
-        {sectionLabel("Progress")}
+      <PropRow label="Progress">
         {derived ? (
           <div
             style={{
-              padding: "0 10px 6px",
               display: "flex",
               alignItems: "center",
               gap: 8,
@@ -1112,7 +1142,6 @@ export function InfoPanel({
         ) : (
           <div
             style={{
-              padding: "0 10px 6px",
               display: "flex",
               alignItems: "center",
               gap: 4,
@@ -1151,7 +1180,7 @@ export function InfoPanel({
             ) : null}
           </div>
         )}
-      </>
+      </PropRow>
     );
   };
   const aside = (
@@ -1208,9 +1237,15 @@ export function InfoPanel({
             active={activeTab}
             onChange={(id) => setTab(id as InfoTab)}
             ariaLabel="Topic info sections"
+            idBase="topic-info"
           />
           {activeTab === "notes" ? (
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <div
+              role="tabpanel"
+              id={tabPanelId("topic-info", "notes")}
+              aria-labelledby={tabId("topic-info", "notes")}
+              style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+            >
               <NotesPanel
                 selected={selected}
                 value={noteDraft}
@@ -1219,7 +1254,12 @@ export function InfoPanel({
               />
             </div>
           ) : (
-            <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+            <div
+              role="tabpanel"
+              id={tabPanelId("topic-info", activeTab)}
+              aria-labelledby={tabId("topic-info", activeTab)}
+              style={{ flex: 1, minHeight: 0, overflowY: "auto" }}
+            >
               {multi && (
                 <div
                   style={{
@@ -1292,89 +1332,89 @@ export function InfoPanel({
 
                   {renderProgress(node)}
 
-                  {sectionLabel("Dates")}
-                  <div
-                    style={{
-                      padding: "0 10px 6px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      flexWrap: "wrap",
-                      fontSize: fontSize.sm,
-                      color: "var(--ed-muted)",
-                    }}
-                  >
-                    <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                      Start
-                      {/* Native input (not the Input primitive) so it stays nested in its label; the
+                  <PropRow label="Dates">
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        flexWrap: "wrap",
+                        fontSize: fontSize.sm,
+                        color: "var(--ed-muted)",
+                      }}
+                    >
+                      <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                        Start
+                        {/* Native input (not the Input primitive) so it stays nested in its label; the
                           mm-prim-input class lets the .mm-inspector theme override re-skin it. */}
-                      <input
-                        key={`${node.id}:start`}
-                        className="mm-prim-input"
-                        type="date"
-                        defaultValue={node.task?.start ?? ""}
-                        onChange={(e) => onSetStart(e.target.value)}
-                        aria-label="Start date"
-                        style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
-                      />
-                    </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                      Due
-                      <input
-                        key={`${node.id}:due`}
-                        className="mm-prim-input"
-                        type="date"
-                        defaultValue={node.task?.due ?? ""}
-                        onChange={(e) => onSetDue(e.target.value)}
-                        aria-label="Due date"
-                        style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
-                      />
-                    </label>
-                  </div>
+                        <input
+                          key={`${node.id}:start`}
+                          className="mm-prim-input"
+                          type="date"
+                          defaultValue={node.task?.start ?? ""}
+                          onChange={(e) => onSetStart(e.target.value)}
+                          aria-label="Start date"
+                          style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+                        />
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                        Due
+                        <input
+                          key={`${node.id}:due`}
+                          className="mm-prim-input"
+                          type="date"
+                          defaultValue={node.task?.due ?? ""}
+                          onChange={(e) => onSetDue(e.target.value)}
+                          aria-label="Due date"
+                          style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+                        />
+                      </label>
+                    </div>
+                  </PropRow>
 
-                  {sectionLabel("Priority")}
-                  <div
-                    style={{
-                      padding: "0 10px 6px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    {PRIORITY_LEVELS.map((p) => {
-                      const active = node.task?.priority === p;
-                      return (
+                  <PropRow label="Priority">
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {PRIORITY_LEVELS.map((p) => {
+                        const active = node.task?.priority === p;
+                        return (
+                          <Button
+                            key={p}
+                            className="mm-keep-color"
+                            onClick={() => onSetPriority(p)}
+                            title={`${PRIORITY_LABEL[p]} priority`}
+                            style={{
+                              padding: "1px 8px",
+                              fontSize: fontSize.sm,
+                              fontWeight: fontWeight.semibold,
+                              // Priority keeps its own semantic colour scale in every theme (opted out
+                              // of the inspector's accent re-theme via mm-keep-color).
+                              background: active ? PRIORITY_COLOR[p] : "var(--ed-card)",
+                              color: active ? "#fff" : PRIORITY_COLOR[p],
+                              borderColor: PRIORITY_COLOR[p],
+                            }}
+                          >
+                            {PRIORITY_LABEL[p]}
+                          </Button>
+                        );
+                      })}
+                      {node.task?.priority ? (
                         <Button
-                          key={p}
-                          className="mm-keep-color"
-                          onClick={() => onSetPriority(p)}
-                          title={`${PRIORITY_LABEL[p]} priority`}
-                          style={{
-                            padding: "1px 8px",
-                            fontSize: fontSize.sm,
-                            fontWeight: fontWeight.semibold,
-                            // Priority keeps its own semantic colour scale in every theme (opted out
-                            // of the inspector's accent re-theme via mm-keep-color).
-                            background: active ? PRIORITY_COLOR[p] : "var(--ed-card)",
-                            color: active ? "#fff" : PRIORITY_COLOR[p],
-                            borderColor: PRIORITY_COLOR[p],
-                          }}
+                          onClick={() => onSetPriority(undefined)}
+                          title="Clear priority"
+                          style={{ padding: "1px 7px", fontSize: fontSize.sm }}
                         >
-                          {PRIORITY_LABEL[p]}
+                          ✕
                         </Button>
-                      );
-                    })}
-                    {node.task?.priority ? (
-                      <Button
-                        onClick={() => onSetPriority(undefined)}
-                        title="Clear priority"
-                        style={{ padding: "1px 7px", fontSize: fontSize.sm }}
-                      >
-                        ✕
-                      </Button>
-                    ) : null}
-                  </div>
+                      ) : null}
+                    </div>
+                  </PropRow>
 
                   {!multi && (
                     <>

@@ -86,3 +86,16 @@ pnpm gate
   Importers: `src/import/`. The `.mmap` importer is **one-way + lossy by design**.
 - Scope: **brainstorming/knowledge + presentations/sharing**. The task / Gantt /
   SmartRules / resource PM layer is **out of scope** unless we decide otherwise.
+
+## Response style
+
+- **Terse.** Answer the question; cut filler. No preamble ("Sure, here's…") and no
+  postamble ("Let me know if…").
+- **No plan narration** unless the task is genuinely ambiguous — then a short plan,
+  otherwise just do it.
+- **Explain decisions only when non-obvious.** Skip the rationale for routine choices;
+  spell it out when a reader would otherwise wonder "why this way?".
+- **Show only changed code**, not whole files — the diff/hunk, with just enough
+  surrounding context to place it.
+- **Keep reasoning visible enough to catch wrong turns** — surface the key assumption
+  or step so a wrong one is obvious, without narrating every move.

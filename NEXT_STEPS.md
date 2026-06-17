@@ -15,20 +15,19 @@ tokens + primitives, `<Toolbar>` / `<Dialog>` / `usePanels()` extracted, canvas 
 
 ## Open items
 
-- [ ] **UX redesign of the canvas/editor chrome (menus / toolbars / inspectors).** The next planned
-      effort: restructure the editor shell — a proper menu system (nested menus + keyboard nav on the
-      Phase-C primitives), a reorganised toolbar, and cleaner inspector/panel layout — now that the
-      chrome is extracted into token-driven components with a regression test net behind it.
-      *Inspector overhaul landed (2026-06-17): the Topic-info panel is a themed `.mm-inspector` shell
-      (re-themes in every palette), resizable + persisted, with a breadcrumb + quick-facts header,
-      denser label-left property rows, keyboard-accessible tabs, "Mixed" handling in bulk edit, and a
-      "Linked from" backlinks section. The no-selection slot is now an editable **Map** panel
-      (title / theme / layout / background / line-jumps / backdrop rings), and clicking a relationship
-      opens an **EdgeInspector** (label / direction / colour / width / style / delete, canvas==export).
-      Still open: the menu/toolbar restructure; **bulk markers + tags** (need set-semantics, stay
-      single-topic); and the heavier **overlay editing** — per-overlay colours + click-to-select for
-      individual boundaries / summaries / callouts (need new model fields), so those still edit on the
-      canvas (the backdrop's rings/remove are in the inspector).*
+- [ ] **UX redesign of the canvas/editor chrome (menus / toolbars).** The next planned effort:
+      restructure the editor shell — a proper menu system (nested menus + keyboard nav on the Phase-C
+      primitives) and a reorganised toolbar — now that the chrome is extracted into token-driven
+      components with a regression test net behind it.
+      *The inspector overhaul + its four follow-ups all landed (2026-06-17). The Topic-info panel is a
+      themed `.mm-inspector` shell (re-themes in every palette), resizable + persisted, with a
+      breadcrumb + quick-facts header (incl. per-node created/modified timestamps), denser label-left
+      property rows, keyboard-accessible tabs, "Mixed" handling + tri-state **bulk markers + tags** in
+      bulk edit, and a "Linked from" backlinks section. The no-selection slot is an editable **Map**
+      panel (title / theme / layout / background / line-jumps / backdrop rings + colour); clicking a
+      relationship opens an **EdgeInspector**; and clicking a **boundary / summary / callout** opens an
+      **OverlayInspector** (label / **colour** / delete) — per-overlay colours re-tint on canvas and in
+      every export (canvas==export). Only the menu/toolbar restructure remains.*
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.

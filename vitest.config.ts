@@ -31,6 +31,7 @@ export default defineConfig({
       ["test/kanban.test.tsx", "jsdom"],
       ["test/brainstorm-timer.test.tsx", "jsdom"],
       ["test/start-sections.test.tsx", "jsdom"],
+      ["test/start-extra.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.

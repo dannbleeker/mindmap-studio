@@ -85,10 +85,14 @@ function Callouts({
   items,
   onCommit,
   onDelete,
+  selectedId,
+  onSelect,
 }: {
   items: CalloutAnchor[];
   onCommit: (nodeId: string, calloutId: string, text: string) => void;
   onDelete: (nodeId: string, calloutId: string) => void;
+  selectedId?: string | null;
+  onSelect?: (nodeId: string, calloutId: string) => void;
 }) {
   const nodes = useNodes();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -120,6 +124,7 @@ function Callouts({
     <ViewportPortal>
       {placed.map(({ nodeId, callout, left, top }) => {
         const editing = editingId === callout.id;
+        const selected = callout.id === selectedId;
         return (
           <div
             key={callout.id}
@@ -144,7 +149,17 @@ function Callouts({
                 strokeDasharray="3 3"
               />
             </svg>
-            <div style={BUBBLE}>
+            {/* biome-ignore lint/a11y/useKeyWithClickEvents: a click selects the bubble; keyboard
+                access to overlays is out of scope (canvas affordance, mirrors node selection). */}
+            <div
+              style={{
+                ...BUBBLE,
+                boxShadow: selected
+                  ? `0 0 0 2px ${CALLOUT_STROKE}, ${BUBBLE.boxShadow}`
+                  : BUBBLE.boxShadow,
+              }}
+              onClick={() => onSelect?.(nodeId, callout.id)}
+            >
               {editing ? (
                 <CalloutEditor
                   initialText={callout.text}
@@ -159,7 +174,10 @@ function Callouts({
                   <button
                     type="button"
                     title="Delete callout"
-                    onClick={() => onDelete(nodeId, callout.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(nodeId, callout.id);
+                    }}
                     style={{
                       float: "right",
                       marginLeft: 6,

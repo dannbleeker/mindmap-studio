@@ -770,6 +770,25 @@ export function deleteSummary(doc: MindMapDoc, id: string): OpResult {
   return { doc: next };
 }
 
+/** Set (or clear, with "") a boundary's label by id. */
+export function setBoundaryLabel(doc: MindMapDoc, id: string, label: string): OpResult {
+  if (!(doc.boundaries ?? []).some((b) => b.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.boundaries = (next.boundaries ?? []).map((b) =>
+    b.id === id ? { ...b, label: label.trim() || undefined } : b,
+  );
+  return { doc: next };
+}
+
+/** Remove a boundary by id (clearing the array when it empties). */
+export function deleteBoundary(doc: MindMapDoc, id: string): OpResult {
+  if (!(doc.boundaries ?? []).some((b) => b.id === id)) return { doc };
+  const next = structuredClone(doc);
+  const kept = (next.boundaries ?? []).filter((b) => b.id !== id);
+  next.boundaries = kept.length > 0 ? kept : undefined;
+  return { doc: next };
+}
+
 /** Replace `query` (case-insensitive) in every topic; returns the doc + count changed. */
 export function replaceTopics(
   doc: MindMapDoc,

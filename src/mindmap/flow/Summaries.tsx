@@ -44,9 +44,13 @@ interface PlacedSummary {
 function Summaries({
   summaries,
   onRename,
+  selectedId,
+  onSelect,
 }: {
   summaries: readonly Summary[];
   onRename: (id: string) => void;
+  selectedId?: string | null;
+  onSelect?: (id: string) => void;
 }) {
   const nodes = useNodes();
   // Resolve each bracket's geometry once per node/summary change rather than on every parent
@@ -88,39 +92,47 @@ function Summaries({
 
   return (
     <ViewportPortal>
-      {placed.map(({ id, label, onLeft, top, height, bracketLeft }) => (
-        <div key={id} style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}>
-          <div
-            style={{
-              position: "absolute",
-              left: bracketLeft,
-              top,
-              width: SUMMARY_BRACKET_W,
-              height,
-              boxSizing: "border-box",
-              borderTop: `2px solid ${SUMMARY_STROKE}`,
-              borderBottom: `2px solid ${SUMMARY_STROKE}`,
-              borderLeft: onLeft ? `2px solid ${SUMMARY_STROKE}` : undefined,
-              borderRight: onLeft ? undefined : `2px solid ${SUMMARY_STROKE}`,
-              pointerEvents: "none",
-            }}
-          />
-          <button
-            type="button"
-            className="nodrag nopan"
-            title="Double-click to rename this summary"
-            onDoubleClick={() => onRename(id)}
-            style={{
-              ...labelChip,
-              top: top + height / 2 - 11,
-              left: onLeft ? bracketLeft - 6 : bracketLeft + SUMMARY_BRACKET_W + 6,
-              transform: onLeft ? "translateX(-100%)" : undefined,
-            }}
-          >
-            {label}
-          </button>
-        </div>
-      ))}
+      {placed.map(({ id, label, onLeft, top, height, bracketLeft }) => {
+        const selected = id === selectedId;
+        return (
+          <div key={id} style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}>
+            <div
+              style={{
+                position: "absolute",
+                left: bracketLeft,
+                top,
+                width: SUMMARY_BRACKET_W,
+                height,
+                boxSizing: "border-box",
+                borderTop: `2px solid ${SUMMARY_STROKE}`,
+                borderBottom: `2px solid ${SUMMARY_STROKE}`,
+                borderLeft: onLeft ? `2px solid ${SUMMARY_STROKE}` : undefined,
+                borderRight: onLeft ? undefined : `2px solid ${SUMMARY_STROKE}`,
+                pointerEvents: "none",
+                // Selection halo (view-only, additive — not exported).
+                filter: selected ? `drop-shadow(0 0 4px ${SUMMARY_STROKE})` : undefined,
+              }}
+            />
+            <button
+              type="button"
+              className="nodrag nopan"
+              title="Click to select · double-click to rename this summary"
+              onClick={() => onSelect?.(id)}
+              onDoubleClick={() => onRename(id)}
+              style={{
+                ...labelChip,
+                top: top + height / 2 - 11,
+                left: onLeft ? bracketLeft - 6 : bracketLeft + SUMMARY_BRACKET_W + 6,
+                transform: onLeft ? "translateX(-100%)" : undefined,
+                cursor: "pointer",
+                boxShadow: selected ? `0 0 0 2px ${SUMMARY_STROKE}` : undefined,
+              }}
+            >
+              {label}
+            </button>
+          </div>
+        );
+      })}
     </ViewportPortal>
   );
 }

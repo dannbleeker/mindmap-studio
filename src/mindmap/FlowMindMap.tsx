@@ -30,7 +30,13 @@ import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
 import { nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
-import { type LayoutKind, type MindMapHandle, type MindMapProps, classifyLink } from "./contract";
+import {
+  type LayoutKind,
+  type MindMapHandle,
+  type MindMapProps,
+  type SelectedOverlay,
+  classifyLink,
+} from "./contract";
 import { BackgroundImage } from "./flow/BackgroundImage";
 import { Boundaries } from "./flow/Boundaries";
 import { BraceConnectors } from "./flow/BraceConnectors";
@@ -58,6 +64,7 @@ import {
   bulkToggleIcon,
   bulkToggleTag,
   clearBackdrop,
+  deleteBoundary,
   deleteCallout,
   deleteLink,
   deleteNode,
@@ -80,6 +87,7 @@ import {
   setBackdropRings,
   setBackground,
   setBackgroundImage,
+  setBoundaryLabel,
   setCalloutText,
   setDue,
   setFreeform,
@@ -185,6 +193,7 @@ function FlowInner({
   onSelectionFields,
   onSelectionMarkerTags,
   onSelectEdge,
+  onSelectOverlay,
   onOpenNote,
   onMapLink,
   ref,
@@ -211,6 +220,9 @@ function FlowInner({
   // The selected relationship (cross-link) edge, if any. Mutually exclusive with node selection —
   // selecting an edge clears the node anchor/set and vice-versa; drives the EdgeInspector + the halo.
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  // The selected overlay object (boundary / summary / callout), if any. The 4th selection channel —
+  // mutually exclusive with node + edge; drives the OverlayInspector + the overlay halo.
+  const [selectedOverlay, setSelectedOverlay] = useState<SelectedOverlay | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
@@ -259,6 +271,10 @@ function FlowInner({
   selectedEdgeIdRef.current = selectedEdgeId;
   const onSelectEdgeRef = useRef(onSelectEdge);
   onSelectEdgeRef.current = onSelectEdge;
+  const selectedOverlayRef = useRef<SelectedOverlay | null>(null);
+  selectedOverlayRef.current = selectedOverlay;
+  const onSelectOverlayRef = useRef(onSelectOverlay);
+  onSelectOverlayRef.current = onSelectOverlay;
   const editingRef = useRef<string | null>(null);
   editingRef.current = editingId;
   const linkingFromRef = useRef<string | null>(null);
@@ -355,6 +371,56 @@ function FlowInner({
     }
   }, []);
 
+  // Resolve + emit the selected overlay (boundary/summary/callout) to the OverlayInspector, or null.
+  // The label is the raw stored value (the inspector edits it; the canvas applies display defaults).
+  const fireSelectOverlay = useCallback(
+    (sel: { kind: SelectedOverlay["kind"]; id: string; nodeId?: string } | null) => {
+      if (!sel) {
+        setSelectedOverlay(null);
+        onSelectOverlayRef.current?.(null);
+        return;
+      }
+      const doc = docRef.current;
+      let label: string | undefined;
+      if (sel.kind === "boundary")
+        label = (doc.boundaries ?? []).find((b) => b.id === sel.id)?.label;
+      else if (sel.kind === "summary")
+        label = (doc.summaries ?? []).find((s) => s.id === sel.id)?.label;
+      else {
+        const node = sel.nodeId ? findAnyNode(doc, sel.nodeId) : null;
+        const found = node?.callouts?.find((c) => c.id === sel.id);
+        if (!found) return; // callout gone
+        label = found.text;
+      }
+      // boundary/summary may legitimately have no label; only bail if the object itself is missing.
+      if (sel.kind !== "callout") {
+        const exists =
+          sel.kind === "boundary"
+            ? (doc.boundaries ?? []).some((b) => b.id === sel.id)
+            : (doc.summaries ?? []).some((s) => s.id === sel.id);
+        if (!exists) return;
+      }
+      const resolved: SelectedOverlay = {
+        kind: sel.kind,
+        id: sel.id,
+        nodeId: sel.nodeId,
+        label: label ?? "",
+        deletable: true,
+      };
+      setSelectedOverlay(resolved);
+      onSelectOverlayRef.current?.(resolved);
+    },
+    [],
+  );
+
+  // Clear any selected overlay (mutually exclusive with node + edge selection).
+  const clearOverlaySelection = useCallback(() => {
+    if (selectedOverlayRef.current !== null) {
+      setSelectedOverlay(null);
+      onSelectOverlayRef.current?.(null);
+    }
+  }, []);
+
   // Collapse the selection to a single anchor (the single-select path), or clear it (id = null).
   const selectOnly = useCallback((id: string | null) => {
     setSelectedId(id);
@@ -369,7 +435,11 @@ function FlowInner({
       const ids = new Set(selNodes.map((n) => n.id));
       const cur = selectedIdsRef.current;
       if (ids.size === cur.size && [...ids].every((x) => cur.has(x))) return;
-      if (ids.size > 0) clearEdgeSelection(); // node + edge selection are mutually exclusive
+      if (ids.size > 0) {
+        // node selection is mutually exclusive with edge + overlay
+        clearEdgeSelection();
+        clearOverlaySelection();
+      }
       setSelectedIds(ids);
       // Keep the anchor if it's still selected, else adopt the most-recently-selected node.
       const anchor =
@@ -379,7 +449,7 @@ function FlowInner({
       setSelectedId(anchor);
       fireSelect(anchor);
     },
-    [fireSelect, clearEdgeSelection],
+    [fireSelect, clearEdgeSelection, clearOverlaySelection],
   );
 
   // Apply a pure op: persist + re-render; optionally enter edit on the resulting node.
@@ -596,6 +666,23 @@ function FlowInner({
     }
   }, [renderDoc, selectedEdgeId]);
 
+  // Prune a dangling overlay selection: if the selected boundary/summary/callout is gone (deleted, a
+  // node pruned its callout, or undo/redo restored a doc without it), clear it.
+  useEffect(() => {
+    const sel = selectedOverlay;
+    if (!sel) return;
+    const gone =
+      sel.kind === "boundary"
+        ? !(renderDoc.boundaries ?? []).some((b) => b.id === sel.id)
+        : sel.kind === "summary"
+          ? !(renderDoc.summaries ?? []).some((s) => s.id === sel.id)
+          : !findAnyNode(renderDoc, sel.nodeId ?? "")?.callouts?.some((c) => c.id === sel.id);
+    if (gone) {
+      setSelectedOverlay(null);
+      onSelectOverlayRef.current?.(null);
+    }
+  }, [renderDoc, selectedOverlay]);
+
   // Report the selection count up (the inspector switches to bulk mode when >1).
   const onSelectionCountRef = useRef(onSelectionCount);
   onSelectionCountRef.current = onSelectionCount;
@@ -772,6 +859,43 @@ function FlowInner({
     [apply],
   );
 
+  // Apply a pure op to the selected overlay (the op picks the right transform by kind); false if none.
+  const withSelectedOverlay = useCallback(
+    (op: (sel: SelectedOverlay) => OpResult): boolean => {
+      const sel = selectedOverlayRef.current;
+      if (!sel) return false;
+      apply(op(sel));
+      return true;
+    },
+    [apply],
+  );
+
+  // Select an overlay (clears node + edge first — mutually exclusive), then resolve + fire.
+  const selectOverlay = useCallback(
+    (sel: { kind: SelectedOverlay["kind"]; id: string; nodeId?: string }) => {
+      setMenu(null);
+      setLinkingFrom(null);
+      selectOnly(null);
+      fireSelect(null);
+      clearEdgeSelection();
+      fireSelectOverlay(sel);
+    },
+    [selectOnly, fireSelect, clearEdgeSelection, fireSelectOverlay],
+  );
+  const handleSelectBoundary = useCallback(
+    (id: string) => selectOverlay({ kind: "boundary", id }),
+    [selectOverlay],
+  );
+  const handleSelectSummaryOverlay = useCallback(
+    (id: string) => selectOverlay({ kind: "summary", id }),
+    [selectOverlay],
+  );
+  const handleSelectCallout = useCallback(
+    (nodeId: string, calloutId: string) =>
+      selectOverlay({ kind: "callout", id: calloutId, nodeId }),
+    [selectOverlay],
+  );
+
   useImperativeHandle(
     ref,
     (): MindMapHandle => ({
@@ -895,8 +1019,34 @@ function FlowInner({
         }
         return ok;
       },
+      // Overlay (boundary / summary / callout) edits — applied to the selected overlay by kind.
+      setOverlayLabel: (label) =>
+        withSelectedOverlay((sel) => {
+          if (sel.kind === "boundary") return setBoundaryLabel(docRef.current, sel.id, label);
+          if (sel.kind === "summary") return setSummaryLabel(docRef.current, sel.id, label);
+          return setCalloutText(docRef.current, sel.nodeId ?? "", sel.id, label);
+        }),
+      deleteOverlay: () => {
+        const ok = withSelectedOverlay((sel) => {
+          if (sel.kind === "boundary") return deleteBoundary(docRef.current, sel.id);
+          if (sel.kind === "summary") return deleteSummary(docRef.current, sel.id);
+          return deleteCallout(docRef.current, sel.nodeId ?? "", sel.id);
+        });
+        if (ok) clearOverlaySelection();
+        return ok;
+      },
     }),
-    [fitView, getNodes, apply, withSelected, withSelectedAll, withSelectedLink, focusNodeById],
+    [
+      fitView,
+      getNodes,
+      apply,
+      withSelected,
+      withSelectedAll,
+      withSelectedLink,
+      withSelectedOverlay,
+      clearOverlaySelection,
+      focusNodeById,
+    ],
   );
 
   return (
@@ -975,6 +1125,7 @@ function FlowInner({
             setLinkingFrom(null);
             setMenu(null);
             clearEdgeSelection();
+            clearOverlaySelection();
             // A modified click extends the selection — React Flow toggles it and we mirror the
             // result via onSelectionChange; a plain click is a single (anchor) select.
             if (ev.shiftKey || ev.metaKey || ev.ctrlKey) return;
@@ -982,13 +1133,14 @@ function FlowInner({
             fireSelect(node.id);
           }}
           onEdgeClick={(_, edge) => {
-            // Selecting a relationship opens the EdgeInspector; clear any node selection (mutually
+            // Selecting a relationship opens the EdgeInspector; clear node + overlay (mutually
             // exclusive), and the menu / link-draw gesture.
             if (edge.type !== "crosslink") return;
             setMenu(null);
             setLinkingFrom(null);
             selectOnly(null);
             fireSelect(null);
+            clearOverlaySelection();
             setSelectedEdgeId(edge.id);
             fireSelectEdge(edge.id);
           }}
@@ -997,11 +1149,13 @@ function FlowInner({
             selectOnly(null);
             fireSelect(null);
             clearEdgeSelection();
+            clearOverlaySelection();
             setMenu(null);
           }}
           onNodeContextMenu={(e, node) => {
             e.preventDefault();
             clearEdgeSelection();
+            clearOverlaySelection();
             selectOnly(node.id);
             fireSelect(node.id);
             setMenu({ x: e.clientX, y: e.clientY, id: node.id });
@@ -1018,12 +1172,23 @@ function FlowInner({
           <BackgroundImage url={renderDoc.meta?.backgroundImage} />
           <DiagramBackdrop backdrop={renderDoc.backdrop} />
           <BraceConnectors braces={braces} />
-          <Boundaries boundaries={boundaries} />
-          <Summaries summaries={summaries} onRename={handleRenameSummary} />
+          <Boundaries
+            boundaries={boundaries}
+            selectedId={selectedOverlay?.kind === "boundary" ? selectedOverlay.id : null}
+            onSelect={handleSelectBoundary}
+          />
+          <Summaries
+            summaries={summaries}
+            onRename={handleRenameSummary}
+            selectedId={selectedOverlay?.kind === "summary" ? selectedOverlay.id : null}
+            onSelect={handleSelectSummaryOverlay}
+          />
           <Callouts
             items={calloutItems}
             onCommit={handleCommitCallout}
             onDelete={handleDeleteCallout}
+            selectedId={selectedOverlay?.kind === "callout" ? selectedOverlay.id : null}
+            onSelect={handleSelectCallout}
           />
           {/* Inline contextual popover — quick structural actions above the selected node. Uses the
               same internal handlers as the keyboard + right-click menu, and React Flow's NodeToolbar

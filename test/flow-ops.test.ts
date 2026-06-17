@@ -14,6 +14,7 @@ import {
   bulkToggleTag,
   clearBackdrop,
   collectRollupMapIds,
+  deleteBoundary,
   deleteLink,
   deleteNode,
   deleteSummary,
@@ -37,6 +38,7 @@ import {
   setBackdropRings,
   setBackground,
   setBackgroundImage,
+  setBoundaryLabel,
   setDue,
   setFreeform,
   setHyperlink,
@@ -654,6 +656,20 @@ describe("flow ops — groupBranch + replaceTopics", () => {
   it("groupBranch is a no-op for an unknown id", () => {
     const d = base();
     expect(groupBranch(d, "ghost").doc).toBe(d);
+  });
+
+  it("setBoundaryLabel sets / trims / clears a boundary's label by id", () => {
+    // base() carries boundary "bd".
+    expect(setBoundaryLabel(base(), "bd", "  Scope  ").doc.boundaries?.[0]?.label).toBe("Scope");
+    expect(setBoundaryLabel(base(), "bd", "").doc.boundaries?.[0]?.label).toBeUndefined();
+    const d = base();
+    expect(setBoundaryLabel(d, "ghost", "x").doc).toBe(d); // no-op for unknown id
+  });
+
+  it("deleteBoundary removes by id and collapses the array when it empties", () => {
+    expect(deleteBoundary(base(), "bd").doc.boundaries).toBeUndefined();
+    const d = base();
+    expect(deleteBoundary(d, "ghost").doc).toBe(d); // no-op for unknown id
   });
 
   it("replaceTopics replaces case-insensitively across the tree and counts changes", () => {

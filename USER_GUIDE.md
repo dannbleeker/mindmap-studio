@@ -375,9 +375,9 @@ backdrop you see on the canvas. The second **✕** removes the image.
     crossing, never two). It's a per-map setting, saved with the map, and the hops are drawn into
     every image export exactly as they appear on the canvas.
 - **Boundaries** — a shaded, rounded box grouping a node and its subtree. Select a node and
-  click **⬚ Group** in the toolbar, then double-click the box's label chip to name it (an
-  unlabelled box shows a "Label…" placeholder). Drawn and imported boundaries both round-trip
-  and persist.
+  click **⬚ Group** in the toolbar. **Click the box (its rim or label) to select it** — the inspector
+  becomes a boundary editor where you can **name** or **delete** it. Drawn and imported boundaries
+  both round-trip and persist.
 - **Summary topics** — a labelled **bracket** beside a branch (rather than a box around it). Select a
   node and click **⊐ Summary** (or right-click → **Summarize branch**); the bracket auto-sizes to the
   branch and sits on the matching side. **Double-click its label** to rename it (clear the label to
@@ -385,6 +385,9 @@ backdrop you see on the canvas. The second **✕** removes the image.
 - **Callouts** — a small sticky-note annotation pinned beside a node. Right-click a node →
   **Add callout**, then double-click the bubble to edit its text (the **×** removes it). Callouts
   are saved with the map and are drawn into the image exports too.
+- **Editing overlays in the inspector** — clicking a **boundary**, **summary** bracket, or **callout**
+  selects it (with a highlight) and turns the right panel into an editor for its label / text and a
+  **Delete** button — an alternative to the inline double-click gestures, which still work.
 - **Floating topics** — detached topics imported from `.mmap` appear in a "Floating topics"
   branch; edit them like any node (rename, add, remove, or drag in/out of the tree) and the
   changes are saved.

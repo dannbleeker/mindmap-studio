@@ -15,6 +15,7 @@ import { EdgeInspector } from "./components/EdgeInspector";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
 import { MapPanel } from "./components/MapPanel";
+import { OverlayInspector } from "./components/OverlayInspector";
 import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
 import "./design/editor.css";
@@ -37,6 +38,7 @@ import {
   NODE_LINK_PREFIX,
   type SelectedEdge,
   type SelectedNode,
+  type SelectedOverlay,
   type SelectionFields,
   type SelectionMarkerTags,
 } from "./mindmap";
@@ -163,6 +165,9 @@ export function App() {
   // The selected relationship (cross-link) edge, if any — swaps the right slot to the EdgeInspector.
   // Mutually exclusive with node selection (the canvas drives both callbacks).
   const [selectedEdge, setSelectedEdge] = useState<SelectedEdge | null>(null);
+  // The selected overlay object (boundary/summary/callout) — swaps the right slot to the
+  // OverlayInspector. Mutually exclusive with node + edge selection (canvas-driven).
+  const [selectedOverlay, setSelectedOverlay] = useState<SelectedOverlay | null>(null);
   // Bumped when a node's 📝 indicator is clicked → InfoPanel switches to its Notes tab.
   const [noteNonce, setNoteNonce] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
@@ -266,13 +271,28 @@ export function App() {
       to: (link && findAnyNode(liveDoc, link.to)?.topic) || "",
     };
   }, [selectedEdge, liveDoc]);
+  // A human caption for the OverlayInspector header — live from the doc. Boundary/summary → member
+  // count; callout → its parent topic.
+  const overlayCaption = useMemo(() => {
+    if (!selectedOverlay) return "";
+    if (selectedOverlay.kind === "callout") {
+      return selectedOverlay.nodeId
+        ? findAnyNode(liveDoc, selectedOverlay.nodeId)?.topic || ""
+        : "";
+    }
+    const arr = selectedOverlay.kind === "boundary" ? liveDoc.boundaries : liveDoc.summaries;
+    const obj = arr?.find((o) => o.id === selectedOverlay.id);
+    const n = obj?.nodeIds.length ?? 0;
+    return `${n} ${n === 1 ? "topic" : "topics"}`;
+  }, [selectedOverlay, liveDoc]);
   // Auto-show the right-side inspector when a node is selected (the redesign's auto-show behaviour).
   // Sticky minimize wins: if the user has collapsed the inspector to its strip, selecting another
   // node does NOT force it back open (selectedNode still updates, so re-expanding shows the new node).
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on selection id; setters are stable.
   useEffect(() => {
-    if ((selected || selectedEdge) && !panels.infoMinimized) panels.setInfoOpen(true);
-  }, [selected?.id, selectedEdge?.id]);
+    if ((selected || selectedEdge || selectedOverlay) && !panels.infoMinimized)
+      panels.setInfoOpen(true);
+  }, [selected?.id, selectedEdge?.id, selectedOverlay?.id]);
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
   const focusLit = useMemo(() => (focus ? focusSet(liveDoc, focus.id) : null), [focus, liveDoc]);
   const litIds = focusLit && focusLit.size > 0 ? focusLit : (filterHits?.lit ?? null);
@@ -1224,6 +1244,7 @@ export function App() {
                 onSelectionFields={setSelectionFields}
                 onSelectionMarkerTags={setSelectionMarkerTags}
                 onSelectEdge={setSelectedEdge}
+                onSelectOverlay={setSelectedOverlay}
                 onOpenNote={() => {
                   panels.setInfoMinimized(false);
                   panels.setInfoOpen(true);
@@ -1296,6 +1317,19 @@ export function App() {
                 onSetArrow={(arrow) => mapRef.current?.setLinkArrow(arrow)}
                 onSetStyle={(patch) => mapRef.current?.setLinkStyle(patch)}
                 onDelete={() => mapRef.current?.deleteLink()}
+                onMinimize={() => {
+                  panels.setInfoOpen(false);
+                  panels.setInfoMinimized(true);
+                }}
+              />
+            ) : selectedOverlay ? (
+              <OverlayInspector
+                overlay={selectedOverlay}
+                caption={overlayCaption}
+                width={panels.inspectorWidth}
+                onResize={panels.setInspectorWidth}
+                onSetLabel={(label) => mapRef.current?.setOverlayLabel(label)}
+                onDelete={() => mapRef.current?.deleteOverlay()}
                 onMinimize={() => {
                   panels.setInfoOpen(false);
                   panels.setInfoMinimized(true);

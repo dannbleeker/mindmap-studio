@@ -504,4 +504,71 @@ describe("FlowMindMap canvas", () => {
     run(() => rerender(view({ direction: "side", numbered: false, litIds: null })));
     expect(ref.current).toBeTruthy();
   });
+
+  it("selects + edits overlays (boundary/summary/callout) with 4-way mutual exclusivity", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "ov1",
+      title: "Overlays",
+      root: {
+        id: "root",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            callouts: [{ id: "c1", text: "note", dx: 10, dy: 0 }],
+            children: [],
+          },
+          { id: "b", topic: "B", children: [] },
+        ],
+      },
+      boundaries: [{ id: "bd1", nodeIds: ["a"], label: "Box" }],
+      summaries: [{ id: "s1", nodeIds: ["a"], label: "Sum" }],
+      links: [{ id: "l1", from: "a", to: "b", label: "rel" }],
+    };
+    const onSelectOverlay = vi.fn();
+    const onSelectEdge = vi.fn();
+    const { container, onChange, h } = mount(doc, { onSelectOverlay, onSelectEdge });
+    const lastDoc = () => onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+
+    // Click the boundary's label chip → selects the boundary.
+    run(() => fireEvent.click(screen.getByText("Box")));
+    expect(onSelectOverlay).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: "boundary", id: "bd1" }),
+    );
+    // Edit + delete via the handle act on the selected overlay.
+    run(() => h.setOverlayLabel("Scope"));
+    expect(lastDoc().boundaries?.[0]?.label).toBe("Scope");
+
+    // Selecting the summary clears the boundary (overlay→overlay).
+    run(() => fireEvent.click(screen.getByText("Sum")));
+    expect(onSelectOverlay).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: "summary", id: "s1" }),
+    );
+
+    // Selecting a node clears the overlay (mutual exclusivity).
+    run(() => fireEvent.click(nodeEl(container, "a")));
+    expect(onSelectOverlay).toHaveBeenLastCalledWith(null);
+    // With no overlay selected, the overlay mutators are no-ops returning false.
+    let ret: boolean | undefined;
+    run(() => {
+      ret = h.deleteOverlay();
+    });
+    expect(ret).toBe(false);
+
+    // Selecting an edge then an overlay each clears the other (4-way exclusivity).
+    const edgeHit = () =>
+      (container.querySelector(".react-flow__edge-interaction") ??
+        container.querySelector(".react-flow__edge-path")) as Element;
+    run(() => fireEvent.click(edgeHit()));
+    expect(onSelectEdge).toHaveBeenLastCalledWith(expect.objectContaining({ id: "l1" }));
+    run(() => fireEvent.click(screen.getByText("Sum")));
+    expect(onSelectEdge).toHaveBeenLastCalledWith(null); // overlay select cleared the edge
+
+    // deleteOverlay on the selected summary removes it + fires null.
+    run(() => h.deleteOverlay());
+    expect(lastDoc().summaries).toBeUndefined();
+    expect(onSelectOverlay).toHaveBeenLastCalledWith(null);
+  });
 });

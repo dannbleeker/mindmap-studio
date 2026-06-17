@@ -56,6 +56,19 @@ export interface SelectedEdge {
   dash: "dashed" | "solid" | "dotted";
 }
 
+/** A selected overlay object (boundary box / summary bracket / callout bubble), surfaced to the
+ *  inspector's OverlayInspector. Resolved (label filled). `nodeId` is set only for callouts (which
+ *  live on a node). Mutually exclusive with node + edge selection. */
+export interface SelectedOverlay {
+  kind: "boundary" | "summary" | "callout";
+  id: string;
+  /** The owning node id — callouts only. */
+  nodeId?: string;
+  label: string;
+  /** Whether a Delete control should show (all overlay kinds are deletable today). */
+  deletable: boolean;
+}
+
 /** Imperative API a canvas component exposes via its ref. */
 export interface MindMapHandle {
   exportSvg: () => Blob | null;
@@ -136,6 +149,10 @@ export interface MindMapHandle {
   setLinkStyle: (patch: { color?: string; width?: number; dash?: SelectedEdge["dash"] }) => boolean;
   /** Delete the selected relationship; false if no edge is selected. */
   deleteLink: () => boolean;
+  /** Set the selected overlay's label (boundary/summary) or text (callout); false if none selected. */
+  setOverlayLabel: (label: string) => boolean;
+  /** Delete the selected overlay (boundary/summary/callout); false if none selected. */
+  deleteOverlay: () => boolean;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */
@@ -195,6 +212,9 @@ export interface MindMapProps {
   /** Fires when a relationship (cross-link) edge is selected/deselected — the inspector swaps to the
    *  EdgeInspector. Mutually exclusive with node selection (selecting one clears the other). */
   onSelectEdge?: (edge: SelectedEdge | null) => void;
+  /** Fires when an overlay object (boundary / summary / callout) is selected/deselected — the
+   *  inspector swaps to the OverlayInspector. Mutually exclusive with node + edge selection. */
+  onSelectOverlay?: (overlay: SelectedOverlay | null) => void;
   /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
    *  Notes tab for the (now-selected) node. */
   onOpenNote?: () => void;

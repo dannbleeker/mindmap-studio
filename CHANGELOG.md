@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Click a boundary, summary or callout to edit it.** Overlay objects are now selectable: click a
+  **boundary** (its rim or label), a **summary** bracket's label, or a **callout** bubble and the
+  inspector becomes an editor for it — rename / retext it and **delete** it — with a highlight on the
+  selected overlay. The existing inline gestures still work (double-click a callout / summary to edit
+  in place). Boundaries can now be labelled too. Selecting an overlay, a node, or a relationship are
+  mutually exclusive.
+
 - **Bulk markers + tags (tri-state).** Select several topics and the inspector now shows their
   **markers** and **tags** with a third state: **lit** = on every selected topic, a **dashed “+”
   chip** = on only some. Clicking adds a marker/tag to the whole selection — or, if every selected

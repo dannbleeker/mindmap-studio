@@ -41,7 +41,25 @@ interface BoundaryBox {
   height: number;
 }
 
-function Boundaries({ boundaries }: { boundaries: readonly Boundary[] }) {
+// The clickable border rim (px). The box interior stays pointer-transparent (so enclosed nodes still
+// drag + the marquee still works); only this thin frame + the label chip select the boundary.
+const RIM = 6;
+const RIM_SIDES = [
+  { side: "top", style: { top: 0, left: 0, right: 0, height: RIM } },
+  { side: "bottom", style: { bottom: 0, left: 0, right: 0, height: RIM } },
+  { side: "left", style: { top: 0, bottom: 0, left: 0, width: RIM } },
+  { side: "right", style: { top: 0, bottom: 0, right: 0, width: RIM } },
+] as const;
+
+function Boundaries({
+  boundaries,
+  selectedId,
+  onSelect,
+}: {
+  boundaries: readonly Boundary[];
+  selectedId?: string | null;
+  onSelect?: (id: string) => void;
+}) {
   const nodes = useNodes();
   // Resolve each boundary's bbox once per node/boundary change instead of on every parent re-render
   // (panning, selection, menus, …). `nodes` gets a fresh reference whenever a member moves, so the
@@ -84,25 +102,68 @@ function Boundaries({ boundaries }: { boundaries: readonly Boundary[] }) {
 
   return (
     <ViewportPortal>
-      {boxes.map((b) => (
-        <div
-          key={b.id}
-          style={{
-            position: "absolute",
-            left: b.left,
-            top: b.top,
-            width: b.width,
-            height: b.height,
-            boxSizing: "border-box",
-            border: `1.5px solid ${BOUNDARY_STROKE}`,
-            background: BOUNDARY_FILL,
-            borderRadius: BOUNDARY_RADIUS,
-            pointerEvents: "none",
-          }}
-        >
-          {b.label ? <div style={chip}>{b.label}</div> : null}
-        </div>
-      ))}
+      {boxes.map((b) => {
+        const selected = b.id === selectedId;
+        return (
+          <div
+            key={b.id}
+            style={{
+              position: "absolute",
+              left: b.left,
+              top: b.top,
+              width: b.width,
+              height: b.height,
+              boxSizing: "border-box",
+              border: `1.5px solid ${BOUNDARY_STROKE}`,
+              background: BOUNDARY_FILL,
+              borderRadius: BOUNDARY_RADIUS,
+              // The box itself never blocks pointer events — enclosed nodes keep dragging and the
+              // marquee keeps working. The rim strips + chip below opt back in to catch selection.
+              pointerEvents: "none",
+              // Selection halo (view-only, additive — never exported, so canvas == export holds).
+              boxShadow: selected
+                ? `0 0 0 2px ${BOUNDARY_STROKE}, 0 0 8px ${BOUNDARY_STROKE}`
+                : undefined,
+            }}
+          >
+            {b.label ? (
+              onSelect ? (
+                <button
+                  type="button"
+                  className="nodrag nopan"
+                  onClick={() => onSelect(b.id)}
+                  title={`Select boundary "${b.label}"`}
+                  style={{ ...chip, cursor: "pointer", pointerEvents: "auto" }}
+                >
+                  {b.label}
+                </button>
+              ) : (
+                <div style={chip}>{b.label}</div>
+              )
+            ) : null}
+            {onSelect
+              ? RIM_SIDES.map(({ side, style }) => (
+                  <button
+                    key={side}
+                    type="button"
+                    className="nodrag nopan"
+                    aria-label={`Select boundary${b.label ? ` "${b.label}"` : ""}`}
+                    onClick={() => onSelect(b.id)}
+                    style={{
+                      position: "absolute",
+                      ...style,
+                      padding: 0,
+                      border: "none",
+                      background: "transparent",
+                      pointerEvents: "auto",
+                      cursor: "pointer",
+                    }}
+                  />
+                ))
+              : null}
+          </div>
+        );
+      })}
     </ViewportPortal>
   );
 }

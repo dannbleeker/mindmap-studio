@@ -14,7 +14,7 @@ import { Dialog } from "./components/Dialog";
 import { EdgeInspector } from "./components/EdgeInspector";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
-import { MapStats } from "./components/MapStats";
+import { MapPanel } from "./components/MapPanel";
 import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
 import "./design/editor.css";
@@ -1372,8 +1372,20 @@ export function App() {
                 }}
               />
             ) : (
-              <MapStats
+              <MapPanel
                 doc={liveDoc}
+                theme={theme}
+                setThemeId={setThemeId}
+                layout={layout}
+                changeLayout={changeLayout}
+                freeform={liveDoc.meta?.freeform}
+                background={liveDoc.meta?.background}
+                onSetBackground={(c) => mapRef.current?.setBackground(c)}
+                onSetBackgroundImage={(u) => mapRef.current?.setBackgroundImage(u)}
+                handleBackgroundImage={handleBackgroundImage}
+                lineJumps={!!liveDoc.meta?.lineJumps}
+                onToggleLineJumps={() => mapRef.current?.setLineJumps(!liveDoc.meta?.lineJumps)}
+                onRenameMap={(t) => mapRef.current?.renameMap(t)}
                 width={panels.inspectorWidth}
                 onResize={panels.setInspectorWidth}
                 onMinimize={() => {

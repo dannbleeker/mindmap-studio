@@ -3,7 +3,7 @@ import type { SelectedEdge } from "../mindmap";
 import { InspectorResizer } from "./InspectorResizer";
 
 // EdgeInspector — the right-panel shown when a relationship (cross-link) edge is selected, in place of
-// the node InfoPanel / MapStats. Styled via .mm-inspector* + --ed-* tokens (matching MapStats) so it
+// the node InfoPanel / MapPanel. Styled via .mm-inspector* + --ed-* tokens (matching MapPanel) so it
 // re-themes with the chrome. Edits go through the canvas's edge mutators (setLinkLabel/Arrow/Style,
 // deleteLink); the `edge` prop is the resolved SelectedEdge (every field has a concrete value).
 

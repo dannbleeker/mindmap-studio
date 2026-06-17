@@ -121,6 +121,12 @@ topic's value; set the control to apply a single value to the whole selection. A
 the multi-selection. *(Because the canvas now box-selects on a
 left-drag, pan with the middle or right mouse button; scroll still zooms.)*
 
+**Map properties.** With nothing selected, the panel shows the **Map** — rename the map inline and
+set its **theme**, **layout**, **background colour / image**, and **line-jumps** there (the same
+settings as the toolbar's Canvas menu), above a quick **overview** (topics, branches, task progress).
+Clicking a **relationship** arrow instead shows a connector editor (see
+[Relationships](#relationships-boundaries--callouts)).
+
 - **Note** — write in the **WYSIWYG** editor: a formatting toolbar (**bold**, *italic*,
   ~~strikethrough~~, bulleted list, numbered list) and inline formatting as you type — no raw markup
   to read. The note box fills the inspector's height. Notes autosave, travel with the map (and the

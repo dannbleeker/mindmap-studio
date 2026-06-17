@@ -95,6 +95,7 @@ import {
   setStart,
   setSummaryLabel,
   setTags,
+  setTopic,
   setTopicRich,
   toggleCollapse,
   toggleIcon,
@@ -825,6 +826,7 @@ function FlowInner({
         apply(groupSummary(docRef.current, id));
         return Boolean(findNode(docRef.current, id));
       },
+      renameMap: (title) => apply(setTopic(docRef.current, docRef.current.root.id, title)),
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),
       setLineJumps: (on) => apply(setLineJumps(docRef.current, on)),

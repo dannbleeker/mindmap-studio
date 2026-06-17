@@ -76,6 +76,8 @@ export interface MindMapHandle {
   groupBranch: (id: string) => boolean;
   /** Add a labelled summary bracket around the node and its subtree; false if it isn't found. */
   groupSummary: (id: string) => boolean;
+  /** Rename the map — sets the root topic; doc.title follows (the same path as inline root rename). */
+  renameMap: (title: string) => void;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
   /** Set the per-map canvas background image (a data: URL); "" clears it. Drawn behind everything,

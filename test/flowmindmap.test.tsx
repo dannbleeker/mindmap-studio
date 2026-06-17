@@ -149,6 +149,7 @@ describe("FlowMindMap canvas", () => {
     run(() => h.setBackground("#fef9c3"));
     run(() => h.setBackgroundImage("data:image/png;base64,AAAA"));
     run(() => h.setLineJumps(true));
+    run(() => h.renameMap("Renamed map"));
     run(() => h.setRules([{ id: "r1", kind: "completed", style: { background: "#dcfce7" } }]));
     run(() => h.addStickyNote());
     run(() => h.quickAdd("Quick capture"));

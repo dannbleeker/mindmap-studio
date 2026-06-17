@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Map properties in the inspector.** With nothing selected, the right panel is now an editable
+  **Map** panel (not just read-only stats): rename the map inline, and set its **theme**, **layout**,
+  **background colour / image**, and **line-jumps** right there — the same settings as the toolbar's
+  Canvas menu, in one place — above the existing topics / branches / task-progress overview. The
+  controls re-theme with the chrome so they stay legible in Dark / Ocean / Sunset.
+
 - **Relationship inspector — style your connectors.** Click a relationship (cross-link) arrow and the
   right panel becomes a dedicated editor: rename its **label**, set its **direction / arrowheads**
   (at the target, the source, both ends, or none), pick a **colour**, **width** (thin / medium /

@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-06-17T21:32:50.323Z",
-  "commit": "574c8dc",
+  "generatedAt": "2026-06-17T21:35:48.048Z",
+  "commit": "17f9637",
   "headline": {
     "linesTsJs": 36522,
     "tests": 971,
     "lineCoveragePct": 81.63,
-    "commits": 496,
+    "commits": 498,
     "ageDays": 6,
     "trackedFiles": 284,
     "featureManualPct": 100,
-    "featureBookPct": 96.6,
-    "featureExamplePct": 52.6
+    "featureBookPct": 94.9,
+    "featureExamplePct": 51.7
   },
   "code": [
     {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 971,
     "e2e": 0,
-    "durationMs": 35055,
+    "durationMs": 34105,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 9398
+        "ms": 9485
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 5322
+        "ms": 5140
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 4931
+        "ms": 4234
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3733
+        "ms": 3639
       },
       {
-        "file": "test/edge-inspector.test.tsx",
-        "ms": 1061
+        "file": "test/map-panel.test.tsx",
+        "ms": 991
       }
     ]
   },
@@ -207,13 +207,13 @@
     "docToCodeRatio": 0.65
   },
   "featureCoverage": {
-    "total": 116,
-    "manual": 116,
+    "total": 118,
+    "manual": 118,
     "manualPct": 100,
     "book": 112,
-    "bookPct": 96.6,
+    "bookPct": 94.9,
     "bookExample": 61,
-    "bookExamplePct": 52.6,
+    "bookExamplePct": 51.7,
     "byArea": {
       "editing": {
         "total": 12,
@@ -246,8 +246,8 @@
         "book": 11
       },
       "navigation": {
-        "total": 18,
-        "manual": 18,
+        "total": 20,
+        "manual": 20,
         "book": 18
       },
       "library": {
@@ -298,6 +298,16 @@
           "id": "overlay-colours",
           "name": "Per-overlay colours (boundary / summary / callout / backdrop, canvas == export)",
           "since": "2026-06-17"
+        },
+        {
+          "id": "editor-command-palette",
+          "name": "In-editor command palette (⌘K) — fuzzy search + run any toolbar action",
+          "since": "2026-06-17"
+        },
+        {
+          "id": "accessible-menus",
+          "name": "Keyboard-accessible toolbar / context menus + mobile bottom sheets",
+          "since": "2026-06-17"
         }
       ]
     }
@@ -305,22 +315,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 6,
-    "commits": 496,
-    "commits7d": 496,
+    "commits": 498,
+    "commits7d": 498,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 272
+        "count": 273
       },
       {
         "name": "github-actions[bot]",
-        "count": 224
+        "count": 225
       }
     ],
     "churn30d": {
-      "added": 72874,
-      "removed": 21760
+      "added": 72958,
+      "removed": 21805
     },
-    "changelogEntries": 155
+    "changelogEntries": 157
   }
 }

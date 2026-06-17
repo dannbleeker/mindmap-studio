@@ -280,3 +280,48 @@ describe("Toolbar — row 2 (view/edit/canvas)", () => {
     expect(t.handle.quickAdd).toHaveBeenCalledWith("New topic");
   });
 });
+
+// A behaviour snapshot of the menus' accessibility contract, captured BEFORE the menu primitive is
+// extracted (the upcoming restructure). Keeping these assertions green through that refactor is the
+// proof it's behaviour-preserving — every menu trigger keeps its ARIA wiring and every menu still
+// surfaces real menuitems, so the migration to a shared <Menu> can't silently regress a11y.
+describe("Toolbar — menu a11y parity net", () => {
+  const MENU_TRIGGERS = [/^export/i, /^more/i, /^panels/i, /^insert/i, /^canvas/i];
+
+  it("every menu trigger advertises aria-haspopup=menu and toggles aria-expanded on open", async () => {
+    setup();
+    for (const name of MENU_TRIGGERS) {
+      const trigger = screen.getByRole("button", { name });
+      expect(trigger.getAttribute("aria-haspopup"), `${name} haspopup`).toBe("menu");
+      expect(trigger.getAttribute("aria-expanded"), `${name} closed`).toBe("false");
+      await u.click(trigger);
+      expect(trigger.getAttribute("aria-expanded"), `${name} open`).toBe("true");
+      // Opening surfaces at least one actionable item (plain menuitem or a panel checkbox).
+      const items = [
+        ...screen.queryAllByRole("menuitem"),
+        ...screen.queryAllByRole("menuitemcheckbox"),
+      ];
+      expect(items.length, `${name} items`).toBeGreaterThan(0);
+      await u.click(trigger); // toggle closed before the next trigger
+    }
+  });
+
+  it("every toolbar button exposes a non-empty accessible name", () => {
+    setup();
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const b of buttons) {
+      const name = (b.getAttribute("aria-label") || b.textContent || "").trim();
+      expect(name, b.outerHTML.slice(0, 140)).not.toBe("");
+    }
+  });
+
+  it("the Panels menu exposes its toggles as menuitemcheckbox with aria-checked state", async () => {
+    setup();
+    await u.click(screen.getByRole("button", { name: /^panels/i }));
+    const checks = screen.getAllByRole("menuitemcheckbox");
+    expect(checks.length).toBeGreaterThanOrEqual(6);
+    // All side panels start closed in the mocked props → every checkbox reads unchecked.
+    for (const c of checks) expect(c.getAttribute("aria-checked")).toBe("false");
+  });
+});

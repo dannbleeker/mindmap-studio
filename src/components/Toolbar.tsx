@@ -1,14 +1,6 @@
-import {
-  type ChangeEvent,
-  type FormEvent,
-  type ReactNode,
-  type RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import type { ChangeEvent, FormEvent, ReactNode, RefObject } from "react";
 import { BrainstormTimer } from "../BrainstormTimer";
+import { Menu, MenuCheckboxItem, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { buildExample, examples } from "../examples";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import { canvasThemes } from "../mindmap/theme";
@@ -179,99 +171,21 @@ function TBtn({
   );
 }
 
-/** A dropdown menu anchored to a trigger button; closes on outside-click or Escape. */
-function Menu({
-  icon,
-  label,
-  align = "left",
-  children,
-}: {
-  icon?: EditorIconName;
-  label: string;
-  align?: "left" | "right";
-  children: (close: () => void) => ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  // Fixed-positioned menu coordinates, computed from the trigger button on open.
-  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
-  const place = useCallback(() => {
-    const b = btnRef.current;
-    if (!b) return;
-    const r = b.getBoundingClientRect();
-    setPos(
-      align === "left"
-        ? { top: r.bottom + 4, left: r.left }
-        : { top: r.bottom + 4, right: window.innerWidth - r.right },
-    );
-  }, [align]);
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("pointerdown", onDown, true);
-    document.addEventListener("keydown", onKey, true);
-    window.addEventListener("resize", place);
-    return () => {
-      document.removeEventListener("pointerdown", onDown, true);
-      document.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("resize", place);
-    };
-  }, [open, place]);
+/** A toolbar dropdown trigger's inner content (icon + label + chevron); the accessible name is the
+ *  label text, matching the old inline trigger so the menu a11y parity net stays green. */
+function menuTrigger(icon: EditorIconName, label: string): ReactNode {
   return (
-    <div className="mm-menu-wrap" ref={ref}>
-      <button
-        ref={btnRef}
-        type="button"
-        className="mm-tbtn mm-tbtn-ghost"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        title={label}
-        onClick={() => {
-          if (!open) place();
-          setOpen((o) => !o);
-        }}
-      >
-        {icon && <EditorIcon name={icon} size={16} />}
-        {label}
-        <EditorIcon name="chevron" size={13} />
-      </button>
-      {open && pos && (
-        <div className="mm-menu" role="menu" style={pos}>
-          {children(() => setOpen(false))}
-        </div>
-      )}
-    </div>
+    <>
+      <EditorIcon name={icon} size={16} />
+      {label}
+      <EditorIcon name="chevron" size={13} />
+    </>
   );
 }
 
-function MenuItem({
-  icon,
-  label,
-  danger,
-  onClick,
-}: {
-  icon?: EditorIconName;
-  label: string;
-  danger?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      className={danger ? "mm-menu-item mm-menu-item-danger" : "mm-menu-item"}
-      onClick={onClick}
-    >
-      {icon && <EditorIcon name={icon} size={15} />}
-      {label}
-    </button>
-  );
+/** A 15px editor icon node for a menu item's leading glyph. */
+function mi(name: EditorIconName): ReactNode {
+  return <EditorIcon name={name} size={15} />;
 }
 
 export function Toolbar({
@@ -415,66 +329,39 @@ export function Toolbar({
             <span style={{ fontSize: 11, color: "var(--ed-muted)" }}>{find.matchInfo}</span>
           )}
         </form>
-        <Menu icon="export" label="Export" align="right">
-          {(close) => (
-            <>
-              {EXPORTS.map((g) => (
-                <div key={g.group}>
-                  <div className="mm-menu-label">{g.group}</div>
-                  {g.items.map(([lbl, fn]) => (
-                    <MenuItem
-                      key={lbl}
-                      label={lbl}
-                      onClick={() => {
-                        fn();
-                        close();
-                      }}
-                    />
-                  ))}
-                </div>
+        <Menu trigger={menuTrigger("export", "Export")} triggerTitle="Export" align="right">
+          {EXPORTS.map((g) => (
+            <div key={g.group}>
+              <MenuLabel>{g.group}</MenuLabel>
+              {g.items.map(([lbl, fn]) => (
+                <MenuItem key={lbl} label={lbl} onSelect={fn} />
               ))}
-            </>
-          )}
+            </div>
+          ))}
         </Menu>
-        <Menu icon="dots" label="More" align="right">
+        <Menu trigger={menuTrigger("dots", "More")} triggerTitle="More" align="right">
           {(close) => (
             <>
-              <div className="mm-menu-label">Map</div>
+              <MenuLabel>Map</MenuLabel>
+              <MenuItem icon={mi("present")} label="Present" onSelect={() => map.present()} />
               <MenuItem
-                icon="present"
-                label="Present"
-                onClick={() => {
-                  map.present();
-                  close();
-                }}
-              />
-              <MenuItem
-                icon="copy"
+                icon={mi("copy")}
                 label="Duplicate map"
-                onClick={() => {
-                  map.duplicateMap();
-                  close();
-                }}
+                onSelect={() => map.duplicateMap()}
               />
               <MenuItem
-                icon="grid"
+                icon={mi("grid")}
                 label="Add sheet to workbook"
-                onClick={() => {
-                  map.addSheet();
-                  close();
-                }}
+                onSelect={() => map.addSheet()}
               />
               <MenuItem
-                icon="trash"
+                icon={mi("trash")}
                 label="Delete map"
                 danger
-                onClick={() => {
-                  map.deleteCurrent();
-                  close();
-                }}
+                onSelect={() => map.deleteCurrent()}
               />
-              <div className="mm-menu-sep" />
-              <div className="mm-menu-label">Import / backup</div>
+              <MenuSeparator />
+              <MenuLabel>Import / backup</MenuLabel>
               <label className="mm-menu-item">
                 <EditorIcon name="import" size={15} /> Open files…
                 <input
@@ -490,37 +377,25 @@ export function Toolbar({
                 />
               </label>
               <MenuItem
-                icon="paste"
+                icon={mi("paste")}
                 label="Paste text → topics"
-                onClick={() => {
-                  nav.openPaste();
-                  close();
-                }}
+                onSelect={() => nav.openPaste()}
               />
               <MenuItem
-                icon="copy"
+                icon={mi("copy")}
                 label="Copy outline to clipboard"
-                onClick={() => {
-                  io.copyOutline();
-                  close();
-                }}
+                onSelect={() => io.copyOutline()}
               />
               <MenuItem
-                icon="export"
+                icon={mi("export")}
                 label="Back up whole library"
-                onClick={() => {
-                  io.exportLibrary();
-                  close();
-                }}
+                onSelect={() => io.exportLibrary()}
               />
-              <div className="mm-menu-sep" />
+              <MenuSeparator />
               <MenuItem
-                icon="help"
+                icon={mi("help")}
                 label="About MindMap Studio"
-                onClick={() => {
-                  nav.openAbout();
-                  close();
-                }}
+                onSelect={() => nav.openAbout()}
               />
             </>
           )}
@@ -529,59 +404,62 @@ export function Toolbar({
 
       {/* ── Row 2 — view / edit / canvas ── */}
       <div className={`mm-topbar-row mm-topbar-row2${isMobile ? "" : " mm-wrap"}`}>
-        <Menu icon="layers" label="Panels">
-          {() => (
-            <>
-              <div className="mm-menu-label">Side panels</div>
-              <PanelToggle
-                label="Outline"
-                icon="layers"
-                on={panels.outlineOpen}
-                onClick={() => panels.setOutlineOpen((v) => !v)}
-              />
-              <PanelToggle
-                label="Markers & tags index"
-                icon="grid"
-                on={panels.indexOpen}
-                onClick={() => panels.setIndexOpen((v) => !v)}
-              />
-              <PanelToggle
-                label="Power Filter"
-                icon="filter"
-                on={panels.filterOpen}
-                onClick={panels.toggleFilter}
-              />
-              <PanelToggle
-                label="Conditional styles"
-                icon="palette"
-                on={panels.stylesOpen}
-                onClick={() => panels.setStylesOpen((v) => !v)}
-              />
-              <PanelToggle
-                label="Version history"
-                icon="history"
-                on={panels.historyOpen}
-                onClick={() => panels.setHistoryOpen((v) => !v)}
-              />
-              <PanelToggle
-                label="Board (Kanban)"
-                icon="board"
-                on={panels.boardOpen}
-                onClick={() => panels.setBoardOpen((v) => !v)}
-              />
-              <PanelToggle
-                label="Topic info / inspector"
-                icon="note"
-                on={panels.infoOpen || panels.infoMinimized}
-                onClick={() => {
-                  // One clean toggle: if shown (panel OR minimized strip) close both; else open.
-                  const shown = panels.infoOpen || panels.infoMinimized;
-                  panels.setInfoMinimized(() => false);
-                  panels.setInfoOpen(() => !shown);
-                }}
-              />
-            </>
-          )}
+        <Menu trigger={menuTrigger("layers", "Panels")} triggerTitle="Panels">
+          <MenuLabel>Side panels</MenuLabel>
+          <MenuCheckboxItem
+            icon={mi("layers")}
+            label="Outline"
+            checked={panels.outlineOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setOutlineOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("grid")}
+            label="Markers & tags index"
+            checked={panels.indexOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setIndexOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("filter")}
+            label="Power Filter"
+            checked={panels.filterOpen}
+            trailing={mi("check")}
+            onSelect={panels.toggleFilter}
+          />
+          <MenuCheckboxItem
+            icon={mi("palette")}
+            label="Conditional styles"
+            checked={panels.stylesOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setStylesOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("history")}
+            label="Version history"
+            checked={panels.historyOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setHistoryOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("board")}
+            label="Board (Kanban)"
+            checked={panels.boardOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setBoardOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("note")}
+            label="Topic info / inspector"
+            checked={panels.infoOpen || panels.infoMinimized}
+            trailing={mi("check")}
+            onSelect={() => {
+              // One clean toggle: if shown (panel OR minimized strip) close both; else open.
+              const shown = panels.infoOpen || panels.infoMinimized;
+              panels.setInfoMinimized(() => false);
+              panels.setInfoOpen(() => !shown);
+            }}
+          />
         </Menu>
         <span className="mm-vdiv" />
         <div className="mm-cluster">
@@ -615,22 +493,21 @@ export function Toolbar({
           />
         </div>
         <span className="mm-vdiv" />
-        <Menu icon="plus" label="Insert">
+        <Menu trigger={menuTrigger("plus", "Insert")} triggerTitle="Insert">
           {(close) => (
             <>
               <MenuItem
-                icon="note"
+                icon={mi("note")}
                 label="Sticky note"
-                onClick={() => {
+                onSelect={() => {
                   m()?.addStickyNote();
                   showHint("Sticky note added — drag it anywhere.");
-                  close();
                 }}
               />
               <MenuItem
-                icon="layers"
+                icon={mi("layers")}
                 label="Group branch (boundary)"
-                onClick={() => {
+                onSelect={() => {
                   const id = canvas.selected?.id;
                   const ok = id ? m()?.groupBranch(id) : false;
                   showHint(
@@ -638,13 +515,12 @@ export function Toolbar({
                       ? "Branch grouped — double-click the label to rename."
                       : "Select a node first, then group its branch.",
                   );
-                  close();
                 }}
               />
               <MenuItem
-                icon="balance"
+                icon={mi("balance")}
                 label="Summary bracket"
-                onClick={() => {
+                onSelect={() => {
                   const id = canvas.selected?.id;
                   const ok = id ? m()?.groupSummary(id) : false;
                   showHint(
@@ -652,7 +528,6 @@ export function Toolbar({
                       ? "Summary added — double-click its label to rename."
                       : "Select a node first, then summarise its branch.",
                   );
-                  close();
                 }}
               />
               <label className="mm-menu-item">
@@ -667,8 +542,8 @@ export function Toolbar({
                   style={{ display: "none" }}
                 />
               </label>
-              <div className="mm-menu-sep" />
-              <div className="mm-menu-label">Roll-up (mirror another map)</div>
+              <MenuSeparator />
+              <MenuLabel>Roll-up (mirror another map)</MenuLabel>
               <div style={{ padding: "2px 6px" }}>
                 <select
                   className="mm-select"
@@ -703,20 +578,17 @@ export function Toolbar({
                 </select>
               </div>
               <MenuItem
-                icon="history"
+                icon={mi("history")}
                 label="Refresh all roll-ups"
-                onClick={() => {
-                  map.refreshRollupsNow();
-                  close();
-                }}
+                onSelect={() => map.refreshRollupsNow()}
               />
             </>
           )}
         </Menu>
-        <Menu icon="palette" label="Canvas">
+        <Menu trigger={menuTrigger("palette", "Canvas")} triggerTitle="Canvas">
           {(close) => (
             <>
-              <div className="mm-menu-label">Theme</div>
+              <MenuLabel>Theme</MenuLabel>
               <div style={{ padding: "2px 6px" }}>
                 <select
                   className="mm-select"
@@ -732,7 +604,7 @@ export function Toolbar({
                   ))}
                 </select>
               </div>
-              <div className="mm-menu-label">Background</div>
+              <MenuLabel>Background</MenuLabel>
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 10px" }}>
                 <input
                   type="color"
@@ -784,14 +656,15 @@ export function Toolbar({
                   </button>
                 ) : null}
               </div>
-              <div className="mm-menu-sep" />
-              <PanelToggle
+              <MenuSeparator />
+              <MenuCheckboxItem
+                icon={mi("hand")}
                 label="Free layout (whiteboard)"
-                icon="hand"
-                on={!!liveDoc.meta?.freeform}
-                onClick={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
+                checked={!!liveDoc.meta?.freeform}
+                trailing={mi("check")}
+                onSelect={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
               />
-              <div className="mm-menu-label">Diagram backdrop</div>
+              <MenuLabel>Diagram backdrop</MenuLabel>
               <div style={{ padding: "2px 6px" }}>
                 <select
                   className="mm-select"
@@ -894,32 +767,5 @@ export function Toolbar({
         <BrainstormTimer />
       </div>
     </header>
-  );
-}
-
-function PanelToggle({
-  label,
-  icon,
-  on,
-  onClick,
-}: {
-  label: string;
-  icon: EditorIconName;
-  on: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="menuitemcheckbox"
-      aria-checked={on}
-      className="mm-menu-item"
-      onClick={onClick}
-      style={on ? { color: "var(--ed-accent)", background: "var(--ed-accent-tint)" } : undefined}
-    >
-      <EditorIcon name={icon} size={15} />
-      {label}
-      {on && <EditorIcon name="check" size={14} />}
-    </button>
   );
 }

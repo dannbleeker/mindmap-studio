@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode, Ref } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { colors, fontSize, fontWeight, radius, space } from "./tokens";
 
 // Reusable chrome primitives, built from the design tokens. Each one's *default* rendered output is
@@ -295,4 +296,253 @@ export function Tabs({
       })}
     </div>
   );
+}
+
+// ── Menu (accessible dropdown) ────────────────────────────────────────────────
+// One shared dropdown: a trigger button + an anchored popover with WAI-ARIA menu semantics and
+// keyboard nav — the idiom the toolbar's five menus (and, later, the canvas context menu) share.
+// The trigger advertises aria-haspopup/aria-expanded; the popup is role="menu" with roving
+// Arrow/Home/End focus, Enter/Space activate (native button click), Escape closes AND restores focus
+// to the trigger, Tab closes, click-outside closes. It emits the existing `.mm-menu*` classes so this
+// is a behaviour extraction, not a restyle. Content is arbitrary (labels, items, even embedded
+// selects), so roving targets every focusable descendant in DOM order. Items call `close()` via
+// context (MenuItem auto-closes; MenuCheckboxItem stays open); the render-prop form `(close) => …`
+// is also supported for leaf controls (file inputs, embedded selects) that close imperatively.
+
+const FOCUSABLE_IN_MENU =
+  'button:not([disabled]), a[href], select:not([disabled]), input:not([disabled]), [tabindex="0"]';
+
+const MenuCtx = createContext<{ close: () => void } | null>(null);
+
+export function Menu({
+  trigger,
+  triggerClassName = "mm-tbtn mm-tbtn-ghost",
+  triggerTitle,
+  triggerAriaLabel,
+  align = "left",
+  menuAriaLabel,
+  children,
+}: {
+  /** Inner content of the trigger button (icon + label + chevron). */
+  trigger: ReactNode;
+  triggerClassName?: string;
+  triggerTitle?: string;
+  triggerAriaLabel?: string;
+  align?: "left" | "right";
+  menuAriaLabel?: string;
+  /** Popup content, or a render-prop given `close` for leaf controls that close imperatively. */
+  children: ReactNode | ((close: () => void) => ReactNode);
+}) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const place = useCallback(() => {
+    const b = btnRef.current;
+    if (!b) return;
+    const r = b.getBoundingClientRect();
+    setPos(
+      align === "left"
+        ? { top: r.bottom + 4, left: r.left }
+        : { top: r.bottom + 4, right: window.innerWidth - r.right },
+    );
+  }, [align]);
+
+  const close = useCallback((restoreFocus = true) => {
+    setOpen(false);
+    if (restoreFocus) btnRef.current?.focus();
+  }, []);
+
+  // Outside-pointerdown + Escape close; reposition on resize/scroll while open.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close(true);
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open, place, close]);
+
+  const items = useCallback(
+    () =>
+      menuRef.current
+        ? Array.from(menuRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_IN_MENU))
+        : [],
+    [],
+  );
+
+  // On open, move focus into the menu (first focusable item) — keyboard users land inside.
+  useEffect(() => {
+    if (open) items()[0]?.focus();
+  }, [open, items]);
+
+  const onTriggerKeyDown = (e: React.KeyboardEvent) => {
+    if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+      e.preventDefault();
+      place();
+      setOpen(true);
+    }
+  };
+
+  const onMenuKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Tab") {
+      setOpen(false); // let focus move out of the menu naturally
+      return;
+    }
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Home" && e.key !== "End") return;
+    const list = items();
+    if (list.length === 0) return;
+    e.preventDefault();
+    const cur = list.indexOf(document.activeElement as HTMLElement);
+    const next =
+      e.key === "Home"
+        ? 0
+        : e.key === "End"
+          ? list.length - 1
+          : e.key === "ArrowDown"
+            ? cur < 0
+              ? 0
+              : (cur + 1) % list.length
+            : cur <= 0
+              ? list.length - 1
+              : cur - 1;
+    list[next]?.focus();
+  };
+
+  return (
+    <div className="mm-menu-wrap" ref={wrapRef}>
+      <button
+        ref={btnRef}
+        type="button"
+        className={triggerClassName}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title={triggerTitle}
+        aria-label={triggerAriaLabel}
+        onClick={() => {
+          if (!open) place();
+          setOpen((o) => !o);
+        }}
+        onKeyDown={onTriggerKeyDown}
+      >
+        {trigger}
+      </button>
+      {open && pos && (
+        <div
+          className="mm-menu"
+          role="menu"
+          aria-label={menuAriaLabel}
+          ref={menuRef}
+          style={pos}
+          onKeyDown={onMenuKeyDown}
+        >
+          <MenuCtx.Provider value={{ close: () => close(true) }}>
+            {typeof children === "function" ? children(() => close(true)) : children}
+          </MenuCtx.Provider>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** A menu action. Auto-closes the menu on select (pass `closeOnSelect={false}` to keep it open). */
+export function MenuItem({
+  icon,
+  label,
+  children,
+  danger,
+  disabled,
+  closeOnSelect = true,
+  title,
+  onSelect,
+}: {
+  icon?: ReactNode;
+  label?: string;
+  children?: ReactNode;
+  danger?: boolean;
+  disabled?: boolean;
+  closeOnSelect?: boolean;
+  title?: string;
+  onSelect: () => void;
+}) {
+  const ctx = useContext(MenuCtx);
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      title={title}
+      disabled={disabled}
+      className={danger ? "mm-menu-item mm-menu-item-danger" : "mm-menu-item"}
+      onClick={() => {
+        onSelect();
+        if (closeOnSelect) ctx?.close();
+      }}
+    >
+      {icon}
+      {label}
+      {children}
+    </button>
+  );
+}
+
+/** A checkbox menu item (a toggle). Stays open on select by default (toggle several in a row). */
+export function MenuCheckboxItem({
+  icon,
+  label,
+  checked,
+  trailing,
+  closeOnSelect = false,
+  onSelect,
+}: {
+  icon?: ReactNode;
+  label: string;
+  checked: boolean;
+  /** Optional trailing node (e.g. a check glyph) shown when `checked`. */
+  trailing?: ReactNode;
+  closeOnSelect?: boolean;
+  onSelect: () => void;
+}) {
+  const ctx = useContext(MenuCtx);
+  return (
+    <button
+      type="button"
+      role="menuitemcheckbox"
+      aria-checked={checked}
+      className="mm-menu-item"
+      onClick={() => {
+        onSelect();
+        if (closeOnSelect) ctx?.close();
+      }}
+      style={
+        checked ? { color: "var(--ed-accent)", background: "var(--ed-accent-tint)" } : undefined
+      }
+    >
+      {icon}
+      {label}
+      {checked && trailing}
+    </button>
+  );
+}
+
+/** A small uppercase section heading inside a menu. */
+export function MenuLabel({ children }: { children: ReactNode }) {
+  return <div className="mm-menu-label">{children}</div>;
+}
+
+/** A horizontal rule between menu groups (decorative, matching the original `.mm-menu-sep` div). */
+export function MenuSeparator() {
+  return <div className="mm-menu-sep" />;
 }

@@ -120,8 +120,9 @@ left-drag, pan with the middle or right mouse button; scroll still zooms.)*
   to read. The note box fills the inspector's height. Notes autosave, travel with the map (and the
   lossless `.json` export). Behind the scenes the note is stored as **Markdown** (`#` headings,
   `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, `- lists`, `1. numbered`, `[links](https://…)`),
-  so it stays portable across every export. Nodes with a note show a 📝 in the
-  [outline](#outline-panel).
+  so it stays portable across every export. Nodes with a note show a 📝 — in the
+  [outline](#outline-panel) and on the topic itself; **click the topic's 📝 to jump straight to its
+  note** (it selects the topic and opens this panel on the Notes tab).
 - **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it; active markers are
   highlighted. Imported MindManager icons map to these glyphs automatically.
 - **Stickers** — click a sticker in the grid (star, heart, check / cross badge, flag, idea, warning,

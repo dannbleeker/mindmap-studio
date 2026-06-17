@@ -998,6 +998,7 @@ const INFO_TABS: readonly TabItem[] = [
 export function InfoPanel({
   selected,
   selectedCount,
+  openNoteNonce,
   node,
   noteDraft,
   onNoteChange,
@@ -1024,6 +1025,8 @@ export function InfoPanel({
   selected: SelectedNode | null;
   /** Number of nodes selected on the canvas; >1 puts the panel in bulk-edit mode. */
   selectedCount?: number;
+  /** Bumped when a node's 📝 indicator is clicked — switches the panel to its Notes tab. */
+  openNoteNonce?: number;
   node: MapNode | null;
   noteDraft: string;
   onNoteChange: (value: string) => void;
@@ -1055,6 +1058,10 @@ export function InfoPanel({
   const multi = (selectedCount ?? 0) > 1;
   const tabs = multi ? INFO_TABS.filter((t) => t.id !== "notes") : INFO_TABS;
   const activeTab: InfoTab = multi && tab === "notes" ? "details" : tab;
+  // Clicking a node's 📝 indicator bumps openNoteNonce → jump to the Notes tab.
+  useEffect(() => {
+    if (openNoteNonce) setTab("notes");
+  }, [openNoteNonce]);
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
   const webUrl = link.startsWith("#") ? "" : link;

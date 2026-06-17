@@ -173,6 +173,7 @@ function FlowInner({
   onChange,
   onSelect,
   onSelectionCount,
+  onOpenNote,
   onMapLink,
   ref,
 }: MindMapProps) {
@@ -249,6 +250,8 @@ function FlowInner({
   onSelectRef.current = onSelect;
   const onMapLinkRef = useRef(onMapLink);
   onMapLinkRef.current = onMapLink;
+  const onOpenNoteRef = useRef(onOpenNote);
+  onOpenNoteRef.current = onOpenNote;
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
@@ -458,8 +461,14 @@ function FlowInner({
         const n = findNode(docRef.current, id);
         if (n) apply(setProgress(docRef.current, id, nextProgressLevel(n.task?.progress ?? 0)));
       },
+      // Click the node's 📝 indicator → select it and ask the app to open the Notes tab.
+      openNote: (id: string) => {
+        selectOnly(id);
+        fireSelect(id);
+        onOpenNoteRef.current?.();
+      },
     };
-  }, [editingId, apply, focusNodeById]);
+  }, [editingId, apply, focusNodeById, selectOnly, fireSelect]);
 
   // Flatten every node's callouts for the overlay, from the live doc (so freshly-added ones show).
   const calloutItems = useMemo<CalloutAnchor[]>(() => {

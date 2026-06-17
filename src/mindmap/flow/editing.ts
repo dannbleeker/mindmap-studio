@@ -20,6 +20,8 @@ export interface EditingApi {
   openLink: (url: string) => void;
   /** Advance a node's task completion one quarter-step (clicking its on-canvas pie), looping at 100%. */
   cycleProgress: (id: string) => void;
+  /** Select the node and open the inspector on its Notes tab (clicking the node's 📝 indicator). */
+  openNote: (id: string) => void;
 }
 
 export const EditingContext = createContext<EditingApi | null>(null);

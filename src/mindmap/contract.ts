@@ -136,6 +136,9 @@ export interface MindMapProps {
   onSelect?: (selected: SelectedNode | null) => void;
   /** Fires when the number of selected nodes changes (the inspector enters bulk mode when >1). */
   onSelectionCount?: (count: number) => void;
+  /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
+   *  Notes tab for the (now-selected) node. */
+  onOpenNote?: () => void;
   /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
   onMapLink?: (mapId: string) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */

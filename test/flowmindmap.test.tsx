@@ -376,13 +376,15 @@ describe("FlowMindMap canvas", () => {
             id: "a",
             topic: "Alpha",
             hyperlink: "https://example.com",
+            note: "a note",
             task: { progress: 0.25 },
             children: [{ id: "a1", topic: "Alpha 1", children: [] }],
           },
         ],
       },
     };
-    const { container, onChange, h } = mount(doc);
+    const onOpenNote = vi.fn();
+    const { container, onChange, h } = mount(doc, { onOpenNote });
     const editable = (): Element => {
       const e = container.querySelector('[contenteditable="true"]');
       if (!e) throw new Error("no contenteditable in edit mode");
@@ -414,6 +416,10 @@ describe("FlowMindMap canvas", () => {
     run(() => fireEvent.click(screen.getByTitle(/Follow link/)));
     expect(window.open).toHaveBeenCalled();
     run(() => fireEvent.click(screen.getByTitle(/click to change/)));
+    // 📝 indicator (present only because the node has a note) → asks the app to open the Notes tab.
+    // Do this before the collapse below, which collapses the root and hides the node.
+    run(() => fireEvent.click(screen.getByTitle("Show note")));
+    expect(onOpenNote).toHaveBeenCalled();
     run(() => fireEvent.click(screen.getAllByTitle(/Collapse|Expand/)[0]));
     expect(onChange).toHaveBeenCalled();
   });

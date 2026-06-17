@@ -304,9 +304,27 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             </button>
           ) : null}
           {note?.trim() ? (
-            <span title="Has a note" style={{ marginLeft: 4, opacity: 0.55 }}>
+            <button
+              type="button"
+              className="nodrag nopan"
+              title="Show note"
+              aria-label="Show note"
+              onClick={(e) => {
+                e.stopPropagation();
+                editing?.openNote(id);
+              }}
+              style={{
+                marginLeft: 4,
+                border: "none",
+                background: "transparent",
+                padding: 0,
+                cursor: "pointer",
+                font: "inherit",
+                opacity: 0.55,
+              }}
+            >
               📝
-            </span>
+            </button>
           ) : null}
         </span>
         {progress || due || attachmentCount || priority ? (

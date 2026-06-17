@@ -197,11 +197,17 @@ describe("InfoPanel", () => {
   const selected: SelectedNode = { id: "a", topic: "Research", note: "interview users" };
   const node = sampleRoot().children[0];
 
-  const renderInfo = (sel: SelectedNode | null, n: MapNode | null, count?: number) =>
+  const renderInfo = (
+    sel: SelectedNode | null,
+    n: MapNode | null,
+    count?: number,
+    nonce?: number,
+  ) =>
     render(
       <InfoPanel
         selected={sel}
         selectedCount={count}
+        openNoteNonce={nonce}
         node={n}
         noteDraft={n?.note ?? ""}
         onNoteChange={noop}
@@ -288,6 +294,12 @@ describe("InfoPanel", () => {
     await userEvent.click(screen.getByRole("tab", { name: "Style" }));
     expect(screen.getByText("Shape")).toBeTruthy(); // StyleBar applies to all
     expect(screen.queryByText(/Stickers/)).toBeNull(); // per-item sticker grid hidden
+  });
+
+  it("opens on the Notes tab when openNoteNonce is set (the node 📝 click target)", () => {
+    renderInfo(selected, node, 1, 1);
+    expect(screen.getByRole("tab", { name: "Notes" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("textbox", { name: "Node note" })).toBeTruthy();
   });
 });
 

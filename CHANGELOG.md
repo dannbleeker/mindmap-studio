@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Click a topic's 📝 to jump to its note** — the on-canvas note indicator is now a button: clicking
+  it selects the topic and opens the inspector straight to its **Notes** tab (re-opening the inspector
+  if it was closed or minimized). The 📝 still appears only when a topic actually has a note.
+
 - **Multi-select + bulk editing** — select several topics at once (**Shift/Ctrl/⌘-click** to extend,
   or **drag a box** on the empty canvas) and change them together from the inspector: **shape, fill,
   border, font/bold, progress, dates and priority** apply across the whole selection in a single undo

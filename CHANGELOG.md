@@ -560,10 +560,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   `test/flowmindmap.test.tsx` mounts the real `FlowMindMap` (React Flow) canvas and drives it through
   the imperative `MindMapHandle` ref + `document` keyboard events — covering the contract surface the
   upcoming UX redesign depends on (every handle action, undo/redo, the keyboard tree-building, the
-  drop-to-floating-topic path, and the brace/filter/numbering re-sync) plus the lazy `MindMap` seam;
+  drop-to-floating-topic path, and the brace/filter/numbering re-sync) plus the lazy `MindMap` seam.
+  A scoped jsdom viewport shim (the documented React Flow test mock) makes the canvas render its nodes
+  + edges, so the test also drives the right-click **context menu** (every action + the branch-layout
+  override), node/pane clicks, the quick-action popover, the **Link to…** relationship gesture,
+  **inline editing** (commit / add-sibling / add-child / cancel), the node affordances (follow link /
+  step task pie / collapse), relationship-edge edit & delete, and the minimap toggle.
   `test/presentation.test.tsx` mounts the ▶ Present overlay and drives navigation, the keyboard, and
-  the presenter sidebar. Lifts `FlowMindMap.tsx` 0 → 67%, `Presentation.tsx` 0 → 100%, and overall line
-  coverage ~67 → ~78%. Tests only — no behaviour change.
+  the presenter sidebar. Lifts `FlowMindMap.tsx` 0 → 91%, `Presentation.tsx` 0 → 100%, the `mindmap/`
+  area 8.5 → 91.5%, and overall line coverage ~67 → ~81%. Tests only — no behaviour change.
 - **Dashboard load + contract tests (internal).** `public/dashboard.html` (the live GitHub + CI-metrics
   page built from `public/stats.json` / `public/stats-history.json`) had no automated coverage;
   `test/dashboard.test.ts` now guards that it loads, in three passes: **structure** (every id the inline

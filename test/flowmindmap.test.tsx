@@ -1,15 +1,79 @@
-import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { type RefObject, createRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MindMap } from "../src/mindmap";
 import { FlowMindMap } from "../src/mindmap/FlowMindMap";
 import type { MindMapHandle } from "../src/mindmap/contract";
 import type { MindMapDoc } from "../src/model/types";
 
 // FlowMindMap — the React Flow canvas. Most of its body is the imperative MindMapHandle (the app's
-// contract surface) plus apply/sync/undo-redo/keyboard, which run when CALLED via the ref, not on
-// mount — so the test mounts the real canvas and drives it through the ref + document keyboard events
-// (sidestepping the jsdom canvas limits: no synthetic node-clicks / edge rendering needed).
+// contract surface) plus apply/sync/undo-redo/keyboard, which run when CALLED via the ref; the rest
+// (context menu, node/pane handlers, popover, inline editing) needs React Flow to actually render
+// nodes + route pointer events — which it only does with a real viewport. The shim below gives it
+// one in jsdom (the documented RF test mock), scoped to this file (vitest isolates each file's env).
+
+class FiringResizeObserver {
+  private cb: ResizeObserverCallback;
+  constructor(cb: ResizeObserverCallback) {
+    this.cb = cb;
+  }
+  observe(target: Element) {
+    const contentRect = {
+      width: 1000,
+      height: 800,
+      top: 0,
+      left: 0,
+      right: 1000,
+      bottom: 800,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    };
+    this.cb([{ target, contentRect } as ResizeObserverEntry], this as unknown as ResizeObserver);
+  }
+  unobserve() {}
+  disconnect() {}
+}
+globalThis.ResizeObserver = FiringResizeObserver as unknown as typeof ResizeObserver;
+
+class DOMMatrixReadOnlyStub {
+  m22: number;
+  constructor(transform?: string) {
+    const m = transform?.match(/scale\(([0-9.]+)\)/);
+    this.m22 = m ? Number(m[1]) : 1;
+  }
+}
+(globalThis as unknown as { DOMMatrixReadOnly: unknown }).DOMMatrixReadOnly = DOMMatrixReadOnlyStub;
+
+const FULL_RECT = {
+  x: 0,
+  y: 0,
+  width: 1000,
+  height: 800,
+  top: 0,
+  left: 0,
+  right: 1000,
+  bottom: 800,
+  toJSON: () => ({}),
+};
+Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {
+  configurable: true,
+  value: () => FULL_RECT,
+});
+Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+  configurable: true,
+  get: () => 1000,
+});
+Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+  configurable: true,
+  get: () => 800,
+});
+if (typeof SVGElement !== "undefined") {
+  Object.defineProperty(SVGElement.prototype, "getBBox", {
+    configurable: true,
+    value: () => ({ x: 0, y: 0, width: 100, height: 100 }),
+  });
+}
 
 // Each render gets a unique doc id: FlowMindMap keys its inner tree on doc.id.
 let seq = 0;
@@ -57,7 +121,21 @@ function mount(
   return { ...utils, ref, onChange, onSelect, onMapLink, h: ref.current };
 }
 
+const nodeEl = (container: HTMLElement, id: string): Element => {
+  const el = container.querySelector(`.react-flow__node[data-id="${id}"]`);
+  if (!el) throw new Error(`node ${id} not rendered`);
+  return el;
+};
+const openMenu = () => document.querySelector("[data-mm-menu]") as HTMLElement | null;
+
 describe("FlowMindMap canvas", () => {
+  beforeEach(() => {
+    vi.spyOn(window, "prompt").mockReturnValue("Label");
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.spyOn(window, "open").mockReturnValue(null);
+  });
+  afterEach(() => vi.restoreAllMocks());
+
   it("mounts and exposes the imperative handle", () => {
     const { h } = mount();
     expect(typeof h.exportSvg).toBe("function");
@@ -192,6 +270,188 @@ describe("FlowMindMap canvas", () => {
     render(<MindMap doc={baseDoc()} ref={ref} />);
     // <MindMap> code-splits FlowMindMap behind Suspense; wait for the chunk to resolve + commit.
     await waitFor(() => expect(ref.current).toBeTruthy());
+  });
+
+  it("opens the right-click context menu and runs its actions", () => {
+    const { container, onChange } = mount();
+    const reopen = () => run(() => fireEvent.contextMenu(nodeEl(container, "a")));
+    reopen();
+    const menu = openMenu();
+    expect(menu).toBeTruthy();
+    // The items builder produced the full set.
+    for (const label of [
+      "Add child",
+      "Add sibling",
+      "Rename",
+      "Link to…",
+      "Add callout",
+      "Group in boundary",
+      "Summarize branch",
+      "Copy branch",
+      "Collapse / expand",
+      "Delete",
+    ]) {
+      expect(within(menu as HTMLElement).getByText(label)).toBeTruthy();
+    }
+
+    const clickItem = (label: string) => {
+      const m = openMenu();
+      if (m) run(() => fireEvent.click(within(m).getByText(label)));
+    };
+    clickItem("Add callout");
+    reopen();
+    clickItem("Group in boundary");
+    reopen();
+    clickItem("Summarize branch");
+    reopen();
+    clickItem("Copy branch"); // → branch clipboard now has something
+    reopen();
+    expect(within(openMenu() as HTMLElement).getByText("Paste branch here")).toBeTruthy();
+    clickItem("Paste branch here");
+    reopen();
+    clickItem("Add child");
+    reopen();
+    clickItem("Add sibling");
+    reopen();
+    clickItem("Collapse / expand");
+    reopen();
+    // Branch-layout override <select>.
+    run(() =>
+      fireEvent.change(within(openMenu() as HTMLElement).getByRole("combobox"), {
+        target: { value: "org-down" },
+      }),
+    );
+    // Esc closes the menu (the close-on-Escape effect).
+    reopen();
+    run(() => fireEvent.keyDown(document, { key: "Escape" }));
+    expect(openMenu()).toBeNull();
+    // Delete last (it removes node "a").
+    reopen();
+    clickItem("Delete");
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it("selects on node click, shows the quick-action popover, and deselects on pane click", () => {
+    const { container, onSelect, onChange } = mount();
+    const sel = (id: string) => run(() => fireEvent.click(nodeEl(container, id)));
+    const pop = (name: string) => run(() => fireEvent.click(screen.getByRole("button", { name })));
+    sel("a");
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "a" }));
+    // Popover quick actions (NodeToolbar) — aria-labelled buttons. Add-child/sibling/Rename each
+    // enter edit (hiding the popover), so re-select before each to keep one visible.
+    pop("Collapse / expand"); // toggleCollapse — popover stays
+    sel("a");
+    pop("Rename"); // editingId = a
+    sel("b");
+    pop("Add child");
+    sel("a");
+    pop("Add sibling");
+    sel("b");
+    pop("Delete");
+    // Pane click clears the selection.
+    const pane = container.querySelector(".react-flow__pane");
+    if (pane) run(() => fireEvent.click(pane));
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it("draws a relationship via the Link to… gesture", () => {
+    const { container, onChange } = mount();
+    run(() => fireEvent.contextMenu(nodeEl(container, "a")));
+    run(() => fireEvent.click(within(openMenu() as HTMLElement).getByText("Link to…")));
+    expect(screen.getByText(/Click a target node/)).toBeTruthy();
+    run(() => fireEvent.click(nodeEl(container, "b"))); // completes the link (prompt → "Label")
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it("commits inline edits and runs the node affordances (link / progress / collapse)", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "edit1",
+      title: "Edit",
+      root: {
+        id: "root",
+        topic: "Root",
+        children: [
+          {
+            id: "a",
+            topic: "Alpha",
+            hyperlink: "https://example.com",
+            task: { progress: 0.25 },
+            children: [{ id: "a1", topic: "Alpha 1", children: [] }],
+          },
+        ],
+      },
+    };
+    const { container, onChange, h } = mount(doc);
+    const editable = (): Element => {
+      const e = container.querySelector('[contenteditable="true"]');
+      if (!e) throw new Error("no contenteditable in edit mode");
+      return e;
+    };
+
+    // Inline edit: double-click the topic text → contenteditable (covers editingApi.beginEdit) →
+    // Enter commits + adds a sibling. The onDoubleClick lives on TopicNode's inner div, so fire on
+    // the text element and let it bubble.
+    run(() =>
+      fireEvent.doubleClick(within(nodeEl(container, "a") as HTMLElement).getByText("Alpha")),
+    );
+    run(() => fireEvent.keyDown(editable(), { key: "Enter" })); // commitAndAdd sibling
+
+    // Re-enter edit via F2 for the Tab / Escape / blur commit paths.
+    const editA = () => {
+      run(() => h.focusNode("a"));
+      run(() => fireEvent.keyDown(document, { key: "F2" }));
+    };
+    editA();
+    run(() => fireEvent.keyDown(editable(), { key: "Tab" })); // commitAndAdd child
+    editA();
+    run(() => fireEvent.keyDown(editable(), { key: "Escape" })); // cancelEdit
+    editA();
+    run(() => fireEvent.blur(editable())); // commitEdit
+
+    // Node affordances: follow the hyperlink (openLink → window.open, stubbed), step the task pie
+    // (cycleProgress), and toggle collapse (the root also has a collapse button → take the first).
+    run(() => fireEvent.click(screen.getByTitle(/Follow link/)));
+    expect(window.open).toHaveBeenCalled();
+    run(() => fireEvent.click(screen.getByTitle(/click to change/)));
+    run(() => fireEvent.click(screen.getAllByTitle(/Collapse|Expand/)[0]));
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it("toggles the minimap, follows in-map / map links, and edits a relationship edge", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "links1",
+      title: "Links",
+      root: {
+        id: "root",
+        topic: "Root",
+        children: [
+          { id: "a", topic: "A", hyperlink: "#node=b", children: [] },
+          { id: "b", topic: "B", hyperlink: "#map=m2", children: [] },
+        ],
+      },
+      links: [{ id: "l1", from: "a", to: "b", label: "rel" }],
+    };
+    const { container, onMapLink } = mount(doc);
+    // Minimap toggle (the bottom-right Panel button) — covers toggleMinimap + its localStorage write.
+    run(() => fireEvent.click(screen.getByText(/Minimap/)));
+    run(() => fireEvent.click(screen.getByText(/Minimap/)));
+    // openLink kinds: in-map jump (#node= → focusNodeById) and map link (#map= → onMapLink).
+    run(() =>
+      fireEvent.click(within(nodeEl(container, "a") as HTMLElement).getByTitle(/Follow link/)),
+    );
+    run(() =>
+      fireEvent.click(within(nodeEl(container, "b") as HTMLElement).getByTitle(/Follow link/)),
+    );
+    expect(onMapLink).toHaveBeenCalledWith("m2");
+    // Relationship edge: double-click sets a label (prompt), right-click deletes it (confirm).
+    const edge = container.querySelector(".react-flow__edge");
+    if (edge) {
+      run(() => fireEvent.doubleClick(edge));
+      const again = container.querySelector(".react-flow__edge");
+      if (again) run(() => fireEvent.contextMenu(again));
+    }
   });
 
   it("re-syncs on live direction / numbering / filter prop changes", () => {

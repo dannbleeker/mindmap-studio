@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Bulk edit shows "Mixed" instead of one topic's value.** When several selected topics disagree on
+  a task field — **progress, dates, or priority** — the inspector now leaves that control blank and
+  tags it *Mixed*, rather than silently showing (and, on the next edit, overwriting everything with)
+  the anchor topic's value. Fields the selection already agrees on still show their shared value, and
+  setting a control applies it to the whole selection in one undo step as before. The "Mixed" state
+  clears the moment you set the field. Single-topic editing is unchanged.
+
 - **Resizable inspector + a header breadcrumb & quick-facts.** Drag the inspector's left edge to
   resize it (or nudge with the arrow keys when focused); the width is clamped and **persists** across
   reloads. The header now shows the selected topic's **breadcrumb** (Root › Branch …) and a small

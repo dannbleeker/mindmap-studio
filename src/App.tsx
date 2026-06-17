@@ -35,6 +35,7 @@ import {
   type MindMapHandle,
   NODE_LINK_PREFIX,
   type SelectedNode,
+  type SelectionFields,
 } from "./mindmap";
 import { nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
@@ -151,6 +152,9 @@ export function App() {
   const [selected, setSelected] = useState<SelectedNode | null>(null);
   // How many nodes are selected on the canvas (the inspector switches to bulk mode when >1).
   const [selectedCount, setSelectedCount] = useState(0);
+  // Per-field "mixed" summary of a multi-selection — lets the inspector blank-out + label fields the
+  // selected topics disagree on, instead of showing (and silently overwriting from) the anchor's.
+  const [selectionFields, setSelectionFields] = useState<SelectionFields | null>(null);
   // Bumped when a node's 📝 indicator is clicked → InfoPanel switches to its Notes tab.
   const [noteNonce, setNoteNonce] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
@@ -1186,6 +1190,7 @@ export function App() {
                 }}
                 onSelect={handleSelect}
                 onSelectionCount={setSelectedCount}
+                onSelectionFields={setSelectionFields}
                 onOpenNote={() => {
                   panels.setInfoMinimized(false);
                   panels.setInfoOpen(true);
@@ -1251,6 +1256,7 @@ export function App() {
               <InfoPanel
                 selected={selected}
                 selectedCount={selectedCount}
+                fields={selectionFields}
                 openNoteNonce={noteNonce}
                 width={panels.inspectorWidth}
                 onResize={panels.setInspectorWidth}

@@ -16,7 +16,7 @@ import {
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { formatBytes } from "./io/attachment";
-import type { SelectedNode } from "./mindmap";
+import type { SelectedNode, SelectionFields } from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
 import type { ConditionalRule, MapNode, NodeShape, NodeStyle } from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
@@ -1036,6 +1036,7 @@ const INFO_TABS: readonly TabItem[] = [
 export function InfoPanel({
   selected,
   selectedCount,
+  fields,
   openNoteNonce,
   node,
   noteDraft,
@@ -1067,6 +1068,9 @@ export function InfoPanel({
   selected: SelectedNode | null;
   /** Number of nodes selected on the canvas; >1 puts the panel in bulk-edit mode. */
   selectedCount?: number;
+  /** Per-field "mixed" summary of the selection (bulk mode) — a field whose selected topics disagree
+   *  renders blank + a "Mixed" hint instead of the anchor's value. Ignored for a single selection. */
+  fields?: SelectionFields | null;
   /** Bumped when a node's 📝 indicator is clicked — switches the panel to its Notes tab. */
   openNoteNonce?: number;
   /** Persisted inspector width (px) + the drag-resize callback. */
@@ -1105,6 +1109,9 @@ export function InfoPanel({
   // shown (shape/colour/font, progress, dates, priority); per-item editors (notes, markers, tags,
   // stickers, attachments, links) are hidden — they stay single-node, edited by selecting one topic.
   const multi = (selectedCount ?? 0) > 1;
+  // In bulk mode, which task fields the selected topics disagree on — those render blank + "Mixed"
+  // instead of (and without overwriting from) the anchor's value. Empty object for a single select.
+  const mixed: Partial<SelectionFields["mixed"]> = multi ? (fields?.mixed ?? {}) : {};
   const tabs = multi ? INFO_TABS.filter((t) => t.id !== "notes") : INFO_TABS;
   const activeTab: InfoTab = multi && tab === "notes" ? "details" : tab;
   // Clicking a node's 📝 indicator bumps openNoteNonce → jump to the Notes tab.
@@ -1114,13 +1121,22 @@ export function InfoPanel({
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
   const webUrl = link.startsWith("#") ? "" : link;
+  // A faint "Mixed" tag shown next to a bulk-edit control whose selected topics hold differing values.
+  const mixedHint = (
+    <span style={{ color: "var(--ed-faint)", fontSize: fontSize.sm, fontStyle: "italic" }}>
+      Mixed
+    </span>
+  );
   const sectionLabel = (text: string) => <PanelSection>{text}</PanelSection>;
 
   // Task progress: parents with sub-tasks show an auto-rolled-up pie (read-only); a leaf (or an
   // undivided node) gets quarter-step buttons to set its own completion, plus a clear-task control.
   const renderProgress = (n: MapNode) => {
-    const info = nodeProgress(n);
-    const derived = hasTaskDescendants(n);
+    // Bulk mode with differing progress values: force the editable-step view with no active step + a
+    // "Mixed" hint (suppress the anchor's pie/active step so it can't imply one rolled-up value).
+    const progressMixed = !!mixed.progress;
+    const info = progressMixed ? null : nodeProgress(n);
+    const derived = !progressMixed && hasTaskDescendants(n);
     const pct = info ? toPercent(info.progress) : null;
     return (
       <PropRow label="Progress">
@@ -1148,7 +1164,11 @@ export function InfoPanel({
               flexWrap: "wrap",
             }}
           >
-            {info ? <ProgressPie fraction={info.progress} size={20} /> : null}
+            {progressMixed ? (
+              mixedHint
+            ) : info ? (
+              <ProgressPie fraction={info.progress} size={20} />
+            ) : null}
             {[0, 25, 50, 75, 100].map((step) => {
               const active = pct === step;
               return (
@@ -1346,28 +1366,32 @@ export function InfoPanel({
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
                         Start
                         {/* Native input (not the Input primitive) so it stays nested in its label; the
-                          mm-prim-input class lets the .mm-inspector theme override re-skin it. */}
+                          mm-prim-input class lets the .mm-inspector theme override re-skin it. The key
+                          includes the mixed flag so the uncontrolled input remounts (and clears its
+                          defaultValue) when bulk mixed-ness flips — never pre-filling the anchor's date. */}
                         <input
-                          key={`${node.id}:start`}
+                          key={`${node.id}:start${mixed.start ? ":mixed" : ""}`}
                           className="mm-prim-input"
                           type="date"
-                          defaultValue={node.task?.start ?? ""}
+                          defaultValue={mixed.start ? "" : (node.task?.start ?? "")}
                           onChange={(e) => onSetStart(e.target.value)}
                           aria-label="Start date"
                           style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
                         />
+                        {mixed.start ? mixedHint : null}
                       </label>
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
                         Due
                         <input
-                          key={`${node.id}:due`}
+                          key={`${node.id}:due${mixed.due ? ":mixed" : ""}`}
                           className="mm-prim-input"
                           type="date"
-                          defaultValue={node.task?.due ?? ""}
+                          defaultValue={mixed.due ? "" : (node.task?.due ?? "")}
                           onChange={(e) => onSetDue(e.target.value)}
                           aria-label="Due date"
                           style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
                         />
+                        {mixed.due ? mixedHint : null}
                       </label>
                     </div>
                   </PropRow>
@@ -1381,8 +1405,9 @@ export function InfoPanel({
                         flexWrap: "wrap",
                       }}
                     >
+                      {mixed.priority ? mixedHint : null}
                       {PRIORITY_LEVELS.map((p) => {
-                        const active = node.task?.priority === p;
+                        const active = !mixed.priority && node.task?.priority === p;
                         return (
                           <Button
                             key={p}

@@ -70,6 +70,7 @@ import {
   removeAttachment,
   reparent,
   replaceTopics,
+  selectionFields,
   setAllExpanded,
   setBackdrop,
   setBackdropRings,
@@ -173,6 +174,7 @@ function FlowInner({
   onChange,
   onSelect,
   onSelectionCount,
+  onSelectionFields,
   onOpenNote,
   onMapLink,
   ref,
@@ -537,6 +539,15 @@ function FlowInner({
   useEffect(() => {
     onSelectionCountRef.current?.(selectedIds.size);
   }, [selectedIds]);
+
+  // Report a per-field "mixed" summary of the selection, so the inspector can blank-out + label a
+  // task field the selected topics disagree on (instead of showing the anchor's value). Keyed on the
+  // live doc too, so a bulk edit re-fires and collapses "Mixed" → the just-applied uniform value.
+  const onSelectionFieldsRef = useRef(onSelectionFields);
+  onSelectionFieldsRef.current = onSelectionFields;
+  useEffect(() => {
+    onSelectionFieldsRef.current?.(selectionFields(renderDoc, selectedIds));
+  }, [selectedIds, renderDoc]);
 
   // Re-layout on a live layout-kind change (initial mount is already laid out).
   const firstRun = useRef(true);

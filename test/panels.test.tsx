@@ -15,7 +15,7 @@ import {
   StyleBar,
   StylesPanel,
 } from "../src/Panels";
-import type { SelectedNode } from "../src/mindmap";
+import type { SelectedNode, SelectionFields } from "../src/mindmap";
 import type { MapNode } from "../src/model/types";
 
 // A small but representative tree: a root with two children, one carrying a marker, a tag, a note,
@@ -202,11 +202,13 @@ describe("InfoPanel", () => {
     n: MapNode | null,
     count?: number,
     nonce?: number,
+    fields?: SelectionFields,
   ) =>
     render(
       <InfoPanel
         selected={sel}
         selectedCount={count}
+        fields={fields}
         openNoteNonce={nonce}
         width={300}
         onResize={noop}
@@ -296,6 +298,33 @@ describe("InfoPanel", () => {
     await userEvent.click(screen.getByRole("tab", { name: "Style" }));
     expect(screen.getByText("Shape")).toBeTruthy(); // StyleBar applies to all
     expect(screen.queryByText(/Stickers/)).toBeNull(); // per-item sticker grid hidden
+  });
+
+  it("bulk mode blanks a mixed field + shows a 'Mixed' hint instead of the anchor's value", () => {
+    // The anchor carries concrete task values; the selection disagrees on due/priority/progress.
+    const tasked: MapNode = { ...node, task: { due: "2026-07-01", priority: 1, progress: 0.5 } };
+    renderInfo(selected, tasked, 3, undefined, {
+      count: 3,
+      mixed: { progress: true, priority: true, start: false, due: true },
+    });
+    // The due date is NOT pre-filled with the anchor's value (would silently overwrite all on edit).
+    expect((screen.getByLabelText("Due date") as HTMLInputElement).value).toBe("");
+    // No priority button reads as active (the anchor's High priority isn't highlighted).
+    expect(screen.getByRole("button", { name: "High" }).getAttribute("aria-pressed")).not.toBe(
+      "true",
+    );
+    // …and at least one "Mixed" hint is rendered for the differing fields.
+    expect(screen.getAllByText("Mixed").length).toBeGreaterThan(0);
+  });
+
+  it("bulk mode still shows the shared value for a uniform field (not blanked)", () => {
+    const tasked: MapNode = { ...node, task: { due: "2026-07-01" } };
+    renderInfo(selected, tasked, 2, undefined, {
+      count: 2,
+      mixed: { progress: false, priority: false, start: false, due: false },
+    });
+    expect((screen.getByLabelText("Due date") as HTMLInputElement).value).toBe("2026-07-01");
+    expect(screen.queryByText("Mixed")).toBeNull();
   });
 
   it("opens on the Notes tab when openNoteNonce is set (the node 📝 click target)", () => {

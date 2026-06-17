@@ -10,6 +10,7 @@ import type {
   NodeStyle,
   TaskInfo,
 } from "../../model/types";
+import type { SelectionFields } from "../contract";
 
 // Pure tree-edit transforms on the canonical MindMapDoc. Each returns a NEW doc (the input
 // is never mutated) plus, where relevant, the id to select next. This is the model-first
@@ -90,6 +91,36 @@ export function findAnyNode(doc: MindMapDoc, id: string): MapNode | null {
     if (found) return found;
   }
   return null;
+}
+
+/** Summarise the task fields across a multi-node selection: a field is "mixed" when the selected
+ *  nodes hold more than one distinct value for it. Lets the inspector blank-out + label a field as
+ *  "Mixed" in bulk mode instead of showing (and silently overwriting from) the anchor's value. Pure;
+ *  `count` reflects only ids that resolve to a node. */
+export function selectionFields(doc: MindMapDoc, ids: Iterable<string>): SelectionFields {
+  const progress = new Set<number | undefined>();
+  const priority = new Set<number | undefined>();
+  const start = new Set<string | undefined>();
+  const due = new Set<string | undefined>();
+  let count = 0;
+  for (const id of ids) {
+    const node = findAnyNode(doc, id);
+    if (!node) continue;
+    count++;
+    progress.add(node.task?.progress);
+    priority.add(node.task?.priority);
+    start.add(node.task?.start);
+    due.add(node.task?.due);
+  }
+  return {
+    count,
+    mixed: {
+      progress: progress.size > 1,
+      priority: priority.size > 1,
+      start: start.size > 1,
+      due: due.size > 1,
+    },
+  };
 }
 
 // --- structural edits ------------------------------------------------------

@@ -25,6 +25,7 @@ import {
   removeAttachment,
   reparent,
   replaceTopics,
+  selectionFields,
   setAllExpanded,
   setBackdrop,
   setBackdropRings,
@@ -789,5 +790,34 @@ describe("nodePath", () => {
   });
   it("returns null for an id not in the central tree", () => {
     expect(nodePath(base(), "nope")).toBeNull();
+  });
+});
+
+describe("selectionFields", () => {
+  it("flags only the task fields the selected nodes disagree on", () => {
+    let d = setPriority(base(), "a", 1).doc; // a: priority 1
+    d = setDue(d, "a", "2026-07-01").doc; // a: + a due date
+    d = setPriority(d, "b", 1).doc; // b: priority 1 (matches a), no due
+    const f = selectionFields(d, ["a", "b"]);
+    expect(f.count).toBe(2);
+    // priority agrees (1 vs 1) → not mixed; due differs (set vs none) → mixed.
+    expect(f.mixed).toEqual({ progress: false, priority: false, start: false, due: true });
+  });
+
+  it("is all-uniform when the nodes share every value (both untasked)", () => {
+    expect(selectionFields(base(), ["a1", "a2"])).toEqual({
+      count: 2,
+      mixed: { progress: false, priority: false, start: false, due: false },
+    });
+  });
+
+  it("reaches floating topics and skips unknown ids (count = resolved only)", () => {
+    let d = addFloatingTopic(base(), "Free").doc;
+    const fid = d.floatingTopics?.[0]?.id as string;
+    d = setPriority(d, fid, 3).doc; // floating topic: priority 3
+    d = setPriority(d, "a", 1).doc; // tree node a: priority 1
+    const f = selectionFields(d, ["a", fid, "ghost"]);
+    expect(f.count).toBe(2); // "ghost" doesn't resolve → not counted
+    expect(f.mixed.priority).toBe(true); // 1 vs 3
   });
 });

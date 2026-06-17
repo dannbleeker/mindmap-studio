@@ -21,6 +21,17 @@ export interface SelectedNode {
   note: string;
 }
 
+/** Per-field summary of a multi-node selection, so the inspector can blank-out + label a field as
+ *  "Mixed" when the selected topics disagree on it (instead of silently showing the anchor's value).
+ *  Computed on the canvas, where both the selection set and the doc live. Only the task fields the
+ *  Details tab reflects are tracked (the StyleBar applies patches without reflecting current state). */
+export interface SelectionFields {
+  /** How many nodes are selected (the inspector enters bulk mode when >1). */
+  count: number;
+  /** True when the selected nodes hold more than one distinct value for that field. */
+  mixed: { progress: boolean; priority: boolean; start: boolean; due: boolean };
+}
+
 /** Imperative API a canvas component exposes via its ref. */
 export interface MindMapHandle {
   exportSvg: () => Blob | null;
@@ -136,6 +147,9 @@ export interface MindMapProps {
   onSelect?: (selected: SelectedNode | null) => void;
   /** Fires when the number of selected nodes changes (the inspector enters bulk mode when >1). */
   onSelectionCount?: (count: number) => void;
+  /** Fires with a per-field "mixed" summary of the selection, so the inspector can blank-out + label
+   *  a task field whose value differs across the selected topics (instead of showing the anchor's). */
+  onSelectionFields?: (fields: SelectionFields) => void;
   /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
    *  Notes tab for the (now-selected) node. */
   onOpenNote?: () => void;

@@ -105,9 +105,12 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
 priority, attachments, links), **Style** (shape / fill / border / font, markers, stickers), and
 **Notes** (the Markdown editor).
 
-- **Note** — write in the editor; notes autosave, travel with the map (and the lossless `.json`
-  export), and render as **Markdown** in **Preview** (`#` headings, `**bold**`, `*italic*`,
-  `` `code` ``, `- lists`, `[links](https://…)`). Nodes with a note show a 📝 in the
+- **Note** — write in the **WYSIWYG** editor: a formatting toolbar (**bold**, *italic*,
+  ~~strikethrough~~, bulleted list, numbered list) and inline formatting as you type — no raw markup
+  to read. The note box fills the inspector's height. Notes autosave, travel with the map (and the
+  lossless `.json` export). Behind the scenes the note is stored as **Markdown** (`#` headings,
+  `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, `- lists`, `1. numbered`, `[links](https://…)`),
+  so it stays portable across every export. Nodes with a note show a 📝 in the
   [outline](#outline-panel).
 - **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it; active markers are
   highlighted. Imported MindManager icons map to these glyphs automatically.

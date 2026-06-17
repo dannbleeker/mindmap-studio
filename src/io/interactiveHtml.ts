@@ -115,7 +115,9 @@ const CSS = `
   .note { margin: 1px 0 4px 23px; padding: 6px 10px; background: var(--card);
     border: 1px solid var(--line); border-radius: 8px; font-size: 13px; color: var(--muted); }
   .note p { margin: 0 0 .4em; } .note p:last-child { margin: 0; }
-  .note ul { list-style: disc; margin: 0 0 0 18px; padding: 0; }
+  .note ul, .note ol { margin: 0 0 0 18px; padding: 0; }
+  .note ul { list-style: disc; } .note ol { list-style: decimal; }
+  .note del { text-decoration: line-through; }
   .note h1, .note h2, .note h3 { font-size: 13px; margin: 0 0 .3em; color: var(--fg); }
   mark { background: var(--hit); color: inherit; border-radius: 3px; padding: 0 1px; }
   li.dim > .row .topic { opacity: .35; }

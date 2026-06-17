@@ -23,6 +23,7 @@ export default defineConfig({
     environment: "node",
     environmentMatchGlobs: [
       ["test/panels.test.tsx", "jsdom"],
+      ["test/noteFormat.test.ts", "jsdom"],
       ["test/hooks.test.tsx", "jsdom"],
       ["test/usePanels.test.ts", "jsdom"],
       ["test/dashboard.test.ts", "jsdom"],

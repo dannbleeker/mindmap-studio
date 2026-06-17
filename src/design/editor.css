@@ -392,6 +392,27 @@
   margin-top: 4px;
 }
 
+/* ── Notes editor (contentEditable WYSIWYG in the Topic-info panel) ────────── */
+.mm-note-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #b6b0a4;
+  pointer-events: none;
+}
+.mm-note-editor p {
+  margin: 0 0 6px;
+}
+.mm-note-editor ul,
+.mm-note-editor ol {
+  margin: 0 0 6px;
+  padding-left: 20px;
+}
+.mm-note-editor h1,
+.mm-note-editor h2,
+.mm-note-editor h3 {
+  margin: 4px 0;
+  font-size: 1.05em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mm-editor * {
     transition: none !important;

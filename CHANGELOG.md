@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **WYSIWYG note editor** — the Topic-info **Notes** tab is now a what-you-see-is-what-you-get rich
+  editor instead of a raw-markdown textarea with an Edit/Preview toggle: a formatting toolbar
+  (**bold**, *italic*, ~~strikethrough~~, bulleted list, numbered list) and inline formatting as you
+  type, filling the inspector's full height. Under the hood the note is still stored as the same
+  **markdown string** — the editor serialises its HTML to/from markdown on every edit (a
+  `contentEditable` div + a small, unit-tested HTML↔markdown round-trip), so every export (JSON /
+  docx / FreeMind / interactive-HTML), cross-map search, the presenter view and the 📝 outline
+  indicator keep working unchanged. `renderNote` gained strikethrough + numbered-list support (it
+  already did bold / italic / code / headings / bullets / links). **0 new dependencies.**
+
 - **Tabbed topic inspector** — the right-hand **Topic info** panel now groups a topic's editors into
   three tabs — **Details** (tags, progress, dates, priority, attachments & links), **Style** (shape /
   fill / border / font bar, markers, stickers) and **Notes** (the Markdown editor) — instead of one

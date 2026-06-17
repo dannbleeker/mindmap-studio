@@ -250,10 +250,11 @@ describe("InfoPanel", () => {
     expect(screen.queryByDisplayValue("interview users")).toBeNull();
   });
 
-  it("reveals the note draft after switching to the Notes tab", async () => {
+  it("reveals the note editor (with the draft rendered) after switching to the Notes tab", async () => {
     renderInfo(selected, node);
     await userEvent.click(screen.getByRole("tab", { name: "Notes" }));
-    expect(screen.getByDisplayValue("interview users")).toBeTruthy();
+    const editor = screen.getByRole("textbox", { name: "Node note" });
+    expect(editor.textContent).toContain("interview users");
     // Details-tab sections are no longer mounted once we leave that tab.
     expect(screen.queryByText("Priority")).toBeNull();
   });

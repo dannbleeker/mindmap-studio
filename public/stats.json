@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-17T19:49:52.418Z",
-  "commit": "6079145",
+  "generatedAt": "2026-06-17T20:12:46.345Z",
+  "commit": "bc4552c",
   "headline": {
-    "linesTsJs": 35572,
-    "tests": 940,
+    "linesTsJs": 35617,
+    "tests": 943,
     "lineCoveragePct": 81.42,
-    "commits": 480,
+    "commits": 482,
     "ageDays": 6,
     "trackedFiles": 279,
     "featureManualPct": 100,
@@ -21,7 +21,7 @@
     {
       "category": "Unit tests",
       "files": 92,
-      "lines": 12431
+      "lines": 12476
     },
     {
       "category": "Build scripts",
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 85.51,
-      "covered": 3371,
-      "total": 3942
+      "covered": 3372,
+      "total": 3943
     }
   },
   "tests": {
-    "unit": 940,
+    "unit": 943,
     "e2e": 0,
-    "durationMs": 33520,
+    "durationMs": 31902,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 10295
+        "ms": 9041
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 5777
+        "ms": 4816
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 3564
+        "ms": 3857
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3411
+        "ms": 3155
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1115
+        "ms": 1027
       }
     ]
   },
@@ -305,21 +305,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 6,
-    "commits": 480,
-    "commits7d": 480,
+    "commits": 482,
+    "commits7d": 482,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 264
+        "count": 265
       },
       {
         "name": "github-actions[bot]",
-        "count": 216
+        "count": 217
       }
     ],
     "churn30d": {
-      "added": 70727,
-      "removed": 20593
+      "added": 70788,
+      "removed": 20609
     },
     "changelogEntries": 155
   }

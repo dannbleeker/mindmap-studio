@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-17T07:18:12.241Z",
-  "commit": "f5d24ca",
+  "generatedAt": "2026-06-17T07:44:38.253Z",
+  "commit": "3b65258",
   "headline": {
-    "linesTsJs": 31295,
-    "tests": 853,
-    "lineCoveragePct": 78.19,
-    "commits": 437,
+    "linesTsJs": 31555,
+    "tests": 859,
+    "lineCoveragePct": 80.62,
+    "commits": 439,
     "ageDays": 5,
     "trackedFiles": 273,
     "featureManualPct": 100,
@@ -21,7 +21,7 @@
     {
       "category": "Unit tests",
       "files": 90,
-      "lines": 10984
+      "lines": 11244
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 78.19,
-      "covered": 10330,
+      "pct": 80.62,
+      "covered": 10652,
       "total": 13211
     },
     "statements": {
-      "pct": 78.19,
-      "covered": 10330,
+      "pct": 80.62,
+      "covered": 10652,
       "total": 13211
     },
     "functions": {
-      "pct": 81.94,
-      "covered": 649,
-      "total": 792
+      "pct": 86.52,
+      "covered": 687,
+      "total": 794
     },
     "branches": {
-      "pct": 85.68,
-      "covered": 2766,
-      "total": 3228
+      "pct": 85.93,
+      "covered": 2891,
+      "total": 3364
     }
   },
   "tests": {
-    "unit": 853,
+    "unit": 859,
     "e2e": 0,
-    "durationMs": 20266,
+    "durationMs": 30375,
     "slowest": [
       {
+        "file": "test/flowmindmap.test.tsx",
+        "ms": 9357
+      },
+      {
         "file": "test/panels.test.tsx",
-        "ms": 3402
+        "ms": 4825
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 2467
+        "ms": 3455
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 2341
+        "ms": 3437
       },
       {
-        "file": "test/flowmindmap.test.tsx",
-        "ms": 1683
-      },
-      {
-        "file": "test/start-sections.test.tsx",
-        "ms": 824
+        "file": "test/brainstorm-timer.test.tsx",
+        "ms": 1118
       }
     ]
   },
@@ -176,19 +176,9 @@
         "commits": 105
       },
       {
-        "file": "mindmap/FlowMindMap.tsx",
-        "pct": 67.06,
-        "commits": 36
-      },
-      {
         "file": "useMapExports.ts",
         "pct": 36.6,
         "commits": 14
-      },
-      {
-        "file": "mindmap/flow/CrosslinkEdge.tsx",
-        "pct": 2.46,
-        "commits": 9
       }
     ]
   },
@@ -294,21 +284,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 5,
-    "commits": 437,
-    "commits7d": 437,
+    "commits": 439,
+    "commits7d": 439,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 243
+        "count": 244
       },
       {
         "name": "github-actions[bot]",
-        "count": 194
+        "count": 195
       }
     ],
     "churn30d": {
-      "added": 63610,
-      "removed": 18142
+      "added": 63923,
+      "removed": 18195
     },
     "changelogEntries": 137
   }

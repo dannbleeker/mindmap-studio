@@ -39,14 +39,14 @@ const BORDER_SWATCHES = colors.borderSwatches;
 // Small icon-button look for the StyleBar shape/font controls (a compact white control). One-off to
 // this bar, but its values come from the tokens so it stays in step with the rest of the chrome.
 const styleBtn = {
-  border: `1px solid ${colors.controlBorder}`,
-  background: colors.white,
+  border: "1px solid var(--ed-border)",
+  background: "var(--ed-card)",
   borderRadius: radius.md,
   cursor: "pointer",
   fontSize: fontSize.lg,
   lineHeight: 1,
   padding: `${space.xxs}px ${space.md}px`,
-  color: colors.text,
+  color: "var(--ed-ink)",
 } as const;
 
 // A clickable list row inside the rail panels (outline rows, index jump targets, saved-filter +
@@ -74,8 +74,8 @@ const barRow: CSSProperties = {
   gap: space.xs,
   flexWrap: "wrap",
   padding: `${space.md}px ${space.xxxl}px`,
-  background: colors.surfaceBar,
-  borderBottom: `1px solid ${colors.border}`,
+  background: "var(--ed-page)",
+  borderBottom: "1px solid var(--ed-divider)",
 };
 
 // The bold ink title at the top of a rail panel (Markers & tags / Power Filter / Styles). The
@@ -107,7 +107,7 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
     />
   );
   const label = (text: string) => (
-    <span style={{ fontSize: fontSize.sm, color: colors.muted, margin: "0 2px 0 6px" }}>
+    <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)", margin: "0 2px 0 6px" }}>
       {text}
     </span>
   );
@@ -123,8 +123,13 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
         preserveAspectRatio="none"
         aria-hidden="true"
       >
-        <path d={shapePath(shape, 5, 5, 90, 60)} fill="none" stroke="#26215c" strokeWidth={7} />
-        {overlay ? <path d={overlay} fill="none" stroke="#26215c" strokeWidth={7} /> : null}
+        <path
+          d={shapePath(shape, 5, 5, 90, 60)}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={7}
+        />
+        {overlay ? <path d={overlay} fill="none" stroke="currentColor" strokeWidth={7} /> : null}
       </svg>
     );
   };
@@ -1087,10 +1092,10 @@ export function InfoPanel({
             }}
           >
             {info ? <ProgressPie fraction={info.progress} size={20} /> : null}
-            <span style={{ color: colors.text, fontVariantNumeric: "tabular-nums" }}>
+            <span style={{ color: "var(--ed-ink)", fontVariantNumeric: "tabular-nums" }}>
               {pct}% · {info?.done}/{info?.total} done
             </span>
-            <span style={{ color: colors.faint }}>(auto)</span>
+            <span style={{ color: "var(--ed-faint)" }}>(auto)</span>
           </div>
         ) : (
           <div
@@ -1138,29 +1143,34 @@ export function InfoPanel({
     );
   };
   const aside = (
-    <Panel width={280}>
+    <aside className="mm-inspector" aria-label="Topic info">
       <div
-        style={{
-          ...panelTitle,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+        className="mm-inspector-head"
+        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}
       >
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            fontWeight: 600,
+            color: "var(--ed-ink)",
+          }}
+        >
           ℹ {node ? node.topic || "(untitled)" : "Topic info"}
         </span>
-        <Button
+        <button
+          type="button"
+          className="mm-inspector-min"
           onClick={onMinimize}
           title="Minimize — collapse to the right edge"
           aria-label="Minimize topic info"
-          style={{ padding: "2px 8px", fontSize: fontSize.sm }}
         >
           ›
-        </Button>
+        </button>
       </div>
       {!node ? (
-        <div style={{ padding: "8px 10px", fontSize: fontSize.md, color: colors.faint }}>
+        <div style={{ padding: "8px 16px", fontSize: fontSize.md, color: "var(--ed-faint)" }}>
           Select a node to see and edit its details.
         </div>
       ) : (
@@ -1188,8 +1198,8 @@ export function InfoPanel({
                     margin: "8px 10px 2px",
                     padding: "6px 10px",
                     borderRadius: radius.md,
-                    background: colors.accentTint,
-                    color: colors.text,
+                    background: "var(--ed-accent-tint)",
+                    color: "var(--ed-ink)",
                     fontSize: fontSize.sm,
                     fontWeight: fontWeight.semibold,
                   }}
@@ -1223,13 +1233,13 @@ export function InfoPanel({
                             onClick={() => onRemoveTag(t)}
                             title={`Remove tag "${t}"`}
                             style={{
-                              border: `1px solid ${colors.controlBorder}`,
-                              background: colors.white,
+                              border: "1px solid var(--ed-border)",
+                              background: "var(--ed-card)",
                               borderRadius: radius.md,
                               cursor: "pointer",
                               fontSize: fontSize.sm,
                               padding: "1px 6px",
-                              color: colors.text,
+                              color: "var(--ed-ink)",
                             }}
                           >
                             {t} ✕
@@ -1263,14 +1273,16 @@ export function InfoPanel({
                       gap: 6,
                       flexWrap: "wrap",
                       fontSize: fontSize.sm,
-                      color: colors.muted,
+                      color: "var(--ed-muted)",
                     }}
                   >
                     <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
                       Start
-                      {/* Native input (not the Input primitive) so it stays nested in its label. */}
+                      {/* Native input (not the Input primitive) so it stays nested in its label; the
+                          mm-prim-input class lets the .mm-inspector theme override re-skin it. */}
                       <input
                         key={`${node.id}:start`}
+                        className="mm-prim-input"
                         type="date"
                         defaultValue={node.task?.start ?? ""}
                         onChange={(e) => onSetStart(e.target.value)}
@@ -1282,6 +1294,7 @@ export function InfoPanel({
                       Due
                       <input
                         key={`${node.id}:due`}
+                        className="mm-prim-input"
                         type="date"
                         defaultValue={node.task?.due ?? ""}
                         onChange={(e) => onSetDue(e.target.value)}
@@ -1306,15 +1319,17 @@ export function InfoPanel({
                       return (
                         <Button
                           key={p}
+                          className="mm-keep-color"
                           onClick={() => onSetPriority(p)}
                           title={`${PRIORITY_LABEL[p]} priority`}
                           style={{
                             padding: "1px 8px",
                             fontSize: fontSize.sm,
                             fontWeight: fontWeight.semibold,
-                            // Priority uses its own colour scale, not the chrome accent.
-                            background: active ? PRIORITY_COLOR[p] : colors.white,
-                            color: active ? colors.white : PRIORITY_COLOR[p],
+                            // Priority keeps its own semantic colour scale in every theme (opted out
+                            // of the inspector's accent re-theme via mm-keep-color).
+                            background: active ? PRIORITY_COLOR[p] : "var(--ed-card)",
+                            color: active ? "#fff" : PRIORITY_COLOR[p],
                             borderColor: PRIORITY_COLOR[p],
                           }}
                         >
@@ -1359,7 +1374,7 @@ export function InfoPanel({
                               download={a.name}
                               title={`Download ${a.name}`}
                               style={{
-                                color: colors.text,
+                                color: "var(--ed-ink)",
                                 flex: 1,
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -1368,7 +1383,7 @@ export function InfoPanel({
                             >
                               📎 {a.name}
                             </a>
-                            <span style={{ color: colors.faint }}>{formatBytes(a.size)}</span>
+                            <span style={{ color: "var(--ed-faint)" }}>{formatBytes(a.size)}</span>
                             <Button
                               onClick={() => onRemoveAttachment(i)}
                               title="Remove attachment"
@@ -1384,6 +1399,9 @@ export function InfoPanel({
                             fontSize: fontSize.sm,
                             cursor: "pointer",
                             textAlign: "center",
+                            background: "var(--ed-card)",
+                            border: "1px solid var(--ed-border)",
+                            color: "var(--ed-ink2)",
                           }}
                         >
                           + Attach file
@@ -1467,7 +1485,7 @@ export function InfoPanel({
           )}
         </>
       )}
-    </Panel>
+    </aside>
   );
   return aside;
 }
@@ -1527,8 +1545,8 @@ export function NotesPanel({
         flexDirection: "column",
         gap: 6,
         padding: "8px 16px",
-        borderTop: `1px solid ${colors.border}`,
-        background: colors.surface,
+        borderTop: "1px solid var(--ed-divider)",
+        background: "transparent",
       }}
     >
       <div
@@ -1537,7 +1555,7 @@ export function NotesPanel({
           justifyContent: "space-between",
           alignItems: "center",
           fontSize: fontSize.sm,
-          color: colors.muted,
+          color: "var(--ed-muted)",
         }}
       >
         <span>📝 Note{selected ? ` — ${selected.topic}` : ""}</span>
@@ -1584,12 +1602,12 @@ export function NotesPanel({
               flex: 1,
               minHeight: 0,
               overflowY: "auto",
-              border: `1px solid ${colors.controlBorder}`,
+              border: "1px solid var(--ed-border)",
               borderRadius: radius.lg,
               padding: "6px 10px",
               fontSize: fontSize.md,
-              color: colors.text,
-              background: colors.white,
+              color: "var(--ed-ink)",
+              background: "var(--ed-card)",
               outline: "none",
             }}
           />
@@ -1600,7 +1618,7 @@ export function NotesPanel({
             flex: 1,
             display: "flex",
             alignItems: "center",
-            color: colors.placeholder,
+            color: "var(--ed-faint)",
             fontSize: fontSize.md,
           }}
         >
@@ -1645,8 +1663,8 @@ export function StickerBar({
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              border: `1px solid ${colors.controlBorder}`,
-              background: colors.white,
+              border: "1px solid var(--ed-border)",
+              background: "var(--ed-card)",
               borderRadius: radius.md,
               cursor: "pointer",
               padding: 3,
@@ -1678,7 +1696,9 @@ export function MarkerBar({
 }) {
   return (
     <div style={{ ...barRow, gap: 4 }}>
-      <span style={{ fontSize: fontSize.sm, color: colors.muted, marginRight: 4 }}>Markers:</span>
+      <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)", marginRight: 4 }}>
+        Markers:
+      </span>
       {markers.map((marker) => {
         const on = active?.includes(marker);
         return (
@@ -1689,8 +1709,8 @@ export function MarkerBar({
             aria-pressed={on}
             title={`Toggle ${marker} on the selected node`}
             style={{
-              border: `1px solid ${on ? colors.accent : colors.controlBorder}`,
-              background: on ? colors.accentTint : colors.white,
+              border: `1px solid ${on ? "var(--ed-accent)" : "var(--ed-border)"}`,
+              background: on ? "var(--ed-accent-tint)" : "var(--ed-card)",
               borderRadius: radius.md,
               cursor: "pointer",
               fontSize: fontSize.xl,

@@ -53,11 +53,12 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 /** A control button with the toolbar look. `active` gives the pressed/aria-pressed variant; the
  *  native `disabled` attribute is forwarded (callers already rely on the browser default styling).
  *  `type` defaults to "button" so these never submit a form. */
-export function Button({ active, style, type, ...rest }: ButtonProps) {
+export function Button({ active, style, type, className, ...rest }: ButtonProps) {
   return (
     <button
       type={type ?? "button"}
       aria-pressed={active ? true : rest["aria-pressed"]}
+      className={className ? `mm-prim-btn ${className}` : "mm-prim-btn"}
       style={{ ...controlStyle, ...(active ? ACTIVE_CONTROL : null), ...style }}
       {...rest}
     />
@@ -69,9 +70,17 @@ export function Button({ active, style, type, ...rest }: ButtonProps) {
 export function Input({
   style,
   ref,
+  className,
   ...rest
 }: React.InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInputElement> }) {
-  return <input ref={ref} style={{ ...inputStyle, ...style }} {...rest} />;
+  return (
+    <input
+      ref={ref}
+      className={className ? `mm-prim-input ${className}` : "mm-prim-input"}
+      style={{ ...inputStyle, ...style }}
+      {...rest}
+    />
+  );
 }
 
 /** A select with the same control look as Input (the panels render selects at input width). */
@@ -79,10 +88,16 @@ export function Select({
   style,
   children,
   ref,
+  className,
   ...rest
 }: React.SelectHTMLAttributes<HTMLSelectElement> & { ref?: Ref<HTMLSelectElement> }) {
   return (
-    <select ref={ref} style={{ ...inputStyle, ...style }} {...rest}>
+    <select
+      ref={ref}
+      className={className ? `mm-prim-select ${className}` : "mm-prim-select"}
+      style={{ ...inputStyle, ...style }}
+      {...rest}
+    >
       {children}
     </select>
   );
@@ -105,11 +120,12 @@ type ChipProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color"> & {
 
 /** A selectable toggle chip (Filter panel). Selected = accent fill + white text + accent border;
  *  unselected = white fill, control border, ink text. */
-export function Chip({ selected, style, type, children, ...rest }: ChipProps) {
+export function Chip({ selected, style, type, className, children, ...rest }: ChipProps) {
   return (
     <button
       type={type ?? "button"}
       aria-pressed={selected}
+      className={className ? `mm-prim-chip ${className}` : "mm-prim-chip"}
       style={{
         ...CHIP_BASE,
         border: `1px solid ${selected ? colors.accent : colors.controlBorder}`,
@@ -157,6 +173,7 @@ export function Panel({
 export function PanelSection({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
     <div
+      className="mm-prim-section"
       style={{
         padding: `${space.lg}px ${space.xl}px ${space.xxs}px`,
         fontSize: fontSize.xs,
@@ -225,7 +242,12 @@ export function Tabs({
   style?: CSSProperties;
 }) {
   return (
-    <div role="tablist" aria-label={ariaLabel} style={{ ...TABLIST_BASE, ...style }}>
+    <div
+      className="mm-prim-tablist"
+      role="tablist"
+      aria-label={ariaLabel}
+      style={{ ...TABLIST_BASE, ...style }}
+    >
       {tabs.map((t) => {
         const selected = t.id === active;
         return (
@@ -236,6 +258,7 @@ export function Tabs({
             aria-selected={selected}
             title={t.title}
             onClick={() => onChange(t.id)}
+            className="mm-prim-tab"
             style={{ ...TAB_BASE, ...(selected ? TAB_SELECTED : null) }}
           >
             {t.label}

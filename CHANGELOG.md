@@ -593,6 +593,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **The Topic-info inspector now matches the rest of the chrome and re-themes.** It was a light-only
+  280px panel with a right-hand border (a left-rail idiom) that stayed white in Dark / Ocean / Sunset;
+  it now uses the same themed `.mm-inspector` shell as the map-overview panel — 300px, border on the
+  left, surface + controls driven by the editor's `--ed-*` tokens — so selecting/deselecting a node no
+  longer makes the right edge jump width or flip its border, and the whole panel (tabs, inputs,
+  buttons, notes editor, markers, stickers) reads correctly in every theme. Purely visual: the shared
+  control primitives gained additive class hooks that only the inspector-scoped CSS targets, so the
+  left-rail panels are byte-for-byte unchanged; priority chips keep their semantic colours.
+
 - **Canvas + Present component tests (internal).** The two biggest untested components now have a net:
   `test/flowmindmap.test.tsx` mounts the real `FlowMindMap` (React Flow) canvas and drives it through
   the imperative `MindMapHandle` ref + `document` keyboard events — covering the contract surface the

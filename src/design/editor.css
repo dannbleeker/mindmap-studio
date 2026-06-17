@@ -420,10 +420,59 @@
   margin-top: 4px;
 }
 
+/* Re-theme the Topic-info inspector's shared primitives onto --ed-*, scoped under .mm-inspector so
+   the left-rail panels (same primitives, static light palette) are untouched. The primitives apply
+   their look via INLINE styles, so these overrides need !important. Priority/semantic-colour buttons
+   opt out with .mm-keep-color so their red/amber/blue survive in every theme. */
+.mm-inspector .mm-prim-section {
+  color: var(--ed-faint) !important;
+}
+.mm-inspector .mm-prim-btn:not(.mm-keep-color) {
+  background: var(--ed-card) !important;
+  color: var(--ed-ink2) !important;
+  border-color: var(--ed-border) !important;
+}
+.mm-inspector .mm-prim-btn:not(.mm-keep-color):hover {
+  background: var(--ed-accent-tint) !important;
+  color: var(--ed-accent) !important;
+}
+.mm-inspector .mm-prim-btn:not(.mm-keep-color)[aria-pressed="true"] {
+  background: var(--ed-accent) !important;
+  color: #fff !important;
+  border-color: var(--ed-accent) !important;
+}
+.mm-inspector .mm-prim-input,
+.mm-inspector .mm-prim-select {
+  background: var(--ed-card) !important;
+  color: var(--ed-ink) !important;
+  border-color: var(--ed-border) !important;
+}
+.mm-inspector .mm-prim-input:focus,
+.mm-inspector .mm-prim-select:focus {
+  border-color: var(--ed-accent) !important;
+  box-shadow: 0 0 0 3px var(--ed-accent-ring);
+}
+.mm-inspector .mm-prim-tablist {
+  background: var(--ed-page) !important;
+  border-color: var(--ed-border) !important;
+}
+.mm-inspector .mm-prim-tab {
+  color: var(--ed-muted) !important;
+}
+.mm-inspector .mm-prim-tab[aria-selected="true"] {
+  background: var(--ed-card) !important;
+  color: var(--ed-ink) !important;
+}
+.mm-inspector .mm-prim-chip[aria-pressed="true"] {
+  background: var(--ed-accent) !important;
+  color: #fff !important;
+  border-color: var(--ed-accent) !important;
+}
+
 /* ── Notes editor (contentEditable WYSIWYG in the Topic-info panel) ────────── */
 .mm-note-editor:empty::before {
   content: attr(data-placeholder);
-  color: #b6b0a4;
+  color: var(--ed-faint);
   pointer-events: none;
 }
 .mm-note-editor p {

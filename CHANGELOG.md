@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Minimize / restore the topic inspector** — the right-hand inspector can now collapse to a thin
+  strip on the canvas edge (the header's **›** button) and re-expand from that strip's ℹ button,
+  reclaiming canvas width without losing the panel. Minimizing is **sticky**: selecting other nodes
+  won't pop it back open (re-expanding always shows the currently-selected node). The state persists
+  across reloads, and the toolbar's **Topic info** toggle still fully shows/hides it. The no-selection
+  map overview can be minimized the same way.
+
 - **WYSIWYG note editor** — the Topic-info **Notes** tab is now a what-you-see-is-what-you-get rich
   editor instead of a raw-markdown textarea with an Edit/Preview toggle: a formatting toolbar
   (**bold**, *italic*, ~~strikethrough~~, bulleted list, numbered list) and inline formatting as you

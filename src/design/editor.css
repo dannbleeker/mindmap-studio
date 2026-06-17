@@ -351,6 +351,34 @@
   padding: 14px 16px;
   border-bottom: 1px solid var(--ed-divider);
 }
+/* The minimized inspector — a thin right-edge strip with an expand button (mirrors the left rail). */
+.mm-inspector-rail {
+  width: 40px;
+  flex-shrink: 0;
+  background: var(--ed-card);
+  border-left: 1px solid var(--ed-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+}
+/* Minimize button in a docked panel's header (sits beside the title). */
+.mm-inspector-min {
+  margin-left: auto;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-page);
+  color: var(--ed-ink2);
+  border-radius: 7px;
+  width: 26px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+.mm-inspector-min:hover {
+  background: var(--ed-accent-tint);
+  color: var(--ed-accent);
+}
 .mm-inspector-path {
   font-size: 11px;
   color: var(--ed-faint);

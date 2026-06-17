@@ -17,6 +17,7 @@ interface PersistedPanels {
   outlineOpen?: boolean;
   indexOpen?: boolean;
   infoOpen?: boolean;
+  infoMinimized?: boolean;
   numbered?: boolean;
 }
 
@@ -48,6 +49,9 @@ export interface PanelsState {
   setIndexOpen: React.Dispatch<React.SetStateAction<boolean>>;
   infoOpen: boolean;
   setInfoOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Inspector collapsed to the right-edge strip. Sticky: suppresses auto-open-on-select. */
+  infoMinimized: boolean;
+  setInfoMinimized: React.Dispatch<React.SetStateAction<boolean>>;
   filterOpen: boolean;
   /** Toggle the Filter panel; closing it also clears the active filter (see `toggleFilter`). */
   toggleFilter: () => void;
@@ -115,6 +119,7 @@ export function usePanels(): UsePanels {
   const [outlineOpen, setOutlineOpen] = useState(!!persisted.outlineOpen);
   const [indexOpen, setIndexOpen] = useState(!!persisted.indexOpen);
   const [infoOpen, setInfoOpen] = useState(!!persisted.infoOpen);
+  const [infoMinimized, setInfoMinimized] = useState(!!persisted.infoMinimized);
   const [numbered, setNumbered] = useState(!!persisted.numbered);
   // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
   const [filterOpen, setFilterOpen] = useState(false);
@@ -127,12 +132,12 @@ export function usePanels(): UsePanels {
     try {
       localStorage.setItem(
         PANELS_KEY,
-        JSON.stringify({ outlineOpen, indexOpen, infoOpen, numbered }),
+        JSON.stringify({ outlineOpen, indexOpen, infoOpen, infoMinimized, numbered }),
       );
     } catch {
       // preference is best-effort
     }
-  }, [outlineOpen, indexOpen, infoOpen, numbered]);
+  }, [outlineOpen, indexOpen, infoOpen, infoMinimized, numbered]);
 
   // --- Power Filter ---
   const [filterText, setFilterText] = useState("");
@@ -198,6 +203,8 @@ export function usePanels(): UsePanels {
       setIndexOpen,
       infoOpen,
       setInfoOpen,
+      infoMinimized,
+      setInfoMinimized,
       filterOpen,
       toggleFilter,
       stylesOpen,

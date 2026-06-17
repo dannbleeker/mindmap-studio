@@ -42,6 +42,8 @@ export interface ToolbarPanels {
   setBoardOpen: (fn: (v: boolean) => boolean) => void;
   infoOpen: boolean;
   setInfoOpen: (fn: (v: boolean) => boolean) => void;
+  infoMinimized: boolean;
+  setInfoMinimized: (fn: (v: boolean) => boolean) => void;
   numbered: boolean;
   setNumbered: (fn: (v: boolean) => boolean) => void;
 }
@@ -570,8 +572,13 @@ export function Toolbar({
               <PanelToggle
                 label="Topic info / inspector"
                 icon="note"
-                on={panels.infoOpen}
-                onClick={() => panels.setInfoOpen((v) => !v)}
+                on={panels.infoOpen || panels.infoMinimized}
+                onClick={() => {
+                  // One clean toggle: if shown (panel OR minimized strip) close both; else open.
+                  const shown = panels.infoOpen || panels.infoMinimized;
+                  panels.setInfoMinimized(() => false);
+                  panels.setInfoOpen(() => !shown);
+                }}
               />
             </>
           )}

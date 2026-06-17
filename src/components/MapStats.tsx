@@ -22,19 +22,35 @@ function tally(node: MapNode, acc: Counts): Counts {
   return acc;
 }
 
-export function MapStats({ doc }: { doc: MindMapDoc }) {
+export function MapStats({ doc, onMinimize }: { doc: MindMapDoc; onMinimize?: () => void }) {
   const counts = tally(doc.root, { total: 0, withProgress: 0, done: 0 });
   const branches = doc.root.children.length;
   const pct = counts.withProgress > 0 ? Math.round((counts.done / counts.withProgress) * 100) : 0;
   return (
     <aside className="mm-inspector" aria-label="Map overview">
-      <div className="mm-inspector-head">
-        <div style={{ fontSize: 11.5, color: "var(--ed-muted)", marginBottom: 5 }}>
-          No node selected
+      <div
+        className="mm-inspector-head"
+        style={{ display: "flex", alignItems: "flex-start", gap: 8 }}
+      >
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 11.5, color: "var(--ed-muted)", marginBottom: 5 }}>
+            No node selected
+          </div>
+          <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.02em" }}>
+            {doc.title || "Map"}
+          </div>
         </div>
-        <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.02em" }}>
-          {doc.title || "Map"}
-        </div>
+        {onMinimize && (
+          <button
+            type="button"
+            className="mm-inspector-min"
+            title="Minimize"
+            aria-label="Minimize map overview"
+            onClick={onMinimize}
+          >
+            ›
+          </button>
+        )}
       </div>
       <div className="mm-inspector-body">
         <div className="mm-stat-grid">

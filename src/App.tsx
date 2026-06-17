@@ -12,6 +12,7 @@ import {
 } from "./Panels";
 import { Dialog } from "./components/Dialog";
 import { IconRail } from "./components/IconRail";
+import { InspectorRail } from "./components/InspectorRail";
 import { MapStats } from "./components/MapStats";
 import { Toolbar } from "./components/Toolbar";
 import { StartScreen } from "./components/start/StartScreen";
@@ -206,10 +207,11 @@ export function App() {
     return find(liveDoc.root) ?? liveDoc.floatingTopics?.map(find).find(Boolean) ?? null;
   }, [selected, liveDoc]);
   // Auto-show the right-side inspector when a node is selected (the redesign's auto-show behaviour).
-  // Closing it (its ✕) only re-hides until the next selection, since this keys on the selection id.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on selection id; setInfoOpen is a stable state setter.
+  // Sticky minimize wins: if the user has collapsed the inspector to its strip, selecting another
+  // node does NOT force it back open (selectedNode still updates, so re-expanding shows the new node).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on selection id; setters are stable.
   useEffect(() => {
-    if (selected) panels.setInfoOpen(true);
+    if (selected && !panels.infoMinimized) panels.setInfoOpen(true);
   }, [selected?.id]);
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
   const focusLit = useMemo(() => (focus ? focusSet(liveDoc, focus.id) : null), [focus, liveDoc]);
@@ -1213,8 +1215,8 @@ export function App() {
               )}
             </div>
           </div>
-          {panels.infoOpen &&
-            (selected ? (
+          {panels.infoOpen ? (
+            selected ? (
               <InfoPanel
                 selected={selected}
                 node={selectedNode}
@@ -1281,11 +1283,28 @@ export function App() {
                   .filter((r) => r.id !== selected?.id)
                   .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
                 onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
-                onClose={() => panels.setInfoOpen(false)}
+                onMinimize={() => {
+                  panels.setInfoOpen(false);
+                  panels.setInfoMinimized(true);
+                }}
               />
             ) : (
-              <MapStats doc={liveDoc} />
-            ))}
+              <MapStats
+                doc={liveDoc}
+                onMinimize={() => {
+                  panels.setInfoOpen(false);
+                  panels.setInfoMinimized(true);
+                }}
+              />
+            )
+          ) : panels.infoMinimized ? (
+            <InspectorRail
+              onExpand={() => {
+                panels.setInfoMinimized(false);
+                panels.setInfoOpen(true);
+              }}
+            />
+          ) : null}
         </div>
       </div>
 

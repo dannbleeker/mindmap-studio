@@ -62,6 +62,15 @@ describe("usePanels — panel toggles + persistence", () => {
     expect(second.result.current.panels.outlineOpen).toBe(true);
     expect(second.result.current.panels.numbered).toBe(true);
   });
+
+  it("persists the sticky infoMinimized flag (defaults false, survives a remount)", () => {
+    const first = renderHook(() => usePanels());
+    expect(first.result.current.panels.infoMinimized).toBe(false);
+    act(() => first.result.current.panels.setInfoMinimized(true));
+    expect(JSON.parse(localStorage.getItem("mindmap-panels") ?? "{}").infoMinimized).toBe(true);
+    const second = renderHook(() => usePanels());
+    expect(second.result.current.panels.infoMinimized).toBe(true);
+  });
 });
 
 describe("usePanels — Power Filter", () => {

@@ -222,7 +222,7 @@ describe("InfoPanel", () => {
         onLinkMap={noop}
         jumpTargets={[]}
         onJump={noop}
-        onClose={noop}
+        onMinimize={noop}
       />,
     );
 
@@ -231,9 +231,9 @@ describe("InfoPanel", () => {
     expect(screen.getByText(/Select a node to see and edit its details/)).toBeTruthy();
   });
 
-  it("shows a Close control and three tabs for the selected node", () => {
+  it("shows a Minimize control and three tabs for the selected node", () => {
     renderInfo(selected, node);
-    expect(screen.getByRole("button", { name: /Close/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Minimize/ })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Details" })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Style" })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Notes" })).toBeTruthy();
@@ -435,7 +435,7 @@ describe("InfoPanel (interaction)", () => {
 
   const renderInfo = (sel: SelectedNode | null, n: MapNode | null) => {
     const onNoteChange = vi.fn();
-    const onClose = vi.fn();
+    const onMinimize = vi.fn();
     const result = render(
       <InfoPanel
         selected={sel}
@@ -460,17 +460,17 @@ describe("InfoPanel (interaction)", () => {
         onLinkMap={noop}
         jumpTargets={[]}
         onJump={noop}
-        onClose={onClose}
+        onMinimize={onMinimize}
       />,
     );
-    return { result, onNoteChange, onClose };
+    return { result, onNoteChange, onMinimize };
   };
 
-  it("calls onClose when the Close button is clicked", async () => {
-    const { onClose } = renderInfo(selected, node);
-    const closeBtn = screen.getByRole("button", { name: /Close/ });
-    await userEvent.click(closeBtn);
-    expect(onClose).toHaveBeenCalled();
+  it("calls onMinimize when the Minimize button is clicked", async () => {
+    const { onMinimize } = renderInfo(selected, node);
+    const minBtn = screen.getByRole("button", { name: /Minimize/ });
+    await userEvent.click(minBtn);
+    expect(onMinimize).toHaveBeenCalled();
   });
 });
 

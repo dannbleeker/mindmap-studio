@@ -54,6 +54,8 @@ function setup(over: { selected?: SelectedNode | null } = {}) {
     setBoardOpen: vi.fn(),
     infoOpen: false,
     setInfoOpen: vi.fn(),
+    infoMinimized: false,
+    setInfoMinimized: vi.fn(),
     numbered: false,
     setNumbered: vi.fn(),
   };

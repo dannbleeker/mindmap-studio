@@ -1018,7 +1018,7 @@ export function InfoPanel({
   onLinkMap,
   jumpTargets,
   onJump,
-  onClose,
+  onMinimize,
 }: {
   selected: SelectedNode | null;
   node: MapNode | null;
@@ -1042,7 +1042,7 @@ export function InfoPanel({
   onLinkMap: (mapId: string) => void;
   jumpTargets: { id: string; topic: string; depth: number }[];
   onJump: (id: string) => void;
-  onClose: () => void;
+  onMinimize: () => void;
 }) {
   const [tagInput, setTagInput] = useState("");
   const [tab, setTab] = useState<InfoTab>("details");
@@ -1134,8 +1134,13 @@ export function InfoPanel({
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           ℹ {node ? node.topic || "(untitled)" : "Topic info"}
         </span>
-        <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
-          Close
+        <Button
+          onClick={onMinimize}
+          title="Minimize — collapse to the right edge"
+          aria-label="Minimize topic info"
+          style={{ padding: "2px 8px", fontSize: fontSize.sm }}
+        >
+          ›
         </Button>
       </div>
       {!node ? (

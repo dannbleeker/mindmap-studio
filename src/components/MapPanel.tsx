@@ -49,6 +49,7 @@ export function MapPanel({
   onToggleLineJumps,
   onRenameMap,
   onBackdropRings,
+  onSetBackdropColor,
   onClearBackdrop,
   onMinimize,
   width,
@@ -69,6 +70,8 @@ export function MapPanel({
   onRenameMap: (title: string) => void;
   /** Add/remove a ring or stage on the current onion/funnel backdrop (no-op for venn). */
   onBackdropRings?: (delta: number) => void;
+  /** Set (or reset, with "") the diagram backdrop's colour override. */
+  onSetBackdropColor?: (color: string) => void;
   /** Remove the map's diagram backdrop. */
   onClearBackdrop?: () => void;
   onMinimize?: () => void;
@@ -239,7 +242,7 @@ export function MapPanel({
         </div>
 
         {/* Diagram backdrop controls — shown only when the map has one (a singleton on the doc). */}
-        {doc.backdrop && (onBackdropRings || onClearBackdrop) ? (
+        {doc.backdrop && (onBackdropRings || onClearBackdrop || onSetBackdropColor) ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div className="mm-map-section-title">Backdrop</div>
             <div className="mm-map-field">
@@ -291,6 +294,33 @@ export function MapPanel({
                 ) : null}
               </div>
             </div>
+            {onSetBackdropColor ? (
+              <div className="mm-map-field">
+                <span>Colour</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <input
+                    type="color"
+                    className="mm-map-control"
+                    // Default-accent placeholder (BACKDROP_STROKE) until an override is set.
+                    value={doc.backdrop.color || "#9a93d6"}
+                    onChange={(e) => onSetBackdropColor(e.target.value)}
+                    aria-label="Backdrop colour"
+                    style={{ padding: 1, width: 34, height: 24 }}
+                  />
+                  {doc.backdrop.color ? (
+                    <button
+                      type="button"
+                      className="mm-map-control"
+                      onClick={() => onSetBackdropColor("")}
+                      title="Reset backdrop colour"
+                      style={{ cursor: "pointer" }}
+                    >
+                      Reset
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : null}
 

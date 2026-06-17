@@ -13,6 +13,10 @@ const KIND_LABEL: Record<SelectedOverlay["kind"], string> = {
   callout: "Callout",
 };
 
+// A small set of overlay colours + the accent default; "" resets to the kind's default accent.
+// The picked colour re-tints the whole object (stroke/fill/label) on canvas and in every export.
+const SWATCHES = ["#8b87e0", "#e0697f", "#3f9e6e", "#d98a2b", "#3b82c4", "#111827"];
+
 const fieldLabel: CSSProperties = {
   fontSize: 11,
   fontWeight: 700,
@@ -21,6 +25,7 @@ const fieldLabel: CSSProperties = {
   color: "var(--ed-faint)",
   margin: "12px 0 5px",
 };
+const segRow: CSSProperties = { display: "flex", flexWrap: "wrap", gap: 4 };
 
 const controlStyle: CSSProperties = {
   width: "100%",
@@ -38,6 +43,7 @@ export function OverlayInspector({
   overlay,
   caption,
   onSetLabel,
+  onSetColor,
   onDelete,
   onMinimize,
   width,
@@ -46,6 +52,7 @@ export function OverlayInspector({
   overlay: SelectedOverlay;
   caption: string;
   onSetLabel: (label: string) => void;
+  onSetColor: (color: string) => void;
   onDelete: () => void;
   onMinimize?: () => void;
   width?: number;
@@ -53,6 +60,7 @@ export function OverlayInspector({
 }) {
   const isCallout = overlay.kind === "callout";
   const labelTitle = isCallout ? "Text" : "Label";
+  const current = overlay.color?.toLowerCase();
   return (
     <aside className="mm-inspector" aria-label="Overlay info" style={width ? { width } : undefined}>
       {width && onResize ? <InspectorResizer width={width} onResize={onResize} /> : null}
@@ -120,7 +128,50 @@ export function OverlayInspector({
           />
         )}
 
-        {/* Colour — added by the overlay-colours spec (Feature 4c slots a swatch row in here). */}
+        {/* Colour — re-tints the whole object (stroke/fill/label); "" resets to the default accent. */}
+        <div style={fieldLabel}>Colour</div>
+        <div style={segRow}>
+          {SWATCHES.map((c) => {
+            const active = current === c.toLowerCase();
+            return (
+              <button
+                key={c}
+                type="button"
+                title={c}
+                aria-label={`Colour ${c}`}
+                aria-pressed={active}
+                onClick={() => onSetColor(c)}
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 6,
+                  background: c,
+                  cursor: "pointer",
+                  border: active ? "2px solid var(--ed-ink)" : "1px solid var(--ed-border)",
+                  padding: 0,
+                }}
+              />
+            );
+          })}
+          <button
+            type="button"
+            title="Reset to the default colour"
+            aria-pressed={!current}
+            onClick={() => onSetColor("")}
+            style={{
+              border: `1px solid ${!current ? "var(--ed-accent)" : "var(--ed-border)"}`,
+              background: !current ? "var(--ed-accent-tint)" : "var(--ed-card)",
+              color: !current ? "var(--ed-accent)" : "var(--ed-ink)",
+              borderRadius: 7,
+              cursor: "pointer",
+              fontSize: 12.5,
+              fontWeight: 600,
+              padding: "3px 9px",
+            }}
+          >
+            Default
+          </button>
+        </div>
 
         {overlay.deletable ? (
           <button

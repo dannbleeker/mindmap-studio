@@ -145,4 +145,53 @@ describe("MapPanel", () => {
     expect(screen.queryByLabelText("More rings")).toBeNull();
     expect(screen.getByRole("button", { name: "Remove" })).toBeTruthy();
   });
+
+  it("reflects + drives the backdrop colour (and offers Reset only once a colour is set)", async () => {
+    const onSetBackdropColor = vi.fn();
+    // Uncoloured backdrop → the picker sits at the default-accent placeholder, no Reset shown.
+    const plain: MindMapDoc = { ...planDoc, backdrop: { kind: "onion", rings: 3 } };
+    const { rerender } = render(
+      <MapPanel
+        doc={plain}
+        theme={themeById("light")}
+        setThemeId={noop}
+        layout="side"
+        changeLayout={noop}
+        background={undefined}
+        onSetBackground={noop}
+        onSetBackgroundImage={noop}
+        handleBackgroundImage={noop}
+        lineJumps={false}
+        onToggleLineJumps={noop}
+        onRenameMap={noop}
+        onSetBackdropColor={onSetBackdropColor}
+      />,
+    );
+    const picker = () => screen.getByLabelText("Backdrop colour") as HTMLInputElement;
+    expect(picker().value).toBe("#9a93d6"); // BACKDROP_STROKE placeholder
+    // Background is undefined here, so the only "Reset" button is the backdrop one (still hidden).
+    expect(screen.queryByRole("button", { name: "Reset" })).toBeNull();
+
+    // A coloured backdrop reflects the override and shows Reset, which clears it.
+    rerender(
+      <MapPanel
+        doc={{ ...planDoc, backdrop: { kind: "onion", rings: 3, color: "#3b82c4" } }}
+        theme={themeById("light")}
+        setThemeId={noop}
+        layout="side"
+        changeLayout={noop}
+        background={undefined}
+        onSetBackground={noop}
+        onSetBackgroundImage={noop}
+        handleBackgroundImage={noop}
+        lineJumps={false}
+        onToggleLineJumps={noop}
+        onRenameMap={noop}
+        onSetBackdropColor={onSetBackdropColor}
+      />,
+    );
+    expect(picker().value).toBe("#3b82c4");
+    await userEvent.click(screen.getByRole("button", { name: "Reset" }));
+    expect(onSetBackdropColor).toHaveBeenCalledWith("");
+  });
 });

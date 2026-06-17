@@ -637,6 +637,21 @@ export function setCalloutText(
   return { doc: next };
 }
 
+/** Set (or clear, with "") a callout's colour override. */
+export function setCalloutColor(
+  doc: MindMapDoc,
+  nodeId: string,
+  calloutId: string,
+  color: string,
+): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, nodeId);
+  const callout = loc?.node.callouts?.find((c) => c.id === calloutId);
+  if (!callout) return { doc };
+  callout.color = color || undefined;
+  return { doc: next };
+}
+
 /** Remove a callout (clearing the array when it empties). */
 export function deleteCallout(doc: MindMapDoc, nodeId: string, calloutId: string): OpResult {
   const next = structuredClone(doc);
@@ -789,6 +804,26 @@ export function deleteBoundary(doc: MindMapDoc, id: string): OpResult {
   return { doc: next };
 }
 
+/** Set (or clear, with "") a boundary's colour override by id. */
+export function setBoundaryColor(doc: MindMapDoc, id: string, color: string): OpResult {
+  if (!(doc.boundaries ?? []).some((b) => b.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.boundaries = (next.boundaries ?? []).map((b) =>
+    b.id === id ? { ...b, color: color || undefined } : b,
+  );
+  return { doc: next };
+}
+
+/** Set (or clear, with "") a summary's colour override by id. */
+export function setSummaryColor(doc: MindMapDoc, id: string, color: string): OpResult {
+  if (!(doc.summaries ?? []).some((s) => s.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.summaries = (next.summaries ?? []).map((s) =>
+    s.id === id ? { ...s, color: color || undefined } : s,
+  );
+  return { doc: next };
+}
+
 /** Replace `query` (case-insensitive) in every topic; returns the doc + count changed. */
 export function replaceTopics(
   doc: MindMapDoc,
@@ -876,6 +911,14 @@ export function clearBackdrop(doc: MindMapDoc): OpResult {
   if (!doc.backdrop) return { doc };
   const next = structuredClone(doc);
   next.backdrop = undefined;
+  return { doc: next };
+}
+
+/** Set (or clear, with "") the diagram backdrop's colour override; no-op if there's no backdrop. */
+export function setBackdropColor(doc: MindMapDoc, color: string): OpResult {
+  if (!doc.backdrop) return { doc };
+  const next = structuredClone(doc);
+  if (next.backdrop) next.backdrop.color = color || undefined;
   return { doc: next };
 }
 

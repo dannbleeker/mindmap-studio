@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 154,
+  "reviewedThroughChangelogBullets": 155,
   "areas": [
     "editing",
     "notes",
@@ -1046,6 +1046,15 @@
       "id": "overlay-inspector",
       "name": "Click a boundary / summary / callout to edit it in the inspector (label, delete)",
       "area": "structure",
+      "since": "2026-06-17",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "overlay-colours",
+      "name": "Per-overlay colours (boundary / summary / callout / backdrop, canvas == export)",
+      "area": "styling",
       "since": "2026-06-17",
       "manual": true,
       "book": false,

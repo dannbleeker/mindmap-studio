@@ -11,17 +11,19 @@ const noop = () => {};
 
 function setup(overlay: SelectedOverlay, caption = "3 topics") {
   const onSetLabel = vi.fn();
+  const onSetColor = vi.fn();
   const onDelete = vi.fn();
   render(
     <OverlayInspector
       overlay={overlay}
       caption={caption}
       onSetLabel={onSetLabel}
+      onSetColor={onSetColor}
       onDelete={onDelete}
       onMinimize={noop}
     />,
   );
-  return { onSetLabel, onDelete };
+  return { onSetLabel, onSetColor, onDelete };
 }
 
 describe("OverlayInspector", () => {
@@ -64,5 +66,41 @@ describe("OverlayInspector", () => {
   it("hides Delete when the overlay is not deletable", () => {
     setup({ kind: "boundary", id: "b", label: "Scope", deletable: false });
     expect(screen.queryByRole("button", { name: /Delete/ })).toBeNull();
+  });
+
+  it("picks a swatch colour and resets to the default", async () => {
+    const { onSetColor } = setup({ kind: "boundary", id: "b", label: "Scope", deletable: true });
+    await userEvent.click(screen.getByRole("button", { name: "Colour #e0697f" }));
+    expect(onSetColor).toHaveBeenCalledWith("#e0697f");
+    await userEvent.click(screen.getByRole("button", { name: "Default" }));
+    expect(onSetColor).toHaveBeenCalledWith("");
+  });
+
+  it("pre-selects the current swatch + presses Default when no colour is set", () => {
+    const { rerender } = render(
+      <OverlayInspector
+        overlay={{ kind: "summary", id: "s", label: "Phase 1", deletable: true }}
+        caption="3 topics"
+        onSetLabel={noop}
+        onSetColor={noop}
+        onDelete={noop}
+      />,
+    );
+    // No override → the Default chip is pressed; no swatch is pressed.
+    const reset = () => screen.getByRole("button", { name: "Default" });
+    const green = () => screen.getByRole("button", { name: "Colour #3f9e6e" });
+    expect(reset().getAttribute("aria-pressed")).toBe("true");
+    expect(green().getAttribute("aria-pressed")).toBe("false");
+    rerender(
+      <OverlayInspector
+        overlay={{ kind: "summary", id: "s", label: "Phase 1", deletable: true, color: "#3f9e6e" }}
+        caption="3 topics"
+        onSetLabel={noop}
+        onSetColor={noop}
+        onDelete={noop}
+      />,
+    );
+    expect(green().getAttribute("aria-pressed")).toBe("true");
+    expect(reset().getAttribute("aria-pressed")).toBe("false");
   });
 });

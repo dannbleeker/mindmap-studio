@@ -1,27 +1,26 @@
 import { ViewportPortal, useNodes } from "@xyflow/react";
 import { type CSSProperties, memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Callout } from "../../model/types";
-import { CALLOUT_BG, CALLOUT_STROKE, CALLOUT_TEXT } from "./style";
+import { resolveCalloutStyle } from "./style";
 
 // Anchored callout bubbles (MindManager-style sticky annotations), rendered in flow space via
 // ViewportPortal so they pan/zoom with the map. Each bubble sits at its node's right edge plus
 // the callout's (dx,dy) offset, joined by a short dashed connector. Text is inline-editable
 // (double-click); a × removes it. Model-first: edits call back to FlowInner, which runs the
-// pure callout ops — so the bubbles also travel into the SVG export and the .json.
+// pure callout ops — so the bubbles also travel into the SVG export and the .json. Colours come
+// from ./style (per-callout override) so the export draws an identical bubble.
 
 export interface CalloutAnchor {
   nodeId: string;
   callout: Callout;
 }
 
-const BUBBLE: CSSProperties = {
+// Bubble layout (colours come per-callout from the resolved style → a recoloured callout re-tints).
+const BUBBLE_BASE: CSSProperties = {
   position: "absolute",
   maxWidth: 180,
   minWidth: 36,
   padding: "3px 8px",
-  background: CALLOUT_BG,
-  color: CALLOUT_TEXT,
-  border: `1px solid ${CALLOUT_STROKE}`,
   borderRadius: 8,
   fontSize: 12,
   lineHeight: 1.3,
@@ -125,6 +124,7 @@ function Callouts({
       {placed.map(({ nodeId, callout, left, top }) => {
         const editing = editingId === callout.id;
         const selected = callout.id === selectedId;
+        const style = resolveCalloutStyle(callout.color);
         return (
           <div
             key={callout.id}
@@ -144,7 +144,7 @@ function Callouts({
                 y1={-callout.dy}
                 x2={0}
                 y2={10}
-                stroke={CALLOUT_STROKE}
+                stroke={style.connector}
                 strokeWidth={1.5}
                 strokeDasharray="3 3"
               />
@@ -153,10 +153,13 @@ function Callouts({
                 access to overlays is out of scope (canvas affordance, mirrors node selection). */}
             <div
               style={{
-                ...BUBBLE,
+                ...BUBBLE_BASE,
+                background: style.bg,
+                color: style.text,
+                border: `1px solid ${style.stroke}`,
                 boxShadow: selected
-                  ? `0 0 0 2px ${CALLOUT_STROKE}, ${BUBBLE.boxShadow}`
-                  : BUBBLE.boxShadow,
+                  ? `0 0 0 2px ${style.stroke}, ${BUBBLE_BASE.boxShadow}`
+                  : BUBBLE_BASE.boxShadow,
               }}
               onClick={() => onSelect?.(nodeId, callout.id)}
             >
@@ -183,7 +186,7 @@ function Callouts({
                       marginLeft: 6,
                       border: "none",
                       background: "transparent",
-                      color: "#8a6d00",
+                      color: style.text,
                       cursor: "pointer",
                       lineHeight: 1,
                       padding: 0,

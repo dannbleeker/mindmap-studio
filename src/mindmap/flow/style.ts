@@ -86,3 +86,117 @@ export const CALLOUT_TEXT = "#3b2f00";
 export function boundaryLabel(label: string | undefined): string {
   return label && label !== "summary" ? label : "";
 }
+
+// ── Per-overlay colour resolvers ─────────────────────────────────────────────
+// A picked overlay colour re-tints the whole object coherently. The same resolver feeds the live
+// component (inline CSS) AND the SVG exporter, emitting identical strings (8-digit hex / 6-digit
+// hex) so canvas == export holds. An absent colour returns the historical constants verbatim, so
+// unstyled overlays are pixel-unchanged. Pure; non-hex inputs fall back gracefully.
+
+const clampByte = (n: number) => Math.max(0, Math.min(255, Math.round(n)));
+const parseHex = (hex: string): [number, number, number] | null => {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return null;
+  const n = Number.parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+const toHex = (r: number, g: number, b: number) =>
+  `#${[r, g, b].map((c) => clampByte(c).toString(16).padStart(2, "0")).join("")}`;
+
+/** A #rrggbb colour at alpha `a` (0..1) as 8-digit #rrggbbaa; non-hex input returned verbatim. */
+export function withAlpha(hex: string, a: number): string {
+  const rgb = parseHex(hex);
+  if (!rgb) return hex;
+  return `${toHex(...rgb)}${clampByte(a * 255)
+    .toString(16)
+    .padStart(2, "0")}`;
+}
+/** Mix `hex` toward `target` (#fff to lighten, #000 to darken) by `t` (0..1); non-hex → verbatim. */
+export function mix(hex: string, target: string, t: number): string {
+  const c = parseHex(hex);
+  const tg = parseHex(target);
+  if (!c || !tg) return hex;
+  return toHex(c[0] + (tg[0] - c[0]) * t, c[1] + (tg[1] - c[1]) * t, c[2] + (tg[2] - c[2]) * t);
+}
+
+export interface ResolvedBoundaryStyle {
+  stroke: string;
+  fill: string;
+  labelBg: string;
+  labelBorder: string;
+  labelColor: string;
+}
+/** Boundary stroke + fill tint + label-chip colours from an optional override. */
+export function resolveBoundaryStyle(color?: string): ResolvedBoundaryStyle {
+  if (!color)
+    return {
+      stroke: BOUNDARY_STROKE,
+      fill: BOUNDARY_FILL,
+      labelBg: BOUNDARY_LABEL_BG,
+      labelBorder: BOUNDARY_LABEL_BORDER,
+      labelColor: BOUNDARY_LABEL_COLOR,
+    };
+  return {
+    stroke: color,
+    fill: withAlpha(color, 0.1),
+    labelBg: mix(color, "#ffffff", 0.85),
+    labelBorder: mix(color, "#ffffff", 0.55),
+    labelColor: mix(color, "#000000", 0.55),
+  };
+}
+
+export interface ResolvedSummaryStyle {
+  stroke: string;
+  labelBg: string;
+  labelBorder: string;
+  labelColor: string;
+}
+/** Summary bracket stroke + label-chip colours from an optional override (no fill — open bracket). */
+export function resolveSummaryStyle(color?: string): ResolvedSummaryStyle {
+  if (!color)
+    return {
+      stroke: SUMMARY_STROKE,
+      labelBg: SUMMARY_LABEL_BG,
+      labelBorder: SUMMARY_LABEL_BORDER,
+      labelColor: SUMMARY_LABEL_COLOR,
+    };
+  return {
+    stroke: color,
+    labelBg: mix(color, "#ffffff", 0.85),
+    labelBorder: mix(color, "#ffffff", 0.55),
+    labelColor: mix(color, "#000000", 0.55),
+  };
+}
+
+export interface ResolvedCalloutStyle {
+  bg: string;
+  stroke: string;
+  text: string;
+  connector: string;
+}
+/** Callout bubble bg + stroke + text + connector from an optional override (the colour = accent). */
+export function resolveCalloutStyle(color?: string): ResolvedCalloutStyle {
+  if (!color)
+    return {
+      bg: CALLOUT_BG,
+      stroke: CALLOUT_STROKE,
+      text: CALLOUT_TEXT,
+      connector: CALLOUT_STROKE,
+    };
+  return {
+    bg: mix(color, "#ffffff", 0.82),
+    stroke: color,
+    text: mix(color, "#000000", 0.6),
+    connector: color,
+  };
+}
+
+export interface ResolvedBackdropStyle {
+  stroke: string;
+  fill: string;
+}
+/** Diagram-backdrop stroke + fill tint from an optional override. */
+export function resolveBackdropStyle(color?: string): ResolvedBackdropStyle {
+  if (!color) return { stroke: BACKDROP_STROKE, fill: BACKDROP_FILL };
+  return { stroke: color, fill: withAlpha(color, 0.06) };
+}

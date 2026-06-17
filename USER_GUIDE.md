@@ -130,8 +130,8 @@ left-drag, pan with the middle or right mouse button; scroll still zooms.)*
 set its **theme**, **layout**, **background colour / image**, and **line-jumps** there (the same
 settings as the toolbar's Canvas menu), above a quick **overview** (topics, branches, task progress).
 When the map has a **diagram backdrop** (onion / funnel / Venn), a **Backdrop** section lets you
-add / remove a ring or stage and remove the backdrop. Clicking a **relationship** arrow instead shows
-a connector editor (see [Relationships](#relationships-boundaries--callouts)).
+add / remove a ring or stage, set its **colour**, and remove the backdrop. Clicking a **relationship**
+arrow instead shows a connector editor (see [Relationships](#relationships-boundaries--callouts)).
 
 - **Note** — write in the **WYSIWYG** editor: a formatting toolbar (**bold**, *italic*,
   ~~strikethrough~~, bulleted list, numbered list) and inline formatting as you type — no raw markup
@@ -386,8 +386,10 @@ backdrop you see on the canvas. The second **✕** removes the image.
   **Add callout**, then double-click the bubble to edit its text (the **×** removes it). Callouts
   are saved with the map and are drawn into the image exports too.
 - **Editing overlays in the inspector** — clicking a **boundary**, **summary** bracket, or **callout**
-  selects it (with a highlight) and turns the right panel into an editor for its label / text and a
-  **Delete** button — an alternative to the inline double-click gestures, which still work.
+  selects it (with a highlight) and turns the right panel into an editor for its label / text, a
+  **Colour** swatch row (with **Default** to reset), and a **Delete** button — an alternative to the
+  inline double-click gestures, which still work. A picked colour re-tints the whole object (outline,
+  fill, and label) on the canvas and in every export; the backdrop colour lives in the Map panel.
 - **Floating topics** — detached topics imported from `.mmap` appear in a "Floating topics"
   branch; edit them like any node (rename, add, remove, or drag in/out of the tree) and the
   changes are saved.

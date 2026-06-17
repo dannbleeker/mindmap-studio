@@ -157,6 +157,7 @@ describe("FlowMindMap canvas", () => {
     run(() => h.setFreeform(false));
     run(() => h.setBackdrop("onion"));
     run(() => h.setBackdropRings(1));
+    run(() => h.setBackdropColor("#3b82c4"));
     run(() => h.clearBackdrop());
     run(() => h.fit());
     expect(onChange).toHaveBeenCalled();
@@ -541,6 +542,15 @@ describe("FlowMindMap canvas", () => {
     run(() => h.setOverlayLabel("Scope"));
     expect(lastDoc().boundaries?.[0]?.label).toBe("Scope");
 
+    // Colour the selected boundary; the swatch re-emits with the new colour, "" resets it.
+    run(() => h.setOverlayColor("#3f9e6e"));
+    expect(lastDoc().boundaries?.[0]?.color).toBe("#3f9e6e");
+    expect(onSelectOverlay).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: "boundary", id: "bd1", color: "#3f9e6e" }),
+    );
+    run(() => h.setOverlayColor(""));
+    expect(lastDoc().boundaries?.[0]?.color).toBeUndefined();
+
     // Selecting the summary clears the boundary (overlay→overlay).
     run(() => fireEvent.click(screen.getByText("Sum")));
     expect(onSelectOverlay).toHaveBeenLastCalledWith(
@@ -554,6 +564,10 @@ describe("FlowMindMap canvas", () => {
     let ret: boolean | undefined;
     run(() => {
       ret = h.deleteOverlay();
+    });
+    expect(ret).toBe(false);
+    run(() => {
+      ret = h.setOverlayColor("#000");
     });
     expect(ret).toBe(false);
 

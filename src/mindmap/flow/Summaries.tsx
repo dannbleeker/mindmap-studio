@@ -2,13 +2,11 @@ import { ViewportPortal, useNodes } from "@xyflow/react";
 import { type CSSProperties, memo, useMemo } from "react";
 import type { Summary } from "../../model/types";
 import {
+  type ResolvedSummaryStyle,
   SUMMARY_BRACKET_W,
   SUMMARY_GAP,
-  SUMMARY_LABEL_BG,
-  SUMMARY_LABEL_BORDER,
-  SUMMARY_LABEL_COLOR,
   SUMMARY_PAD,
-  SUMMARY_STROKE,
+  resolveSummaryStyle,
   summaryLabel,
 } from "./style";
 
@@ -17,12 +15,11 @@ import {
 // root — a right-side branch gets a "]" on its right; a left-side branch gets a "[" on its left.
 // Double-click the label to rename. Geometry + colours come from ./style so the SVG export matches.
 
-const labelChip: CSSProperties = {
+// Label-chip layout (colours come per-bracket from the resolved style → a recoloured summary
+// re-tints its chip).
+const labelChipBase: CSSProperties = {
   position: "absolute",
   padding: "1px 8px",
-  background: SUMMARY_LABEL_BG,
-  color: SUMMARY_LABEL_COLOR,
-  border: `1px solid ${SUMMARY_LABEL_BORDER}`,
   borderRadius: 8,
   fontSize: 12,
   fontWeight: 600,
@@ -31,7 +28,7 @@ const labelChip: CSSProperties = {
   pointerEvents: "auto",
 };
 
-/** A summary bracket resolved to its drawn geometry from the live node rects. */
+/** A summary bracket resolved to its drawn geometry from the live node rects + its resolved colours. */
 interface PlacedSummary {
   id: string;
   label: string;
@@ -39,6 +36,7 @@ interface PlacedSummary {
   top: number;
   height: number;
   bracketLeft: number;
+  style: ResolvedSummaryStyle;
 }
 
 function Summaries({
@@ -83,7 +81,15 @@ function Summaries({
       const top = minY - SUMMARY_PAD;
       const height = maxY - minY + 2 * SUMMARY_PAD;
       const bracketLeft = onLeft ? minX - SUMMARY_GAP - SUMMARY_BRACKET_W : maxX + SUMMARY_GAP;
-      out.push({ id: s.id, label: summaryLabel(s.label), onLeft, top, height, bracketLeft });
+      out.push({
+        id: s.id,
+        label: summaryLabel(s.label),
+        onLeft,
+        top,
+        height,
+        bracketLeft,
+        style: resolveSummaryStyle(s.color),
+      });
     }
     return out;
   }, [nodes, summaries]);
@@ -92,7 +98,7 @@ function Summaries({
 
   return (
     <ViewportPortal>
-      {placed.map(({ id, label, onLeft, top, height, bracketLeft }) => {
+      {placed.map(({ id, label, onLeft, top, height, bracketLeft, style }) => {
         const selected = id === selectedId;
         return (
           <div key={id} style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}>
@@ -104,13 +110,13 @@ function Summaries({
                 width: SUMMARY_BRACKET_W,
                 height,
                 boxSizing: "border-box",
-                borderTop: `2px solid ${SUMMARY_STROKE}`,
-                borderBottom: `2px solid ${SUMMARY_STROKE}`,
-                borderLeft: onLeft ? `2px solid ${SUMMARY_STROKE}` : undefined,
-                borderRight: onLeft ? undefined : `2px solid ${SUMMARY_STROKE}`,
+                borderTop: `2px solid ${style.stroke}`,
+                borderBottom: `2px solid ${style.stroke}`,
+                borderLeft: onLeft ? `2px solid ${style.stroke}` : undefined,
+                borderRight: onLeft ? undefined : `2px solid ${style.stroke}`,
                 pointerEvents: "none",
                 // Selection halo (view-only, additive — not exported).
-                filter: selected ? `drop-shadow(0 0 4px ${SUMMARY_STROKE})` : undefined,
+                filter: selected ? `drop-shadow(0 0 4px ${style.stroke})` : undefined,
               }}
             />
             <button
@@ -120,12 +126,15 @@ function Summaries({
               onClick={() => onSelect?.(id)}
               onDoubleClick={() => onRename(id)}
               style={{
-                ...labelChip,
+                ...labelChipBase,
+                background: style.labelBg,
+                color: style.labelColor,
+                border: `1px solid ${style.labelBorder}`,
                 top: top + height / 2 - 11,
                 left: onLeft ? bracketLeft - 6 : bracketLeft + SUMMARY_BRACKET_W + 6,
                 transform: onLeft ? "translateX(-100%)" : undefined,
                 cursor: "pointer",
-                boxShadow: selected ? `0 0 0 2px ${SUMMARY_STROKE}` : undefined,
+                boxShadow: selected ? `0 0 0 2px ${style.stroke}` : undefined,
               }}
             >
               {label}

@@ -13,7 +13,12 @@ import { sanitizeSvg } from "../src/io/svgSanitize";
 import { arrowHeadPath } from "../src/mindmap/flow/arrowhead";
 import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
 import { shapePath } from "../src/mindmap/flow/shapes";
-import { CROSSLINK_COLOR } from "../src/mindmap/flow/style";
+import {
+  CROSSLINK_COLOR,
+  resolveBoundaryStyle,
+  resolveCalloutStyle,
+  resolveSummaryStyle,
+} from "../src/mindmap/flow/style";
 import type { CrossLink, MindMapDoc } from "../src/model/types";
 import { STICKERS, stickerImage } from "../src/stickers";
 
@@ -395,6 +400,90 @@ describe("flow exportSvg — styled relationship fidelity (canvas == export)", (
     const both = build({ arrow: "both", color: "#123456" });
     expect([...both.matchAll(/ fill="#123456"/g)]).toHaveLength(2); // one head per end
     expect(build({ arrow: "none", color: "#654321" })).not.toMatch(/ fill="#654321"/);
+  });
+});
+
+describe("flow exportSvg — styled overlay fidelity (canvas == export)", () => {
+  // Each overlay (boundary / summary / callout / backdrop) resolves its per-object colour through the
+  // SAME resolver the canvas component uses, so a recoloured overlay must export byte-identically and
+  // an uncoloured one must keep the historical default constants.
+  const orects = new Map<string, NodeRect>([
+    ["r", { x: 0, y: 0, w: 80, h: 40 }],
+    ["a", { x: 200, y: 0, w: 80, h: 40 }],
+    ["b", { x: 200, y: 200, w: 80, h: 40 }],
+  ]);
+  const ovDoc = (over: Partial<MindMapDoc>): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "o",
+    title: "O",
+    root: {
+      id: "r",
+      topic: "R",
+      children: [
+        {
+          id: "a",
+          topic: "A",
+          children: [],
+          callouts: [{ id: "co", text: "Note", dx: 20, dy: 0 }],
+        },
+        { id: "b", topic: "B", children: [] },
+      ],
+    },
+    ...over,
+  });
+  const buildOv = (over: Partial<MindMapDoc>) => buildFlowSvg(ovDoc(over), orects, palette, cssVar);
+
+  it("re-tints a boundary's stroke + fill + label chip from the resolver (canvas == export)", () => {
+    const s = resolveBoundaryStyle("#3f9e6e");
+    const out = buildOv({
+      boundaries: [{ id: "bd", nodeIds: ["a", "b"], label: "Grp", color: "#3f9e6e" }],
+    });
+    expect(out).toContain(`fill="${s.fill}" stroke="${s.stroke}"`);
+    expect(out).toContain(`fill="${s.labelBg}" stroke="${s.labelBorder}"`);
+    expect(out).toContain(`fill="${s.labelColor}"`);
+  });
+
+  it("an uncoloured boundary keeps the default accent constants", () => {
+    const out = buildOv({ boundaries: [{ id: "bd", nodeIds: ["a", "b"], label: "Grp" }] });
+    expect(out).toMatch(/<rect[^>]*rx="16"[^>]*stroke="#8b87e0"/);
+  });
+
+  it("re-tints a summary bracket + chip from the resolver", () => {
+    const s = resolveSummaryStyle("#e0697f");
+    const out = buildOv({
+      summaries: [{ id: "su", nodeIds: ["a"], label: "Phase 1", color: "#e0697f" }],
+    });
+    expect(out).toMatch(new RegExp(`<path[^>]*stroke="${s.stroke}"`));
+    expect(out).toContain(`fill="${s.labelBg}" stroke="${s.labelBorder}"`);
+  });
+
+  it("re-tints a callout bubble + connector + text from the resolver", () => {
+    const s = resolveCalloutStyle("#d98a2b");
+    const out = buildOv({
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            children: [],
+            callouts: [{ id: "co", text: "Note", dx: 20, dy: 0, color: "#d98a2b" }],
+          },
+          { id: "b", topic: "B", children: [] },
+        ],
+      },
+    });
+    expect(out).toContain(`fill="${s.bg}" stroke="${s.stroke}"`);
+    expect(out).toContain(`stroke="${s.connector}" stroke-width="1.5" stroke-dasharray="3 3"`);
+    expect(out).toContain(`fill="${s.text}"`);
+  });
+
+  it("re-tints a diagram backdrop's stroke + fill (and absent → default #9a93d6)", () => {
+    const onion = buildOv({ backdrop: { kind: "onion", rings: 2, color: "#3b82c4" } });
+    expect(onion).toContain('stroke="#3b82c4"');
+    const plain = buildOv({ backdrop: { kind: "onion", rings: 2 } });
+    expect(plain).toContain('stroke="#9a93d6"'); // BACKDROP_STROKE default
   });
 });
 

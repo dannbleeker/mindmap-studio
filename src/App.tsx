@@ -1329,6 +1329,7 @@ export function App() {
                 width={panels.inspectorWidth}
                 onResize={panels.setInspectorWidth}
                 onSetLabel={(label) => mapRef.current?.setOverlayLabel(label)}
+                onSetColor={(color) => mapRef.current?.setOverlayColor(color)}
                 onDelete={() => mapRef.current?.deleteOverlay()}
                 onMinimize={() => {
                   panels.setInfoOpen(false);
@@ -1437,6 +1438,7 @@ export function App() {
                 onToggleLineJumps={() => mapRef.current?.setLineJumps(!liveDoc.meta?.lineJumps)}
                 onRenameMap={(t) => mapRef.current?.renameMap(t)}
                 onBackdropRings={(d) => mapRef.current?.setBackdropRings(d)}
+                onSetBackdropColor={(c) => mapRef.current?.setBackdropColor(c)}
                 onClearBackdrop={() => mapRef.current?.clearBackdrop()}
                 width={panels.inspectorWidth}
                 onResize={panels.setInspectorWidth}

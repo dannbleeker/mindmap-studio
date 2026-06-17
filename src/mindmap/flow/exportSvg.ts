@@ -12,26 +12,17 @@ import { type HopSegment, hopPath } from "./lineJumps";
 import { project } from "./project";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import {
-  BOUNDARY_FILL,
-  BOUNDARY_LABEL_BG,
-  BOUNDARY_LABEL_BORDER,
-  BOUNDARY_LABEL_COLOR,
   BOUNDARY_PAD,
   BOUNDARY_RADIUS,
-  BOUNDARY_STROKE,
   BRACE_STROKE,
-  CALLOUT_BG,
-  CALLOUT_STROKE,
-  CALLOUT_TEXT,
   SUMMARY_BRACKET_W,
   SUMMARY_GAP,
-  SUMMARY_LABEL_BG,
-  SUMMARY_LABEL_BORDER,
-  SUMMARY_LABEL_COLOR,
   SUMMARY_PAD,
-  SUMMARY_STROKE,
   boundaryLabel,
+  resolveBoundaryStyle,
+  resolveCalloutStyle,
   resolveLinkStyle,
+  resolveSummaryStyle,
   summaryLabel,
 } from "./style";
 
@@ -124,6 +115,8 @@ interface CalloutBox {
   w: number;
   h: number;
   text: string;
+  /** Per-callout colour override (resolved at emit time so canvas == export). */
+  color?: string;
 }
 
 /** Walk the model for callouts and resolve each to a bubble box anchored to its node's rect. */
@@ -142,6 +135,7 @@ function collectCallouts(doc: MindMapDoc, rects: Map<string, NodeRect>): Callout
           w: Math.max(36, text.length * 6.6 + 16),
           h: 22,
           text,
+          color: c.color,
         });
       }
     }
@@ -238,14 +232,16 @@ export function buildFlowSvg(
     const y = by - BOUNDARY_PAD;
     const w = bX - bx + 2 * BOUNDARY_PAD;
     const h = bY - by + 2 * BOUNDARY_PAD;
+    // Per-boundary colours from the SAME resolver the canvas uses (canvas == export).
+    const bs = resolveBoundaryStyle(b.color);
     parts.push(
-      `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" rx="${BOUNDARY_RADIUS}" fill="${BOUNDARY_FILL}" stroke="${BOUNDARY_STROKE}" stroke-width="1.5"/>`,
+      `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" rx="${BOUNDARY_RADIUS}" fill="${bs.fill}" stroke="${bs.stroke}" stroke-width="1.5"/>`,
     );
     const label = boundaryLabel(b.label);
     if (label) {
       parts.push(
-        `<rect x="${r2(x + 12)}" y="${r2(y - 11)}" width="${r2(label.length * 7 + 12)}" height="20" rx="8" fill="${BOUNDARY_LABEL_BG}" stroke="${BOUNDARY_LABEL_BORDER}"/>`,
-        `<text x="${r2(x + 18)}" y="${r2(y + 3)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${BOUNDARY_LABEL_COLOR}">${esc(label)}</text>`,
+        `<rect x="${r2(x + 12)}" y="${r2(y - 11)}" width="${r2(label.length * 7 + 12)}" height="20" rx="8" fill="${bs.labelBg}" stroke="${bs.labelBorder}"/>`,
+        `<text x="${r2(x + 18)}" y="${r2(y + 3)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${bs.labelColor}">${esc(label)}</text>`,
       );
     }
   }
@@ -275,16 +271,18 @@ export function buildFlowSvg(
     // Spine + caps: a "]" on the right (caps reach left toward the nodes) or "[" on the left.
     const spineX = onLeft ? sx - SUMMARY_GAP : sX + SUMMARY_GAP;
     const capX = onLeft ? spineX + SUMMARY_BRACKET_W : spineX - SUMMARY_BRACKET_W;
+    // Per-summary colours from the SAME resolver the canvas uses (canvas == export).
+    const ss = resolveSummaryStyle(s.color);
     parts.push(
-      `<path d="M ${r2(capX)} ${r2(y0)} L ${r2(spineX)} ${r2(y0)} L ${r2(spineX)} ${r2(y1)} L ${r2(capX)} ${r2(y1)}" fill="none" stroke="${SUMMARY_STROKE}" stroke-width="2"/>`,
+      `<path d="M ${r2(capX)} ${r2(y0)} L ${r2(spineX)} ${r2(y0)} L ${r2(spineX)} ${r2(y1)} L ${r2(capX)} ${r2(y1)}" fill="none" stroke="${ss.stroke}" stroke-width="2"/>`,
     );
     const label = summaryLabel(s.label);
     const midY = (y0 + y1) / 2;
     const lw = label.length * 7 + 12;
     const lx = onLeft ? spineX - 6 - lw : spineX + 6;
     parts.push(
-      `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${SUMMARY_LABEL_BG}" stroke="${SUMMARY_LABEL_BORDER}"/>`,
-      `<text x="${r2(lx + 6)}" y="${r2(midY + 4)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${SUMMARY_LABEL_COLOR}">${esc(label)}</text>`,
+      `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${ss.labelBg}" stroke="${ss.labelBorder}"/>`,
+      `<text x="${r2(lx + 6)}" y="${r2(midY + 4)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${ss.labelColor}">${esc(label)}</text>`,
     );
   }
 
@@ -467,11 +465,13 @@ export function buildFlowSvg(
   }
 
   // Callouts (anchored bubbles, drawn on top): dashed connector + sticky-note bubble + text.
+  // Per-callout colours from the SAME resolver the canvas uses (canvas == export).
   for (const c of callouts) {
+    const cs = resolveCalloutStyle(c.color);
     parts.push(
-      `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${CALLOUT_STROKE}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
-      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${c.h}" rx="8" fill="${CALLOUT_BG}" stroke="${CALLOUT_STROKE}"/>`,
-      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${CALLOUT_TEXT}">${esc(c.text)}</text>`,
+      `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${cs.connector}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
+      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${c.h}" rx="8" fill="${cs.bg}" stroke="${cs.stroke}"/>`,
+      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${cs.text}">${esc(c.text)}</text>`,
     );
   }
 

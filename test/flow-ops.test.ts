@@ -35,10 +35,13 @@ import {
   selectionTags,
   setAllExpanded,
   setBackdrop,
+  setBackdropColor,
   setBackdropRings,
   setBackground,
   setBackgroundImage,
+  setBoundaryColor,
   setBoundaryLabel,
+  setCalloutColor,
   setDue,
   setFreeform,
   setHyperlink,
@@ -55,6 +58,7 @@ import {
   setRollup,
   setRules,
   setStart,
+  setSummaryColor,
   setSummaryLabel,
   setTags,
   setTopic,
@@ -372,6 +376,75 @@ describe("flow ops — diagram backdrops", () => {
     expect(setBackdropRings(o, -5).doc.backdrop?.rings).toBe(2);
     const v = setBackdrop(base(), "venn2").doc;
     expect(setBackdropRings(v, 1).doc.backdrop).toEqual({ kind: "venn2" });
+  });
+
+  it("setBackdropColor sets / clears a colour override and is a no-op without a backdrop", () => {
+    const o = setBackdrop(base(), "onion", 3).doc;
+    expect(setBackdropColor(o, "#ff8800").doc.backdrop?.color).toBe("#ff8800");
+    // Clearing with "" drops the field (absent = default accent, lossless in .json).
+    const colored = setBackdropColor(o, "#ff8800").doc;
+    expect(setBackdropColor(colored, "").doc.backdrop?.color).toBeUndefined();
+    const noBackdrop = base();
+    expect(setBackdropColor(noBackdrop, "#ff8800").doc).toBe(noBackdrop); // no-op returns same doc
+  });
+});
+
+describe("flow ops — per-overlay colours", () => {
+  // A doc with a boundary, a summary, and a node-anchored callout to colour.
+  const withOverlays = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "Root",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "a", topic: "A", children: [], callouts: [{ id: "co", text: "n", dx: 8, dy: 0 }] },
+        { id: "b", topic: "B", children: [] },
+      ],
+    },
+    boundaries: [{ id: "bd", nodeIds: ["a", "b"], label: "grp" }],
+    summaries: [{ id: "su", nodeIds: ["a"], label: "Phase 1" }],
+  });
+
+  it("setBoundaryColor sets / clears a boundary's colour by id", () => {
+    expect(setBoundaryColor(withOverlays(), "bd", "#3f9e6e").doc.boundaries?.[0]?.color).toBe(
+      "#3f9e6e",
+    );
+    const colored = setBoundaryColor(withOverlays(), "bd", "#3f9e6e").doc;
+    expect(setBoundaryColor(colored, "bd", "").doc.boundaries?.[0]?.color).toBeUndefined();
+    const d = withOverlays();
+    expect(setBoundaryColor(d, "ghost", "#000").doc).toBe(d); // no-op for unknown id
+  });
+
+  it("setSummaryColor sets / clears a summary's colour by id", () => {
+    expect(setSummaryColor(withOverlays(), "su", "#e0697f").doc.summaries?.[0]?.color).toBe(
+      "#e0697f",
+    );
+    const colored = setSummaryColor(withOverlays(), "su", "#e0697f").doc;
+    expect(setSummaryColor(colored, "su", "").doc.summaries?.[0]?.color).toBeUndefined();
+    const d = withOverlays();
+    expect(setSummaryColor(d, "ghost", "#000").doc).toBe(d); // no-op for unknown id
+  });
+
+  it("setCalloutColor sets / clears a callout's colour, no-op for an unknown node/callout", () => {
+    const set = setCalloutColor(withOverlays(), "a", "co", "#d98a2b").doc;
+    expect(findNode(set, "a")?.callouts?.[0]?.color).toBe("#d98a2b");
+    const cleared = setCalloutColor(set, "a", "co", "").doc;
+    expect(findNode(cleared, "a")?.callouts?.[0]?.color).toBeUndefined();
+    const d = withOverlays();
+    expect(setCalloutColor(d, "a", "ghost", "#000").doc).toBe(d); // unknown callout
+    expect(setCalloutColor(d, "ghost", "co", "#000").doc).toBe(d); // unknown node
+  });
+
+  it("colour overrides round-trip through JSON unchanged (lossless)", () => {
+    let d = setBoundaryColor(withOverlays(), "bd", "#3f9e6e").doc;
+    d = setSummaryColor(d, "su", "#e0697f").doc;
+    d = setCalloutColor(d, "a", "co", "#d98a2b").doc;
+    const roundTripped = JSON.parse(JSON.stringify(d)) as MindMapDoc;
+    expect(roundTripped.boundaries?.[0]?.color).toBe("#3f9e6e");
+    expect(roundTripped.summaries?.[0]?.color).toBe("#e0697f");
+    expect(findNode(roundTripped, "a")?.callouts?.[0]?.color).toBe("#d98a2b");
   });
 });
 

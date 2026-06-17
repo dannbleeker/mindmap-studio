@@ -2,14 +2,11 @@ import { ViewportPortal, useNodes } from "@xyflow/react";
 import { type CSSProperties, memo, useMemo } from "react";
 import type { Boundary } from "../../model/types";
 import {
-  BOUNDARY_FILL,
-  BOUNDARY_LABEL_BG,
-  BOUNDARY_LABEL_BORDER,
-  BOUNDARY_LABEL_COLOR,
   BOUNDARY_PAD,
   BOUNDARY_RADIUS,
-  BOUNDARY_STROKE,
+  type ResolvedBoundaryStyle,
   boundaryLabel,
+  resolveBoundaryStyle,
 } from "./style";
 
 // Filled boundary boxes, rendered in the flow coordinate space via ViewportPortal so they
@@ -17,21 +14,20 @@ import {
 // live measured rects), with a label chip — a MindManager-style enclosure. Geometry +
 // colours come from ./style so the SVG export draws an identical box.
 
-const chip: CSSProperties = {
+// Label-chip layout (the colours come per-box from the resolved style, so a recoloured boundary
+// re-tints its chip too).
+const chipBase: CSSProperties = {
   position: "absolute",
   top: -11,
   left: 12,
   padding: "1px 8px",
-  background: BOUNDARY_LABEL_BG,
-  color: BOUNDARY_LABEL_COLOR,
-  border: `1px solid ${BOUNDARY_LABEL_BORDER}`,
   borderRadius: 8,
   fontSize: 12,
   fontWeight: 600,
   whiteSpace: "nowrap",
 };
 
-/** One boundary box, resolved to its padded bbox in flow space. */
+/** One boundary box, resolved to its padded bbox in flow space + its resolved colours. */
 interface BoundaryBox {
   id: string;
   label: string;
@@ -39,6 +35,7 @@ interface BoundaryBox {
   top: number;
   width: number;
   height: number;
+  style: ResolvedBoundaryStyle;
 }
 
 // The clickable border rim (px). The box interior stays pointer-transparent (so enclosed nodes still
@@ -93,6 +90,7 @@ function Boundaries({
         top: minY - BOUNDARY_PAD,
         width: maxX - minX + 2 * BOUNDARY_PAD,
         height: maxY - minY + 2 * BOUNDARY_PAD,
+        style: resolveBoundaryStyle(b.color),
       });
     }
     return out;
@@ -104,6 +102,12 @@ function Boundaries({
     <ViewportPortal>
       {boxes.map((b) => {
         const selected = b.id === selectedId;
+        const chip: CSSProperties = {
+          ...chipBase,
+          background: b.style.labelBg,
+          color: b.style.labelColor,
+          border: `1px solid ${b.style.labelBorder}`,
+        };
         return (
           <div
             key={b.id}
@@ -114,15 +118,15 @@ function Boundaries({
               width: b.width,
               height: b.height,
               boxSizing: "border-box",
-              border: `1.5px solid ${BOUNDARY_STROKE}`,
-              background: BOUNDARY_FILL,
+              border: `1.5px solid ${b.style.stroke}`,
+              background: b.style.fill,
               borderRadius: BOUNDARY_RADIUS,
               // The box itself never blocks pointer events — enclosed nodes keep dragging and the
               // marquee keeps working. The rim strips + chip below opt back in to catch selection.
               pointerEvents: "none",
               // Selection halo (view-only, additive — never exported, so canvas == export holds).
               boxShadow: selected
-                ? `0 0 0 2px ${BOUNDARY_STROKE}, 0 0 8px ${BOUNDARY_STROKE}`
+                ? `0 0 0 2px ${b.style.stroke}, 0 0 8px ${b.style.stroke}`
                 : undefined,
             }}
           >

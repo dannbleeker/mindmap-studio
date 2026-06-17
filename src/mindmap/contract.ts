@@ -67,6 +67,9 @@ export interface SelectedOverlay {
   label: string;
   /** Whether a Delete control should show (all overlay kinds are deletable today). */
   deletable: boolean;
+  /** The overlay's colour override (`#rrggbb`), or undefined when it uses the default accent —
+   *  lets the inspector pre-select the current swatch and show a "Reset" affordance. */
+  color?: string;
 }
 
 /** Imperative API a canvas component exposes via its ref. */
@@ -151,8 +154,15 @@ export interface MindMapHandle {
   deleteLink: () => boolean;
   /** Set the selected overlay's label (boundary/summary) or text (callout); false if none selected. */
   setOverlayLabel: (label: string) => boolean;
+  /** Set the selected overlay's colour override (`#rrggbb`); "" resets to the default accent. The
+   *  same picked colour re-tints the whole object (stroke/fill/label) on canvas + in every export.
+   *  False if no overlay is selected. */
+  setOverlayColor: (color: string) => boolean;
   /** Delete the selected overlay (boundary/summary/callout); false if none selected. */
   deleteOverlay: () => boolean;
+  /** Set the map's diagram-backdrop colour override (`#rrggbb`); "" resets to the default accent.
+   *  No-op if the map has no backdrop. */
+  setBackdropColor: (color: string) => void;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */

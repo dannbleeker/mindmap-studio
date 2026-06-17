@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Per-overlay colours.** Recolour any individual **boundary**, **summary** bracket, or **callout**
+  bubble from its inspector (a swatch row + **Default** to reset), and the map's diagram **backdrop**
+  from the Map panel. The picked colour re-tints the whole object coherently — stroke, fill tint, and
+  label chip — on the canvas **and** in every image / PDF / HTML export (one shared resolver, so the
+  canvas and export stay byte-identical). Colours are saved losslessly in the `.json`; an uncoloured
+  overlay keeps the default accent.
+
 - **Click a boundary, summary or callout to edit it.** Overlay objects are now selectable: click a
   **boundary** (its rim or label), a **summary** bracket's label, or a **callout** bubble and the
   inspector becomes an editor for it — rename / retext it and **delete** it — with a highlight on the
@@ -28,9 +35,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 - **Diagram-backdrop controls in the inspector.** When the map has an onion / funnel / Venn
   backdrop, the Map panel shows a **Backdrop** section — add or remove a **ring / stage** (onion &
-  funnel) and **Remove** the backdrop — so you can adjust it without opening the toolbar's Canvas
-  menu. *(Per-overlay colours and click-to-select for individual boundaries / summaries / callouts
-  remain a follow-up — they need new model fields; today those still edit on the canvas.)*
+  funnel), set its **colour**, and **Remove** the backdrop — so you can adjust it without opening the
+  toolbar's Canvas menu.
 
 - **Map properties in the inspector.** With nothing selected, the right panel is now an editable
   **Map** panel (not just read-only stats): rename the map inline, and set its **theme**, **layout**,

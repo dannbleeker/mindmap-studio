@@ -73,6 +73,8 @@ export interface Callout {
   /** Offset of the bubble from the node's right edge / vertical centre, in flow units. */
   dx: number;
   dy: number;
+  /** Colour override (the bubble's accent); absent = the default sticky-yellow. Lossless in .json. */
+  color?: string;
 }
 
 export interface MapNode {
@@ -143,6 +145,8 @@ export interface Boundary {
   id: string;
   nodeIds: NodeId[];
   label?: string;
+  /** Stroke/fill override; absent = the shared boundary accent. Lossless in .json. */
+  color?: string;
 }
 
 /** A labelled bracket spanning a node + its subtree (MindManager "summary topic"). Like a Boundary,
@@ -151,6 +155,8 @@ export interface Summary {
   id: string;
   nodeIds: NodeId[];
   label?: string;
+  /** Bracket/label colour override; absent = the default green. Lossless in .json. */
+  color?: string;
 }
 
 /** A conditional-formatting rule: topics matching `kind`/`value` get `style` applied (view-only). */
@@ -170,6 +176,8 @@ export interface Backdrop {
   kind: BackdropKind;
   /** Ring/stage count for onion + funnel (ignored by the fixed venn frames). */
   rings?: number;
+  /** Stroke/fill override; absent = the default backdrop accent. Lossless in .json. */
+  color?: string;
 }
 
 export interface MindMapDoc {

@@ -84,10 +84,13 @@ import {
   selectionTags,
   setAllExpanded,
   setBackdrop,
+  setBackdropColor,
   setBackdropRings,
   setBackground,
   setBackgroundImage,
+  setBoundaryColor,
   setBoundaryLabel,
+  setCalloutColor,
   setCalloutText,
   setDue,
   setFreeform,
@@ -105,6 +108,7 @@ import {
   setRollup,
   setRules,
   setStart,
+  setSummaryColor,
   setSummaryLabel,
   setTags,
   setTopic,
@@ -382,15 +386,21 @@ function FlowInner({
       }
       const doc = docRef.current;
       let label: string | undefined;
-      if (sel.kind === "boundary")
-        label = (doc.boundaries ?? []).find((b) => b.id === sel.id)?.label;
-      else if (sel.kind === "summary")
-        label = (doc.summaries ?? []).find((s) => s.id === sel.id)?.label;
-      else {
+      let color: string | undefined;
+      if (sel.kind === "boundary") {
+        const b = (doc.boundaries ?? []).find((x) => x.id === sel.id);
+        label = b?.label;
+        color = b?.color;
+      } else if (sel.kind === "summary") {
+        const s = (doc.summaries ?? []).find((x) => x.id === sel.id);
+        label = s?.label;
+        color = s?.color;
+      } else {
         const node = sel.nodeId ? findAnyNode(doc, sel.nodeId) : null;
         const found = node?.callouts?.find((c) => c.id === sel.id);
         if (!found) return; // callout gone
         label = found.text;
+        color = found.color;
       }
       // boundary/summary may legitimately have no label; only bail if the object itself is missing.
       if (sel.kind !== "callout") {
@@ -406,6 +416,7 @@ function FlowInner({
         nodeId: sel.nodeId,
         label: label ?? "",
         deletable: true,
+        color,
       };
       setSelectedOverlay(resolved);
       onSelectOverlayRef.current?.(resolved);
@@ -1026,6 +1037,17 @@ function FlowInner({
           if (sel.kind === "summary") return setSummaryLabel(docRef.current, sel.id, label);
           return setCalloutText(docRef.current, sel.nodeId ?? "", sel.id, label);
         }),
+      setOverlayColor: (color) => {
+        const sel = selectedOverlayRef.current;
+        const ok = withSelectedOverlay((s) => {
+          if (s.kind === "boundary") return setBoundaryColor(docRef.current, s.id, color);
+          if (s.kind === "summary") return setSummaryColor(docRef.current, s.id, color);
+          return setCalloutColor(docRef.current, s.nodeId ?? "", s.id, color);
+        });
+        // Re-emit the (unchanged) selection so the inspector's swatch reflects the new colour.
+        if (ok && sel) fireSelectOverlay({ kind: sel.kind, id: sel.id, nodeId: sel.nodeId });
+        return ok;
+      },
       deleteOverlay: () => {
         const ok = withSelectedOverlay((sel) => {
           if (sel.kind === "boundary") return deleteBoundary(docRef.current, sel.id);
@@ -1035,6 +1057,7 @@ function FlowInner({
         if (ok) clearOverlaySelection();
         return ok;
       },
+      setBackdropColor: (color) => apply(setBackdropColor(docRef.current, color)),
     }),
     [
       fitView,
@@ -1045,6 +1068,7 @@ function FlowInner({
       withSelectedLink,
       withSelectedOverlay,
       clearOverlaySelection,
+      fireSelectOverlay,
       focusNodeById,
     ],
   );

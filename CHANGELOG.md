@@ -556,6 +556,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Canvas + Present component tests (internal).** The two biggest untested components now have a net:
+  `test/flowmindmap.test.tsx` mounts the real `FlowMindMap` (React Flow) canvas and drives it through
+  the imperative `MindMapHandle` ref + `document` keyboard events — covering the contract surface the
+  upcoming UX redesign depends on (every handle action, undo/redo, the keyboard tree-building, the
+  drop-to-floating-topic path, and the brace/filter/numbering re-sync) plus the lazy `MindMap` seam;
+  `test/presentation.test.tsx` mounts the ▶ Present overlay and drives navigation, the keyboard, and
+  the presenter sidebar. Lifts `FlowMindMap.tsx` 0 → 67%, `Presentation.tsx` 0 → 100%, and overall line
+  coverage ~67 → ~78%. Tests only — no behaviour change.
 - **Dashboard load + contract tests (internal).** `public/dashboard.html` (the live GitHub + CI-metrics
   page built from `public/stats.json` / `public/stats-history.json`) had no automated coverage;
   `test/dashboard.test.ts` now guards that it loads, in three passes: **structure** (every id the inline

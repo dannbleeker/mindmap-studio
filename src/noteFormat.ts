@@ -3,6 +3,12 @@
 // inject markup. Pure + deterministic (unit-tested); the Notes panel feeds the
 // result to dangerouslySetInnerHTML.
 
+/** Word + character counts for a note string — the inspector's per-node facts line. Pure. */
+export function noteCounts(text: string): { words: number; chars: number } {
+  const trimmed = text.trim();
+  return { words: trimmed ? trimmed.split(/\s+/).length : 0, chars: text.length };
+}
+
 function escapeHtml(s: string): string {
   // Quotes MUST be escaped too: the link transform drops the matched URL into a
   // double-quoted href="…", so a `"` in a markdown link would otherwise break

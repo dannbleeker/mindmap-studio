@@ -208,6 +208,8 @@ describe("InfoPanel", () => {
         selected={sel}
         selectedCount={count}
         openNoteNonce={nonce}
+        width={300}
+        onResize={noop}
         node={n}
         noteDraft={n?.note ?? ""}
         onNoteChange={noop}
@@ -474,6 +476,8 @@ describe("InfoPanel (interaction)", () => {
     const result = render(
       <InfoPanel
         selected={sel}
+        width={300}
+        onResize={noop}
         node={n}
         noteDraft={n?.note ?? ""}
         onNoteChange={onNoteChange}

@@ -60,6 +60,27 @@ export function findNode(doc: MindMapDoc, id: string): MapNode | null {
   return locate(doc.root, id)?.node ?? null;
 }
 
+/** The ancestor chain (root → parent, excluding the node itself) and depth of a node in the central
+ *  tree; depth 0 = the root. Returns null if the id isn't in the central tree (e.g. a floating
+ *  topic). Pure — feeds the inspector's breadcrumb + facts line. */
+export function nodePath(
+  doc: MindMapDoc,
+  id: string,
+): { ancestors: MapNode[]; depth: number } | null {
+  const path: MapNode[] = [];
+  const walk = (node: MapNode): boolean => {
+    if (node.id === id) return true;
+    for (const child of node.children) {
+      path.push(node);
+      if (walk(child)) return true;
+      path.pop();
+    }
+    return false;
+  };
+  if (!walk(doc.root)) return null;
+  return { ancestors: path, depth: path.length };
+}
+
 /** Find a node by id anywhere in the doc — the central tree OR inside a floating topic's subtree. */
 export function findAnyNode(doc: MindMapDoc, id: string): MapNode | null {
   const inTree = locate(doc.root, id)?.node;

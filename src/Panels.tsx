@@ -1,5 +1,6 @@
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { ProgressPie } from "./ProgressPie";
+import { InspectorResizer } from "./components/InspectorResizer";
 import {
   Button,
   Chip,
@@ -1026,12 +1027,23 @@ export function InfoPanel({
   jumpTargets,
   onJump,
   onMinimize,
+  width,
+  onResize,
+  breadcrumb,
+  facts,
 }: {
   selected: SelectedNode | null;
   /** Number of nodes selected on the canvas; >1 puts the panel in bulk-edit mode. */
   selectedCount?: number;
   /** Bumped when a node's 📝 indicator is clicked — switches the panel to its Notes tab. */
   openNoteNonce?: number;
+  /** Persisted inspector width (px) + the drag-resize callback. */
+  width: number;
+  onResize: (next: number) => void;
+  /** Ancestor path (Root › Branch …) for the header; empty for root/floating. */
+  breadcrumb?: string;
+  /** Quick-facts line (outline no · depth · children · note size). */
+  facts?: string;
   node: MapNode | null;
   noteDraft: string;
   onNoteChange: (value: string) => void;
@@ -1143,31 +1155,47 @@ export function InfoPanel({
     );
   };
   const aside = (
-    <aside className="mm-inspector" aria-label="Topic info">
-      <div
-        className="mm-inspector-head"
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}
-      >
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            fontWeight: 600,
-            color: "var(--ed-ink)",
-          }}
+    <aside className="mm-inspector" aria-label="Topic info" style={{ width }}>
+      <InspectorResizer width={width} onResize={onResize} />
+      <div className="mm-inspector-head">
+        <div
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}
         >
-          ℹ {node ? node.topic || "(untitled)" : "Topic info"}
-        </span>
-        <button
-          type="button"
-          className="mm-inspector-min"
-          onClick={onMinimize}
-          title="Minimize — collapse to the right edge"
-          aria-label="Minimize topic info"
-        >
-          ›
-        </button>
+          <span
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              fontWeight: 600,
+              color: "var(--ed-ink)",
+            }}
+          >
+            ℹ {node ? node.topic || "(untitled)" : "Topic info"}
+          </span>
+          <button
+            type="button"
+            className="mm-inspector-min"
+            onClick={onMinimize}
+            title="Minimize — collapse to the right edge"
+            aria-label="Minimize topic info"
+          >
+            ›
+          </button>
+        </div>
+        {node && !multi && (breadcrumb || facts) ? (
+          <div style={{ marginTop: 4 }}>
+            {breadcrumb ? (
+              <div className="mm-inspector-path" title={breadcrumb}>
+                {breadcrumb}
+              </div>
+            ) : null}
+            {facts ? (
+              <div className="mm-inspector-path" style={{ marginTop: 1 }}>
+                {facts}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       {!node ? (
         <div style={{ padding: "8px 16px", fontSize: fontSize.md, color: "var(--ed-faint)" }}>

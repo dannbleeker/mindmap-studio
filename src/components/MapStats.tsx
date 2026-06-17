@@ -1,4 +1,5 @@
 import type { MapNode, MindMapDoc } from "../model/types";
+import { InspectorResizer } from "./InspectorResizer";
 
 // MapStats — the right-panel empty state shown when no node is selected (the inspector takes over on
 // selection). A quick read on the whole map: total topics, first-level branches, and task progress
@@ -22,12 +23,23 @@ function tally(node: MapNode, acc: Counts): Counts {
   return acc;
 }
 
-export function MapStats({ doc, onMinimize }: { doc: MindMapDoc; onMinimize?: () => void }) {
+export function MapStats({
+  doc,
+  onMinimize,
+  width,
+  onResize,
+}: {
+  doc: MindMapDoc;
+  onMinimize?: () => void;
+  width?: number;
+  onResize?: (next: number) => void;
+}) {
   const counts = tally(doc.root, { total: 0, withProgress: 0, done: 0 });
   const branches = doc.root.children.length;
   const pct = counts.withProgress > 0 ? Math.round((counts.done / counts.withProgress) * 100) : 0;
   return (
-    <aside className="mm-inspector" aria-label="Map overview">
+    <aside className="mm-inspector" aria-label="Map overview" style={width ? { width } : undefined}>
+      {width && onResize ? <InspectorResizer width={width} onResize={onResize} /> : null}
       <div
         className="mm-inspector-head"
         style={{ display: "flex", alignItems: "flex-start", gap: 8 }}

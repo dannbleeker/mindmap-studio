@@ -105,7 +105,9 @@ note, markers, tags, style, and links. (This replaces the old separate **Notes**
 priority, attachments, links), **Style** (shape / fill / border / font, markers, stickers), and
 **Notes** (the Markdown editor). **Minimize** it with the **›** button to collapse it to a thin strip
 on the right edge (click the strip's ℹ to bring it back) — minimizing sticks, so selecting other
-nodes won't reopen it; re-expanding shows whatever node is selected then.
+nodes won't reopen it; re-expanding shows whatever node is selected then. **Drag the panel's left
+edge to resize it** (the width is remembered); the header shows the topic's path (Root › Branch …)
+and a facts line — outline number, depth, child count, and note size.
 
 **Edit several topics at once.** Select multiple topics — **Shift/Ctrl/⌘-click** to add to the
 selection, or **drag a box** across the empty canvas — and the inspector switches to bulk mode (an

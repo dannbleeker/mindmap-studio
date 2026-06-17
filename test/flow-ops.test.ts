@@ -19,6 +19,7 @@ import {
   groupSummary,
   indent,
   mergeStyle,
+  nodePath,
   outdent,
   pasteBranch,
   removeAttachment,
@@ -774,5 +775,19 @@ describe("flow ops — grouping (boundaries & summaries)", () => {
     const { doc } = groupBranch(deep(), "l1");
     // Boundary should include l1 and all descendants (l2, l3, l4)
     expect(doc.boundaries?.[0]?.nodeIds).toEqual(["l1", "l2", "l3", "l4"]);
+  });
+});
+
+describe("nodePath", () => {
+  it("returns the ancestor chain (root → parent) + depth for a nested node", () => {
+    const p = nodePath(base(), "a1");
+    expect(p?.ancestors.map((n) => n.id)).toEqual(["r", "a"]);
+    expect(p?.depth).toBe(2);
+  });
+  it("gives the root depth 0 with no ancestors", () => {
+    expect(nodePath(base(), "r")).toEqual({ ancestors: [], depth: 0 });
+  });
+  it("returns null for an id not in the central tree", () => {
+    expect(nodePath(base(), "nope")).toBeNull();
   });
 });

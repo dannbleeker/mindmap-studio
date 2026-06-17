@@ -345,6 +345,28 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+}
+/* Drag gutter on the inspector's left (canvas-facing) edge to resize it. */
+.mm-inspector-resizer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 5;
+  background: transparent;
+}
+.mm-inspector-resizer:hover,
+.mm-inspector-resizer:focus-visible {
+  background: var(--ed-accent-tint);
+  outline: none;
+}
+@media (max-width: 640px) {
+  .mm-inspector-resizer {
+    display: none;
+  }
 }
 .mm-inspector-head {
   flex-shrink: 0;

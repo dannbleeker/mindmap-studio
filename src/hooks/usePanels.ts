@@ -12,12 +12,23 @@ import { type DueMode, type FilterCriteria, type SavedFilter, isFilterActive } f
 const PANELS_KEY = "mindmap-panels";
 const SAVED_FILTERS_KEY = "mindmap-saved-filters";
 
+/** Resizable inspector width bounds (px). Default matches the .mm-inspector CSS width. */
+export const INSPECTOR_MIN = 240;
+export const INSPECTOR_MAX = 560;
+export const INSPECTOR_DEFAULT = 300;
+/** Clamp a persisted/dragged width into range (and fall back to the default for junk values). */
+export const clampInspectorWidth = (w: number | undefined): number =>
+  typeof w === "number" && Number.isFinite(w)
+    ? Math.min(INSPECTOR_MAX, Math.max(INSPECTOR_MIN, w))
+    : INSPECTOR_DEFAULT;
+
 /** The persisted slice of panel state (the durable panels — the rest are session-only). */
 interface PersistedPanels {
   outlineOpen?: boolean;
   indexOpen?: boolean;
   infoOpen?: boolean;
   infoMinimized?: boolean;
+  inspectorWidth?: number;
   numbered?: boolean;
 }
 
@@ -52,6 +63,9 @@ export interface PanelsState {
   /** Inspector collapsed to the right-edge strip. Sticky: suppresses auto-open-on-select. */
   infoMinimized: boolean;
   setInfoMinimized: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Persisted inspector width (px), clamped to [INSPECTOR_MIN, INSPECTOR_MAX]. */
+  inspectorWidth: number;
+  setInspectorWidth: React.Dispatch<React.SetStateAction<number>>;
   filterOpen: boolean;
   /** Toggle the Filter panel; closing it also clears the active filter (see `toggleFilter`). */
   toggleFilter: () => void;
@@ -120,6 +134,9 @@ export function usePanels(): UsePanels {
   const [indexOpen, setIndexOpen] = useState(!!persisted.indexOpen);
   const [infoOpen, setInfoOpen] = useState(!!persisted.infoOpen);
   const [infoMinimized, setInfoMinimized] = useState(!!persisted.infoMinimized);
+  const [inspectorWidth, setInspectorWidth] = useState(() =>
+    clampInspectorWidth(persisted.inspectorWidth),
+  );
   const [numbered, setNumbered] = useState(!!persisted.numbered);
   // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
   const [filterOpen, setFilterOpen] = useState(false);
@@ -132,12 +149,19 @@ export function usePanels(): UsePanels {
     try {
       localStorage.setItem(
         PANELS_KEY,
-        JSON.stringify({ outlineOpen, indexOpen, infoOpen, infoMinimized, numbered }),
+        JSON.stringify({
+          outlineOpen,
+          indexOpen,
+          infoOpen,
+          infoMinimized,
+          inspectorWidth,
+          numbered,
+        }),
       );
     } catch {
       // preference is best-effort
     }
-  }, [outlineOpen, indexOpen, infoOpen, infoMinimized, numbered]);
+  }, [outlineOpen, indexOpen, infoOpen, infoMinimized, inspectorWidth, numbered]);
 
   // --- Power Filter ---
   const [filterText, setFilterText] = useState("");
@@ -205,6 +229,8 @@ export function usePanels(): UsePanels {
       setInfoOpen,
       infoMinimized,
       setInfoMinimized,
+      inspectorWidth,
+      setInspectorWidth,
       filterOpen,
       toggleFilter,
       stylesOpen,

@@ -36,9 +36,11 @@ import {
   NODE_LINK_PREFIX,
   type SelectedNode,
 } from "./mindmap";
+import { nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
-import { outlineRows } from "./outline";
+import { noteCounts } from "./noteFormat";
+import { outlineNumbers, outlineRows } from "./outline";
 import { Presentation } from "./present/Presentation";
 import {
   type ToastAction,
@@ -210,6 +212,25 @@ export function App() {
     };
     return find(liveDoc.root) ?? liveDoc.floatingTopics?.map(find).find(Boolean) ?? null;
   }, [selected, liveDoc]);
+  // Inspector header breadcrumb (ancestor path) + quick-facts line (outline number, depth, child
+  // count, note size). Memoised so the whole-tree outline-number walk only reruns on doc/selection.
+  const inspectorInfo = useMemo(() => {
+    if (!selected || !selectedNode) return { breadcrumb: "", facts: "" };
+    const path = nodePath(liveDoc, selected.id);
+    const breadcrumb = (path?.ancestors ?? []).map((a) => a.topic || "(untitled)").join(" › ");
+    const outlineNo = outlineNumbers(liveDoc.root).get(selected.id);
+    const counts = noteCounts(selectedNode.note ?? "");
+    const kids = selectedNode.children.length;
+    const facts = [
+      outlineNo ? `#${outlineNo}` : null,
+      `depth ${path?.depth ?? 0}`,
+      `${kids} ${kids === 1 ? "child" : "children"}`,
+      counts.chars ? `note ${counts.words}w · ${counts.chars}c` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    return { breadcrumb, facts };
+  }, [selected, selectedNode, liveDoc]);
   // Auto-show the right-side inspector when a node is selected (the redesign's auto-show behaviour).
   // Sticky minimize wins: if the user has collapsed the inspector to its strip, selecting another
   // node does NOT force it back open (selectedNode still updates, so re-expanding shows the new node).
@@ -1231,6 +1252,10 @@ export function App() {
                 selected={selected}
                 selectedCount={selectedCount}
                 openNoteNonce={noteNonce}
+                width={panels.inspectorWidth}
+                onResize={panels.setInspectorWidth}
+                breadcrumb={inspectorInfo.breadcrumb}
+                facts={inspectorInfo.facts}
                 node={selectedNode}
                 noteDraft={noteDraft}
                 onNoteChange={onNoteChange}
@@ -1303,6 +1328,8 @@ export function App() {
             ) : (
               <MapStats
                 doc={liveDoc}
+                width={panels.inspectorWidth}
+                onResize={panels.setInspectorWidth}
                 onMinimize={() => {
                   panels.setInfoOpen(false);
                   panels.setInfoMinimized(true);

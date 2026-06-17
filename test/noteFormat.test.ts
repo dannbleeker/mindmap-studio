@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { htmlToNote, renderNote } from "../src/noteFormat";
+import { htmlToNote, noteCounts, renderNote } from "../src/noteFormat";
+
+describe("noteCounts", () => {
+  it("counts words + chars, treating whitespace-only as zero words", () => {
+    expect(noteCounts("")).toEqual({ words: 0, chars: 0 });
+    expect(noteCounts("   \n ")).toEqual({ words: 0, chars: 5 });
+    expect(noteCounts("hello world")).toEqual({ words: 2, chars: 11 });
+    expect(noteCounts("  two   spaced  words ")).toEqual({ words: 3, chars: 22 });
+  });
+});
 
 describe("renderNote", () => {
   it("renders headings, bold, italic, and code", () => {

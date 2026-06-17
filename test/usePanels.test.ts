@@ -71,6 +71,21 @@ describe("usePanels — panel toggles + persistence", () => {
     const second = renderHook(() => usePanels());
     expect(second.result.current.panels.infoMinimized).toBe(true);
   });
+
+  it("seeds + persists the inspector width (default 300, clamped, round-trips)", () => {
+    const first = renderHook(() => usePanels());
+    expect(first.result.current.panels.inspectorWidth).toBe(300);
+    act(() => first.result.current.panels.setInspectorWidth(420));
+    expect(JSON.parse(localStorage.getItem("mindmap-panels") ?? "{}").inspectorWidth).toBe(420);
+    expect(renderHook(() => usePanels()).result.current.panels.inspectorWidth).toBe(420);
+  });
+
+  it("clamps an out-of-range / junk persisted inspector width", () => {
+    localStorage.setItem("mindmap-panels", JSON.stringify({ inspectorWidth: 99999 }));
+    expect(renderHook(() => usePanels()).result.current.panels.inspectorWidth).toBe(560);
+    localStorage.setItem("mindmap-panels", JSON.stringify({ inspectorWidth: "wide" }));
+    expect(renderHook(() => usePanels()).result.current.panels.inspectorWidth).toBe(300);
+  });
 });
 
 describe("usePanels — Power Filter", () => {

@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Resizable inspector + a header breadcrumb & quick-facts.** Drag the inspector's left edge to
+  resize it (or nudge with the arrow keys when focused); the width is clamped and **persists** across
+  reloads. The header now shows the selected topic's **breadcrumb** (Root › Branch …) and a small
+  facts line — outline number, depth, child count, and the note's word/char count. The no-selection
+  map panel honours the same persisted width.
+
 - **Click a topic's 📝 to jump to its note** — the on-canvas note indicator is now a button: clicking
   it selects the topic and opens the inspector straight to its **Notes** tab (re-opening the inspector
   if it was closed or minimized). The 📝 still appears only when a topic actually has a note.

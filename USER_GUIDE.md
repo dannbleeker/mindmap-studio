@@ -78,6 +78,13 @@ Left to right:
 | **⬇ Backup** | [Back up](#backup--restore) the whole library to one file |
 | **Open files** | [Import](#importing) one or many files |
 
+Related controls are grouped into labelled **menus** (Panels, Insert, Canvas, Export, More). Every
+menu is fully **keyboard-navigable** — open with the mouse or **↓**, move with **↑ ↓ Home End**, run
+with **Enter**, and close with **Esc** (focus returns where it was). On phones the menus open as a
+full-width **bottom sheet**. And anywhere in the editor, press **⌘K** (Ctrl-K) for a **command
+palette** — fuzzy-search and run any toolbar action (present, export, toggle a panel, switch layout,
+group a branch, …) without reaching for the menus.
+
 ---
 
 ## Editing the map
@@ -90,6 +97,7 @@ Keyboard-first, just like MindManager:
 - **Delete** — remove the selected node
 - **Double-click** a node — edit its text (or just start typing on a selected node)
 - **Ctrl + B / I / U** — while editing a topic: bold / italic / underline the selection
+- **⌘K / Ctrl-K** — open the [command palette](#the-toolbar) to search and run any action
 - **Drag** a node onto another — re-parent it
 - **Ctrl + Z / Ctrl + Shift + Z** (or Ctrl + Y) — **undo / redo** (kept in sync with what's saved)
 - Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down)

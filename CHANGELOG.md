@@ -7,6 +7,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Command palette in the editor (⌘K / Ctrl-K).** Press **⌘K** anywhere in the editor to fuzzy-search
+  and run any toolbar action — present, export to any format, toggle a panel, switch layout, fit,
+  group a branch, and more — without hunting through menus. Selection-only actions (Focus / Group /
+  Summary) appear only when a topic is selected. (The Start screen's ⌘K is unchanged; both now share
+  one palette.)
+
+- **Keyboard-accessible menus + bottom sheets on phones.** Every toolbar dropdown and the canvas
+  right-click menu is now a proper WAI-ARIA menu: open with the mouse or **↓**, move with
+  **↑ ↓ Home End**, run with **Enter**, close with **Esc** (focus returns to where you were). Menus
+  flip / slide to stay on-screen near an edge, and on phone widths they open as a full-width **bottom
+  sheet**. The two toolbar rows are also grouped into clearer clusters. (No actions changed — same
+  buttons, same results.)
+
 - **Per-overlay colours.** Recolour any individual **boundary**, **summary** bracket, or **callout**
   bubble from its inspector (a swatch row + **Default** to reset), and the map's diagram **backdrop**
   from the Map panel. The picked colour re-tints the whole object coherently — stroke, fill tint, and

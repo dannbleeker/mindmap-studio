@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 155,
+  "reviewedThroughChangelogBullets": 157,
   "areas": [
     "editing",
     "notes",
@@ -1055,6 +1055,24 @@
       "id": "overlay-colours",
       "name": "Per-overlay colours (boundary / summary / callout / backdrop, canvas == export)",
       "area": "styling",
+      "since": "2026-06-17",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "editor-command-palette",
+      "name": "In-editor command palette (⌘K) — fuzzy search + run any toolbar action",
+      "area": "navigation",
+      "since": "2026-06-17",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "accessible-menus",
+      "name": "Keyboard-accessible toolbar / context menus + mobile bottom sheets",
+      "area": "navigation",
       "since": "2026-06-17",
       "manual": true,
       "book": false,

@@ -10,6 +10,13 @@ import { InspectorResizer } from "./InspectorResizer";
 // existing handlers (mapRef edge mutators / app theme+layout state), so there's no duplicated logic.
 // Styled via .mm-inspector* / .mm-stat* / .mm-map-* + --ed-* so it re-themes with the chrome.
 
+const BACKDROP_LABELS: Record<string, string> = {
+  onion: "Onion (rings)",
+  funnel: "Funnel (stages)",
+  venn2: "Venn (2 circles)",
+  venn3: "Venn (3 circles)",
+};
+
 interface Counts {
   total: number;
   withProgress: number;
@@ -41,6 +48,8 @@ export function MapPanel({
   lineJumps,
   onToggleLineJumps,
   onRenameMap,
+  onBackdropRings,
+  onClearBackdrop,
   onMinimize,
   width,
   onResize,
@@ -58,6 +67,10 @@ export function MapPanel({
   lineJumps: boolean;
   onToggleLineJumps: () => void;
   onRenameMap: (title: string) => void;
+  /** Add/remove a ring or stage on the current onion/funnel backdrop (no-op for venn). */
+  onBackdropRings?: (delta: number) => void;
+  /** Remove the map's diagram backdrop. */
+  onClearBackdrop?: () => void;
   onMinimize?: () => void;
   width?: number;
   onResize?: (next: number) => void;
@@ -224,6 +237,62 @@ export function MapPanel({
             />
           </label>
         </div>
+
+        {/* Diagram backdrop controls — shown only when the map has one (a singleton on the doc). */}
+        {doc.backdrop && (onBackdropRings || onClearBackdrop) ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="mm-map-section-title">Backdrop</div>
+            <div className="mm-map-field">
+              <span>{BACKDROP_LABELS[doc.backdrop.kind] ?? doc.backdrop.kind}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {(doc.backdrop.kind === "onion" || doc.backdrop.kind === "funnel") &&
+                onBackdropRings ? (
+                  <>
+                    <button
+                      type="button"
+                      className="mm-map-control"
+                      onClick={() => onBackdropRings(-1)}
+                      title="Fewer rings / stages"
+                      aria-label="Fewer rings"
+                      style={{ cursor: "pointer" }}
+                    >
+                      −
+                    </button>
+                    {typeof doc.backdrop.rings === "number" ? (
+                      <span
+                        className="mm-mono"
+                        style={{ minWidth: 14, textAlign: "center", color: "var(--ed-ink)" }}
+                      >
+                        {doc.backdrop.rings}
+                      </span>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="mm-map-control"
+                      onClick={() => onBackdropRings(1)}
+                      title="More rings / stages"
+                      aria-label="More rings"
+                      style={{ cursor: "pointer" }}
+                    >
+                      +
+                    </button>
+                  </>
+                ) : null}
+                {onClearBackdrop ? (
+                  <button
+                    type="button"
+                    className="mm-map-control"
+                    onClick={onClearBackdrop}
+                    title="Remove the backdrop"
+                    style={{ cursor: "pointer" }}
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className="mm-stat-grid">
           <div className="mm-stat">

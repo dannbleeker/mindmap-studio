@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Diagram-backdrop controls in the inspector.** When the map has an onion / funnel / Venn
+  backdrop, the Map panel shows a **Backdrop** section — add or remove a **ring / stage** (onion &
+  funnel) and **Remove** the backdrop — so you can adjust it without opening the toolbar's Canvas
+  menu. *(Per-overlay colours and click-to-select for individual boundaries / summaries / callouts
+  remain a follow-up — they need new model fields; today those still edit on the canvas.)*
+
 - **Map properties in the inspector.** With nothing selected, the right panel is now an editable
   **Map** panel (not just read-only stats): rename the map inline, and set its **theme**, **layout**,
   **background colour / image**, and **line-jumps** right there — the same settings as the toolbar's

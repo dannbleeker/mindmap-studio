@@ -1386,6 +1386,8 @@ export function App() {
                 lineJumps={!!liveDoc.meta?.lineJumps}
                 onToggleLineJumps={() => mapRef.current?.setLineJumps(!liveDoc.meta?.lineJumps)}
                 onRenameMap={(t) => mapRef.current?.renameMap(t)}
+                onBackdropRings={(d) => mapRef.current?.setBackdropRings(d)}
+                onClearBackdrop={() => mapRef.current?.clearBackdrop()}
                 width={panels.inspectorWidth}
                 onResize={panels.setInspectorWidth}
                 onMinimize={() => {

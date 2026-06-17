@@ -114,4 +114,35 @@ describe("MapPanel", () => {
     });
     expect((screen.getByLabelText("Layout") as HTMLSelectElement).disabled).toBe(true);
   });
+
+  it("shows backdrop ring + remove controls only when the map has a backdrop", () => {
+    const onBackdropRings = vi.fn();
+    const onClearBackdrop = vi.fn();
+    // No backdrop → no section.
+    setup(planDoc, { onBackdropRings, onClearBackdrop });
+    expect(screen.queryByText("Backdrop")).toBeNull();
+  });
+
+  it("drives onion backdrop rings + remove from the inspector", async () => {
+    const onBackdropRings = vi.fn();
+    const onClearBackdrop = vi.fn();
+    const d: MindMapDoc = { ...planDoc, backdrop: { kind: "onion", rings: 3 } };
+    setup(d, { onBackdropRings, onClearBackdrop });
+    expect(screen.getByText("Backdrop")).toBeTruthy();
+    expect(screen.getByText("Onion (rings)")).toBeTruthy();
+    await userEvent.click(screen.getByLabelText("More rings"));
+    expect(onBackdropRings).toHaveBeenCalledWith(1);
+    await userEvent.click(screen.getByLabelText("Fewer rings"));
+    expect(onBackdropRings).toHaveBeenCalledWith(-1);
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onClearBackdrop).toHaveBeenCalled();
+  });
+
+  it("hides the ring buttons for a venn backdrop (rings don't apply)", () => {
+    const d: MindMapDoc = { ...planDoc, backdrop: { kind: "venn3" } };
+    setup(d, { onBackdropRings: vi.fn(), onClearBackdrop: vi.fn() });
+    expect(screen.getByText("Venn (3 circles)")).toBeTruthy();
+    expect(screen.queryByLabelText("More rings")).toBeNull();
+    expect(screen.getByRole("button", { name: "Remove" })).toBeTruthy();
+  });
 });

@@ -19,11 +19,16 @@ tokens + primitives, `<Toolbar>` / `<Dialog>` / `usePanels()` extracted, canvas 
       effort: restructure the editor shell — a proper menu system (nested menus + keyboard nav on the
       Phase-C primitives), a reorganised toolbar, and cleaner inspector/panel layout — now that the
       chrome is extracted into token-driven components with a regression test net behind it.
-      *Inspector slice landed (2026-06-17): tabbed Topic-info panel (Details / Style / Notes) on a
-      reusable `Tabs` primitive, a WYSIWYG note editor, minimize-to-strip, and multi-select bulk
-      editing (shape/fill/border/font/progress/dates/priority across a selection). Still open: the
-      menu/toolbar restructure, and **bulk markers + tags** (deferred — they need set-semantics
-      rather than the per-node toggle/array, so they stay single-topic for now).*
+      *Inspector overhaul landed (2026-06-17): the Topic-info panel is a themed `.mm-inspector` shell
+      (re-themes in every palette), resizable + persisted, with a breadcrumb + quick-facts header,
+      denser label-left property rows, keyboard-accessible tabs, "Mixed" handling in bulk edit, and a
+      "Linked from" backlinks section. The no-selection slot is now an editable **Map** panel
+      (title / theme / layout / background / line-jumps / backdrop rings), and clicking a relationship
+      opens an **EdgeInspector** (label / direction / colour / width / style / delete, canvas==export).
+      Still open: the menu/toolbar restructure; **bulk markers + tags** (need set-semantics, stay
+      single-topic); and the heavier **overlay editing** — per-overlay colours + click-to-select for
+      individual boundaries / summaries / callouts (need new model fields), so those still edit on the
+      canvas (the backdrop's rings/remove are in the inspector).*
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.

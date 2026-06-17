@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Bulk markers + tags (tri-state).** Select several topics and the inspector now shows their
+  **markers** and **tags** with a third state: **lit** = on every selected topic, a **dashed “+”
+  chip** = on only some. Clicking adds a marker/tag to the whole selection — or, if every selected
+  topic already has it, removes it from all — in a single undo step. (Single-topic editing is
+  unchanged.)
+
 - **Per-node timestamps.** Every topic now tracks when it was **created** and **last edited**; both
   show in the inspector's quick-facts line (e.g. *created 2h ago · modified just now*) and are saved
   losslessly in the `.json`. Editing a topic's content (text, note, style, task, tags, markers,

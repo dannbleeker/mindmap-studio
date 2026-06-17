@@ -10,6 +10,8 @@ import {
   addStickyNote,
   addSubtree,
   applyRollups,
+  bulkToggleIcon,
+  bulkToggleTag,
   clearBackdrop,
   collectRollupMapIds,
   deleteLink,
@@ -28,6 +30,8 @@ import {
   reparent,
   replaceTopics,
   selectionFields,
+  selectionMarkers,
+  selectionTags,
   setAllExpanded,
   setBackdrop,
   setBackdropRings,
@@ -913,5 +917,63 @@ describe("flow ops — node timestamps", () => {
     const graft = findNode(doc, selectId as string);
     expect(graft?.createdAt).toBe(CLOCK);
     expect(graft?.modifiedAt).toBe(CLOCK);
+  });
+});
+
+describe("flow ops — bulk markers / tags (tri-state)", () => {
+  // a1 carries ⭐; a2 carries ⭐ + 🚩  → ⭐ on all, 🚩 on some.
+  const tagged = () => {
+    let d = toggleIcon(base(), "a1", "⭐").doc;
+    d = toggleIcon(d, "a2", "⭐").doc;
+    d = toggleIcon(d, "a2", "🚩").doc;
+    return d;
+  };
+
+  it("selectionMarkers partitions into all vs some, skipping unresolved ids", () => {
+    expect(selectionMarkers(tagged(), ["a1", "a2", "ghost"])).toEqual({
+      all: ["⭐"],
+      some: ["🚩"],
+    });
+    expect(selectionMarkers(base(), ["a1", "a2"])).toEqual({ all: [], some: [] });
+  });
+
+  it("selectionTags partitions the same way", () => {
+    let d = setTags(base(), "a1", ["x", "y"]).doc;
+    d = setTags(d, "a2", ["x"]).doc;
+    expect(selectionTags(d, ["a1", "a2"])).toEqual({ all: ["x"], some: ["y"] });
+  });
+
+  it("bulkToggleIcon adds to all when partial, removes from all when every node has it", () => {
+    // partial (⭐ on a1 only across {a1,a2}) → adds to all
+    const added = bulkToggleIcon(tagged(), ["a1", "a2"], "🚩").doc;
+    expect(findNode(added, "a1")?.icons).toContain("🚩");
+    expect(findNode(added, "a2")?.icons).toContain("🚩");
+    // all-present (⭐ on both) → removes from all (icons cleared to undefined when emptied)
+    const removed = bulkToggleIcon(tagged(), ["a1", "a2"], "⭐").doc;
+    expect(findNode(removed, "a1")?.icons).toBeUndefined();
+    expect(findNode(removed, "a2")?.icons).not.toContain("⭐");
+  });
+
+  it("bulkToggleTag mirrors the tri-state semantics and clears emptied arrays", () => {
+    let d = setTags(base(), "a1", ["risk"]).doc; // risk on a1 only
+    d = bulkToggleTag(d, ["a1", "a2"], "risk").doc; // partial → add to all
+    expect(findNode(d, "a1")?.tags).toEqual(["risk"]);
+    expect(findNode(d, "a2")?.tags).toEqual(["risk"]);
+    d = bulkToggleTag(d, ["a1", "a2"], "risk").doc; // all → remove from all
+    expect(findNode(d, "a1")?.tags).toBeUndefined();
+    expect(findNode(d, "a2")?.tags).toBeUndefined();
+  });
+
+  it("a single-node bulk toggle matches the single-node op; no-op + immutability hold", () => {
+    const d = base();
+    // single-selection equivalence: adding ⭐ to [a]
+    expect(findNode(bulkToggleIcon(d, ["a"], "⭐").doc, "a")?.icons).toEqual(["⭐"]);
+    // no resolvable ids → same doc
+    expect(bulkToggleIcon(d, ["ghost"], "⭐").doc).toBe(d);
+    // input never mutated
+    const snap = JSON.stringify(d);
+    bulkToggleIcon(d, ["a", "b"], "⭐");
+    bulkToggleTag(d, ["a", "b"], "x");
+    expect(JSON.stringify(d)).toBe(snap);
   });
 });

@@ -146,6 +146,88 @@ export function selectionFields(doc: MindMapDoc, ids: Iterable<string>): Selecti
   };
 }
 
+/** Partition a string-set field (icons/tags) across a selection into the values present on EVERY
+ *  resolved node (`all`) vs only SOME (`some`, excluding `all`). Drives the inspector's tri-state
+ *  bulk markers/tags. Pure + deterministic (sorted); ids that don't resolve are skipped. */
+function selectionSets(
+  doc: MindMapDoc,
+  ids: Iterable<string>,
+  pick: (n: MapNode) => string[] | undefined,
+): { all: string[]; some: string[] } {
+  let resolved = 0;
+  const count = new Map<string, number>();
+  for (const id of ids) {
+    const node = findAnyNode(doc, id);
+    if (!node) continue;
+    resolved++;
+    for (const v of new Set(pick(node) ?? [])) count.set(v, (count.get(v) ?? 0) + 1);
+  }
+  const all: string[] = [];
+  const some: string[] = [];
+  for (const [k, c] of count) (resolved > 0 && c === resolved ? all : some).push(k);
+  all.sort();
+  some.sort();
+  return { all, some };
+}
+
+/** Markers (icons) on ALL vs SOME of the selection — the inspector's tri-state bulk markers. */
+export function selectionMarkers(
+  doc: MindMapDoc,
+  ids: Iterable<string>,
+): {
+  all: string[];
+  some: string[];
+} {
+  return selectionSets(doc, ids, (n) => n.icons);
+}
+
+/** Tags on ALL vs SOME of the selection — the inspector's tri-state bulk tags. */
+export function selectionTags(
+  doc: MindMapDoc,
+  ids: Iterable<string>,
+): {
+  all: string[];
+  some: string[];
+} {
+  return selectionSets(doc, ids, (n) => n.tags);
+}
+
+/** Tri-state bulk marker toggle: if EVERY resolved selected node already carries `icon`, remove it
+ *  from all; otherwise add it to every node that lacks it. Folds the single-node toggleIcon (so the
+ *  cleared-to-undefined + timestamp invariants hold) into ONE new doc — a single undo step. */
+export function bulkToggleIcon(doc: MindMapDoc, ids: Iterable<string>, icon: string): OpResult {
+  const idList = [...ids].filter((id) => findAnyNode(doc, id));
+  if (idList.length === 0) return { doc };
+  const allHave = idList.every((id) => (findAnyNode(doc, id)?.icons ?? []).includes(icon));
+  let next = doc;
+  for (const id of idList) {
+    const has = (findAnyNode(next, id)?.icons ?? []).includes(icon);
+    // remove-from-all → toggle the nodes that have it; add-to-all → toggle the nodes that lack it.
+    if (allHave ? has : !has) next = toggleIcon(next, id, icon).doc;
+  }
+  return next === doc ? { doc } : { doc: next };
+}
+
+/** Tri-state bulk tag toggle (same semantics as bulkToggleIcon), folding setTags per node. */
+export function bulkToggleTag(doc: MindMapDoc, ids: Iterable<string>, tag: string): OpResult {
+  const idList = [...ids].filter((id) => findAnyNode(doc, id));
+  if (idList.length === 0) return { doc };
+  const allHave = idList.every((id) => (findAnyNode(doc, id)?.tags ?? []).includes(tag));
+  let next = doc;
+  for (const id of idList) {
+    const cur = findAnyNode(next, id)?.tags ?? [];
+    const has = cur.includes(tag);
+    if (allHave && has)
+      next = setTags(
+        next,
+        id,
+        cur.filter((t) => t !== tag),
+      ).doc;
+    else if (!allHave && !has) next = setTags(next, id, [...cur, tag]).doc;
+  }
+  return next === doc ? { doc } : { doc: next };
+}
+
 // --- structural edits ------------------------------------------------------
 
 /** Add an empty sibling after `id` (a root gets a child, since it has no sibling). */

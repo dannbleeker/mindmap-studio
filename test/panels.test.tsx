@@ -207,6 +207,12 @@ describe("InfoPanel", () => {
     backlinks: Backlink[] = [],
     onFollowBacklink: (id: string) => void = noop,
     times?: string,
+    bulk?: {
+      markers?: { all: string[]; some: string[] };
+      tags?: { all: string[]; some: string[] };
+      onMarker?: (m: string) => void;
+      onTag?: (t: string) => void;
+    },
   ) =>
     render(
       <InfoPanel
@@ -223,6 +229,10 @@ describe("InfoPanel", () => {
         onNoteBlur={noop}
         markers={["⭐", "🚩"]}
         onToggleMarker={noop}
+        bulkMarkers={bulk?.markers}
+        bulkTags={bulk?.tags}
+        onBulkToggleMarker={bulk?.onMarker}
+        onBulkToggleTag={bulk?.onTag}
         onPickSticker={noop}
         onStyle={noop}
         onAddTag={noop}
@@ -311,17 +321,37 @@ describe("InfoPanel", () => {
     // Details (default) keeps the value-setting editors that fold across a set…
     expect(screen.getByText("Dates")).toBeTruthy();
     expect(screen.getByText("Priority")).toBeTruthy();
-    // …but hides the per-item ones.
+    // …Attachments/Links stay single-topic; Tags only appears in bulk when a summary is supplied
+    // (the tri-state block, exercised below) — none is passed here.
     expect(screen.queryByText("Tags")).toBeNull();
     expect(screen.queryByText("Attachments")).toBeNull();
     expect(screen.queryByText("Links")).toBeNull();
   });
 
-  it("bulk Style tab keeps the style bar but hides per-item markers + stickers", async () => {
+  it("bulk Style tab keeps the style bar but hides per-item stickers", async () => {
     renderInfo(selected, node, 3);
     await userEvent.click(screen.getByRole("tab", { name: "Style" }));
     expect(screen.getByText("Shape")).toBeTruthy(); // StyleBar applies to all
     expect(screen.queryByText(/Stickers/)).toBeNull(); // per-item sticker grid hidden
+  });
+
+  it("bulk mode shows tri-state markers + tags and toggles them across the selection", async () => {
+    const onMarker = vi.fn();
+    const onTag = vi.fn();
+    renderInfo(selected, node, 3, undefined, undefined, [], noop, undefined, {
+      markers: { all: ["⭐"], some: ["🚩"] },
+      tags: { all: ["risk"], some: ["wip"] },
+      onMarker,
+      onTag,
+    });
+    // Details tab (default): tri-state tags — "risk" on all (✕ removes), "wip" on some (+ adds).
+    expect(screen.getByText("risk ✕")).toBeTruthy();
+    await userEvent.click(screen.getByText("wip +"));
+    expect(onTag).toHaveBeenCalledWith("wip");
+    // Style tab: tri-state markers — clicking the partial 🚩 adds it to all.
+    await userEvent.click(screen.getByRole("tab", { name: "Style" }));
+    await userEvent.click(screen.getByRole("button", { name: "🚩" }));
+    expect(onMarker).toHaveBeenCalledWith("🚩");
   });
 
   it("bulk mode blanks a mixed field + shows a 'Mixed' hint instead of the anchor's value", () => {

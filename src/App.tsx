@@ -38,6 +38,7 @@ import {
   type SelectedEdge,
   type SelectedNode,
   type SelectionFields,
+  type SelectionMarkerTags,
 } from "./mindmap";
 import { findAnyNode, nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
@@ -157,6 +158,8 @@ export function App() {
   // Per-field "mixed" summary of a multi-selection — lets the inspector blank-out + label fields the
   // selected topics disagree on, instead of showing (and silently overwriting from) the anchor's.
   const [selectionFields, setSelectionFields] = useState<SelectionFields | null>(null);
+  // Markers/tags-on-all-vs-some across the selection — drives the inspector's tri-state bulk chips.
+  const [selectionMarkerTags, setSelectionMarkerTags] = useState<SelectionMarkerTags | null>(null);
   // The selected relationship (cross-link) edge, if any — swaps the right slot to the EdgeInspector.
   // Mutually exclusive with node selection (the canvas drives both callbacks).
   const [selectedEdge, setSelectedEdge] = useState<SelectedEdge | null>(null);
@@ -1219,6 +1222,7 @@ export function App() {
                 onSelect={handleSelect}
                 onSelectionCount={setSelectedCount}
                 onSelectionFields={setSelectionFields}
+                onSelectionMarkerTags={setSelectionMarkerTags}
                 onSelectEdge={setSelectedEdge}
                 onOpenNote={() => {
                   panels.setInfoMinimized(false);
@@ -1317,6 +1321,10 @@ export function App() {
                   const ok = mapRef.current?.toggleSelectedIcon(mk);
                   if (!ok) showHint("Select a node first, then click a marker.");
                 }}
+                bulkMarkers={selectionMarkerTags?.markers}
+                bulkTags={selectionMarkerTags?.tags}
+                onBulkToggleMarker={(mk) => mapRef.current?.bulkToggleSelectedIcon(mk)}
+                onBulkToggleTag={(t) => mapRef.current?.bulkToggleSelectedTag(t)}
                 onPickSticker={(s) => {
                   const ok = mapRef.current?.setSelectedImage(stickerImage(s));
                   if (!ok) showHint("Select a node first, then pick a sticker.");

@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 152,
+  "reviewedThroughChangelogBullets": 153,
   "areas": [
     "editing",
     "notes",
@@ -1028,6 +1028,15 @@
       "id": "inspector-node-timestamps",
       "name": "Per-node created / modified timestamps (shown in the inspector)",
       "area": "editing",
+      "since": "2026-06-17",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "bulk-markers-tags",
+      "name": "Bulk markers + tags across a multi-selection (tri-state add/remove)",
+      "area": "markers",
       "since": "2026-06-17",
       "manual": true,
       "book": false,

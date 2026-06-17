@@ -55,6 +55,8 @@ import {
   addSibling,
   addStickyNote,
   addSubtree,
+  bulkToggleIcon,
+  bulkToggleTag,
   clearBackdrop,
   deleteCallout,
   deleteLink,
@@ -71,6 +73,8 @@ import {
   reparent,
   replaceTopics,
   selectionFields,
+  selectionMarkers,
+  selectionTags,
   setAllExpanded,
   setBackdrop,
   setBackdropRings,
@@ -179,6 +183,7 @@ function FlowInner({
   onSelect,
   onSelectionCount,
   onSelectionFields,
+  onSelectionMarkerTags,
   onSelectEdge,
   onOpenNote,
   onMapLink,
@@ -607,6 +612,17 @@ function FlowInner({
     onSelectionFieldsRef.current?.(selectionFields(renderDoc, selectedIds));
   }, [selectedIds, renderDoc]);
 
+  // Markers/tags-on-all-vs-some summary for tri-state bulk chips. Keyed on the live doc too, so a
+  // bulk toggle re-fires and a value flips between "all" and "some" as topics gain/lose it.
+  const onSelectionMarkerTagsRef = useRef(onSelectionMarkerTags);
+  onSelectionMarkerTagsRef.current = onSelectionMarkerTags;
+  useEffect(() => {
+    onSelectionMarkerTagsRef.current?.({
+      markers: selectionMarkers(renderDoc, selectedIds),
+      tags: selectionTags(renderDoc, selectedIds),
+    });
+  }, [selectedIds, renderDoc]);
+
   // Re-layout on a live layout-kind change (initial mount is already laid out).
   const firstRun = useRef(true);
   // biome-ignore lint/correctness/useExhaustiveDependencies: `direction` is the trigger; sync reads directionRef.
@@ -790,6 +806,18 @@ function FlowInner({
       setSelectedNote: (note) => withSelected((id) => apply(setNote(docRef.current, id, note))),
       toggleSelectedIcon: (icon) =>
         withSelected((id) => apply(toggleIcon(docRef.current, id, icon))),
+      bulkToggleSelectedIcon: (icon) => {
+        const ids = [...selectedIdsRef.current];
+        if (ids.length === 0) return false;
+        apply(bulkToggleIcon(docRef.current, ids, icon));
+        return true;
+      },
+      bulkToggleSelectedTag: (tag) => {
+        const ids = [...selectedIdsRef.current];
+        if (ids.length === 0) return false;
+        apply(bulkToggleTag(docRef.current, ids, tag));
+        return true;
+      },
       replaceTopics: (query, replacement) => {
         const res = replaceTopics(docRef.current, query, replacement);
         if (res.count > 0) apply({ doc: res.doc });

@@ -21,6 +21,19 @@ export interface SelectedNode {
   note: string;
 }
 
+/** A string-set field (markers/tags) summarised across a multi-node selection: values present on
+ *  EVERY selected topic (`all`) vs only SOME (`some`). Drives the inspector's tri-state bulk chips. */
+export interface MarkerTagSummary {
+  all: string[];
+  some: string[];
+}
+
+/** Markers + tags summaries for the selection (bulk mode). */
+export interface SelectionMarkerTags {
+  markers: MarkerTagSummary;
+  tags: MarkerTagSummary;
+}
+
 /** Per-field summary of a multi-node selection, so the inspector can blank-out + label a field as
  *  "Mixed" when the selected topics disagree on it (instead of silently showing the anchor's value).
  *  Computed on the canvas, where both the selection set and the doc live. Only the task fields the
@@ -54,6 +67,11 @@ export interface MindMapHandle {
   setSelectedNote: (note: string) => boolean;
   /** Toggle a marker icon on the selected node; false if nothing is selected. */
   toggleSelectedIcon: (icon: string) => boolean;
+  /** Tri-state bulk marker toggle across the whole selection: if every selected topic already has
+   *  the icon, remove it from all; else add it to those lacking it (one undo step). False if none. */
+  bulkToggleSelectedIcon: (icon: string) => boolean;
+  /** Tri-state bulk tag toggle across the whole selection (same semantics). False if none selected. */
+  bulkToggleSelectedTag: (tag: string) => boolean;
   /** Replace the query in every matching node topic; returns the count changed. */
   replaceTopics: (query: string, replacement: string) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
@@ -171,6 +189,9 @@ export interface MindMapProps {
   /** Fires with a per-field "mixed" summary of the selection, so the inspector can blank-out + label
    *  a task field whose value differs across the selected topics (instead of showing the anchor's). */
   onSelectionFields?: (fields: SelectionFields) => void;
+  /** Fires with the markers/tags-on-all-vs-some summary of the selection, so the inspector can show
+   *  tri-state bulk marker + tag chips. */
+  onSelectionMarkerTags?: (summary: SelectionMarkerTags) => void;
   /** Fires when a relationship (cross-link) edge is selected/deselected — the inspector swaps to the
    *  EdgeInspector. Mutually exclusive with node selection (selecting one clears the other). */
   onSelectEdge?: (edge: SelectedEdge | null) => void;

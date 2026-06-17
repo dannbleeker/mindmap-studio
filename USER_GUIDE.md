@@ -115,9 +115,12 @@ never drawn on the canvas or in image / PDF exports.)
 **Edit several topics at once.** Select multiple topics — **Shift/Ctrl/⌘-click** to add to the
 selection, or **drag a box** across the empty canvas — and the inspector switches to bulk mode (an
 "N topics selected" banner). Changes to **shape, fill, border, font/bold, progress, dates and
-priority** apply to every selected topic at once (a single undo reverts them all); the per-item
-editors (notes, markers, tags, stickers, attachments, links) are hidden — select a single topic to
-edit those. If the selected topics disagree on a field (progress, dates or priority), its control
+priority** apply to every selected topic at once (a single undo reverts them all). **Markers and
+tags** also work in bulk, with a *tri-state* view: a chip is **lit** when every selected topic has
+it and **dashed (a “+” chip)** when only some do — clicking adds it to the whole selection, or
+removes it from all if they all already have it. The remaining per-item editors (notes, stickers,
+attachments, links) stay single-topic — select one topic to edit those. If the selected topics
+disagree on a field (progress, dates or priority), its control
 shows blank and is tagged **Mixed** — so a bulk edit never silently overwrites them all with one
 topic's value; set the control to apply a single value to the whole selection. A plain click clears
 the multi-selection. *(Because the canvas now box-selects on a

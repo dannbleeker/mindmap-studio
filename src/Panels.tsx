@@ -16,7 +16,7 @@ import {
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { formatBytes } from "./io/attachment";
-import type { SelectedNode, SelectionFields } from "./mindmap";
+import type { MarkerTagSummary, SelectedNode, SelectionFields } from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
 import type { ConditionalRule, MapNode, NodeShape, NodeStyle } from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
@@ -1045,6 +1045,10 @@ export function InfoPanel({
   onNoteBlur,
   markers,
   onToggleMarker,
+  bulkMarkers,
+  bulkTags,
+  onBulkToggleMarker,
+  onBulkToggleTag,
   onPickSticker,
   onStyle,
   onAddTag,
@@ -1092,6 +1096,12 @@ export function InfoPanel({
   onNoteBlur: () => void;
   markers: readonly string[];
   onToggleMarker: (marker: string) => void;
+  /** Bulk mode: markers/tags on ALL vs SOME of the selection (tri-state chips). */
+  bulkMarkers?: MarkerTagSummary;
+  bulkTags?: MarkerTagSummary;
+  /** Bulk mode: tri-state toggle a marker/tag across the whole selection (add-to-all / remove-from-all). */
+  onBulkToggleMarker?: (marker: string) => void;
+  onBulkToggleTag?: (tag: string) => void;
   onPickSticker: (sticker: Sticker) => void;
   onStyle: (patch: Partial<NodeStyle>) => void;
   onAddTag: (tag: string) => void;
@@ -1314,7 +1324,17 @@ export function InfoPanel({
               {activeTab === "style" && (
                 <>
                   <StyleBar onStyle={onStyle} />
-                  {!multi && (
+                  {multi ? (
+                    // Bulk: tri-state markers (lit = on all, dashed = on some); stickers stay single-node.
+                    onBulkToggleMarker ? (
+                      <MarkerBar
+                        markers={markers}
+                        active={bulkMarkers?.all}
+                        partial={bulkMarkers?.some}
+                        onToggle={onBulkToggleMarker}
+                      />
+                    ) : null
+                  ) : (
                     <>
                       <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
                       <StickerBar stickers={STICKERS} onPick={onPickSticker} />
@@ -1365,6 +1385,73 @@ export function InfoPanel({
                       />
                     </>
                   )}
+
+                  {multi && bulkTags && onBulkToggleTag ? (
+                    <>
+                      {sectionLabel("Tags")}
+                      <div
+                        style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}
+                      >
+                        {bulkTags.all.map((t) => (
+                          <button
+                            key={`all:${t}`}
+                            type="button"
+                            onClick={() => onBulkToggleTag(t)}
+                            title={`"${t}" is on all selected topics — click to remove from all`}
+                            style={{
+                              border: "1px solid var(--ed-accent)",
+                              background: "var(--ed-accent-tint)",
+                              borderRadius: radius.md,
+                              cursor: "pointer",
+                              fontSize: fontSize.sm,
+                              padding: "1px 6px",
+                              color: "var(--ed-ink)",
+                            }}
+                          >
+                            {t} ✕
+                          </button>
+                        ))}
+                        {bulkTags.some.map((t) => (
+                          <button
+                            key={`some:${t}`}
+                            type="button"
+                            onClick={() => onBulkToggleTag(t)}
+                            title={`"${t}" is on some selected topics — click to add to all`}
+                            style={{
+                              border: "1px dashed var(--ed-accent)",
+                              background: "var(--ed-card)",
+                              borderRadius: radius.md,
+                              cursor: "pointer",
+                              fontSize: fontSize.sm,
+                              padding: "1px 6px",
+                              color: "var(--ed-muted)",
+                              opacity: 0.7,
+                            }}
+                          >
+                            {t} +
+                          </button>
+                        ))}
+                        {bulkTags.all.length === 0 && bulkTags.some.length === 0 ? (
+                          <span style={{ fontSize: fontSize.sm, color: "var(--ed-faint)" }}>
+                            No tags on the selection
+                          </span>
+                        ) : null}
+                      </div>
+                      <Input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && tagInput.trim()) {
+                            onBulkToggleTag(tagInput.trim());
+                            setTagInput("");
+                          }
+                        }}
+                        placeholder="Add a tag to all, press Enter"
+                        aria-label="Add a tag to all selected"
+                        style={{ width: "auto", margin: "0 10px 4px" }}
+                      />
+                    </>
+                  ) : null}
 
                   {renderProgress(node)}
 
@@ -1842,11 +1929,14 @@ export function StickerBar({
 export function MarkerBar({
   markers,
   active,
+  partial,
   onToggle,
 }: {
   markers: readonly string[];
-  /** Markers currently on the selected node — highlighted so the bar reflects state. */
+  /** Markers currently on the selected node (or on ALL selected, in bulk) — shown lit. */
   active?: readonly string[];
+  /** Bulk mode only: markers on SOME of the selection — shown as a dashed "partial" chip. */
+  partial?: readonly string[];
   onToggle: (marker: string) => void;
 }) {
   return (
@@ -1856,21 +1946,27 @@ export function MarkerBar({
       </span>
       {markers.map((marker) => {
         const on = active?.includes(marker);
+        const some = !on && partial?.includes(marker);
         return (
           <button
             key={marker}
             type="button"
             onClick={() => onToggle(marker)}
             aria-pressed={on}
-            title={`Toggle ${marker} on the selected node`}
+            title={
+              some
+                ? `${marker} is on some selected topics — click to add to all`
+                : `Toggle ${marker} on the selected topic(s)`
+            }
             style={{
-              border: `1px solid ${on ? "var(--ed-accent)" : "var(--ed-border)"}`,
+              border: `1px ${some ? "dashed" : "solid"} ${on || some ? "var(--ed-accent)" : "var(--ed-border)"}`,
               background: on ? "var(--ed-accent-tint)" : "var(--ed-card)",
               borderRadius: radius.md,
               cursor: "pointer",
               fontSize: fontSize.xl,
               lineHeight: 1,
               padding: "3px 5px",
+              opacity: some ? 0.6 : 1,
             }}
           >
             {marker}

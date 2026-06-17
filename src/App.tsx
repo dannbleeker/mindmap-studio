@@ -11,6 +11,7 @@ import {
   StylesPanel,
 } from "./Panels";
 import { Dialog } from "./components/Dialog";
+import { EdgeInspector } from "./components/EdgeInspector";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
 import { MapStats } from "./components/MapStats";
@@ -34,10 +35,11 @@ import {
   MindMap,
   type MindMapHandle,
   NODE_LINK_PREFIX,
+  type SelectedEdge,
   type SelectedNode,
   type SelectionFields,
 } from "./mindmap";
-import { nodePath } from "./mindmap/flow/ops";
+import { findAnyNode, nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
 import { noteCounts } from "./noteFormat";
@@ -155,6 +157,9 @@ export function App() {
   // Per-field "mixed" summary of a multi-selection — lets the inspector blank-out + label fields the
   // selected topics disagree on, instead of showing (and silently overwriting from) the anchor's.
   const [selectionFields, setSelectionFields] = useState<SelectionFields | null>(null);
+  // The selected relationship (cross-link) edge, if any — swaps the right slot to the EdgeInspector.
+  // Mutually exclusive with node selection (the canvas drives both callbacks).
+  const [selectedEdge, setSelectedEdge] = useState<SelectedEdge | null>(null);
   // Bumped when a node's 📝 indicator is clicked → InfoPanel switches to its Notes tab.
   const [noteNonce, setNoteNonce] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
@@ -242,13 +247,22 @@ export function App() {
     () => (selected ? backlinksFor(liveDoc, selected.id) : []),
     [selected, liveDoc],
   );
+  // The selected relationship's endpoint topics (for the EdgeInspector's "From → To" caption),
+  // resolved live so renames stay correct.
+  const edgeTopics = useMemo(() => {
+    const link = selectedEdge ? liveDoc.links?.find((l) => l.id === selectedEdge.id) : undefined;
+    return {
+      from: (link && findAnyNode(liveDoc, link.from)?.topic) || "",
+      to: (link && findAnyNode(liveDoc, link.to)?.topic) || "",
+    };
+  }, [selectedEdge, liveDoc]);
   // Auto-show the right-side inspector when a node is selected (the redesign's auto-show behaviour).
   // Sticky minimize wins: if the user has collapsed the inspector to its strip, selecting another
   // node does NOT force it back open (selectedNode still updates, so re-expanding shows the new node).
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on selection id; setters are stable.
   useEffect(() => {
-    if (selected && !panels.infoMinimized) panels.setInfoOpen(true);
-  }, [selected?.id]);
+    if ((selected || selectedEdge) && !panels.infoMinimized) panels.setInfoOpen(true);
+  }, [selected?.id, selectedEdge?.id]);
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
   const focusLit = useMemo(() => (focus ? focusSet(liveDoc, focus.id) : null), [focus, liveDoc]);
   const litIds = focusLit && focusLit.size > 0 ? focusLit : (filterHits?.lit ?? null);
@@ -1198,6 +1212,7 @@ export function App() {
                 onSelect={handleSelect}
                 onSelectionCount={setSelectedCount}
                 onSelectionFields={setSelectionFields}
+                onSelectEdge={setSelectedEdge}
                 onOpenNote={() => {
                   panels.setInfoMinimized(false);
                   panels.setInfoOpen(true);
@@ -1259,7 +1274,23 @@ export function App() {
             </div>
           </div>
           {panels.infoOpen ? (
-            selected ? (
+            selectedEdge ? (
+              <EdgeInspector
+                edge={selectedEdge}
+                fromTopic={edgeTopics.from}
+                toTopic={edgeTopics.to}
+                width={panels.inspectorWidth}
+                onResize={panels.setInspectorWidth}
+                onSetLabel={(label) => mapRef.current?.setLinkLabel(label)}
+                onSetArrow={(arrow) => mapRef.current?.setLinkArrow(arrow)}
+                onSetStyle={(patch) => mapRef.current?.setLinkStyle(patch)}
+                onDelete={() => mapRef.current?.deleteLink()}
+                onMinimize={() => {
+                  panels.setInfoOpen(false);
+                  panels.setInfoMinimized(true);
+                }}
+              />
+            ) : selected ? (
               <InfoPanel
                 selected={selected}
                 selectedCount={selectedCount}

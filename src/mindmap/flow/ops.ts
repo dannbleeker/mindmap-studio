@@ -535,13 +535,55 @@ export function addLink(doc: MindMapDoc, from: string, to: string, label?: strin
   return { doc: next };
 }
 
-/** Set (or clear, with "") a cross-link's label. */
+/** Set (or clear, with "") a cross-link's label — preserving its style fields. */
 export function setLinkLabel(doc: MindMapDoc, id: string, label: string): OpResult {
   if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
   const next = structuredClone(doc);
-  next.links = (next.links ?? []).map((l) =>
-    l.id === id ? (label ? { ...l, label } : { id: l.id, from: l.from, to: l.to }) : l,
-  );
+  next.links = (next.links ?? []).map((l) => {
+    if (l.id !== id) return l;
+    const { label: _drop, ...rest } = l;
+    return label ? { ...rest, label } : rest;
+  });
+  return { doc: next };
+}
+
+/** Set a cross-link's arrowhead placement. "to" is the implicit default (single-headed at the
+ *  target, today's look), so it's stored as the absence of the field to keep the .json lean. */
+export function setLinkArrow(doc: MindMapDoc, id: string, arrow: CrossLink["arrow"]): OpResult {
+  if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.links = (next.links ?? []).map((l) => {
+    if (l.id !== id) return l;
+    const { arrow: _drop, ...rest } = l;
+    return arrow && arrow !== "to" ? { ...rest, arrow } : rest;
+  });
+  return { doc: next };
+}
+
+/** Merge a style patch (colour / width / dash) into a cross-link. A field cleared to a falsy value —
+ *  or `dash:"dashed"` (the implicit default) — is dropped, so a reset link serialises field-free. */
+export function setLinkStyle(
+  doc: MindMapDoc,
+  id: string,
+  patch: { color?: string; width?: number; dash?: CrossLink["dash"] },
+): OpResult {
+  if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.links = (next.links ?? []).map((l) => {
+    if (l.id !== id) return l;
+    const merged = {
+      ...l,
+      ...("color" in patch ? { color: patch.color || undefined } : {}),
+      ...("width" in patch ? { width: patch.width || undefined } : {}),
+      ...("dash" in patch
+        ? { dash: patch.dash && patch.dash !== "dashed" ? patch.dash : undefined }
+        : {}),
+    };
+    // Strip keys now undefined so a cleared field doesn't survive in the lossless .json.
+    return Object.fromEntries(
+      Object.entries(merged).filter(([, v]) => v !== undefined),
+    ) as unknown as CrossLink;
+  });
   return { doc: next };
 }
 

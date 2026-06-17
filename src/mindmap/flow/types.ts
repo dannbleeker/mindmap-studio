@@ -59,6 +59,12 @@ export type EdgeData = {
   /** Line-jumps on (per-map meta.lineJumps): a crosslink draws its line as a chord with semicircular
    *  hops where it crosses another crosslink. Carried on crosslink edges so CrosslinkEdge can decide. */
   lineJumps?: boolean;
+  /** Per-link style overrides carried from CrossLink so the renderer + exporter resolve one source
+   *  (see resolveLinkStyle). Absent fields fall back to today's accent/1.5px/dashed/arrow-at-target. */
+  arrow?: "to" | "from" | "both" | "none";
+  color?: string;
+  width?: number;
+  dash?: "dashed" | "solid" | "dotted";
   /** Dimmed by the read-only Power Filter (an endpoint isn't lit); view-only opacity. */
   dimmed?: boolean;
 };

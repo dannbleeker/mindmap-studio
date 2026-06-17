@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Relationship inspector — style your connectors.** Click a relationship (cross-link) arrow and the
+  right panel becomes a dedicated editor: rename its **label**, set its **direction / arrowheads**
+  (at the target, the source, both ends, or none), pick a **colour**, **width** (thin / medium /
+  thick) and **line style** (dashed / solid / dotted), or **delete** it. The selected relationship
+  shows a highlight halo on the canvas, and node vs. relationship selection are mutually exclusive.
+  Styling is **lossless in `.json`** and carried into every image / PDF / HTML export (the canvas and
+  the export resolve it through one shared helper, so they always match); existing relationships keep
+  their original single-arrow dashed look until you change them.
+
 - **"Linked from" backlinks in the inspector.** The Details tab now lists every topic that points
   *at* the selected one — via a **topic-jump link** (`↪`) or an incoming **relationship** edge (`↬`,
   with its label) — and each is a one-click jump that selects and centres that source topic. It

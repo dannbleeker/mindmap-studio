@@ -32,6 +32,17 @@ export interface SelectionFields {
   mixed: { progress: boolean; priority: boolean; start: boolean; due: boolean };
 }
 
+/** A relationship (cross-link) edge surfaced to the app's inspector when one is selected. Resolved —
+ *  every field carries a concrete value (defaults filled), so the EdgeInspector renders directly. */
+export interface SelectedEdge {
+  id: string;
+  label: string;
+  arrow: "to" | "from" | "both" | "none";
+  color: string;
+  width: number;
+  dash: "dashed" | "solid" | "dotted";
+}
+
 /** Imperative API a canvas component exposes via its ref. */
 export interface MindMapHandle {
   exportSvg: () => Blob | null;
@@ -97,6 +108,14 @@ export interface MindMapHandle {
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the
    *  current selection so repeated calls add siblings under the same parent. */
   quickAdd: (text: string) => void;
+  /** Set (or clear, with "") the selected relationship's label; false if no edge is selected. */
+  setLinkLabel: (label: string) => boolean;
+  /** Set the selected relationship's arrowhead placement; false if no edge is selected. */
+  setLinkArrow: (arrow: SelectedEdge["arrow"]) => boolean;
+  /** Merge a style patch (colour / width / dash) into the selected relationship; false if none. */
+  setLinkStyle: (patch: { color?: string; width?: number; dash?: SelectedEdge["dash"] }) => boolean;
+  /** Delete the selected relationship; false if no edge is selected. */
+  deleteLink: () => boolean;
 }
 
 /** Prefix marking a node hyperlink as an in-app link to another map. */
@@ -150,6 +169,9 @@ export interface MindMapProps {
   /** Fires with a per-field "mixed" summary of the selection, so the inspector can blank-out + label
    *  a task field whose value differs across the selected topics (instead of showing the anchor's). */
   onSelectionFields?: (fields: SelectionFields) => void;
+  /** Fires when a relationship (cross-link) edge is selected/deselected — the inspector swaps to the
+   *  EdgeInspector. Mutually exclusive with node selection (selecting one clears the other). */
+  onSelectEdge?: (edge: SelectedEdge | null) => void;
   /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
    *  Notes tab for the (now-selected) node. */
   onOpenNote?: () => void;

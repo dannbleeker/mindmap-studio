@@ -147,7 +147,16 @@ export function project(
       target: link.to,
       type: "crosslink",
       label: link.label,
-      data: { depth: 0, branchColor: CROSSLINK_COLOR, crosslink: true, lineJumps },
+      data: {
+        depth: 0,
+        branchColor: CROSSLINK_COLOR,
+        crosslink: true,
+        lineJumps,
+        arrow: link.arrow,
+        color: link.color,
+        width: link.width,
+        dash: link.dash,
+      },
     });
   }
 

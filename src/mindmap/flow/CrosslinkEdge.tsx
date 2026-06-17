@@ -11,7 +11,7 @@ import { memo, useMemo } from "react";
 import { arrowHeadPath } from "./arrowhead";
 import { type Box, floatingPoints, getFloatingPoints } from "./floating";
 import { type HopSegment, hopPath } from "./lineJumps";
-import { CROSSLINK_COLOR, CROSSLINK_DASH, CROSSLINK_WIDTH } from "./style";
+import { resolveLinkStyle } from "./style";
 import type { EdgeData, FlowEdge } from "./types";
 
 /** A live React Flow node's on-screen box (top-left + size → centre + size). This app has no
@@ -57,7 +57,7 @@ function collectSegments(
 // wide bezier hit-area + arrowhead + label are unchanged (the gentle curve keeps the hit-area within
 // reach of the chord), so rename/delete still work.
 
-function CrosslinkEdgeImpl({ id, source, target, label, data }: EdgeProps<FlowEdge>) {
+function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgeProps<FlowEdge>) {
   const s = useInternalNode(source);
   const t = useInternalNode(target);
   // Subscribe to all nodes + edges so the hops re-compute live as ANY node moves or a relationship
@@ -89,24 +89,37 @@ function CrosslinkEdgeImpl({ id, source, target, label, data }: EdgeProps<FlowEd
     targetX: tx,
     targetY: ty,
   });
-  const color = data?.branchColor ?? CROSSLINK_COLOR;
+  const { color, width, dasharray, arrowAtTarget, arrowAtSource } = resolveLinkStyle(data ?? {});
   const dimOpacity = data?.dimmed ? 0.12 : 1;
 
   const visiblePath = hopPathStr ?? bezier;
 
   return (
     <>
+      {selected ? (
+        // A wider translucent halo under the line marks the selected relationship (no hit-area, solid).
+        <BaseEdge
+          path={visiblePath}
+          interactionWidth={0}
+          style={{ stroke: color, strokeWidth: width + 6, opacity: 0.25 }}
+        />
+      ) : null}
       <BaseEdge
         path={visiblePath}
         interactionWidth={20}
         style={{
           stroke: color,
-          strokeWidth: CROSSLINK_WIDTH,
-          strokeDasharray: CROSSLINK_DASH,
+          strokeWidth: width,
+          strokeDasharray: dasharray || undefined,
           opacity: dimOpacity,
         }}
       />
-      <path d={arrowHeadPath(tx, ty, sx, sy)} fill={color} style={{ opacity: dimOpacity }} />
+      {arrowAtTarget ? (
+        <path d={arrowHeadPath(tx, ty, sx, sy)} fill={color} style={{ opacity: dimOpacity }} />
+      ) : null}
+      {arrowAtSource ? (
+        <path d={arrowHeadPath(sx, sy, tx, ty)} fill={color} style={{ opacity: dimOpacity }} />
+      ) : null}
       {label ? (
         <EdgeLabelRenderer>
           <div

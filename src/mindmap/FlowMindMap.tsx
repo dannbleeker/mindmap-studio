@@ -82,7 +82,9 @@ import {
   setHyperlink,
   setImage,
   setLineJumps,
+  setLinkArrow,
   setLinkLabel,
+  setLinkStyle,
   setNodeLayout,
   setNodePos,
   setNote,
@@ -98,6 +100,7 @@ import {
   toggleIcon,
 } from "./flow/ops";
 import { project } from "./flow/project";
+import { CROSSLINK_COLOR, CROSSLINK_WIDTH } from "./flow/style";
 import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { mindManagerTheme } from "./theme";
 
@@ -175,6 +178,7 @@ function FlowInner({
   onSelect,
   onSelectionCount,
   onSelectionFields,
+  onSelectEdge,
   onOpenNote,
   onMapLink,
   ref,
@@ -198,6 +202,9 @@ function FlowInner({
   // last-touched node) that every single-node behaviour — keyboard, popover, per-item edits — keeps
   // using. For a single selection the set is just {anchor}.
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  // The selected relationship (cross-link) edge, if any. Mutually exclusive with node selection —
+  // selecting an edge clears the node anchor/set and vice-versa; drives the EdgeInspector + the halo.
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
@@ -242,6 +249,10 @@ function FlowInner({
   selectedRef.current = selectedId;
   const selectedIdsRef = useRef<Set<string>>(selectedIds);
   selectedIdsRef.current = selectedIds;
+  const selectedEdgeIdRef = useRef<string | null>(null);
+  selectedEdgeIdRef.current = selectedEdgeId;
+  const onSelectEdgeRef = useRef(onSelectEdge);
+  onSelectEdgeRef.current = onSelectEdge;
   const editingRef = useRef<string | null>(null);
   editingRef.current = editingId;
   const linkingFromRef = useRef<string | null>(null);
@@ -292,16 +303,17 @@ function FlowInner({
       );
       // Brace map hides the tapered branch ribbons (the "{" forks replace them); cross-links stay.
       const brace = kind === "brace";
+      const selEdge = selectedEdgeIdRef.current;
       setEdges(
-        lit || brace
-          ? proj.edges.map((e) => ({
-              ...e,
-              ...(brace && !e.data?.crosslink ? { hidden: true } : {}),
-              data: lit
-                ? { ...(e.data as EdgeData), dimmed: !(lit.has(e.source) && lit.has(e.target)) }
-                : e.data,
-            }))
-          : proj.edges,
+        proj.edges.map((e) => ({
+          ...e,
+          // Persist the selected relationship's halo across re-projection (mirrors the node path).
+          selected: e.id === selEdge,
+          ...(brace && !e.data?.crosslink ? { hidden: true } : {}),
+          data: lit
+            ? { ...(e.data as EdgeData), dimmed: !(lit.has(e.source) && lit.has(e.target)) }
+            : e.data,
+        })),
       );
     },
     [getNodes, setNodes, setEdges],
@@ -310,6 +322,31 @@ function FlowInner({
   const fireSelect = useCallback((id: string | null) => {
     const n = id ? findNode(docRef.current, id) : null;
     onSelectRef.current?.(n ? { id: n.id, topic: n.topic, note: n.note ?? "" } : null);
+  }, []);
+
+  // Emit the selected relationship (resolved, defaults filled) to the app's EdgeInspector, or null.
+  const fireSelectEdge = useCallback((id: string | null) => {
+    const l = id ? (docRef.current.links ?? []).find((x) => x.id === id) : null;
+    onSelectEdgeRef.current?.(
+      l
+        ? {
+            id: l.id,
+            label: l.label ?? "",
+            arrow: l.arrow ?? "to",
+            color: l.color ?? CROSSLINK_COLOR,
+            width: l.width ?? CROSSLINK_WIDTH,
+            dash: l.dash ?? "dashed",
+          }
+        : null,
+    );
+  }, []);
+
+  // Clear any selected relationship (when a node / the pane is selected — they're mutually exclusive).
+  const clearEdgeSelection = useCallback(() => {
+    if (selectedEdgeIdRef.current !== null) {
+      setSelectedEdgeId(null);
+      onSelectEdgeRef.current?.(null);
+    }
   }, []);
 
   // Collapse the selection to a single anchor (the single-select path), or clear it (id = null).
@@ -326,6 +363,7 @@ function FlowInner({
       const ids = new Set(selNodes.map((n) => n.id));
       const cur = selectedIdsRef.current;
       if (ids.size === cur.size && [...ids].every((x) => cur.has(x))) return;
+      if (ids.size > 0) clearEdgeSelection(); // node + edge selection are mutually exclusive
       setSelectedIds(ids);
       // Keep the anchor if it's still selected, else adopt the most-recently-selected node.
       const anchor =
@@ -335,7 +373,7 @@ function FlowInner({
       setSelectedId(anchor);
       fireSelect(anchor);
     },
-    [fireSelect],
+    [fireSelect, clearEdgeSelection],
   );
 
   // Apply a pure op: persist + re-render; optionally enter edit on the resulting node.
@@ -533,6 +571,25 @@ function FlowInner({
     );
   }, [selectedIds, setNodes]);
 
+  // Mirror the selected relationship into the edges' `selected` flag (drives the halo), the same way
+  // the node effect above does — so app-side edge selection + the live RF click stay in lockstep.
+  useEffect(() => {
+    setEdges((eds) =>
+      eds.map((e) =>
+        e.selected === (e.id === selectedEdgeId) ? e : { ...e, selected: e.id === selectedEdgeId },
+      ),
+    );
+  }, [selectedEdgeId, setEdges]);
+
+  // Prune a dangling edge selection: if the selected link is gone (deleted, or pruned with a node, or
+  // an undo/redo restored a doc without it), clear it so the inspector doesn't show a stale edge.
+  useEffect(() => {
+    if (selectedEdgeId && !(renderDoc.links ?? []).some((l) => l.id === selectedEdgeId)) {
+      setSelectedEdgeId(null);
+      onSelectEdgeRef.current?.(null);
+    }
+  }, [renderDoc, selectedEdgeId]);
+
   // Report the selection count up (the inspector switches to bulk mode when >1).
   const onSelectionCountRef = useRef(onSelectionCount);
   onSelectionCountRef.current = onSelectionCount;
@@ -686,6 +743,18 @@ function FlowInner({
     [apply],
   );
 
+  // Apply a pure cross-link op to the selected relationship edge (the edge-inspector path); false if
+  // no edge is selected. Mirrors withSelected for nodes.
+  const withSelectedLink = useCallback(
+    (op: (doc: MindMapDoc, id: string) => OpResult): boolean => {
+      const id = selectedEdgeIdRef.current;
+      if (!id) return false;
+      apply(op(docRef.current, id));
+      return true;
+    },
+    [apply],
+  );
+
   useImperativeHandle(
     ref,
     (): MindMapHandle => ({
@@ -784,8 +853,20 @@ function FlowInner({
         const res = addSubtree(docRef.current, parentId, [{ id: "q", topic: t, children: [] }]);
         apply({ doc: res.doc });
       },
+      // Relationship (cross-link) edits — applied to the selected edge (false if none selected).
+      setLinkLabel: (label) => withSelectedLink((doc, id) => setLinkLabel(doc, id, label)),
+      setLinkArrow: (arrow) => withSelectedLink((doc, id) => setLinkArrow(doc, id, arrow)),
+      setLinkStyle: (patch) => withSelectedLink((doc, id) => setLinkStyle(doc, id, patch)),
+      deleteLink: () => {
+        const ok = withSelectedLink((doc, id) => deleteLink(doc, id));
+        if (ok) {
+          setSelectedEdgeId(null);
+          onSelectEdgeRef.current?.(null);
+        }
+        return ok;
+      },
     }),
-    [fitView, getNodes, apply, withSelected, withSelectedAll, focusNodeById],
+    [fitView, getNodes, apply, withSelected, withSelectedAll, withSelectedLink, focusNodeById],
   );
 
   return (
@@ -863,31 +944,39 @@ function FlowInner({
             }
             setLinkingFrom(null);
             setMenu(null);
+            clearEdgeSelection();
             // A modified click extends the selection — React Flow toggles it and we mirror the
             // result via onSelectionChange; a plain click is a single (anchor) select.
             if (ev.shiftKey || ev.metaKey || ev.ctrlKey) return;
             selectOnly(node.id);
             fireSelect(node.id);
           }}
+          onEdgeClick={(_, edge) => {
+            // Selecting a relationship opens the EdgeInspector; clear any node selection (mutually
+            // exclusive), and the menu / link-draw gesture.
+            if (edge.type !== "crosslink") return;
+            setMenu(null);
+            setLinkingFrom(null);
+            selectOnly(null);
+            fireSelect(null);
+            setSelectedEdgeId(edge.id);
+            fireSelectEdge(edge.id);
+          }}
           onPaneClick={() => {
             setLinkingFrom(null);
             selectOnly(null);
             fireSelect(null);
+            clearEdgeSelection();
             setMenu(null);
           }}
           onNodeContextMenu={(e, node) => {
             e.preventDefault();
+            clearEdgeSelection();
             selectOnly(node.id);
             fireSelect(node.id);
             setMenu({ x: e.clientX, y: e.clientY, id: node.id });
           }}
           onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
-          onEdgeDoubleClick={(_, edge) => {
-            if (edge.type !== "crosslink") return;
-            const cur = (docRef.current.links ?? []).find((l) => l.id === edge.id);
-            const label = window.prompt("Relationship label (blank for none):", cur?.label ?? "");
-            if (label !== null) apply(setLinkLabel(docRef.current, edge.id, label));
-          }}
           onEdgeContextMenu={(e, edge) => {
             e.preventDefault();
             if (edge.type !== "crosslink") return;

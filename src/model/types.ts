@@ -113,12 +113,22 @@ export interface MapNode {
   rollup?: string;
 }
 
-/** A labelled cross-link between two nodes (MindManager "relationship"). */
+/** A labelled cross-link between two nodes (MindManager "relationship"). The optional style fields
+ *  are json-lossless and ignored by flat exporters; when absent the link renders with today's look
+ *  (a single arrowhead at the target, the shared accent colour, 1.5px dashed). */
 export interface CrossLink {
   id: string;
   from: NodeId;
   to: NodeId;
   label?: string;
+  /** Which end(s) carry an arrowhead. Absent = "to" (the historical single-headed default). */
+  arrow?: "to" | "from" | "both" | "none";
+  /** Stroke colour override; absent = the shared CROSSLINK_COLOR accent. */
+  color?: string;
+  /** Stroke width override (px); absent = CROSSLINK_WIDTH. */
+  width?: number;
+  /** Line style; absent = "dashed" (the historical CROSSLINK_DASH). */
+  dash?: "dashed" | "solid" | "dotted";
 }
 
 /** A visual grouping around a set of nodes (MindManager "boundary"). */

@@ -36,7 +36,9 @@ import {
   setHyperlink,
   setImage,
   setLineJumps,
+  setLinkArrow,
   setLinkLabel,
+  setLinkStyle,
   setNodeLayout,
   setNodePos,
   setNote,
@@ -740,6 +742,40 @@ describe("flow ops — cross-links (relationships)", () => {
   it("deleteLink is a no-op for a non-existent link id", () => {
     const d = base();
     expect(deleteLink(d, "ghost").doc).toBe(d);
+  });
+
+  it("setLinkLabel preserves a link's style fields when clearing the label", () => {
+    const styled = setLinkStyle(base(), "l", { color: "#ff0000", dash: "dotted" }).doc;
+    const cleared = setLinkLabel(styled, "l", "").doc;
+    // label gone, but the style survives.
+    expect(cleared.links?.[0]).toEqual({
+      id: "l",
+      from: "a1",
+      to: "b",
+      color: "#ff0000",
+      dash: "dotted",
+    });
+  });
+
+  it("setLinkArrow stores a non-default arrow and drops it back to the implicit 'to'", () => {
+    const both = setLinkArrow(base(), "l", "both").doc;
+    expect(both.links?.[0]?.arrow).toBe("both");
+    // "to" is the historical default → stored as the field's absence.
+    expect(setLinkArrow(both, "l", "to").doc.links?.[0]).not.toHaveProperty("arrow");
+  });
+
+  it("setLinkStyle merges colour/width/dash and clears each on a falsy / default value", () => {
+    const styled = setLinkStyle(base(), "l", { color: "#abc", width: 3, dash: "dotted" }).doc;
+    expect(styled.links?.[0]).toMatchObject({ color: "#abc", width: 3, dash: "dotted" });
+    // Clear colour with "", width with 0, and dash back to the default "dashed" → all dropped.
+    const reset = setLinkStyle(styled, "l", { color: "", width: 0, dash: "dashed" }).doc;
+    expect(reset.links?.[0]).toEqual({ id: "l", from: "a1", to: "b", label: "x" });
+  });
+
+  it("setLinkArrow / setLinkStyle are no-ops for an unknown link id", () => {
+    const d = base();
+    expect(setLinkArrow(d, "ghost", "both").doc).toBe(d);
+    expect(setLinkStyle(d, "ghost", { color: "#abc" }).doc).toBe(d);
   });
 });
 

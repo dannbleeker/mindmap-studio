@@ -7,6 +7,37 @@
 export const CROSSLINK_COLOR = "#8b87e0";
 export const CROSSLINK_WIDTH = 1.5;
 export const CROSSLINK_DASH = "6 4";
+export const CROSSLINK_DOT = "2 4";
+
+/** A relationship edge's resolved render values + arrowhead placement, defaults filled in. Computed
+ *  once here so the live canvas edge (CrosslinkEdge) and the SVG exporter draw the byte-identical
+ *  stroke + arrowheads — the canvas==export invariant. `dasharray` is "" for a solid line. */
+export interface ResolvedLinkStyle {
+  color: string;
+  width: number;
+  dasharray: string;
+  arrowAtTarget: boolean;
+  arrowAtSource: boolean;
+}
+
+/** Resolve a cross-link's optional style/arrow fields to concrete render values. Absent fields fall
+ *  back to today's look (accent colour, 1.5px, dashed, a single arrowhead at the target). */
+export function resolveLinkStyle(s: {
+  color?: string;
+  width?: number;
+  dash?: "dashed" | "solid" | "dotted";
+  arrow?: "to" | "from" | "both" | "none";
+}): ResolvedLinkStyle {
+  const dash = s.dash ?? "dashed";
+  const arrow = s.arrow ?? "to";
+  return {
+    color: s.color || CROSSLINK_COLOR,
+    width: s.width || CROSSLINK_WIDTH,
+    dasharray: dash === "solid" ? "" : dash === "dotted" ? CROSSLINK_DOT : CROSSLINK_DASH,
+    arrowAtTarget: arrow === "to" || arrow === "both",
+    arrowAtSource: arrow === "from" || arrow === "both",
+  };
+}
 
 // Boundary enclosure box.
 export const BOUNDARY_PAD = 16;

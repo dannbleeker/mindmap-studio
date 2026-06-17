@@ -350,11 +350,13 @@ backdrop you see on the canvas. The second **✕** removes the image.
 
 ## Relationships, boundaries & callouts
 
-- **Relationships** — draw a labelled, **directional** arrow (the arrowhead points at the target)
-  between two nodes: right-click the first node → **Link to…**, then click the target (you'll be
-  prompted for an optional label). Double-click a relationship to relabel it, right-click it to
-  delete. Drawn and imported (`.mmap`) relationships both persist, and the arrow direction carries
-  into image exports.
+- **Relationships** — draw a labelled, **directional** arrow between two nodes: right-click the first
+  node → **Link to…**, then click the target (you'll be prompted for an optional label). **Click a
+  relationship to select it** and the inspector becomes a connector editor — change its **label**,
+  **direction / arrowheads** (target, source, both, or none), **colour**, **width**, and **line
+  style** (dashed / solid / dotted), or **delete** it (right-click still deletes as a shortcut). The
+  selected relationship gets a highlight halo. Styling is lossless in `.json` and carries into every
+  image / PDF / HTML export; drawn and imported (`.mmap`) relationships both persist.
   - **Line jumps** — on a busy map where relationship arrows cross each other, click **⌒ Line jumps**
     in the toolbar. Wherever two relationships cross, one of them draws a small semicircular **hop**
     over the other, so the lines clearly *pass over* rather than appear to join (you get one bump per

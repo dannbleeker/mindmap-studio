@@ -35,6 +35,7 @@ export default defineConfig({
       ["test/start-extra.test.tsx", "jsdom"],
       ["test/presentation.test.tsx", "jsdom"],
       ["test/flowmindmap.test.tsx", "jsdom"],
+      ["test/edge-inspector.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.

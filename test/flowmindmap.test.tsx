@@ -439,7 +439,8 @@ describe("FlowMindMap canvas", () => {
       },
       links: [{ id: "l1", from: "a", to: "b", label: "rel" }],
     };
-    const { container, onMapLink } = mount(doc);
+    const onSelectEdge = vi.fn();
+    const { container, onMapLink, onChange, h } = mount(doc, { onSelectEdge });
     // Minimap toggle (the bottom-right Panel button) — covers toggleMinimap + its localStorage write.
     run(() => fireEvent.click(screen.getByText(/Minimap/)));
     run(() => fireEvent.click(screen.getByText(/Minimap/)));
@@ -451,13 +452,43 @@ describe("FlowMindMap canvas", () => {
       fireEvent.click(within(nodeEl(container, "b") as HTMLElement).getByTitle(/Follow link/)),
     );
     expect(onMapLink).toHaveBeenCalledWith("m2");
-    // Relationship edge: double-click sets a label (prompt), right-click deletes it (confirm).
-    const edge = container.querySelector(".react-flow__edge");
-    if (edge) {
-      run(() => fireEvent.doubleClick(edge));
-      const again = container.querySelector(".react-flow__edge");
-      if (again) run(() => fireEvent.contextMenu(again));
-    }
+
+    // Relationship edge: clicking it selects the edge and surfaces the resolved SelectedEdge. RF
+    // wires the edge click on the wide invisible interaction path (the visible <g> has none).
+    const edgeHit = () =>
+      (container.querySelector(".react-flow__edge-interaction") ??
+        container.querySelector(".react-flow__edge-path")) as Element;
+    run(() => fireEvent.click(edgeHit()));
+    expect(onSelectEdge).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: "l1", label: "rel", arrow: "to", dash: "dashed" }),
+    );
+
+    // The imperative edge mutators apply to the selected edge.
+    run(() => h.setLinkArrow("both"));
+    run(() => h.setLinkStyle({ color: "#ff0000", dash: "dotted" }));
+    run(() => h.setLinkLabel("depends on"));
+    const link = () => (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).links?.[0];
+    expect(link()).toMatchObject({
+      arrow: "both",
+      color: "#ff0000",
+      dash: "dotted",
+      label: "depends on",
+    });
+
+    // Selecting a node clears the edge selection (mutually exclusive).
+    run(() => fireEvent.click(nodeEl(container, "a")));
+    expect(onSelectEdge).toHaveBeenLastCalledWith(null);
+    // With no edge selected, the edge mutators are no-ops returning false.
+    let ret: boolean | undefined;
+    run(() => {
+      ret = h.deleteLink();
+    });
+    expect(ret).toBe(false);
+
+    // Re-select + delete the edge via the handle.
+    run(() => fireEvent.click(edgeHit()));
+    run(() => h.deleteLink());
+    expect((onChange.mock.calls.at(-1)?.[0] as MindMapDoc).links).toBeUndefined();
   });
 
   it("re-syncs on live direction / numbering / filter prop changes", () => {

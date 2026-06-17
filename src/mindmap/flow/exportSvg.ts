@@ -23,9 +23,6 @@ import {
   CALLOUT_BG,
   CALLOUT_STROKE,
   CALLOUT_TEXT,
-  CROSSLINK_COLOR,
-  CROSSLINK_DASH,
-  CROSSLINK_WIDTH,
   SUMMARY_BRACKET_W,
   SUMMARY_GAP,
   SUMMARY_LABEL_BG,
@@ -34,6 +31,7 @@ import {
   SUMMARY_PAD,
   SUMMARY_STROKE,
   boundaryLabel,
+  resolveLinkStyle,
   summaryLabel,
 } from "./style";
 
@@ -324,7 +322,15 @@ export function buildFlowSvg(
     if (!sr || !tr) continue;
     const { sx, sy, tx, ty } = floatingPoints(boxOf(sr), boxOf(tr));
     if (e.data?.crosslink) {
-      const clColor = e.data.branchColor ?? CROSSLINK_COLOR;
+      // Resolve colour / width / dash + arrow placement from the SAME helper the canvas edge uses,
+      // so a styled relationship exports byte-for-byte identically (canvas == export).
+      const {
+        color: clColor,
+        width: clWidth,
+        dasharray,
+        arrowAtTarget,
+        arrowAtSource,
+      } = resolveLinkStyle(e.data);
       // Hopped chord when line-jumps is on; otherwise the gentle S-bezier.
       const self = lineJumps ? hopSegments.find((seg) => seg.id === e.id) : undefined;
       const linePath = self
@@ -333,12 +339,15 @@ export function buildFlowSvg(
             const mx = (sx + tx) / 2;
             return `M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}`;
           })();
+      const dashAttr = dasharray ? ` stroke-dasharray="${dasharray}"` : "";
       parts.push(
-        `<path d="${linePath}" fill="none" stroke="${clColor}" stroke-width="${CROSSLINK_WIDTH}" stroke-dasharray="${CROSSLINK_DASH}"/>`,
-        // Directional arrowhead at the target — same builder the canvas uses, so the relationship
-        // reads as flow in exports too.
-        `<path d="${arrowHeadPath(tx, ty, sx, sy)}" fill="${clColor}"/>`,
+        `<path d="${linePath}" fill="none" stroke="${clColor}" stroke-width="${clWidth}"${dashAttr}/>`,
       );
+      // Directional arrowhead(s) — same builder the canvas uses, at whichever end(s) carry one.
+      if (arrowAtTarget)
+        parts.push(`<path d="${arrowHeadPath(tx, ty, sx, sy)}" fill="${clColor}"/>`);
+      if (arrowAtSource)
+        parts.push(`<path d="${arrowHeadPath(sx, sy, tx, ty)}" fill="${clColor}"/>`);
       const label = typeof e.label === "string" ? e.label : "";
       if (label) {
         parts.push(

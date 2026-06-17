@@ -14,7 +14,7 @@ import { arrowHeadPath } from "../src/mindmap/flow/arrowhead";
 import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
 import { shapePath } from "../src/mindmap/flow/shapes";
 import { CROSSLINK_COLOR } from "../src/mindmap/flow/style";
-import type { MindMapDoc } from "../src/model/types";
+import type { CrossLink, MindMapDoc } from "../src/model/types";
 import { STICKERS, stickerImage } from "../src/stickers";
 
 const PNG =
@@ -353,6 +353,48 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     );
     expect(tricky).toContain("A &amp; B &lt;c&gt;");
     expect(tricky).not.toContain("<c>");
+  });
+});
+
+describe("flow exportSvg — styled relationship fidelity (canvas == export)", () => {
+  // The export resolves per-link colour/width/dash + arrow placement through the SAME helper the
+  // canvas edge uses (resolveLinkStyle), so a styled relationship must round-trip into the SVG.
+  const styledDoc = (over: Partial<CrossLink>): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "s",
+    title: "S",
+    root: {
+      id: "r",
+      topic: "R",
+      children: [
+        { id: "a", topic: "A", children: [] },
+        { id: "b", topic: "B", children: [] },
+      ],
+    },
+    links: [{ id: "l", from: "a", to: "b", ...over }],
+  });
+  const rr = new Map<string, NodeRect>([
+    ["r", { x: 0, y: 0, w: 80, h: 40 }],
+    ["a", { x: 200, y: 0, w: 80, h: 40 }],
+    ["b", { x: 200, y: 200, w: 80, h: 40 }],
+  ]);
+  const build = (over: Partial<CrossLink>) => buildFlowSvg(styledDoc(over), rr, palette, cssVar);
+
+  it("applies a custom colour + width + dotted dash to the relationship stroke", () => {
+    expect(build({ color: "#ff0000", width: 3, dash: "dotted" })).toMatch(
+      /stroke="#ff0000" stroke-width="3" stroke-dasharray="2 4"/,
+    );
+  });
+
+  it("a solid relationship omits the dash attribute entirely", () => {
+    // No callouts/boundaries here, so the ONLY potential dasharray is the (now solid) relationship.
+    expect(build({ dash: "solid" })).not.toMatch(/stroke-dasharray/);
+  });
+
+  it("arrow 'both' draws two arrowheads and 'none' draws zero (arrowheads fill with the colour)", () => {
+    const both = build({ arrow: "both", color: "#123456" });
+    expect([...both.matchAll(/ fill="#123456"/g)]).toHaveLength(2); // one head per end
+    expect(build({ arrow: "none", color: "#654321" })).not.toMatch(/ fill="#654321"/);
   });
 });
 

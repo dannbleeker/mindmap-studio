@@ -169,3 +169,79 @@ export function PanelSection({ children, style }: { children: ReactNode; style?:
     </div>
   );
 }
+
+// A segmented tab strip — the start screen's `.st-tabs` pattern (CaptureCard) ported to the panel
+// palette so the Info panel can group its sections into tabs. The container is a faint inset pill;
+// the active tab gets a raised white card. Each button is role="tab"/aria-selected (matching the
+// start-screen idiom); state lives in the caller.
+const TABLIST_BASE: CSSProperties = {
+  display: "flex",
+  gap: 2,
+  padding: 3,
+  margin: `${space.md}px ${space.xl}px ${space.xs}px`,
+  background: colors.surfaceBar,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.lg,
+  flexShrink: 0,
+};
+const TAB_BASE: CSSProperties = {
+  flex: 1,
+  border: "none",
+  background: "transparent",
+  color: colors.muted,
+  font: "inherit",
+  fontWeight: fontWeight.semibold,
+  fontSize: fontSize.sm,
+  padding: `${space.md}px ${space.lg}px`,
+  borderRadius: radius.md,
+  cursor: "pointer",
+};
+const TAB_SELECTED: CSSProperties = {
+  background: colors.white,
+  color: colors.text,
+  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.08)",
+};
+
+export interface TabItem {
+  id: string;
+  label: ReactNode;
+  /** Optional tooltip / accessible hint for the tab button. */
+  title?: string;
+}
+
+/** A segmented tab strip. `active` is the selected tab id; `onChange` fires with the clicked id.
+ *  The caller renders the matching tab body itself (this is just the selector). */
+export function Tabs({
+  tabs,
+  active,
+  onChange,
+  ariaLabel,
+  style,
+}: {
+  tabs: readonly TabItem[];
+  active: string;
+  onChange: (id: string) => void;
+  ariaLabel: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <div role="tablist" aria-label={ariaLabel} style={{ ...TABLIST_BASE, ...style }}>
+      {tabs.map((t) => {
+        const selected = t.id === active;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            title={t.title}
+            onClick={() => onChange(t.id)}
+            style={{ ...TAB_BASE, ...(selected ? TAB_SELECTED : null) }}
+          >
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

@@ -101,7 +101,9 @@ underlying model, so the outline, every export, and the autosave always reflect 
 
 Select a node and open **ℹ Info** to see and edit everything about it in one side panel — its
 note, markers, tags, style, and links. (This replaces the old separate **Notes**, **Markers**, and
-**Style** toggles.)
+**Style** toggles.) The panel is organised into three tabs: **Details** (tags, progress, dates,
+priority, attachments, links), **Style** (shape / fill / border / font, markers, stickers), and
+**Notes** (the Markdown editor).
 
 - **Note** — write in the editor; notes autosave, travel with the map (and the lossless `.json`
   export), and render as **Markdown** in **Preview** (`#` headings, `**bold**`, `*italic*`,

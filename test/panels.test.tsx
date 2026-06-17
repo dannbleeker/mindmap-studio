@@ -231,10 +231,39 @@ describe("InfoPanel", () => {
     expect(screen.getByText(/Select a node to see and edit its details/)).toBeTruthy();
   });
 
-  it("renders the inspector for the selected node (note draft + a Close control)", () => {
+  it("shows a Close control and three tabs for the selected node", () => {
     renderInfo(selected, node);
     expect(screen.getByRole("button", { name: /Close/ })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Details" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Style" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Notes" })).toBeTruthy();
+  });
+
+  it("opens on the Details tab (tags / dates / priority / links); the note editor is not mounted yet", () => {
+    renderInfo(selected, node);
+    expect(screen.getByRole("tab", { name: "Details" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByText("Tags")).toBeTruthy();
+    expect(screen.getByText("Dates")).toBeTruthy();
+    expect(screen.getByText("Priority")).toBeTruthy();
+    expect(screen.getByText("Links")).toBeTruthy();
+    // The markdown note lives in the Notes tab, so its editor isn't in the DOM on first render.
+    expect(screen.queryByDisplayValue("interview users")).toBeNull();
+  });
+
+  it("reveals the note draft after switching to the Notes tab", async () => {
+    renderInfo(selected, node);
+    await userEvent.click(screen.getByRole("tab", { name: "Notes" }));
     expect(screen.getByDisplayValue("interview users")).toBeTruthy();
+    // Details-tab sections are no longer mounted once we leave that tab.
+    expect(screen.queryByText("Priority")).toBeNull();
+  });
+
+  it("reveals the shape + sticker controls after switching to the Style tab", async () => {
+    renderInfo(selected, node);
+    await userEvent.click(screen.getByRole("tab", { name: "Style" }));
+    expect(screen.getByText("Shape")).toBeTruthy();
+    expect(screen.getByText(/Stickers/)).toBeTruthy();
+    expect(screen.queryByText("Tags")).toBeNull();
   });
 });
 

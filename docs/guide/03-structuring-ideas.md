@@ -111,7 +111,7 @@ a punchline -- a total, a verdict, a next step -- you want on the page without a
 
 By default every topic is a soft rectangle, and for most maps that's exactly right -- the
 *words* carry the meaning. But when a map is really a **process or a decision flow**, shape
-becomes meaning. Select a node, open the **Style bar** (in the ℹ Info panel), and you can recast it as a
+becomes meaning. Select a node, open the **Style tab** (in the ℹ Info panel), and you can recast it as a
 **diamond** (a decision -- "approved?"), an **oval** (a start or end point), a **parallelogram**
 (an input or output), a **hexagon** (a preparation step), or a **cylinder** (a data store).
 These are the classic flowchart shapes, and they read instantly to anyone who's seen one: a

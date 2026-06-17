@@ -1,6 +1,15 @@
 import { type CSSProperties, useState } from "react";
 import { ProgressPie } from "./ProgressPie";
-import { Button, Chip, Input, Panel, PanelSection, Select } from "./design/primitives";
+import {
+  Button,
+  Chip,
+  Input,
+  Panel,
+  PanelSection,
+  Select,
+  type TabItem,
+  Tabs,
+} from "./design/primitives";
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { formatBytes } from "./io/attachment";
@@ -973,6 +982,19 @@ export function StylesPanel({
 // Unified per-node "topic info" panel: one side rail consolidating everything you can set on the
 // selected node — note, markers, tags, style, and links (web / another map / another topic) —
 // replacing the separate Notes / Markers / Style bars and the Link / Jump toolbar selects.
+// The Info panel groups a topic's editors into three tabs: Details (tags/markers/progress/dates/
+// priority/attachments/links), Style (shape & fill bar + stickers), and Notes (the markdown editor).
+type InfoTab = "details" | "style" | "notes";
+const INFO_TABS: readonly TabItem[] = [
+  {
+    id: "details",
+    label: "Details",
+    title: "Tags, progress, dates, priority, attachments & links",
+  },
+  { id: "style", label: "Style", title: "Shape, colour, font & stickers" },
+  { id: "notes", label: "Notes", title: "Markdown note for this topic" },
+];
+
 export function InfoPanel({
   selected,
   node,
@@ -1023,6 +1045,7 @@ export function InfoPanel({
   onClose: () => void;
 }) {
   const [tagInput, setTagInput] = useState("");
+  const [tab, setTab] = useState<InfoTab>("details");
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
   const webUrl = link.startsWith("#") ? "" : link;
@@ -1120,238 +1143,268 @@ export function InfoPanel({
           Select a node to see and edit its details.
         </div>
       ) : (
-        <div style={{ overflowY: "auto" }}>
-          <StyleBar onStyle={onStyle} />
-          <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
-          <StickerBar stickers={STICKERS} onPick={onPickSticker} />
-
-          {sectionLabel("Tags")}
-          <div style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {(node.tags ?? []).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => onRemoveTag(t)}
-                title={`Remove tag "${t}"`}
-                style={{
-                  border: `1px solid ${colors.controlBorder}`,
-                  background: colors.white,
-                  borderRadius: radius.md,
-                  cursor: "pointer",
-                  fontSize: fontSize.sm,
-                  padding: "1px 6px",
-                  color: colors.text,
-                }}
-              >
-                {t} ✕
-              </button>
-            ))}
-          </div>
-          <Input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && tagInput.trim()) {
-                onAddTag(tagInput.trim());
-                setTagInput("");
-              }
-            }}
-            placeholder="Add a tag, press Enter"
-            aria-label="Add a tag"
-            style={{ width: "auto", margin: "0 10px 4px" }}
+        <>
+          <Tabs
+            tabs={INFO_TABS}
+            active={tab}
+            onChange={(id) => setTab(id as InfoTab)}
+            ariaLabel="Topic info sections"
           />
+          <div style={{ overflowY: "auto" }}>
+            {tab === "style" && (
+              <>
+                <StyleBar onStyle={onStyle} />
+                <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
+                <StickerBar stickers={STICKERS} onPick={onPickSticker} />
+              </>
+            )}
+            {tab === "details" && (
+              <>
+                {sectionLabel("Tags")}
+                <div style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {(node.tags ?? []).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => onRemoveTag(t)}
+                      title={`Remove tag "${t}"`}
+                      style={{
+                        border: `1px solid ${colors.controlBorder}`,
+                        background: colors.white,
+                        borderRadius: radius.md,
+                        cursor: "pointer",
+                        fontSize: fontSize.sm,
+                        padding: "1px 6px",
+                        color: colors.text,
+                      }}
+                    >
+                      {t} ✕
+                    </button>
+                  ))}
+                </div>
+                <Input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && tagInput.trim()) {
+                      onAddTag(tagInput.trim());
+                      setTagInput("");
+                    }
+                  }}
+                  placeholder="Add a tag, press Enter"
+                  aria-label="Add a tag"
+                  style={{ width: "auto", margin: "0 10px 4px" }}
+                />
 
-          {renderProgress(node)}
+                {renderProgress(node)}
 
-          {sectionLabel("Dates")}
-          <div
-            style={{
-              padding: "0 10px 6px",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              flexWrap: "wrap",
-              fontSize: fontSize.sm,
-              color: colors.muted,
-            }}
-          >
-            <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              Start
-              {/* Native input (not the Input primitive) so it stays nested in its label. */}
-              <input
-                key={`${node.id}:start`}
-                type="date"
-                defaultValue={node.task?.start ?? ""}
-                onChange={(e) => onSetStart(e.target.value)}
-                aria-label="Start date"
-                style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
-              />
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              Due
-              <input
-                key={`${node.id}:due`}
-                type="date"
-                defaultValue={node.task?.due ?? ""}
-                onChange={(e) => onSetDue(e.target.value)}
-                aria-label="Due date"
-                style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
-              />
-            </label>
-          </div>
-
-          {sectionLabel("Priority")}
-          <div
-            style={{
-              padding: "0 10px 6px",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              flexWrap: "wrap",
-            }}
-          >
-            {PRIORITY_LEVELS.map((p) => {
-              const active = node.task?.priority === p;
-              return (
-                <Button
-                  key={p}
-                  onClick={() => onSetPriority(p)}
-                  title={`${PRIORITY_LABEL[p]} priority`}
+                {sectionLabel("Dates")}
+                <div
                   style={{
-                    padding: "1px 8px",
+                    padding: "0 10px 6px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    flexWrap: "wrap",
                     fontSize: fontSize.sm,
-                    fontWeight: fontWeight.semibold,
-                    // Priority uses its own colour scale, not the chrome accent.
-                    background: active ? PRIORITY_COLOR[p] : colors.white,
-                    color: active ? colors.white : PRIORITY_COLOR[p],
-                    borderColor: PRIORITY_COLOR[p],
+                    color: colors.muted,
                   }}
                 >
-                  {PRIORITY_LABEL[p]}
-                </Button>
-              );
-            })}
-            {node.task?.priority ? (
-              <Button
-                onClick={() => onSetPriority(undefined)}
-                title="Clear priority"
-                style={{ padding: "1px 7px", fontSize: fontSize.sm }}
-              >
-                ✕
-              </Button>
-            ) : null}
-          </div>
+                  <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                    Start
+                    {/* Native input (not the Input primitive) so it stays nested in its label. */}
+                    <input
+                      key={`${node.id}:start`}
+                      type="date"
+                      defaultValue={node.task?.start ?? ""}
+                      onChange={(e) => onSetStart(e.target.value)}
+                      aria-label="Start date"
+                      style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+                    />
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                    Due
+                    <input
+                      key={`${node.id}:due`}
+                      type="date"
+                      defaultValue={node.task?.due ?? ""}
+                      onChange={(e) => onSetDue(e.target.value)}
+                      aria-label="Due date"
+                      style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+                    />
+                  </label>
+                </div>
 
-          {sectionLabel("Attachments")}
-          <div style={{ padding: "0 10px 6px", display: "flex", flexDirection: "column", gap: 4 }}>
-            {(node.attachments ?? []).map((a, i) => (
-              <div
-                key={`${a.name}:${i}`}
-                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: fontSize.sm }}
-              >
-                <a
-                  href={a.dataUrl}
-                  download={a.name}
-                  title={`Download ${a.name}`}
+                {sectionLabel("Priority")}
+                <div
                   style={{
-                    color: colors.text,
-                    flex: 1,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    padding: "0 10px 6px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    flexWrap: "wrap",
                   }}
                 >
-                  📎 {a.name}
-                </a>
-                <span style={{ color: colors.faint }}>{formatBytes(a.size)}</span>
-                <Button
-                  onClick={() => onRemoveAttachment(i)}
-                  title="Remove attachment"
-                  style={{ padding: "1px 6px", fontSize: fontSize.sm }}
+                  {PRIORITY_LEVELS.map((p) => {
+                    const active = node.task?.priority === p;
+                    return (
+                      <Button
+                        key={p}
+                        onClick={() => onSetPriority(p)}
+                        title={`${PRIORITY_LABEL[p]} priority`}
+                        style={{
+                          padding: "1px 8px",
+                          fontSize: fontSize.sm,
+                          fontWeight: fontWeight.semibold,
+                          // Priority uses its own colour scale, not the chrome accent.
+                          background: active ? PRIORITY_COLOR[p] : colors.white,
+                          color: active ? colors.white : PRIORITY_COLOR[p],
+                          borderColor: PRIORITY_COLOR[p],
+                        }}
+                      >
+                        {PRIORITY_LABEL[p]}
+                      </Button>
+                    );
+                  })}
+                  {node.task?.priority ? (
+                    <Button
+                      onClick={() => onSetPriority(undefined)}
+                      title="Clear priority"
+                      style={{ padding: "1px 7px", fontSize: fontSize.sm }}
+                    >
+                      ✕
+                    </Button>
+                  ) : null}
+                </div>
+
+                {sectionLabel("Attachments")}
+                <div
+                  style={{
+                    padding: "0 10px 6px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                  }}
                 >
-                  ✕
-                </Button>
-              </div>
-            ))}
-            <label
-              style={{
-                ...controlStyle,
-                fontSize: fontSize.sm,
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              + Attach file
-              <input
-                type="file"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) onAddAttachment(f);
-                  e.target.value = "";
-                }}
-                style={{ display: "none" }}
+                  {(node.attachments ?? []).map((a, i) => (
+                    <div
+                      key={`${a.name}:${i}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        fontSize: fontSize.sm,
+                      }}
+                    >
+                      <a
+                        href={a.dataUrl}
+                        download={a.name}
+                        title={`Download ${a.name}`}
+                        style={{
+                          color: colors.text,
+                          flex: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        📎 {a.name}
+                      </a>
+                      <span style={{ color: colors.faint }}>{formatBytes(a.size)}</span>
+                      <Button
+                        onClick={() => onRemoveAttachment(i)}
+                        title="Remove attachment"
+                        style={{ padding: "1px 6px", fontSize: fontSize.sm }}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                  <label
+                    style={{
+                      ...controlStyle,
+                      fontSize: fontSize.sm,
+                      cursor: "pointer",
+                      textAlign: "center",
+                    }}
+                  >
+                    + Attach file
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) onAddAttachment(f);
+                        e.target.value = "";
+                      }}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                </div>
+
+                {sectionLabel("Links")}
+                <Input
+                  key={`${node.id}:url`}
+                  defaultValue={webUrl}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter")
+                      onSetHyperlink((e.target as HTMLInputElement).value.trim());
+                  }}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v !== webUrl) onSetHyperlink(v);
+                  }}
+                  placeholder="Web link (https://…)"
+                  aria-label="Web link"
+                  style={{ width: "auto", margin: "0 10px 4px" }}
+                />
+                <Select
+                  value=""
+                  onChange={(e) => e.target.value && onLinkMap(e.target.value)}
+                  aria-label="Link to another map"
+                  style={{ width: "auto", margin: "0 10px 4px" }}
+                >
+                  <option value="">🔗 Link to a map…</option>
+                  {maps.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.title}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  value=""
+                  onChange={(e) => e.target.value && onJump(e.target.value)}
+                  aria-label="Jump to another topic"
+                  style={{ width: "auto", margin: "0 10px 4px" }}
+                >
+                  <option value="">↪ Jump to a topic…</option>
+                  {jumpTargets.map((row) => (
+                    <option key={row.id} value={row.id}>
+                      {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+                    </option>
+                  ))}
+                </Select>
+                {link && (
+                  <Button
+                    onClick={() => onSetHyperlink("")}
+                    style={{ padding: "2px 8px", fontSize: fontSize.sm, margin: "0 10px 6px" }}
+                  >
+                    ✕ Remove link (
+                    {link.startsWith("#map=") ? "map" : link.startsWith("#node=") ? "topic" : "web"}
+                    )
+                  </Button>
+                )}
+              </>
+            )}
+            {tab === "notes" && (
+              <NotesPanel
+                selected={selected}
+                value={noteDraft}
+                onChange={onNoteChange}
+                onBlur={onNoteBlur}
               />
-            </label>
+            )}
           </div>
-
-          {sectionLabel("Links")}
-          <Input
-            key={`${node.id}:url`}
-            defaultValue={webUrl}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") onSetHyperlink((e.target as HTMLInputElement).value.trim());
-            }}
-            onBlur={(e) => {
-              const v = e.target.value.trim();
-              if (v !== webUrl) onSetHyperlink(v);
-            }}
-            placeholder="Web link (https://…)"
-            aria-label="Web link"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          />
-          <Select
-            value=""
-            onChange={(e) => e.target.value && onLinkMap(e.target.value)}
-            aria-label="Link to another map"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          >
-            <option value="">🔗 Link to a map…</option>
-            {maps.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.title}
-              </option>
-            ))}
-          </Select>
-          <Select
-            value=""
-            onChange={(e) => e.target.value && onJump(e.target.value)}
-            aria-label="Jump to another topic"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          >
-            <option value="">↪ Jump to a topic…</option>
-            {jumpTargets.map((row) => (
-              <option key={row.id} value={row.id}>
-                {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
-              </option>
-            ))}
-          </Select>
-          {link && (
-            <Button
-              onClick={() => onSetHyperlink("")}
-              style={{ padding: "2px 8px", fontSize: fontSize.sm, margin: "0 10px 6px" }}
-            >
-              ✕ Remove link (
-              {link.startsWith("#map=") ? "map" : link.startsWith("#node=") ? "topic" : "web"})
-            </Button>
-          )}
-
-          <NotesPanel
-            selected={selected}
-            value={noteDraft}
-            onChange={onNoteChange}
-            onBlur={onNoteBlur}
-          />
-        </div>
+        </>
       )}
     </Panel>
   );

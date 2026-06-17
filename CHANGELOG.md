@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Tabbed topic inspector** — the right-hand **Topic info** panel now groups a topic's editors into
+  three tabs — **Details** (tags, progress, dates, priority, attachments & links), **Style** (shape /
+  fill / border / font bar, markers, stickers) and **Notes** (the Markdown editor) — instead of one
+  long scroll. Built on a new reusable `Tabs` primitive (a `role="tablist"` segmented control, the
+  start-screen tab pattern shared into `design/primitives`). Pure regroup: every field and handler is
+  unchanged, the panel's props/API are untouched, and the canvas/exports are unaffected.
+
 - **Inline node popover (redesign phase 2, complete)** — selecting a topic now shows a small
   quick-action toolbar floating just above it (via React Flow's `NodeToolbar`, so it tracks the node
   through pan/zoom): **Add child**, **Add sibling**, **Rename**, **Collapse/expand**, **Delete** —

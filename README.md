@@ -50,7 +50,7 @@ GitHub Pages).
   plus integrated zoom controls (−/+, live %, fit).
 - **Topic info panel** — one **ℹ Info** side panel consolidating the selected node's note,
   markers (click-to-toggle, with active highlighted), **tags** (add/remove), style
-  (shape/fill/border/bold), and links.
+  (shape/fill/border/bold), and links, organised into **Details / Style / Notes** tabs.
 - **Task progress** — set a topic's completion (0–100%) and a small **completion pie**
   (MindManager-style, ✓ at 100%) shows on the node — click the pie to step it (0→25→…→100→0).
   Parents **roll up automatically** (average + done/total count), with the percentage echoed in the

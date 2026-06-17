@@ -7,27 +7,16 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 Phase 1 (Brainstorming MVP) complete; canvas engine is **@xyflow/react**. MindMap Studio is
 **feature-complete for its scope** (local-first, offline, single-user, free) — the competitive
 gap-closing effort is **concluded by decision (2026-06-16)**; remaining gaps are surveyed, not
-pursued (see Reference). The handbook documents every feature (`book` 100%), and the
-**foundation-hardening run (2026-06-16)** prepped the chrome for the editor/UX redesign (design
-tokens + primitives, `<Toolbar>` / `<Dialog>` / `usePanels()` extracted, canvas memoised, coverage
-~44%→~55%) — all in `CHANGELOG.md`. Deployed to GitHub Pages on every push to `main` — live at
+pursued (see Reference). The handbook documents every feature (`book` ~95%). The **editor/UX
+redesign is complete** (2026-06-17): chrome (rail / two-row toolbar / inspector), the inspector
+overhaul + its four follow-ups, and the **menu/toolbar restructure** — one accessible Menu primitive
+(keyboard nav + viewport clamping), every dropdown + the canvas context menu migrated onto it,
+grouped rows, an editor **⌘K command palette**, and mobile bottom-sheet menus — all in `CHANGELOG.md`.
+Deployed to GitHub Pages on every push to `main` — live at
 <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
 ## Open items
 
-- [ ] **UX redesign of the canvas/editor chrome (menus / toolbars).** The next planned effort:
-      restructure the editor shell — a proper menu system (nested menus + keyboard nav on the Phase-C
-      primitives) and a reorganised toolbar — now that the chrome is extracted into token-driven
-      components with a regression test net behind it.
-      *The inspector overhaul + its four follow-ups all landed (2026-06-17). The Topic-info panel is a
-      themed `.mm-inspector` shell (re-themes in every palette), resizable + persisted, with a
-      breadcrumb + quick-facts header (incl. per-node created/modified timestamps), denser label-left
-      property rows, keyboard-accessible tabs, "Mixed" handling + tri-state **bulk markers + tags** in
-      bulk edit, and a "Linked from" backlinks section. The no-selection slot is an editable **Map**
-      panel (title / theme / layout / background / line-jumps / backdrop rings + colour); clicking a
-      relationship opens an **EdgeInspector**; and clicking a **boundary / summary / callout** opens an
-      **OverlayInspector** (label / **colour** / delete) — per-overlay colours re-tint on canvas and in
-      every export (canvas==export). Only the menu/toolbar restructure remains.*
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.

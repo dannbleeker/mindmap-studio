@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Tighter, MindManager-style layout geometry.** Sibling spacing is now proportional to each topic's
+  height (a tall image topic reserves room; one-line siblings pack tight) instead of every row being
+  as tall as the biggest node in the map; each branch's columns hang just past its **own** parent, so
+  a long label only pushes its own descendants out rather than a whole global column across unrelated
+  branches; and the **fishbone** (Ishikawa) layout draws true diagonal bones with sub-causes stepping
+  outward along the bone instead of stacking straight down.
+
 - **Floating topics get real branch colours, and relationship arrows scale with line weight.** A
   floating (detached) topic and its branches now cycle the palette like a normal coloured mini-map
   instead of a washed-out grey, and a relationship's arrowhead grows with its line thickness so a thick

@@ -23,7 +23,6 @@ const FALLBACK_PALETTE = [
   "#993C1D",
 ];
 const ROOT_COLOR = "#26215c";
-const FLOATING_COLOR = "#73726c";
 
 export interface ProjectResult {
   nodes: TopicNode[];
@@ -146,11 +145,13 @@ export function project(
     });
   }
 
-  // Floating topics: each a detached subtree (no edge to the root). Floating subtrees are always
-  // placed horizontally (placeFloating), so their branches stay organic even in an org-chart map.
-  for (const floating of doc.floatingTopics ?? []) {
-    emit(floating, undefined, 1, "right", FLOATING_COLOR, true, false, true, "right");
-  }
+  // Floating topics: each a detached subtree (no edge to the root). Each gets its own palette colour
+  // (cycled) rather than a washed-out grey, so a floating cluster reads like a normal coloured mini-map
+  // (MindManager). Floating subtrees are always placed horizontally (placeFloating), so their branches
+  // stay organic even in an org-chart map. A sticky note keeps its explicit amber style (set per-node).
+  (doc.floatingTopics ?? []).forEach((floating, i) => {
+    emit(floating, undefined, 1, "right", pal[i % pal.length], true, false, true, "right");
+  });
 
   // Cross-links: dashed, labelled relationship edges (floating custom edge).
   const lineJumps = Boolean(doc.meta?.lineJumps);

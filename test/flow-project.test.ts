@@ -75,6 +75,12 @@ describe("flow project (model → React Flow)", () => {
     expect(node("a")?.data.branchColor).not.toBe(node("b")?.data.branchColor);
   });
 
+  it("gives each floating root a palette colour (not a washed-out grey)", () => {
+    expect(node("f")?.data.branchColor).not.toBe("#73726c"); // the old forced grey
+    // it's one of the cycled palette colours, and its subtree inherits it
+    expect(node("f")?.data.branchColor).toBe(node("f1")?.data.branchColor);
+  });
+
   it("honours an explicit side and assigns the rest", () => {
     expect(node("c")?.data.side).toBe("left");
     expect(["left", "right"]).toContain(node("a")?.data.side);

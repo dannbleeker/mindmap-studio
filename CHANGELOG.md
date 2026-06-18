@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Floating topics get real branch colours, and relationship arrows scale with line weight.** A
+  floating (detached) topic and its branches now cycle the palette like a normal coloured mini-map
+  instead of a washed-out grey, and a relationship's arrowhead grows with its line thickness so a thick
+  link reads in proportion — on canvas and in every export.
+
 - **Topics now read as a hierarchy, MindManager-style.** The map's depth is legible from shape alone:
   the **central topic** is larger, bold, and centred; **main (level-1) topics are filled** with their
   branch colour (white/auto-contrast text) instead of a thin outline; mid topics keep the bordered

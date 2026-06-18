@@ -382,10 +382,12 @@ export function buildFlowSvg(
         `<path d="${linePath}" fill="none" stroke="${clColor}" stroke-width="${clWidth}"${dashAttr}/>`,
       );
       // Directional arrowhead(s) — same builder the canvas uses, at whichever end(s) carry one.
+      // Arrowhead scales with the line weight (a thick relationship gets a proportionally larger head).
+      const headSize = 6 + clWidth * 2;
       if (arrowAtTarget)
-        parts.push(`<path d="${arrowHeadPath(tx, ty, sx, sy)}" fill="${clColor}"/>`);
+        parts.push(`<path d="${arrowHeadPath(tx, ty, sx, sy, headSize)}" fill="${clColor}"/>`);
       if (arrowAtSource)
-        parts.push(`<path d="${arrowHeadPath(sx, sy, tx, ty)}" fill="${clColor}"/>`);
+        parts.push(`<path d="${arrowHeadPath(sx, sy, tx, ty, headSize)}" fill="${clColor}"/>`);
       const label = typeof e.label === "string" ? e.label : "";
       if (label) {
         parts.push(

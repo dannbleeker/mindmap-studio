@@ -796,4 +796,9 @@ describe("arrowHeadPath (shared relationship arrowhead)", () => {
     // base sits `size` back from the tip along the axis
     expect(d).toContain("L 91 "); // bx = 100 - 9
   });
+
+  it("scales the head with the size argument (the caller passes 6 + width*2)", () => {
+    expect(arrowHeadPath(100, 0, 0, 0, 8)).toContain("L 92 "); // base 8 back
+    expect(arrowHeadPath(100, 0, 0, 0, 16)).toContain("L 84 "); // base 16 back → bigger head
+  });
 });

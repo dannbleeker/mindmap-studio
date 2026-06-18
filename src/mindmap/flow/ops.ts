@@ -748,7 +748,7 @@ export function setLinkArrow(doc: MindMapDoc, id: string, arrow: CrossLink["arro
 export function setLinkStyle(
   doc: MindMapDoc,
   id: string,
-  patch: { color?: string; width?: number; dash?: CrossLink["dash"] },
+  patch: { color?: string; width?: number; dash?: CrossLink["dash"]; curve?: number },
 ): OpResult {
   if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
   const next = structuredClone(doc);
@@ -760,6 +760,11 @@ export function setLinkStyle(
       ...("width" in patch ? { width: patch.width || undefined } : {}),
       ...("dash" in patch
         ? { dash: patch.dash && patch.dash !== "dashed" ? patch.dash : undefined }
+        : {}),
+      // Curve bow (perpendicular offset, px). `curve: 0` is an explicit STRAIGHT line; `undefined`
+      // resets to the gentle auto-bow (so a default link serialises field-free).
+      ...("curve" in patch
+        ? { curve: patch.curve == null ? undefined : Math.round(patch.curve) }
         : {}),
     };
     // Strip keys now undefined so a cleared field doesn't survive in the lossless .json.

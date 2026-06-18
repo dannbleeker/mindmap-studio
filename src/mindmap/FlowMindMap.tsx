@@ -455,6 +455,7 @@ function FlowInner({
             color: l.color ?? CROSSLINK_COLOR,
             width: l.width ?? CROSSLINK_WIDTH,
             dash: l.dash ?? "dashed",
+            curve: l.curve,
           }
         : null,
     );

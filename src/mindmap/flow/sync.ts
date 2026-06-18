@@ -92,12 +92,21 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
   // Cross-links from the crosslink edges.
   const links: CrossLink[] = edges
     .filter((e) => e.data?.crosslink)
-    .map((e) => ({
-      id: e.id,
-      from: e.source,
-      to: e.target,
-      ...(typeof e.label === "string" && e.label ? { label: e.label } : {}),
-    }));
+    .map((e) => {
+      const d = e.data;
+      return {
+        id: e.id,
+        from: e.source,
+        to: e.target,
+        ...(typeof e.label === "string" && e.label ? { label: e.label } : {}),
+        // Per-link style + curve are carried through so a round-trip keeps the relationship's look.
+        ...(d?.arrow ? { arrow: d.arrow } : {}),
+        ...(d?.color ? { color: d.color } : {}),
+        ...(d?.width ? { width: d.width } : {}),
+        ...(d?.dash ? { dash: d.dash } : {}),
+        ...(d?.curve != null ? { curve: d.curve } : {}),
+      };
+    });
 
   // Boundaries aren't represented in nodes/edges — carry from prevDoc, dropping any member
   // ids that no longer exist (and any boundary thereby emptied).

@@ -143,6 +143,10 @@ export interface CrossLink {
   width?: number;
   /** Line style; absent = "dashed" (the historical CROSSLINK_DASH). */
   dash?: "dashed" | "solid" | "dotted";
+  /** Signed perpendicular offset (px) of the arc's midpoint from the straight chord — the draggable
+   *  curve handle / inspector sets it to bow the relationship around clutter. Absent = a gentle
+   *  auto-bow. Lossless in .json, ignored by flat exporters. */
+  curve?: number;
 }
 
 /** A visual grouping around a set of nodes (MindManager "boundary"). */

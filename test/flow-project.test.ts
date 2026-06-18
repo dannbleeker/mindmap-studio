@@ -56,15 +56,30 @@ describe("flow project (model → React Flow)", () => {
     expect(link?.data?.crosslink).toBe(true);
   });
 
-  it("carries a cross-link's per-link style (arrow/colour/width/dash) into the edge data", () => {
+  it("carries a cross-link's per-link style (arrow/colour/width/dash/curve) into the edge data", () => {
     const styled = project({
       ...doc,
       links: [
-        { id: "s", from: "a", to: "c", arrow: "both", color: "#ff0000", width: 3, dash: "dotted" },
+        {
+          id: "s",
+          from: "a",
+          to: "c",
+          arrow: "both",
+          color: "#ff0000",
+          width: 3,
+          dash: "dotted",
+          curve: 40,
+        },
       ],
     });
     const edge = styled.edges.find((e) => e.id === "s");
-    expect(edge?.data).toMatchObject({ arrow: "both", color: "#ff0000", width: 3, dash: "dotted" });
+    expect(edge?.data).toMatchObject({
+      arrow: "both",
+      color: "#ff0000",
+      width: 3,
+      dash: "dotted",
+      curve: 40,
+    });
   });
 
   it("flags floating topics and gives each branch a palette colour", () => {

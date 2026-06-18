@@ -54,6 +54,8 @@ export interface SelectedEdge {
   color: string;
   width: number;
   dash: "dashed" | "solid" | "dotted";
+  /** Curve bow (perpendicular offset, px); `0` = straight, `undefined` = the gentle auto-bow. */
+  curve?: number;
 }
 
 /** A selected overlay object (boundary box / summary bracket / callout bubble), surfaced to the
@@ -161,7 +163,12 @@ export interface MindMapHandle {
   /** Set the selected relationship's arrowhead placement; false if no edge is selected. */
   setLinkArrow: (arrow: SelectedEdge["arrow"]) => boolean;
   /** Merge a style patch (colour / width / dash) into the selected relationship; false if none. */
-  setLinkStyle: (patch: { color?: string; width?: number; dash?: SelectedEdge["dash"] }) => boolean;
+  setLinkStyle: (patch: {
+    color?: string;
+    width?: number;
+    dash?: SelectedEdge["dash"];
+    curve?: number;
+  }) => boolean;
   /** Delete the selected relationship; false if no edge is selected. */
   deleteLink: () => boolean;
   /** Set the selected overlay's label (boundary/summary) or text (callout); false if none selected. */

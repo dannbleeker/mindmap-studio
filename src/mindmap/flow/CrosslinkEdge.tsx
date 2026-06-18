@@ -84,7 +84,7 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
   // The bezier carries the wide invisible hit-area (and is the visible line when line-jumps is off).
   // Built from the SHARED helper the exporter uses, so the curve bows along the same (horizontal) axis
   // on screen and in exports — canvas == export.
-  const { path: bezier, labelX, labelY } = crosslinkBezier(sx, sy, tx, ty);
+  const { path: bezier, labelX, labelY } = crosslinkBezier(sx, sy, tx, ty, data?.curve);
   const { color, width, dasharray, arrowAtTarget, arrowAtSource } = resolveLinkStyle(data ?? {});
   const dimOpacity = data?.dimmed ? 0.12 : 1;
 

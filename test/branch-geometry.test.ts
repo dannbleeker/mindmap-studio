@@ -64,13 +64,11 @@ describe("branch geometry", () => {
     expect(branchWidths(1).trunk).toBeGreaterThan(branchWidths(1).tip);
   });
 
-  it("crosslinkBezier: a horizontal S-curve (control points at the midpoint X) — canvas == export", () => {
-    const { path, labelX, labelY } = crosslinkBezier(0, 0, 200, 100);
-    // Both control points pinned to mx=100, so the curve bows along X — the SAME axis the live canvas
-    // now uses (it previously used React Flow's vertical default, disagreeing with this exporter path).
-    expect(path).toBe("M 0 0 C 100 0 100 100 200 100");
-    expect(labelX).toBe(100); // label at the curve's geometric midpoint
-    expect(labelY).toBe(50);
+  it("crosslinkBezier: a deterministic perpendicular-bow cubic shared canvas == export", () => {
+    const { path } = crosslinkBezier(0, 0, 200, 100);
+    // Control points are offset PERPENDICULAR to the chord (auto-bow), the same shape the live canvas
+    // + the SVG exporter both emit (canvas == export) — byte-stable for a fixed input.
+    expect(path).toBe("M 0 0 C 52.67 61.33 119.33 94.67 200 100");
     expect(crosslinkBezier(0, 0, 200, 100).path).toBe(path); // deterministic
   });
 
@@ -92,6 +90,14 @@ describe("branch geometry", () => {
     expect(dashed.fill).toBeNull();
     expect(dashed.stroke).not.toBeNull();
     expect(dashed.dash).toBe("6 4");
+  });
+
+  it("crosslinkBezier: bows perpendicular to the chord; `curve` overrides it (0 = straight)", () => {
+    // Horizontal chord (0,0)→(200,0): the perpendicular is vertical, so the bow shows up in labelY.
+    expect(crosslinkBezier(0, 0, 200, 0).labelY).not.toBe(0); // a gentle auto-bow by default
+    expect(crosslinkBezier(0, 0, 200, 0, 0).labelY).toBe(0); // curve 0 → a straight line
+    expect(Math.abs(crosslinkBezier(0, 0, 200, 0, 50).labelY)).toBeGreaterThan(20); // a bigger bow
+    expect(crosslinkBezier(0, 0, 200, 0, 50).path).toContain("C");
   });
 
   it("elbowPath: a right-angle org-chart connector from parent-bottom-centre to child-top-centre", () => {

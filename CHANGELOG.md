@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Reshape relationship curves.** A relationship's arc now bows **perpendicular to its line** (rather
+  than a fixed horizontal axis), so it leaves and enters both topics cleanly instead of looking pinned,
+  and the relationship inspector gains a **Curve** control — **Auto / Straight / Bow ± ** — to route a
+  link around clutter. The bow round-trips in `.json` and renders the same on canvas and in exports.
+  (Per-link colour / width / dash now also round-trip, which they previously dropped.)
+
 - **Connector options — style picker, per-branch colour, dashed branches.** A **Connectors** picker in
   the toolbar sets the whole map's branch style: **organic** (the tapered default), **curved**, **elbow**
   (right-angle), or **straight**. The node right-click menu adds a **branch colour** (recolours that

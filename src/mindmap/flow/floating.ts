@@ -165,10 +165,26 @@ export function crosslinkBezier(
   sy: number,
   tx: number,
   ty: number,
+  curve?: number,
 ): { path: string; labelX: number; labelY: number } {
-  const mx = (sx + tx) / 2;
-  const path = `M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}`;
-  return { path, labelX: (sx + tx) / 2, labelY: (sy + ty) / 2 };
+  // Bow PERPENDICULAR to the chord (not a fixed axis), so the arc leaves/enters each end smoothly
+  // instead of looking pinned. `curve` is the signed perpendicular offset of the arc's midpoint (a
+  // draggable handle / the inspector sets it); absent = a gentle auto-bow proportional to the span.
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len; // unit perpendicular (left of the chord)
+  const ny = dx / len;
+  const bow = curve ?? len * 0.14;
+  const c1x = sx + dx / 3 + nx * bow;
+  const c1y = sy + dy / 3 + ny * bow;
+  const c2x = tx - dx / 3 + nx * bow;
+  const c2y = ty - dy / 3 + ny * bow;
+  const path = `M ${r2(sx)} ${r2(sy)} C ${r2(c1x)} ${r2(c1y)} ${r2(c2x)} ${r2(c2y)} ${r2(tx)} ${r2(ty)}`;
+  // Label at the cubic's midpoint (t=0.5).
+  const labelX = (sx + 3 * c1x + 3 * c2x + tx) / 8;
+  const labelY = (sy + 3 * c1y + 3 * c2y + ty) / 8;
+  return { path, labelX, labelY };
 }
 
 /** Right-angle "org-chart" connector: a uniform-width path from the parent's near-edge CENTRE to the

@@ -374,7 +374,9 @@ export function buildFlowSvg(
       // Hopped chord when line-jumps is on; otherwise the gentle S-bezier from the SAME helper the
       // canvas edge uses, so the relationship bows identically on screen and here (canvas == export).
       const self = lineJumps ? hopSegments.find((seg) => seg.id === e.id) : undefined;
-      const linePath = self ? hopPath(self, hopSegments) : crosslinkBezier(sx, sy, tx, ty).path;
+      const linePath = self
+        ? hopPath(self, hopSegments)
+        : crosslinkBezier(sx, sy, tx, ty, e.data?.curve).path;
       const dashAttr = dasharray ? ` stroke-dasharray="${dasharray}"` : "";
       parts.push(
         `<path d="${linePath}" fill="none" stroke="${clColor}" stroke-width="${clWidth}"${dashAttr}/>`,

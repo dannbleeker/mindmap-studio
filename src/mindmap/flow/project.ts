@@ -182,6 +182,7 @@ export function project(
         color: link.color,
         width: link.width,
         dash: link.dash,
+        curve: link.curve,
       },
     });
   }

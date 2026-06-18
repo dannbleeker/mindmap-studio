@@ -66,7 +66,12 @@ export function EdgeInspector({
   toTopic: string;
   onSetLabel: (label: string) => void;
   onSetArrow: (arrow: SelectedEdge["arrow"]) => void;
-  onSetStyle: (patch: { color?: string; width?: number; dash?: SelectedEdge["dash"] }) => void;
+  onSetStyle: (patch: {
+    color?: string;
+    width?: number;
+    dash?: SelectedEdge["dash"];
+    curve?: number;
+  }) => void;
   onDelete: () => void;
   onMinimize?: () => void;
   width?: number;
@@ -223,6 +228,45 @@ export function EdgeInspector({
               {label}
             </button>
           ))}
+        </div>
+
+        {/* Curve — reshape the arc to route around clutter (perpendicular bow). */}
+        <div style={fieldLabel}>Curve</div>
+        <div style={segRow}>
+          <button
+            type="button"
+            title="Gentle automatic bow"
+            aria-pressed={edge.curve == null}
+            onClick={() => onSetStyle({ curve: undefined })}
+            style={seg(edge.curve == null)}
+          >
+            Auto
+          </button>
+          <button
+            type="button"
+            title="A straight line"
+            aria-pressed={edge.curve === 0}
+            onClick={() => onSetStyle({ curve: 0 })}
+            style={seg(edge.curve === 0)}
+          >
+            Straight
+          </button>
+          <button
+            type="button"
+            title="Bow more one way"
+            onClick={() => onSetStyle({ curve: (edge.curve ?? 0) - 25 })}
+            style={seg(false)}
+          >
+            Bow −
+          </button>
+          <button
+            type="button"
+            title="Bow more the other way"
+            onClick={() => onSetStyle({ curve: (edge.curve ?? 0) + 25 })}
+            style={seg(false)}
+          >
+            Bow +
+          </button>
         </div>
 
         {/* Delete */}

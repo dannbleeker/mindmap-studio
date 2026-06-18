@@ -75,6 +75,8 @@ export type EdgeData = {
   color?: string;
   width?: number;
   dash?: "dashed" | "solid" | "dotted";
+  /** Relationship arc bow: signed perpendicular offset of the midpoint (crosslink edges only). */
+  curve?: number;
   /** Dimmed by the read-only Power Filter (an endpoint isn't lit); view-only opacity. */
   dimmed?: boolean;
   /** Which side of the parent this branch springs from — one shared origin per parent-side, computed

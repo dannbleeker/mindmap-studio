@@ -170,3 +170,55 @@ export function crosslinkBezier(
   const path = `M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}`;
   return { path, labelX: (sx + tx) / 2, labelY: (sy + ty) / 2 };
 }
+
+/** Right-angle "org-chart" connector: a uniform-width path from the parent's near-edge CENTRE to the
+ *  child's near-edge centre via a shared mid bus (a vertical bus for top/bottom, horizontal for
+ *  left/right) with small rounded corners. Org-down/org-up layouts use this instead of the organic
+ *  taper, which reads wrong for a formal hierarchy. Siblings share the parent-edge point and the bus
+ *  level, so they form the classic org "T". Pure → canvas (BranchEdge) and exporter share it. */
+export function elbowPath(parent: Box, child: Box, side: AttachSide): string {
+  const pl = parent.cx - parent.w / 2;
+  const pr = parent.cx + parent.w / 2;
+  const pt = parent.cy - parent.h / 2;
+  const pb = parent.cy + parent.h / 2;
+  const cl = child.cx - child.w / 2;
+  const cr = child.cx + child.w / 2;
+  const ct = child.cy - child.h / 2;
+  const cb = child.cy + child.h / 2;
+  // Endpoints on the facing edge centres (the org-chart "drop from the bottom-centre").
+  const sx = side === "left" ? pl : side === "right" ? pr : parent.cx;
+  const sy = side === "top" ? pt : side === "bottom" ? pb : parent.cy;
+  const tx = side === "left" ? cr : side === "right" ? cl : child.cx;
+  const ty = side === "top" ? cb : side === "bottom" ? ct : child.cy;
+  if (side === "top" || side === "bottom") {
+    const my = (sy + ty) / 2;
+    const hx = Math.sign(tx - sx) || 1;
+    const vy = Math.sign(my - sy) || 1;
+    const r = Math.max(0, Math.min(6, Math.abs(tx - sx) / 2, Math.abs(my - sy), Math.abs(ty - my)));
+    if (r < 0.5)
+      return `M ${r2(sx)} ${r2(sy)} L ${r2(sx)} ${r2(my)} L ${r2(tx)} ${r2(my)} L ${r2(tx)} ${r2(ty)}`;
+    return [
+      `M ${r2(sx)} ${r2(sy)}`,
+      `L ${r2(sx)} ${r2(my - vy * r)}`,
+      `Q ${r2(sx)} ${r2(my)} ${r2(sx + hx * r)} ${r2(my)}`,
+      `L ${r2(tx - hx * r)} ${r2(my)}`,
+      `Q ${r2(tx)} ${r2(my)} ${r2(tx)} ${r2(my + vy * r)}`,
+      `L ${r2(tx)} ${r2(ty)}`,
+    ].join(" ");
+  }
+  // Horizontal bus (left/right) — kept general though org layouts use the vertical case above.
+  const mx = (sx + tx) / 2;
+  const vy = Math.sign(ty - sy) || 1;
+  const hx = Math.sign(mx - sx) || 1;
+  const r = Math.max(0, Math.min(6, Math.abs(ty - sy) / 2, Math.abs(mx - sx), Math.abs(tx - mx)));
+  if (r < 0.5)
+    return `M ${r2(sx)} ${r2(sy)} L ${r2(mx)} ${r2(sy)} L ${r2(mx)} ${r2(ty)} L ${r2(tx)} ${r2(ty)}`;
+  return [
+    `M ${r2(sx)} ${r2(sy)}`,
+    `L ${r2(mx - hx * r)} ${r2(sy)}`,
+    `Q ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(sy + vy * r)}`,
+    `L ${r2(mx)} ${r2(ty - vy * r)}`,
+    `Q ${r2(mx)} ${r2(ty)} ${r2(mx + hx * r)} ${r2(ty)}`,
+    `L ${r2(tx)} ${r2(ty)}`,
+  ].join(" ");
+}

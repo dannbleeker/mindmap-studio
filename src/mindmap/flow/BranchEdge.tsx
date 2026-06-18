@@ -5,6 +5,7 @@ import {
   branchEndpoints,
   branchWidths,
   childrenAxis,
+  elbowPath,
   nodeBox,
   taperedRibbonPath,
 } from "./floating";
@@ -27,6 +28,24 @@ function BranchEdgeImpl({ source, target, data }: EdgeProps<FlowEdge>) {
   const parent = nodeBox(s);
   const child = nodeBox(t);
   const side = data?.attachSide ?? attachSideFor(parent, child, childrenAxis(parent, [child]));
+  const dimOpacity = data?.dimmed ? 0.12 : 1;
+  // Org-chart layouts (org-down/org-up) draw a uniform right-angle elbow — the organic taper reads
+  // wrong for a formal hierarchy. The bus is always vertical (children sit in a row below/above the
+  // parent), so derive the side from the parent→child direction, NOT the sibling-spread axis. The
+  // shared geometry (floating.ts) is the same one the exporter uses (canvas == export).
+  if (data?.elbow) {
+    const elbowSide = child.cy >= parent.cy ? "bottom" : "top";
+    return (
+      <path
+        d={elbowPath(parent, child, elbowSide)}
+        fill="none"
+        stroke={data?.branchColor ?? "#999"}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        opacity={dimOpacity}
+      />
+    );
+  }
   const { sx, sy, tx, ty } = branchEndpoints(parent, child, side);
   const { trunk, tip } = branchWidths(data?.depth ?? 1);
   return (
@@ -34,7 +53,7 @@ function BranchEdgeImpl({ source, target, data }: EdgeProps<FlowEdge>) {
       d={taperedRibbonPath(sx, sy, tx, ty, side, trunk, tip)}
       fill={data?.branchColor ?? "#999"}
       stroke="none"
-      opacity={data?.dimmed ? 0.12 : 1}
+      opacity={dimOpacity}
     />
   );
 }

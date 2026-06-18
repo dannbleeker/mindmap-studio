@@ -6,6 +6,7 @@ import {
   branchWidths,
   childrenAxis,
   crosslinkBezier,
+  elbowPath,
   taperedRibbonPath,
 } from "../src/mindmap/flow/floating";
 
@@ -70,5 +71,15 @@ describe("branch geometry", () => {
     expect(labelX).toBe(100); // label at the curve's geometric midpoint
     expect(labelY).toBe(50);
     expect(crosslinkBezier(0, 0, 200, 100).path).toBe(path); // deterministic
+  });
+
+  it("elbowPath: a right-angle org-chart connector from parent-bottom-centre to child-top-centre", () => {
+    const parent = box(0, 0, 100, 40); // centre (0,0) → bottom edge at y=20
+    const child = box(60, 200, 100, 40); // below + offset → top edge at y=180
+    const d = elbowPath(parent, child, "bottom");
+    expect(d.startsWith("M 0 20")).toBe(true); // leaves the parent's bottom CENTRE
+    expect(d.trimEnd().endsWith("60 180")).toBe(true); // ends at the child's top CENTRE
+    expect(d).toContain("Q"); // routes via a rounded mid-bus, not one diagonal
+    expect(elbowPath(parent, child, "bottom")).toBe(d); // deterministic
   });
 });

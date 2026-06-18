@@ -2,6 +2,7 @@ import type { MapNode, MindMapDoc } from "../../model/types";
 import { outlineNumbers } from "../../outline";
 import { type ProgressInfo, progressMap } from "../../progress";
 import { conditionalStyle } from "../../rules";
+import type { LayoutKind } from "../contract";
 import { CROSSLINK_COLOR } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
 
@@ -47,10 +48,14 @@ function assignSides(children: MapNode[]): ("left" | "right")[] {
   });
 }
 
+/** Org-chart layouts (vertical hierarchy) draw right-angle elbow connectors, not the organic taper. */
+const isOrg = (k: LayoutKind): boolean => k === "org-down" || k === "org-up";
+
 export function project(
   doc: MindMapDoc,
   palette: string[] = FALLBACK_PALETTE,
   numbered = false,
+  kind: LayoutKind = "side",
 ): ProjectResult {
   const pal = palette.length > 0 ? palette : FALLBACK_PALETTE;
   const nodes: TopicNode[] = [];
@@ -73,6 +78,9 @@ export function project(
     floating: boolean,
     isRoot: boolean,
     recurse = true,
+    // The layout governing the edge INTO this node (= the layout that placed it). Org layouts → the
+    // branch renders as a right-angle elbow. A node's own `layout` override governs its children.
+    edgeLayout: LayoutKind = kind,
   ): void => {
     nodes.push({
       id: node.id,
@@ -102,6 +110,8 @@ export function project(
         progress: progress.get(node.id),
         due: node.task?.due,
         start: node.task?.start,
+        durationDays: node.task?.durationDays,
+        resources: node.task?.resources,
         priority: node.task?.priority,
         attachmentCount: node.attachments?.length,
         floating,
@@ -113,14 +123,16 @@ export function project(
         source: parentId,
         target: node.id,
         type: "branch", // a floating tapered edge — routes itself from the node borders
-        data: { depth, branchColor: color, crosslink: false },
+        data: { depth, branchColor: color, crosslink: false, elbow: isOrg(edgeLayout) },
       });
     }
     // Collapsed → keep the node (with hasChildren) but omit its descendants. The root is
     // emitted with recurse=false so its children are emitted once, per-branch (colour/side).
     if (node.collapsed || !recurse) return;
+    // This node's children are governed by its own layout override, else the layout that placed it.
+    const childLayout = (node.layout as LayoutKind | undefined) ?? edgeLayout;
     for (const child of node.children) {
-      emit(child, node.id, depth + 1, side, color, floating, false);
+      emit(child, node.id, depth + 1, side, color, floating, false, true, childLayout);
     }
   };
 
@@ -133,9 +145,10 @@ export function project(
     });
   }
 
-  // Floating topics: each a detached subtree (no edge to the root).
+  // Floating topics: each a detached subtree (no edge to the root). Floating subtrees are always
+  // placed horizontally (placeFloating), so their branches stay organic even in an org-chart map.
   for (const floating of doc.floatingTopics ?? []) {
-    emit(floating, undefined, 1, "right", FLOATING_COLOR, true, false);
+    emit(floating, undefined, 1, "right", FLOATING_COLOR, true, false, true, "right");
   }
 
   // Cross-links: dashed, labelled relationship edges (floating custom edge).

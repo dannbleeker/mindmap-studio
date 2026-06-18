@@ -577,6 +577,73 @@ describe("flow exportSvg survives the cleanSvg pipeline (sanitizeSvg)", () => {
   });
 });
 
+describe("flow exportSvg — level styling, task-info, org elbows (canvas == export)", () => {
+  // r(0) → m(1, a task) → s(2) → leaf(3): one node per level so the depth-driven box treatments fire.
+  const ldoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "lv",
+    title: "LV",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        {
+          id: "m",
+          topic: "Main",
+          task: { start: "2026-03-03", durationDays: 5, resources: ["Ann", "Bo"] },
+          children: [
+            { id: "s", topic: "Sub", children: [{ id: "leaf", topic: "Leaf", children: [] }] },
+          ],
+        },
+      ],
+    },
+  };
+  const lrects = new Map<string, NodeRect>([
+    ["r", { x: 0, y: 0, w: 120, h: 50 }],
+    ["m", { x: 200, y: 0, w: 120, h: 44 }],
+    ["s", { x: 400, y: 0, w: 120, h: 36 }],
+    ["leaf", { x: 600, y: 0, w: 120, h: 36 }],
+  ]);
+
+  it("fills the depth-1 main topic with its branch colour (no white card, no border)", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toContain('<rect x="200" y="0" width="120" height="44" rx="11" fill="#E8593C"/>');
+  });
+
+  it("renders a depth-3+ leaf as a branch-colour underline, not a bordered box", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toContain(
+      '<line x1="602" y1="35" x2="718" y2="35" stroke="#E8593C" stroke-width="2"/>',
+    );
+    expect(out).not.toContain('<rect x="600"'); // the leaf draws no card rect
+  });
+
+  it("draws the inline task-info line (start ▸ duration ▸ resources)", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toContain("▶");
+    expect(out).toContain("5d");
+    expect(out).toContain("@Ann, Bo");
+  });
+
+  it("centres the root label (text-anchor=middle) at the larger root size", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toMatch(
+      /<text x="60"[^>]*text-anchor="middle"[^>]*font-size="20"[^>]*>Root<\/text>/,
+    );
+  });
+
+  it("renders org-chart layouts with uniform right-angle elbows, not tapered ribbons", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar, false, "", undefined, "org-down");
+    // an elbow is a fill:none stroked path with rounded corners (the organic ribbon is a FILLED path)
+    expect(out).toMatch(/<path d="M [^"]*Q[^"]*" fill="none" stroke="#E8593C" stroke-width="2"/);
+  });
+
+  it("keeps the organic taper (a filled branch path) for the default side layout", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toMatch(/<path d="M [^"]*" fill="#E8593C"\/>/); // filled ribbon, no stroke
+  });
+});
+
 describe("arrowHeadPath (shared relationship arrowhead)", () => {
   it("builds a 3-vertex triangle with its tip at the target, pointing away from the source", () => {
     const d = arrowHeadPath(100, 0, 0, 0, 9); // horizontal, pointing +x

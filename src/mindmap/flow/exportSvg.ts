@@ -2,6 +2,7 @@ import type { MapNode, MindMapDoc } from "../../model/types";
 import { priorityColor, priorityLabel } from "../../priority";
 import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
+import type { LayoutKind } from "../contract";
 import { arrowHeadPath } from "./arrowhead";
 import { backdropGeometry } from "./backdrop";
 import { type BraceGroup, braceGeometry, bracePath } from "./brace";
@@ -13,6 +14,7 @@ import {
   branchWidths,
   childrenAxis,
   crosslinkBezier,
+  elbowPath,
   floatingPoints,
   taperedRibbonPath,
 } from "./floating";
@@ -28,6 +30,7 @@ import {
   SUMMARY_GAP,
   SUMMARY_PAD,
   boundaryLabel,
+  readableTextOn,
   resolveBoundaryStyle,
   resolveCalloutStyle,
   resolveLinkStyle,
@@ -86,7 +89,8 @@ function parseBorder(border: string | undefined): { width: number; color: string
   return color ? { width, color } : null;
 }
 
-/** A multi-line <text> centred vertically between top..bottom, left-aligned at x. */
+/** A multi-line <text> centred vertically between top..bottom; left-aligned at x, or centred on x
+ *  when `anchor` is "middle" (used for the root topic, whose label is horizontally centred). */
 function textBlock(
   lines: string[],
   x: number,
@@ -96,6 +100,7 @@ function textBlock(
   color: string,
   weight?: string,
   fontFamily?: string,
+  anchor: "start" | "middle" = "start",
 ): string {
   if (lines.length === 0) return "";
   const lineHeight = fontSize * 1.2;
@@ -103,7 +108,8 @@ function textBlock(
   const firstBaseline = centre - ((lines.length - 1) * lineHeight) / 2;
   const w =
     weight && weight !== "400" && weight !== "normal" ? ` font-weight="${esc(weight)}"` : "";
-  const attrs = `x="${r2(x)}" font-family="${esc(fontFamily || "sans-serif")}" font-size="${fontSize}" fill="${esc(color)}"${w}`;
+  const anchorAttr = anchor === "middle" ? ` text-anchor="middle"` : "";
+  const attrs = `x="${r2(x)}"${anchorAttr} font-family="${esc(fontFamily || "sans-serif")}" font-size="${fontSize}" fill="${esc(color)}"${w}`;
   if (lines.length === 1) {
     return `<text ${attrs} y="${r2(firstBaseline)}">${esc(lines[0])}</text>`;
   }
@@ -163,8 +169,9 @@ export function buildFlowSvg(
   numbered = false,
   today = "",
   braces?: BraceGroup[],
+  kind: LayoutKind = "side",
 ): string {
-  const { nodes, edges } = project(doc, palette, numbered);
+  const { nodes, edges } = project(doc, palette, numbered, kind);
   const callouts = collectCallouts(doc, rects);
   const bd = doc.backdrop ? backdropGeometry(doc.backdrop) : null;
   const nodeBg = cssVar["--bgcolor"] ?? "#ffffff";
@@ -381,10 +388,20 @@ export function buildFlowSvg(
       const parent = boxOf(sr);
       const child = boxOf(tr);
       const side: AttachSide = attachSideFor(parent, child, axisByParent.get(e.source) ?? "h");
-      const ep = branchEndpoints(parent, child, side);
-      const { trunk, tip } = branchWidths(e.data?.depth ?? 1);
-      const path = taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, side, trunk, tip);
-      parts.push(`<path d="${path}" fill="${e.data?.branchColor ?? "#999"}"/>`);
+      if (e.data?.elbow) {
+        // Org-chart layouts: a uniform right-angle elbow, not the organic taper. The bus is vertical
+        // (children in a row below/above the parent), so the side comes from the parent→child
+        // direction, not the sibling-spread axis. Same renderer the canvas uses → canvas == export.
+        const elbowSide: AttachSide = child.cy >= parent.cy ? "bottom" : "top";
+        parts.push(
+          `<path d="${elbowPath(parent, child, elbowSide)}" fill="none" stroke="${e.data?.branchColor ?? "#999"}" stroke-width="2" stroke-linejoin="round"/>`,
+        );
+      } else {
+        const ep = branchEndpoints(parent, child, side);
+        const { trunk, tip } = branchWidths(e.data?.depth ?? 1);
+        const path = taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, side, trunk, tip);
+        parts.push(`<path d="${path}" fill="${e.data?.branchColor ?? "#999"}"/>`);
+      }
     }
   }
 
@@ -408,20 +425,39 @@ export function buildFlowSvg(
     // Conditional-formatting style sits under the node's own style (manual wins) — matches the canvas.
     const st = d.condStyle ? { ...d.condStyle, ...d.style } : d.style;
     const pad = d.isRoot ? ROOT_PAD : PAD;
-    const fill = d.isRoot ? rootBg : (st?.background ?? nodeBg);
-    const textColor = d.isRoot ? rootColor : (st?.color ?? color);
-    // Card radii + default branch border match the canvas TopicNode (canvas == export).
-    const radius = d.isRoot ? 14 : Number.parseFloat(st?.borderRadius ?? "11") || 11;
-    const border = d.isRoot
-      ? null
-      : (parseBorder(st?.border) ?? { width: 1.5, color: d.branchColor });
-    const strokeAttr = border
-      ? ` stroke="${esc(border.color)}" stroke-width="${border.width}"`
-      : "";
     // Geometric shapes (diamond/ellipse/…) paint an SVG path — the same builder the canvas
     // uses — so the export matches the screen; the rest stay rounded rects. Insets keep text
     // inside a narrowing outline.
     const shape = d.isRoot ? undefined : st?.shape;
+    const geom = isGeometric(shape);
+    // Level-based styling — mirrors the canvas TopicNode (canvas == export): depth-1 mains are FILLED
+    // with the branch colour; depth-3+ leaves drop the box for a branch-colour underline. Manual style
+    // (a set background / border) wins and reverts the node to a normal bordered card.
+    const filledMain = !d.isRoot && !geom && d.depth === 1 && !st?.background;
+    const underlineLeaf = !d.isRoot && !geom && d.depth >= 3 && !st?.background && !st?.border;
+    const fill = d.isRoot
+      ? rootBg
+      : filledMain
+        ? d.branchColor
+        : underlineLeaf
+          ? "none"
+          : (st?.background ?? nodeBg);
+    const textColor = d.isRoot
+      ? rootColor
+      : (st?.color ?? (filledMain ? readableTextOn(d.branchColor) : color));
+    const radius = d.isRoot
+      ? 16
+      : underlineLeaf
+        ? 0
+        : Number.parseFloat(st?.borderRadius ?? "11") || 11;
+    const border = st?.border
+      ? parseBorder(st.border)
+      : d.isRoot || filledMain || underlineLeaf
+        ? null
+        : { width: 1.5, color: d.branchColor };
+    const strokeAttr = border
+      ? ` stroke="${esc(border.color)}" stroke-width="${border.width}"`
+      : "";
     const ins = isGeometric(shape) ? shapeInset(shape) : { left: 0, right: 0, top: 0, bottom: 0 };
     if (isGeometric(shape)) {
       parts.push(
@@ -429,6 +465,11 @@ export function buildFlowSvg(
       );
       const ov = shapeOverlayPath(shape, r.x, r.y, r.w, r.h);
       if (ov) parts.push(`<path d="${ov}" fill="none"${strokeAttr}/>`);
+    } else if (underlineLeaf) {
+      // No box — a short branch-colour underline under the text (matches the canvas border-bottom).
+      parts.push(
+        `<line x1="${r2(r.x + 2)}" y1="${r2(r.y + r.h - 1)}" x2="${r2(r.x + r.w - 2)}" y2="${r2(r.y + r.h - 1)}" stroke="${esc(d.branchColor)}" stroke-width="2"/>`,
+      );
     } else {
       parts.push(
         `<rect x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" rx="${radius}" fill="${esc(fill)}"${strokeAttr}/>`,
@@ -445,10 +486,19 @@ export function buildFlowSvg(
       textTop = r.y + pad + ih;
     }
 
-    // The task pie + due-date chip sit in a reserved strip at the bottom (matches the canvas badge).
-    const pieReserve = d.progress || d.due || d.priority ? 20 : 0;
+    // The priority/progress/due chips sit in a reserved strip at the bottom; the inline task-info line
+    // (start ▸ duration ▸ resources) sits just above them. Both reserved so the title doesn't overlap.
+    const taskInfo = [
+      d.start ? `▶ ${formatDateShort(d.start)}` : null,
+      d.durationDays ? `${d.durationDays}d` : null,
+      d.resources?.length ? `@${d.resources.join(", ")}` : null,
+    ]
+      .filter(Boolean)
+      .join("   ·   ");
+    const chipRow = d.progress || d.due || d.priority ? 20 : 0;
+    const pieReserve = chipRow + (taskInfo ? 15 : 0);
 
-    const fontSize = Number.parseFloat(st?.fontSize ?? "") || 16;
+    const fontSize = d.isRoot ? 20 : Number.parseFloat(st?.fontSize ?? "") || 16;
     const lines = d.topic.split("\n").map((l) => l.trim());
     if (d.icons?.length) lines[0] = `${d.icons.join(" ")} ${lines[0] ?? ""}`.trim();
     if (d.number) lines[0] = `${d.number} ${lines[0] ?? ""}`.trim();
@@ -457,13 +507,14 @@ export function buildFlowSvg(
       parts.push(
         textBlock(
           nonEmpty,
-          r.x + pad + ins.left,
+          d.isRoot ? r.x + r.w / 2 : r.x + pad + ins.left,
           textTop,
           r.y + r.h - pieReserve - ins.bottom,
           fontSize,
           textColor,
-          d.isRoot ? "700" : st?.fontWeight,
+          d.isRoot ? "700" : (st?.fontWeight ?? (filledMain ? "600" : undefined)),
           st?.fontFamily,
+          d.isRoot ? "middle" : "start",
         ),
       );
     }
@@ -489,6 +540,13 @@ export function buildFlowSvg(
       parts.push(
         `<rect x="${r2(badgeX)}" y="${r2(chipY)}" width="${r2(chipW)}" height="16" rx="5" fill="${over ? "#fde2e2" : "rgba(0,0,0,0.06)"}"/>`,
         `<text x="${r2(badgeX + 5)}" y="${r2(chipY + 12)}" font-family="sans-serif" font-size="10.5" fill="${over ? "#b42318" : esc(textColor)}">${esc(label)}</text>`,
+      );
+    }
+    // Inline task-info line (start ▸ duration ▸ resources), just above the chip strip — mirrors the
+    // canvas TopicNode line (canvas == export).
+    if (taskInfo) {
+      parts.push(
+        `<text x="${r2(r.x + pad + ins.left)}" y="${r2(r.y + r.h - chipRow - 5)}" font-family="sans-serif" font-size="11" fill="${esc(textColor)}" opacity="0.65">${esc(taskInfo)}</text>`,
       );
     }
   }

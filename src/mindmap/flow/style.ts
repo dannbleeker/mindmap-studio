@@ -118,6 +118,19 @@ export function mix(hex: string, target: string, t: number): string {
   if (!c || !tg) return hex;
   return toHex(c[0] + (tg[0] - c[0]) * t, c[1] + (tg[1] - c[1]) * t, c[2] + (tg[2] - c[2]) * t);
 }
+/** Black or white text that stays readable on a filled `hex` background (WCAG relative luminance).
+ *  Used for the level-1 "main topic" pill, whose body is the branch colour rather than white. Non-hex
+ *  input → dark text. Shared by the canvas node + the exporter so a filled topic reads the same. */
+export function readableTextOn(hex: string): string {
+  const rgb = parseHex(hex);
+  if (!rgb) return "#1a1a1a";
+  const lin = (c: number): number => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  const lum = 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
+  return lum > 0.5 ? "#1a1a1a" : "#ffffff";
+}
 
 export interface ResolvedBoundaryStyle {
   stroke: string;

@@ -6,9 +6,10 @@ import { sanitizeRich } from "../../io/richText";
 import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
-import { isOverdue, todayISO } from "../../taskDate";
+import { formatDateShort, isOverdue, todayISO } from "../../taskDate";
 import { useEditing } from "./editing";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
+import { readableTextOn } from "./style";
 import type { TopicNode as TopicNodeT } from "./types";
 
 // Custom topic node: a rounded box honouring the model's NodeStyle, with marker emoji, the
@@ -111,11 +112,15 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     note,
     hyperlink,
     isRoot,
+    depth,
     branchColor,
     collapsed,
     hasChildren,
     progress,
     due,
+    start,
+    durationDays,
+    resources,
     priority,
     attachmentCount,
     dimmed,
@@ -186,13 +191,23 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const shapeStroke = style?.border?.match(/#[0-9a-f]{3,8}|rgba?\([^)]+\)/i)?.[0] ?? branchColor;
   const shapeStrokeW = style?.border ? Number.parseFloat(style.border) || 2 : 2;
 
+  // Level-based topic styling (MindManager reads its hierarchy from shape alone): depth-1 mains are
+  // FILLED with the branch colour; depth-2 keep the bordered white card; depth-3+ leaves drop the box
+  // for a short branch-colour underline under the text. A manual NodeStyle key always wins — set a
+  // background or border and the node reverts to a normal card.
+  const filledMain = !isRoot && !geom && depth === 1 && !style?.background;
+  const underlineLeaf = !isRoot && !geom && depth >= 3 && !style?.background && !style?.border;
+
   const box: CSSProperties = isRoot
     ? {
+        // The central topic dominates: larger bold type + a slightly bigger capsule, text centred.
         background: "var(--mm-root-bg, #1b8a5e)",
         color: "var(--mm-root-color, #ffffff)",
-        borderRadius: 14,
-        padding: "8px 18px",
+        borderRadius: 16,
+        padding: "9px 20px",
         fontWeight: 700,
+        fontSize: 20,
+        textAlign: "center",
         border: "none",
       }
     : geom && ins
@@ -207,19 +222,39 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           textDecoration: style?.textDecoration,
         }
       : {
-          background: style?.background ?? "var(--mm-node-bg, #ffffff)",
-          color: style?.color ?? "var(--mm-color, #23211c)",
-          border: style?.border ?? `1.5px solid ${branchColor}`,
-          borderRadius: style?.borderRadius ?? "11px",
-          padding: "6px 12px",
+          background:
+            style?.background ??
+            (filledMain
+              ? branchColor
+              : underlineLeaf
+                ? "transparent"
+                : "var(--mm-node-bg, #ffffff)"),
+          color:
+            style?.color ?? (filledMain ? readableTextOn(branchColor) : "var(--mm-color, #23211c)"),
+          border:
+            style?.border ?? (filledMain || underlineLeaf ? "none" : `1.5px solid ${branchColor}`),
+          borderBottom: !style?.border && underlineLeaf ? `2px solid ${branchColor}` : undefined,
+          borderRadius: style?.borderRadius ?? (underlineLeaf ? 0 : "11px"),
+          padding: underlineLeaf ? "3px 8px 4px" : "6px 12px",
           fontSize: style?.fontSize,
-          fontWeight: style?.fontWeight,
+          fontWeight: style?.fontWeight ?? (filledMain ? 600 : undefined),
           fontFamily: style?.fontFamily,
           textDecoration: style?.textDecoration,
         };
 
   // Selection-ring colour: the node's branch colour, emerald for the root.
   const ringColor = isRoot ? "#1b8a5e" : branchColor;
+
+  // Inline task-info line (MindManager schedule/assignment row): start ▸ duration ▸ resources. The
+  // priority / progress / due chips render above; this surfaces the remaining task fields the canvas
+  // used to drop. Mirrored in the exporter (canvas == export).
+  const taskInfo = [
+    start ? `▶ ${formatDateShort(start)}` : null,
+    durationDays ? `${durationDays}d` : null,
+    resources?.length ? `@${resources.join(", ")}` : null,
+  ]
+    .filter(Boolean)
+    .join("   ·   ");
 
   return (
     <div
@@ -241,8 +276,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             : hovered
               ? isRoot
                 ? "0 10px 26px rgba(27,138,94,0.40)"
-                : "0 6px 18px rgba(40,30,16,0.20)"
-              : geom
+                : underlineLeaf
+                  ? "none"
+                  : "0 6px 18px rgba(40,30,16,0.20)"
+              : geom || underlineLeaf
                 ? "none"
                 : isRoot
                   ? "0 6px 18px rgba(27,138,94,0.30)"
@@ -427,6 +464,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 📎 {attachmentCount}
               </Chip>
             ) : null}
+          </div>
+        ) : null}
+        {taskInfo ? (
+          <div style={{ marginTop: 3, fontSize: 11, opacity: 0.65, whiteSpace: "pre-wrap" }}>
+            {taskInfo}
           </div>
         ) : null}
         {tags?.length ? (

@@ -7,6 +7,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Topics now read as a hierarchy, MindManager-style.** The map's depth is legible from shape alone:
+  the **central topic** is larger, bold, and centred; **main (level-1) topics are filled** with their
+  branch colour (white/auto-contrast text) instead of a thin outline; mid topics keep the bordered
+  white card; and **deep (level-3+) leaves drop the box** for the text on a short branch-colour
+  underline. A manual style (a set fill or border) always wins and reverts a topic to a normal card.
+  Identical on canvas and in every image / PDF / HTML export.
+
+- **Org-chart layouts draw right-angle elbow connectors.** In the Org-chart (down / up) layouts a
+  parent now connects to its children with clean uniform right-angle "bus" elbows — the formal
+  hierarchy look — instead of the organic tapered trunk (which stays for the mind-map / radial
+  layouts). Per-branch layout overrides are honoured, and floating subtrees stay organic.
+
+- **Inline task-info line on topics.** A topic with task scheduling now shows a compact muted line
+  (**▶ start · duration · @resources**) beneath the title, surfacing the start date, duration, and
+  assigned resources the canvas previously dropped — on canvas and in exports.
+
 - **Organic branch connectors (MindManager-style).** A parent's child branches now spring from a
   **single point** on the side its children sit — one chunky trunk that fans out, tapering to a fine
   tip at each child, **entering each child at its near end** and tucking under both boxes so the line

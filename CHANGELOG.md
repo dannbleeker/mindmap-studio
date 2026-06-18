@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Organic branch connectors (MindManager-style).** A parent's child branches now spring from a
+  **single point** on the side its children sit — one chunky trunk that fans out, tapering to a fine
+  tip at each child, **entering each child at its near end** and tucking under both boxes so the line
+  **always connects** (no more crossings or gaps). The origin side adapts to the layout (3 o'clock for
+  right-growing, 9 for left, 6/12 for org charts, nearest-side for radial), and the centre topic fans
+  from a left **and** a right origin. The whole thing is one shared geometry, so the canvas and every
+  image / PDF / HTML export stay byte-identical.
+
 - **Type to edit a topic.** With a topic selected, just **start typing** — the topic opens for editing
   with your first keystroke replacing the old text (caret at the end, so you keep typing straight on).
   Matches MindManager. **F2** and **double-click** still edit in place starting from the existing text

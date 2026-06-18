@@ -1,6 +1,7 @@
 import type { Edge, Node } from "@xyflow/react";
 import type { MapImage, NodeStyle } from "../../model/types";
 import type { ProgressInfo } from "../../progress";
+import type { AttachSide } from "./floating";
 
 // Shared data shapes for the React Flow canvas. Using `type` (not `interface`) so the
 // shapes satisfy React Flow's `Record<string, unknown>` data constraint.
@@ -67,6 +68,9 @@ export type EdgeData = {
   dash?: "dashed" | "solid" | "dotted";
   /** Dimmed by the read-only Power Filter (an endpoint isn't lit); view-only opacity. */
   dimmed?: boolean;
+  /** Which side of the parent this branch springs from — one shared origin per parent-side, computed
+   *  per parent in sync() so siblings stay consistent (no crossed fan). Branch edges only. */
+  attachSide?: AttachSide;
 };
 
 export type TopicNode = Node<TopicData, "topic">;

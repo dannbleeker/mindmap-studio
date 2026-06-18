@@ -39,15 +39,21 @@ export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
     const fs = levelFontSize(d.depth);
     const rawLines = d.topic.split("\n");
     const longest = Math.max(1, ...rawLines.map((l) => l.length));
+    // Markers now sit in their own fixed-height row above the title (~16px tiles).
+    const markerRow = d.icons?.length ? 18 : 0;
     const width = Math.min(
       320,
-      Math.max(64, longest * fs * 0.46 + 30 + (d.icons?.length ? 18 : 0)),
+      Math.max(64, longest * fs * 0.46 + 30, (d.icons?.length ?? 0) * 16 + 12),
     );
     // Reserve height for the WRAPPED line count (the box wraps at ~width), not just the explicit
     // newlines — so a long single-line topic that wraps on screen doesn't overflow its reserved box.
     const wrapped = wrapText(d.topic, Math.max(16, width - 30), fs);
     const height =
-      (d.image ? 130 : 0) + wrapped.length * (fs * 1.25) + 16 + (d.tags?.length ? 22 : 0);
+      (d.image ? 130 : 0) +
+      markerRow +
+      wrapped.length * (fs * 1.25) +
+      16 +
+      (d.tags?.length ? 22 : 0);
     return { width, height };
   };
 }

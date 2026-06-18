@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Flat vector marker icons (replacing emoji).** Topic markers (check, flag, star, priority dots,
+  target, idea, …) now render as a crisp **flat icon set** at a fixed size in a tidy row above the
+  title — **identical on every machine and in every export** — instead of OS colour emoji that vary by
+  platform and rasterizer. Existing maps are unchanged (same marker keys) and the picker shows the new
+  icons; an unrecognised imported glyph still falls back to its character.
+
 - **Tighter, MindManager-style layout geometry.** Sibling spacing is now proportional to each topic's
   height (a tall image topic reserves room; one-line siblings pack tight) instead of every row being
   as tall as the biggest node in the map; each branch's columns hang just past its **own** parent, so

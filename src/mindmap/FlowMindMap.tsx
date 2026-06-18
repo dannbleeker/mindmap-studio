@@ -24,7 +24,7 @@ import {
 import { EditorIcon, type EditorIconName } from "../components/EditorIcons";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors } from "../design/tokens";
-import { MARKER_PALETTE } from "../icons";
+import { MARKER_PALETTE, markerImage } from "../icons";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
@@ -1589,7 +1589,11 @@ function FlowInner({
                           data-on={on || undefined}
                           onClick={() => apply(toggleIcon(docRef.current, id, m))}
                         >
-                          {m}
+                          {markerImage(m) ? (
+                            <img src={markerImage(m) as string} alt={m} width={16} height={16} />
+                          ) : (
+                            m
+                          )}
                         </button>
                       );
                     })}

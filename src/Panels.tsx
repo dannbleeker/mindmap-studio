@@ -15,6 +15,7 @@ import {
 } from "./design/primitives";
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
+import { markerImage } from "./icons";
 import { formatBytes } from "./io/attachment";
 import type { MarkerTagSummary, SelectedNode, SelectionFields } from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
@@ -1967,7 +1968,17 @@ export function MarkerBar({
               opacity: some ? 0.6 : 1,
             }}
           >
-            {marker}
+            {markerImage(marker) ? (
+              <img
+                src={markerImage(marker) as string}
+                alt={marker}
+                width={18}
+                height={18}
+                style={{ display: "block" }}
+              />
+            ) : (
+              marker
+            )}
           </button>
         );
       })}

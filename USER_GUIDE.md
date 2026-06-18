@@ -95,7 +95,8 @@ Keyboard-first, just like MindManager:
 - **Tab** — add a child topic
 - **Ctrl + Enter** — add a child of the selected topic
 - **Delete** — remove the selected node (if it has sub-topics, you're asked to confirm — it removes the whole branch)
-- **Double-click** a node, or press **F2** with it selected — edit its text inline
+- **Just start typing** on a selected topic — it opens for editing with your first keystroke replacing the old text (type straight on)
+- **Double-click** a node, or press **F2** with it selected — edit its text inline (starting from the existing text, all selected)
 - **Ctrl + B / I / U** — while editing a topic: bold / italic / underline the selection
 - **⌘K / Ctrl-K** — open the [command palette](#the-toolbar) to search and run any action
 - **Drag** a node onto another — re-parent it
@@ -607,6 +608,8 @@ updates**.
 | Tab | Add child |
 | Ctrl + Enter | Add child (selected topic) |
 | Delete | Remove node (confirm if it has sub-topics) |
+| Type a letter (topic selected) | Edit in place, replacing the text |
+| F2 / double-click | Edit in place, keeping the text |
 | Ctrl + B / I / U (while editing) | Bold / italic / underline the selection |
 | Ctrl + Z / Ctrl + Shift + Z / Ctrl + Y | Undo / redo |
 | `/` | Focus Find |

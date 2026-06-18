@@ -104,6 +104,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const style = condStyle ? { ...condStyle, ...ownStyle } : ownStyle;
   const editing = useEditing();
   const isEditing = editing?.editingId === id;
+  // Type-to-edit: when edit was started by typing a character on the selected node, seed the editor
+  // with that character (caret at the end) instead of the existing topic + select-all.
+  const seed = isEditing ? (editing?.seed ?? null) : null;
   const editRef = useRef<HTMLDivElement>(null);
   // Re-sanitise on render too (defence-in-depth: a topicRich could arrive via an imported .json).
   const richHtml = useMemo(() => (topicRich ? sanitizeRich(topicRich) : null), [topicRich]);
@@ -113,8 +116,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   useEffect(() => {
     if (!isEditing || !editRef.current) return;
     const el = editRef.current;
-    // Seed with the rich HTML so existing formatting stays editable; else plain text.
-    if (richHtml) el.innerHTML = richHtml;
+    // Type-to-edit seeds with the typed character (plain text); otherwise seed with the rich HTML so
+    // existing formatting stays editable, else the plain topic.
+    if (seed !== null) el.textContent = seed;
+    else if (richHtml) el.innerHTML = richHtml;
     else el.textContent = topic;
     // A freshly-CREATED node is briefly `visibility:hidden` while React Flow measures it, so the
     // first focus() is a no-op (focus can't land on a hidden element) — that left a new node in edit
@@ -127,6 +132,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       if (document.activeElement === el) {
         const range = document.createRange();
         range.selectNodeContents(el);
+        // Type-to-edit: caret at the end (keep the just-typed char). Normal edit: select all.
+        if (seed !== null) range.collapse(false);
         const sel = window.getSelection();
         sel?.removeAllRanges();
         sel?.addRange(range);
@@ -140,7 +147,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isEditing, topic, richHtml]);
+  }, [isEditing, topic, richHtml, seed]);
 
   // Geometric shapes (diamond/ellipse/…) are painted by an SVG backdrop; the box itself goes
   // transparent and the text gets extra padding so it stays inside the narrowing outline.

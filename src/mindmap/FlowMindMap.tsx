@@ -238,6 +238,9 @@ function FlowInner({
   // mutually exclusive with node + edge; drives the OverlayInspector + the overlay halo.
   const [selectedOverlay, setSelectedOverlay] = useState<SelectedOverlay | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  // When edit was started by typing on a selected node, the character to seed the editor with
+  // (caret at end); null for a normal edit (double-click / F2 / new node → seed topic, select all).
+  const [editSeed, setEditSeed] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
@@ -484,11 +487,21 @@ function FlowInner({
       if (result.selectId !== undefined) {
         selectOnly(result.selectId);
         fireSelect(result.selectId);
-        if (edit) setEditingId(result.selectId);
+        if (edit) {
+          setEditSeed(null); // a new node seeds with its (empty) topic, not a leftover typed char
+          setEditingId(result.selectId);
+        }
       }
     },
     [sync, fireSelect, selectOnly],
   );
+
+  // Enter inline edit for a node; `seed` is the character to start typing with (type-to-edit),
+  // or null for a normal edit (seed the existing topic + select all).
+  const startEdit = useCallback((id: string, seed: string | null = null) => {
+    setEditSeed(seed);
+    setEditingId(id);
+  }, []);
 
   // Undo/redo restore a snapshot without recording it.
   const restore = useCallback(
@@ -569,10 +582,15 @@ function FlowInner({
       !!n && (n.topic !== plain || (n.topicRich ?? undefined) !== rich);
     return {
       editingId,
-      beginEdit: (id: string) => setEditingId(id),
-      cancelEdit: () => setEditingId(null),
+      seed: editSeed,
+      beginEdit: (id: string) => startEdit(id),
+      cancelEdit: () => {
+        setEditingId(null);
+        setEditSeed(null);
+      },
       commitEdit: (id: string, html: string) => {
         setEditingId(null);
+        setEditSeed(null);
         const n = id ? findNode(docRef.current, id) : null;
         const { rich, plain } = parse(html);
         if (changed(n, rich, plain)) apply(setTopicRich(docRef.current, id, rich, plain));
@@ -605,7 +623,7 @@ function FlowInner({
         onOpenNoteRef.current?.();
       },
     };
-  }, [editingId, apply, focusNodeById, selectOnly, fireSelect]);
+  }, [editingId, editSeed, startEdit, apply, focusNodeById, selectOnly, fireSelect]);
 
   // Flatten every node's callouts for the overlay, from the live doc (so freshly-added ones show).
   const calloutItems = useMemo<CalloutAnchor[]>(() => {
@@ -843,12 +861,17 @@ function FlowInner({
         confirmDeleteNode(id);
       } else if (e.key === "F2") {
         e.preventDefault();
-        setEditingId(id);
+        startEdit(id);
+      } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        // Type-to-edit (MindManager-style): start typing on a selected node to enter edit mode,
+        // replacing the topic with the typed character (caret at the end).
+        e.preventDefault();
+        startEdit(id, e.key);
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [apply, undoAction, redoAction, confirmDeleteNode]);
+  }, [apply, undoAction, redoAction, confirmDeleteNode, startEdit]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 
@@ -1267,7 +1290,7 @@ function FlowInner({
                           onClick={() => apply(addSibling(docRef.current, sid), true)}
                         />
                       ) : null}
-                      <PopBtn icon="text" label="Rename" onClick={() => setEditingId(sid)} />
+                      <PopBtn icon="text" label="Rename" onClick={() => startEdit(sid)} />
                       {hasKids ? (
                         <PopBtn
                           icon="minus"
@@ -1331,7 +1354,7 @@ function FlowInner({
               const items: [string, () => void, boolean?][] = [
                 ["Add child", () => apply(addChild(docRef.current, id), true)],
                 ["Add sibling", () => apply(addSibling(docRef.current, id), true)],
-                ["Rename", () => setEditingId(id)],
+                ["Rename", () => startEdit(id)],
                 ["Link to…", () => setLinkingFrom(id)],
                 ["Add callout", () => apply(addCallout(docRef.current, id))],
                 ["Group in boundary", () => apply(groupBranch(docRef.current, id))],

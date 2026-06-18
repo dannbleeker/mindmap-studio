@@ -228,6 +228,22 @@ describe("FlowMindMap canvas", () => {
     expect(doc.root.children.find((n) => n.id === "a")?.children).toHaveLength(2);
   });
 
+  it("type-to-edit: typing a printable char on a selected node enters edit seeded with that char", () => {
+    const { container, h } = mount();
+    run(() => h.focusNode("a"));
+    run(() => fireEvent.keyDown(document, { key: "X" }));
+    const editable = container.querySelector('[contenteditable="true"]');
+    expect(editable).toBeTruthy();
+    expect(editable?.textContent).toBe("X"); // seeded with the typed char, not the old topic
+  });
+
+  it("type-to-edit ignores modified keys (Ctrl/Cmd shortcuts don't open the editor)", () => {
+    const { container, h } = mount();
+    run(() => h.focusNode("a"));
+    run(() => fireEvent.keyDown(document, { key: "b", ctrlKey: true })); // a shortcut, not an edit
+    expect(container.querySelector('[contenteditable="true"]')).toBeNull();
+  });
+
   it("Delete on a node WITH children confirms first, and cancelling keeps it", () => {
     const { h, onChange } = mount();
     vi.mocked(window.confirm).mockReturnValue(false); // user cancels

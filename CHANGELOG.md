@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Type to edit a topic.** With a topic selected, just **start typing** — the topic opens for editing
+  with your first keystroke replacing the old text (caret at the end, so you keep typing straight on).
+  Matches MindManager. **F2** and **double-click** still edit in place starting from the existing text
+  (all selected), and modifier shortcuts (Ctrl/⌘/Alt) are untouched.
+
 - **Ctrl+Enter adds a child topic; deleting a branch asks first.** With a topic selected,
   **Ctrl/⌘+Enter** now adds a **child** (plain Enter still adds a sibling, Tab also adds a child).
   And **Delete** now **confirms before removing a topic that has sub-topics** ("Delete X and its N

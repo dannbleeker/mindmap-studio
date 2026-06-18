@@ -6,6 +6,10 @@ import { createContext, useContext } from "react";
 
 export interface EditingApi {
   editingId: string | null;
+  /** When edit was started by typing a character on a selected node, that character — the editor
+   *  seeds with it (caret at the end) instead of the existing topic. `null` for a normal edit
+   *  (double-click / F2 / a new node), which seeds with the topic and selects all. */
+  seed: string | null;
   /** Enter inline edit for a node. */
   beginEdit: (id: string) => void;
   /** Commit the edited topic (raw contenteditable HTML) and leave edit mode. */

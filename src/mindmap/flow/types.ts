@@ -1,7 +1,7 @@
 import type { Edge, Node } from "@xyflow/react";
 import type { MapImage, NodeStyle } from "../../model/types";
 import type { ProgressInfo } from "../../progress";
-import type { AttachSide } from "./floating";
+import type { AttachSide, ConnectorStyle } from "./floating";
 
 // Shared data shapes for the React Flow canvas. Using `type` (not `interface`) so the
 // shapes satisfy React Flow's `Record<string, unknown>` data constraint.
@@ -83,6 +83,9 @@ export type EdgeData = {
   /** Render as a right-angle org-chart elbow (uniform stroke) instead of the organic tapered ribbon.
    *  Set in project() when the branch's governing layout is org-down/org-up. Branch edges only. */
   elbow?: boolean;
+  /** The map's connector style (organic / curved / elbow / straight), stamped on every branch edge so
+   *  the canvas + exporter render the chosen shape. Absent = "organic". Branch edges only. */
+  connectorStyle?: ConnectorStyle;
 };
 
 export type TopicNode = Node<TopicData, "topic">;

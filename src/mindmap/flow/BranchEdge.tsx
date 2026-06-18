@@ -1,14 +1,6 @@
 import { type EdgeProps, useInternalNode } from "@xyflow/react";
 import { memo } from "react";
-import {
-  attachSideFor,
-  branchEndpoints,
-  branchWidths,
-  childrenAxis,
-  elbowPath,
-  nodeBox,
-  taperedRibbonPath,
-} from "./floating";
+import { attachSideFor, branchRender, childrenAxis, nodeBox } from "./floating";
 import type { FlowEdge } from "./types";
 
 // Organic, tapered branch (the MindManager "trunk that fans" look): all of a parent's children spring
@@ -28,32 +20,18 @@ function BranchEdgeImpl({ source, target, data }: EdgeProps<FlowEdge>) {
   const parent = nodeBox(s);
   const child = nodeBox(t);
   const side = data?.attachSide ?? attachSideFor(parent, child, childrenAxis(parent, [child]));
-  const dimOpacity = data?.dimmed ? 0.12 : 1;
-  // Org-chart layouts (org-down/org-up) draw a uniform right-angle elbow — the organic taper reads
-  // wrong for a formal hierarchy. The bus is always vertical (children sit in a row below/above the
-  // parent), so derive the side from the parent→child direction, NOT the sibling-spread axis. The
-  // shared geometry (floating.ts) is the same one the exporter uses (canvas == export).
-  if (data?.elbow) {
-    const elbowSide = child.cy >= parent.cy ? "bottom" : "top";
-    return (
-      <path
-        d={elbowPath(parent, child, elbowSide)}
-        fill="none"
-        stroke={data?.branchColor ?? "#999"}
-        strokeWidth={2}
-        strokeLinejoin="round"
-        opacity={dimOpacity}
-      />
-    );
-  }
-  const { sx, sy, tx, ty } = branchEndpoints(parent, child, side);
-  const { trunk, tip } = branchWidths(data?.depth ?? 1);
+  // One shared decision (floating.ts) picks the path + paint from the map's connector style and the
+  // branch's colour / dash, so the canvas matches the SVG exporter exactly (canvas == export).
+  const { d, fill, stroke, width, dash } = branchRender(parent, child, side, data ?? {});
   return (
     <path
-      d={taperedRibbonPath(sx, sy, tx, ty, side, trunk, tip)}
-      fill={data?.branchColor ?? "#999"}
-      stroke="none"
-      opacity={dimOpacity}
+      d={d}
+      fill={fill ?? "none"}
+      stroke={stroke ?? "none"}
+      strokeWidth={stroke ? width : undefined}
+      strokeDasharray={dash || undefined}
+      strokeLinejoin="round"
+      opacity={data?.dimmed ? 0.12 : 1}
     />
   );
 }

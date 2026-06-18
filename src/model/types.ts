@@ -109,6 +109,11 @@ export interface MapNode {
   /** Per-branch layout override: this node's subtree lays out with this layout kind (a `LayoutKind`)
    *  instead of the map's. Lossless in .json, ignored by flat exporters. */
   layout?: string;
+  /** Per-branch connector colour (`#rrggbb`): overrides the auto-cycled palette for this node AND its
+   *  subtree's branches (the subtree inherits it). Lossless in .json, ignored by flat exporters. */
+  branchColor?: string;
+  /** Line style of THIS node's incoming branch connector; absent = solid. Lossless in .json. */
+  lineDash?: "solid" | "dashed" | "dotted";
   /** Roll-up source: the library map id this node mirrors. On "Refresh roll-ups" the node's children
    *  are replaced with a fresh copy of that map's branches — so one map can aggregate several others.
    *  Lossless in .json, ignored by flat exporters. */
@@ -219,5 +224,9 @@ export interface MindMapDoc {
      *  crossing reads as "passes over", not "joins" (MindManager convention). Off by default.
      *  Lossless in .json, ignored by flat exporters; carried into the image/PDF/HTML export. */
     lineJumps?: boolean;
+    /** Connector (branch line) style for the whole map: "organic" (the adaptive tapered default),
+     *  "curved", "elbow" (right-angle), or "straight". Absent = "organic". Lossless in .json, ignored
+     *  by flat exporters; carried into the image/PDF/HTML export. */
+    connectorStyle?: "organic" | "curved" | "elbow" | "straight";
   };
 }

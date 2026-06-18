@@ -11,13 +11,10 @@ import {
   type AttachSide,
   type Box,
   attachSideFor,
-  branchEndpoints,
-  branchWidths,
+  branchRender,
   childrenAxis,
   crosslinkBezier,
-  elbowPath,
   floatingPoints,
-  taperedRibbonPath,
 } from "./floating";
 import { type Rect, r2 } from "./geometry";
 import { type HopSegment, hopPath } from "./lineJumps";
@@ -400,19 +397,16 @@ export function buildFlowSvg(
       const parent = boxOf(sr);
       const child = boxOf(tr);
       const side: AttachSide = attachSideFor(parent, child, axisByParent.get(e.source) ?? "h");
-      if (e.data?.elbow) {
-        // Org-chart layouts: a uniform right-angle elbow, not the organic taper. The bus is vertical
-        // (children in a row below/above the parent), so the side comes from the parent→child
-        // direction, not the sibling-spread axis. Same renderer the canvas uses → canvas == export.
-        const elbowSide: AttachSide = child.cy >= parent.cy ? "bottom" : "top";
-        parts.push(
-          `<path d="${elbowPath(parent, child, elbowSide)}" fill="none" stroke="${e.data?.branchColor ?? "#999"}" stroke-width="2" stroke-linejoin="round"/>`,
-        );
+      // Same shared decision the canvas uses (connector style + branch colour + dash) → canvas ==
+      // export. A filled ribbon for the organic taper; a uniform stroke for elbow/curved/straight/dash.
+      const br = branchRender(parent, child, side, e.data ?? {});
+      if (br.fill) {
+        parts.push(`<path d="${br.d}" fill="${br.fill}"/>`);
       } else {
-        const ep = branchEndpoints(parent, child, side);
-        const { trunk, tip } = branchWidths(e.data?.depth ?? 1);
-        const path = taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, side, trunk, tip);
-        parts.push(`<path d="${path}" fill="${e.data?.branchColor ?? "#999"}"/>`);
+        const dashAttr = br.dash ? ` stroke-dasharray="${br.dash}"` : "";
+        parts.push(
+          `<path d="${br.d}" fill="none" stroke="${br.stroke}" stroke-width="${br.width}" stroke-linejoin="round"${dashAttr}/>`,
+        );
       }
     }
   }

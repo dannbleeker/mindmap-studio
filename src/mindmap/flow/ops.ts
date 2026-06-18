@@ -560,6 +560,41 @@ export function setLineJumps(doc: MindMapDoc, on: boolean): OpResult {
   return { doc: next };
 }
 
+/** Set the map's branch connector style; "organic" (the default) clears the override. */
+export function setConnectorStyle(
+  doc: MindMapDoc,
+  style: "organic" | "curved" | "elbow" | "straight",
+): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, connectorStyle: style === "organic" ? undefined : style };
+  return { doc: next };
+}
+
+/** Set a node's per-branch connector colour ("" clears it back to the auto-palette). Inherited by the
+ *  node's subtree at render time. */
+export function setBranchColor(doc: MindMapDoc, id: string, color: string): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc) return { doc };
+  loc.node.branchColor = color || undefined;
+  touch(loc.node, opsClock());
+  return { doc: next };
+}
+
+/** Set the line style of a node's incoming branch connector; "solid" (the default) clears it. */
+export function setLineDash(
+  doc: MindMapDoc,
+  id: string,
+  dash: "solid" | "dashed" | "dotted",
+): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc) return { doc };
+  loc.node.lineDash = dash === "solid" ? undefined : dash;
+  touch(loc.node, opsClock());
+  return { doc: next };
+}
+
 /** Set a node's hyperlink ("" clears it). */
 export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult {
   const next = structuredClone(doc);

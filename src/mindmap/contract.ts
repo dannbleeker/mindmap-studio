@@ -119,6 +119,8 @@ export interface MindMapHandle {
   setBackgroundImage: (url: string) => void;
   /** Toggle line-jumps: draw a hop where two relationship lines cross (per-map, lossless in .json). */
   setLineJumps: (on: boolean) => void;
+  /** Set the map's branch connector style (organic / curved / elbow / straight). */
+  setConnectorStyle: (style: "organic" | "curved" | "elbow" | "straight") => void;
   /** Replace the map's conditional-formatting rules (empty array clears them). */
   setRules: (rules: ConditionalRule[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */

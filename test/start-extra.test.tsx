@@ -67,6 +67,7 @@ describe("CommandPalette", () => {
     render(<CommandPalette ctx={ctx} onClose={onClose} />);
     expect(screen.getByText("New blank map")).toBeTruthy();
     expect(screen.getByText("Browse templates")).toBeTruthy();
+    expect(screen.getByText("Browse examples")).toBeTruthy();
     await u.click(screen.getByText("New blank map"));
     expect(ctx.onOpen).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);

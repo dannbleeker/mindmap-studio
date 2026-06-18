@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 // A generic ⌘K command palette: fuzzy (subsequence) search over a list of commands, arrow-key nav,
 // Enter to run, Esc / click-outside to close. The Start screen and the editor both build a
@@ -13,6 +13,9 @@ export interface Command {
   run: () => void;
   /** When false, the command is hidden (e.g. a selection-dependent action with nothing selected). */
   enabled?: boolean;
+  /** Extra text folded into the fuzzy match but NOT displayed — e.g. a topic's note, so "jump to a
+   *  topic" finds it by note text too. */
+  keywords?: string;
 }
 
 /** Subsequence match (typo-tolerant enough for a small command set). */
@@ -24,6 +27,29 @@ function matches(text: string, q: string): boolean {
     if (i === q.length) return true;
   }
   return false;
+}
+
+// A small most-recently-used list (commands + jumped-to topics) so reopening ⌘K surfaces what you
+// just did. Best-effort localStorage, like the theme + panel prefs.
+const RECENT_KEY = "mindmap-cmdk-recent";
+const RECENT_MAX = 5;
+function loadRecent(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
+    return Array.isArray(v)
+      ? v.filter((x): x is string => typeof x === "string").slice(0, RECENT_MAX)
+      : [];
+  } catch {
+    return [];
+  }
+}
+function pushRecent(id: string) {
+  try {
+    const next = [id, ...loadRecent().filter((x) => x !== id)].slice(0, RECENT_MAX);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    // best-effort — recents just don't persist
+  }
 }
 
 export function CommandPalette({
@@ -58,24 +84,51 @@ export function CommandPalette({
     };
   }, [onClose]);
 
-  const items = useMemo<Command[]>(() => {
+  // Snapshot the recents once per open (they're rewritten on run, but we don't want the list to
+  // reshuffle under the cursor mid-session).
+  const recentIds = useMemo(() => loadRecent(), []);
+
+  const { items, recentCount } = useMemo<{ items: Command[]; recentCount: number }>(() => {
     const query = q.trim().toLowerCase();
-    const list = commands.filter(
-      (c) => c.enabled !== false && matches(c.label.toLowerCase(), query),
+    const enabled = commands.filter((c) => c.enabled !== false);
+    if (!query) {
+      // Empty query: lead with the recently-used (still present) commands, then the rest.
+      const recent = recentIds
+        .map((id) => enabled.find((c) => c.id === id))
+        .filter((c): c is Command => !!c);
+      const recentSet = new Set(recent.map((c) => c.id));
+      return {
+        items: [...recent, ...enabled.filter((c) => !recentSet.has(c.id))],
+        recentCount: recent.length,
+      };
+    }
+    const matched = enabled.filter((c) =>
+      matches(`${c.label} ${c.keywords ?? ""}`.toLowerCase(), query),
     );
     const qc = makeQueryCommand?.(q.trim());
-    if (qc) list.unshift(qc);
-    return list;
-  }, [q, commands, makeQueryCommand]);
+    if (qc) matched.unshift(qc);
+    return { items: matched, recentCount: 0 };
+  }, [q, commands, makeQueryCommand, recentIds]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset highlight to top when the result set changes.
   useEffect(() => setActive(0), [items.length]);
 
   const run = (c: Command | undefined) => {
     if (!c) return;
+    // Record only real registry commands (not the synthetic query-derived one) as recent.
+    if (commands.some((x) => x.id === c.id)) pushRecent(c.id);
     c.run();
     onClose();
   };
+
+  const sectionStyle = {
+    padding: "7px 12px 3px",
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: "0.6px",
+    textTransform: "uppercase",
+    opacity: 0.5,
+  } as const;
 
   return (
     <div className="st-cmdk-backdrop">
@@ -104,17 +157,22 @@ export function CommandPalette({
             <div className="st-cmdk-empty">No matches.</div>
           ) : (
             items.map((c, i) => (
-              <button
-                key={c.id}
-                type="button"
-                className="st-cmdk-item"
-                data-active={i === active}
-                onMouseEnter={() => setActive(i)}
-                onClick={() => run(c)}
-              >
-                <span>{c.label}</span>
-                <span className="st-cmdk-kind">{c.kind}</span>
-              </button>
+              <Fragment key={c.id}>
+                {recentCount > 0 && i === 0 ? <div style={sectionStyle}>Recent</div> : null}
+                {recentCount > 0 && i === recentCount ? (
+                  <div style={sectionStyle}>All commands</div>
+                ) : null}
+                <button
+                  type="button"
+                  className="st-cmdk-item"
+                  data-active={i === active}
+                  onMouseEnter={() => setActive(i)}
+                  onClick={() => run(c)}
+                >
+                  <span>{c.label}</span>
+                  <span className="st-cmdk-kind">{c.kind}</span>
+                </button>
+              </Fragment>
             ))
           )}
         </div>

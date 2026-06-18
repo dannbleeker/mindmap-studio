@@ -8,6 +8,7 @@ export type StartSection =
   | "all"
   | "recent"
   | "templates"
+  | "examples"
   | "layouts"
   | "import"
   | "learn"

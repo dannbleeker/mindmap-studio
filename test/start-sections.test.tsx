@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { CaptureCard } from "../src/components/start/CaptureCard";
+import { Examples } from "../src/components/start/sections/Examples";
 import { ImportView } from "../src/components/start/sections/ImportView";
 import { Layouts } from "../src/components/start/sections/Layouts";
 import type { StartContext } from "../src/components/start/types";
@@ -54,6 +55,27 @@ describe("CaptureCard", () => {
     expect(onBlank).toHaveBeenCalledWith("radial");
     await u.click(screen.getByRole("button", { name: /open canvas/i }));
     expect(onBlank).toHaveBeenCalledWith();
+  });
+});
+
+describe("Examples section", () => {
+  it("lists the worked examples (the same set as the editor's New menu) and opens one", async () => {
+    const ctx = mkCtx();
+    render(<Examples ctx={ctx} />);
+    expect(screen.getByRole("button", { name: /Product launch plan/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Quarterly OKRs/i })).toBeTruthy();
+    await u.click(screen.getByRole("button", { name: /Product launch plan/i }));
+    expect(ctx.onOpen).toHaveBeenCalledTimes(1);
+    const [doc] = (ctx.onOpen as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(doc.meta?.source).toBe("example"); // a built example map, not an empty template
+  });
+
+  it("filters examples by a search query", async () => {
+    const ctx = mkCtx();
+    render(<Examples ctx={ctx} />);
+    await u.type(screen.getByPlaceholderText(/search examples/i), "okr");
+    expect(screen.getByRole("button", { name: /Quarterly OKRs/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Product launch plan/i })).toBeNull();
   });
 });
 

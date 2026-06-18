@@ -575,6 +575,262 @@
   font-size: 1.05em;
 }
 
+/* On-node ＋ add affordances (#1). Sizing lives here so a coarse pointer (touch) gets a ≥44px
+   target; the per-button colour comes in via --mm-add-color (the node's branch / ring colour). */
+.mm-node-add {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--mm-add-color, #1b8a5e);
+  background: var(--mm-node-bg, #fff);
+  color: var(--mm-add-color, #1b8a5e);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(40, 30, 16, 0.18);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.mm-node-add:hover {
+  background: var(--mm-add-color, #1b8a5e);
+  color: #fff;
+}
+.mm-node-add:focus-visible {
+  outline: 2px solid var(--mm-add-color, #1b8a5e);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .mm-node-add {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+}
+
+/* "Double-click to edit" first-hover microcopy (#5) — a small tooltip above the node. */
+.mm-node-hint {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  font-size: 11px;
+  border-radius: 6px;
+  background: var(--ed-ink, #23211c);
+  color: var(--ed-card, #fff);
+  box-shadow: var(--ed-shadow-pop, 0 8px 22px rgba(0, 0, 0, 0.18));
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Drag-to-reparent "Make child of X" label (#11) — rides above the highlighted drop target. */
+.mm-drop-label {
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: var(--ed-accent, #1b8a5e);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--ed-shadow-pop, 0 8px 22px rgba(0, 0, 0, 0.2));
+  pointer-events: none;
+}
+
+/* Empty-map onboarding coachmark (#1) — anchored under the root, theme-reactive via --ed-*. */
+.mm-coachmark {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 280px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--ed-card, #fff);
+  border: 1px solid var(--ed-border, #e7e4dc);
+  color: var(--ed-ink, #23211c);
+  box-shadow: var(--ed-shadow-pop, 0 12px 30px rgba(0, 0, 0, 0.2));
+  font-size: 12px;
+  line-height: 1.45;
+}
+.mm-coachmark strong {
+  font-size: 13px;
+}
+.mm-coachmark kbd {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid var(--ed-border, #d8d4cc);
+  background: var(--ed-page, #f4f2ec);
+  font-family: var(--ed-font-mono, monospace);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Inline marker / priority quick-setter rows inside the right-click menu (#3). */
+.mm-menu-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 240px;
+  padding: 2px 10px 6px;
+}
+.mm-menu-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 28px;
+  padding: 0 7px;
+  border-radius: 6px;
+  border: 1px solid var(--ed-border, #e7e4dc);
+  background: var(--ed-card, #fff);
+  color: var(--ed-ink, #23211c);
+  font-size: 14px;
+  cursor: pointer;
+}
+.mm-menu-chip:hover {
+  background: var(--ed-accent-tint, #e3f1ea);
+}
+.mm-menu-chip[data-on] {
+  background: var(--ed-accent, #1b8a5e);
+  border-color: var(--ed-accent, #1b8a5e);
+  color: #fff;
+}
+.mm-menu-chip:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+}
+@media (pointer: coarse) {
+  .mm-menu-chip {
+    min-width: 44px;
+    height: 44px;
+  }
+}
+
+/* Right-aligned keyboard hint inside a menu row (#2). aria-hidden, so it never alters the item name. */
+.mm-menu-shortcut {
+  margin-left: auto;
+  padding-left: 16px;
+  font-size: 11px;
+  color: var(--ed-muted, #6b675e);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Shortcuts cheat-sheet content (#2), rendered inside the shared <Dialog>. */
+.mm-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 28px;
+}
+.mm-shortcuts-group h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ed-accent, #1b8a5e);
+}
+.mm-shortcuts-group dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.mm-shortcut-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.mm-shortcut-row dt {
+  flex: 0 0 auto;
+}
+.mm-shortcut-row dd {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ed-ink2, #4a463e);
+}
+.mm-shortcuts kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--ed-border, #d8d4cc);
+  background: var(--ed-page, #f4f2ec);
+  color: var(--ed-ink, #23211c);
+  font-family: var(--ed-font-mono, monospace);
+  font-size: 11px;
+  white-space: nowrap;
+}
+@media (max-width: 540px) {
+  .mm-shortcuts {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* First-run "3 things to try" card (#13) — a dismissible overlay, bottom-left of the canvas. */
+.mm-firstrun {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 9;
+  max-width: 250px;
+  padding: 12px 32px 12px 14px;
+  border-radius: 10px;
+  background: var(--ed-card, #fff);
+  border: 1px solid var(--ed-border, #e7e4dc);
+  color: var(--ed-ink, #23211c);
+  box-shadow: var(--ed-shadow-pop, 0 12px 30px rgba(0, 0, 0, 0.2));
+  font-size: 12.5px;
+}
+.mm-firstrun-title {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.mm-firstrun-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.45;
+}
+.mm-firstrun-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: none;
+  background: transparent;
+  color: var(--ed-muted, #6b675e);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+.mm-firstrun-close:hover {
+  background: var(--ed-accent-tint, #e3f1ea);
+  color: var(--ed-ink, #23211c);
+}
+.mm-firstrun-close:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+}
+.mm-firstrun kbd {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid var(--ed-border, #d8d4cc);
+  background: var(--ed-page, #f4f2ec);
+  font-family: var(--ed-font-mono, monospace);
+  font-size: 11px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mm-editor * {
     transition: none !important;

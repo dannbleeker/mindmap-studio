@@ -94,7 +94,7 @@ Keyboard-first, just like MindManager:
 - **Enter** — add a sibling topic
 - **Tab** — add a child topic
 - **Ctrl + Enter** — add a child of the selected topic
-- **Delete** — remove the selected node (if it has sub-topics, you're asked to confirm — it removes the whole branch)
+- **Delete** — remove the selected topic and its branch immediately; an **Undo** toast appears (and Ctrl/⌘+Z works) — no confirmation prompt
 - **Just start typing** on a selected topic — it opens for editing with your first keystroke replacing the old text (type straight on)
 - **Double-click** a node, or press **F2** with it selected — edit its text inline (starting from the existing text, all selected)
 - **Ctrl + B / I / U** — while editing a topic: bold / italic / underline the selection
@@ -607,14 +607,34 @@ updates**.
 | Enter | Add sibling |
 | Tab | Add child |
 | Ctrl + Enter | Add child (selected topic) |
-| Delete | Remove node (confirm if it has sub-topics) |
+| Shift + Tab | Outdent (promote one level) |
+| Delete | Remove the topic + its branch (instant — undo from the toast) |
 | Type a letter (topic selected) | Edit in place, replacing the text |
 | F2 / double-click | Edit in place, keeping the text |
 | Ctrl + B / I / U (while editing) | Bold / italic / underline the selection |
 | Ctrl + Z / Ctrl + Shift + Z / Ctrl + Y | Undo / redo |
+| Ctrl + K | Open the command palette — run anything, or jump to a topic |
 | `/` | Focus Find |
 | Enter (in Find) | Next match |
 | Arrow keys / Esc (in Present) | Navigate / exit slides |
+
+(All of these — Ctrl works as ⌘ on a Mac.) The same list is built into the app: press the **?**
+button at the bottom of the left rail, or ⌘K → **"Keyboard shortcuts"**, for a cheat-sheet grouped by
+Editing / Navigation / View.
+
+### On the canvas
+
+- **Add a topic with the mouse.** Hover (or select) any topic to reveal a small **＋** — one adds a
+  **child**, one adds a **sibling**, dropping straight into editing. New to the app? A one-time
+  **"3 things to try"** card and an empty-map hint point the way; both disappear once you make an edit.
+- **Move around.** **Drag the background to pan**, **scroll** (or ⌘-scroll) to **zoom**, and
+  **double-click an empty spot** to drop a floating topic. Hold **Shift** and drag to rubber-band a
+  multi-selection.
+- **Re-parent by dragging.** Drag a topic onto another; the target highlights with a
+  **"↳ Make child of X"** label so you can see the result before you let go. Drop on empty space to
+  cancel.
+- **Delete safely.** Deleting a topic or a whole map is **instant and reversible** — an **Undo** toast
+  appears (and Ctrl/⌘+Z works too); there's no blocking confirmation.
 
 ---
 

@@ -35,13 +35,19 @@ export type TopicData = {
   side: "left" | "right";
   collapsed: boolean;
   hasChildren: boolean;
+  /** When collapsed, the number of direct subtopics folded away — shown in the +N expand affordance. */
+  hiddenCount?: number;
   /** Rolled-up task progress (0..1 + done/total), or undefined when the node isn't a task. */
   progress?: ProgressInfo;
   /** Task due date ("YYYY-MM-DD"), shown as a chip (red when overdue). */
   due?: string;
   /** Task start date ("YYYY-MM-DD"). */
   start?: string;
-  /** Task priority (1=High..3=Low), shown as a coloured chip. */
+  /** Task duration in days — shown in the inline task-info line (e.g. "5d"). */
+  durationDays?: number;
+  /** Assigned resources/people — shown in the inline task-info line (e.g. "@Ann, Bo"). */
+  resources?: string[];
+  /** Task priority (1=High..3=Low; imported maps may carry 4..9), shown as a coloured chip. */
   priority?: number;
   /** How many files are attached (shown as a 📎 chip; the files live in the model). */
   attachmentCount?: number;
@@ -74,6 +80,9 @@ export type EdgeData = {
   /** Which side of the parent this branch springs from — one shared origin per parent-side, computed
    *  per parent in sync() so siblings stay consistent (no crossed fan). Branch edges only. */
   attachSide?: AttachSide;
+  /** Render as a right-angle org-chart elbow (uniform stroke) instead of the organic tapered ribbon.
+   *  Set in project() when the branch's governing layout is org-down/org-up. Branch edges only. */
+  elbow?: boolean;
 };
 
 export type TopicNode = Node<TopicData, "topic">;

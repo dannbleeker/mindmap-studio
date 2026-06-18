@@ -7,6 +7,29 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Floating topics get real branch colours, and relationship arrows scale with line weight.** A
+  floating (detached) topic and its branches now cycle the palette like a normal coloured mini-map
+  instead of a washed-out grey, and a relationship's arrowhead grows with its line thickness so a thick
+  link reads in proportion — on canvas and in every export.
+
+- **Topics now read as a hierarchy, MindManager-style.** The map's depth is legible from shape alone:
+  the **central topic** is larger, bold, and centred; **main (level-1) topics are filled** with their
+  branch colour (white/auto-contrast text) instead of a thin outline; mid topics keep the bordered
+  white card; and **deep (level-3+) leaves drop the box** for the text on a short branch-colour
+  underline. **Type shrinks with depth** (root → main → sub → leaf) and **wrapped labels centre**
+  within their box, so the structure is legible at a glance. A manual style (a set fill or border)
+  always wins and reverts a topic to a normal card. Identical on canvas and in every image / PDF /
+  HTML export.
+
+- **Org-chart layouts draw right-angle elbow connectors.** In the Org-chart (down / up) layouts a
+  parent now connects to its children with clean uniform right-angle "bus" elbows — the formal
+  hierarchy look — instead of the organic tapered trunk (which stays for the mind-map / radial
+  layouts). Per-branch layout overrides are honoured, and floating subtrees stay organic.
+
+- **Inline task-info line on topics.** A topic with task scheduling now shows a compact muted line
+  (**▶ start · duration · @resources**) beneath the title, surfacing the start date, duration, and
+  assigned resources the canvas previously dropped — on canvas and in exports.
+
 - **Organic branch connectors (MindManager-style).** A parent's child branches now spring from a
   **single point** on the side its children sit — one chunky trunk that fans out, tapering to a fine
   tip at each child, **entering each child at its near end** and tucking under both boxes so the line
@@ -934,6 +957,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   you open a backup via Open files.
 
 ### Fixed
+
+- **Exports now match the canvas for wrapped text, callouts, indicators, collapsed branches and
+  images.** Several things rendered on screen but were dropped or distorted in the SVG / PNG / PDF
+  export; they now render identically (canvas == export): long topic labels **word-wrap** inside their
+  box instead of overflowing; a **multi-line callout** grows to fit instead of clipping to one strip;
+  the **note / hyperlink / attachment** indicators are drawn (they used to vanish); a **collapsed
+  branch** shows a circled hidden-subtopic count instead of looking like a leaf; and a topic **image**
+  uses the same size cap on both. The always-on dot **grid** is gone (clean paper, like MindManager),
+  and topics are flat at rest (the soft shadow was a screen-only affordance) — so the screen and the
+  exported deliverable agree.
 
 - **Relationship lines now bow the same way on screen and in exports.** The live canvas drew a
   relationship with React Flow's default bottom/top handles (a *vertical* bow) while the SVG/PNG/PDF

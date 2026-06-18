@@ -1,5 +1,7 @@
 import { hierarchy, tree } from "d3-hierarchy";
 import type { LayoutKind } from "../contract";
+import { levelFontSize } from "./style";
+import { wrapText } from "./text";
 import type { FlowEdge, TopicNode } from "./types";
 
 // Position the projected nodes for a given layout. Tree-based kinds (side/left/right/
@@ -32,10 +34,20 @@ export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
   return (id) => {
     const d = byId.get(id)?.data;
     if (!d) return DEFAULT_SIZE;
-    const lines = d.topic.split("\n");
-    const longest = Math.max(1, ...lines.map((l) => l.length));
-    const width = Math.min(320, Math.max(64, longest * 7.3 + 30 + (d.icons?.length ? 18 : 0)));
-    const height = (d.image ? 130 : 0) + lines.length * 20 + 16 + (d.tags?.length ? 22 : 0);
+    // Size scales with the per-depth font (root largest → deep leaves smallest), so the layout
+    // reserves the right slot before React Flow measures the real node.
+    const fs = levelFontSize(d.depth);
+    const rawLines = d.topic.split("\n");
+    const longest = Math.max(1, ...rawLines.map((l) => l.length));
+    const width = Math.min(
+      320,
+      Math.max(64, longest * fs * 0.46 + 30 + (d.icons?.length ? 18 : 0)),
+    );
+    // Reserve height for the WRAPPED line count (the box wraps at ~width), not just the explicit
+    // newlines — so a long single-line topic that wraps on screen doesn't overflow its reserved box.
+    const wrapped = wrapText(d.topic, Math.max(16, width - 30), fs);
+    const height =
+      (d.image ? 130 : 0) + wrapped.length * (fs * 1.25) + 16 + (d.tags?.length ? 22 : 0);
     return { width, height };
   };
 }

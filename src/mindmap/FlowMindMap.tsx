@@ -1,6 +1,5 @@
 import "@xyflow/react/dist/style.css";
 import {
-  Background,
   Controls,
   MiniMap,
   NodeToolbar,
@@ -238,7 +237,10 @@ function FlowInner({
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
   const isMobile = useIsMobile();
-  const projected = useMemo(() => project(doc, palette, numbered), [doc, palette, numbered]);
+  const projected = useMemo(
+    () => project(doc, palette, numbered, doc.meta?.freeform ? "freeform" : direction),
+    [doc, palette, numbered, direction],
+  );
   const initialNodes = useMemo(() => {
     const pos = computeLayout(
       projected.nodes,
@@ -351,7 +353,10 @@ function FlowInner({
         selectedRef.current = nextSelected;
         selectedIdsRef.current = nextSelected ? new Set([nextSelected]) : new Set();
       }
-      const proj = project(newDoc, paletteRef.current, numberedRef.current);
+      // Free-canvas mode overrides the picked layout: nodes sit at their own `pos`. The kind also
+      // drives project()'s org-chart elbow stamping, so compute it before projecting.
+      const kind = newDoc.meta?.freeform ? "freeform" : directionRef.current;
+      const proj = project(newDoc, paletteRef.current, numberedRef.current, kind);
       const est = estimateSizeOf(proj.nodes);
       const measured = getNodes();
       const sizeOf = (id: string) => {
@@ -360,8 +365,6 @@ function FlowInner({
           ? { width: m.measured.width, height: m.measured.height }
           : est(id);
       };
-      // Free-canvas mode overrides the picked layout: nodes sit at their own `pos`.
-      const kind = newDoc.meta?.freeform ? "freeform" : directionRef.current;
       const pos = computeLayout(proj.nodes, proj.edges, sizeOf, kind);
       const selIds = selectedIdsRef.current;
       const lit = litIdsRef.current;
@@ -1103,6 +1106,7 @@ function FlowInner({
           numberedRef.current,
           todayISO(),
           directionRef.current === "brace" ? computeBraces(docRef.current) : undefined,
+          docRef.current.meta?.freeform ? "freeform" : directionRef.current,
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
@@ -1379,7 +1383,6 @@ function FlowInner({
               apply(deleteLink(docRef.current, edge.id));
           }}
         >
-          <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
           <BackgroundImage url={renderDoc.meta?.backgroundImage} />
           <DiagramBackdrop backdrop={renderDoc.backdrop} />
           <BraceConnectors braces={braces} />

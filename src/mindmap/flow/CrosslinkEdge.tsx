@@ -111,10 +111,18 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
         }}
       />
       {arrowAtTarget ? (
-        <path d={arrowHeadPath(tx, ty, sx, sy)} fill={color} style={{ opacity: dimOpacity }} />
+        <path
+          d={arrowHeadPath(tx, ty, sx, sy, 6 + width * 2)}
+          fill={color}
+          style={{ opacity: dimOpacity }}
+        />
       ) : null}
       {arrowAtSource ? (
-        <path d={arrowHeadPath(sx, sy, tx, ty)} fill={color} style={{ opacity: dimOpacity }} />
+        <path
+          d={arrowHeadPath(sx, sy, tx, ty, 6 + width * 2)}
+          fill={color}
+          style={{ opacity: dimOpacity }}
+        />
       ) : null}
       {label ? (
         <EdgeLabelRenderer>

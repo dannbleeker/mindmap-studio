@@ -75,6 +75,12 @@ describe("flow project (model → React Flow)", () => {
     expect(node("a")?.data.branchColor).not.toBe(node("b")?.data.branchColor);
   });
 
+  it("gives each floating root a palette colour (not a washed-out grey)", () => {
+    expect(node("f")?.data.branchColor).not.toBe("#73726c"); // the old forced grey
+    // it's one of the cycled palette colours, and its subtree inherits it
+    expect(node("f")?.data.branchColor).toBe(node("f1")?.data.branchColor);
+  });
+
   it("honours an explicit side and assigns the rest", () => {
     expect(node("c")?.data.side).toBe("left");
     expect(["left", "right"]).toContain(node("a")?.data.side);
@@ -93,5 +99,69 @@ describe("flow project (model → React Flow)", () => {
     expect(n("a1")?.data.number).toBe("1.1");
     expect(n("c")?.data.number).toBe("3"); // third child, even with a collapsed sibling between
     expect(n("f")?.data.number).toBeUndefined(); // floating topics aren't in the outline
+  });
+});
+
+describe("flow project — org-chart elbow stamping + task fields", () => {
+  it("stamps elbow on branch edges for org layouts, not for side", () => {
+    const org = project(doc, undefined, false, "org-down");
+    expect(org.edges.find((e) => e.id === "e:r:a")?.data?.elbow).toBe(true);
+    expect(org.edges.find((e) => e.id === "e:a:a1")?.data?.elbow).toBe(true);
+    const side = project(doc, undefined, false, "side");
+    expect(side.edges.find((e) => e.id === "e:r:a")?.data?.elbow).toBe(false);
+  });
+
+  it("keeps floating subtrees organic (no elbow) even in an org-chart map", () => {
+    const org = project(doc, undefined, false, "org-down");
+    expect(org.edges.find((e) => e.id === "e:f:f1")?.data?.elbow).toBe(false);
+  });
+
+  it("lets a per-branch layout override govern only its own subtree's connectors", () => {
+    const odoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "o",
+      title: "O",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            layout: "org-down",
+            children: [{ id: "a1", topic: "A1", children: [] }],
+          },
+          { id: "b", topic: "B", children: [{ id: "b1", topic: "B1", children: [] }] },
+        ],
+      },
+    };
+    const { edges } = project(odoc, undefined, false, "side");
+    expect(edges.find((e) => e.id === "e:r:a")?.data?.elbow).toBe(false); // map is side
+    expect(edges.find((e) => e.id === "e:a:a1")?.data?.elbow).toBe(true); // a's override → org
+    expect(edges.find((e) => e.id === "e:b:b1")?.data?.elbow).toBe(false);
+  });
+
+  it("projects the task schedule fields the inline task-info line draws", () => {
+    const tdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "t",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "m",
+            topic: "M",
+            task: { start: "2026-03-03", durationDays: 5, resources: ["Ann", "Bo"] },
+            children: [],
+          },
+        ],
+      },
+    };
+    const m = project(tdoc).nodes.find((n) => n.id === "m");
+    expect(m?.data.start).toBe("2026-03-03");
+    expect(m?.data.durationDays).toBe(5);
+    expect(m?.data.resources).toEqual(["Ann", "Bo"]);
   });
 });

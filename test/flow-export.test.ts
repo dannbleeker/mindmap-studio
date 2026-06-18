@@ -411,7 +411,9 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
       palette,
       cssVar,
     );
-    expect(tricky).toContain("A &amp; B &lt;c&gt;");
+    // (the narrow fixed rect wraps it across two tspans, but every special char is still escaped)
+    expect(tricky).toContain("A &amp; B");
+    expect(tricky).toContain("&lt;c&gt;");
     expect(tricky).not.toContain("<c>");
   });
 });
@@ -577,6 +579,214 @@ describe("flow exportSvg survives the cleanSvg pipeline (sanitizeSvg)", () => {
   });
 });
 
+describe("flow exportSvg — level styling, task-info, org elbows (canvas == export)", () => {
+  // r(0) → m(1, a task) → s(2) → leaf(3): one node per level so the depth-driven box treatments fire.
+  const ldoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "lv",
+    title: "LV",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        {
+          id: "m",
+          topic: "Main",
+          task: { start: "2026-03-03", durationDays: 5, resources: ["Ann", "Bo"] },
+          children: [
+            { id: "s", topic: "Sub", children: [{ id: "leaf", topic: "Leaf", children: [] }] },
+          ],
+        },
+      ],
+    },
+  };
+  const lrects = new Map<string, NodeRect>([
+    ["r", { x: 0, y: 0, w: 120, h: 50 }],
+    ["m", { x: 200, y: 0, w: 120, h: 44 }],
+    ["s", { x: 400, y: 0, w: 120, h: 36 }],
+    ["leaf", { x: 600, y: 0, w: 120, h: 36 }],
+  ]);
+
+  it("fills the depth-1 main topic with its branch colour (no white card, no border)", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toContain('<rect x="200" y="0" width="120" height="44" rx="11" fill="#E8593C"/>');
+  });
+
+  it("renders a depth-3+ leaf as a branch-colour underline, not a bordered box", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toContain(
+      '<line x1="602" y1="35" x2="718" y2="35" stroke="#E8593C" stroke-width="2"/>',
+    );
+    expect(out).not.toContain('<rect x="600"'); // the leaf draws no card rect
+  });
+
+  it("draws the inline task-info line (start ▸ duration ▸ resources)", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toContain("▶");
+    expect(out).toContain("5d");
+    expect(out).toContain("@Ann, Bo");
+  });
+
+  it("centres the root label (text-anchor=middle) at the larger root size", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toMatch(
+      /<text x="60"[^>]*text-anchor="middle"[^>]*font-size="20"[^>]*>Root<\/text>/,
+    );
+  });
+
+  it("renders org-chart layouts with uniform right-angle elbows, not tapered ribbons", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar, false, "", undefined, "org-down");
+    // an elbow is a fill:none stroked path with rounded corners (the organic ribbon is a FILLED path)
+    expect(out).toMatch(/<path d="M [^"]*Q[^"]*" fill="none" stroke="#E8593C" stroke-width="2"/);
+  });
+
+  it("keeps the organic taper (a filled branch path) for the default side layout", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toMatch(/<path d="M [^"]*" fill="#E8593C"\/>/); // filled ribbon, no stroke
+  });
+});
+
+describe("flow exportSvg — canvas == export parity (wrap, callouts, indicators, collapse, image)", () => {
+  const rr = (id: string, w: number, h: number) =>
+    new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 120, h: 50 }],
+      [id, { x: 200, y: 0, w, h }],
+    ]);
+
+  it("word-wraps a long topic into multiple <tspan> lines (no overflow)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "w",
+      title: "W",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A deliberately long single-line topic that must wrap in its box",
+            children: [],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 160, 120), palette, cssVar);
+    expect((out.match(/<tspan/g) ?? []).length).toBeGreaterThan(1);
+  });
+
+  it("grows a multi-line callout bubble + emits stacked tspans (not a single clipped strip)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "c",
+      title: "C",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            callouts: [
+              {
+                id: "co",
+                text: "a fairly long callout note that wraps onto several lines",
+                dx: 40,
+                dy: 0,
+              },
+            ],
+            children: [],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    // the callout text (CALLOUT_TEXT #3b2f00) carries multiple tspans
+    expect(out).toMatch(/fill="#3b2f00"><tspan/);
+    expect((out.match(/<tspan/g) ?? []).length).toBeGreaterThan(1);
+  });
+
+  it("draws note + hyperlink indicators in the export (no longer dropped)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "i",
+      title: "I",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "a", topic: "A", note: "hello", hyperlink: "https://x", children: [] }],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain("🔗");
+    expect(out).toContain("📝");
+  });
+
+  it("draws the attachment-count chip in the export", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "at",
+      title: "AT",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            attachments: [{ name: "f", dataUrl: PNG, size: 1 }],
+            children: [],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain("📎 1");
+  });
+
+  it("draws a collapsed-branch circle + hidden-subtopic count in the export", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "col",
+      title: "COL",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            collapsed: true,
+            children: [
+              { id: "a1", topic: "A1", children: [] },
+              { id: "a2", topic: "A2", children: [] },
+            ],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toMatch(/<circle cx="320" cy="44" r="9"/); // node a's bottom-right corner
+    expect(out).toMatch(/>2<\/text>/); // two hidden subtopics
+  });
+
+  it("clamps an oversized topic image to 200×140 in the export (matches the canvas cap)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "img",
+      title: "IMG",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", image: { url: PNG, width: 600, height: 400 }, children: [] },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 240, 180), palette, cssVar);
+    expect(out).toMatch(/<image x="[\d.]+" y="[\d.]+" width="200" height="140"/);
+  });
+});
+
 describe("arrowHeadPath (shared relationship arrowhead)", () => {
   it("builds a 3-vertex triangle with its tip at the target, pointing away from the source", () => {
     const d = arrowHeadPath(100, 0, 0, 0, 9); // horizontal, pointing +x
@@ -585,5 +795,10 @@ describe("arrowHeadPath (shared relationship arrowhead)", () => {
     expect((d.match(/L/g) ?? []).length).toBe(2); // 3 vertices
     // base sits `size` back from the tip along the axis
     expect(d).toContain("L 91 "); // bx = 100 - 9
+  });
+
+  it("scales the head with the size argument (the caller passes 6 + width*2)", () => {
+    expect(arrowHeadPath(100, 0, 0, 0, 8)).toContain("L 92 "); // base 8 back
+    expect(arrowHeadPath(100, 0, 0, 0, 16)).toContain("L 84 "); // base 16 back → bigger head
   });
 });

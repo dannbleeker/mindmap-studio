@@ -28,9 +28,9 @@ export const mindManagerTheme = {
   },
 };
 
-// Dark canvas variant — same per-branch palette (the MindManager identity), dark
-// surfaces and dimmed connectors. Useful for on-screen presentation, and image
-// exports inherit it. Topic shapes/sizing stay identical to the light theme.
+// Dark canvas variant — same per-branch palette (the MindManager identity) on dark
+// surfaces. Branch connectors keep their per-branch palette colours (they don't use
+// `--line-color`); image exports inherit the theme. Topic shapes/sizing match the light theme.
 export const mindManagerDarkTheme = {
   name: "Dark",
   type: "dark" as const,

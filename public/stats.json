@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-18T07:48:43.759Z",
-  "commit": "27b6c11",
+  "generatedAt": "2026-06-18T07:50:01.997Z",
+  "commit": "fa19cc8",
   "headline": {
     "linesTsJs": 36594,
     "tests": 975,
     "lineCoveragePct": 81.67,
-    "commits": 504,
+    "commits": 506,
     "ageDays": 6,
     "trackedFiles": 284,
     "featureManualPct": 100,
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 975,
     "e2e": 0,
-    "durationMs": 34386,
+    "durationMs": 37641,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 10122
+        "ms": 12718
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 5033
+        "ms": 5484
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 4355
+        "ms": 5173
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3697
+        "ms": 3520
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1012
+        "ms": 1124
       }
     ]
   },
@@ -315,22 +315,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 6,
-    "commits": 504,
-    "commits7d": 504,
+    "commits": 506,
+    "commits7d": 506,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 276
+        "count": 277
       },
       {
         "name": "github-actions[bot]",
-        "count": 228
+        "count": 229
       }
     ],
     "churn30d": {
-      "added": 73135,
-      "removed": 21889
+      "added": 73185,
+      "removed": 21943
     },
-    "changelogEntries": 157
+    "changelogEntries": 158
   }
 }

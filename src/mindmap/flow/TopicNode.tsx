@@ -9,7 +9,7 @@ import { toPercent } from "../../progress";
 import { formatDateShort, isOverdue, todayISO } from "../../taskDate";
 import { useEditing } from "./editing";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
-import { readableTextOn } from "./style";
+import { levelFontSize, readableTextOn } from "./style";
 import type { TopicNode as TopicNodeT } from "./types";
 
 // Custom topic node: a rounded box honouring the model's NodeStyle, with marker emoji, the
@@ -216,10 +216,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           color: style?.color ?? "var(--mm-color, #2c2c2a)",
           border: "none",
           padding: `${6 + ins.top}px ${12 + ins.right}px ${6 + ins.bottom}px ${12 + ins.left}px`,
-          fontSize: style?.fontSize,
+          fontSize: style?.fontSize ?? levelFontSize(depth),
           fontWeight: style?.fontWeight,
           fontFamily: style?.fontFamily,
           textDecoration: style?.textDecoration,
+          textAlign: "center",
         }
       : {
           background:
@@ -236,10 +237,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           borderBottom: !style?.border && underlineLeaf ? `2px solid ${branchColor}` : undefined,
           borderRadius: style?.borderRadius ?? (underlineLeaf ? 0 : "11px"),
           padding: underlineLeaf ? "3px 8px 4px" : "6px 12px",
-          fontSize: style?.fontSize,
+          fontSize: style?.fontSize ?? levelFontSize(depth),
           fontWeight: style?.fontWeight ?? (filledMain ? 600 : undefined),
           fontFamily: style?.fontFamily,
           textDecoration: style?.textDecoration,
+          textAlign: "center",
         };
 
   // Selection-ring colour: the node's branch colour, emerald for the root.

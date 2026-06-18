@@ -30,6 +30,7 @@ import {
   SUMMARY_GAP,
   SUMMARY_PAD,
   boundaryLabel,
+  levelFontSize,
   readableTextOn,
   resolveBoundaryStyle,
   resolveCalloutStyle,
@@ -498,7 +499,7 @@ export function buildFlowSvg(
     const chipRow = d.progress || d.due || d.priority ? 20 : 0;
     const pieReserve = chipRow + (taskInfo ? 15 : 0);
 
-    const fontSize = d.isRoot ? 20 : Number.parseFloat(st?.fontSize ?? "") || 16;
+    const fontSize = Number.parseFloat(st?.fontSize ?? "") || levelFontSize(d.depth);
     const lines = d.topic.split("\n").map((l) => l.trim());
     if (d.icons?.length) lines[0] = `${d.icons.join(" ")} ${lines[0] ?? ""}`.trim();
     if (d.number) lines[0] = `${d.number} ${lines[0] ?? ""}`.trim();
@@ -507,14 +508,14 @@ export function buildFlowSvg(
       parts.push(
         textBlock(
           nonEmpty,
-          d.isRoot ? r.x + r.w / 2 : r.x + pad + ins.left,
+          r.x + r.w / 2,
           textTop,
           r.y + r.h - pieReserve - ins.bottom,
           fontSize,
           textColor,
           d.isRoot ? "700" : (st?.fontWeight ?? (filledMain ? "600" : undefined)),
           st?.fontFamily,
-          d.isRoot ? "middle" : "start",
+          "middle",
         ),
       );
     }
@@ -546,7 +547,7 @@ export function buildFlowSvg(
     // canvas TopicNode line (canvas == export).
     if (taskInfo) {
       parts.push(
-        `<text x="${r2(r.x + pad + ins.left)}" y="${r2(r.y + r.h - chipRow - 5)}" font-family="sans-serif" font-size="11" fill="${esc(textColor)}" opacity="0.65">${esc(taskInfo)}</text>`,
+        `<text x="${r2(r.x + r.w / 2)}" y="${r2(r.y + r.h - chipRow - 5)}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="${esc(textColor)}" opacity="0.65">${esc(taskInfo)}</text>`,
       );
     }
   }

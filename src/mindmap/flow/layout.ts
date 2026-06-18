@@ -1,5 +1,6 @@
 import { hierarchy, tree } from "d3-hierarchy";
 import type { LayoutKind } from "../contract";
+import { levelFontSize } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
 
 // Position the projected nodes for a given layout. Tree-based kinds (side/left/right/
@@ -32,10 +33,17 @@ export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
   return (id) => {
     const d = byId.get(id)?.data;
     if (!d) return DEFAULT_SIZE;
+    // Size scales with the per-depth font (root largest → deep leaves smallest), so the layout
+    // reserves the right slot before React Flow measures the real node.
+    const fs = levelFontSize(d.depth);
     const lines = d.topic.split("\n");
     const longest = Math.max(1, ...lines.map((l) => l.length));
-    const width = Math.min(320, Math.max(64, longest * 7.3 + 30 + (d.icons?.length ? 18 : 0)));
-    const height = (d.image ? 130 : 0) + lines.length * 20 + 16 + (d.tags?.length ? 22 : 0);
+    const width = Math.min(
+      320,
+      Math.max(64, longest * fs * 0.46 + 30 + (d.icons?.length ? 18 : 0)),
+    );
+    const height =
+      (d.image ? 130 : 0) + lines.length * (fs * 1.25) + 16 + (d.tags?.length ? 22 : 0);
     return { width, height };
   };
 }

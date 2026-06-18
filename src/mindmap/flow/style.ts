@@ -118,6 +118,17 @@ export function mix(hex: string, target: string, t: number): string {
   if (!c || !tg) return hex;
   return toHex(c[0] + (tg[0] - c[0]) * t, c[1] + (tg[1] - c[1]) * t, c[2] + (tg[2] - c[2]) * t);
 }
+/** Default topic font size by depth — the central topic is largest, mains a step down, subtopics
+ *  smaller — so the hierarchy reads from type size as well as shape (MindManager). A manual
+ *  NodeStyle.fontSize always overrides this. Shared by the layout estimate, the canvas, and the
+ *  exporter so all three agree. */
+export function levelFontSize(depth: number): number {
+  if (depth <= 0) return 20; // root
+  if (depth === 1) return 16; // main topics
+  if (depth === 2) return 14;
+  return 13; // depth 3+
+}
+
 /** Black or white text that stays readable on a filled `hex` background (WCAG relative luminance).
  *  Used for the level-1 "main topic" pill, whose body is the branch colour rather than white. Non-hex
  *  input → dark text. Shared by the canvas node + the exporter so a filled topic reads the same. */

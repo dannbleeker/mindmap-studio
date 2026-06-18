@@ -11,8 +11,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   the **central topic** is larger, bold, and centred; **main (level-1) topics are filled** with their
   branch colour (white/auto-contrast text) instead of a thin outline; mid topics keep the bordered
   white card; and **deep (level-3+) leaves drop the box** for the text on a short branch-colour
-  underline. A manual style (a set fill or border) always wins and reverts a topic to a normal card.
-  Identical on canvas and in every image / PDF / HTML export.
+  underline. **Type shrinks with depth** (root → main → sub → leaf) and **wrapped labels centre**
+  within their box, so the structure is legible at a glance. A manual style (a set fill or border)
+  always wins and reverts a topic to a normal card. Identical on canvas and in every image / PDF /
+  HTML export.
 
 - **Org-chart layouts draw right-angle elbow connectors.** In the Org-chart (down / up) layouts a
   parent now connects to its children with clean uniform right-angle "bus" elbows — the formal

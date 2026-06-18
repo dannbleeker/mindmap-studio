@@ -138,6 +138,13 @@ const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
 const EMPTY_BOUNDARIES: readonly Boundary[] = Object.freeze([]);
 const EMPTY_SUMMARIES: readonly Summary[] = Object.freeze([]);
 
+/** Count all descendants of a node (the size of the branch beneath it) — drives the delete confirm. */
+function countDescendants(n: MapNode): number {
+  let total = 0;
+  for (const k of n.children) total += 1 + countDescendants(k);
+  return total;
+}
+
 function themeVars(theme: MindMapProps["theme"]): CSSProperties {
   const v = (theme ?? mindManagerTheme).cssVar;
   return {
@@ -774,6 +781,27 @@ function FlowInner({
     sync(docRef.current);
   }, [initialized, sync]);
 
+  // Delete a node, confirming first when it has descendants — Delete removes the whole branch
+  // below it, so a guard prevents an accidental keystroke from wiping a subtree. Shared by the
+  // keyboard Delete, the context menu, and the on-node popover so the confirm is consistent.
+  const confirmDeleteNode = useCallback(
+    (id: string) => {
+      const node = findAnyNode(docRef.current, id);
+      const kids = node ? countDescendants(node) : 0;
+      if (kids > 0) {
+        const label = node?.topic?.trim() || "this topic";
+        if (
+          !window.confirm(
+            `Delete "${label}" and its ${kids} sub-topic${kids === 1 ? "" : "s"}? This removes the whole branch.`,
+          )
+        )
+          return;
+      }
+      apply(deleteNode(docRef.current, id));
+    },
+    [apply],
+  );
+
   // Keyboard tree-building (when a node is selected and we're not inline-editing or in a field).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -801,7 +829,9 @@ function FlowInner({
       if (!id) return;
       if (e.key === "Enter") {
         e.preventDefault();
-        apply(addSibling(docRef.current, id), true);
+        // Ctrl/⌘+Enter adds a child; plain Enter adds a sibling.
+        if (e.ctrlKey || e.metaKey) apply(addChild(docRef.current, id), true);
+        else apply(addSibling(docRef.current, id), true);
       } else if (e.key === "Tab" && !e.shiftKey) {
         e.preventDefault();
         apply(addChild(docRef.current, id), true);
@@ -810,7 +840,7 @@ function FlowInner({
         apply(outdent(docRef.current, id));
       } else if (e.key === "Delete") {
         e.preventDefault();
-        apply(deleteNode(docRef.current, id));
+        confirmDeleteNode(id);
       } else if (e.key === "F2") {
         e.preventDefault();
         setEditingId(id);
@@ -818,7 +848,7 @@ function FlowInner({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [apply, undoAction, redoAction]);
+  }, [apply, undoAction, redoAction, confirmDeleteNode]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 
@@ -1250,7 +1280,7 @@ function FlowInner({
                           icon="trash"
                           label="Delete"
                           danger
-                          onClick={() => apply(deleteNode(docRef.current, sid))}
+                          onClick={() => confirmDeleteNode(sid)}
                         />
                       ) : null}
                     </div>
@@ -1323,7 +1353,7 @@ function FlowInner({
                   () => apply(pasteBranch(docRef.current, id, clip)),
                 ]);
               items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
-              items.push(["Delete", () => apply(deleteNode(docRef.current, id)), true]);
+              items.push(["Delete", () => confirmDeleteNode(id), true]);
               return (
                 <>
                   {items.map(([label, fn, danger]) => (

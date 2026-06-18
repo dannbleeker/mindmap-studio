@@ -219,6 +219,48 @@ describe("FlowMindMap canvas", () => {
     run(() => fireEvent.keyDown(document, { key: "y", ctrlKey: true }));
   });
 
+  it("Ctrl+Enter adds a child of the selected node (plain Enter still adds a sibling)", () => {
+    const { h, onChange } = mount();
+    run(() => h.focusNode("a")); // "a" starts with one child (a1)
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(document, { key: "Enter", ctrlKey: true }));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children.find((n) => n.id === "a")?.children).toHaveLength(2);
+  });
+
+  it("Delete on a node WITH children confirms first, and cancelling keeps it", () => {
+    const { h, onChange } = mount();
+    vi.mocked(window.confirm).mockReturnValue(false); // user cancels
+    run(() => h.focusNode("a")); // "a" has child a1
+    onChange.mockClear();
+    vi.mocked(window.confirm).mockClear();
+    run(() => fireEvent.keyDown(document, { key: "Delete" }));
+    expect(window.confirm).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled(); // cancelled → nothing deleted
+  });
+
+  it("Delete on a node WITH children deletes the branch when confirmed", () => {
+    const { h, onChange } = mount();
+    vi.mocked(window.confirm).mockReturnValue(true);
+    run(() => h.focusNode("a"));
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(document, { key: "Delete" }));
+    expect(window.confirm).toHaveBeenCalled();
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children.find((n) => n.id === "a")).toBeUndefined();
+  });
+
+  it("Delete on a childless node deletes without prompting", () => {
+    const { h, onChange } = mount();
+    vi.mocked(window.confirm).mockClear();
+    run(() => h.focusNode("b")); // "b" has no children
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(document, { key: "Delete" }));
+    expect(window.confirm).not.toHaveBeenCalled();
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children.find((n) => n.id === "b")).toBeUndefined();
+  });
+
   it("drops a URL onto the canvas as a floating topic", () => {
     const { container, onChange } = mount();
     const surface = container.querySelector("div");

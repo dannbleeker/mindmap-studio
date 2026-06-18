@@ -57,6 +57,7 @@ export function project(
   kind: LayoutKind = "side",
 ): ProjectResult {
   const pal = palette.length > 0 ? palette : FALLBACK_PALETTE;
+  const connectorStyle = doc.meta?.connectorStyle;
   const nodes: TopicNode[] = [];
   const edges: FlowEdge[] = [];
   // Auto-numbering is a view concern: numbers are computed from the tree and shown as a prefix,
@@ -81,6 +82,9 @@ export function project(
     // branch renders as a right-angle elbow. A node's own `layout` override governs its children.
     edgeLayout: LayoutKind = kind,
   ): void => {
+    // A node's own `branchColor` override (if set) recolours it AND its subtree (inherited via the
+    // `color` passed down to children); otherwise it keeps the inherited auto-palette colour.
+    const nodeColor = node.branchColor ?? color;
     nodes.push({
       id: node.id,
       type: "topic",
@@ -102,7 +106,7 @@ export function project(
         layout: node.layout,
         isRoot,
         depth,
-        branchColor: color,
+        branchColor: nodeColor,
         side,
         collapsed: Boolean(node.collapsed),
         hasChildren: node.children.length > 0,
@@ -123,7 +127,14 @@ export function project(
         source: parentId,
         target: node.id,
         type: "branch", // a floating tapered edge — routes itself from the node borders
-        data: { depth, branchColor: color, crosslink: false, elbow: isOrg(edgeLayout) },
+        data: {
+          depth,
+          branchColor: nodeColor,
+          crosslink: false,
+          elbow: isOrg(edgeLayout),
+          connectorStyle,
+          dash: node.lineDash,
+        },
       });
     }
     // Collapsed → keep the node (with hasChildren) but omit its descendants. The root is
@@ -132,7 +143,7 @@ export function project(
     // This node's children are governed by its own layout override, else the layout that placed it.
     const childLayout = (node.layout as LayoutKind | undefined) ?? edgeLayout;
     for (const child of node.children) {
-      emit(child, node.id, depth + 1, side, color, floating, false, true, childLayout);
+      emit(child, node.id, depth + 1, side, nodeColor, floating, false, true, childLayout);
     }
   };
 

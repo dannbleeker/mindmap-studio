@@ -3,6 +3,7 @@ import {
   type Box,
   attachSideFor,
   branchEndpoints,
+  branchRender,
   branchWidths,
   childrenAxis,
   crosslinkBezier,
@@ -71,6 +72,26 @@ describe("branch geometry", () => {
     expect(labelX).toBe(100); // label at the curve's geometric midpoint
     expect(labelY).toBe(50);
     expect(crosslinkBezier(0, 0, 200, 100).path).toBe(path); // deterministic
+  });
+
+  it("branchRender: filled ribbon for organic; uniform stroke for elbow/curved/straight; dash → stroke", () => {
+    const p = box(0, 0, 100, 40);
+    const c = box(200, 0, 100, 40);
+    const organic = branchRender(p, c, "right", { depth: 1 });
+    expect(organic.fill).not.toBeNull(); // the chunky taper is a FILLED ribbon
+    expect(organic.stroke).toBeNull();
+    const elbow = branchRender(p, c, "right", { depth: 1, connectorStyle: "elbow" });
+    expect(elbow.fill).toBeNull();
+    expect(elbow.stroke).not.toBeNull();
+    const straight = branchRender(p, c, "right", { connectorStyle: "straight" });
+    expect(straight.d).toMatch(/^M [\d.]+ [\d.]+ L /); // a single line
+    const curved = branchRender(p, c, "right", { connectorStyle: "curved" });
+    expect(curved.d).toContain("C"); // a cubic
+    // a dashed branch can't be a filled ribbon → falls back to a uniform stroked curve
+    const dashed = branchRender(p, c, "right", { connectorStyle: "organic", dash: "dashed" });
+    expect(dashed.fill).toBeNull();
+    expect(dashed.stroke).not.toBeNull();
+    expect(dashed.dash).toBe("6 4");
   });
 
   it("elbowPath: a right-angle org-chart connector from parent-bottom-centre to child-top-centre", () => {

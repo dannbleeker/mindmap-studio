@@ -66,6 +66,9 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
     if (prev?.callouts) node.callouts = prev.callouts;
     if (prev?.pos) node.pos = prev.pos;
     if (prev?.layout) node.layout = prev.layout;
+    // Connector colour / dash are set via model ops (not RF gestures), so carry by id like side/task.
+    if (prev?.branchColor) node.branchColor = prev.branchColor;
+    if (prev?.lineDash) node.lineDash = prev.lineDash;
     // Per-node timestamps aren't in TopicData (never rendered) — carry by id, only when present, so
     // a timestamp-free doc round-trips to itself (never invent them here).
     if (prev?.createdAt !== undefined) node.createdAt = prev.createdAt;

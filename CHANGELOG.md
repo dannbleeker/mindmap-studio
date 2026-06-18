@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Connector options — style picker, per-branch colour, dashed branches.** A **Connectors** picker in
+  the toolbar sets the whole map's branch style: **organic** (the tapered default), **curved**, **elbow**
+  (right-angle), or **straight**. The node right-click menu adds a **branch colour** (recolours that
+  branch *and its subtree* — overriding the auto palette) and a **branch line** style (solid / dashed /
+  dotted). All render on the canvas and in every export, and round-trip losslessly in `.json`.
+
 - **Flat vector marker icons (replacing emoji).** Topic markers (check, flag, star, priority dots,
   target, idea, …) now render as a crisp **flat icon set** at a fixed size in a tidy row above the
   title — **identical on every machine and in every export** — instead of OS colour emoji that vary by

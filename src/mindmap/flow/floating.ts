@@ -222,3 +222,107 @@ export function elbowPath(parent: Box, child: Box, side: AttachSide): string {
     `L ${r2(tx)} ${r2(ty)}`,
   ].join(" ");
 }
+
+// ── Selectable connector styles ───────────────────────────────────────────────────────────────────
+// The per-map connector style (MindManager's Line Style picker). "organic" is the adaptive default
+// (chunky taper, or an org-chart elbow on org layouts); the rest force one shape everywhere.
+export type ConnectorStyle = "organic" | "curved" | "elbow" | "straight";
+
+/** Parent's near-edge centre + child's near-edge centre, on the parent's attach `side` — the endpoints
+ *  for the uniform-stroke connector styles (straight / curved / elbow). */
+export function sideEndpoints(parent: Box, child: Box, side: AttachSide): FloatingPoints {
+  const sx =
+    side === "left"
+      ? parent.cx - parent.w / 2
+      : side === "right"
+        ? parent.cx + parent.w / 2
+        : parent.cx;
+  const sy =
+    side === "top"
+      ? parent.cy - parent.h / 2
+      : side === "bottom"
+        ? parent.cy + parent.h / 2
+        : parent.cy;
+  const tx =
+    side === "left" ? child.cx + child.w / 2 : side === "right" ? child.cx - child.w / 2 : child.cx;
+  const ty =
+    side === "top" ? child.cy + child.h / 2 : side === "bottom" ? child.cy - child.h / 2 : child.cy;
+  return { sx, sy, tx, ty };
+}
+
+/** A straight (direct) connector: one uniform line from the parent's edge to the child's near edge. */
+export function straightPath(parent: Box, child: Box, side: AttachSide): string {
+  const { sx, sy, tx, ty } = sideEndpoints(parent, child, side);
+  return `M ${r2(sx)} ${r2(sy)} L ${r2(tx)} ${r2(ty)}`;
+}
+
+/** A smooth uniform curved connector: leaves the parent perpendicular to its `side` and eases into the
+ *  child's near edge. */
+export function curvedPath(parent: Box, child: Box, side: AttachSide): string {
+  const { sx, sy, tx, ty } = sideEndpoints(parent, child, side);
+  const horizontal = side === "left" || side === "right";
+  const c1x = horizontal ? (sx + tx) / 2 : sx;
+  const c1y = horizontal ? sy : (sy + ty) / 2;
+  const c2x = horizontal ? (sx + tx) / 2 : tx;
+  const c2y = horizontal ? ty : (sy + ty) / 2;
+  return `M ${r2(sx)} ${r2(sy)} C ${r2(c1x)} ${r2(c1y)} ${r2(c2x)} ${r2(c2y)} ${r2(tx)} ${r2(ty)}`;
+}
+
+export interface BranchRender {
+  /** SVG path `d`. */
+  d: string;
+  /** Set for the filled organic ribbon; null when the branch is a uniform stroke. */
+  fill: string | null;
+  /** Set for the uniform-stroke styles (elbow / straight / curved / dashed); null for the ribbon. */
+  stroke: string | null;
+  width: number;
+  /** SVG stroke-dasharray ("" = solid). */
+  dash: string;
+}
+
+/** Resolve a branch edge to its path + paint, honouring the map's connector style + a per-branch dash.
+ *  ONE shared decision so the live canvas (BranchEdge) and the SVG exporter render identically
+ *  (canvas == export). `attachSide` is the per-parent fan side; `elbow` marks an org-chart branch
+ *  (used only for the adaptive "organic" style). A dashed branch can't be a filled ribbon, so it
+ *  falls back to a uniform stroked curve. */
+export function branchRender(
+  parent: Box,
+  child: Box,
+  attachSide: AttachSide,
+  data: {
+    depth?: number;
+    branchColor?: string;
+    elbow?: boolean;
+    connectorStyle?: ConnectorStyle;
+    dash?: "solid" | "dashed" | "dotted";
+  },
+): BranchRender {
+  const color = data.branchColor ?? "#999";
+  const dashArr = data.dash === "dashed" ? "6 4" : data.dash === "dotted" ? "2 4" : "";
+  const cs = data.connectorStyle ?? "organic";
+  const effective = cs === "organic" ? (data.elbow ? "elbow" : "taper") : cs;
+  if (effective === "taper" && !dashArr) {
+    const ep = branchEndpoints(parent, child, attachSide);
+    const { trunk, tip } = branchWidths(data.depth ?? 1);
+    return {
+      d: taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, attachSide, trunk, tip),
+      fill: color,
+      stroke: null,
+      width: 0,
+      dash: "",
+    };
+  }
+  const elbowSide: AttachSide = data.elbow
+    ? child.cy >= parent.cy
+      ? "bottom"
+      : "top"
+    : attachSide;
+  const d =
+    effective === "elbow"
+      ? elbowPath(parent, child, elbowSide)
+      : effective === "straight"
+        ? straightPath(parent, child, attachSide)
+        : curvedPath(parent, child, attachSide); // "curved", or a dashed taper
+  const width = Math.max(1.6, 3.4 - (data.depth ?? 1) * 0.5);
+  return { d, fill: null, stroke: color, width, dash: dashArr };
+}

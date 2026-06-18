@@ -796,6 +796,21 @@ export function Toolbar({
             <option value="brace">Brace map</option>
           </optgroup>
         </select>
+        <span className="mm-eyebrow">Connectors</span>
+        <select
+          className="mm-select"
+          value={liveDoc.meta?.connectorStyle ?? "organic"}
+          onChange={(e) =>
+            m()?.setConnectorStyle(e.target.value as "organic" | "curved" | "elbow" | "straight")
+          }
+          aria-label="Connector style"
+          title="Branch connector style"
+        >
+          <option value="organic">Organic</option>
+          <option value="curved">Curved</option>
+          <option value="elbow">Elbow</option>
+          <option value="straight">Straight</option>
+        </select>
         <span className="mm-vdiv" />
         <input
           className="mm-input"

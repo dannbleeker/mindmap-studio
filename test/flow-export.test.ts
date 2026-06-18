@@ -640,7 +640,9 @@ describe("flow exportSvg — level styling, task-info, org elbows (canvas == exp
   it("renders org-chart layouts with uniform right-angle elbows, not tapered ribbons", () => {
     const out = buildFlowSvg(ldoc, lrects, palette, cssVar, false, "", undefined, "org-down");
     // an elbow is a fill:none stroked path with rounded corners (the organic ribbon is a FILLED path)
-    expect(out).toMatch(/<path d="M [^"]*Q[^"]*" fill="none" stroke="#E8593C" stroke-width="2"/);
+    expect(out).toMatch(
+      /<path d="M [^"]*Q[^"]*" fill="none" stroke="#E8593C" stroke-width="[\d.]+"/,
+    );
   });
 
   it("keeps the organic taper (a filled branch path) for the default side layout", () => {

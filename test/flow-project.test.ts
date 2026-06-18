@@ -141,6 +141,36 @@ describe("flow project — org-chart elbow stamping + task fields", () => {
     expect(edges.find((e) => e.id === "e:b:b1")?.data?.elbow).toBe(false);
   });
 
+  it("stamps the map connector style + per-branch colour (inherited) + dash on branch edges", () => {
+    const cdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "c",
+      title: "C",
+      meta: { connectorStyle: "elbow" },
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            branchColor: "#ff0000",
+            lineDash: "dashed",
+            children: [{ id: "a1", topic: "A1", children: [] }],
+          },
+        ],
+      },
+    };
+    const { nodes, edges } = project(cdoc);
+    const ra = edges.find((e) => e.id === "e:r:a");
+    expect(ra?.data?.connectorStyle).toBe("elbow");
+    expect(ra?.data?.dash).toBe("dashed");
+    expect(ra?.data?.branchColor).toBe("#ff0000");
+    // the override is inherited by the subtree (node data + the child's edge)
+    expect(nodes.find((n) => n.id === "a1")?.data.branchColor).toBe("#ff0000");
+    expect(edges.find((e) => e.id === "e:a:a1")?.data?.branchColor).toBe("#ff0000");
+  });
+
   it("projects the task schedule fields the inline task-info line draws", () => {
     const tdoc: MindMapDoc = {
       schemaVersion: 1,

@@ -94,12 +94,15 @@ import {
   setBackgroundImage,
   setBoundaryColor,
   setBoundaryLabel,
+  setBranchColor,
   setCalloutColor,
   setCalloutText,
+  setConnectorStyle,
   setDue,
   setFreeform,
   setHyperlink,
   setImage,
+  setLineDash,
   setLineJumps,
   setLinkArrow,
   setLinkLabel,
@@ -1168,6 +1171,7 @@ function FlowInner({
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),
       setLineJumps: (on) => apply(setLineJumps(docRef.current, on)),
+      setConnectorStyle: (style) => apply(setConnectorStyle(docRef.current, style)),
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
       setSelectedProgress: (progress) =>
@@ -1652,6 +1656,49 @@ function FlowInner({
                       <option value="brace">Brace</option>
                     </select>
                   </label>
+                  <MenuLabel>Branch colour</MenuLabel>
+                  <div className="mm-menu-row">
+                    {["#c2701a", "#3f6fb0", "#1b8a5e", "#b23b6a", "#8a6d2f", "#6a5acd"].map((c) => {
+                      const on = findNode(docRef.current, id)?.branchColor === c;
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          className="mm-menu-chip"
+                          aria-label={`Branch colour ${c}`}
+                          aria-pressed={on}
+                          data-on={on || undefined}
+                          onClick={() => apply(setBranchColor(docRef.current, id, on ? "" : c))}
+                          style={{ background: c, width: 18, height: 18, padding: 0 }}
+                        />
+                      );
+                    })}
+                    <button
+                      type="button"
+                      className="mm-menu-chip"
+                      onClick={() => apply(setBranchColor(docRef.current, id, ""))}
+                    >
+                      Default
+                    </button>
+                  </div>
+                  <MenuLabel>Branch line</MenuLabel>
+                  <div className="mm-menu-row">
+                    {(["solid", "dashed", "dotted"] as const).map((d) => {
+                      const on = (findNode(docRef.current, id)?.lineDash ?? "solid") === d;
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          className="mm-menu-chip"
+                          aria-pressed={on}
+                          data-on={on || undefined}
+                          onClick={() => apply(setLineDash(docRef.current, id, d))}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </>
               );
             })()}

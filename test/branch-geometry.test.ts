@@ -10,6 +10,7 @@ import {
   elbowPath,
   taperedRibbonPath,
 } from "../src/mindmap/flow/floating";
+import { boundaryPath, dashArray } from "../src/mindmap/flow/geometry";
 
 // The organic branch connectors: one shared origin per parent-side, enter-from-near-end, overlap-touch,
 // chunky taper. Pure geometry shared by the canvas (BranchEdge) + the SVG exporter (canvas == export).
@@ -57,6 +58,23 @@ describe("branch geometry", () => {
     expect(d.startsWith("M ")).toBe(true);
     expect(d.trim().endsWith("Z")).toBe(true);
     expect(d).toBe(taperedRibbonPath(0, 0, -200, -100, "left", 6, 1.5)); // deterministic
+  });
+
+  it("boundaryPath: every shape is a closed path (cloud bumps, polygon corners, ellipse arcs)", () => {
+    expect(boundaryPath("rect", 0, 0, 100, 60)).toBe("M 0 0 H 100 V 60 H 0 Z");
+    expect(boundaryPath("roundRect", 0, 0, 100, 60)).toContain("A"); // rounded corners
+    expect(boundaryPath("ellipse", 0, 0, 100, 60)).toContain("A"); // arcs
+    expect(boundaryPath("polygon", 0, 0, 100, 60)).toContain("L"); // cut corners
+    expect(boundaryPath("cloud", 0, 0, 100, 60)).toContain("Q"); // scalloped bumps
+    for (const s of ["roundRect", "rect", "ellipse", "polygon", "cloud"] as const)
+      expect(boundaryPath(s, 0, 0, 100, 60).trim().endsWith("Z"), s).toBe(true);
+  });
+
+  it("dashArray maps the dash styles", () => {
+    expect(dashArray("solid")).toBe("");
+    expect(dashArray("dashed")).toBe("6 5");
+    expect(dashArray("dotted")).toBe("2 4");
+    expect(dashArray(undefined)).toBe("");
   });
 
   it("branchWidths tapers thinner with depth (chunky main branches → fine sub-branches)", () => {

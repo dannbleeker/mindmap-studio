@@ -43,7 +43,6 @@ export function resolveLinkStyle(s: {
 export const BOUNDARY_PAD = 16;
 export const BOUNDARY_STROKE = "#8b87e0";
 export const BOUNDARY_FILL = "rgba(120,116,210,0.10)";
-export const BOUNDARY_RADIUS = 16;
 
 // Boundary label chip.
 export const BOUNDARY_LABEL_BG = "#eceafb";
@@ -146,26 +145,24 @@ export function readableTextOn(hex: string): string {
 export interface ResolvedBoundaryStyle {
   stroke: string;
   fill: string;
+  /** Soft gradient stops (lighter top → slightly deeper bottom) for a panel-like fill. */
+  fillTop: string;
+  fillBottom: string;
   labelBg: string;
   labelBorder: string;
   labelColor: string;
 }
-/** Boundary stroke + fill tint + label-chip colours from an optional override. */
+/** Boundary stroke + fill tint (+ gradient stops) + label-chip colours from an optional override. */
 export function resolveBoundaryStyle(color?: string): ResolvedBoundaryStyle {
-  if (!color)
-    return {
-      stroke: BOUNDARY_STROKE,
-      fill: BOUNDARY_FILL,
-      labelBg: BOUNDARY_LABEL_BG,
-      labelBorder: BOUNDARY_LABEL_BORDER,
-      labelColor: BOUNDARY_LABEL_COLOR,
-    };
+  const base = color || BOUNDARY_STROKE;
   return {
-    stroke: color,
-    fill: withAlpha(color, 0.1),
-    labelBg: mix(color, "#ffffff", 0.85),
-    labelBorder: mix(color, "#ffffff", 0.55),
-    labelColor: mix(color, "#000000", 0.55),
+    stroke: color || BOUNDARY_STROKE,
+    fill: color ? withAlpha(color, 0.1) : BOUNDARY_FILL,
+    fillTop: withAlpha(base, 0.05),
+    fillBottom: withAlpha(base, 0.16),
+    labelBg: color ? mix(color, "#ffffff", 0.85) : BOUNDARY_LABEL_BG,
+    labelBorder: color ? mix(color, "#ffffff", 0.55) : BOUNDARY_LABEL_BORDER,
+    labelColor: color ? mix(color, "#000000", 0.55) : BOUNDARY_LABEL_COLOR,
   };
 }
 

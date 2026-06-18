@@ -1,5 +1,6 @@
 import type {
   BackdropKind,
+  Boundary,
   Callout,
   ConditionalRule,
   CrossLink,
@@ -859,6 +860,38 @@ export function setBoundaryColor(doc: MindMapDoc, id: string, color: string): Op
   next.boundaries = (next.boundaries ?? []).map((b) =>
     b.id === id ? { ...b, color: color || undefined } : b,
   );
+  return { doc: next };
+}
+
+/** Set a boundary's outline shape; "roundRect" (the default) clears the override. */
+export function setBoundaryShape(
+  doc: MindMapDoc,
+  id: string,
+  shape: NonNullable<Boundary["shape"]>,
+): OpResult {
+  if (!(doc.boundaries ?? []).some((b) => b.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.boundaries = (next.boundaries ?? []).map((b) => {
+    if (b.id !== id) return b;
+    const { shape: _drop, ...rest } = b;
+    return shape === "roundRect" ? rest : { ...rest, shape };
+  });
+  return { doc: next };
+}
+
+/** Set a boundary's outline line style; "solid" (the default) clears the override. */
+export function setBoundaryDash(
+  doc: MindMapDoc,
+  id: string,
+  dash: NonNullable<Boundary["dash"]>,
+): OpResult {
+  if (!(doc.boundaries ?? []).some((b) => b.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.boundaries = (next.boundaries ?? []).map((b) => {
+    if (b.id !== id) return b;
+    const { dash: _drop, ...rest } = b;
+    return dash === "solid" ? rest : { ...rest, dash };
+  });
   return { doc: next };
 }
 

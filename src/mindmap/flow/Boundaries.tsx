@@ -1,9 +1,9 @@
 import { ViewportPortal, useNodes } from "@xyflow/react";
 import { type CSSProperties, memo, useMemo } from "react";
 import type { Boundary } from "../../model/types";
+import { type BoundaryShape, boundaryPath, dashArray } from "./geometry";
 import {
   BOUNDARY_PAD,
-  BOUNDARY_RADIUS,
   type ResolvedBoundaryStyle,
   boundaryLabel,
   resolveBoundaryStyle,
@@ -14,20 +14,21 @@ import {
 // live measured rects), with a label chip — a MindManager-style enclosure. Geometry +
 // colours come from ./style so the SVG export draws an identical box.
 
-// Label-chip layout (the colours come per-box from the resolved style, so a recoloured boundary
-// re-tints its chip too).
-const chipBase: CSSProperties = {
+// Title-tab layout: a filled tab fused to the top edge of the outline (replacing the old floating
+// pill). Colours come per-box from the resolved style, so a recoloured boundary re-tints its tab too.
+const tabBase: CSSProperties = {
   position: "absolute",
-  top: -11,
-  left: 12,
-  padding: "1px 8px",
-  borderRadius: 8,
-  fontSize: 12,
+  top: -19,
+  left: 14,
+  padding: "2px 9px",
+  borderRadius: "7px 7px 0 0",
+  fontSize: 11.5,
   fontWeight: 600,
   whiteSpace: "nowrap",
+  color: "#fff",
 };
 
-/** One boundary box, resolved to its padded bbox in flow space + its resolved colours. */
+/** One boundary box, resolved to its padded bbox in flow space + its shape / dash / colours. */
 interface BoundaryBox {
   id: string;
   label: string;
@@ -35,6 +36,8 @@ interface BoundaryBox {
   top: number;
   width: number;
   height: number;
+  shape: BoundaryShape | undefined;
+  dash: "solid" | "dashed" | "dotted" | undefined;
   style: ResolvedBoundaryStyle;
 }
 
@@ -90,6 +93,8 @@ function Boundaries({
         top: minY - BOUNDARY_PAD,
         width: maxX - minX + 2 * BOUNDARY_PAD,
         height: maxY - minY + 2 * BOUNDARY_PAD,
+        shape: b.shape,
+        dash: b.dash,
         style: resolveBoundaryStyle(b.color),
       });
     }
@@ -102,12 +107,10 @@ function Boundaries({
     <ViewportPortal>
       {boxes.map((b) => {
         const selected = b.id === selectedId;
-        const chip: CSSProperties = {
-          ...chipBase,
-          background: b.style.labelBg,
-          color: b.style.labelColor,
-          border: `1px solid ${b.style.labelBorder}`,
-        };
+        const d = boundaryPath(b.shape, 0, 0, b.width, b.height);
+        const gid = `bgrad-${b.id}`;
+        const dash = dashArray(b.dash);
+        const tab: CSSProperties = { ...tabBase, background: b.style.stroke };
         return (
           <div
             key={b.id}
@@ -117,19 +120,36 @@ function Boundaries({
               top: b.top,
               width: b.width,
               height: b.height,
-              boxSizing: "border-box",
-              border: `1.5px solid ${b.style.stroke}`,
-              background: b.style.fill,
-              borderRadius: BOUNDARY_RADIUS,
               // The box itself never blocks pointer events — enclosed nodes keep dragging and the
-              // marquee keeps working. The rim strips + chip below opt back in to catch selection.
+              // marquee keeps working. The rim strips + tab below opt back in to catch selection.
               pointerEvents: "none",
-              // Selection halo (view-only, additive — never exported, so canvas == export holds).
-              boxShadow: selected
-                ? `0 0 0 2px ${b.style.stroke}, 0 0 8px ${b.style.stroke}`
-                : undefined,
             }}
           >
+            {/* biome-ignore lint/a11y/noSvgWithoutTitle: decorative enclosure outline (aria-hidden) */}
+            <svg
+              width={b.width}
+              height={b.height}
+              style={{ position: "absolute", inset: 0, overflow: "visible" }}
+              aria-hidden
+            >
+              <defs>
+                <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor={b.style.fillTop} />
+                  <stop offset="1" stopColor={b.style.fillBottom} />
+                </linearGradient>
+              </defs>
+              {/* Selection halo (view-only, additive — never exported, so canvas == export holds). */}
+              {selected ? (
+                <path d={d} fill="none" stroke={b.style.stroke} strokeWidth={5} opacity={0.35} />
+              ) : null}
+              <path
+                d={d}
+                fill={`url(#${gid})`}
+                stroke={b.style.stroke}
+                strokeWidth={1.5}
+                strokeDasharray={dash || undefined}
+              />
+            </svg>
             {b.label ? (
               onSelect ? (
                 <button
@@ -137,12 +157,12 @@ function Boundaries({
                   className="nodrag nopan"
                   onClick={() => onSelect(b.id)}
                   title={`Select boundary "${b.label}"`}
-                  style={{ ...chip, cursor: "pointer", pointerEvents: "auto" }}
+                  style={{ ...tab, cursor: "pointer", pointerEvents: "auto", border: "none" }}
                 >
                   {b.label}
                 </button>
               ) : (
-                <div style={chip}>{b.label}</div>
+                <div style={tab}>{b.label}</div>
               )
             ) : null}
             {onSelect

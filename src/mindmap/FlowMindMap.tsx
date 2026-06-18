@@ -93,7 +93,9 @@ import {
   setBackground,
   setBackgroundImage,
   setBoundaryColor,
+  setBoundaryDash,
   setBoundaryLabel,
+  setBoundaryShape,
   setBranchColor,
   setCalloutColor,
   setCalloutText,
@@ -481,10 +483,14 @@ function FlowInner({
       const doc = docRef.current;
       let label: string | undefined;
       let color: string | undefined;
+      let shape: SelectedOverlay["shape"];
+      let dash: SelectedOverlay["dash"];
       if (sel.kind === "boundary") {
         const b = (doc.boundaries ?? []).find((x) => x.id === sel.id);
         label = b?.label;
         color = b?.color;
+        shape = b?.shape;
+        dash = b?.dash;
       } else if (sel.kind === "summary") {
         const s = (doc.summaries ?? []).find((x) => x.id === sel.id);
         label = s?.label;
@@ -511,6 +517,8 @@ function FlowInner({
         label: label ?? "",
         deletable: true,
         color,
+        shape,
+        dash,
       };
       setSelectedOverlay(resolved);
       onSelectOverlayRef.current?.(resolved);
@@ -1230,6 +1238,20 @@ function FlowInner({
         });
         // Re-emit the (unchanged) selection so the inspector's swatch reflects the new colour.
         if (ok && sel) fireSelectOverlay({ kind: sel.kind, id: sel.id, nodeId: sel.nodeId });
+        return ok;
+      },
+      setOverlayShape: (shape) => {
+        const sel = selectedOverlayRef.current;
+        if (sel?.kind !== "boundary") return false;
+        const ok = withSelectedOverlay((s) => setBoundaryShape(docRef.current, s.id, shape));
+        if (ok) fireSelectOverlay({ kind: sel.kind, id: sel.id, nodeId: sel.nodeId });
+        return ok;
+      },
+      setOverlayDash: (dash) => {
+        const sel = selectedOverlayRef.current;
+        if (sel?.kind !== "boundary") return false;
+        const ok = withSelectedOverlay((s) => setBoundaryDash(docRef.current, s.id, dash));
+        if (ok) fireSelectOverlay({ kind: sel.kind, id: sel.id, nodeId: sel.nodeId });
         return ok;
       },
       deleteOverlay: () => {

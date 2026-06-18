@@ -259,27 +259,52 @@ function tidy(
   return out;
 }
 
-/** Run one tidy tree from `rootId` and place each node along a depth axis. The shared core of the
- *  horizontal / vertical / two-sided tree layouts: `tidy` gives each node a (breadth, depth); we
- *  place it at the per-depth centre (`axisCenters[depth]`, times `sign`) on the major axis and at its
- *  breadth on the cross axis — `orientation` picks which axis is which. `depthFallback` supplies the
- *  major-axis value when a depth has no centre (each caller passes the same fallback it used inline).
- *  Pure: it only writes through `place(ctx, …)`, exactly as the inlined loops did. */
+/** Lay out a tidy tree from `rootId`. Two MindManager-isms vs a plain grid:
+ *  • breadth (cross-axis) spacing is PROPORTIONAL to each node's size via d3's `separation` — a tall
+ *    image topic reserves more room while one-line siblings pack tight, instead of every sibling slot
+ *    being as tall as the single biggest node in the map; and
+ *  • the major axis (depth) is accumulated PER SUBTREE — each child hangs just past its OWN parent's
+ *    edge, so a short-label branch stays tight and a long label only pushes its own descendants out
+ *    (not one global column per depth across unrelated branches).
+ *  `orientation` picks which axis is breadth vs major; `sign` flips direction (left / up). Pure. */
 function layoutTidyTree(
   ctx: Ctx,
   rootId: string,
   childrenOf: (id: string) => string[],
-  breadthSlot: number,
-  axisCenters: number[],
   orientation: "horizontal" | "vertical",
   sign: 1 | -1,
-  depthFallback: (depth: number) => number,
 ): void {
-  const breadth = tidy(rootId, childrenOf, breadthSlot);
-  for (const [id, b] of breadth) {
-    const major = sign * (axisCenters[b.depth] ?? depthFallback(b.depth));
-    if (orientation === "horizontal") place(ctx, id, major, b.breadth);
-    else place(ctx, id, b.breadth, major);
+  const { size } = ctx;
+  const horizontal = orientation === "horizontal";
+  const breadthGap = horizontal ? ROW_GAP : VCOL_GAP;
+  const majorGap = horizontal ? COL_GAP : VROW_GAP;
+  const breadthOf = (id: string) => (horizontal ? size(id).height : size(id).width);
+  const majorOf = (id: string) => (horizontal ? size(id).width : size(id).height);
+  const h = hierarchy<string>(rootId, childrenOf);
+  // nodeSize [1,1] + a size-aware separation → breadth distance between adjacent nodes is their
+  // half-sizes plus a gap (height-proportional packing).
+  tree<string>()
+    .nodeSize([1, 1])
+    .separation((a, b) => (breadthOf(a.data) + breadthOf(b.data)) / 2 + breadthGap)(h);
+  const rootBreadth = h.x ?? 0;
+  // Per-subtree major offset: each node sits one (half-parent + gap + half-self) past its parent.
+  const major = new Map<string, number>();
+  h.eachBefore((node) => {
+    if (!node.parent) {
+      major.set(node.data, 0);
+      return;
+    }
+    const pm = major.get(node.parent.data) ?? 0;
+    major.set(
+      node.data,
+      pm + sign * (majorOf(node.parent.data) / 2 + majorGap + majorOf(node.data) / 2),
+    );
+  });
+  for (const node of h.descendants()) {
+    const breadth = (node.x ?? 0) - rootBreadth;
+    const m = major.get(node.data) ?? 0;
+    if (horizontal) place(ctx, node.data, m, breadth);
+    else place(ctx, node.data, breadth, m);
   }
 }
 
@@ -311,9 +336,6 @@ function place(ctx: Ctx, id: string, cx: number, cy: number): void {
 // --- side (two-sided radial, the default) ----------------------------------
 function layoutSide(ctx: Ctx): void {
   const { root, branchChildren, byId } = ctx;
-  const maxH = Math.max(DEFAULT_SIZE.height, ...maxExtentAtDepth(ctx, "h"));
-  const colX = depthCenters(maxExtentAtDepth(ctx, "w"), COL_GAP);
-  const slot = maxH + ROW_GAP;
   const kids = root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []);
   const right = kids.filter((id) => byId.get(id)?.data.side !== "left");
   const left = kids.filter((id) => byId.get(id)?.data.side === "left");
@@ -325,11 +347,8 @@ function layoutSide(ctx: Ctx): void {
       ctx,
       root.id,
       (id) => (id === root.id ? kidsOnSide : (branchChildren.get(id) ?? [])),
-      slot,
-      colX,
       "horizontal",
       sign,
-      (depth) => depth * 200,
     );
   }
   // The root is shared by both side-passes; pin it at the origin (it's also where the breadth-0
@@ -340,35 +359,25 @@ function layoutSide(ctx: Ctx): void {
 // --- left / right (single-sided horizontal tidy tree) ----------------------
 function layoutHorizontal(ctx: Ctx, sign: 1 | -1, rootKids: string[]): void {
   const { root, branchChildren } = ctx;
-  const maxH = Math.max(DEFAULT_SIZE.height, ...maxExtentAtDepth(ctx, "h"));
-  const colX = depthCenters(maxExtentAtDepth(ctx, "w"), COL_GAP);
   layoutTidyTree(
     ctx,
     root.id,
     (id) => (id === root.id ? rootKids : (branchChildren.get(id) ?? [])),
-    maxH + ROW_GAP,
-    colX,
     "horizontal",
     sign,
-    () => 0,
   );
 }
 
 // --- org-down / org-up (vertical tidy tree) --------------------------------
 function layoutVertical(ctx: Ctx, sign: 1 | -1): void {
   const { root, branchChildren } = ctx;
-  const maxW = Math.max(DEFAULT_SIZE.width, ...maxExtentAtDepth(ctx, "w"));
-  const rowY = depthCenters(maxExtentAtDepth(ctx, "h"), VROW_GAP);
   const kids = root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []);
   layoutTidyTree(
     ctx,
     root.id,
     (id) => (id === root.id ? kids : (branchChildren.get(id) ?? [])),
-    maxW + VCOL_GAP,
-    rowY,
     "vertical",
     sign,
-    () => 0,
   );
 }
 
@@ -504,19 +513,26 @@ function layoutTimeline(ctx: Ctx): void {
 
 // --- fishbone (Ishikawa: spine with diagonal bones) ------------------------
 function layoutFishbone(ctx: Ctx): void {
-  const { root, branchChildren, size } = ctx;
+  const { root, branchChildren } = ctx;
   const kids = root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []);
   place(ctx, root.id, 0, 0); // head at the right end of the spine
-  const spineStep = Math.max(DEFAULT_SIZE.width, ...maxExtentAtDepth(ctx, "w")) + COL_GAP * 1.5;
-  const boneRise = 90;
+  const maxW = Math.max(DEFAULT_SIZE.width, ...maxExtentAtDepth(ctx, "w"));
+  const maxH = Math.max(DEFAULT_SIZE.height, ...maxExtentAtDepth(ctx, "h"));
+  const spineStep = maxW + COL_GAP * 1.5;
+  // Bones run as true diagonals off the horizontal spine (~60°); sub-causes step OUTWARD along the
+  // bone (parallel to it), not straight down — the recognisable Ishikawa shape.
+  const ux = -Math.cos(Math.PI / 3); // leftward component along the bone
+  const uy = Math.sin(Math.PI / 3); // vertical component (× up/down)
+  const step = maxH + 26; // box spacing along the bone
   kids.forEach((kid, i) => {
     const spineX = -((Math.floor(i / 2) + 1) * spineStep);
     const up = i % 2 === 0 ? -1 : 1;
-    place(ctx, kid, spineX, up * boneRise);
-    // ribs: this branch's children stack further out along the bone.
+    // Main cause near the spine attachment; its sub-causes continue outward along the same diagonal.
+    place(ctx, kid, spineX + ux * step, up * uy * step);
     const children = branchChildren.get(kid) ?? [];
     children.forEach((c, j) => {
-      place(ctx, c, spineX - 30, up * (boneRise + (j + 1) * (size(c).height + 14)));
+      const d = (j + 2) * step;
+      place(ctx, c, spineX + ux * d, up * uy * d);
     });
   });
 }

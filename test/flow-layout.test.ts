@@ -235,3 +235,65 @@ describe("flow layout (alternate kinds)", () => {
     expect(pos.get("s1")?.y ?? 0).toBeGreaterThan(pos.get("s")?.y ?? 0);
   });
 });
+
+describe("flow layout (per-subtree columns + height-proportional gaps + fishbone diagonal)", () => {
+  // Two right-side branches, each with one child. Per-subtree columns mean a1's offset from `a`
+  // depends only on `a`'s own width, not on the wide sibling (a global per-depth grid would push both).
+  const colDoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "col",
+    title: "R",
+    root: {
+      id: "r",
+      topic: "R",
+      children: [
+        { id: "a", topic: "A", side: "right", children: [{ id: "a1", topic: "A1", children: [] }] },
+        {
+          id: "wide",
+          topic: "Wide",
+          side: "right",
+          children: [{ id: "w1", topic: "W1", children: [] }],
+        },
+      ],
+    },
+  };
+  const colP = project(colDoc);
+  const sizeWith = (wideW: number) => (id: string) =>
+    id === "wide" ? { width: wideW, height: 40 } : { width: 100, height: 40 };
+  const gapAtoA1 = (wideW: number) => {
+    const pos = computeLayout(colP.nodes, colP.edges, sizeWith(wideW), "right");
+    return (pos.get("a1")?.x ?? 0) - (pos.get("a")?.x ?? 0);
+  };
+
+  it("per-subtree columns: a wide sibling doesn't push an unrelated branch's column out", () => {
+    expect(gapAtoA1(320)).toBeCloseTo(gapAtoA1(100)); // a→a1 spacing is independent of 'wide'
+  });
+
+  it("height-proportional gaps: taller siblings sit further apart", () => {
+    const gapAt = (h: number) => {
+      const pos = computeLayout(colP.nodes, colP.edges, () => ({ width: 100, height: h }), "right");
+      return Math.abs((pos.get("a")?.y ?? 0) - (pos.get("wide")?.y ?? 0));
+    };
+    expect(gapAt(200)).toBeGreaterThan(gapAt(40)); // not a single global uniform slot
+  });
+
+  it("fishbone: sub-causes step diagonally outward along the bone (not straight down)", () => {
+    const fdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "fb",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "a", topic: "A", children: [{ id: "a1", topic: "A1", children: [] }] }],
+      },
+    };
+    const p = project(fdoc);
+    const pos = computeLayout(p.nodes, p.edges, () => ({ width: 100, height: 40 }), "fishbone");
+    const a = pos.get("a");
+    const a1 = pos.get("a1");
+    if (!a || !a1) throw new Error("missing fishbone positions");
+    expect(a1.x).toBeLessThan(a.x); // further along the bone (leftward)
+    expect(Math.abs(a1.y)).toBeGreaterThan(Math.abs(a.y)); // and further from the spine → diagonal
+  });
+});

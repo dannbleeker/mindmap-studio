@@ -107,6 +107,7 @@ export function project(
         side,
         collapsed: Boolean(node.collapsed),
         hasChildren: node.children.length > 0,
+        hiddenCount: node.collapsed ? node.children.length : undefined,
         progress: progress.get(node.id),
         due: node.task?.due,
         start: node.task?.start,

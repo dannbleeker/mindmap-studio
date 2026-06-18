@@ -1,6 +1,5 @@
 import "@xyflow/react/dist/style.css";
 import {
-  Background,
   Controls,
   MiniMap,
   NodeToolbar,
@@ -1384,7 +1383,6 @@ function FlowInner({
               apply(deleteLink(docRef.current, edge.id));
           }}
         >
-          <Background color="var(--mm-line-color, #d8d8d8)" gap={24} />
           <BackgroundImage url={renderDoc.meta?.backgroundImage} />
           <DiagramBackdrop backdrop={renderDoc.backdrop} />
           <BraceConnectors braces={braces} />

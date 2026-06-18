@@ -38,6 +38,7 @@ import {
   resolveSummaryStyle,
   summaryLabel,
 } from "./style";
+import { wrapText } from "./text";
 
 // Author a clean, standalone SVG of the map directly from the canonical model + the live
 // node rects — emitting native <text> from the start (no foreignObject), so it renders
@@ -131,6 +132,8 @@ interface CalloutBox {
   w: number;
   h: number;
   text: string;
+  /** Wrapped text lines (the canvas bubble wraps at max-width 180; the export mirrors it). */
+  lines: string[];
   /** Per-callout colour override (resolved at emit time so canvas == export). */
   color?: string;
 }
@@ -143,14 +146,19 @@ function collectCallouts(doc: MindMapDoc, rects: Map<string, NodeRect>): Callout
     if (r) {
       for (const c of n.callouts ?? []) {
         const text = c.text || "…";
+        // Wrap like the canvas bubble (max-width 180, padding 8, font 12) and grow the bubble height
+        // to the wrapped line count — so a multi-line callout isn't clipped to one strip in the export.
+        const lines = wrapText(text, 164, 12);
+        const longest = Math.max(1, ...lines.map((l) => l.length));
         out.push({
           ax: r.x + r.w,
           ay: r.y + r.h / 2,
           x: r.x + r.w + c.dx,
           y: r.y + r.h / 2 + c.dy,
-          w: Math.max(36, text.length * 6.6 + 16),
-          h: 22,
+          w: Math.max(36, Math.min(180, longest * 6.6 + 16)),
+          h: lines.length * 16 + 8,
           text,
+          lines,
           color: c.color,
         });
       }
@@ -479,8 +487,10 @@ export function buildFlowSvg(
 
     let textTop = r.y + ins.top;
     if (d.image) {
-      const iw = Math.min(r.w - 2 * pad, d.image.width ?? 120);
-      const ih = d.image.height ?? 120;
+      // Clamp to the same caps the canvas uses (max 200×140, and never wider than the box) so the
+      // image renders at the same size on screen and in the export (canvas == export).
+      const iw = Math.min(d.image.width ?? 120, 200, r.w - 2 * pad);
+      const ih = Math.min(d.image.height ?? 120, 140);
       parts.push(
         `<image x="${r2(r.x + pad)}" y="${r2(r.y + pad)}" width="${r2(iw)}" height="${r2(ih)}" href="${esc(d.image.url)}" preserveAspectRatio="xMidYMid meet"/>`,
       );
@@ -496,14 +506,24 @@ export function buildFlowSvg(
     ]
       .filter(Boolean)
       .join("   ·   ");
-    const chipRow = d.progress || d.due || d.priority ? 20 : 0;
+    const chipRow = d.progress || d.due || d.priority || d.attachmentCount ? 20 : 0;
     const pieReserve = chipRow + (taskInfo ? 15 : 0);
 
     const fontSize = Number.parseFloat(st?.fontSize ?? "") || levelFontSize(d.depth);
-    const lines = d.topic.split("\n").map((l) => l.trim());
+    // Wrap to the box's content width — the SAME wrap the canvas gets from CSS max-width — so a long
+    // label stays inside its box in the export instead of overflowing (canvas == export).
+    const contentW = Math.max(16, r.w - 2 * pad - ins.left - ins.right);
+    const lines = wrapText(d.topic, contentW, fontSize);
     if (d.icons?.length) lines[0] = `${d.icons.join(" ")} ${lines[0] ?? ""}`.trim();
     if (d.number) lines[0] = `${d.number} ${lines[0] ?? ""}`.trim();
     const nonEmpty = lines.filter((l) => l.length > 0);
+    // Note / hyperlink indicators inline after the title (mirrors the canvas), so the export keeps the
+    // "has a note / link" cue it used to drop.
+    const ind = `${d.hyperlink ? " 🔗" : ""}${d.note?.trim() ? " 📝" : ""}`;
+    if (ind) {
+      if (nonEmpty.length > 0) nonEmpty[nonEmpty.length - 1] += ind;
+      else nonEmpty.push(ind.trim());
+    }
     if (nonEmpty.length > 0) {
       parts.push(
         textBlock(
@@ -542,6 +562,18 @@ export function buildFlowSvg(
         `<rect x="${r2(badgeX)}" y="${r2(chipY)}" width="${r2(chipW)}" height="16" rx="5" fill="${over ? "#fde2e2" : "rgba(0,0,0,0.06)"}"/>`,
         `<text x="${r2(badgeX + 5)}" y="${r2(chipY + 12)}" font-family="sans-serif" font-size="10.5" fill="${over ? "#b42318" : esc(textColor)}">${esc(label)}</text>`,
       );
+      badgeX += chipW + 4;
+    }
+    if (d.attachmentCount) {
+      // Attachment count chip — drawn in the export too (the canvas had it; the export dropped it).
+      const label = `📎 ${d.attachmentCount}`;
+      const chipW = label.length * 6.6 + 8;
+      const chipY = r.y + r.h - 20;
+      parts.push(
+        `<rect x="${r2(badgeX)}" y="${r2(chipY)}" width="${r2(chipW)}" height="16" rx="5" fill="rgba(0,0,0,0.06)"/>`,
+        `<text x="${r2(badgeX + 5)}" y="${r2(chipY + 12)}" font-family="sans-serif" font-size="10.5" fill="${esc(textColor)}">${esc(label)}</text>`,
+      );
+      badgeX += chipW + 4;
     }
     // Inline task-info line (start ▸ duration ▸ resources), just above the chip strip — mirrors the
     // canvas TopicNode line (canvas == export).
@@ -550,16 +582,31 @@ export function buildFlowSvg(
         `<text x="${r2(r.x + r.w / 2)}" y="${r2(r.y + r.h - chipRow - 5)}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="${esc(textColor)}" opacity="0.65">${esc(taskInfo)}</text>`,
       );
     }
+    // Collapsed-branch indicator: a small circle showing the hidden-subtopic count at the box's
+    // bottom-right corner — matches the canvas affordance, so an export shows that content is folded
+    // away (a collapsed branch no longer looks like a leaf).
+    if (d.collapsed && d.hasChildren) {
+      const cx = r.x + r.w;
+      const cy = r.y + r.h;
+      const label = d.hiddenCount ? String(d.hiddenCount) : "+";
+      parts.push(
+        `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="9" fill="${esc(nodeBg)}" stroke="${esc(d.branchColor)}" stroke-width="1"/>`,
+        `<text x="${r2(cx)}" y="${r2(cy + 3.5)}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="${esc(d.branchColor)}">${esc(label)}</text>`,
+      );
+    }
   }
 
   // Callouts (anchored bubbles, drawn on top): dashed connector + sticky-note bubble + text.
   // Per-callout colours from the SAME resolver the canvas uses (canvas == export).
   for (const c of callouts) {
     const cs = resolveCalloutStyle(c.color);
+    const tspans = c.lines
+      .map((l, i) => `<tspan x="${r2(c.x + 8)}"${i > 0 ? ` dy="16"` : ""}>${esc(l)}</tspan>`)
+      .join("");
     parts.push(
       `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${cs.connector}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
-      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${c.h}" rx="8" fill="${cs.bg}" stroke="${cs.stroke}"/>`,
-      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${cs.text}">${esc(c.text)}</text>`,
+      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${r2(c.h)}" rx="8" fill="${cs.bg}" stroke="${cs.stroke}"/>`,
+      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${cs.text}">${tspans}</text>`,
     );
   }
 

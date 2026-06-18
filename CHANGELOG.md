@@ -953,6 +953,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Exports now match the canvas for wrapped text, callouts, indicators, collapsed branches and
+  images.** Several things rendered on screen but were dropped or distorted in the SVG / PNG / PDF
+  export; they now render identically (canvas == export): long topic labels **word-wrap** inside their
+  box instead of overflowing; a **multi-line callout** grows to fit instead of clipping to one strip;
+  the **note / hyperlink / attachment** indicators are drawn (they used to vanish); a **collapsed
+  branch** shows a circled hidden-subtopic count instead of looking like a leaf; and a topic **image**
+  uses the same size cap on both. The always-on dot **grid** is gone (clean paper, like MindManager),
+  and topics are flat at rest (the soft shadow was a screen-only affordance) — so the screen and the
+  exported deliverable agree.
+
 - **Relationship lines now bow the same way on screen and in exports.** The live canvas drew a
   relationship with React Flow's default bottom/top handles (a *vertical* bow) while the SVG/PNG/PDF
   exporter drew a *horizontal* S-curve — so the same link could curve the opposite way in a deliverable.

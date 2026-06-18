@@ -116,6 +116,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     branchColor,
     collapsed,
     hasChildren,
+    hiddenCount,
     progress,
     due,
     start,
@@ -232,8 +233,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 : "var(--mm-node-bg, #ffffff)"),
           color:
             style?.color ?? (filledMain ? readableTextOn(branchColor) : "var(--mm-color, #23211c)"),
+          // Underline leaves carry only a bottom rule — set border-bottom alone (no `border`
+          // shorthand) so React doesn't warn about mixing shorthand + longhand.
           border:
-            style?.border ?? (filledMain || underlineLeaf ? "none" : `1.5px solid ${branchColor}`),
+            style?.border ??
+            (underlineLeaf ? undefined : filledMain ? "none" : `1.5px solid ${branchColor}`),
           borderBottom: !style?.border && underlineLeaf ? `2px solid ${branchColor}` : undefined,
           borderRadius: style?.borderRadius ?? (underlineLeaf ? 0 : "11px"),
           padding: underlineLeaf ? "3px 8px 4px" : "6px 12px",
@@ -281,11 +285,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 : underlineLeaf
                   ? "none"
                   : "0 6px 18px rgba(40,30,16,0.20)"
-              : geom || underlineLeaf
-                ? "none"
-                : isRoot
-                  ? "0 6px 18px rgba(27,138,94,0.30)"
-                  : "0 2px 8px rgba(40,30,16,0.10)",
+              : // At rest the cards are flat (no shadow) — matches the export, which has no shadow.
+                // Hover + selection + drop still lift (interaction affordances, screen-only).
+                "none",
         // Hover lift + a pointer cursor signal "you can click/edit me" (#5); selection keeps the ring.
         transform: hovered && !selected && !isEditing ? "translateY(-1px)" : undefined,
         cursor: isEditing ? "text" : "pointer",
@@ -338,6 +340,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             alt=""
             style={{
               display: "block",
+              // Honour the stored dimensions (clamped) so the image is the same size on screen and in
+              // the export, which also reads image.width/height (canvas == export).
+              width: image.width ? Math.min(image.width, 200) : undefined,
+              height: image.height ? Math.min(image.height, 140) : undefined,
               maxWidth: 200,
               maxHeight: 140,
               borderRadius: 4,
@@ -509,7 +515,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             zIndex: 1,
           }}
         >
-          {collapsed ? "+" : "−"}
+          {collapsed ? (hiddenCount ?? "+") : "−"}
         </button>
       ) : null}
       {/* On-node ＋ add affordances (#1): child on the right edge, sibling below. Shown on hover or

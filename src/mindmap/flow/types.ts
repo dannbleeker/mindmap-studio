@@ -35,6 +35,8 @@ export type TopicData = {
   side: "left" | "right";
   collapsed: boolean;
   hasChildren: boolean;
+  /** When collapsed, the number of direct subtopics folded away — shown in the +N expand affordance. */
+  hiddenCount?: number;
   /** Rolled-up task progress (0..1 + done/total), or undefined when the node isn't a task. */
   progress?: ProgressInfo;
   /** Task due date ("YYYY-MM-DD"), shown as a chip (red when overdue). */

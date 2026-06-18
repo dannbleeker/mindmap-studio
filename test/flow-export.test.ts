@@ -411,7 +411,9 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
       palette,
       cssVar,
     );
-    expect(tricky).toContain("A &amp; B &lt;c&gt;");
+    // (the narrow fixed rect wraps it across two tspans, but every special char is still escaped)
+    expect(tricky).toContain("A &amp; B");
+    expect(tricky).toContain("&lt;c&gt;");
     expect(tricky).not.toContain("<c>");
   });
 });
@@ -641,6 +643,147 @@ describe("flow exportSvg — level styling, task-info, org elbows (canvas == exp
   it("keeps the organic taper (a filled branch path) for the default side layout", () => {
     const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
     expect(out).toMatch(/<path d="M [^"]*" fill="#E8593C"\/>/); // filled ribbon, no stroke
+  });
+});
+
+describe("flow exportSvg — canvas == export parity (wrap, callouts, indicators, collapse, image)", () => {
+  const rr = (id: string, w: number, h: number) =>
+    new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 120, h: 50 }],
+      [id, { x: 200, y: 0, w, h }],
+    ]);
+
+  it("word-wraps a long topic into multiple <tspan> lines (no overflow)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "w",
+      title: "W",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A deliberately long single-line topic that must wrap in its box",
+            children: [],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 160, 120), palette, cssVar);
+    expect((out.match(/<tspan/g) ?? []).length).toBeGreaterThan(1);
+  });
+
+  it("grows a multi-line callout bubble + emits stacked tspans (not a single clipped strip)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "c",
+      title: "C",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            callouts: [
+              {
+                id: "co",
+                text: "a fairly long callout note that wraps onto several lines",
+                dx: 40,
+                dy: 0,
+              },
+            ],
+            children: [],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    // the callout text (CALLOUT_TEXT #3b2f00) carries multiple tspans
+    expect(out).toMatch(/fill="#3b2f00"><tspan/);
+    expect((out.match(/<tspan/g) ?? []).length).toBeGreaterThan(1);
+  });
+
+  it("draws note + hyperlink indicators in the export (no longer dropped)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "i",
+      title: "I",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "a", topic: "A", note: "hello", hyperlink: "https://x", children: [] }],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain("🔗");
+    expect(out).toContain("📝");
+  });
+
+  it("draws the attachment-count chip in the export", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "at",
+      title: "AT",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            attachments: [{ name: "f", dataUrl: PNG, size: 1 }],
+            children: [],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain("📎 1");
+  });
+
+  it("draws a collapsed-branch circle + hidden-subtopic count in the export", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "col",
+      title: "COL",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            collapsed: true,
+            children: [
+              { id: "a1", topic: "A1", children: [] },
+              { id: "a2", topic: "A2", children: [] },
+            ],
+          },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toMatch(/<circle cx="320" cy="44" r="9"/); // node a's bottom-right corner
+    expect(out).toMatch(/>2<\/text>/); // two hidden subtopics
+  });
+
+  it("clamps an oversized topic image to 200×140 in the export (matches the canvas cap)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "img",
+      title: "IMG",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", image: { url: PNG, width: 600, height: 400 }, children: [] },
+        ],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 240, 180), palette, cssVar);
+    expect(out).toMatch(/<image x="[\d.]+" y="[\d.]+" width="200" height="140"/);
   });
 });
 

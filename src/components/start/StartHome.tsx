@@ -1,3 +1,4 @@
+import { buildExample, examples } from "../../examples";
 import { templates } from "../../templates";
 import { buildTemplate } from "../../templates";
 import { CaptureCard } from "./CaptureCard";
@@ -19,6 +20,9 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
     .filter((t) => t.id !== "blank")
     .slice(0, 4)
     .map((t) => ({ id: t.id, name: t.name, doc: t.build() }));
+  const featuredExamples = examples
+    .slice(0, 4)
+    .map((e) => ({ id: e.id, name: e.name, doc: e.build() }));
 
   return (
     <div className="st-content">
@@ -62,6 +66,26 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
               doc={t.doc}
               seed={t.id}
               onOpen={() => ctx.onOpen(buildTemplate(t.id))}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <div className="st-row">
+          <h2 className="st-section-title">Or open a worked example</h2>
+          <button type="button" className="st-link" onClick={() => ctx.go("examples")}>
+            Browse all examples →
+          </button>
+        </div>
+        <div className="st-grid" style={{ marginTop: 12 }}>
+          {featuredExamples.map((e) => (
+            <TemplateCard
+              key={e.id}
+              name={e.name}
+              doc={e.doc}
+              seed={e.id}
+              onOpen={() => ctx.onOpen(buildExample(e.id))}
             />
           ))}
         </div>

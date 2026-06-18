@@ -8,6 +8,7 @@ import { StartSidebar } from "./StartSidebar";
 import { blankDoc } from "./docBuilders";
 import { About } from "./sections/About";
 import { AllMaps } from "./sections/AllMaps";
+import { Examples } from "./sections/Examples";
 import { ImportView } from "./sections/ImportView";
 import { Layouts } from "./sections/Layouts";
 import { Learn } from "./sections/Learn";
@@ -23,6 +24,7 @@ const TITLES: Record<StartSection, string> = {
   all: "All maps",
   recent: "Recent",
   templates: "Templates",
+  examples: "Examples",
   layouts: "Layouts",
   import: "Import",
   learn: "Learn mind mapping",
@@ -80,6 +82,7 @@ export function StartScreen({
           {section === "all" ? <AllMaps ctx={ctx} /> : null}
           {section === "recent" ? <Recent ctx={ctx} /> : null}
           {section === "templates" ? <Templates ctx={ctx} /> : null}
+          {section === "examples" ? <Examples ctx={ctx} /> : null}
           {section === "layouts" ? <Layouts ctx={ctx} /> : null}
           {section === "import" ? <ImportView ctx={ctx} /> : null}
           {section === "learn" ? <Learn /> : null}

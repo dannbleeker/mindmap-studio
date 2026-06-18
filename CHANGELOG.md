@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Examples gallery on the Start screen.** The Start screen now has an **Examples** section (in the
+  sidebar, in its ⌘K palette as "Browse examples", and as a featured row on the home view) listing all
+  the worked example maps — the **same set as the editor's New-map gallery** — so you can browse and
+  open them before you're even in a map. Templates were already there; examples now match.
+
 - **Add topics without the keyboard — hover ＋ and a starter coachmark.** Every topic now shows a
   small **＋** on hover or selection: one adds a **child**, one adds a **sibling**, each dropping
   straight into editing. A fresh map shows a one-time hint under the root (**Tab** = child ·

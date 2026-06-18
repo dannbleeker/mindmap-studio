@@ -7,17 +7,57 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Add topics without the keyboard — hover ＋ and a starter coachmark.** Every topic now shows a
+  small **＋** on hover or selection: one adds a **child**, one adds a **sibling**, each dropping
+  straight into editing. A fresh map shows a one-time hint under the root (**Tab** = child ·
+  **Enter** = sibling · double-click to rename), and topics lift on hover with a "Double-click to
+  edit" cue so they read as editable.
+
+- **Direct-manipulation canvas.** **Drag the background to pan**, **scroll / ⌘-scroll to zoom**, and
+  **double-click an empty spot** to drop a new floating topic — the +/−/fit controls stay. Off-screen
+  branches are now reachable without the buttons (hold **Shift** and drag to rubber-band a selection).
+
+- **Drag-to-reparent shows where it lands.** While you drag a topic onto another, the target lights up
+  with a **"↳ Make child of X"** label, so the new structure is obvious before you let go; dropping on
+  empty space snaps it back.
+
+- **Richer right-click menu.** The node context menu now also offers **Add note**, an inline **marker**
+  row and a **priority** picker (High / Med / Low / clear) alongside add / rename / link / delete —
+  every common single-topic action one click away, fully keyboard-drivable. *(Also fixes a duplicate
+  React key when a branch carrying a callout was copy-pasted.)*
+
+- **⌘K can do anything.** The command palette now also **jumps to any topic** (fuzzy over the topic
+  text **and** its note), runs **selection-scoped actions** (add child, set marker / priority, delete)
+  when a topic is selected, and keeps a small **Recent** list.
+
+- **Undo / Redo in the toolbar.** Row 1 has **Undo** and **Redo** buttons that enable / disable with
+  the history depth and show a brief toast — no keyboard required.
+
+- **Delete is instant and undoable — no blocking "Are you sure?".** Deleting a topic (and its branch)
+  or a whole map happens immediately and shows a **"… deleted — Undo"** toast wired to undo.
+
+- **Note + markers lead the inspector.** The Topic-info **Details** tab now opens with a one-click
+  **note** field and the **marker** row at the top (the separate Notes tab is folded in); **Style**
+  stays the secondary tab. With nothing selected the inspector shows the **map** panel + "Select a
+  topic to edit it" — never blank or stale.
+
+- **Clearer toolbar + a keyboard cheat-sheet.** The view controls (Fit / Collapse all / Expand all /
+  Focus) fold into one labelled **View ▾** menu, and the **?** button (and ⌘K → "Keyboard shortcuts")
+  opens a **shortcuts cheat-sheet** grouped by Editing / Navigation / View — sourced from one central
+  map so tooltips and the sheet can't drift; common right-click rows show their key hint.
+
+- **First-run tips.** A brand-new user sees a one-time **"3 things to try"** card (rename a topic ·
+  **Tab** for a child · **⌘K** for anything); it disappears after the first edit and never nags again.
+
 - **Type to edit a topic.** With a topic selected, just **start typing** — the topic opens for editing
   with your first keystroke replacing the old text (caret at the end, so you keep typing straight on).
   Matches MindManager. **F2** and **double-click** still edit in place starting from the existing text
   (all selected), and modifier shortcuts (Ctrl/⌘/Alt) are untouched.
 
-- **Ctrl+Enter adds a child topic; deleting a branch asks first.** With a topic selected,
-  **Ctrl/⌘+Enter** now adds a **child** (plain Enter still adds a sibling, Tab also adds a child).
-  And **Delete** now **confirms before removing a topic that has sub-topics** ("Delete X and its N
-  sub-topics? This removes the whole branch.") — the guard applies wherever you delete (keyboard,
-  right-click menu, on-node popover); childless topics still delete instantly. *(Fixes the
-  keyboard help, which wrongly listed Ctrl+Enter as "add a parent".)*
+- **Ctrl+Enter adds a child topic.** With a topic selected, **Ctrl/⌘+Enter** now adds a **child**
+  (plain Enter still adds a sibling, Tab also adds a child). *(Fixes the keyboard help, which wrongly
+  listed Ctrl+Enter as "add a parent".)* *(The brief confirm-before-deleting-a-branch prompt added
+  this cycle is superseded by the instant + Undo-toast delete below.)*
 
 - **Command palette in the editor (⌘K / Ctrl-K).** Press **⌘K** anywhere in the editor to fuzzy-search
   and run any toolbar action — present, export to any format, toggle a panel, switch layout, fit,

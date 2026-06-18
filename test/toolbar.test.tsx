@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type RefObject, createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -29,13 +29,21 @@ function mockHandle(): MindMapHandle {
   });
 }
 
-function setup(over: { selected?: SelectedNode | null; isMobile?: boolean } = {}) {
+function setup(
+  over: {
+    selected?: SelectedNode | null;
+    isMobile?: boolean;
+    canUndo?: boolean;
+    canRedo?: boolean;
+  } = {},
+) {
   const handle = mockHandle();
   const mapRef = createRef<MindMapHandle>() as RefObject<MindMapHandle | null>;
   mapRef.current = handle;
   const nav = {
     goHome: vi.fn(),
     openAbout: vi.fn(),
+    openShortcuts: vi.fn(),
     openSearchAll: vi.fn(),
     openPaste: vi.fn(),
   };
@@ -121,6 +129,12 @@ function setup(over: { selected?: SelectedNode | null; isMobile?: boolean } = {}
     ].map((k) => [k, vi.fn()]),
   ) as unknown as Parameters<typeof Toolbar>[0]["io"];
   const showHint = vi.fn();
+  const history = {
+    canUndo: over.canUndo ?? false,
+    canRedo: over.canRedo ?? false,
+    undo: vi.fn(),
+    redo: vi.fn(),
+  };
   render(
     <Toolbar
       isMobile={over.isMobile ?? false}
@@ -131,10 +145,11 @@ function setup(over: { selected?: SelectedNode | null; isMobile?: boolean } = {}
       canvas={canvas}
       find={find}
       io={io}
+      history={history}
       showHint={showHint}
     />,
   );
-  return { handle, nav, panels, map, canvas, find, io, showHint };
+  return { handle, nav, panels, map, canvas, find, io, history, showHint };
 }
 
 const u = userEvent.setup();
@@ -155,6 +170,22 @@ describe("Toolbar — row 1 (file/identity)", () => {
     expect(t.map.switchMap).toHaveBeenCalledWith("m2");
     await u.click(screen.getByRole("button", { name: /all maps/i }));
     expect(t.nav.openSearchAll).toHaveBeenCalled();
+  });
+
+  it("disables Undo/Redo when there's no history, enables + fires them when there is (#8)", async () => {
+    setup();
+    expect((screen.getByRole("button", { name: /undo \(/i }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    expect((screen.getByRole("button", { name: /redo \(/i }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    cleanup();
+    const t = setup({ canUndo: true, canRedo: true });
+    await u.click(screen.getByRole("button", { name: /undo \(/i }));
+    expect(t.history.undo).toHaveBeenCalled();
+    await u.click(screen.getByRole("button", { name: /redo \(/i }));
+    expect(t.history.redo).toHaveBeenCalled();
   });
 
   it("loads a new map from the +New template menu", async () => {
@@ -213,31 +244,38 @@ describe("Toolbar — More menu", () => {
 });
 
 describe("Toolbar — row 2 (view/edit/canvas)", () => {
-  it("structure cluster: fit, collapse/expand all, numbering, line jumps", async () => {
+  it("View menu: fit / collapse / expand; numbering + line jumps stay top-level (#4)", async () => {
     const t = setup();
-    await u.click(screen.getByRole("button", { name: /fit map/i }));
+    // Fit / collapse / expand are folded into the View menu (one labelled dropdown, not 4 icons).
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    await u.click(screen.getByRole("menuitem", { name: /fit map/i }));
     expect(t.handle.fit).toHaveBeenCalled();
-    await u.click(screen.getByRole("button", { name: /collapse all/i }));
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    await u.click(screen.getByRole("menuitem", { name: /collapse all/i }));
     expect(t.handle.setAllExpanded).toHaveBeenCalledWith(false);
-    await u.click(screen.getByRole("button", { name: /expand all/i }));
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    await u.click(screen.getByRole("menuitem", { name: /expand all/i }));
     expect(t.handle.setAllExpanded).toHaveBeenCalledWith(true);
+    // The view-toggle switches stay top-level so their on/off state is visible at a glance.
     await u.click(screen.getByRole("button", { name: /numbering/i }));
     expect(t.panels.setNumbered).toHaveBeenCalled();
     await u.click(screen.getByRole("button", { name: /line jumps/i }));
     expect(t.handle.setLineJumps).toHaveBeenCalled();
   });
 
-  it("Focus is disabled without a selection", () => {
+  it("Focus is disabled in the View menu without a selection (#4)", async () => {
     setup();
-    expect(screen.getByRole("button", { name: /focus the selected/i })).toHaveProperty(
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    expect(screen.getByRole("menuitem", { name: /focus the selected/i })).toHaveProperty(
       "disabled",
       true,
     );
   });
 
-  it("Focus fires with a selection", async () => {
+  it("Focus fires from the View menu with a selection (#4)", async () => {
     const t = setup({ selected: { id: "n1", topic: "Node", note: "" } });
-    await u.click(screen.getByRole("button", { name: /focus the selected/i }));
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    await u.click(screen.getByRole("menuitem", { name: /focus the selected/i }));
     expect(t.canvas.setFocus).toHaveBeenCalledWith({ id: "n1", topic: "Node" });
   });
 
@@ -305,7 +343,7 @@ describe("Toolbar — row 2 (view/edit/canvas)", () => {
 // proof it's behaviour-preserving — every menu trigger keeps its ARIA wiring and every menu still
 // surfaces real menuitems, so the migration to a shared <Menu> can't silently regress a11y.
 describe("Toolbar — menu a11y parity net", () => {
-  const MENU_TRIGGERS = [/^export/i, /^more/i, /^panels/i, /^insert/i, /^canvas/i];
+  const MENU_TRIGGERS = [/^export/i, /^more/i, /^panels/i, /^insert/i, /^canvas/i, /^view/i];
 
   it("every menu trigger advertises aria-haspopup=menu and toggles aria-expanded on open", async () => {
     setup();
@@ -347,7 +385,7 @@ describe("Toolbar — menu a11y parity net", () => {
   it("renders + works in mobile mode (rows scroll instead of wrapping)", async () => {
     const t = setup({ isMobile: true });
     // The grouped controls are all still present and wired in the single-row mobile layout.
-    expect(screen.getByRole("button", { name: /fit map/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^view/i })).toBeTruthy(); // View menu (holds Fit etc.)
     expect(screen.getByLabelText("Quick add topic")).toBeTruthy();
     await u.click(screen.getByRole("button", { name: /^export/i }));
     await u.click(screen.getByRole("menuitem", { name: /\.json/i }));

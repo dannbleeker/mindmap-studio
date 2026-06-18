@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 160,
+  "reviewedThroughChangelogBullets": 170,
   "areas": [
     "editing",
     "notes",
@@ -16,6 +16,51 @@
     "pwa"
   ],
   "features": [
+    {
+      "id": "add-affordances",
+      "name": "Hover ＋ to add a child or sibling topic",
+      "area": "editing",
+      "since": "2026-06-18",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "canvas-gestures",
+      "name": "Pan, scroll-zoom & double-click the canvas to add a topic",
+      "area": "navigation",
+      "since": "2026-06-18",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cmdk-jump",
+      "name": "Jump to any topic from ⌘K (fuzzy over text + notes)",
+      "area": "navigation",
+      "since": "2026-06-18",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "shortcuts-cheatsheet",
+      "name": "Keyboard shortcuts cheat-sheet (? button / ⌘K)",
+      "area": "navigation",
+      "since": "2026-06-18",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "first-run-tips",
+      "name": "First-run \"3 things to try\" onboarding card",
+      "area": "navigation",
+      "since": "2026-06-18",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
     {
       "id": "keyboard-editing",
       "name": "Keyboard editing (Enter/Tab/Ctrl+Enter/Delete)",

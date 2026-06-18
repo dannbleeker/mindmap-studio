@@ -112,6 +112,7 @@ export interface ToolbarProps {
   nav: {
     goHome: () => void;
     openAbout: () => void;
+    openShortcuts: () => void;
     openSearchAll: () => void;
     openPaste: () => void;
   };
@@ -120,6 +121,9 @@ export interface ToolbarProps {
   canvas: ToolbarCanvas;
   find: ToolbarFind;
   io: ToolbarIo;
+  /** Undo / redo for the Row-1 buttons. canUndo/canRedo are reported live from the canvas history so
+   *  the buttons disable correctly; undo/redo fire the action and a transient "Undone"/"Redone" toast. */
+  history: { canUndo: boolean; canRedo: boolean; undo: () => void; redo: () => void };
   /** Transient hint toast (used by the group/summary/note/roll-up actions). */
   showHint: (message: string) => void;
 }
@@ -197,6 +201,7 @@ export function Toolbar({
   canvas,
   find,
   io,
+  history,
   showHint,
 }: ToolbarProps) {
   const { liveDoc, doc } = map;
@@ -249,6 +254,18 @@ export function Toolbar({
           icon="home"
           label="Start screen — new maps, templates, library"
           onClick={nav.goHome}
+        />
+        <TBtn
+          icon="undo"
+          label="Undo (Ctrl/⌘+Z)"
+          disabled={!history.canUndo}
+          onClick={history.undo}
+        />
+        <TBtn
+          icon="redo"
+          label="Redo (Ctrl/⌘+Shift+Z)"
+          disabled={!history.canRedo}
+          onClick={history.redo}
         />
         <span className="mm-crumb">Maps /</span>
         <select
@@ -475,25 +492,30 @@ export function Toolbar({
           />
         </Menu>
         <span className="mm-vdiv" />
-        {/* View group — fit / collapse / expand / focus the tree. */}
-        <div className="mm-cluster">
-          <TBtn icon="fit" label="Fit map to screen" onClick={() => m()?.fit()} />
-          <TBtn
-            icon="minus"
+        {/* View menu — fit / collapse / expand / focus folded into one labelled dropdown so the bar
+            reads clearly instead of four ambiguous icons (#4). Mirrored 1:1 in ⌘K (kind "view"). */}
+        <Menu trigger={menuTrigger("fit", "View")} triggerTitle="View actions" sheet={isMobile}>
+          <MenuItem icon={mi("fit")} label="Fit map to screen" onSelect={() => m()?.fit()} />
+          <MenuItem
+            icon={mi("minus")}
             label="Collapse all branches"
-            onClick={() => m()?.setAllExpanded(false)}
+            onSelect={() => m()?.setAllExpanded(false)}
           />
-          <TBtn icon="plus" label="Expand all branches" onClick={() => m()?.setAllExpanded(true)} />
-          <TBtn
-            icon="balance"
-            label="Focus the selected branch (dim the rest)"
+          <MenuItem
+            icon={mi("plus")}
+            label="Expand all branches"
+            onSelect={() => m()?.setAllExpanded(true)}
+          />
+          <MenuItem
+            icon={mi("balance")}
+            label="Focus the selected branch"
             disabled={!canvas.selected}
-            onClick={() =>
+            onSelect={() =>
               canvas.selected &&
               canvas.setFocus({ id: canvas.selected.id, topic: canvas.selected.topic })
             }
           />
-        </div>
+        </Menu>
         <span className="mm-vdiv" />
         {/* Overlay-toggle group — outline numbering / line-jumps (view-only switches). */}
         <div className="mm-cluster">

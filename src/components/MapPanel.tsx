@@ -373,7 +373,7 @@ export function MapPanel({
             lineHeight: 1.7,
           }}
         >
-          Click any node to inspect it
+          Select a topic to edit it
         </div>
       </div>
     </aside>

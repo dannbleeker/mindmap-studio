@@ -1023,15 +1023,16 @@ export function StylesPanel({
 // replacing the separate Notes / Markers / Style bars and the Link / Jump toolbar selects.
 // The Info panel groups a topic's editors into three tabs: Details (tags/markers/progress/dates/
 // priority/attachments/links), Style (shape & fill bar + stickers), and Notes (the markdown editor).
-type InfoTab = "details" | "style" | "notes";
+type InfoTab = "details" | "style";
+// Details now leads with the note + markers (the most-reached-for edits), so the old separate Notes
+// tab is folded in; Style stays the secondary tab. (#7)
 const INFO_TABS: readonly TabItem[] = [
   {
     id: "details",
     label: "Details",
-    title: "Tags, progress, dates, priority, attachments & links",
+    title: "Note, markers, tags, progress, dates, priority, attachments & links",
   },
   { id: "style", label: "Style", title: "Shape, colour, font & stickers" },
-  { id: "notes", label: "Notes", title: "Markdown note for this topic" },
 ];
 
 export function InfoPanel({
@@ -1133,11 +1134,11 @@ export function InfoPanel({
   // In bulk mode, which task fields the selected topics disagree on — those render blank + "Mixed"
   // instead of (and without overwriting from) the anchor's value. Empty object for a single select.
   const mixed: Partial<SelectionFields["mixed"]> = multi ? (fields?.mixed ?? {}) : {};
-  const tabs = multi ? INFO_TABS.filter((t) => t.id !== "notes") : INFO_TABS;
-  const activeTab: InfoTab = multi && tab === "notes" ? "details" : tab;
-  // Clicking a node's 📝 indicator bumps openNoteNonce → jump to the Notes tab.
+  const tabs = INFO_TABS;
+  const activeTab: InfoTab = tab;
+  // Clicking a node's 📝 indicator bumps openNoteNonce → jump to Details, where the note now lives.
   useEffect(() => {
-    if (openNoteNonce) setTab("notes");
+    if (openNoteNonce) setTab("details");
   }, [openNoteNonce]);
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
@@ -1285,21 +1286,7 @@ export function InfoPanel({
             ariaLabel="Topic info sections"
             idBase="topic-info"
           />
-          {activeTab === "notes" ? (
-            <div
-              role="tabpanel"
-              id={tabPanelId("topic-info", "notes")}
-              aria-labelledby={tabId("topic-info", "notes")}
-              style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
-            >
-              <NotesPanel
-                selected={selected}
-                value={noteDraft}
-                onChange={onNoteChange}
-                onBlur={onNoteBlur}
-              />
-            </div>
-          ) : (
+          {
             <div
               role="tabpanel"
               id={tabPanelId("topic-info", activeTab)}
@@ -1335,10 +1322,8 @@ export function InfoPanel({
                       />
                     ) : null
                   ) : (
-                    <>
-                      <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
-                      <StickerBar stickers={STICKERS} onPick={onPickSticker} />
-                    </>
+                    // Markers now lead the Details tab (#7); Style keeps the per-item sticker grid.
+                    <StickerBar stickers={STICKERS} onPick={onPickSticker} />
                   )}
                 </>
               )}
@@ -1346,6 +1331,19 @@ export function InfoPanel({
                 <>
                   {!multi && (
                     <>
+                      {/* Note + markers lead Details — the most-reached-for edits, one click from
+                          the default inspector view (#7). */}
+                      {sectionLabel("Markers")}
+                      <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
+                      {sectionLabel("Note")}
+                      <div style={{ display: "flex", flexDirection: "column", height: 168 }}>
+                        <NotesPanel
+                          selected={selected}
+                          value={noteDraft}
+                          onChange={onNoteChange}
+                          onBlur={onNoteBlur}
+                        />
+                      </div>
                       {sectionLabel("Tags")}
                       <div
                         style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}
@@ -1724,7 +1722,7 @@ export function InfoPanel({
                 </>
               )}
             </div>
-          )}
+          }
         </>
       )}
     </aside>

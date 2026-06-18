@@ -58,6 +58,7 @@ describe("MapPanel", () => {
   it("counts topics + first-level branches and shows task progress", () => {
     setup();
     expect(screen.getByText("No node selected")).toBeTruthy();
+    expect(screen.getByText("Select a topic to edit it")).toBeTruthy(); // zero-selection guidance (#10)
     expect(screen.getByText("5")).toBeTruthy(); // root + a + b + b1 + c
     expect(screen.getByText("3")).toBeTruthy(); // branches
     expect(screen.getByText("Task progress")).toBeTruthy();

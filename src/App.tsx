@@ -13,10 +13,12 @@ import {
 import { CommandPalette } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
 import { EdgeInspector } from "./components/EdgeInspector";
+import { FirstRunCard } from "./components/FirstRunCard";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
 import { MapPanel } from "./components/MapPanel";
 import { OverlayInspector } from "./components/OverlayInspector";
+import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { Toolbar, type ToolbarProps } from "./components/Toolbar";
 import { buildEditorCommands } from "./components/editorCommands";
 import { StartScreen } from "./components/start/StartScreen";
@@ -173,6 +175,9 @@ export function App() {
   // Bumped when a node's 📝 indicator is clicked → InfoPanel switches to its Notes tab.
   const [noteNonce, setNoteNonce] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
+  // Live undo/redo availability, reported up by the canvas, so the Row-1 buttons disable correctly (#8).
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
   // Panel open/close + Power-Filter + saved-filter presets (with their localStorage persistence) all
   // live in usePanels; App threads `panels` into <Toolbar> and `filter`/`savedFilters` into the
   // FilterPanel. Auto-numbering (`panels.numbered`) draws hierarchical outline numbers on the canvas.
@@ -324,6 +329,24 @@ export function App() {
   } | null>(null);
   const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  // First-run "3 things to try" card (#13): shown once for a brand-new user, dismissed for good on
+  // the first edit or an explicit close. Best-effort localStorage, like the theme + panel prefs.
+  const [firstRunSeen, setFirstRunSeen] = useState(() => {
+    try {
+      return localStorage.getItem("mindmap-first-run-seen") === "1";
+    } catch {
+      return true; // can't persist → don't nag
+    }
+  });
+  const dismissFirstRun = useCallback(() => {
+    setFirstRunSeen(true);
+    try {
+      localStorage.setItem("mindmap-first-run-seen", "1");
+    } catch {
+      // best-effort
+    }
+  }, []);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
   // In-editor ⌘K command palette (the Start screen has its own). Cmd/Ctrl+K opens it.
   const [cmdkOpen, setCmdkOpen] = useState(false);
@@ -835,11 +858,28 @@ export function App() {
   }
 
   async function deleteCurrent() {
+    // Delete immediately + offer Undo (re-saves the map), instead of a blocking confirm (#9).
+    const deleted = structuredClone(liveDocRef.current);
     try {
-      await deleteMap(liveDocRef.current.id);
+      await deleteMap(deleted.id);
       const remaining = await listMaps();
       const next = remaining.length > 0 ? await loadMap(remaining[0].id) : null;
       load(next ?? buildTemplate("blank"));
+      showToast("info", `Deleted “${deleted.title || "Untitled map"}”`, {
+        action: {
+          label: "Undo",
+          run: async () => {
+            try {
+              await saveMap(deleted);
+              await setLastOpened(deleted.id);
+              load(deleted);
+            } catch {
+              // best-effort restore
+            }
+          },
+        },
+        durationMs: 8000,
+      });
     } catch {
       // ignore
     }
@@ -958,6 +998,7 @@ export function App() {
     nav: {
       goHome,
       openAbout: () => setAboutOpen(true),
+      openShortcuts: () => setShortcutsOpen(true),
       openSearchAll: () => setSearchAllOpen(true),
       openPaste: () => setPasteOpen(true),
     },
@@ -1007,6 +1048,18 @@ export function App() {
       copyOutline,
       handleFile,
     },
+    history: {
+      canUndo,
+      canRedo,
+      undo: () => {
+        mapRef.current?.undo();
+        showHint("Undone");
+      },
+      redo: () => {
+        mapRef.current?.redo();
+        showHint("Redone");
+      },
+    },
     showHint,
   };
 
@@ -1023,7 +1076,7 @@ export function App() {
         }
         onImage={handleImage}
         onPaste={() => setPasteOpen(true)}
-        onAbout={() => setAboutOpen(true)}
+        onShortcuts={() => setShortcutsOpen(true)}
       />
       <div className="mm-editor-main">
         <Toolbar {...toolbarProps} />
@@ -1249,6 +1302,7 @@ export function App() {
                   liveDocRef.current = d;
                   setLiveDoc(d);
                   scheduleSave();
+                  if (!firstRunSeen) dismissFirstRun(); // the first edit retires the tips card (#13)
                 }}
                 onSelect={handleSelect}
                 onSelectionCount={setSelectedCount}
@@ -1262,7 +1316,23 @@ export function App() {
                   setNoteNonce((n) => n + 1);
                 }}
                 onMapLink={(id) => switchMap(id)}
+                onHistory={(u, r) => {
+                  setCanUndo(u);
+                  setCanRedo(r);
+                }}
+                onDelete={(topic, descendants) => {
+                  const detail =
+                    descendants > 0
+                      ? ` and ${descendants} sub-topic${descendants === 1 ? "" : "s"}`
+                      : "";
+                  showToast("info", `Deleted “${topic}”${detail}`, {
+                    action: { label: "Undo", run: () => mapRef.current?.undo() },
+                  });
+                }}
               />
+              {/* First-run tips (#13) — overlays the canvas for a brand-new user; gone after the
+                  first edit or an explicit dismiss. */}
+              {!firstRunSeen ? <FirstRunCard onDismiss={dismissFirstRun} /> : null}
               {/* Kanban board overlays the canvas (the map stays mounted underneath). */}
               {panels.boardOpen && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
@@ -1655,6 +1725,9 @@ export function App() {
           </button>
         </div>
       </Dialog>
+
+      {/* Keyboard shortcuts cheat-sheet (#2) — opened from the icon-rail (?) and ⌘K. */}
+      <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* Paste text → map — controlled <Dialog>; focus the textarea on open. (No drop shadow here —
           the original Paste dialog had none, so cancel the shared base shadow.) */}

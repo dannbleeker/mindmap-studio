@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type Command, CommandPalette } from "../src/components/CommandPalette";
 
 // The generic ⌘K palette (shared by the Start screen + the editor): fuzzy search, arrow/Enter nav,
@@ -18,6 +18,8 @@ function cmds(over: Partial<Command>[] = []): Command[] {
 }
 
 describe("CommandPalette (generic)", () => {
+  beforeEach(() => localStorage.clear()); // isolate the Recent MRU between tests
+
   it("lists enabled commands, hides disabled ones, and runs + closes on click", async () => {
     const onClose = vi.fn();
     const run = vi.fn();
@@ -82,5 +84,30 @@ describe("CommandPalette (generic)", () => {
     render(<CommandPalette commands={cmds()} onClose={onClose} />);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("matches hidden keywords and surfaces a Recent section after use (#12)", async () => {
+    const run = vi.fn();
+    const topicCmds: Command[] = [
+      { id: "j1", label: "Go to: Alpha", kind: "topic", run, keywords: "interview users" },
+      { id: "other", label: "Other", kind: "view", run: () => {} },
+    ];
+    const { unmount } = render(<CommandPalette commands={topicCmds} onClose={vi.fn()} />);
+    // "interview" is only in the keywords, not the label — still matches.
+    await u.type(screen.getByPlaceholderText(/search commands/i), "interview");
+    await u.click(screen.getByText("Go to: Alpha"));
+    expect(run).toHaveBeenCalled();
+    unmount();
+    // Reopening surfaces the just-run command under a Recent header.
+    render(
+      <CommandPalette
+        commands={[
+          { id: "j1", label: "Go to: Alpha", kind: "topic", run: () => {} },
+          { id: "other", label: "Other", kind: "view", run: () => {} },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getByText("Recent")).toBeTruthy();
   });
 });

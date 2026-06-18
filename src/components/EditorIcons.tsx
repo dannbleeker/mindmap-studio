@@ -38,7 +38,9 @@ export type EditorIconName =
   | "history"
   | "grid"
   | "copy"
-  | "paste";
+  | "paste"
+  | "undo"
+  | "redo";
 
 export function EditorIcon({
   name,
@@ -307,6 +309,20 @@ export function EditorIcon({
           <rect x="6" y="4" width="12" height="17" rx="2" />
           <rect x="9" y="2" width="6" height="3.4" rx="1" />
           <path d="M9 11h6M9 15h4" />
+        </svg>
+      );
+    case "undo":
+      return (
+        <svg {...p} aria-hidden="true">
+          <path d="M9 7L4 12l5 5" />
+          <path d="M4 12h11a5 5 0 015 5v0a5 5 0 01-5 5h-3" />
+        </svg>
+      );
+    case "redo":
+      return (
+        <svg {...p} aria-hidden="true">
+          <path d="M15 7l5 5-5 5" />
+          <path d="M20 12H9a5 5 0 00-5 5v0a5 5 0 005 5h3" />
         </svg>
       );
     default:

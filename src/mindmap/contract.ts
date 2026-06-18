@@ -144,6 +144,16 @@ export interface MindMapHandle {
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the
    *  current selection so repeated calls add siblings under the same parent. */
   quickAdd: (text: string) => void;
+  /** Add an empty child to the selected node and drop straight into editing it (the ⌘K / command
+   *  path for "add child"); false if nothing is selected. */
+  addChildToSelected: () => boolean;
+  /** Delete the selected node and its subtree (shared by ⌘K and the keyboard); false if none
+   *  selected. Reversible — undo / the delete toast restores it. */
+  deleteSelected: () => boolean;
+  /** Undo / redo the last edit (the same doc-snapshot stack as Ctrl+Z / Ctrl+Shift+Z), exposed so
+   *  the Row-1 buttons + ⌘K can drive it. No-op when the respective stack is empty. */
+  undo: () => void;
+  redo: () => void;
   /** Set (or clear, with "") the selected relationship's label; false if no edge is selected. */
   setLinkLabel: (label: string) => boolean;
   /** Set the selected relationship's arrowhead placement; false if no edge is selected. */
@@ -230,6 +240,13 @@ export interface MindMapProps {
   onOpenNote?: () => void;
   /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
   onMapLink?: (mapId: string) => void;
+  /** Fires whenever the undo/redo stack depth changes, so the chrome can live-enable/disable the
+   *  Row-1 undo + redo buttons (the depths aren't otherwise observable from outside the canvas). */
+  onHistory?: (canUndo: boolean, canRedo: boolean) => void;
+  /** Fires right after a node is deleted (keyboard / menu / popover), with the deleted topic + the
+   *  number of sub-topics that went with it, so the app can show a "… deleted — Undo" toast. The
+   *  delete is already done + reversible via undo(); this never blocks. */
+  onDelete?: (topic: string, descendants: number) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
   theme?: MindMapTheme;
   /** Layout: a direction, or an alternate layout (org-chart, radial, timeline, fishbone). */

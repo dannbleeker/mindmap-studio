@@ -2,11 +2,19 @@ import type { MapNode, MindMapDoc } from "../../model/types";
 import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
 import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
-import { taperedRibbonPath } from "./BranchEdge";
 import { arrowHeadPath } from "./arrowhead";
 import { backdropGeometry } from "./backdrop";
 import { type BraceGroup, braceGeometry, bracePath } from "./brace";
-import { type Box, floatingPoints } from "./floating";
+import {
+  type AttachSide,
+  type Box,
+  attachSideFor,
+  branchEndpoints,
+  branchWidths,
+  childrenAxis,
+  floatingPoints,
+  taperedRibbonPath,
+} from "./floating";
 import { type Rect, r2 } from "./geometry";
 import { type HopSegment, hopPath } from "./lineJumps";
 import { project } from "./project";
@@ -313,6 +321,25 @@ export function buildFlowSvg(
     }
   }
 
+  // Branch attach-side per parent — one shared origin per side so sibling branches fan without
+  // crossing. Computed from the same rects + helper the canvas uses in sync() (canvas == export).
+  const axisByParent = new Map<string, "h" | "v">();
+  {
+    const kids = new Map<string, NodeRect[]>();
+    for (const e of edges) {
+      if (e.data?.crosslink) continue;
+      const cr = rects.get(e.target);
+      if (!cr) continue;
+      const a = kids.get(e.source);
+      if (a) a.push(cr);
+      else kids.set(e.source, [cr]);
+    }
+    for (const [pid, crs] of kids) {
+      const pr = rects.get(pid);
+      if (pr) axisByParent.set(pid, childrenAxis(boxOf(pr), crs.map(boxOf)));
+    }
+  }
+
   // Edges.
   for (const e of edges) {
     const sr = rects.get(e.source);
@@ -354,7 +381,12 @@ export function buildFlowSvg(
       }
     } else if (!braces) {
       // Brace map replaces the tapered ribbons with "{" forks (drawn below), so skip them here.
-      const path = taperedRibbonPath(sx, sy, tx, ty, e.data?.depth ?? 1);
+      const parent = boxOf(sr);
+      const child = boxOf(tr);
+      const side: AttachSide = attachSideFor(parent, child, axisByParent.get(e.source) ?? "h");
+      const ep = branchEndpoints(parent, child, side);
+      const { trunk, tip } = branchWidths(e.data?.depth ?? 1);
+      const path = taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, side, trunk, tip);
       parts.push(`<path d="${path}" fill="${e.data?.branchColor ?? "#999"}"/>`);
     }
   }

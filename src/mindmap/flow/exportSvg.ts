@@ -16,13 +16,12 @@ import {
   crosslinkBezier,
   floatingPoints,
 } from "./floating";
-import { type Rect, r2 } from "./geometry";
+import { type Rect, boundaryPath, dashArray, r2 } from "./geometry";
 import { type HopSegment, hopPath } from "./lineJumps";
 import { project } from "./project";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import {
   BOUNDARY_PAD,
-  BOUNDARY_RADIUS,
   BRACE_STROKE,
   SUMMARY_BRACKET_W,
   SUMMARY_GAP,
@@ -255,16 +254,21 @@ export function buildFlowSvg(
     const y = by - BOUNDARY_PAD;
     const w = bX - bx + 2 * BOUNDARY_PAD;
     const h = bY - by + 2 * BOUNDARY_PAD;
-    // Per-boundary colours from the SAME resolver the canvas uses (canvas == export).
+    // Per-boundary shape / gradient / dash from the SAME geometry + resolver the canvas uses
+    // (canvas == export): a shape path with a soft gradient fill + a title-tab fused to the top.
     const bs = resolveBoundaryStyle(b.color);
+    const gid = `bgrad-${b.id}`;
+    const da = dashArray(b.dash);
+    const dashAttr = da ? ` stroke-dasharray="${da}"` : "";
     parts.push(
-      `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" rx="${BOUNDARY_RADIUS}" fill="${bs.fill}" stroke="${bs.stroke}" stroke-width="1.5"/>`,
+      `<defs><linearGradient id="${esc(gid)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bs.fillTop}"/><stop offset="1" stop-color="${bs.fillBottom}"/></linearGradient></defs>`,
+      `<path d="${boundaryPath(b.shape, x, y, w, h)}" fill="url(#${esc(gid)})" stroke="${bs.stroke}" stroke-width="1.5"${dashAttr}/>`,
     );
     const label = boundaryLabel(b.label);
     if (label) {
       parts.push(
-        `<rect x="${r2(x + 12)}" y="${r2(y - 11)}" width="${r2(label.length * 7 + 12)}" height="20" rx="8" fill="${bs.labelBg}" stroke="${bs.labelBorder}"/>`,
-        `<text x="${r2(x + 18)}" y="${r2(y + 3)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${bs.labelColor}">${esc(label)}</text>`,
+        `<rect x="${r2(x + 14)}" y="${r2(y - 19)}" width="${r2(label.length * 6.6 + 14)}" height="19" rx="6" fill="${bs.stroke}"/>`,
+        `<text x="${r2(x + 20)}" y="${r2(y - 5.5)}" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
       );
     }
   }

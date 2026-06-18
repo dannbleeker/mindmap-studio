@@ -1411,6 +1411,8 @@ export function App() {
                 onResize={panels.setInspectorWidth}
                 onSetLabel={(label) => mapRef.current?.setOverlayLabel(label)}
                 onSetColor={(color) => mapRef.current?.setOverlayColor(color)}
+                onSetShape={(shape) => mapRef.current?.setOverlayShape(shape)}
+                onSetDash={(dash) => mapRef.current?.setOverlayDash(dash)}
                 onDelete={() => mapRef.current?.deleteOverlay()}
                 onMinimize={() => {
                   panels.setInfoOpen(false);

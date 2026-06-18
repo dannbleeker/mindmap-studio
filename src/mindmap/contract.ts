@@ -72,6 +72,10 @@ export interface SelectedOverlay {
   /** The overlay's colour override (`#rrggbb`), or undefined when it uses the default accent —
    *  lets the inspector pre-select the current swatch and show a "Reset" affordance. */
   color?: string;
+  /** Boundary outline shape (boundary kind only); undefined = the default rounded box. */
+  shape?: "roundRect" | "rect" | "ellipse" | "cloud" | "polygon";
+  /** Boundary outline line style (boundary kind only); undefined = solid. */
+  dash?: "solid" | "dashed" | "dotted";
 }
 
 /** Imperative API a canvas component exposes via its ref. */
@@ -177,6 +181,10 @@ export interface MindMapHandle {
    *  same picked colour re-tints the whole object (stroke/fill/label) on canvas + in every export.
    *  False if no overlay is selected. */
   setOverlayColor: (color: string) => boolean;
+  /** Set the selected boundary's outline shape; false if no boundary is selected. */
+  setOverlayShape: (shape: NonNullable<SelectedOverlay["shape"]>) => boolean;
+  /** Set the selected boundary's outline line style; false if no boundary is selected. */
+  setOverlayDash: (dash: NonNullable<SelectedOverlay["dash"]>) => boolean;
   /** Delete the selected overlay (boundary/summary/callout); false if none selected. */
   deleteOverlay: () => boolean;
   /** Set the map's diagram-backdrop colour override (`#rrggbb`); "" resets to the default accent.

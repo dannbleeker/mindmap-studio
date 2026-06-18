@@ -156,6 +156,10 @@ export interface Boundary {
   label?: string;
   /** Stroke/fill override; absent = the shared boundary accent. Lossless in .json. */
   color?: string;
+  /** Outline shape; absent = "roundRect" (the historical rounded box). Lossless in .json. */
+  shape?: "roundRect" | "rect" | "ellipse" | "cloud" | "polygon";
+  /** Outline line style; absent = solid. Lossless in .json. */
+  dash?: "solid" | "dashed" | "dotted";
 }
 
 /** A labelled bracket spanning a node + its subtree (MindManager "summary topic"). Like a Boundary,

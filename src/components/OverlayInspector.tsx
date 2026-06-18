@@ -39,11 +39,34 @@ const controlStyle: CSSProperties = {
   padding: "4px 7px",
 };
 
+function seg(active: boolean): CSSProperties {
+  return {
+    border: `1px solid ${active ? "var(--ed-accent)" : "var(--ed-border)"}`,
+    background: active ? "var(--ed-accent-tint)" : "var(--ed-card)",
+    color: active ? "var(--ed-accent)" : "var(--ed-ink)",
+    borderRadius: 7,
+    cursor: "pointer",
+    fontSize: 12.5,
+    fontWeight: 600,
+    padding: "3px 9px",
+  };
+}
+
+const SHAPE_LABEL = {
+  roundRect: "Rounded",
+  rect: "Square",
+  ellipse: "Ellipse",
+  cloud: "Cloud",
+  polygon: "Polygon",
+} as const;
+
 export function OverlayInspector({
   overlay,
   caption,
   onSetLabel,
   onSetColor,
+  onSetShape,
+  onSetDash,
   onDelete,
   onMinimize,
   width,
@@ -53,6 +76,8 @@ export function OverlayInspector({
   caption: string;
   onSetLabel: (label: string) => void;
   onSetColor: (color: string) => void;
+  onSetShape?: (shape: NonNullable<SelectedOverlay["shape"]>) => void;
+  onSetDash?: (dash: NonNullable<SelectedOverlay["dash"]>) => void;
   onDelete: () => void;
   onMinimize?: () => void;
   width?: number;
@@ -172,6 +197,46 @@ export function OverlayInspector({
             Default
           </button>
         </div>
+
+        {/* Boundary shape + outline (boundary kind only). */}
+        {overlay.kind === "boundary" ? (
+          <>
+            <div style={fieldLabel}>Shape</div>
+            <div style={segRow}>
+              {(["roundRect", "rect", "ellipse", "cloud", "polygon"] as const).map((s) => {
+                const active = (overlay.shape ?? "roundRect") === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => onSetShape?.(s)}
+                    style={seg(active)}
+                  >
+                    {SHAPE_LABEL[s]}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={fieldLabel}>Outline</div>
+            <div style={segRow}>
+              {(["solid", "dashed", "dotted"] as const).map((d) => {
+                const active = (overlay.dash ?? "solid") === d;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => onSetDash?.(d)}
+                    style={seg(active)}
+                  >
+                    {d}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
 
         {overlay.deletable ? (
           <button

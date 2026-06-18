@@ -278,10 +278,9 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(off).not.toMatch(/<path d="[^"]*A [^"]*" fill="none"[^>]*stroke-dasharray=/);
   });
 
-  it("draws the boundary box and carries its label (dropped by the old export)", () => {
-    // a rounded boundary rect + its chip text
-    expect(svg).toMatch(/<rect[^>]*rx="16"[^>]*stroke="#8b87e0"/);
-    expect(svg).toContain("Theme group");
+  it("draws the boundary outline (path) and carries its label (dropped by the old export)", () => {
+    expect(svg).toMatch(/<path[^>]*stroke="#8b87e0"/); // the boundary outline path (default accent)
+    expect(svg).toContain("Theme group"); // the title-tab label
   });
 
   it("emits a geometric node as the shared shapePath (canvas == export), not a rect", () => {
@@ -498,14 +497,24 @@ describe("flow exportSvg — styled overlay fidelity (canvas == export)", () => 
     const out = buildOv({
       boundaries: [{ id: "bd", nodeIds: ["a", "b"], label: "Grp", color: "#3f9e6e" }],
     });
-    expect(out).toContain(`fill="${s.fill}" stroke="${s.stroke}"`);
-    expect(out).toContain(`fill="${s.labelBg}" stroke="${s.labelBorder}"`);
-    expect(out).toContain(`fill="${s.labelColor}"`);
+    // outline path strokes in the resolved colour; gradient stops + the title-tab use the resolver too
+    expect(out).toMatch(new RegExp(`<path[^>]*stroke="${s.stroke}"`));
+    expect(out).toContain(`stop-color="${s.fillTop}"`);
+    expect(out).toContain(`stop-color="${s.fillBottom}"`);
+    expect(out).toContain(`fill="${s.stroke}"`); // the title-tab fill
   });
 
   it("an uncoloured boundary keeps the default accent constants", () => {
     const out = buildOv({ boundaries: [{ id: "bd", nodeIds: ["a", "b"], label: "Grp" }] });
-    expect(out).toMatch(/<rect[^>]*rx="16"[^>]*stroke="#8b87e0"/);
+    expect(out).toMatch(/<path[^>]*stroke="#8b87e0"/);
+  });
+
+  it("renders a boundary's shape (cloud) + dashed outline", () => {
+    const out = buildOv({
+      boundaries: [{ id: "bd", nodeIds: ["a", "b"], label: "Grp", shape: "cloud", dash: "dashed" }],
+    });
+    expect(out).toMatch(/<path d="M [^"]*Q[^"]*" fill="url\(#bgrad-bd\)"/); // cloud bumps + gradient
+    expect(out).toContain('stroke-dasharray="6 5"'); // dashed outline
   });
 
   it("re-tints a summary bracket + chip from the resolver", () => {
@@ -572,8 +581,8 @@ describe("flow exportSvg survives the cleanSvg pipeline (sanitizeSvg)", () => {
     expect(out).toContain("data:image/png;base64,"); // the topic image
   });
 
-  it("keeps all path geometry (3 branches + 1 crosslink line + 1 crosslink arrowhead)", () => {
-    expect((out.match(/<path[\s>]/g) ?? []).length).toBe(5);
+  it("keeps all path geometry (3 branches + 1 crosslink line + 1 arrowhead + 1 boundary outline)", () => {
+    expect((out.match(/<path[\s>]/g) ?? []).length).toBe(6);
   });
 
   it("introduced no foreignObject and no script", () => {

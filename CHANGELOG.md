@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Boundary shapes + styling.** A boundary can now be a **rounded rectangle, sharp rectangle,
+  ellipse, scalloped cloud, or polygon** (its outline is real SVG geometry, not a CSS box), with a
+  **soft gradient fill**, an optional **dashed / dotted** outline, and its title drawn as a **tab fused
+  to the top edge** rather than a floating pill. Pick the shape + line style in the overlay inspector;
+  both round-trip in `.json` and render identically on canvas and in every export.
+
 - **Reshape relationship curves.** A relationship's arc now bows **perpendicular to its line** (rather
   than a fixed horizontal axis), so it leaves and enters both topics cleanly instead of looking pinned,
   and the relationship inspector gains a **Curve** control — **Auto / Straight / Bow ± ** — to route a

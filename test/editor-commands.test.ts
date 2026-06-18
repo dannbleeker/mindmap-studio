@@ -58,7 +58,13 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
   return {
     isMobile: false,
     mapRef,
-    nav: { goHome: vi.fn(), openAbout: vi.fn(), openSearchAll: vi.fn(), openPaste: vi.fn() },
+    nav: {
+      goHome: vi.fn(),
+      openAbout: vi.fn(),
+      openShortcuts: vi.fn(),
+      openSearchAll: vi.fn(),
+      openPaste: vi.fn(),
+    },
     panels: {
       outlineOpen: false,
       setOutlineOpen: vi.fn(),
@@ -112,6 +118,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       runReplace: vi.fn(),
     },
     io,
+    history: { canUndo: false, canRedo: false, undo: vi.fn(), redo: vi.fn() },
     showHint: vi.fn(),
   };
 }
@@ -172,5 +179,38 @@ describe("buildEditorCommands", () => {
     const props = mkProps({ id: "n1", topic: "N", note: "" });
     byId(props).get("insert-group")?.run();
     expect(props.mapRef.current?.groupBranch).toHaveBeenCalledWith("n1");
+  });
+
+  it("exposes a 'Keyboard shortcuts' command that opens the cheat-sheet (#2)", () => {
+    const props = mkProps();
+    byId(props).get("shortcuts")?.run();
+    expect(props.nav.openShortcuts).toHaveBeenCalled();
+  });
+
+  it("offers a jump-to-topic command per topic that selects + centres on run (#12)", () => {
+    const props = mkProps();
+    const jump = byId(props).get("jump:root");
+    expect(jump?.kind).toBe("topic");
+    expect(jump?.enabled).toBe(true); // jump is always available
+    jump?.run();
+    expect(props.mapRef.current?.focusNode).toHaveBeenCalledWith("root");
+  });
+
+  it("gates add-child / delete / marker / priority on a selection and routes them (#12)", () => {
+    const gatedIds = ["node-add-child", "node-delete", "node-marker:⭐", "node-priority:1"];
+    const none = byId(mkProps(null));
+    for (const id of gatedIds) expect(none.get(id)?.enabled, id).toBe(false);
+
+    const props = mkProps({ id: "n1", topic: "N", note: "" });
+    const cmds = byId(props);
+    for (const id of gatedIds) expect(cmds.get(id)?.enabled, id).toBe(true);
+    cmds.get("node-add-child")?.run();
+    expect(props.mapRef.current?.addChildToSelected).toHaveBeenCalled();
+    cmds.get("node-delete")?.run();
+    expect(props.mapRef.current?.deleteSelected).toHaveBeenCalled();
+    cmds.get("node-marker:⭐")?.run();
+    expect(props.mapRef.current?.toggleSelectedIcon).toHaveBeenCalledWith("⭐");
+    cmds.get("node-priority:1")?.run();
+    expect(props.mapRef.current?.setSelectedPriority).toHaveBeenCalledWith(1);
   });
 });

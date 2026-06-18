@@ -401,7 +401,15 @@ export function setNote(doc: MindMapDoc, id: string, note: string): OpResult {
 /** Deep-clone a subtree with fresh ids (so grafted/pasted nodes never collide with existing ones).
  *  Re-id'd nodes are newly born, so each gets created = modified = now. */
 function reId(node: MapNode): MapNode {
-  const cloned: MapNode = { ...node, id: makeId(), children: node.children.map(reId) };
+  const cloned: MapNode = {
+    ...node,
+    id: makeId(),
+    children: node.children.map(reId),
+    // Callouts carry their own ids and are rendered keyed by id; without fresh ids a pasted branch
+    // would share callout ids with the original, tripping React's duplicate-key warning (and letting
+    // the two callouts' selection/edits collide).
+    ...(node.callouts ? { callouts: node.callouts.map((c) => ({ ...c, id: makeId() })) } : {}),
+  };
   birth(cloned, opsClock());
   return cloned;
 }

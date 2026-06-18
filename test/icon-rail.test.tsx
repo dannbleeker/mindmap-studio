@@ -12,7 +12,7 @@ function setup(over: Partial<Parameters<typeof IconRail>[0]> = {}) {
     onFind: vi.fn(),
     onImage: vi.fn(),
     onPaste: vi.fn(),
-    onAbout: vi.fn(),
+    onShortcuts: vi.fn(),
     ...over,
   };
   render(<IconRail {...props} />);
@@ -26,14 +26,14 @@ describe("IconRail", () => {
     expect(p.onHome).toHaveBeenCalledTimes(1);
   });
 
-  it("fires onFind, onPaste and onAbout from their buttons", async () => {
+  it("fires onFind, onPaste and onShortcuts from their buttons", async () => {
     const p = setup();
     await userEvent.click(screen.getByRole("button", { name: /find in map/i }));
     await userEvent.click(screen.getByRole("button", { name: /paste text/i }));
-    await userEvent.click(screen.getByRole("button", { name: /about/i }));
+    await userEvent.click(screen.getByRole("button", { name: /keyboard shortcuts/i }));
     expect(p.onFind).toHaveBeenCalledTimes(1);
     expect(p.onPaste).toHaveBeenCalledTimes(1);
-    expect(p.onAbout).toHaveBeenCalledTimes(1);
+    expect(p.onShortcuts).toHaveBeenCalledTimes(1);
   });
 
   it("exposes an image file picker wired to onImage", async () => {

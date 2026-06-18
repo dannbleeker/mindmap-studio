@@ -9,6 +9,7 @@ const NAV: { id: StartSection; label: string; icon: string }[] = [
   { id: "all", label: "All maps", icon: "▦" },
   { id: "recent", label: "Recent", icon: "🕘" },
   { id: "templates", label: "Templates", icon: "▢" },
+  { id: "examples", label: "Examples", icon: "✸" },
   { id: "layouts", label: "Layouts", icon: "❖" },
   { id: "import", label: "Import", icon: "⤓" },
   { id: "learn", label: "Learn mind mapping", icon: "✎" },

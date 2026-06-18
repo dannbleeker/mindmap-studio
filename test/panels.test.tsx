@@ -259,12 +259,13 @@ describe("InfoPanel", () => {
     expect(screen.getByText(/Select a node to see and edit its details/)).toBeTruthy();
   });
 
-  it("shows a Minimize control and three tabs for the selected node", () => {
+  it("shows a Minimize control and the Details + Style tabs for the selected node", () => {
     renderInfo(selected, node);
     expect(screen.getByRole("button", { name: /Minimize/ })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Details" })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Style" })).toBeTruthy();
-    expect(screen.getByRole("tab", { name: "Notes" })).toBeTruthy();
+    // Notes folded into Details (#7) — no separate Notes tab.
+    expect(screen.queryByRole("tab", { name: "Notes" })).toBeNull();
   });
 
   it("renders the created/modified times line when provided, and omits it when empty", () => {
@@ -284,23 +285,23 @@ describe("InfoPanel", () => {
     expect(screen.queryByText(/created .* ago/)).toBeNull();
   });
 
-  it("opens on the Details tab (tags / dates / priority / links); the note editor is not mounted yet", () => {
+  it("opens on Details, leading with the note editor + markers, then tags / dates / priority / links (#7)", () => {
     renderInfo(selected, node);
     expect(screen.getByRole("tab", { name: "Details" }).getAttribute("aria-selected")).toBe("true");
+    // Note + markers now lead Details — one click from the default inspector view.
+    const editor = screen.getByRole("textbox", { name: "Node note" });
+    expect(editor.textContent).toContain("interview users");
+    expect(screen.getByText("Markers")).toBeTruthy();
     expect(screen.getByText("Tags")).toBeTruthy();
     expect(screen.getByText("Dates")).toBeTruthy();
     expect(screen.getByText("Priority")).toBeTruthy();
     expect(screen.getByText("Links")).toBeTruthy();
-    // The markdown note lives in the Notes tab, so its editor isn't in the DOM on first render.
-    expect(screen.queryByDisplayValue("interview users")).toBeNull();
   });
 
-  it("reveals the note editor (with the draft rendered) after switching to the Notes tab", async () => {
+  it("hides the Details note/markers/tags once the Style tab is active (#7)", async () => {
     renderInfo(selected, node);
-    await userEvent.click(screen.getByRole("tab", { name: "Notes" }));
-    const editor = screen.getByRole("textbox", { name: "Node note" });
-    expect(editor.textContent).toContain("interview users");
-    // Details-tab sections are no longer mounted once we leave that tab.
+    await userEvent.click(screen.getByRole("tab", { name: "Style" }));
+    expect(screen.queryByRole("textbox", { name: "Node note" })).toBeNull();
     expect(screen.queryByText("Priority")).toBeNull();
   });
 
@@ -408,9 +409,9 @@ describe("InfoPanel", () => {
     expect(screen.queryByText("Linked from")).toBeNull();
   });
 
-  it("opens on the Notes tab when openNoteNonce is set (the node 📝 click target)", () => {
+  it("surfaces the note on Details when openNoteNonce is set (the node 📝 click target) (#7)", () => {
     renderInfo(selected, node, 1, 1);
-    expect(screen.getByRole("tab", { name: "Notes" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("tab", { name: "Details" }).getAttribute("aria-selected")).toBe("true");
     expect(screen.getByRole("textbox", { name: "Node note" })).toBeTruthy();
   });
 });

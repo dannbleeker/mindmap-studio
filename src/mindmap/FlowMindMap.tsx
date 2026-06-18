@@ -23,11 +23,13 @@ import {
   useState,
 } from "react";
 import { EditorIcon, type EditorIconName } from "../components/EditorIcons";
-import { ContextMenu, MenuItem, MenuSeparator } from "../design/primitives";
+import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors } from "../design/tokens";
+import { MARKER_PALETTE } from "../icons";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
+import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
 import { nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
@@ -139,11 +141,31 @@ const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
 const EMPTY_BOUNDARIES: readonly Boundary[] = Object.freeze([]);
 const EMPTY_SUMMARIES: readonly Summary[] = Object.freeze([]);
 
-/** Count all descendants of a node (the size of the branch beneath it) — drives the delete confirm. */
+// Keyboard hints shown right-aligned on the matching right-click menu rows (#2) — kept in step with
+// the canvas keydown handler + the cheat-sheet (src/shortcuts.ts).
+const MENU_SHORTCUT: Record<string, string> = {
+  "Add child": "Tab",
+  "Add sibling": "Enter",
+  Rename: "F2",
+  Delete: "Del",
+};
+
+/** Count all descendants of a node (the size of the branch beneath it) — drives the delete toast. */
 function countDescendants(n: MapNode): number {
   let total = 0;
   for (const k of n.children) total += 1 + countDescendants(k);
   return total;
+}
+
+/** The id of a node and every node beneath it — a drag-to-reparent can't target its own subtree. */
+function subtreeIds(node: MapNode | null): Set<string> {
+  const ids = new Set<string>();
+  const walk = (n: MapNode) => {
+    ids.add(n.id);
+    for (const c of n.children) walk(c);
+  };
+  if (node) walk(node);
+  return ids;
 }
 
 function themeVars(theme: MindMapProps["theme"]): CSSProperties {
@@ -210,6 +232,8 @@ function FlowInner({
   onSelectOverlay,
   onOpenNote,
   onMapLink,
+  onHistory,
+  onDelete,
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
@@ -267,6 +291,10 @@ function FlowInner({
   // canvas is model-first: edits update docRef + RF state via sync(); App keeps the `doc` prop
   // stable during a session, so the overlays must track this live copy, not the prop.
   const [renderDoc, setRenderDoc] = useState(doc);
+  // The empty-map coachmark (#1) is dismissed for good on the first edit (any path into edit mode).
+  const [coachDismissed, setCoachDismissed] = useState(false);
+  // During a drag-to-reparent, the node the dragged topic would drop under (highlighted live). (#11)
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const { fitView, getNodes, setCenter } = useReactFlow();
   const initialized = useNodesInitialized();
 
@@ -305,6 +333,10 @@ function FlowInner({
   onMapLinkRef.current = onMapLink;
   const onOpenNoteRef = useRef(onOpenNote);
   onOpenNoteRef.current = onOpenNote;
+  const onHistoryRef = useRef(onHistory);
+  onHistoryRef.current = onHistory;
+  const onDeleteRef = useRef(onDelete);
+  onDeleteRef.current = onDelete;
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
@@ -518,11 +550,18 @@ function FlowInner({
     [fireSelect, clearEdgeSelection, clearOverlaySelection],
   );
 
+  // Push the current undo/redo depths up so the Row-1 undo/redo buttons can live-enable/disable (#8).
+  const reportHistory = useCallback(() => {
+    const h = historyRef.current;
+    onHistoryRef.current?.(h.past.length > 0, h.future.length > 0);
+  }, []);
+
   // Apply a pure op: persist + re-render; optionally enter edit on the resulting node.
   const apply = useCallback(
     (result: OpResult, edit = false) => {
       if (result.doc !== docRef.current) {
         historyRef.current = record(historyRef.current, docRef.current); // snapshot the old doc
+        reportHistory();
         sync(result.doc, result.selectId);
         onChangeRef.current?.(result.doc);
       }
@@ -535,7 +574,7 @@ function FlowInner({
         }
       }
     },
-    [sync, fireSelect, selectOnly],
+    [sync, fireSelect, selectOnly, reportHistory],
   );
 
   // Enter inline edit for a node; `seed` is the character to start typing with (type-to-edit),
@@ -557,31 +596,31 @@ function FlowInner({
     const r = undoHistory(historyRef.current, docRef.current);
     if (r) {
       historyRef.current = r.history;
+      reportHistory();
       restore(r.value);
     }
-  }, [restore]);
+  }, [restore, reportHistory]);
   const redoAction = useCallback(() => {
     const r = redoHistory(historyRef.current, docRef.current);
     if (r) {
       historyRef.current = r.history;
+      reportHistory();
       restore(r.value);
     }
-  }, [restore]);
+  }, [restore, reportHistory]);
 
-  // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back. In free-canvas
-  // mode a drag instead persists the node's new position (no re-parenting).
-  const handleDragStop = useCallback(
-    (dragId: string, dropPos: { x: number; y: number }) => {
-      if (docRef.current.meta?.freeform) {
-        apply(setNodePos(docRef.current, dragId, dropPos.x, dropPos.y));
-        return;
-      }
+  // Which node a dragged topic would re-parent under: the first whose box contains the dragged node's
+  // centre, excluding the dragged node and its own subtree (you can't parent a node into itself). The
+  // single source of truth for both the live drop indicator (#11) and the actual drop.
+  const findReparentTarget = useCallback(
+    (dragId: string, dropPos: { x: number; y: number }): string | null => {
       const all = getNodes();
       const dragged = all.find((n) => n.id === dragId);
       const cx = dropPos.x + (dragged?.measured?.width ?? 0) / 2;
       const cy = dropPos.y + (dragged?.measured?.height ?? 0) / 2;
-      const target = all.find((n) => {
-        if (n.id === dragId) return false;
+      const exclude = subtreeIds(findAnyNode(docRef.current, dragId));
+      const hit = all.find((n) => {
+        if (exclude.has(n.id)) return false;
         const w = n.measured?.width ?? 0;
         const h = n.measured?.height ?? 0;
         return (
@@ -591,11 +630,35 @@ function FlowInner({
           cy <= n.position.y + h
         );
       });
-      const r = target ? reparent(docRef.current, dragId, target.id) : { doc: docRef.current };
+      return hit?.id ?? null;
+    },
+    [getNodes],
+  );
+
+  // Live drop-target highlight while dragging (skipped in free-canvas mode, where a drag just moves
+  // the node). The exact node this resolves is the one handleDragStop will re-parent under.
+  const handleDrag = useCallback(
+    (dragId: string, dragPos: { x: number; y: number }) => {
+      setDropTargetId(docRef.current.meta?.freeform ? null : findReparentTarget(dragId, dragPos));
+    },
+    [findReparentTarget],
+  );
+
+  // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back. In free-canvas
+  // mode a drag instead persists the node's new position (no re-parenting).
+  const handleDragStop = useCallback(
+    (dragId: string, dropPos: { x: number; y: number }) => {
+      setDropTargetId(null);
+      if (docRef.current.meta?.freeform) {
+        apply(setNodePos(docRef.current, dragId, dropPos.x, dropPos.y));
+        return;
+      }
+      const targetId = findReparentTarget(dragId, dropPos);
+      const r = targetId ? reparent(docRef.current, dragId, targetId) : { doc: docRef.current };
       if (r.doc !== docRef.current) apply(r);
       else sync(docRef.current); // snap back to the computed layout
     },
-    [getNodes, apply, sync],
+    [apply, sync, findReparentTarget],
   );
 
   // Centre + select a node by id (shared by the imperative handle and the in-map jump links).
@@ -626,6 +689,10 @@ function FlowInner({
       editingId,
       seed: editSeed,
       beginEdit: (id: string) => startEdit(id),
+      // On-node hover ＋ affordances (#1): add a child/sibling and drop straight into editing it.
+      // These never commit the node's own text (no inline-edit in flight), unlike commitAndAdd.
+      addChild: (id: string) => apply(addChild(docRef.current, id), true),
+      addSibling: (id: string) => apply(addSibling(docRef.current, id), true),
       cancelEdit: () => {
         setEditingId(null);
         setEditSeed(null);
@@ -691,6 +758,14 @@ function FlowInner({
   // empty-case identity. The overlays are memoised, so a stable ref lets them skip unrelated renders.
   const boundaries = renderDoc.boundaries ?? EMPTY_BOUNDARIES;
   const summaries = renderDoc.summaries ?? EMPTY_SUMMARIES;
+
+  // Empty-state coachmark (#1): when the map is just the bare root (≤1 topic), anchor a one-time
+  // hint under it teaching the core add/rename gestures. Hidden once anything is added or edited.
+  const showCoach =
+    renderDoc.root.children.length === 0 &&
+    !(renderDoc.floatingTopics?.length ?? 0) &&
+    editingId === null &&
+    !coachDismissed;
 
   // Stable overlay callbacks (deps: the stable `apply`) so the memoised Summaries/Callouts aren't
   // re-rendered by a fresh inline closure every render. Each reads docRef.current for live state.
@@ -764,6 +839,12 @@ function FlowInner({
     }
   }, [renderDoc, selectedOverlay]);
 
+  // Dismiss the empty-map coachmark permanently once the user enters edit mode by any path
+  // (double-click, F2, type-to-edit, or the ＋ affordance) — it never nags again this session.
+  useEffect(() => {
+    if (editingId) setCoachDismissed(true);
+  }, [editingId]);
+
   // Report the selection count up (the inspector switches to bulk mode when >1).
   const onSelectionCountRef = useRef(onSelectionCount);
   onSelectionCountRef.current = onSelectionCount;
@@ -833,6 +914,19 @@ function FlowInner({
     );
   }, [litIds, setNodes, setEdges]);
 
+  // Reflect the live drag-to-reparent target as a node-data flag so TopicNode rings it (#11). Only
+  // the target's `data` changes (the equality guard skips the rest); cleared when the drag ends.
+  useEffect(() => {
+    setNodes((ns) =>
+      ns.map((n) => {
+        const isTarget = n.id === dropTargetId;
+        return Boolean(n.data.dropTarget) === isTarget
+          ? n
+          : { ...n, data: { ...n.data, dropTarget: isTarget } };
+      }),
+    );
+  }, [dropTargetId, setNodes]);
+
   // One-time refine once React Flow has measured the nodes (better sizing than estimates).
   const refined = useRef(false);
   useEffect(() => {
@@ -841,23 +935,17 @@ function FlowInner({
     sync(docRef.current);
   }, [initialized, sync]);
 
-  // Delete a node, confirming first when it has descendants — Delete removes the whole branch
-  // below it, so a guard prevents an accidental keystroke from wiping a subtree. Shared by the
-  // keyboard Delete, the context menu, and the on-node popover so the confirm is consistent.
-  const confirmDeleteNode = useCallback(
+  // Delete a node and its branch immediately — no blocking "Are you sure?" modal (#9). The delete is
+  // a normal undoable edit, and App turns the onDelete report into a "… deleted — Undo" toast wired
+  // to undo(), so it's always reversible. Shared by the keyboard Delete, the context menu, and the
+  // on-node popover. A no-op (deleting the root / a missing node) reports nothing.
+  const deleteNodeWithUndo = useCallback(
     (id: string) => {
       const node = findAnyNode(docRef.current, id);
-      const kids = node ? countDescendants(node) : 0;
-      if (kids > 0) {
-        const label = node?.topic?.trim() || "this topic";
-        if (
-          !window.confirm(
-            `Delete "${label}" and its ${kids} sub-topic${kids === 1 ? "" : "s"}? This removes the whole branch.`,
-          )
-        )
-          return;
-      }
-      apply(deleteNode(docRef.current, id));
+      const r = deleteNode(docRef.current, id);
+      if (r.doc === docRef.current) return; // no-op: root or not found
+      apply(r);
+      onDeleteRef.current?.(node?.topic?.trim() || "topic", node ? countDescendants(node) : 0);
     },
     [apply],
   );
@@ -869,6 +957,7 @@ function FlowInner({
         setLinkingFrom(null);
         return;
       }
+      if (e.key === "Escape") setDropTargetId(null); // clear a stray drag-reparent indicator
       if (editingRef.current) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName)))
@@ -900,7 +989,7 @@ function FlowInner({
         apply(outdent(docRef.current, id));
       } else if (e.key === "Delete") {
         e.preventDefault();
-        confirmDeleteNode(id);
+        deleteNodeWithUndo(id);
       } else if (e.key === "F2") {
         e.preventDefault();
         startEdit(id);
@@ -913,7 +1002,7 @@ function FlowInner({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [apply, undoAction, redoAction, confirmDeleteNode, startEdit]);
+  }, [apply, undoAction, redoAction, deleteNodeWithUndo, startEdit]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 
@@ -1100,6 +1189,10 @@ function FlowInner({
         const res = addSubtree(docRef.current, parentId, [{ id: "q", topic: t, children: [] }]);
         apply({ doc: res.doc });
       },
+      addChildToSelected: () => withSelected((id) => apply(addChild(docRef.current, id), true)),
+      deleteSelected: () => withSelected((id) => deleteNodeWithUndo(id)),
+      undo: undoAction,
+      redo: redoAction,
       // Relationship (cross-link) edits — applied to the selected edge (false if none selected).
       setLinkLabel: (label) => withSelectedLink((doc, id) => setLinkLabel(doc, id, label)),
       setLinkArrow: (arrow) => withSelectedLink((doc, id) => setLinkArrow(doc, id, arrow)),
@@ -1152,6 +1245,9 @@ function FlowInner({
       clearOverlaySelection,
       fireSelectOverlay,
       focusNodeById,
+      deleteNodeWithUndo,
+      undoAction,
+      redoAction,
     ],
   );
 
@@ -1196,6 +1292,14 @@ function FlowInner({
           }
           apply(addFloatingTopic(docRef.current, topic, link));
         }}
+        // Double-click the empty canvas to drop a new floating topic and edit it straight away (#6).
+        // Node double-clicks stopPropagation (→ inline edit), so only bare-pane double-clicks reach
+        // here; the target guard keeps clicks on the controls / minimap from creating stray topics.
+        onDoubleClick={(e) => {
+          if ((e.target as HTMLElement)?.classList?.contains("react-flow__pane")) {
+            apply(addFloatingTopic(docRef.current, ""), true);
+          }
+        }}
       >
         <ReactFlow
           nodes={nodes}
@@ -1213,11 +1317,11 @@ function FlowInner({
           minZoom={0.2}
           maxZoom={3}
           fitView
-          // Drag the empty canvas to rubber-band a multi-selection; pan with the middle/right
-          // button (selectionOnDrag claims the left button). Shift/Ctrl/Cmd-click extends.
-          selectionOnDrag
-          panOnDrag={[1, 2]}
-          selectionKeyCode={null}
+          // Left-drag the background to pan (the gesture most people reach for first); the +/−/fit
+          // controls stay too. Scroll / ⌘-scroll zooms (React Flow's defaults). Hold Shift and drag
+          // to rubber-band a marquee selection; Shift/Ctrl/Cmd-click extends the selection. (#6)
+          panOnDrag
+          selectionKeyCode="Shift"
           multiSelectionKeyCode={["Shift", "Meta", "Control"]}
           onSelectionChange={onSelectionChange}
           onNodeClick={(ev, node) => {
@@ -1266,6 +1370,7 @@ function FlowInner({
             fireSelect(node.id);
             setMenu({ x: e.clientX, y: e.clientY, id: node.id });
           }}
+          onNodeDrag={(_, node) => handleDrag(node.id, node.position)}
           onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
           onEdgeContextMenu={(e, edge) => {
             e.preventDefault();
@@ -1320,18 +1425,8 @@ function FlowInner({
                         boxShadow: "0 10px 30px rgba(40,30,16,0.18)",
                       }}
                     >
-                      <PopBtn
-                        icon="child"
-                        label="Add child"
-                        onClick={() => apply(addChild(docRef.current, sid), true)}
-                      />
-                      {!isRootSel ? (
-                        <PopBtn
-                          icon="plus"
-                          label="Add sibling"
-                          onClick={() => apply(addSibling(docRef.current, sid), true)}
-                        />
-                      ) : null}
+                      {/* Add child / sibling are re-homed onto the node itself as the hover ＋
+                          affordances (#1); this popover keeps the rest of the quick actions. */}
                       <PopBtn icon="text" label="Rename" onClick={() => startEdit(sid)} />
                       {hasKids ? (
                         <PopBtn
@@ -1345,9 +1440,41 @@ function FlowInner({
                           icon="trash"
                           label="Delete"
                           danger
-                          onClick={() => confirmDeleteNode(sid)}
+                          onClick={() => deleteNodeWithUndo(sid)}
                         />
                       ) : null}
+                    </div>
+                  </NodeToolbar>
+                );
+              })()
+            : null}
+          {/* Empty-map coachmark — anchored under the root via NodeToolbar so it tracks pan/zoom.
+              Canvas-only (never authored into buildFlowSvg), so exports stay unchanged. */}
+          {showCoach ? (
+            <NodeToolbar
+              nodeId={renderDoc.root.id}
+              isVisible
+              position={Position.Bottom}
+              offset={18}
+            >
+              <div className="mm-coachmark nodrag nopan">
+                <strong>Start your map</strong>
+                <span>
+                  Press <kbd>Tab</kbd> for a child · <kbd>Enter</kbd> for a sibling · double-click
+                  to rename
+                </span>
+              </div>
+            </NodeToolbar>
+          ) : null}
+          {/* Drag-to-reparent label (#11): names the topic the dragged node will become a child of,
+              anchored on the highlighted target. Canvas-only — never authored into exports. */}
+          {dropTargetId
+            ? (() => {
+                const t = findAnyNode(renderDoc, dropTargetId);
+                return (
+                  <NodeToolbar nodeId={dropTargetId} isVisible position={Position.Top} offset={8}>
+                    <div className="mm-drop-label nodrag nopan">
+                      ↳ Make child of “{t?.topic?.trim() || "topic"}”
                     </div>
                   </NodeToolbar>
                 );
@@ -1397,6 +1524,14 @@ function FlowInner({
                 ["Add child", () => apply(addChild(docRef.current, id), true)],
                 ["Add sibling", () => apply(addSibling(docRef.current, id), true)],
                 ["Rename", () => startEdit(id)],
+                [
+                  "Add note",
+                  () => {
+                    selectOnly(id);
+                    fireSelect(id);
+                    onOpenNoteRef.current?.();
+                  },
+                ],
                 ["Link to…", () => setLinkingFrom(id)],
                 ["Add callout", () => apply(addCallout(docRef.current, id))],
                 ["Group in boundary", () => apply(groupBranch(docRef.current, id))],
@@ -1418,12 +1553,71 @@ function FlowInner({
                   () => apply(pasteBranch(docRef.current, id, clip)),
                 ]);
               items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
-              items.push(["Delete", () => confirmDeleteNode(id), true]);
+              items.push(["Delete", () => deleteNodeWithUndo(id), true]);
+              // Live marker/priority state so the quick-setters reflect the node (and toggle off).
+              const node = findAnyNode(docRef.current, id);
+              const activeMarkers = node?.icons ?? [];
+              const curPriority = node?.task?.priority;
               return (
                 <>
                   {items.map(([label, fn, danger]) => (
-                    <MenuItem key={label} label={label} danger={danger} onSelect={fn} />
+                    <MenuItem
+                      key={label}
+                      label={label}
+                      danger={danger}
+                      shortcut={MENU_SHORTCUT[label]}
+                      onSelect={fn}
+                    />
                   ))}
+                  <MenuSeparator />
+                  {/* Inline marker quick-setter (the "Set marker" submenu): toggle several without
+                      closing, mirroring the inspector's MarkerBar but reachable in one right-click. */}
+                  <MenuLabel>Markers</MenuLabel>
+                  <div className="mm-menu-row">
+                    {MARKER_PALETTE.map((m) => {
+                      const on = activeMarkers.includes(m);
+                      return (
+                        <button
+                          key={m}
+                          type="button"
+                          className="mm-menu-chip"
+                          aria-pressed={on}
+                          aria-label={`${on ? "Remove" : "Add"} marker ${m}`}
+                          data-on={on || undefined}
+                          onClick={() => apply(toggleIcon(docRef.current, id, m))}
+                        >
+                          {m}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Inline priority quick-setter (the "Set priority" submenu). */}
+                  <MenuLabel>Priority</MenuLabel>
+                  <div className="mm-menu-row">
+                    {PRIORITY_LEVELS.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        className="mm-menu-chip"
+                        aria-pressed={curPriority === p}
+                        data-on={curPriority === p || undefined}
+                        onClick={() =>
+                          apply(setPriority(docRef.current, id, curPriority === p ? undefined : p))
+                        }
+                      >
+                        {PRIORITY_LABEL[p]}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      className="mm-menu-chip"
+                      aria-pressed={!curPriority}
+                      data-on={!curPriority || undefined}
+                      onClick={() => apply(setPriority(docRef.current, id, undefined))}
+                    >
+                      None
+                    </button>
+                  </div>
                   <MenuSeparator />
                   <label
                     className="mm-menu-label"

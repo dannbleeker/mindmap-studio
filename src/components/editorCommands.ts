@@ -1,6 +1,21 @@
+import { MARKER_PALETTE } from "../icons";
 import type { LayoutKind } from "../mindmap";
+import type { MapNode } from "../model/types";
+import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
 import type { Command } from "./CommandPalette";
 import type { ToolbarProps } from "./Toolbar";
+
+/** Walk every topic in the doc (central tree + floating subtrees) for the jump-to-topic palette. */
+function* walkTopics(node: MapNode): Generator<MapNode> {
+  yield node;
+  for (const c of node.children) yield* walkTopics(c);
+}
+
+/** A one-line, length-capped preview of a topic for a palette row. */
+function topicLabel(topic: string): string {
+  const t = topic.replace(/\s+/g, " ").trim() || "(untitled)";
+  return t.length > 60 ? `${t.slice(0, 57)}…` : t;
+}
 
 // The editor command registry — one flat `Command[]`, 1:1 with the toolbar's actions, built from the
 // SAME prop groups App already hands `<Toolbar>` (so there's no second source of truth). Drives the
@@ -42,12 +57,18 @@ const EXPORTS = (io: ToolbarProps["io"]): [string, string, () => void][] => [
 
 /** Build the editor's command list from the toolbar prop groups (the same object App passes Toolbar). */
 export function buildEditorCommands(props: ToolbarProps): Command[] {
-  const { mapRef, nav, panels, map, canvas, io, showHint } = props;
+  const { mapRef, nav, panels, map, canvas, io, history, showHint } = props;
   const m = () => mapRef.current;
   const sel = canvas.selected;
   const cmds: Command[] = [];
-  const add = (id: string, label: string, kind: string, run: () => void, enabled = true) =>
-    cmds.push({ id, label, kind, run, enabled });
+  const add = (
+    id: string,
+    label: string,
+    kind: string,
+    run: () => void,
+    enabled = true,
+    extra?: { keywords?: string },
+  ) => cmds.push({ id, label, kind, run, enabled, ...extra });
 
   // Map / file
   add("present", "Present", "map", () => map.present());
@@ -59,7 +80,12 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("paste-topics", "Paste text → topics", "map", () => nav.openPaste());
   add("copy-outline", "Copy outline to clipboard", "map", () => io.copyOutline());
   add("backup", "Back up whole library", "map", () => io.exportLibrary());
+  add("shortcuts", "Keyboard shortcuts", "map", () => nav.openShortcuts());
   add("about", "About MindMap Studio", "map", () => nav.openAbout());
+
+  // Edit history
+  add("undo", "Undo", "edit", () => history.undo(), history.canUndo);
+  add("redo", "Redo", "edit", () => history.redo(), history.canRedo);
 
   // View
   add("fit", "Fit map to screen", "view", () => m()?.fit());
@@ -115,6 +141,63 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     },
     !!sel,
   );
+
+  // Selected node — shown only when a node is selected (Command.enabled). These give mouse-free
+  // parity with the right-click menu: add a child, set a marker/priority, or delete. (#12)
+  add(
+    "node-add-child",
+    "Add child to selected topic",
+    "node",
+    () => m()?.addChildToSelected(),
+    !!sel,
+  );
+  add("node-delete", "Delete selected topic", "node", () => m()?.deleteSelected(), !!sel);
+  for (const marker of MARKER_PALETTE)
+    add(
+      `node-marker:${marker}`,
+      `Marker: ${marker} on selected topic`,
+      "marker",
+      () => m()?.toggleSelectedIcon(marker),
+      !!sel,
+    );
+  for (const p of PRIORITY_LEVELS)
+    add(
+      `node-priority:${p}`,
+      `Priority: ${PRIORITY_LABEL[p]} on selected topic`,
+      "priority",
+      () => m()?.setSelectedPriority(p),
+      !!sel,
+    );
+  add(
+    "node-priority:clear",
+    "Priority: clear on selected topic",
+    "priority",
+    () => m()?.setSelectedPriority(undefined),
+    !!sel,
+  );
+
+  // Jump to any topic — fuzzy over the topic text AND its note (keywords), then select + centre it.
+  for (const n of walkTopics(map.liveDoc.root))
+    add(
+      `jump:${n.id}`,
+      `Go to: ${topicLabel(n.topic)}`,
+      "topic",
+      () => m()?.focusNode(n.id),
+      true,
+      {
+        keywords: `${n.topic} ${n.note ?? ""}`,
+      },
+    );
+  for (const f of map.liveDoc.floatingTopics ?? [])
+    for (const n of walkTopics(f))
+      add(
+        `jump:${n.id}`,
+        `Go to: ${topicLabel(n.topic)}`,
+        "topic",
+        () => m()?.focusNode(n.id),
+        true,
+        { keywords: `${n.topic} ${n.note ?? ""}` },
+      );
 
   // Layout
   for (const l of LAYOUTS)

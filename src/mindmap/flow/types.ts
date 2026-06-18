@@ -49,6 +49,9 @@ export type TopicData = {
   floating: boolean;
   /** Dimmed by the read-only Power Filter (not on a path to a match); view-only opacity. */
   dimmed?: boolean;
+  /** During a drag-to-reparent, the node the dragged topic would become a child of — highlighted as
+   *  the drop target (view-only, canvas-only; never exported). */
+  dropTarget?: boolean;
 };
 
 /** Data carried by an edge (branch or cross-link). */

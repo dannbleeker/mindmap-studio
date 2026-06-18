@@ -106,6 +106,7 @@ function mount(
   const onChange = vi.fn();
   const onSelect = vi.fn();
   const onMapLink = vi.fn();
+  const onDelete = vi.fn();
   const ref = createRef<MindMapHandle>() as RefObject<MindMapHandle | null>;
   const utils = render(
     <FlowMindMap
@@ -113,12 +114,13 @@ function mount(
       onChange={onChange}
       onSelect={onSelect}
       onMapLink={onMapLink}
+      onDelete={onDelete}
       ref={ref}
       {...over}
     />,
   );
   if (!ref.current) throw new Error("FlowMindMap did not expose its imperative handle");
-  return { ...utils, ref, onChange, onSelect, onMapLink, h: ref.current };
+  return { ...utils, ref, onChange, onSelect, onMapLink, onDelete, h: ref.current };
 }
 
 const nodeEl = (container: HTMLElement, id: string): Element => {
@@ -244,37 +246,27 @@ describe("FlowMindMap canvas", () => {
     expect(container.querySelector('[contenteditable="true"]')).toBeNull();
   });
 
-  it("Delete on a node WITH children confirms first, and cancelling keeps it", () => {
-    const { h, onChange } = mount();
-    vi.mocked(window.confirm).mockReturnValue(false); // user cancels
-    run(() => h.focusNode("a")); // "a" has child a1
-    onChange.mockClear();
-    vi.mocked(window.confirm).mockClear();
-    run(() => fireEvent.keyDown(document, { key: "Delete" }));
-    expect(window.confirm).toHaveBeenCalledTimes(1);
-    expect(onChange).not.toHaveBeenCalled(); // cancelled → nothing deleted
-  });
-
-  it("Delete on a node WITH children deletes the branch when confirmed", () => {
-    const { h, onChange } = mount();
-    vi.mocked(window.confirm).mockReturnValue(true);
-    run(() => h.focusNode("a"));
+  it("Delete removes a node with children immediately (no modal) + reports it for the undo toast (#9)", () => {
+    const { h, onChange, onDelete } = mount();
+    run(() => h.focusNode("a")); // "a" (Alpha) has child a1
     onChange.mockClear();
     run(() => fireEvent.keyDown(document, { key: "Delete" }));
-    expect(window.confirm).toHaveBeenCalled();
+    expect(window.confirm).not.toHaveBeenCalled(); // no blocking modal anymore
     const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
     expect(doc.root.children.find((n) => n.id === "a")).toBeUndefined();
+    // topic + descendant count flow up so App can show "… deleted — Undo".
+    expect(onDelete).toHaveBeenCalledWith("Alpha", 1);
   });
 
-  it("Delete on a childless node deletes without prompting", () => {
-    const { h, onChange } = mount();
-    vi.mocked(window.confirm).mockClear();
-    run(() => h.focusNode("b")); // "b" has no children
+  it("Delete on a childless node deletes immediately and reports it (#9)", () => {
+    const { h, onChange, onDelete } = mount();
+    run(() => h.focusNode("b")); // "b" (Beta) has no children
     onChange.mockClear();
     run(() => fireEvent.keyDown(document, { key: "Delete" }));
     expect(window.confirm).not.toHaveBeenCalled();
     const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
     expect(doc.root.children.find((n) => n.id === "b")).toBeUndefined();
+    expect(onDelete).toHaveBeenCalledWith("Beta", 0);
   });
 
   it("drops a URL onto the canvas as a floating topic", () => {
@@ -391,6 +383,21 @@ describe("FlowMindMap canvas", () => {
     expect(onChange).toHaveBeenCalled();
   });
 
+  it("context menu exposes Add note + inline marker/priority quick-setters (#3)", () => {
+    const { container, onChange } = mount();
+    run(() => fireEvent.contextMenu(nodeEl(container, "a")));
+    const menu = openMenu() as HTMLElement;
+    expect(within(menu).getByText("Add note")).toBeTruthy();
+    // Toggle a marker from the menu (stays open for multi-toggle).
+    run(() => fireEvent.click(within(menu).getByRole("button", { name: /marker ⭐/ })));
+    expect(onChange).toHaveBeenCalled();
+    expect(openMenu()).toBeTruthy(); // not closed by a marker toggle
+    // Set a priority from the menu.
+    const before = onChange.mock.calls.length;
+    run(() => fireEvent.click(within(menu).getByRole("button", { name: "High" })));
+    expect(onChange.mock.calls.length).toBeGreaterThan(before);
+  });
+
   it("context menu is keyboard-accessible: focus-first, roving, and arrows don't edit the tree", () => {
     const { container, onChange } = mount();
     run(() => fireEvent.contextMenu(nodeEl(container, "a")));
@@ -435,6 +442,46 @@ describe("FlowMindMap canvas", () => {
     const pane = container.querySelector(".react-flow__pane");
     if (pane) run(() => fireEvent.click(pane));
     expect(onChange).toHaveBeenCalled();
+  });
+
+  it("reveals the on-node ＋ add affordances on hover (#1) and wires them to add child/sibling", () => {
+    const { container, onChange } = mount();
+    // Nothing hovered or selected → no ＋.
+    expect(screen.queryByRole("button", { name: "Add child" })).toBeNull();
+    // Hovering a node reveals the ＋ child / ＋ sibling affordances (re-homed off the popover).
+    const inner = nodeEl(container, "b").firstElementChild as HTMLElement;
+    run(() => fireEvent.mouseOver(inner));
+    const addChildBtn = screen.getByRole("button", { name: "Add child" });
+    expect(screen.getByRole("button", { name: "Add sibling" })).toBeTruthy();
+    // Clicking ＋ adds a child and drops straight into editing it.
+    run(() => fireEvent.click(addChildBtn));
+    expect(onChange).toHaveBeenCalled();
+    expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
+  });
+
+  it("double-clicks the empty canvas to create a floating topic and edit it (#6)", () => {
+    const { container, onChange } = mount();
+    const pane = container.querySelector(".react-flow__pane") as HTMLElement;
+    expect(pane).toBeTruthy();
+    run(() => fireEvent.doubleClick(pane));
+    expect(onChange).toHaveBeenCalled();
+    // Lands straight in inline edit of the new topic.
+    expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
+  });
+
+  it("shows the empty-map coachmark until the first edit, never on a populated map (#1)", () => {
+    // Populated map → no coachmark.
+    const populated = mount(baseDoc());
+    expect(screen.queryByText("Start your map")).toBeNull();
+    populated.unmount();
+    // Bare root (≤1 topic) → coachmark visible.
+    const empty: MindMapDoc = { ...baseDoc(), root: { id: "root", topic: "Root", children: [] } };
+    const { container } = mount(empty);
+    expect(screen.getByText("Start your map")).toBeTruthy();
+    // Entering edit (F2 on the selected root) dismisses it for good.
+    run(() => fireEvent.click(nodeEl(container, "root")));
+    run(() => fireEvent.keyDown(document, { key: "F2" }));
+    expect(screen.queryByText("Start your map")).toBeNull();
   });
 
   it("draws a relationship via the Link to… gesture", () => {

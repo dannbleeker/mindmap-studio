@@ -1,5 +1,5 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { type CSSProperties, memo, useEffect, useMemo, useRef } from "react";
+import { type CSSProperties, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Chip, DateChip } from "../../Chip";
 import { ProgressPie } from "../../ProgressPie";
 import { sanitizeRich } from "../../io/richText";
@@ -14,6 +14,26 @@ import type { TopicNode as TopicNodeT } from "./types";
 // Custom topic node: a rounded box honouring the model's NodeStyle, with marker emoji, the
 // topic text (inline-editable via contenteditable), an optional image, note/link affordances,
 // tag chips, and a collapse toggle. Four hidden handles let branches connect on any side.
+
+// The "double-click to edit" microcopy (#5) is shown on hover until the user edits a topic for the
+// first time, then never again (best-effort persisted, like the theme + panel prefs). Module-level so
+// every node shares the one flag without re-projecting node data.
+let editHintSeen = (() => {
+  try {
+    return localStorage.getItem("mindmap-edit-hint") === "seen";
+  } catch {
+    return false;
+  }
+})();
+function markEditHintSeen() {
+  if (editHintSeen) return;
+  editHintSeen = true;
+  try {
+    localStorage.setItem("mindmap-edit-hint", "seen");
+  } catch {
+    // best-effort — the hint just shows again next session
+  }
+}
 
 const HANDLE: CSSProperties = {
   opacity: 0,
@@ -99,6 +119,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     priority,
     attachmentCount,
     dimmed,
+    dropTarget,
   } = data;
   // Conditional-formatting style sits *under* the node's own style (manual styling wins).
   const style = condStyle ? { ...condStyle, ...ownStyle } : ownStyle;
@@ -108,6 +129,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   // with that character (caret at the end) instead of the existing topic + select-all.
   const seed = isEditing ? (editing?.seed ?? null) : null;
   const editRef = useRef<HTMLDivElement>(null);
+  // Hover state drives the lift/shadow (#5) and reveals the ＋ add affordances (#1).
+  const [hovered, setHovered] = useState(false);
   // Re-sanitise on render too (defence-in-depth: a topicRich could arrive via an imported .json).
   const richHtml = useMemo(() => (topicRich ? sanitizeRich(topicRich) : null), [topicRich]);
 
@@ -148,6 +171,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       if (raf) cancelAnimationFrame(raf);
     };
   }, [isEditing, topic, richHtml, seed]);
+
+  // The first real edit retires the "double-click to edit" microcopy for good.
+  useEffect(() => {
+    if (isEditing) markEditHintSeen();
+  }, [isEditing]);
 
   // Geometric shapes (diamond/ellipse/…) are painted by an SVG backdrop; the box itself goes
   // transparent and the text gets extra padding so it stays inside the narrowing outline.
@@ -202,19 +230,32 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         maxWidth: 320,
         lineHeight: 1.35,
         // Selected: a branded ring (node's branch colour, emerald for the root) + soft glow — the
-        // redesign's selection treatment, replacing React Flow's faint default. Canvas-only (exports
-        // never render selection), so it carries no canvas==export risk.
-        boxShadow: selected
-          ? `0 0 0 2px ${ringColor}, 0 0 0 6px ${ringColor}33, 0 8px 22px rgba(40,30,16,0.16)`
-          : geom
-            ? "none"
-            : isRoot
-              ? "0 6px 18px rgba(27,138,94,0.30)"
-              : "0 2px 8px rgba(40,30,16,0.10)",
+        // redesign's selection treatment, replacing React Flow's faint default. Hover gets a softer
+        // lift so the node reads as interactive (#5). Canvas-only (exports never render selection or
+        // hover), so it carries no canvas==export risk.
+        boxShadow: dropTarget
+          ? // Drag-to-reparent target: a bold emerald ring so the drop destination is unmistakable.
+            "0 0 0 3px #1b8a5e, 0 0 0 8px rgba(27,138,94,0.25), 0 8px 22px rgba(40,30,16,0.18)"
+          : selected
+            ? `0 0 0 2px ${ringColor}, 0 0 0 6px ${ringColor}33, 0 8px 22px rgba(40,30,16,0.16)`
+            : hovered
+              ? isRoot
+                ? "0 10px 26px rgba(27,138,94,0.40)"
+                : "0 6px 18px rgba(40,30,16,0.20)"
+              : geom
+                ? "none"
+                : isRoot
+                  ? "0 6px 18px rgba(27,138,94,0.30)"
+                  : "0 2px 8px rgba(40,30,16,0.10)",
+        // Hover lift + a pointer cursor signal "you can click/edit me" (#5); selection keeps the ring.
+        transform: hovered && !selected && !isEditing ? "translateY(-1px)" : undefined,
+        cursor: isEditing ? "text" : "pointer",
         // Read-only Power Filter: fade nodes that aren't on a path to a match.
         opacity: dimmed ? 0.22 : 1,
-        transition: "opacity 0.15s ease",
+        transition: "opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       onDoubleClick={(e) => {
         e.stopPropagation();
         editing?.beginEdit(id);
@@ -426,6 +467,58 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         >
           {collapsed ? "+" : "−"}
         </button>
+      ) : null}
+      {/* On-node ＋ add affordances (#1): child on the right edge, sibling below. Shown on hover or
+          selection; ≥24px desktop / ≥44px touch (see .mm-node-add). nodrag nopan so dragging from
+          them never moves the node. Canvas-only — not authored into exports. */}
+      {(hovered || selected) && !isEditing ? (
+        <>
+          <button
+            type="button"
+            className="mm-node-add nodrag nopan"
+            title="Add child"
+            aria-label="Add child"
+            onClick={(e) => {
+              e.stopPropagation();
+              editing?.addChild(id);
+            }}
+            style={
+              {
+                right: -13,
+                top: "50%",
+                transform: "translateY(-50%)",
+                "--mm-add-color": ringColor,
+              } as CSSProperties
+            }
+          >
+            +
+          </button>
+          {!isRoot ? (
+            <button
+              type="button"
+              className="mm-node-add nodrag nopan"
+              title="Add sibling"
+              aria-label="Add sibling"
+              onClick={(e) => {
+                e.stopPropagation();
+                editing?.addSibling(id);
+              }}
+              style={
+                {
+                  left: "50%",
+                  bottom: -13,
+                  transform: "translateX(-50%)",
+                  "--mm-add-color": ringColor,
+                } as CSSProperties
+              }
+            >
+              +
+            </button>
+          ) : null}
+        </>
+      ) : null}
+      {hovered && !isEditing && !editHintSeen ? (
+        <span className="mm-node-hint nodrag nopan">Double-click to edit</span>
       ) : null}
     </div>
   );

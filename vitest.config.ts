@@ -40,6 +40,8 @@ export default defineConfig({
       ["test/overlay-inspector.test.tsx", "jsdom"],
       ["test/menu-primitive.test.tsx", "jsdom"],
       ["test/command-palette.test.tsx", "jsdom"],
+      ["test/shortcuts-dialog.test.tsx", "jsdom"],
+      ["test/first-run-card.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.

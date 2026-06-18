@@ -75,6 +75,29 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(svg).toContain("#faf9f5");
   });
 
+  it("stays byte-stable + free of the redesign's canvas-only chrome (no export leakage)", () => {
+    // Deterministic given a fixed `today` (the only time-dependent input), so the UX-pass additions
+    // can't perturb the exported bytes. PNG/SVG/HTML/PDF all derive from this string via cleanSvg();
+    // the model-backed Office exports keep their own byte-determinism tests (docx/pptx/xlsx/ooxml).
+    const a = buildFlowSvg(doc, rects, palette, cssVar, false, "2026-01-01");
+    const b = buildFlowSvg(doc, rects, palette, cssVar, false, "2026-01-01");
+    expect(a).toBe(b);
+    // The hover ＋, coachmark, edit microcopy, drop indicator, first-run card and selection chrome
+    // are React/DOM-only — buildFlowSvg never walks them, so none can reach an export.
+    for (const leak of [
+      "Make child of", // #11 drop-target label
+      "Start your map", // #1 empty-map coachmark
+      "Double-click to edit", // #5 first-hover microcopy
+      "3 things to try", // #13 first-run card
+      "mm-node-add", // #1 hover ＋ affordance
+      "mm-coachmark", // #1
+      "mm-firstrun", // #13
+      "dropTarget", // #11 flag
+    ]) {
+      expect(a).not.toContain(leak);
+    }
+  });
+
   it("uses a per-map background colour over the theme default", () => {
     const withBg = buildFlowSvg(
       { ...doc, meta: { background: "#abcdef" } },

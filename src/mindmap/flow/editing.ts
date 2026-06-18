@@ -16,6 +16,12 @@ export interface EditingApi {
   commitEdit: (id: string, html: string) => void;
   /** Commit, then add + edit a sibling (Enter) or child (Tab). `html` is the raw editor HTML. */
   commitAndAdd: (id: string, html: string, what: "sibling" | "child") => void;
+  /** Add a child to a node and drop straight into editing it (the on-node hover ＋ child affordance,
+   *  shown on hover/selection). Unlike commitAndAdd this does NOT touch the node's own text, so it's
+   *  safe to call on a node that isn't currently being edited. */
+  addChild: (id: string) => void;
+  /** Add a sibling after a node and edit it (the on-node hover ＋ sibling affordance). */
+  addSibling: (id: string) => void;
   /** Leave edit mode without saving. */
   cancelEdit: () => void;
   /** Collapse/expand a node from its toggle. */

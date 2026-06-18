@@ -11,7 +11,7 @@ export interface IconRailProps {
   onFind: () => void;
   onImage: (event: ChangeEvent<HTMLInputElement>) => void;
   onPaste: () => void;
-  onAbout: () => void;
+  onShortcuts: () => void;
 }
 
 function RailBtn({
@@ -36,7 +36,7 @@ function RailBtn({
   );
 }
 
-export function IconRail({ onHome, onFind, onImage, onPaste, onAbout }: IconRailProps) {
+export function IconRail({ onHome, onFind, onImage, onPaste, onShortcuts }: IconRailProps) {
   return (
     <aside className="mm-rail">
       <button
@@ -61,7 +61,7 @@ export function IconRail({ onHome, onFind, onImage, onPaste, onAbout }: IconRail
       </label>
       <RailBtn icon="paste" label="Paste text → topics" onClick={onPaste} />
       <div className="mm-rail-spacer">
-        <RailBtn icon="help" label="About & help" onClick={onAbout} />
+        <RailBtn icon="help" label="Keyboard shortcuts" onClick={onShortcuts} />
       </div>
     </aside>
   );

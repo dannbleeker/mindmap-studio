@@ -501,6 +501,7 @@ export function MenuItem({
   disabled,
   closeOnSelect = true,
   title,
+  shortcut,
   onSelect,
 }: {
   icon?: ReactNode;
@@ -510,6 +511,8 @@ export function MenuItem({
   disabled?: boolean;
   closeOnSelect?: boolean;
   title?: string;
+  /** Optional keyboard hint shown right-aligned (aria-hidden, so it doesn't alter the item's name). */
+  shortcut?: string;
   onSelect: () => void;
 }) {
   const ctx = useContext(MenuCtx);
@@ -528,6 +531,11 @@ export function MenuItem({
       {icon}
       {label}
       {children}
+      {shortcut ? (
+        <span className="mm-menu-shortcut" aria-hidden="true">
+          {shortcut}
+        </span>
+      ) : null}
     </button>
   );
 }

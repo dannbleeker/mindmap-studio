@@ -502,6 +502,21 @@ describe("flow ops — copy/paste branch", () => {
     expect(ids.size).toBe(total); // every id is unique (no clash across two pastes)
   });
 
+  it("pasteBranch re-ids nested callouts so a pasted branch never shares a callout id (#3)", () => {
+    const src: MapNode = {
+      id: "src",
+      topic: "S",
+      children: [],
+      callouts: [{ id: "co1", text: "n", dx: 8, dy: 0 }],
+    };
+    const pasted = pasteBranch(base(), "b", src)
+      .doc.root.children.find((c) => c.id === "b")
+      ?.children.at(-1);
+    expect(pasted?.callouts?.[0]?.id).toBeDefined();
+    // Fresh callout id → the on-canvas Callouts overlay can't trip a React duplicate-key warning.
+    expect(pasted?.callouts?.[0]?.id).not.toBe("co1");
+  });
+
   it("pasteBranch mutates neither the input doc nor the source node", () => {
     const doc = base();
     const src = findNode(base(), "a") as MapNode;

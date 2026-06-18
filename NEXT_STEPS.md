@@ -12,8 +12,13 @@ redesign is complete** (2026-06-17): chrome (rail / two-row toolbar / inspector)
 overhaul + its four follow-ups, and the **menu/toolbar restructure** — one accessible Menu primitive
 (keyboard nav + viewport clamping), every dropdown + the canvas context menu migrated onto it,
 grouped rows, an editor **⌘K command palette**, and mobile bottom-sheet menus — all in `CHANGELOG.md`.
-Deployed to GitHub Pages on every push to `main` — live at
-<https://mindmap-studio.struktureretsundfornuft.dk/>.
+A **MindManager canvas-rendering fidelity pass is also complete** (2026-06-19): the five
+audited areas — markers (flat vector set), layouts (height-proportional / per-subtree tidy
+tree + fishbone), connectors (style picker + per-branch colour/dash), relationships
+(perpendicular-bow curve + arrowhead scaling), and boundaries (shape set + gradient +
+title-tab + dashed) — all ship with UI controls and `.json` schema fields, and all render
+identically on canvas and in export (see `CHANGELOG.md`). Deployed to GitHub Pages on every
+push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
 ## Open items
 

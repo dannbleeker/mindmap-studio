@@ -2,14 +2,13 @@ import {
   BaseEdge,
   EdgeLabelRenderer,
   type EdgeProps,
-  getBezierPath,
   useEdges,
   useInternalNode,
   useNodes,
 } from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { arrowHeadPath } from "./arrowhead";
-import { type Box, floatingPoints, getFloatingPoints } from "./floating";
+import { type Box, crosslinkBezier, floatingPoints, getFloatingPoints } from "./floating";
 import { type HopSegment, hopPath } from "./lineJumps";
 import { resolveLinkStyle } from "./style";
 import type { EdgeData, FlowEdge } from "./types";
@@ -83,12 +82,9 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
   if (!s || !t) return null;
   const { sx, sy, tx, ty } = getFloatingPoints(s, t);
   // The bezier carries the wide invisible hit-area (and is the visible line when line-jumps is off).
-  const [bezier, labelX, labelY] = getBezierPath({
-    sourceX: sx,
-    sourceY: sy,
-    targetX: tx,
-    targetY: ty,
-  });
+  // Built from the SHARED helper the exporter uses, so the curve bows along the same (horizontal) axis
+  // on screen and in exports — canvas == export.
+  const { path: bezier, labelX, labelY } = crosslinkBezier(sx, sy, tx, ty);
   const { color, width, dasharray, arrowAtTarget, arrowAtSource } = resolveLinkStyle(data ?? {});
   const dimOpacity = data?.dimmed ? 0.12 : 1;
 

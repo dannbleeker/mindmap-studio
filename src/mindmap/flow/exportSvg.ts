@@ -1,5 +1,5 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
-import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
+import { priorityColor, priorityLabel } from "../../priority";
 import { checkPath, piePath } from "../../progress";
 import { formatDateShort, isOverdue } from "../../taskDate";
 import { arrowHeadPath } from "./arrowhead";
@@ -12,6 +12,7 @@ import {
   branchEndpoints,
   branchWidths,
   childrenAxis,
+  crosslinkBezier,
   floatingPoints,
   taperedRibbonPath,
 } from "./floating";
@@ -356,14 +357,10 @@ export function buildFlowSvg(
         arrowAtTarget,
         arrowAtSource,
       } = resolveLinkStyle(e.data);
-      // Hopped chord when line-jumps is on; otherwise the gentle S-bezier.
+      // Hopped chord when line-jumps is on; otherwise the gentle S-bezier from the SAME helper the
+      // canvas edge uses, so the relationship bows identically on screen and here (canvas == export).
       const self = lineJumps ? hopSegments.find((seg) => seg.id === e.id) : undefined;
-      const linePath = self
-        ? hopPath(self, hopSegments)
-        : (() => {
-            const mx = (sx + tx) / 2;
-            return `M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}`;
-          })();
+      const linePath = self ? hopPath(self, hopSegments) : crosslinkBezier(sx, sy, tx, ty).path;
       const dashAttr = dasharray ? ` stroke-dasharray="${dasharray}"` : "";
       parts.push(
         `<path d="${linePath}" fill="none" stroke="${clColor}" stroke-width="${clWidth}"${dashAttr}/>`,
@@ -472,10 +469,10 @@ export function buildFlowSvg(
     }
     let badgeX = r.x + pad + ins.left;
     if (d.priority) {
-      const label = PRIORITY_LABEL[d.priority] ?? "?";
+      const label = priorityLabel(d.priority);
       const w = label.length * 6.4 + 8;
       parts.push(
-        `<rect x="${r2(badgeX)}" y="${r2(r.y + r.h - 20)}" width="${r2(w)}" height="16" rx="5" fill="${PRIORITY_COLOR[d.priority] ?? "#888"}"/>`,
+        `<rect x="${r2(badgeX)}" y="${r2(r.y + r.h - 20)}" width="${r2(w)}" height="16" rx="5" fill="${priorityColor(d.priority)}"/>`,
         `<text x="${r2(badgeX + 4)}" y="${r2(r.y + r.h - 8)}" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
       );
       badgeX += w + 4;

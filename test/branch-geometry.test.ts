@@ -5,6 +5,7 @@ import {
   branchEndpoints,
   branchWidths,
   childrenAxis,
+  crosslinkBezier,
   taperedRibbonPath,
 } from "../src/mindmap/flow/floating";
 
@@ -59,5 +60,15 @@ describe("branch geometry", () => {
   it("branchWidths tapers thinner with depth (chunky main branches → fine sub-branches)", () => {
     expect(branchWidths(1).trunk).toBeGreaterThan(branchWidths(3).trunk);
     expect(branchWidths(1).trunk).toBeGreaterThan(branchWidths(1).tip);
+  });
+
+  it("crosslinkBezier: a horizontal S-curve (control points at the midpoint X) — canvas == export", () => {
+    const { path, labelX, labelY } = crosslinkBezier(0, 0, 200, 100);
+    // Both control points pinned to mx=100, so the curve bows along X — the SAME axis the live canvas
+    // now uses (it previously used React Flow's vertical default, disagreeing with this exporter path).
+    expect(path).toBe("M 0 0 C 100 0 100 100 200 100");
+    expect(labelX).toBe(100); // label at the curve's geometric midpoint
+    expect(labelY).toBe(50);
+    expect(crosslinkBezier(0, 0, 200, 100).path).toBe(path); // deterministic
   });
 });

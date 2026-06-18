@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import { sanitizeSvg } from "../src/io/svgSanitize";
 import { arrowHeadPath } from "../src/mindmap/flow/arrowhead";
 import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
+import { crosslinkBezier, floatingPoints } from "../src/mindmap/flow/floating";
 import { shapePath } from "../src/mindmap/flow/shapes";
 import {
   CROSSLINK_COLOR,
@@ -190,6 +191,37 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
 
   it("carries the cross-link label (dropped by the old export)", () => {
     expect(svg).toContain("depends on");
+  });
+
+  it("draws the relationship as the SHARED crosslink S-bezier (canvas == export)", () => {
+    // The exporter now builds the visible relationship line from crosslinkBezier — the same helper the
+    // live CrosslinkEdge uses — so the curve bows along the same (horizontal) axis on screen and here.
+    const toBox = (r: NodeRect) => ({ cx: r.x + r.w / 2, cy: r.y + r.h / 2, w: r.w, h: r.h });
+    const { sx, sy, tx, ty } = floatingPoints(
+      toBox(rects.get("a") as NodeRect),
+      toBox(rects.get("c") as NodeRect),
+    );
+    expect(svg).toContain(crosslinkBezier(sx, sy, tx, ty).path);
+  });
+
+  it("exports an imported priority 4–9 as its number on a badge — never '?'", () => {
+    const pdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "p",
+      title: "P",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "hi", topic: "Hi", task: { priority: 5 }, children: [] }],
+      },
+    };
+    const prects = new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 80, h: 40 }],
+      ["hi", { x: 200, y: 0, w: 80, h: 40 }],
+    ]);
+    const out = buildFlowSvg(pdoc, prects, palette, cssVar);
+    expect(out).toMatch(/>5<\/text>/); // the priority badge shows the number
+    expect(out).not.toContain(">?<"); // and never the old "?" fallback
   });
 
   it("draws a directional arrowhead on the cross-link (a filled triangle at the target)", () => {

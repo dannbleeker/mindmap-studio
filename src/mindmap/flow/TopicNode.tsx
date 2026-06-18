@@ -3,7 +3,7 @@ import { type CSSProperties, memo, useEffect, useMemo, useRef, useState } from "
 import { Chip, DateChip } from "../../Chip";
 import { ProgressPie } from "../../ProgressPie";
 import { sanitizeRich } from "../../io/richText";
-import { PRIORITY_COLOR, PRIORITY_LABEL } from "../../priority";
+import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
 import { isOverdue, todayISO } from "../../taskDate";
@@ -405,12 +405,12 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           >
             {priority ? (
               <Chip
-                title={`${PRIORITY_LABEL[priority] ?? ""} priority`}
-                bg={PRIORITY_COLOR[priority] ?? "#888"}
+                title={`${priorityLabel(priority)} priority`}
+                bg={priorityColor(priority)}
                 color="#fff"
                 fontWeight={600}
               >
-                {PRIORITY_LABEL[priority] ?? "?"}
+                {priorityLabel(priority)}
               </Chip>
             ) : null}
             {progress ? (

@@ -153,3 +153,20 @@ export function taperedRibbonPath(
     "Z",
   ].join(" ");
 }
+
+/** The relationship (cross-link) curve: a cubic that bows along the X axis, with both control points
+ *  pinned to the horizontal midpoint. Shared by the live canvas edge (BranchEdge's sibling
+ *  CrosslinkEdge) AND the SVG exporter so a relationship bows the SAME way on screen and in every
+ *  export — canvas == export. Without this the canvas used React Flow's default bottom/top handles
+ *  (a vertical bow) while the exporter drew this horizontal S, so the two disagreed. The label sits at
+ *  the curve's geometric midpoint. */
+export function crosslinkBezier(
+  sx: number,
+  sy: number,
+  tx: number,
+  ty: number,
+): { path: string; labelX: number; labelY: number } {
+  const mx = (sx + tx) / 2;
+  const path = `M ${r2(sx)} ${r2(sy)} C ${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(ty)} ${r2(tx)} ${r2(ty)}`;
+  return { path, labelX: (sx + tx) / 2, labelY: (sy + ty) / 2 };
+}

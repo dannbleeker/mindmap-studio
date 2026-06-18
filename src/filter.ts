@@ -1,5 +1,5 @@
 import type { MapNode, MindMapDoc } from "./model/types";
-import { PRIORITY_LABEL } from "./priority";
+import { priorityLabel } from "./priority";
 import { progressMap } from "./progress";
 import { isDueSoon, isOverdue } from "./taskDate";
 
@@ -54,7 +54,7 @@ export function describeCriteria(c: FilterCriteria): string {
   if (c.markers.length) parts.push(c.markers.join(" "));
   if (c.tags.length) parts.push(c.tags.map((t) => `#${t}`).join(" "));
   if (c.due) parts.push(DUE_LABEL[c.due]);
-  if (c.priority) parts.push(`${PRIORITY_LABEL[c.priority] ?? "?"} priority`);
+  if (c.priority) parts.push(`${priorityLabel(c.priority)} priority`);
   return parts.join(" · ") || "everything";
 }
 

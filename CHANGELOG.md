@@ -935,6 +935,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Relationship lines now bow the same way on screen and in exports.** The live canvas drew a
+  relationship with React Flow's default bottom/top handles (a *vertical* bow) while the SVG/PNG/PDF
+  exporter drew a *horizontal* S-curve — so the same link could curve the opposite way in a deliverable.
+  Both now build the curve from one shared helper (`crosslinkBezier`), restoring canvas == export.
+
+- **An imported task priority of 4–9 no longer renders as a grey "?".** `TaskInfo.priority` is modelled
+  1..9 (MindManager's range), but the badge only defined 1–3 (High/Med/Low) and fell back to "?" for
+  anything higher. Priorities 4–9 (which arrive via import) now show their number on a neutral badge,
+  on the canvas and in exports alike.
+
 - **A new topic is now focused for typing immediately.** Adding a topic (Enter / Tab / Ctrl+Enter)
   opens it in edit mode, but a freshly-created node is briefly `visibility:hidden` while React Flow
   measures it — so the one-shot `focus()` was a no-op and the new node sat in edit mode *unfocused*,

@@ -116,12 +116,30 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     // Seed with the rich HTML so existing formatting stays editable; else plain text.
     if (richHtml) el.innerHTML = richHtml;
     else el.textContent = topic;
-    el.focus();
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const sel = window.getSelection();
-    sel?.removeAllRanges();
-    sel?.addRange(range);
+    // A freshly-CREATED node is briefly `visibility:hidden` while React Flow measures it, so the
+    // first focus() is a no-op (focus can't land on a hidden element) — that left a new node in edit
+    // mode but unfocused, so you couldn't type into it. Retry across a few frames until focus lands
+    // (an existing node, e.g. via F2, is already visible so it succeeds on the first try).
+    let raf = 0;
+    let tries = 0;
+    const place = () => {
+      el.focus();
+      if (document.activeElement === el) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+        return;
+      }
+      if (tries++ < 10 && typeof requestAnimationFrame === "function") {
+        raf = requestAnimationFrame(place);
+      }
+    };
+    place();
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [isEditing, topic, richHtml]);
 
   // Geometric shapes (diamond/ellipse/…) are painted by an SVG backdrop; the box itself goes

@@ -877,6 +877,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **A new topic is now focused for typing immediately.** Adding a topic (Enter / Tab / Ctrl+Enter)
+  opens it in edit mode, but a freshly-created node is briefly `visibility:hidden` while React Flow
+  measures it — so the one-shot `focus()` was a no-op and the new node sat in edit mode *unfocused*,
+  forcing a click before you could type. The editor now retries focus across a few frames until it
+  lands (an existing node, e.g. via F2, still focuses on the first try).
+
 - **Toolbar dropdown menus (Panels / Insert / Canvas) no longer open as an invisible sliver.**
   Row 2 of the toolbar sets `overflow-x: auto` for horizontal scrolling, which per CSS coerces
   `overflow-y` too — so the absolutely-positioned dropdown was clipped to the ~50px toolbar row and

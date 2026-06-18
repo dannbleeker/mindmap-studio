@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Ctrl+Enter adds a child topic; deleting a branch asks first.** With a topic selected,
+  **Ctrl/⌘+Enter** now adds a **child** (plain Enter still adds a sibling, Tab also adds a child).
+  And **Delete** now **confirms before removing a topic that has sub-topics** ("Delete X and its N
+  sub-topics? This removes the whole branch.") — the guard applies wherever you delete (keyboard,
+  right-click menu, on-node popover); childless topics still delete instantly. *(Fixes the
+  keyboard help, which wrongly listed Ctrl+Enter as "add a parent".)*
+
 - **Command palette in the editor (⌘K / Ctrl-K).** Press **⌘K** anywhere in the editor to fuzzy-search
   and run any toolbar action — present, export to any format, toggle a panel, switch layout, fit,
   group a branch, and more — without hunting through menus. Selection-only actions (Focus / Group /

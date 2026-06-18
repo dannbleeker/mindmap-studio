@@ -17,17 +17,6 @@ Deployed to GitHub Pages on every push to `main` — live at
 
 ## Open items
 
-- [ ] **Keyboard-editing tweaks (selected-node shortcuts).** In `FlowMindMap.tsx`'s document keydown:
-      - **Ctrl+Enter → add a child** of the selected node (today Ctrl+Enter is unbound; Tab adds a
-        child, Enter adds a sibling). Reconcile the docs — `USER_GUIDE.md` currently claims
-        "Ctrl + Enter — add a parent", which the code never bound; update it to the new child behaviour.
-      - **Delete-with-children confirmation** — `Delete` already removes the selected node, but with no
-        prompt. When the node has descendants, `window.confirm` first (it removes the topic *and* the
-        whole subtree below). (Mirror the existing relationship-delete confirm at `FlowMindMap.tsx:1178`.)
-      - *(Already working, no change needed: **F2** edits the selected topic inline; **Delete** deletes
-        a childless node. Verified 2026-06-18.)*
-      Add/extend coverage in `test/flowmindmap.test.tsx` (Ctrl+Enter adds a child; Delete on a parent
-      prompts and only deletes on confirm).
 - [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
       spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
       SimpleMind file) fully close them.

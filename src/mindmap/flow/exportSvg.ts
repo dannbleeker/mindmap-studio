@@ -1,3 +1,4 @@
+import { markerImage } from "../../icons";
 import type { MapNode, MindMapDoc } from "../../model/types";
 import { priorityColor, priorityLabel } from "../../priority";
 import { checkPath, piePath } from "../../progress";
@@ -499,6 +500,21 @@ export function buildFlowSvg(
       textTop = r.y + pad + ih;
     }
 
+    // Markers as fixed-size vector tiles, centred above the title (matches the canvas marker row →
+    // canvas == export). An unknown marker (no vector) falls back into the title text below.
+    const tileIcons = (d.icons ?? []).filter((ic) => markerImage(ic));
+    if (tileIcons.length) {
+      const rowW = tileIcons.length * 16 - 2;
+      let mx = r.x + r.w / 2 - rowW / 2;
+      for (const ic of tileIcons) {
+        parts.push(
+          `<image x="${r2(mx)}" y="${r2(textTop)}" width="14" height="14" href="${esc(markerImage(ic) as string)}"/>`,
+        );
+        mx += 16;
+      }
+      textTop += 18;
+    }
+
     // The priority/progress/due chips sit in a reserved strip at the bottom; the inline task-info line
     // (start ▸ duration ▸ resources) sits just above them. Both reserved so the title doesn't overlap.
     const taskInfo = [
@@ -516,8 +532,10 @@ export function buildFlowSvg(
     // label stays inside its box in the export instead of overflowing (canvas == export).
     const contentW = Math.max(16, r.w - 2 * pad - ins.left - ins.right);
     const lines = wrapText(d.topic, contentW, fontSize);
-    if (d.icons?.length) lines[0] = `${d.icons.join(" ")} ${lines[0] ?? ""}`.trim();
-    if (d.number) lines[0] = `${d.number} ${lines[0] ?? ""}`.trim();
+    // Number + any markers WITHOUT a vector (fallback) prefix the title; vector markers drew above.
+    const textIcons = (d.icons ?? []).filter((ic) => !markerImage(ic));
+    const prefix = [...textIcons, d.number].filter(Boolean).join(" ");
+    if (prefix) lines[0] = `${prefix} ${lines[0] ?? ""}`.trim();
     const nonEmpty = lines.filter((l) => l.length > 0);
     // Note / hyperlink indicators inline after the title (mirrors the canvas), so the export keeps the
     // "has a note / link" cue it used to drop.

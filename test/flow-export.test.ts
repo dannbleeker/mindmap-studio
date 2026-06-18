@@ -136,9 +136,12 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(svg).toMatch(/<text[^>]*>Root<\/text>/);
   });
 
-  it("renders a multi-line topic as stacked <tspan> lines with the icon on line 1", () => {
-    expect(svg).toMatch(/<tspan[^>]*>⭐ Multi<\/tspan>/);
+  it("renders a multi-line topic as stacked <tspan> lines + the marker as a vector tile", () => {
+    expect(svg).toMatch(/<tspan[^>]*>Multi<\/tspan>/);
     expect(svg).toMatch(/<tspan[^>]*dy="[0-9.]+"[^>]*>Line<\/tspan>/);
+    // the ⭐ marker now renders as a flat vector <image> tile, not an emoji glyph in the text
+    expect(svg).toContain('href="data:image/svg+xml,');
+    expect(svg).not.toMatch(/<tspan[^>]*>⭐/);
   });
 
   it("draws a node border from the style shorthand colour", () => {
@@ -551,7 +554,7 @@ describe("flow exportSvg survives the cleanSvg pipeline (sanitizeSvg)", () => {
 
   it("keeps every topic + multi-line tspan", () => {
     expect(out).toContain("Root");
-    expect(out).toMatch(/<tspan[^>]*>⭐ Multi<\/tspan>/);
+    expect(out).toMatch(/<tspan[^>]*>Multi<\/tspan>/);
     expect(out).toContain("Line");
   });
 
@@ -564,9 +567,9 @@ describe("flow exportSvg survives the cleanSvg pipeline (sanitizeSvg)", () => {
     expect(out).toContain("Review me");
   });
 
-  it("keeps the marker icon and the image data URL", () => {
-    expect(out).toContain("⭐");
-    expect(out).toContain("data:image/png;base64,");
+  it("keeps the marker (vector tile) and the image data URL", () => {
+    expect(out).toContain("data:image/svg+xml,"); // the ⭐ marker now renders as a vector <image>
+    expect(out).toContain("data:image/png;base64,"); // the topic image
   });
 
   it("keeps all path geometry (3 branches + 1 crosslink line + 1 crosslink arrowhead)", () => {

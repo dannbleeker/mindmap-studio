@@ -2,6 +2,7 @@ import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { type CSSProperties, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Chip, DateChip } from "../../Chip";
 import { ProgressPie } from "../../ProgressPie";
+import { markerImage } from "../../icons";
 import { sanitizeRich } from "../../io/richText";
 import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
@@ -351,13 +352,41 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             }}
           />
         ) : null}
+        {icons?.length ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 2,
+              marginBottom: 2,
+            }}
+          >
+            {icons.map((ic) => {
+              const url = markerImage(ic);
+              return url ? (
+                <img
+                  key={ic}
+                  src={url}
+                  alt=""
+                  width={14}
+                  height={14}
+                  style={{ display: "block" }}
+                />
+              ) : (
+                <span key={ic} style={{ fontSize: 13 }}>
+                  {ic}
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
         <span style={{ whiteSpace: "pre-wrap" }}>
           {number ? (
             <span style={{ marginRight: 5, opacity: 0.55, fontVariantNumeric: "tabular-nums" }}>
               {number}
             </span>
           ) : null}
-          {icons?.length ? <span style={{ marginRight: 4 }}>{icons.join(" ")}</span> : null}
           {isEditing ? (
             <span
               ref={editRef}

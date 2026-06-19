@@ -1,14 +1,12 @@
-import type { CSSProperties } from "react";
 import type { SelectedEdge } from "../mindmap";
 import { InspectorResizer } from "./InspectorResizer";
+import { SWATCHES, fieldLabel, seg, segRow } from "./inspectorControls";
 
 // EdgeInspector — the right-panel shown when a relationship (cross-link) edge is selected, in place of
 // the node InfoPanel / MapPanel. Styled via .mm-inspector* + --ed-* tokens (matching MapPanel) so it
 // re-themes with the chrome. Edits go through the canvas's edge mutators (setLinkLabel/Arrow/Style,
 // deleteLink); the `edge` prop is the resolved SelectedEdge (every field has a concrete value).
 
-// A small set of relationship colours + the accent default; "" resets to the shared CROSSLINK_COLOR.
-const SWATCHES = ["#8b87e0", "#e0697f", "#3f9e6e", "#d98a2b", "#3b82c4", "#111827"];
 const WIDTHS: { w: number; label: string }[] = [
   { w: 1, label: "Thin" },
   { w: 1.5, label: "Medium" },
@@ -25,29 +23,6 @@ const ARROWS: { a: SelectedEdge["arrow"]; glyph: string; title: string }[] = [
   { a: "both", glyph: "↔", title: "Arrows at both ends" },
   { a: "none", glyph: "—", title: "No arrowheads (a plain line)" },
 ];
-
-const fieldLabel: CSSProperties = {
-  fontSize: 11,
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
-  color: "var(--ed-faint)",
-  margin: "12px 0 5px",
-};
-const segRow: CSSProperties = { display: "flex", flexWrap: "wrap", gap: 4 };
-
-function seg(active: boolean): CSSProperties {
-  return {
-    border: `1px solid ${active ? "var(--ed-accent)" : "var(--ed-border)"}`,
-    background: active ? "var(--ed-accent-tint)" : "var(--ed-card)",
-    color: active ? "var(--ed-accent)" : "var(--ed-ink)",
-    borderRadius: 7,
-    cursor: "pointer",
-    fontSize: 12.5,
-    fontWeight: 600,
-    padding: "3px 9px",
-  };
-}
 
 export function EdgeInspector({
   edge,

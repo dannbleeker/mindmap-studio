@@ -16,9 +16,10 @@
 // and skipped. A stack-based outline builder reconstructs the tree.
 
 import { XMLParser } from "fast-xml-parser";
-import { strFromU8, unzipSync } from "fflate";
+import { strFromU8 } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { escapeXml, zipOoxml } from "./ooxml";
+import { unzipOrThrow } from "./zip";
 
 const NS_MAIN = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
 const NS_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
@@ -280,12 +281,7 @@ function buildTree(rows: ParsedRow[]): MapNode {
  * nesting level; a stack-based outline builder reconstructs the tree.
  */
 export function fromXlsx(bytes: Uint8Array): MindMapDoc {
-  let files: Record<string, Uint8Array>;
-  try {
-    files = unzipSync(bytes);
-  } catch {
-    throw new Error("Not a valid .xlsx file (could not unzip)");
-  }
+  const files = unzipOrThrow(bytes, ".xlsx");
 
   const sheetEntry = files["xl/worksheets/sheet1.xml"];
   if (!sheetEntry) throw new Error("No xl/worksheets/sheet1.xml found in .xlsx");

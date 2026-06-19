@@ -1,7 +1,8 @@
 import { XMLParser } from "fast-xml-parser";
-import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
+import { strFromU8, strToU8, zipSync } from "fflate";
 import type { CrossLink, MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
+import { unzipOrThrow } from "./zip";
 
 // SimpleMind `.smmx` <-> canonical model.
 //
@@ -58,12 +59,7 @@ function linkOf(t: Xml): string {
 }
 
 export function fromSmmx(bytes: Uint8Array): MindMapDoc {
-  let files: Record<string, Uint8Array>;
-  try {
-    files = unzipSync(bytes);
-  } catch {
-    throw new Error("Not a valid .smmx file (could not unzip)");
-  }
+  const files = unzipOrThrow(bytes, ".smmx");
   const xml = files[MINDMAP_PATH];
   if (!xml) throw new Error(`Unsupported .smmx: no ${MINDMAP_PATH}`);
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });

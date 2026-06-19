@@ -7,14 +7,9 @@
 
 import type { MapNode, MindMapDoc } from "../model/types";
 import { presentationSlides } from "../present/slides";
-
-// Quote-safe: deck text lands in element content here, but escaping quotes too
-// keeps it safe if it is ever moved into an attribute, and costs nothing.
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (c) =>
-    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c === '"' ? "&quot;" : "&#39;",
-  );
-}
+// Quote-safe (attr-level): deck text lands in element content here, but escaping quotes too keeps it
+// safe if it is ever moved into an attribute, and costs nothing.
+import { escapeHtmlAttr as escapeHtml } from "./htmlEscape";
 
 function bulletsHtml(node: MapNode): string {
   if (node.children.length === 0) return "";

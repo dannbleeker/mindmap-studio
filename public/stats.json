@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-19T18:17:05.678Z",
-  "commit": "81976a9",
+  "generatedAt": "2026-06-19T18:30:07.465Z",
+  "commit": "18f110d",
   "headline": {
-    "linesTsJs": 40366,
-    "tests": 1068,
+    "linesTsJs": 40381,
+    "tests": 1069,
     "lineCoveragePct": 83.65,
-    "commits": 577,
+    "commits": 579,
     "ageDays": 7,
     "trackedFiles": 305,
     "featureManualPct": 100,
@@ -16,12 +16,12 @@
     {
       "category": "App code (src)",
       "files": 140,
-      "lines": 24106
+      "lines": 24108
     },
     {
       "category": "Unit tests",
       "files": 104,
-      "lines": 14538
+      "lines": 14551
     },
     {
       "category": "Build scripts",
@@ -62,29 +62,29 @@
     }
   },
   "tests": {
-    "unit": 1068,
+    "unit": 1069,
     "e2e": 0,
-    "durationMs": 42395,
+    "durationMs": 42892,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 14619
+        "ms": 14178
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6230
+        "ms": 6562
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5993
+        "ms": 6276
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4003
+        "ms": 3870
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1926
+        "ms": 1896
       }
     ]
   },
@@ -190,15 +190,15 @@
   "bundle": {
     "jsGzipKb": 252.2,
     "cssGzipKb": 7.3,
-    "totalGzipKb": 259.4,
-    "entryGzipKb": 126,
+    "totalGzipKb": 259.5,
+    "entryGzipKb": 126.1,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 16963,
     "chapters": 11,
-    "appLoc": 24106,
+    "appLoc": 24108,
     "docToCodeRatio": 0.7
   },
   "featureCoverage": {
@@ -279,22 +279,22 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 7,
-    "commits": 577,
+    "commits": 579,
     "commits7d": 490,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 311
+        "count": 312
       },
       {
         "name": "github-actions[bot]",
-        "count": 266
+        "count": 267
       }
     ],
     "churn30d": {
-      "added": 80533,
-      "removed": 24862
+      "added": 80610,
+      "removed": 24917
     },
-    "changelogEntries": 187
+    "changelogEntries": 188
   }
 }

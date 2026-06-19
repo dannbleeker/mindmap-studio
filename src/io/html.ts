@@ -1,9 +1,7 @@
 // Self-contained HTML export: embed the map's SVG in a standalone document that
 // opens anywhere, offline, with no dependencies. Pure + deterministic.
 
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>]/g, (c) => (c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;"));
-}
+import { escapeHtmlContent as escapeHtml } from "./htmlEscape";
 
 export function wrapSvgHtml(svg: string, title: string): string {
   return `<!doctype html>

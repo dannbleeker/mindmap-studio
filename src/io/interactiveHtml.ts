@@ -16,25 +16,9 @@
 
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
-
-// Quote- and slash-safe: escaping `"`/`'` keeps text safe in attributes, and
-// escaping `/` means a topic containing "</script>" survives as text rather than
-// closing the embedded data block. `&` first so we don't double-escape.
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>"'/]/g, (c) =>
-    c === "&"
-      ? "&amp;"
-      : c === "<"
-        ? "&lt;"
-        : c === ">"
-          ? "&gt;"
-          : c === '"'
-            ? "&quot;"
-            : c === "'"
-              ? "&#39;"
-              : "&#47;",
-  );
-}
+// Quote- and slash-safe: escaping `"`/`'` keeps text safe in attributes, and escaping `/` means a
+// topic containing "</script>" survives as text rather than closing the embedded data block.
+import { escapeHtmlScriptSafe as escapeHtml } from "./htmlEscape";
 
 // One outline row: the topic plus (when present) a note and a hyperlink, then
 // its children nested inside a <ul>. A node with children gets a toggle button;

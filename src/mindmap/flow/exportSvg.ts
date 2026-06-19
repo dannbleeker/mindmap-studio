@@ -16,7 +16,7 @@ import {
   crosslinkBezier,
   floatingPoints,
 } from "./floating";
-import { type Rect, boundaryPath, dashArray, r2 } from "./geometry";
+import { type Rect, boundaryPath, dashArray, matchBorderColor, r2 } from "./geometry";
 import { type HopSegment, hopPath } from "./lineJumps";
 import { project } from "./project";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
@@ -85,7 +85,7 @@ function boxOf(rect: NodeRect): Box {
 function parseBorder(border: string | undefined): { width: number; color: string } | null {
   if (!border) return null;
   const width = Number.parseFloat(border) || 2;
-  const color = border.match(/#[0-9a-f]{3,8}|rgba?\([^)]+\)/i)?.[0] ?? null;
+  const color = matchBorderColor(border);
   return color ? { width, color } : null;
 }
 

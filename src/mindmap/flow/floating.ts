@@ -138,13 +138,19 @@ export function taperedRibbonPath(
   const c1y = horizontal ? sy : sy + dy * 0.5;
   const c2x = horizontal ? tx - dx * 0.5 : tx;
   const c2y = horizontal ? ty : ty - dy * 0.5;
-  // Offset perpendicular to the local tangent at each end, not the chord — even taper.
-  const sl = Math.hypot(c1x - sx, c1y - sy) || 1;
-  const spx = -(c1y - sy) / sl;
-  const spy = (c1x - sx) / sl;
-  const tl = Math.hypot(tx - c2x, ty - c2y) || 1;
-  const tpx = -(ty - c2y) / tl;
-  const tpy = (tx - c2x) / tl;
+  // Offset perpendicular to the local tangent at each end, not the chord — even taper. When an end
+  // segment is degenerate (axis-aligned overlap: dx===0 on a horizontal side, dy===0 on a vertical
+  // one → zero-length tangent), fall back to the CHORD normal so the ribbon keeps its width instead
+  // of collapsing to a zero-area, invisible path.
+  const chordLen = Math.hypot(dx, dy) || 1;
+  const cnx = -dy / chordLen;
+  const cny = dx / chordLen;
+  const sl = Math.hypot(c1x - sx, c1y - sy);
+  const spx = sl < 1e-6 ? cnx : -(c1y - sy) / sl;
+  const spy = sl < 1e-6 ? cny : (c1x - sx) / sl;
+  const tl = Math.hypot(tx - c2x, ty - c2y);
+  const tpx = tl < 1e-6 ? cnx : -(ty - c2y) / tl;
+  const tpy = tl < 1e-6 ? cny : (tx - c2x) / tl;
   return [
     `M ${r2(sx + spx * trunkHW)} ${r2(sy + spy * trunkHW)}`,
     `C ${r2(c1x + spx * trunkHW)} ${r2(c1y + spy * trunkHW)} ${r2(c2x + tpx * tipHW)} ${r2(c2y + tpy * tipHW)} ${r2(tx + tpx * tipHW)} ${r2(ty + tpy * tipHW)}`,

@@ -60,6 +60,18 @@ describe("branch geometry", () => {
     expect(d).toBe(taperedRibbonPath(0, 0, -200, -100, "left", 6, 1.5)); // deterministic
   });
 
+  it("taperedRibbonPath keeps width on an axis-aligned branch (no zero-area collapse)", () => {
+    // 'right' side but the child sits straight below → dx===0; must fall back to the chord normal so
+    // the ribbon doesn't degenerate to an invisible zero-area path.
+    const d = taperedRibbonPath(133, 100, 133, 160, "right", 7.5, 2.4);
+    const m = d.match(/^M ([\d.-]+) ([\d.-]+)/) as RegExpMatchArray;
+    expect(Math.abs(Number(m[1]) - 133)).toBeGreaterThan(5); // start is offset off the spine
+    // vertical-side mirror: 'bottom' with the child straight to the right → dy===0
+    const v = taperedRibbonPath(100, 133, 160, 133, "bottom", 7.5, 2.4);
+    const mv = v.match(/^M ([\d.-]+) ([\d.-]+)/) as RegExpMatchArray;
+    expect(Math.abs(Number(mv[2]) - 133)).toBeGreaterThan(5);
+  });
+
   it("boundaryPath: every shape is a closed path (cloud bumps, polygon corners, ellipse arcs)", () => {
     expect(boundaryPath("rect", 0, 0, 100, 60)).toBe("M 0 0 H 100 V 60 H 0 Z");
     expect(boundaryPath("roundRect", 0, 0, 100, 60)).toContain("A"); // rounded corners
@@ -68,6 +80,13 @@ describe("branch geometry", () => {
     expect(boundaryPath("cloud", 0, 0, 100, 60)).toContain("Q"); // scalloped bumps
     for (const s of ["roundRect", "rect", "ellipse", "polygon", "cloud"] as const)
       expect(boundaryPath(s, 0, 0, 100, 60).trim().endsWith("Z"), s).toBe(true);
+  });
+
+  it("boundaryPath roundRect clamps its corner radius so a small box can't invert", () => {
+    // rr is clamped to min(16, w/2, h/2); a 10×8 box stays within [0,10]×[0,8] with no backwards run.
+    const d = boundaryPath("roundRect", 0, 0, 10, 8);
+    expect(d).not.toMatch(/-\d/); // no negative coordinate (the un-clamped rr=16 produced H -6 / V -8)
+    expect(d.trim().endsWith("Z")).toBe(true);
   });
 
   it("dashArray maps the dash styles", () => {

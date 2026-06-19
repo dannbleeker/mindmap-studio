@@ -989,6 +989,26 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Canvas-fidelity bug-hunt fixes (post-merge sweep of the MindManager rendering pass).** A review
+  of the just-landed markers/layouts/connectors/relationships/boundaries code surfaced a cluster of
+  defects, now fixed with tests: the **fishbone layout** now positions sub-causes at **any depth**
+  (depth-3+ nodes used to get no position and stack on the spine head at the origin); an **organic
+  branch that runs perfectly axis-aligned** (a child dragged directly in line with its parent) no
+  longer collapses to an invisible zero-area ribbon (falls back to the chord normal); the export
+  **due-date chip keeps its 📅 glyph** to match the canvas; `fromFlow` now carries a node's **roll-up
+  binding and attachments** through the round-trip (they were silently dropped); `boundaryPath`
+  **clamps its corner radius** so a small rounded-rect box can't invert; an imported empty-string
+  branch colour now **falls back to the palette** instead of emitting an empty stroke; and the export
+  root-background fallback colour matches the canvas. A follow-up pass cleared the remaining reviewed
+  findings: an **emoji / unknown marker** (e.g. an imported 👍) now draws in the marker row above the
+  title in exports — matching the canvas — instead of being prepended to the title text; **bulk marker /
+  tag toggles reach a selected floating topic** (the single-node `toggleIcon` / `setTags` now resolve
+  floating topics too, so the decision and the mutation agree); the export's **outline number** is drawn
+  de-emphasised (opacity 0.55) like the canvas; an **underline leaf** wraps at its true 8px padding;
+  and a topic **image with no stored size** uses the same fallback + aspect handling on canvas and in
+  export. All canvas==export-invariant or round-trip correctness fixes — no behaviour change to normal
+  maps.
+
 - **Exports now match the canvas for wrapped text, callouts, indicators, collapsed branches and
   images.** Several things rendered on screen but were dropped or distorted in the SVG / PNG / PDF
   export; they now render identically (canvas == export): long topic labels **word-wrap** inside their

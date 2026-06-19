@@ -41,7 +41,11 @@ const doc: MindMapDoc = {
       side: "left",
       task: { priority: 1 },
     }),
-    n("c", "Gamma", { image: { url: "data:abc", width: 100, height: 50 } }),
+    n("c", "Gamma", {
+      image: { url: "data:abc", width: 100, height: 50 },
+      rollup: "src-map",
+      attachments: [{ name: "spec.pdf", dataUrl: "data:application/pdf;base64,AA==", size: 3 }],
+    }),
   ]),
   links: [
     { id: "l1", from: "a", to: "b", label: "rel" },
@@ -181,6 +185,14 @@ describe("flow fromFlow (React Flow → model)", () => {
     expect(fresh?.topic).toBe("Fresh");
     expect(fresh?.task).toBeUndefined();
     expect(fresh?.side).toBeUndefined();
+  });
+
+  it("carries node rollup + attachments by id (model-only fields survive the round-trip)", () => {
+    const c = roundTrip(doc).root.children.find((ch) => ch.id === "c");
+    expect(c?.rollup).toBe("src-map");
+    expect(c?.attachments).toEqual([
+      { name: "spec.pdf", dataUrl: "data:application/pdf;base64,AA==", size: 3 },
+    ]);
   });
 
   it("preserves callouts by id", () => {

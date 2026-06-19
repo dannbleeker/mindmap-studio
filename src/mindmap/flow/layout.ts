@@ -533,13 +533,20 @@ function layoutFishbone(ctx: Ctx): void {
   kids.forEach((kid, i) => {
     const spineX = -((Math.floor(i / 2) + 1) * spineStep);
     const up = i % 2 === 0 ? -1 : 1;
-    // Main cause near the spine attachment; its sub-causes continue outward along the same diagonal.
+    // Main cause near the spine attachment; its descendants (sub-causes at ANY depth) continue
+    // outward along the same diagonal in DFS order — each one box-step further than the last, so
+    // nothing collapses onto the spine head (depth ≥3 used to get no position at all).
     place(ctx, kid, spineX + ux * step, up * uy * step);
-    const children = branchChildren.get(kid) ?? [];
-    children.forEach((c, j) => {
-      const d = (j + 2) * step;
-      place(ctx, c, spineX + ux * d, up * uy * d);
-    });
+    let slot = 2;
+    const walk = (id: string): void => {
+      for (const c of branchChildren.get(id) ?? []) {
+        const d = slot * step;
+        slot += 1;
+        place(ctx, c, spineX + ux * d, up * uy * d);
+        walk(c);
+      }
+    };
+    walk(kid);
   });
 }
 

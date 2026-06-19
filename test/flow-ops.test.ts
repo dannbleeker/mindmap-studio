@@ -1080,4 +1080,18 @@ describe("flow ops — bulk markers / tags (tri-state)", () => {
     bulkToggleTag(d, ["a", "b"], "x");
     expect(JSON.stringify(d)).toBe(snap);
   });
+
+  it("marker/tag toggles reach a selected floating topic (decision + mutation both reach-everywhere)", () => {
+    const withFloat = addFloatingTopic(base(), "Free").doc;
+    const fid = withFloat.floatingTopics?.[0]?.id as string;
+    // a mixed central + floating selection: both get the marker (the floating one used to be skipped)
+    const added = bulkToggleIcon(withFloat, ["a", fid], "⭐").doc;
+    expect(findNode(added, "a")?.icons).toContain("⭐");
+    expect(findAnyNode(added, fid)?.icons).toContain("⭐");
+    // a bulk tag toggle reaches the floating topic too
+    const tg = bulkToggleTag(withFloat, [fid], "risk").doc;
+    expect(findAnyNode(tg, fid)?.tags).toEqual(["risk"]);
+    // and the single-node primitives now reach floating topics as well
+    expect(findAnyNode(toggleIcon(withFloat, fid, "🚩").doc, fid)?.icons).toContain("🚩");
+  });
 });

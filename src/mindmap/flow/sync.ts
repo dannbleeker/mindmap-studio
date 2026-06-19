@@ -69,6 +69,10 @@ export function fromFlow(nodes: TopicNode[], edges: FlowEdge[], prevDoc: MindMap
     // Connector colour / dash are set via model ops (not RF gestures), so carry by id like side/task.
     if (prev?.branchColor) node.branchColor = prev.branchColor;
     if (prev?.lineDash) node.lineDash = prev.lineDash;
+    // Roll-up binding + attachments are model-only (not in TopicData / not RF-editable) — carry by id
+    // so they survive the round-trip, like callouts/task. (project() only emits a derived count.)
+    if (prev?.rollup) node.rollup = prev.rollup;
+    if (prev?.attachments) node.attachments = prev.attachments;
     // Per-node timestamps aren't in TopicData (never rendered) — carry by id, only when present, so
     // a timestamp-free doc round-trips to itself (never invent them here).
     if (prev?.createdAt !== undefined) node.createdAt = prev.createdAt;

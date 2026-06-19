@@ -171,6 +171,92 @@ function collectCallouts(doc: MindMapDoc, rects: Map<string, NodeRect>): Callout
   return out;
 }
 
+/** SVG for every boundary enclosure (shape path + soft gradient + title-tab), sized to its members'
+ *  rects — the same geometry + resolver the canvas overlay uses (canvas == export). */
+function emitBoundaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[] {
+  const out: string[] = [];
+  for (const b of doc.boundaries ?? []) {
+    let bx = Number.POSITIVE_INFINITY;
+    let by = Number.POSITIVE_INFINITY;
+    let bX = Number.NEGATIVE_INFINITY;
+    let bY = Number.NEGATIVE_INFINITY;
+    let found = 0;
+    for (const id of b.nodeIds) {
+      const r = rects.get(id);
+      if (!r) continue;
+      bx = Math.min(bx, r.x);
+      by = Math.min(by, r.y);
+      bX = Math.max(bX, r.x + r.w);
+      bY = Math.max(bY, r.y + r.h);
+      found += 1;
+    }
+    if (found === 0) continue;
+    const x = bx - BOUNDARY_PAD;
+    const y = by - BOUNDARY_PAD;
+    const w = bX - bx + 2 * BOUNDARY_PAD;
+    const h = bY - by + 2 * BOUNDARY_PAD;
+    const bs = resolveBoundaryStyle(b.color);
+    const gid = `bgrad-${b.id}`;
+    const da = dashArray(b.dash);
+    const dashAttr = da ? ` stroke-dasharray="${da}"` : "";
+    out.push(
+      `<defs><linearGradient id="${esc(gid)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bs.fillTop}"/><stop offset="1" stop-color="${bs.fillBottom}"/></linearGradient></defs>`,
+      `<path d="${boundaryPath(b.shape, x, y, w, h)}" fill="url(#${esc(gid)})" stroke="${bs.stroke}" stroke-width="1.5"${dashAttr}/>`,
+    );
+    const label = boundaryLabel(b.label);
+    if (label) {
+      out.push(
+        `<rect x="${r2(x + 14)}" y="${r2(y - 19)}" width="${r2(label.length * 6.6 + 14)}" height="19" rx="6" fill="${bs.stroke}"/>`,
+        `<text x="${r2(x + 20)}" y="${r2(y - 5.5)}" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
+      );
+    }
+  }
+  return out;
+}
+
+/** SVG for every summary bracket (a "[" / "]" spine + label beside a node subtree), sized to its
+ *  members' rects and sided relative to the root — the same resolver the canvas uses (canvas == export). */
+function emitSummaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[] {
+  const out: string[] = [];
+  const rootRect = rects.get(doc.root.id);
+  const rootCenterX = rootRect ? rootRect.x + rootRect.w / 2 : 0;
+  for (const s of doc.summaries ?? []) {
+    let sx = Number.POSITIVE_INFINITY;
+    let sy = Number.POSITIVE_INFINITY;
+    let sX = Number.NEGATIVE_INFINITY;
+    let sY = Number.NEGATIVE_INFINITY;
+    let found = 0;
+    for (const id of s.nodeIds) {
+      const r = rects.get(id);
+      if (!r) continue;
+      sx = Math.min(sx, r.x);
+      sy = Math.min(sy, r.y);
+      sX = Math.max(sX, r.x + r.w);
+      sY = Math.max(sY, r.y + r.h);
+      found += 1;
+    }
+    if (found === 0) continue;
+    const onLeft = (sx + sX) / 2 < rootCenterX;
+    const y0 = sy - SUMMARY_PAD;
+    const y1 = sY + SUMMARY_PAD;
+    const spineX = onLeft ? sx - SUMMARY_GAP : sX + SUMMARY_GAP;
+    const capX = onLeft ? spineX + SUMMARY_BRACKET_W : spineX - SUMMARY_BRACKET_W;
+    const ss = resolveSummaryStyle(s.color);
+    out.push(
+      `<path d="M ${r2(capX)} ${r2(y0)} L ${r2(spineX)} ${r2(y0)} L ${r2(spineX)} ${r2(y1)} L ${r2(capX)} ${r2(y1)}" fill="none" stroke="${ss.stroke}" stroke-width="2"/>`,
+    );
+    const label = summaryLabel(s.label);
+    const midY = (y0 + y1) / 2;
+    const lw = label.length * 7 + 12;
+    const lx = onLeft ? spineX - 6 - lw : spineX + 6;
+    out.push(
+      `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${ss.labelBg}" stroke="${ss.labelBorder}"/>`,
+      `<text x="${r2(lx + 6)}" y="${r2(midY + 4)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${ss.labelColor}">${esc(label)}</text>`,
+    );
+  }
+  return out;
+}
+
 export function buildFlowSvg(
   doc: MindMapDoc,
   rects: Map<string, NodeRect>,
@@ -237,85 +323,10 @@ export function buildFlowSvg(
     }
   }
 
-  // Boundaries (behind everything).
-  for (const b of doc.boundaries ?? []) {
-    let bx = Number.POSITIVE_INFINITY;
-    let by = Number.POSITIVE_INFINITY;
-    let bX = Number.NEGATIVE_INFINITY;
-    let bY = Number.NEGATIVE_INFINITY;
-    let found = 0;
-    for (const id of b.nodeIds) {
-      const r = rects.get(id);
-      if (!r) continue;
-      bx = Math.min(bx, r.x);
-      by = Math.min(by, r.y);
-      bX = Math.max(bX, r.x + r.w);
-      bY = Math.max(bY, r.y + r.h);
-      found += 1;
-    }
-    if (found === 0) continue;
-    const x = bx - BOUNDARY_PAD;
-    const y = by - BOUNDARY_PAD;
-    const w = bX - bx + 2 * BOUNDARY_PAD;
-    const h = bY - by + 2 * BOUNDARY_PAD;
-    // Per-boundary shape / gradient / dash from the SAME geometry + resolver the canvas uses
-    // (canvas == export): a shape path with a soft gradient fill + a title-tab fused to the top.
-    const bs = resolveBoundaryStyle(b.color);
-    const gid = `bgrad-${b.id}`;
-    const da = dashArray(b.dash);
-    const dashAttr = da ? ` stroke-dasharray="${da}"` : "";
-    parts.push(
-      `<defs><linearGradient id="${esc(gid)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bs.fillTop}"/><stop offset="1" stop-color="${bs.fillBottom}"/></linearGradient></defs>`,
-      `<path d="${boundaryPath(b.shape, x, y, w, h)}" fill="url(#${esc(gid)})" stroke="${bs.stroke}" stroke-width="1.5"${dashAttr}/>`,
-    );
-    const label = boundaryLabel(b.label);
-    if (label) {
-      parts.push(
-        `<rect x="${r2(x + 14)}" y="${r2(y - 19)}" width="${r2(label.length * 6.6 + 14)}" height="19" rx="6" fill="${bs.stroke}"/>`,
-        `<text x="${r2(x + 20)}" y="${r2(y - 5.5)}" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
-      );
-    }
-  }
-
-  // Summary brackets (a bracket + label to one side of a node's subtree).
-  const rootRect = rects.get(doc.root.id);
-  const rootCenterX = rootRect ? rootRect.x + rootRect.w / 2 : 0;
-  for (const s of doc.summaries ?? []) {
-    let sx = Number.POSITIVE_INFINITY;
-    let sy = Number.POSITIVE_INFINITY;
-    let sX = Number.NEGATIVE_INFINITY;
-    let sY = Number.NEGATIVE_INFINITY;
-    let found = 0;
-    for (const id of s.nodeIds) {
-      const r = rects.get(id);
-      if (!r) continue;
-      sx = Math.min(sx, r.x);
-      sy = Math.min(sy, r.y);
-      sX = Math.max(sX, r.x + r.w);
-      sY = Math.max(sY, r.y + r.h);
-      found += 1;
-    }
-    if (found === 0) continue;
-    const onLeft = (sx + sX) / 2 < rootCenterX;
-    const y0 = sy - SUMMARY_PAD;
-    const y1 = sY + SUMMARY_PAD;
-    // Spine + caps: a "]" on the right (caps reach left toward the nodes) or "[" on the left.
-    const spineX = onLeft ? sx - SUMMARY_GAP : sX + SUMMARY_GAP;
-    const capX = onLeft ? spineX + SUMMARY_BRACKET_W : spineX - SUMMARY_BRACKET_W;
-    // Per-summary colours from the SAME resolver the canvas uses (canvas == export).
-    const ss = resolveSummaryStyle(s.color);
-    parts.push(
-      `<path d="M ${r2(capX)} ${r2(y0)} L ${r2(spineX)} ${r2(y0)} L ${r2(spineX)} ${r2(y1)} L ${r2(capX)} ${r2(y1)}" fill="none" stroke="${ss.stroke}" stroke-width="2"/>`,
-    );
-    const label = summaryLabel(s.label);
-    const midY = (y0 + y1) / 2;
-    const lw = label.length * 7 + 12;
-    const lx = onLeft ? spineX - 6 - lw : spineX + 6;
-    parts.push(
-      `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${ss.labelBg}" stroke="${ss.labelBorder}"/>`,
-      `<text x="${r2(lx + 6)}" y="${r2(midY + 4)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${ss.labelColor}">${esc(label)}</text>`,
-    );
-  }
+  // Boundaries (behind everything), then summary brackets — extracted emitters; the same geometry +
+  // resolvers the canvas overlays use, so the bytes are identical (canvas == export).
+  parts.push(...emitBoundaries(doc, rects));
+  parts.push(...emitSummaries(doc, rects));
 
   // Line-jumps: when on, every relationship line is drawn as its chord with semicircular hops cut
   // in at crossings — from the shared helper the canvas edge also uses (canvas == export). Build all

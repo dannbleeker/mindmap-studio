@@ -38,6 +38,7 @@ import { serializeLibrary, tryParseLibrary } from "./io/library";
 import { toMarkdown } from "./io/markdown";
 import { parseOutline } from "./io/pasteOutline";
 import {
+  type CanvasSession,
   type LayoutKind,
   MAP_LINK_PREFIX,
   MindMap,
@@ -83,6 +84,13 @@ import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
 
+// How many recently-used document tabs keep their canvas session (viewport + undo/redo) cached for
+// lossless switching; beyond this the least-recently-used session is dropped (that tab reopens fresh).
+const MAX_SESSIONS = 5;
+// Cap the cached undo depth per tab so several tabs' histories don't balloon memory — the live canvas
+// keeps the full depth; only the stashed copy is trimmed.
+const CACHED_UNDO_DEPTH = 40;
+
 /** Total topics in a parsed paste forest (for the dialog's live count). */
 function countForest(nodes: MapNode[]): number {
   return nodes.reduce((sum, n) => sum + 1 + countForest(n.children), 0);
@@ -96,6 +104,9 @@ export function App() {
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mapRef = useRef<MindMapHandle>(null);
+  // Per-tab canvas sessions (viewport + undo/redo), captured on switch-away and restored on switch-back
+  // so the recently-used tabs are lossless. An LRU Map capped at MAX_SESSIONS; one-shot on restore.
+  const sessionCache = useRef<Map<string, CanvasSession>>(new Map());
   const [maps, setMaps] = useState<MapSummary[]>([]);
   // Start screen vs editor. Default to the editor so a returning user's last map restores without a
   // flash; the boot effect flips to "start" only when there's no map to restore (first run / empty
@@ -442,6 +453,25 @@ export function App() {
 
   const load = useCallback(
     (next: MindMapDoc, nextWarnings: string[] = []) => {
+      // Stash the outgoing map's canvas session (viewport + undo/redo) so switching back to it is
+      // lossless. Captured here, while the old canvas is still mounted, before the doc swaps.
+      const prev = liveDocRef.current;
+      if (prev && prev.id !== next.id && mapRef.current) {
+        const session = mapRef.current.getSession();
+        sessionCache.current.delete(prev.id); // re-insert to bump LRU recency
+        sessionCache.current.set(prev.id, {
+          viewport: session.viewport,
+          history: {
+            past: session.history.past.slice(-CACHED_UNDO_DEPTH),
+            future: session.history.future,
+          },
+        });
+        while (sessionCache.current.size > MAX_SESSIONS) {
+          const oldest = sessionCache.current.keys().next().value;
+          if (oldest === undefined) break;
+          sessionCache.current.delete(oldest);
+        }
+      }
       liveDocRef.current = next;
       setLiveDoc(next);
       setWarnings(nextWarnings);
@@ -834,6 +864,14 @@ export function App() {
     };
   }, [load, restoreSession]);
 
+  // A restored canvas session is one-shot: drop it once the (re)mounted canvas has consumed it, so a
+  // later in-place remount that keeps the same map id (a version restore bumps restoreRev) starts from
+  // a clean session rather than re-applying a stale viewport / undo stack.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the remount inputs (doc.id, restoreRev).
+  useEffect(() => {
+    sessionCache.current.delete(doc.id);
+  }, [doc.id, restoreRev]);
+
   // Press "/" to jump to the Find box (ignored while typing in a field/node).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1163,6 +1201,10 @@ export function App() {
                 key={playback ? `pb:${playback.index}` : `${doc.id}:${restoreRev}`}
                 ref={mapRef}
                 doc={playback ? playback.snaps[playback.index].doc : doc}
+                // Restore this tab's stashed viewport + undo/redo on a switch-back (never during
+                // history playback). Consumed one-shot by the effect below so a later version-restore
+                // remount starts fresh, not from a stale session.
+                initialSession={playback ? undefined : sessionCache.current.get(doc.id)}
                 theme={theme.theme}
                 direction={layout}
                 numbered={panels.numbered}

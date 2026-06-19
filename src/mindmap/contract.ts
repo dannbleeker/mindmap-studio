@@ -83,6 +83,10 @@ export interface MindMapHandle {
   exportSvg: () => Blob | null;
   focusNode: (id: string) => void;
   fit: () => void;
+  /** Snapshot the live canvas session — viewport (pan/zoom) + undo/redo stacks — so the app can
+   *  stash it when switching away from a document tab and restore it (via `initialSession`) on a
+   *  remount, making tab switches lossless for the recently-used set. */
+  getSession: () => CanvasSession;
   /** Apply an image to the currently-selected node; false if nothing is selected. */
   setSelectedImage: (image: MapImage) => boolean;
   /** Set the note on the currently-selected node; false if nothing is selected. */
@@ -232,6 +236,15 @@ export type LayoutKind =
 
 /** Props the canvas accepts. Kept engine-neutral so the renderer stays swappable behind
  *  the `index.tsx` chooser. */
+/** A saved canvas session — the viewport + the undo/redo snapshot stacks — used to make document-tab
+ *  switches lossless (captured via `MindMapHandle.getSession`, restored via `MindMapProps.initialSession`).
+ *  The history shape is structurally the flow engine's `History<MindMapDoc>`, kept inline so the
+ *  engine-neutral contract doesn't import from the flow layer. */
+export interface CanvasSession {
+  viewport: { x: number; y: number; zoom: number };
+  history: { past: MindMapDoc[]; future: MindMapDoc[] };
+}
+
 export interface MindMapProps {
   doc: MindMapDoc;
   /** Fires after every canvas edit with the updated canonical doc. */
@@ -272,5 +285,9 @@ export interface MindMapProps {
   numbered?: boolean;
   /** Read-only Power Filter: ids to keep lit; all other nodes/edges dim. null/undefined = off. */
   litIds?: Set<string> | null;
+  /** A session to restore at mount — the viewport + undo/redo stacks captured from a previous
+   *  `getSession()` (used by the document-tab switcher so returning to a tab keeps its pan/zoom +
+   *  history). Absent → fresh canvas (fit-to-view, empty history). */
+  initialSession?: CanvasSession;
   ref?: Ref<MindMapHandle>;
 }

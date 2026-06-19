@@ -25,9 +25,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Open documents as tabs.** Maps you open now appear as a **flat tab strip** under the toolbar —
   one tab per document, the active one underlined — replacing the old map dropdown's lone view.
   Opening a map (from the library, a cross-map link, or **+**) adds a tab; the **×** (or middle-click)
-  closes it; switching reloads that map. The open set + active tab are **persisted**, so a reload
-  reopens the whole workspace. (A follow-up keeps recently-used tabs' undo + viewport live across
-  switches.)
+  closes it. The open set + active tab are **persisted**, so a reload reopens the whole workspace.
+
+- **Lossless tab switching.** Switching back to a recently-used tab now keeps its **pan / zoom and
+  undo-redo history** — the canvas session (viewport + history stacks) is stashed on switch-away and
+  restored on return for the last few tabs (older ones reopen fit-to-view, fresh history). One-shot,
+  so a version restore still starts clean.
 
 - **Boundary shapes + styling.** A boundary can now be a **rounded rectangle, sharp rectangle,
   ellipse, scalloped cloud, or polygon** (its outline is real SVG geometry, not a CSS box), with a

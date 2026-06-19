@@ -12,6 +12,7 @@ import {
 } from "./Panels";
 import { CommandPalette } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
+import { DocumentTabs } from "./components/DocumentTabs";
 import { EdgeInspector } from "./components/EdgeInspector";
 import { FirstRunCard } from "./components/FirstRunCard";
 import { IconRail } from "./components/IconRail";
@@ -26,6 +27,7 @@ import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
 import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
 import { clampIndex, togglePlay } from "./historyPlayback";
+import { useOpenDocuments } from "./hooks/useOpenDocuments";
 import { usePanels } from "./hooks/usePanels";
 import { useVersionHistory } from "./hooks/useVersionHistory";
 import { MARKER_PALETTE } from "./icons";
@@ -67,7 +69,7 @@ import {
   type MapSummary,
   deleteMap,
   getAllMaps,
-  getLastOpened,
+  getTabSession,
   listMaps,
   loadMap,
   saveMap,
@@ -173,6 +175,10 @@ export function App() {
   // live in usePanels; App threads `panels` into <Toolbar> and `filter`/`savedFilters` into the
   // FilterPanel. Auto-numbering (`panels.numbered`) draws hierarchical outline numbers on the canvas.
   const { panels, filter, savedFilters } = usePanels();
+  // Open-document tabs: which maps are open + which is active (persisted). The active map's state
+  // still lives in the doc/liveDoc singletons below — this registry just follows it (load() calls
+  // ensureOpen) and drives the tab strip; switching a tab reloads that map.
+  const { openIds, ensureOpen, closeTab, restoreSession } = useOpenDocuments();
   const [outlineFilter, setOutlineFilter] = useState("");
   // Named styles ("styles organizer"), persisted app-wide so a look is reusable across maps.
   const [namedStyles, setNamedStyles] = useState<NamedStyle[]>(() => {
@@ -441,9 +447,10 @@ export function App() {
       setWarnings(nextWarnings);
       setError(null);
       setDoc(next);
+      ensureOpen(next.id); // register/activate this map's tab (the registry follows the active map)
       persist(next);
     },
-    [persist],
+    [persist, ensureOpen],
   );
 
   function scheduleSave() {
@@ -720,8 +727,14 @@ export function App() {
     const deleted = structuredClone(liveDocRef.current);
     try {
       await deleteMap(deleted.id);
-      const remaining = await listMaps();
-      const next = remaining.length > 0 ? await loadMap(remaining[0].id) : null;
+      // Drop its tab and prefer the adjacent open tab; only fall back to the library / a blank map
+      // when no other tab is open.
+      const neighbour = closeTab(deleted.id);
+      let next = neighbour ? await loadMap(neighbour).catch(() => null) : null;
+      if (!next) {
+        const remaining = await listMaps();
+        next = remaining.length > 0 ? await loadMap(remaining[0].id) : null;
+      }
       load(next ?? buildTemplate("blank"));
       showToast("info", `Deleted “${deleted.title || "Untitled map"}”`, {
         action: {
@@ -741,6 +754,24 @@ export function App() {
     } catch {
       // ignore
     }
+  }
+
+  // Close a document tab. Flushes the active map first; if it was the active tab, advances to a
+  // neighbouring open tab (or the start screen when none remain).
+  async function closeMapTab(mapId: string) {
+    const wasActive = mapId === doc.id;
+    if (wasActive) {
+      try {
+        await saveMap(liveDocRef.current);
+      } catch {
+        // best-effort flush
+      }
+    }
+    const neighbour = closeTab(mapId);
+    if (!wasActive) return;
+    const next = neighbour ? await loadMap(neighbour).catch(() => null) : null;
+    if (next) load(next);
+    else setView("start");
   }
 
   const {
@@ -767,10 +798,31 @@ export function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const lastId = await getLastOpened().catch(() => null);
-      const restored = lastId ? await loadMap(lastId).catch(() => null) : null;
+      const session = await getTabSession().catch(() => null);
       if (cancelled) return;
-      if (restored) {
+      if (!session) {
+        setView("start");
+        return;
+      }
+      // Prune the open set to maps that still exist (one may have been deleted out-of-band) and seed
+      // the library list so the tab titles paint correctly on first render (no "Untitled" flash).
+      const lib = await listMaps().catch(() => []);
+      if (cancelled) return;
+      setMaps(lib);
+      const existing = new Set(lib.map((m) => m.id));
+      const validIds = session.openTabIds.filter((id) => existing.has(id));
+      // Restore the persisted active tab; if its map is gone, fall back to the first surviving tab so
+      // a single dead map doesn't drop the whole workspace.
+      const activeId = existing.has(session.activeTabId)
+        ? session.activeTabId
+        : (validIds[0] ?? null);
+      const restored = activeId ? await loadMap(activeId).catch(() => null) : null;
+      if (cancelled) return;
+      if (restored && activeId) {
+        restoreSession({
+          openTabIds: validIds.length ? validIds : [activeId],
+          activeTabId: activeId,
+        });
         load(restored);
         setView("editor");
       } else {
@@ -780,7 +832,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [load]);
+  }, [load, restoreSession]);
 
   // Press "/" to jump to the Find box (ignored while typing in a field/node).
   useEffect(() => {
@@ -933,6 +985,22 @@ export function App() {
       />
       <div className="mm-editor-main">
         <Toolbar {...toolbarProps} />
+
+        {openIds.length > 0 && (
+          <DocumentTabs
+            docs={openIds.map((id) => ({
+              id,
+              title:
+                id === doc.id
+                  ? liveDoc.title || doc.title
+                  : (maps.find((m) => m.id === id)?.title ?? ""),
+            }))}
+            activeId={doc.id}
+            onActivate={switchMap}
+            onClose={closeMapTab}
+            onNew={() => load(buildTemplate("blank"))}
+          />
+        )}
 
         {error && (
           <div

@@ -92,7 +92,8 @@ GitHub Pages).
   (concentric rings), **funnel** (stacked stages), or **Venn** (2 or 3 overlapping circles) — and
   switches to free layout so you drop topics into its regions; **−/+** changes the ring/stage count.
   The frame renders into image exports too.
-- **Multi-map library** — keep many named maps; switch, create, and delete from the header.
+- **Multi-map library** — keep many named maps; switch, create, and delete from the header. Open
+  maps appear as **tabs** under the toolbar (the open set is remembered across reloads).
 - **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
   capped at 30, stored in IndexedDB, deleted with the map.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on

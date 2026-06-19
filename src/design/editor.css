@@ -837,3 +837,89 @@
     animation: none !important;
   }
 }
+
+/* --- document tabs (open maps) --- */
+.mm-doctabs {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  height: 38px;
+  background: var(--ed-card);
+  border-bottom: 1px solid var(--ed-border);
+  padding: 0 8px;
+  gap: 2px;
+}
+.mm-doctabs-scroll {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  min-width: 0;
+  flex: 1;
+}
+.mm-doctab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px 0 10px;
+  max-width: 200px;
+  border-bottom: 2px solid transparent;
+  color: var(--ed-ink2);
+}
+.mm-doctab[data-active] {
+  border-bottom-color: var(--ed-accent);
+  color: var(--ed-ink);
+}
+.mm-doctab:hover {
+  background: var(--ed-accent-tint);
+}
+.mm-doctab-main {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 8px 0;
+}
+.mm-doctab[data-active] .mm-doctab-main {
+  font-weight: 600;
+}
+.mm-doctab-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--ed-faint);
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+.mm-doctab-x:hover {
+  background: var(--ed-accent-tint);
+  color: var(--ed-danger);
+}
+.mm-doctab-new {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  border: none;
+  background: transparent;
+  color: var(--ed-ink2);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.mm-doctab-new:hover {
+  background: var(--ed-accent-tint);
+}

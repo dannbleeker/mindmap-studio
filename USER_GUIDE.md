@@ -413,6 +413,11 @@ backdrop you see on the canvas. The second **✕** removes the image.
 Every map you create or import is kept in the browser, keyed by name in the **map dropdown**.
 Switch freely; each is autosaved. **Delete** removes the current one.
 
+Maps you open appear as **tabs** in a strip under the toolbar — one tab per document, the active one
+underlined. Open a map (from the dropdown, a cross-map link, or **+**) and it gets a tab; click **×**
+(or middle-click) to close it. The open tabs + the active one are remembered, so a reload reopens your
+whole workspace.
+
 ### Copying a branch between maps
 
 Right-click a branch → **Copy branch** to copy it (the whole subtree) to a clipboard kept in your

@@ -67,4 +67,33 @@ describe("useOpenDocuments", () => {
     renderHook(() => useOpenDocuments());
     expect(setTabSession).not.toHaveBeenCalled();
   });
+
+  it("persists an empty session when the last tab is closed (so it doesn't resurrect)", async () => {
+    const { result } = renderHook(() => useOpenDocuments());
+    act(() => result.current.ensureOpen("a"));
+    await waitFor(() =>
+      expect(setTabSession).toHaveBeenCalledWith({ openTabIds: ["a"], activeTabId: "a" }),
+    );
+    setTabSession.mockClear();
+    act(() => {
+      result.current.closeTab("a");
+    });
+    await waitFor(() =>
+      expect(setTabSession).toHaveBeenCalledWith({ openTabIds: [], activeTabId: "" }),
+    );
+  });
+
+  it("closing two tabs in the same tick removes both (batch-safe)", () => {
+    const { result } = renderHook(() => useOpenDocuments());
+    act(() => {
+      result.current.ensureOpen("a");
+      result.current.ensureOpen("b");
+      result.current.ensureOpen("c");
+    });
+    act(() => {
+      result.current.closeTab("a");
+      result.current.closeTab("b");
+    });
+    expect(result.current.openIds).toEqual(["c"]);
+  });
 });

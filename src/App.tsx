@@ -727,9 +727,14 @@ export function App() {
     const deleted = structuredClone(liveDocRef.current);
     try {
       await deleteMap(deleted.id);
-      closeTab(deleted.id); // drop its tab too (load() below re-registers whatever we open next)
-      const remaining = await listMaps();
-      const next = remaining.length > 0 ? await loadMap(remaining[0].id) : null;
+      // Drop its tab and prefer the adjacent open tab; only fall back to the library / a blank map
+      // when no other tab is open.
+      const neighbour = closeTab(deleted.id);
+      let next = neighbour ? await loadMap(neighbour).catch(() => null) : null;
+      if (!next) {
+        const remaining = await listMaps();
+        next = remaining.length > 0 ? await loadMap(remaining[0].id) : null;
+      }
       load(next ?? buildTemplate("blank"));
       showToast("info", `Deleted “${deleted.title || "Untitled map"}”`, {
         action: {
@@ -794,10 +799,30 @@ export function App() {
     let cancelled = false;
     (async () => {
       const session = await getTabSession().catch(() => null);
-      const restored = session ? await loadMap(session.activeTabId).catch(() => null) : null;
       if (cancelled) return;
-      if (session && restored) {
-        restoreSession(session); // seed the open-tab set before the active map loads
+      if (!session) {
+        setView("start");
+        return;
+      }
+      // Prune the open set to maps that still exist (one may have been deleted out-of-band) and seed
+      // the library list so the tab titles paint correctly on first render (no "Untitled" flash).
+      const lib = await listMaps().catch(() => []);
+      if (cancelled) return;
+      setMaps(lib);
+      const existing = new Set(lib.map((m) => m.id));
+      const validIds = session.openTabIds.filter((id) => existing.has(id));
+      // Restore the persisted active tab; if its map is gone, fall back to the first surviving tab so
+      // a single dead map doesn't drop the whole workspace.
+      const activeId = existing.has(session.activeTabId)
+        ? session.activeTabId
+        : (validIds[0] ?? null);
+      const restored = activeId ? await loadMap(activeId).catch(() => null) : null;
+      if (cancelled) return;
+      if (restored && activeId) {
+        restoreSession({
+          openTabIds: validIds.length ? validIds : [activeId],
+          activeTabId: activeId,
+        });
         load(restored);
         setView("editor");
       } else {

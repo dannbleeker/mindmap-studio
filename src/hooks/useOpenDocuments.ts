@@ -35,6 +35,7 @@ export function useOpenDocuments() {
     if (idx === -1) return null;
     const remaining = prev.filter((id) => id !== mapId);
     const neighbour = remaining[idx] ?? remaining[idx - 1] ?? null;
+    openIdsRef.current = remaining; // keep the ref current so a same-tick second close is correct
     setOpenIds(remaining);
     setActiveId((cur) => (cur === mapId ? neighbour : cur));
     return neighbour;
@@ -47,12 +48,16 @@ export function useOpenDocuments() {
     setActiveId(session.activeTabId);
   }, []);
 
-  // Persist whenever the set or active id changes. Guarded on a non-null active id so the initial
-  // empty state (mount, or the start screen with nothing open) never clobbers a stored session
-  // before boot has read it.
+  // Persist whenever the set or active id changes. Guarded by `hydrated` so the INITIAL empty state
+  // (mount, before boot reads the stored session) never clobbers it — but once something has been
+  // open, an empty state IS persisted (so closing the last tab actually sticks across a reload, and
+  // doesn't resurrect the closed map). An empty session writes activeTabId "" — boot treats that as
+  // "nothing open" → start screen.
+  const hydrated = useRef(false);
   useEffect(() => {
-    if (activeId === null) return;
-    void setTabSession({ openTabIds: openIds, activeTabId: activeId });
+    if (activeId !== null) hydrated.current = true;
+    if (!hydrated.current) return;
+    void setTabSession({ openTabIds: openIds, activeTabId: activeId ?? "" });
   }, [openIds, activeId]);
 
   return { openIds, activeId, ensureOpen, closeTab, restoreSession };

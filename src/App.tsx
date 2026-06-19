@@ -25,8 +25,9 @@ import { StartScreen } from "./components/start/StartScreen";
 import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
 import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
-import { clampIndex, nextPlaybackIndex, togglePlay } from "./historyPlayback";
+import { clampIndex, togglePlay } from "./historyPlayback";
 import { usePanels } from "./hooks/usePanels";
+import { useVersionHistory } from "./hooks/useVersionHistory";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
 import { fileToMapImage } from "./io/image";
@@ -64,19 +65,12 @@ import { type LibraryHit, searchLibrary } from "./search";
 import { stickerImage } from "./stickers";
 import {
   type MapSummary,
-  type VersionMeta,
-  type VersionSnapshot,
   deleteMap,
   getAllMaps,
   getLastOpened,
-  latestVersionDoc,
   listMaps,
-  listVersions,
-  loadAllVersions,
   loadMap,
-  loadVersion,
   saveMap,
-  saveVersion,
   setLastOpened,
 } from "./store/mapStore";
 import { todayISO } from "./taskDate";
@@ -86,9 +80,6 @@ import { useFind } from "./useFind";
 import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
-
-// Coalesce rapid edits into roughly one auto-saved version every few minutes per map.
-const SNAPSHOT_THROTTLE_MS = 3 * 60 * 1000;
 
 /** Total topics in a parsed paste forest (for the dialog's live count). */
 function countForest(nodes: MapNode[]): number {
@@ -314,20 +305,6 @@ export function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  // Version history: a "🕔 History" panel of per-map snapshots (open/close in usePanels). Snapshots
-  // are captured on a throttle while editing (in `persist`) + on demand; `restoreRev` forces the
-  // canvas to re-init when a version is restored in place (same map id, so the doc.id key wouldn't
-  // change otherwise).
-  const [versions, setVersions] = useState<VersionMeta[]>([]);
-  const [restoreRev, setRestoreRev] = useState(0);
-  // Version-history timeline playback: when non-null, the canvas shows snaps[index]
-  // read-only instead of the live doc, stepped/scrubbed via the PlaybackBar.
-  const [playback, setPlayback] = useState<{
-    snaps: VersionSnapshot[];
-    index: number;
-    playing: boolean;
-  } | null>(null);
-  const lastSnapshotByMap = useRef<Map<string, number>>(new Map());
   const [aboutOpen, setAboutOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   // First-run "3 things to try" card (#13): shown once for a brand-new user, dismissed for good on
@@ -425,6 +402,21 @@ export function App() {
     }
   }, []);
 
+  // Version history (the 🕔 History panel's snapshot list, throttled auto-save, in-place restore, and
+  // timeline playback) lives in its own hook. App feeds maybeSnapshot into the autosave path below and
+  // renders versions / playback / restoreRev; restoreRev remounts the canvas on an in-place restore.
+  const {
+    versions,
+    restoreRev,
+    playback,
+    setPlayback,
+    refreshVersions,
+    saveVersionNow,
+    restoreVersion,
+    startPlayback,
+    maybeSnapshot,
+  } = useVersionHistory({ liveDocRef, setLiveDoc, setDoc, refreshMaps, showHint });
+
   const persist = useCallback(
     // `snapshot` is true only on edit-driven saves — opening/switching a map shouldn't create a
     // version, or pure reloads would spam the history.
@@ -433,17 +425,13 @@ export function App() {
         await saveMap(d);
         await setLastOpened(d.id);
         await refreshMaps();
-        // Throttled auto-snapshot for version history (best-effort, never blocks the save).
-        const last = lastSnapshotByMap.current.get(d.id) ?? 0;
-        if (snapshot && Date.now() - last >= SNAPSHOT_THROTTLE_MS) {
-          lastSnapshotByMap.current.set(d.id, Date.now());
-          saveVersion(d, Date.now()).catch(() => {});
-        }
+        // Edit-driven saves feed the version-history auto-snapshot (throttle lives inside the hook).
+        if (snapshot) maybeSnapshot(d);
       } catch {
         // autosave is best-effort
       }
     },
-    [refreshMaps],
+    [refreshMaps, maybeSnapshot],
   );
 
   const load = useCallback(
@@ -462,96 +450,6 @@ export function App() {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => persist(liveDocRef.current, true), 500);
   }
-
-  // --- version history ---
-  const refreshVersions = useCallback(async () => {
-    try {
-      setVersions(await listVersions(liveDocRef.current.id));
-    } catch {
-      // best-effort
-    }
-  }, []);
-
-  async function saveVersionNow() {
-    const d = liveDocRef.current;
-    try {
-      const latest = await latestVersionDoc(d.id);
-      if (latest && JSON.stringify(latest) === JSON.stringify(d)) {
-        showHint("No changes since the last version.");
-        return;
-      }
-      await saveVersion(d, Date.now());
-      lastSnapshotByMap.current.set(d.id, Date.now());
-      await refreshVersions();
-      showHint("Version saved.");
-    } catch {
-      showHint("Couldn't save a version.");
-    }
-  }
-
-  async function restoreVersion(id: string) {
-    const v = await loadVersion(id);
-    if (!v) return;
-    if (
-      !window.confirm(
-        "Restore this version? Your current map is saved to history first, so you can undo.",
-      )
-    )
-      return;
-    try {
-      await saveVersion(liveDocRef.current, Date.now()); // checkpoint current before replacing
-      const next: MindMapDoc = { ...structuredClone(v), id: liveDocRef.current.id };
-      liveDocRef.current = next;
-      setLiveDoc(next);
-      setDoc(next);
-      setRestoreRev((r) => r + 1); // remount the canvas (same map id won't otherwise re-init)
-      lastSnapshotByMap.current.set(next.id, Date.now());
-      await saveMap(next);
-      await setLastOpened(next.id);
-      await refreshMaps();
-      await refreshVersions();
-      showHint("Version restored — the previous state is saved in history.");
-    } catch {
-      showHint("Couldn't restore the version.");
-    }
-  }
-
-  // --- version-history timeline playback ---
-  async function startPlayback() {
-    try {
-      const snaps = await loadAllVersions(liveDocRef.current.id);
-      if (snaps.length < 2) {
-        showHint("Save at least two versions to play the timeline.");
-        return;
-      }
-      setPlayback({ snaps, index: 0, playing: true });
-    } catch {
-      showHint("Couldn't load the history for playback.");
-    }
-  }
-
-  // Advance one frame per tick while playing; stop at the newest snapshot (don't loop).
-  useEffect(() => {
-    if (!playback?.playing) return;
-    const t = setInterval(() => {
-      setPlayback((p) => {
-        if (!p) return p;
-        const nxt = nextPlaybackIndex(p.index, p.snaps.length);
-        return nxt === null ? { ...p, playing: false } : { ...p, index: nxt };
-      });
-    }, 1100);
-    return () => clearInterval(t);
-  }, [playback?.playing]);
-
-  // Esc exits playback (matching the presentation overlay).
-  useEffect(() => {
-    if (!playback) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPlayback(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [playback]);
 
   // Refresh the history list whenever the panel opens.
   useEffect(() => {

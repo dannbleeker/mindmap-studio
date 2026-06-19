@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-06-19T12:16:54.438Z",
-  "commit": "2c0e9a6",
+  "generatedAt": "2026-06-19T12:44:02.403Z",
+  "commit": "7ad0109",
   "headline": {
     "linesTsJs": 39598,
     "tests": 1034,
     "lineCoveragePct": 82.77,
-    "commits": 545,
+    "commits": 547,
     "ageDays": 7,
     "trackedFiles": 294,
     "featureManualPct": 100,
-    "featureBookPct": 90.3,
-    "featureExamplePct": 69.4
+    "featureBookPct": 100,
+    "featureExamplePct": 100
   },
   "code": [
     {
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 13,
-      "lines": 1498
+      "lines": 1576
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 1034,
     "e2e": 0,
-    "durationMs": 31008,
+    "durationMs": 39944,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 11062
+        "ms": 13958
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 5250
+        "ms": 5814
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5130
+        "ms": 5810
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 2704
+        "ms": 4318
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1381
+        "ms": 1921
       }
     ]
   },
@@ -201,29 +201,29 @@
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 14806,
+    "bookWords": 17201,
     "chapters": 11,
     "appLoc": 23885,
-    "docToCodeRatio": 0.62
+    "docToCodeRatio": 0.72
   },
   "featureCoverage": {
     "total": 124,
     "manual": 124,
     "manualPct": 100,
-    "book": 112,
-    "bookPct": 90.3,
-    "bookExample": 86,
-    "bookExamplePct": 69.4,
+    "book": 124,
+    "bookPct": 100,
+    "bookExample": 124,
+    "bookExamplePct": 100,
     "byArea": {
       "editing": {
         "total": 14,
         "manual": 14,
-        "book": 11
+        "book": 14
       },
       "navigation": {
         "total": 24,
         "manual": 24,
-        "book": 18
+        "book": 24
       },
       "notes": {
         "total": 3,
@@ -233,12 +233,12 @@
       "markers": {
         "total": 7,
         "manual": 7,
-        "book": 6
+        "book": 7
       },
       "styling": {
         "total": 12,
         "manual": 12,
-        "book": 11
+        "book": 12
       },
       "images": {
         "total": 1,
@@ -248,7 +248,7 @@
       "structure": {
         "total": 12,
         "manual": 12,
-        "book": 11
+        "book": 12
       },
       "library": {
         "total": 12,
@@ -278,88 +278,27 @@
     },
     "gaps": {
       "noManual": [],
-      "noBook": [
-        {
-          "id": "add-affordances",
-          "name": "Hover ＋ to add a child or sibling topic",
-          "since": "2026-06-18"
-        },
-        {
-          "id": "canvas-gestures",
-          "name": "Pan, scroll-zoom & double-click the canvas to add a topic",
-          "since": "2026-06-18"
-        },
-        {
-          "id": "cmdk-jump",
-          "name": "Jump to any topic from ⌘K (fuzzy over text + notes)",
-          "since": "2026-06-18"
-        },
-        {
-          "id": "shortcuts-cheatsheet",
-          "name": "Keyboard shortcuts cheat-sheet (? button / ⌘K)",
-          "since": "2026-06-18"
-        },
-        {
-          "id": "first-run-tips",
-          "name": "First-run \"3 things to try\" onboarding card",
-          "since": "2026-06-18"
-        },
-        {
-          "id": "edit-in-place",
-          "name": "Edit a topic in place — type to edit, F2, or double-click",
-          "since": "2026-06-18"
-        },
-        {
-          "id": "inspector-node-timestamps",
-          "name": "Per-node created / modified timestamps (shown in the inspector)",
-          "since": "2026-06-17"
-        },
-        {
-          "id": "bulk-markers-tags",
-          "name": "Bulk markers + tags across a multi-selection (tri-state add/remove)",
-          "since": "2026-06-17"
-        },
-        {
-          "id": "overlay-inspector",
-          "name": "Click a boundary / summary / callout to edit it in the inspector (label, delete)",
-          "since": "2026-06-17"
-        },
-        {
-          "id": "overlay-colours",
-          "name": "Per-overlay colours (boundary / summary / callout / backdrop, canvas == export)",
-          "since": "2026-06-17"
-        },
-        {
-          "id": "editor-command-palette",
-          "name": "In-editor command palette (⌘K) — fuzzy search + run any toolbar action",
-          "since": "2026-06-17"
-        },
-        {
-          "id": "accessible-menus",
-          "name": "Keyboard-accessible toolbar / context menus + mobile bottom sheets",
-          "since": "2026-06-17"
-        }
-      ]
+      "noBook": []
     }
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 7,
-    "commits": 545,
-    "commits7d": 492,
+    "commits": 547,
+    "commits7d": 494,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 296
+        "count": 297
       },
       {
         "name": "github-actions[bot]",
-        "count": 249
+        "count": 250
       }
     ],
     "churn30d": {
-      "added": 78410,
-      "removed": 23583
+      "added": 78558,
+      "removed": 23654
     },
     "changelogEntries": 185
   }

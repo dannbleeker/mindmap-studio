@@ -84,7 +84,7 @@
     "bundleKb": 258.6,
     "mutationScore": null,
     "featureManualPct": 100,
-    "featureBookPct": 90.3,
-    "featureExamplePct": 69.4
+    "featureBookPct": 100,
+    "featureExamplePct": 100
   }
 ]

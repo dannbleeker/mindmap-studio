@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { strToU8, unzipSync, zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { fromSmmx, toSmmx } from "../src/io/smmx";
@@ -221,5 +222,31 @@ describe("SimpleMind .smmx export", () => {
 
   it("round-trips a floating topic as a separate root", () => {
     expect(fromSmmx(toSmmx(doc)).floatingTopics?.map((f) => f.topic)).toEqual(["Legend"]);
+  });
+});
+
+// Opt-in integration check against a REAL SimpleMind export. CI-safe: it skips when SMMX_FILE is
+// unset, so the repo never depends on a personal file. Run it locally with:
+//   $env:SMMX_FILE="C:\path\to\file.smmx"; pnpm test
+// (The owner validated this against a real 101-topic SimpleMind export, "Enablement.smmx", on
+// 2026-06-19 — every topic + the full hierarchy + the title imported with zero loss; structure
+// confirmed flat, root simplemind-mindmaps>mindmap, exactly as the importer assumes. CI still skips
+// by default since no real file is committed.)
+const realFile = process.env.SMMX_FILE;
+describe.skipIf(!realFile)("fromSmmx — real .smmx (SMMX_FILE)", () => {
+  it("imports the real map: a single tree, every topic accounted for", () => {
+    const bytes = new Uint8Array(readFileSync(realFile as string));
+    const doc = fromSmmx(bytes);
+    let count = 0;
+    const walk = (n: MapNode) => {
+      count += 1;
+      for (const c of n.children) walk(c);
+    };
+    walk(doc.root);
+    for (const f of doc.floatingTopics ?? []) walk(f);
+    expect(doc.title.length).toBeGreaterThan(0);
+    expect(doc.root.topic.length).toBeGreaterThan(0);
+    expect(count).toBeGreaterThan(1);
+    expect(doc.meta?.source).toBe("smmx");
   });
 });

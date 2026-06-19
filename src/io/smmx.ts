@@ -9,12 +9,13 @@ import { isDangerousUrl } from "./urlSafety";
 // (`mindmap/topics/topic`) joined by `parent` id references (the central topic has parent="-1"),
 // with `relations` (source/target) for cross-links. We map `text` <-> topic, the parent graph
 // <-> the tree, `<note>` <-> note, `<link urllink>` <-> hyperlink, and relations <-> cross-links;
-// the exporter also writes a simple tidy x/y layout so the map opens readably. Schema confirmed
-// against a working `.smmx` parser; per-topic styling/images and rich-note markup aren't carried.
-// NOTE: not yet verified against a real SimpleMind file/app — validate with a real `.smmx` when
-// one is available. (The sibling `.mmap` importer cleared this same caveat on 2026-06-19, when it
-// was confirmed against real feature-rich MindManager exports; `.smmx` is still awaiting a real
-// file.) fflate does the zip/unzip.
+// the exporter also writes a simple tidy x/y layout so the map opens readably.
+// **Validated against a real SimpleMind export (a 101-topic map, owner-confirmed 2026-06-19): the
+// flat topics/parent-ref model, the `simplemind-mindmaps > mindmap` root, and `@_text`/`@_id`/
+// `@_parent` attributes all match the real app's output, and every topic + the full hierarchy + the
+// title import with zero content loss.** Out of scope (SimpleMind app-state / styling, dropped by
+// design): per-topic palette/colorinfo/x-y, `<node-groups>` (visual groups), rich-note markup, and
+// images. fflate does the zip/unzip.
 
 const MINDMAP_PATH = "document/mindmap.xml";
 

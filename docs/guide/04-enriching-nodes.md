@@ -178,5 +178,16 @@ rule** (tag a node `risk`, have the rule paint it red), and add that tag to a se
 red on its own. That's the chapter in miniature -- a node that tracks its own status, and
 formatting that follows the data instead of waiting for your hand.
 
+Two more passes turn a handsome map into a working one. Give a topic a **priority** -- High,
+Medium, or Low -- then switch on the priority filter and watch everything but the High items
+fade; that is triage in two clicks. Pick a font that suits the map's register -- the Styles bar
+offers **Sans, Serif, or Mono** per topic -- and, once a node looks exactly right, **save its look
+as a named style** and drop that style onto its siblings so the set moves as one. Hang a real
+**file** off a topic -- a spec, a slide deck -- and it travels inside the map, downloadable
+whenever you reopen it. Reach into the **sticker** library when a small picture says more than a
+label would. And if the canvas itself wants a mood, give the whole map a **background colour**, or
+a faint background **image** behind everything -- it renders the same in every export, so what you
+arrange is what you ship.
+
 The next chapter is about the opposite problem: when a map gets big, how do you keep
 finding your way around it?

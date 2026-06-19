@@ -104,7 +104,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "edit-capture",
@@ -149,7 +149,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "tag-editing",
@@ -158,7 +158,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "task-progress",
@@ -176,7 +176,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "task-dates",
@@ -203,7 +203,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "per-topic-style",
@@ -230,7 +230,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "canvas-background-image",
@@ -239,7 +239,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "sticker-library",
@@ -248,7 +248,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "per-topic-font",
@@ -302,7 +302,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "freeform-mode",
@@ -320,7 +320,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "relationships",
@@ -365,7 +365,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "callouts",
@@ -401,7 +401,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "auto-numbering",
@@ -410,7 +410,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "power-filter",
@@ -419,7 +419,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "focus-branch",
@@ -428,7 +428,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "saved-filters",
@@ -455,7 +455,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "find-shortcut",
@@ -500,7 +500,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "layout-direction",
@@ -527,7 +527,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "multi-map-library",
@@ -581,7 +581,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "history-playback",
@@ -590,7 +590,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "library-backup",
@@ -671,7 +671,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "conditional-formatting",
@@ -698,7 +698,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "quick-add",
@@ -716,7 +716,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "brainstorm-timer",
@@ -914,7 +914,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-pdf",
@@ -1067,7 +1067,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-textbundle",

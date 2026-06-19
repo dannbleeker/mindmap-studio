@@ -184,6 +184,17 @@ and watch the decision read at a glance. Or toggle **🧲 Free layout** and drag
 shape you choose by hand -- then turn it off and watch the tree snap back, your positions
 remembered. None of these replace the tree; they're there for the maps the tree alone can't draw.
 
+Three more moves for the maps that need them. Right-click a single branch and choose **Branch
+layout** -- give just that sub-tree an org-chart while the rest of the map stays radial; the
+layouts compose, so one busy branch can read its own way without reshaping anything else. When a
+map is really a framework, open the **Diagram builder** and drop topics into an onion, a funnel,
+or a Venn backdrop -- the frame carries the meaning so the labels don't have to. And reach past
+the diamond: the shape menu also holds a trapezoid, octagon, document, star, and cloud, each drawn
+identically on the canvas and in every export. One last doorway -- when two far-apart topics refer
+to each other but aren't a true dependency, give one a **jump link** to the other; clicking it
+flies the canvas to the target, the connection without the arrow. (You can also drop a web link or
+a block of text straight onto empty canvas and watch it land as a floating topic, ready to place.)
+
 Two quick reuse moves to finish: **right-click a branch → Copy branch**, then paste it under
 another node -- or even into a *different* map -- and notice the copy is independent of the
 original. And drop a **🗒 sticky note** somewhere with a reminder to yourself: a remark that rides

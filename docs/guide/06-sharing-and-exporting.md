@@ -172,5 +172,11 @@ outline** and paste -- no file, no download, just the map as a Markdown outline 
 cursor is. Same map, every door out: a file to keep, a picture to show, a sheet to crunch, a
 paste to drop.
 
+One safety net is worth feeling before you trust a map with real work: make a few edits, then
+open **version history** and restore an earlier snapshot -- the map rewinds intact, and you can
+**play the timeline back** to watch it grow from the first node to now. And when you bring a map in
+from MindManager, notice that its stock icons arrive as familiar **emoji** -- the meaning crosses
+over even when the file format doesn't.
+
 The final chapter is about the most demanding kind of sharing: standing up and walking a
 room through a map live.

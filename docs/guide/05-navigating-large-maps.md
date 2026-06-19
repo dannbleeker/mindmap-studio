@@ -246,4 +246,13 @@ keep a few maps that are really parts of one project,
 click **▦ + Sheet** to fold them into a single workbook and flip between them on the tab strip --
 then **⤓ Workbook** to save the whole set as one file.
 
+A few more ways to cut a big map down to what matters. Open the **marker and tag index** and
+click a tag -- it lists every node carrying it and jumps you there, no scrolling. Turn on
+**auto-numbering** and the branches read 1, 1.2, 1.3 like a document outline, so you can talk
+someone through the map by reference. When a single branch is all that matters for the moment,
+**focus** it and the rest dims to quiet context. The **Power Filter** does the same by rule rather
+than by hand -- dim, not hide, everything that lacks a marker, tag, or word, so the matches stand
+out while the map keeps its shape. Keep the **corner minimap** in view to hold your bearings while
+you are zoomed in, and don't fuss over a typo in **Find** -- a near-miss still lands the right node.
+
 Part 3 turns outward: getting the map off your screen and in front of other people.

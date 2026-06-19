@@ -999,8 +999,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   binding and attachments** through the round-trip (they were silently dropped); `boundaryPath`
   **clamps its corner radius** so a small rounded-rect box can't invert; an imported empty-string
   branch colour now **falls back to the palette** instead of emitting an empty stroke; and the export
-  root-background fallback colour matches the canvas. All canvas==export-invariant or round-trip
-  correctness fixes — no behaviour change to normal maps. Several things rendered on screen but were dropped or distorted in the SVG / PNG / PDF
+  root-background fallback colour matches the canvas. A follow-up pass cleared the remaining reviewed
+  findings: an **emoji / unknown marker** (e.g. an imported 👍) now draws in the marker row above the
+  title in exports — matching the canvas — instead of being prepended to the title text; **bulk marker /
+  tag toggles reach a selected floating topic** (the single-node `toggleIcon` / `setTags` now resolve
+  floating topics too, so the decision and the mutation agree); the export's **outline number** is drawn
+  de-emphasised (opacity 0.55) like the canvas; an **underline leaf** wraps at its true 8px padding;
+  and a topic **image with no stored size** uses the same fallback + aspect handling on canvas and in
+  export. All canvas==export-invariant or round-trip correctness fixes — no behaviour change to normal
+  maps.
+
+- **Exports now match the canvas for wrapped text, callouts, indicators, collapsed branches and
+  images.** Several things rendered on screen but were dropped or distorted in the SVG / PNG / PDF
   export; they now render identically (canvas == export): long topic labels **word-wrap** inside their
   box instead of overflowing; a **multi-line callout** grows to fit instead of clipping to one strip;
   the **note / hyperlink / attachment** indicators are drawn (they used to vanish); a **collapsed

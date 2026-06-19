@@ -100,6 +100,7 @@ function textBlock(
   weight?: string,
   fontFamily?: string,
   anchor: "start" | "middle" = "start",
+  dimPrefix?: string,
 ): string {
   if (lines.length === 0) return "";
   const lineHeight = fontSize * 1.2;
@@ -109,13 +110,15 @@ function textBlock(
     weight && weight !== "400" && weight !== "normal" ? ` font-weight="${esc(weight)}"` : "";
   const anchorAttr = anchor === "middle" ? ` text-anchor="middle"` : "";
   const attrs = `x="${r2(x)}"${anchorAttr} font-family="${esc(fontFamily || "sans-serif")}" font-size="${fontSize}" fill="${esc(color)}"${w}`;
+  // A leading outline number is de-emphasised (matches the canvas span at opacity 0.55).
+  const lead = dimPrefix ? `<tspan opacity="0.55">${esc(dimPrefix)} </tspan>` : "";
   if (lines.length === 1) {
-    return `<text ${attrs} y="${r2(firstBaseline)}">${esc(lines[0])}</text>`;
+    return `<text ${attrs} y="${r2(firstBaseline)}">${lead}${esc(lines[0])}</text>`;
   }
   const tspans = lines
     .map(
       (line, i) =>
-        `<tspan x="${r2(x)}"${i > 0 ? ` dy="${r2(lineHeight)}"` : ""}>${esc(line)}</tspan>`,
+        `<tspan x="${r2(x)}"${i > 0 ? ` dy="${r2(lineHeight)}"` : ""}>${i === 0 ? lead : ""}${esc(line)}</tspan>`,
     )
     .join("");
   return `<text ${attrs} y="${r2(firstBaseline)}">${tspans}</text>`;
@@ -500,17 +503,26 @@ export function buildFlowSvg(
       textTop = r.y + pad + ih;
     }
 
-    // Markers as fixed-size vector tiles, centred above the title (matches the canvas marker row →
-    // canvas == export). An unknown marker (no vector) falls back into the title text below.
-    const tileIcons = (d.icons ?? []).filter((ic) => markerImage(ic));
-    if (tileIcons.length) {
-      const rowW = tileIcons.length * 16 - 2;
+    // Markers as fixed-size tiles in a centred row above the title (matches the canvas marker row →
+    // canvas == export): vector markers draw as <image>, an emoji / unknown marker draws as its glyph
+    // in the SAME row (it used to fall into the title text — a placement + sizing mismatch).
+    const markers = d.icons ?? [];
+    if (markers.length) {
+      const stride = 16;
+      const rowW = markers.length * stride - 2;
       let mx = r.x + r.w / 2 - rowW / 2;
-      for (const ic of tileIcons) {
-        parts.push(
-          `<image x="${r2(mx)}" y="${r2(textTop)}" width="14" height="14" href="${esc(markerImage(ic) as string)}"/>`,
-        );
-        mx += 16;
+      for (const ic of markers) {
+        const url = markerImage(ic);
+        if (url) {
+          parts.push(
+            `<image x="${r2(mx)}" y="${r2(textTop)}" width="14" height="14" href="${esc(url)}"/>`,
+          );
+        } else {
+          parts.push(
+            `<text x="${r2(mx + 7)}" y="${r2(textTop + 12)}" font-family="sans-serif" font-size="13" text-anchor="middle">${esc(ic)}</text>`,
+          );
+        }
+        mx += stride;
       }
       textTop += 18;
     }
@@ -530,12 +542,14 @@ export function buildFlowSvg(
     const fontSize = Number.parseFloat(st?.fontSize ?? "") || levelFontSize(d.depth);
     // Wrap to the box's content width — the SAME wrap the canvas gets from CSS max-width — so a long
     // label stays inside its box in the export instead of overflowing (canvas == export).
-    const contentW = Math.max(16, r.w - 2 * pad - ins.left - ins.right);
+    // Underline leaves use a tighter 8px horizontal padding on the canvas (vs PAD=12); match it so the
+    // wrap width is the same and a leaf label doesn't break a line earlier in the export.
+    const hpad = underlineLeaf ? 8 : pad;
+    const contentW = Math.max(16, r.w - 2 * hpad - ins.left - ins.right);
     const lines = wrapText(d.topic, contentW, fontSize);
-    // Number + any markers WITHOUT a vector (fallback) prefix the title; vector markers drew above.
-    const textIcons = (d.icons ?? []).filter((ic) => !markerImage(ic));
-    const prefix = [...textIcons, d.number].filter(Boolean).join(" ");
-    if (prefix) lines[0] = `${prefix} ${lines[0] ?? ""}`.trim();
+    // The outline number prefixes the title, drawn de-emphasised via textBlock (markers — incl. emoji
+    // — now all draw in the marker row above, so they no longer prefix the title text).
+    const numberPrefix = d.number ? String(d.number) : "";
     const nonEmpty = lines.filter((l) => l.length > 0);
     // Note / hyperlink indicators inline after the title (mirrors the canvas), so the export keeps the
     // "has a note / link" cue it used to drop.
@@ -556,6 +570,7 @@ export function buildFlowSvg(
           d.isRoot ? "700" : (st?.fontWeight ?? (filledMain ? "600" : undefined)),
           st?.fontFamily,
           "middle",
+          numberPrefix,
         ),
       );
     }

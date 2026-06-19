@@ -489,10 +489,10 @@ export function addStickyNote(doc: MindMapDoc, text = "Note"): OpResult {
 /** Replace a node's tags (an empty array clears them). */
 export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  loc.node.tags = tags.length > 0 ? tags : undefined;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id); // reach floating topics too (single + bulk tag toggles)
+  if (!node) return { doc };
+  node.tags = tags.length > 0 ? tags : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 
@@ -640,14 +640,16 @@ export function setImage(doc: MindMapDoc, id: string, image: MapImage): OpResult
 /** Toggle a marker icon on a node. */
 export function toggleIcon(doc: MindMapDoc, id: string, icon: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  const icons = loc.node.icons ?? [];
+  // findAnyNode (not locate(next.root)) so a floating topic's marker is toggled too — otherwise a
+  // single or bulk toggle on a floating topic silently no-ops (the bulk op decides via findAnyNode).
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  const icons = node.icons ?? [];
   const i = icons.indexOf(icon);
   if (i >= 0) icons.splice(i, 1);
   else icons.push(icon);
-  loc.node.icons = icons.length > 0 ? icons : undefined;
-  touch(loc.node, opsClock());
+  node.icons = icons.length > 0 ? icons : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 

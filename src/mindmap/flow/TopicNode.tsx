@@ -342,11 +342,14 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             style={{
               display: "block",
               // Honour the stored dimensions (clamped) so the image is the same size on screen and in
-              // the export, which also reads image.width/height (canvas == export).
-              width: image.width ? Math.min(image.width, 200) : undefined,
-              height: image.height ? Math.min(image.height, 140) : undefined,
+              // the export, which also reads image.width/height (canvas == export). Fall back to the
+              // SAME 120px default the export uses when a dimension is missing, and `contain` to match
+              // the export's preserveAspectRatio="meet" (no stretch) — so the two never diverge.
+              width: Math.min(image.width ?? 120, 200),
+              height: Math.min(image.height ?? 120, 140),
               maxWidth: 200,
               maxHeight: 140,
+              objectFit: "contain",
               borderRadius: 4,
               marginBottom: 4,
             }}

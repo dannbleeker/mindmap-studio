@@ -37,6 +37,7 @@ import {
   summaryLabel,
 } from "./style";
 import { wrapText } from "./text";
+import type { TopicNode } from "./types";
 
 // Author a clean, standalone SVG of the map directly from the canonical model + the live
 // node rects — emitting native <text> from the start (no foreignObject), so it renders
@@ -451,10 +452,11 @@ export function buildFlowSvg(
     }
   }
 
-  // Nodes.
-  for (const n of nodes) {
-    const r = rects.get(n.id);
-    if (!r) continue;
+  // Each node's SVG, emitted into `parts`: the level-styled box / fill / underline, an image, the
+  // marker row, the wrapped title, the task chips + info line, and the collapsed-count glyph. Pulled
+  // into one named local (capturing the resolved theme colours computed above) so the main flow below
+  // reads as a tight loop. Mirrors the canvas TopicNode (canvas == export).
+  const emitNode = (n: TopicNode, r: NodeRect): void => {
     const d = n.data;
     // Conditional-formatting style sits under the node's own style (manual wins) — matches the canvas.
     const st = d.condStyle ? { ...d.condStyle, ...d.style } : d.style;
@@ -650,6 +652,10 @@ export function buildFlowSvg(
         `<text x="${r2(cx)}" y="${r2(cy + 3.5)}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="${esc(d.branchColor)}">${esc(label)}</text>`,
       );
     }
+  };
+  for (const n of nodes) {
+    const r = rects.get(n.id);
+    if (r) emitNode(n, r);
   }
 
   // Callouts (anchored bubbles, drawn on top) — extracted emitter (canvas == export).

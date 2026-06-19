@@ -60,6 +60,8 @@ A rule of thumb: **JSON to keep it, Markdown to discuss it, PNG/SVG/HTML to show
 interactive HTML to let someone explore it, the slide deck or PowerPoint to present it, Word or
 PDF to send it, Excel to crunch it.**
 
+A worked tour of the interchange exports, one file each. Take a project map and pick **Export -> OPML**; open the `.opml` in your outliner and the topics arrive as nested headings, ready to keep editing as an outline. **Export -> FreeMind (`.mm`)** and double-click the file: it opens in FreeMind, Freeplane, or XMind with the tree, the folded branches, the links, and the notes intact -- the one bridge almost every mind-mapper reads. **Export -> Mermaid (`.mmd`)** gives you a `mindmap` block you paste straight into a README on GitHub, where it renders as a diagram in the rendered Markdown. **Export -> XMind (`.xmind`)** opens natively in XMind 2020+ -- tree, notes, links, tags, floating topics, and relationships -- with no `.mm` detour. **Export -> SimpleMind (`.smmx`)** opens natively in SimpleMind on desktop or phone, carrying notes, web links, and relations. And **Export -> HTML** hands someone a single self-contained page that opens in any browser with nothing installed -- one file, no app, no server. Same map, six more doors, and every one is a file on *your* disk.
+
 ## Copy the outline
 
 Sometimes you don't want a file at all -- you want the text on your clipboard, ready to
@@ -144,6 +146,8 @@ local database, and the app works fully offline (Chapter 7). Sharing is always a
 explicit act, never a background one -- which is exactly how a thinking tool should treat
 the half-formed ideas you trust it with.
 
+Because the app is a PWA, that locality holds even with no network. Load it once and it keeps working offline: the app shell is precached, so on your next visit -- plane, train, dead Wi-Fi -- it opens and your maps are right there, with a quiet **Ready to use offline.** note the first time the cache lands. When a new version ships, it never reloads under you mid-edit; instead a small **A new version is available.** toast appears with a **Refresh now** button, and the swap happens only when you click it. And on a phone the editor adapts -- the wide toolbar collapses into a single compact, horizontally-scrollable strip and the side panels slide up as bottom sheets -- so the same map is workable on a screen it was never drawn for.
+
 ## Now you try
 
 Take any map and export it twice: once to **JSON** and once to **Markdown**. Open the
@@ -177,6 +181,20 @@ open **version history** and restore an earlier snapshot -- the map rewinds inta
 **play the timeline back** to watch it grow from the first node to now. And when you bring a map in
 from MindManager, notice that its stock icons arrive as familiar **emoji** -- the meaning crosses
 over even when the file format doesn't.
+
+Now prove the *interchange*. Export the map to **OPML** and reopen the `.opml` in your outliner --
+the headings are your topics. Export **FreeMind (`.mm`)** and open it in Freeplane; export
+**Mermaid (`.mmd`)** and paste the `mindmap` block into a README so it renders as a diagram; export
+**XMind** or **SimpleMind** and watch it open natively in those apps, notes and links along for the
+ride; export self-contained **HTML** and double-click it in any browser. Then go the other way:
+take that `.mm` (or a `.opml`, `.xmind`, `.smmx`, `.mup`, `.itmz`, `.mind`, `.xlsx`, `.docx`,
+`.textpack`, a MindManager `.mmap`, a plain or Markmap-flavoured `.md`, or a Mermaid file) and
+**Import** it back -- the tree and the fields that map cleanly come across -- or drop a whole folder
+at once to **batch-import** them into a library. When you've only got loose text -- an agenda from an email --
+**Paste text** turns the indentation into a tree in one click. Finally, feel the PWA: kill your
+network and reload (it still opens, maps and all, because the shell is precached), watch for the
+**A new version is available.** toast next time a build ships, and open the same map on your phone
+-- the toolbar shrinks to one scrollable strip and the panels become bottom sheets.
 
 The final chapter is about the most demanding kind of sharing: standing up and walking a
 room through a map live.

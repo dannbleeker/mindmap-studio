@@ -22,8 +22,8 @@
       "area": "editing",
       "since": "2026-06-18",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "canvas-gestures",
@@ -31,8 +31,8 @@
       "area": "navigation",
       "since": "2026-06-18",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "cmdk-jump",
@@ -40,8 +40,8 @@
       "area": "navigation",
       "since": "2026-06-18",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "shortcuts-cheatsheet",
@@ -49,8 +49,8 @@
       "area": "navigation",
       "since": "2026-06-18",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "first-run-tips",
@@ -58,8 +58,8 @@
       "area": "navigation",
       "since": "2026-06-18",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "keyboard-editing",
@@ -76,8 +76,8 @@
       "area": "editing",
       "since": "2026-06-18",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "drag-reparent",
@@ -338,7 +338,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "floating-topics",
@@ -626,7 +626,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-docx",
@@ -635,7 +635,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-xlsx",
@@ -644,7 +644,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-markdown",
@@ -653,7 +653,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "paste-text",
@@ -662,7 +662,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "styles-organizer",
@@ -743,7 +743,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-freemind",
@@ -752,7 +752,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-mermaid",
@@ -761,7 +761,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-xmind",
@@ -770,7 +770,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-mindmup",
@@ -779,7 +779,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-markmap",
@@ -788,7 +788,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-smmx",
@@ -797,7 +797,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-ithoughts",
@@ -806,7 +806,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "import-mindmeister",
@@ -815,7 +815,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "batch-import",
@@ -824,7 +824,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-json",
@@ -851,7 +851,7 @@
       "since": "2026-06-12",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-freemind",
@@ -860,7 +860,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-mermaid",
@@ -869,7 +869,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-xmind",
@@ -878,7 +878,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-smmx",
@@ -887,7 +887,7 @@
       "since": "2026-06-14",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-image",
@@ -905,7 +905,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "export-interactive-html",
@@ -995,7 +995,7 @@
       "since": "2026-06-11",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "pwa-install",
@@ -1013,7 +1013,7 @@
       "since": "2026-06-13",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "start-screen",
@@ -1049,7 +1049,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "multi-map-rollups",
@@ -1076,7 +1076,7 @@
       "since": "2026-06-15",
       "manual": true,
       "book": true,
-      "bookExample": false
+      "bookExample": true
     },
     {
       "id": "inspector-node-timestamps",
@@ -1084,8 +1084,8 @@
       "area": "editing",
       "since": "2026-06-17",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "bulk-markers-tags",
@@ -1093,8 +1093,8 @@
       "area": "markers",
       "since": "2026-06-17",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "overlay-inspector",
@@ -1102,8 +1102,8 @@
       "area": "structure",
       "since": "2026-06-17",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "overlay-colours",
@@ -1111,8 +1111,8 @@
       "area": "styling",
       "since": "2026-06-17",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "editor-command-palette",
@@ -1120,8 +1120,8 @@
       "area": "navigation",
       "since": "2026-06-17",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "accessible-menus",
@@ -1129,8 +1129,8 @@
       "area": "navigation",
       "since": "2026-06-17",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     }
   ]
 }

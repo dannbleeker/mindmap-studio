@@ -32,6 +32,10 @@ branches. Select `Venue`, press **Tab**, and add `Shortlist`, `Site visit`,
 > a node, for when a label genuinely needs two lines. Use it sparingly -- short labels
 > keep a map readable.
 
+The keys are the fast path, but the canvas reaches back. Hover a node (or select it) and a small **+** appears on its right edge -- click it to add a child -- and a second **+** below it to add a sibling. Either way you land straight in the new node, ready to type, so a hand on the mouse never has to find the keyboard. The root only offers the child **+**: nothing sits beside the centre of a map.
+
+There is also no separate "rename" step. To relabel any node, **double-click** it, press **F2** with it selected, or -- fastest -- just **start typing**: the first letter you press replaces the old label and the rest follows. The same three gestures work whether the node is brand new or one you made an hour ago.
+
 ## Capturing in a hurry
 
 The three keys are for *building* a map; sometimes you just need to *dump* something in before it
@@ -48,6 +52,8 @@ Click any node to select it; the arrow keys walk you between parent, child and
 siblings. Drag the canvas background to pan; scroll or pinch to zoom. If you ever lose
 the map off the edge of the screen, the **Fit** button in the toolbar frames the whole
 thing again.
+
+One more canvas gesture earns its keep: **double-click an empty patch** of background and a fresh topic appears there, already in edit mode. It lands as a *floating topic* -- unattached to the tree -- which is exactly what you want when an idea arrives before you know where it belongs. Drop it down, name it, and connect it later; Chapter 3 covers the dragging-into-shape.
 
 ## You can't lose it
 
@@ -74,6 +80,8 @@ or start a fresh one, rather than always opening straight onto the canvas. Press
 time to return; choose a map (or start one) and you're back on the canvas, where the rest of this
 book happens.
 
+The very first time you open a fresh map, a small **"3 things to try"** card sits in the corner: double-click a topic to rename it, press **Tab** to add a child, press **Ctrl/Cmd + K** for anything. It is a one-time nudge -- close it with the **x**, or just make your first edit and it retires itself for good. You will not see it nagging on every map.
+
 ## Now you try
 
 Start a **Blank** map and build something real to you in five minutes -- a trip, a project, a
@@ -87,6 +95,8 @@ Two captures worth trying once: from the **⌂ Start** screen, type a title into
 press Enter -- you're on a fresh map in a single line; and while building, throw three half-formed
 ideas through the **Quick add** box (type, Enter, type, Enter) to feel how *capturing* and
 *structuring* are two different gears.
+
+Try the mouse-only path too, so you know it is there when your hand is already on the trackpad. Hover a branch, click its **+** to add a child, and type the label that appears under your cursor. Then **double-click an empty patch** of canvas: a floating topic drops where you clicked, ready to name. Rename any node three ways to feel them -- **double-click** it, press **F2**, and on a third just **start typing** -- and notice you never had to reach for a menu.
 
 That's enough to build maps. The next chapter slows down for a moment to explain *what*
 you've been building -- the handful of ideas the rest of the app rests on.

@@ -32,6 +32,8 @@ different icons used once each is just clutter.
 > Markers imported from a MindManager `.mmap` file are mapped to the closest emoji, so a
 > map you bring in from elsewhere keeps its visual cues rather than arriving as bare text.
 
+When you select several nodes at once, the Markers palette switches to **bulk** mode and works across the whole selection. A marker chip reads its state from the group: it shows **lit** when every selected topic already carries that marker, and **dashed** when only some of them do. Clicking follows the obvious rule -- a lit chip *removes* the marker from all the nodes; a dashed or empty chip *adds* it to every node that lacks it, in a single undo step. So to flag a dozen blocked topics, lasso them, click the flag once, and it lands on all twelve; click it again and it's gone from all twelve. Tags behave the same way in bulk: select the cluster, type or click a tag, and `risk` is on every node in the group at once -- which is exactly what a conditional rule (below) is waiting for.
+
 ## Tasks: when a topic is also a job
 
 A marker says *this is urgent*; a **task** says *this is work, and here's where it stands*.
@@ -117,6 +119,8 @@ node one click away, a callout sits *on the canvas*, visible at a glance and dra
 image exports -- the right tool for the one remark a reader must not miss. Like markers, their
 power is in scarcity: a map speckled with callouts has none.
 
+A boundary, a summary bracket, and a callout each carry their own **colour**. Select one and the inspector offers a small row of swatches plus a **Default** button; the colour you pick re-tints the whole object -- its outline, fill, and label together -- on the canvas and in every export, and **Default** drops it back to the theme's accent. Use it the way you use everything else here: to *encode*. Tint the "out of scope" boundary grey and the "this release" one green and a reader sees the split before reading a word; leave the rest on the default accent so the two coloured ones carry the meaning.
+
 ## Themes: the whole canvas at once
 
 Where per-node styling is a scalpel, a **theme** is a coat of paint for the entire map.
@@ -147,6 +151,8 @@ make the map easier to think with?* A note that captures a decision -- yes. A ma
 convention a team shares -- yes. Six fonts and a gradient on every node -- no. The most
 useful maps are usually the plainest ones with enrichment applied exactly where it
 carries meaning.
+
+One quiet piece of bookkeeping needs no decision from you at all. Select a node and the inspector header shows, in faint text under the breadcrumb, when the topic was **created** and last **modified** -- "created 3 d ago, modified 2 h ago", and a plain date once a change is more than a week old. You never set these; the map keeps them. They earn their place when a map outlives the meeting that made it: glancing at a branch and seeing it hasn't been touched in a month tells you whether it's settled or stale before you reopen the argument.
 
 ## Now you try
 
@@ -188,6 +194,8 @@ whenever you reopen it. Reach into the **sticker** library when a small picture 
 label would. And if the canvas itself wants a mood, give the whole map a **background colour**, or
 a faint background **image** behind everything -- it renders the same in every export, so what you
 arrange is what you ship.
+
+One more pass, this time on a group. Select three or four nodes at once -- the Markers palette switches to **bulk** mode. Click a marker and watch it land on the whole selection; notice that a chip already on *all* of them reads **lit** (click to clear all) while one on only *some* reads **dashed** (click to add to all). Add a **tag** across the same selection the same way. Then pin a **callout** and open its inspector: give it a **colour** from the swatch row so the remark reads as deliberately set-apart, and try **Default** to drop it back. Finally, just look at a node's inspector header -- the faint **created** and **modified** line is there without your having lifted a finger, and on an old map that one glance tells you what's still alive and what has gone quiet.
 
 The next chapter is about the opposite problem: when a map gets big, how do you keep
 finding your way around it?

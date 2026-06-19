@@ -107,6 +107,12 @@ conclusion*. It's side-aware, so on a two-sided map the bracket sits on the oute
 reads naturally, and double-clicking its label renames it. Reach for a summary when a branch has
 a punchline -- a total, a verdict, a next step -- you want on the page without adding another node.
 
+## Editing an overlay: the inspector
+
+Boundaries, summaries, and callouts aren't just drawn-and-forgotten -- each is a thing you can come back to. **Click** any of them once and the right-hand panel switches to an **overlay inspector** for that object. There you rename it (the box's label, the bracket's caption, the callout's text), re-tint it from a small set of swatches -- the colour carries through to every export -- and, for a boundary, switch its shape (rounded, square, ellipse, cloud, polygon) and its outline (solid, dashed, dotted). A **Delete** button at the foot removes the overlay without touching the nodes underneath; the branch and its topics stay exactly where they were.
+
+So if a Phase 1 boundary you drew earlier should now read as out-of-scope, click it, dash its outline and recolour it grey -- the grouping is the same, the signal is softer. And when a summary bracket has served its purpose, click it and delete it; the conclusion goes, the branch remains.
+
 ## A vocabulary of shapes
 
 By default every topic is a soft rectangle, and for most maps that's exactly right -- the
@@ -194,6 +200,15 @@ identically on the canvas and in every export. One last doorway -- when two far-
 to each other but aren't a true dependency, give one a **jump link** to the other; clicking it
 flies the canvas to the target, the connection without the arrow. (You can also drop a web link or
 a block of text straight onto empty canvas and watch it land as a floating topic, ready to place.)
+
+If you drew a boundary or a summary above, **click it once** now: the inspector opens on the right.
+Rename it, pick a colour, and -- for a boundary -- try the dashed outline. Then **delete** one and
+watch the branch underneath stay put; the grouping was never holding the nodes, only enclosing them.
+Now draw a second **relationship** arrow that crosses the first, then turn on **⌒ Line jumps** in
+the toolbar. Where the two lines met as an ambiguous junction, one now lifts in a small hop over the
+other and the crossing reads cleanly. Toggle it off and the hop vanishes -- it's a per-map switch,
+so save it for the moment your arrows start to tangle. Either way, export the map and the hops come
+through exactly as you see them.
 
 Two quick reuse moves to finish: **right-click a branch → Copy branch**, then paste it under
 another node -- or even into a *different* map -- and notice the copy is independent of the

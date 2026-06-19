@@ -7,7 +7,7 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 Phase 1 (Brainstorming MVP) complete; canvas engine is **@xyflow/react**. MindMap Studio is
 **feature-complete for its scope** (local-first, offline, single-user, free) — the competitive
 gap-closing effort is **concluded by decision (2026-06-16)**; remaining gaps are surveyed, not
-pursued (see Reference). The handbook documents nearly every feature (`book` ~90%). The **editor/UX
+pursued (see Reference). The handbook documents every feature, each with a worked example (`book` + `bookExample` **100%**). The **editor/UX
 redesign is complete** (2026-06-17): chrome (rail / two-row toolbar / inspector), the inspector
 overhaul + its four follow-ups, and the **menu/toolbar restructure** — one accessible Menu primitive
 (keyboard nav + viewport clamping), every dropdown + the canvas context menu migrated onto it,
@@ -62,8 +62,7 @@ no-backend PWA can't and shouldn't chase these.
   data binding, embed-a-live-webpage, idea voting, arbitrary custom fonts, named bookmarks, native
   desktop / mobile shells, and an infinite Miro-style object canvas. The decided / blocked ones are
   under *Deferred* and *Out of scope* above.
-- **Book worked examples** — `book` prose coverage ~90%, worked examples (`bookExample`) raised to
-  **~69%** (2026-06-19): chapters 3–6 gained concrete walkthroughs for the features that benefit. The
-  remaining `bookExample` gaps are the **format-adapter (import/export) and PWA features**, where a
-  per-feature worked example adds nothing over the generic "Importing" / "export menu" sections — left
-  `false` by design, not pending.
+- **Book worked examples — COMPLETE (2026-06-19).** `book` + `bookExample` are both at **100%**:
+  every catalogued feature is covered in prose AND carries a concrete worked example across chapters
+  1–7 (the import/export format adapters + PWA got concrete walkthroughs in chapter 6; the UX
+  affordances got prose + examples in chapters 1/3/4/5).

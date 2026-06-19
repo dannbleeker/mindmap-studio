@@ -151,6 +151,24 @@ decided to change, all in one pass.
 > The `/`-to-find shortcut is the single most useful key on a big map. When you can't
 > remember where something is, don't hunt -- press `/` and type.
 
+## The command palette: do anything by name
+
+Find locates a *topic*; the **command palette** locates an *action*. Press **Ctrl/Cmd + K** anywhere in the editor and a single search box opens over the map. Type a few letters of what you want -- `fit`, `collapse`, `board`, `outline`, `timeline`, `export pdf` -- and the list narrows to matching commands; arrow down to one and press **Enter** to run it. Every button on the toolbar is in here, so you never have to remember which row or menu hides a control: you just name it. The match is *fuzzy* -- it accepts a subsequence, so `cllpse` still finds **Collapse all branches** and `xpdf` still finds **Export .pdf** -- and the palette remembers your last few choices under a **Recent** heading, so the things you do often are one keystroke and Enter away the next time you open it.
+
+The palette is selection-aware. Select a node first and a band of commands appears that act on *it* -- add a child, set a marker or priority, focus its branch, delete it -- so a node's whole context menu is reachable by name without touching the mouse. With nothing selected, those commands quietly drop off the list rather than offering you an action with no target.
+
+## Jump to any topic from the palette
+
+The same **Ctrl/Cmd + K** box is also the fastest way to *travel*. Alongside the actions, every topic in the map sits in the list as **Go to: <topic>**; type part of its text, press Enter, and the canvas selects and centres that node. The trick that makes it worth the keystroke is what it searches: each topic's row quietly folds in its **note text** as well, so a term you only wrote in a note -- never in a topic title -- still surfaces the right node. It is the `/`-to-Find idea widened to the whole map at once: one box that finds both the thing you want to *do* and the place you want to *be*.
+
+## The keyboard shortcuts cheat-sheet
+
+When you forget a binding, you don't have to leave the map to look it up. Click the **? (help)** button in the icon rail -- or open the command palette and run **Keyboard shortcuts** -- and a cheat-sheet lists every editing, navigation, and view shortcut: Tab for a child, Enter for a sibling, `/` for Find, **Ctrl/Cmd + K** for the palette itself, and the pan-and-zoom gestures. The sheet is generated from the same shortcut table the app actually binds, so what it shows is always what the keys really do. Skim it once and the moves in this chapter stop being things you memorise and start being things you reach for.
+
+## Keyboard-reachable menus, and the same map on a phone
+
+None of this assumes a mouse. The toolbar's dropdown menus and a node's right-click context menu are fully keyboard-driven: open one and the arrow keys walk the items, Home and End jump to the ends, Enter runs the highlighted one, and Escape closes without choosing. On a narrow screen the layout adapts rather than breaking: the side panels -- Outline, Index, Filter, Info -- slide up as a **bottom sheet** over a full-width canvas instead of crushing it into a sliver, so the same map you build at a desk stays usable on a phone.
+
 ## Links: doorways between topics and maps
 
 A radial map is a tree, but real subjects aren't: the risk you noted on one branch is the
@@ -254,5 +272,14 @@ someone through the map by reference. When a single branch is all that matters f
 than by hand -- dim, not hide, everything that lacks a marker, tag, or word, so the matches stand
 out while the map keeps its shape. Keep the **corner minimap** in view to hold your bearings while
 you are zoomed in, and don't fuss over a typo in **Find** -- a near-miss still lands the right node.
+
+One more lens, the keyboard one. Press **Ctrl/Cmd + K** and first *do* something by name: type
+`collapse` and run **Collapse all branches**, then open the palette again and notice it now sits
+under **Recent**. Now *go* somewhere: type the text of a node you only mentioned in a *note* and
+watch **Go to:** land you on it, proving the palette searches notes too. Select a node and reopen
+the palette -- see the band of actions that act on just that node, and watch them vanish when
+nothing is selected. Then click the **?** button (or run **Keyboard shortcuts** from the palette)
+and skim the cheat-sheet once. If you have a phone handy, open the same map there and toggle the
+**Outline** panel -- it rises as a bottom sheet over a full-width canvas instead of squeezing the map.
 
 Part 3 turns outward: getting the map off your screen and in front of other people.

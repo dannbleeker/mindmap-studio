@@ -140,6 +140,42 @@ import { mindManagerTheme } from "./theme";
 const nodeTypes = { topic: TopicNode };
 const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
 
+// Per-overlay-kind op table: routes a label / colour / delete edit to the right boundary / summary /
+// callout op, so the three-way kind dispatch lives in ONE place instead of being re-spelled in each
+// overlay handle method (add a 4th overlay kind → one entry here, not three edits).
+const OVERLAY_OPS: Record<
+  SelectedOverlay["kind"],
+  {
+    label: (
+      doc: MindMapDoc,
+      sel: SelectedOverlay,
+      value: string,
+    ) => ReturnType<typeof setBoundaryLabel>;
+    color: (
+      doc: MindMapDoc,
+      sel: SelectedOverlay,
+      value: string,
+    ) => ReturnType<typeof setBoundaryColor>;
+    del: (doc: MindMapDoc, sel: SelectedOverlay) => ReturnType<typeof deleteBoundary>;
+  }
+> = {
+  boundary: {
+    label: (d, s, v) => setBoundaryLabel(d, s.id, v),
+    color: (d, s, v) => setBoundaryColor(d, s.id, v),
+    del: (d, s) => deleteBoundary(d, s.id),
+  },
+  summary: {
+    label: (d, s, v) => setSummaryLabel(d, s.id, v),
+    color: (d, s, v) => setSummaryColor(d, s.id, v),
+    del: (d, s) => deleteSummary(d, s.id),
+  },
+  callout: {
+    label: (d, s, v) => setCalloutText(d, s.nodeId ?? "", s.id, v),
+    color: (d, s, v) => setCalloutColor(d, s.nodeId ?? "", s.id, v),
+    del: (d, s) => deleteCallout(d, s.nodeId ?? "", s.id),
+  },
+};
+
 // Shared empty arrays so the boundary/summary overlays get a stable prop ref when the doc has none
 // (a fresh `[]` each render would defeat their React.memo). Frozen to flag them as never-mutated.
 const EMPTY_BOUNDARIES: readonly Boundary[] = Object.freeze([]);
@@ -1206,18 +1242,10 @@ function FlowInner({
       },
       // Overlay (boundary / summary / callout) edits — applied to the selected overlay by kind.
       setOverlayLabel: (label) =>
-        withSelectedOverlay((sel) => {
-          if (sel.kind === "boundary") return setBoundaryLabel(docRef.current, sel.id, label);
-          if (sel.kind === "summary") return setSummaryLabel(docRef.current, sel.id, label);
-          return setCalloutText(docRef.current, sel.nodeId ?? "", sel.id, label);
-        }),
+        withSelectedOverlay((sel) => OVERLAY_OPS[sel.kind].label(docRef.current, sel, label)),
       setOverlayColor: (color) => {
         const sel = selectedOverlayRef.current;
-        const ok = withSelectedOverlay((s) => {
-          if (s.kind === "boundary") return setBoundaryColor(docRef.current, s.id, color);
-          if (s.kind === "summary") return setSummaryColor(docRef.current, s.id, color);
-          return setCalloutColor(docRef.current, s.nodeId ?? "", s.id, color);
-        });
+        const ok = withSelectedOverlay((s) => OVERLAY_OPS[s.kind].color(docRef.current, s, color));
         // Re-emit the (unchanged) selection so the inspector's swatch reflects the new colour.
         if (ok && sel) fireSelectOverlay({ kind: sel.kind, id: sel.id, nodeId: sel.nodeId });
         return ok;
@@ -1237,11 +1265,7 @@ function FlowInner({
         return ok;
       },
       deleteOverlay: () => {
-        const ok = withSelectedOverlay((sel) => {
-          if (sel.kind === "boundary") return deleteBoundary(docRef.current, sel.id);
-          if (sel.kind === "summary") return deleteSummary(docRef.current, sel.id);
-          return deleteCallout(docRef.current, sel.nodeId ?? "", sel.id);
-        });
+        const ok = withSelectedOverlay((sel) => OVERLAY_OPS[sel.kind].del(docRef.current, sel));
         if (ok) clearOverlaySelection();
         return ok;
       },

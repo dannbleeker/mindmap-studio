@@ -27,7 +27,9 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
             <h3>{group.title}</h3>
             <dl>
               {group.items.map((s) => (
-                <div key={s.action} className="mm-shortcut-row">
+                // Key on keys+action: a single action can have two bindings (e.g. Tab and
+                // Ctrl/⌘+Enter both "Add a child topic"), so `action` alone is not unique.
+                <div key={`${s.keys} ${s.action}`} className="mm-shortcut-row">
                   <dt>
                     <kbd>{s.keys}</kbd>
                   </dt>

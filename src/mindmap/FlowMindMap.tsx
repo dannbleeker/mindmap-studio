@@ -52,7 +52,7 @@ import { TopicNode } from "./flow/TopicNode";
 import { type BraceGroup, computeBraces } from "./flow/brace";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
-import { type Box, attachSideFor, childrenAxis } from "./flow/floating";
+import { type Box, attachSideFor, computeAxisByParent } from "./flow/floating";
 import { createHistory, record, redo as redoHistory, undo as undoHistory } from "./flow/history";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import {
@@ -392,25 +392,7 @@ function FlowInner({
         const z = sizeOf(id);
         return { cx: p.x + z.width / 2, cy: p.y + z.height / 2, w: z.width, h: z.height };
       };
-      const kidsByParent = new Map<string, string[]>();
-      for (const e of proj.edges) {
-        if (e.data?.crosslink) continue;
-        const a = kidsByParent.get(e.source);
-        if (a) a.push(e.target);
-        else kidsByParent.set(e.source, [e.target]);
-      }
-      const axisByParent = new Map<string, "h" | "v">();
-      for (const [pid, kids] of kidsByParent) {
-        const pb = rectOf(pid);
-        if (!pb) continue;
-        axisByParent.set(
-          pid,
-          childrenAxis(
-            pb,
-            kids.map(rectOf).filter((b): b is Box => !!b),
-          ),
-        );
-      }
+      const axisByParent = computeAxisByParent(proj.edges, rectOf);
       setEdges(
         proj.edges.map((e) => {
           let data = e.data;

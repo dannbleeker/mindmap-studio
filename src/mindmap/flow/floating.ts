@@ -70,6 +70,31 @@ export function childrenAxis(parent: Box, children: Box[]): "h" | "v" {
   return sx >= sy ? "h" : "v";
 }
 
+/** Each parent's dominant child-axis ("h"/"v"), keyed by parent id — group the non-crosslink edges
+ *  by source and run childrenAxis over the children's boxes. Shared by the live canvas (FlowMindMap's
+ *  sync) and the SVG exporter so both pick the SAME branch attach sides (canvas == export). `rectOf`
+ *  maps a node id to its box (undefined if unknown). Pure. */
+export function computeAxisByParent(
+  edges: readonly { source: string; target: string; data?: { crosslink?: boolean } | null }[],
+  rectOf: (id: string) => Box | null | undefined,
+): Map<string, "h" | "v"> {
+  const kids = new Map<string, Box[]>();
+  for (const e of edges) {
+    if (e.data?.crosslink) continue;
+    const cb = rectOf(e.target);
+    if (!cb) continue;
+    const a = kids.get(e.source);
+    if (a) a.push(cb);
+    else kids.set(e.source, [cb]);
+  }
+  const out = new Map<string, "h" | "v">();
+  for (const [pid, cbs] of kids) {
+    const pb = rectOf(pid);
+    if (pb) out.set(pid, childrenAxis(pb, cbs));
+  }
+  return out;
+}
+
 /** The side of the parent a child sits on, along the parent's dominant axis. */
 export function attachSideFor(parent: Box, child: Box, axis: "h" | "v"): AttachSide {
   if (axis === "h") return child.cx >= parent.cx ? "right" : "left";

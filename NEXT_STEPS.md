@@ -23,7 +23,7 @@ push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 ## Open items
 
 _None actionable._ Both real-file importer validations are now done — **`.mmap`** (a feature-rich
-MindManager export) and **`.smmx`** (a 101-topic SimpleMind export, "Enablement.smmx"), each
+MindManager export) and **`.smmx`** (a real ~100-topic SimpleMind export), each
 owner-validated **2026-06-19** with zero content loss and guarded by an env-gated integration test
 (`MMAP_FILE` / `SMMX_FILE`). The only remaining importer gap is embedded-image `.mmap` import, under
 *Deferred* below (blocked on an image-bearing sample).

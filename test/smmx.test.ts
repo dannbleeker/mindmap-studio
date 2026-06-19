@@ -228,10 +228,10 @@ describe("SimpleMind .smmx export", () => {
 // Opt-in integration check against a REAL SimpleMind export. CI-safe: it skips when SMMX_FILE is
 // unset, so the repo never depends on a personal file. Run it locally with:
 //   $env:SMMX_FILE="C:\path\to\file.smmx"; pnpm test
-// (The owner validated this against a real 101-topic SimpleMind export, "Enablement.smmx", on
-// 2026-06-19 — every topic + the full hierarchy + the title imported with zero loss; structure
-// confirmed flat, root simplemind-mindmaps>mindmap, exactly as the importer assumes. CI still skips
-// by default since no real file is committed.)
+// (The owner validated this against a real ~100-topic SimpleMind export on 2026-06-19 — every
+// topic + the full hierarchy + the title imported with zero loss; structure confirmed flat, root
+// simplemind-mindmaps>mindmap, exactly as the importer assumes. CI still skips by default since no
+// real file is committed.)
 const realFile = process.env.SMMX_FILE;
 describe.skipIf(!realFile)("fromSmmx — real .smmx (SMMX_FILE)", () => {
   it("imports the real map: a single tree, every topic accounted for", () => {

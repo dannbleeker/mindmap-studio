@@ -2,6 +2,7 @@ import { XMLParser } from "fast-xml-parser";
 import { strFromU8, strToU8, zipSync } from "fflate";
 import type { CrossLink, MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
+import { escapeXmlAttr as escapeXml } from "./xml";
 import { unzipOrThrow } from "./zip";
 
 // SimpleMind `.smmx` <-> canonical model.
@@ -19,14 +20,6 @@ import { unzipOrThrow } from "./zip";
 // images. fflate does the zip/unzip.
 
 const MINDMAP_PATH = "document/mindmap.xml";
-
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 // biome-ignore lint/suspicious/noExplicitAny: tolerant shape from the XML parser
 type Xml = any;

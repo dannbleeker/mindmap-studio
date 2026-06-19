@@ -1,18 +1,11 @@
 import { XMLParser } from "fast-xml-parser";
 import type { MapNode, MindMapDoc } from "../model/types";
+import { escapeXmlAttr as escapeXml } from "./xml";
 
 // OPML <-> canonical model. OPML is the common outline-interchange format
 // (Freeplane, OmniOutliner, Workflowy, …): nested <outline text="…"> elements.
 // Notes round-trip via the de-facto `_note` attribute. This module pulls in
 // fast-xml-parser, so the app loads it on demand (kept out of the entry bundle).
-
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 export function toOpml(doc: MindMapDoc): string {
   const lines: string[] = [];

@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
+import { escapeXmlAttr as escapeXml } from "./xml";
 
 // FreeMind / Freeplane `.mm` <-> canonical model.
 //
@@ -13,14 +14,6 @@ import { isDangerousUrl } from "./urlSafety";
 //   • <richcontent TYPE="NOTE">…</>  <-> note   (HTML body text)
 // Per-node styling, icons and positions are tool-specific and intentionally not carried.
 // fast-xml-parser is pulled in here, so the app loads this module on demand.
-
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 export function toFreemind(doc: MindMapDoc): string {
   const lines: string[] = [];

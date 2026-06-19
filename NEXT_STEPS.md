@@ -22,9 +22,11 @@ push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
 ## Open items
 
-- [ ] **Validate importers against real feature-rich files.** The `.mmap` + `.smmx` importers are
-      spec/XSD-authoritative and integration-tested, but only real exports (an `MMAP_FILE`, a real
-      SimpleMind file) fully close them.
+- [ ] **Validate the `.smmx` (SimpleMind) importer against a real SimpleMind export.** It's
+      spec-authoritative and integration-tested against synthetic fixtures, but no real `.smmx`
+      file has been round-tripped yet. (The `.mmap` importer is **confirmed against real
+      feature-rich MindManager files — owner-validated 2026-06-19**; only the separate
+      embedded-image `.mmap` gap remains, under *Deferred* below.)
 
 ## Deferred / blocked (off the active list)
 

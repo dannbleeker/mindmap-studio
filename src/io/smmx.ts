@@ -12,7 +12,9 @@ import { isDangerousUrl } from "./urlSafety";
 // the exporter also writes a simple tidy x/y layout so the map opens readably. Schema confirmed
 // against a working `.smmx` parser; per-topic styling/images and rich-note markup aren't carried.
 // NOTE: not yet verified against a real SimpleMind file/app — validate with a real `.smmx` when
-// one is available (same caveat as the `.mmap` importer). fflate does the zip/unzip.
+// one is available. (The sibling `.mmap` importer cleared this same caveat on 2026-06-19, when it
+// was confirmed against real feature-rich MindManager exports; `.smmx` is still awaiting a real
+// file.) fflate does the zip/unzip.
 
 const MINDMAP_PATH = "document/mindmap.xml";
 

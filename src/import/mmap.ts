@@ -9,9 +9,11 @@ import type { Boundary, CrossLink, MapNode, MindMapDoc, NodeId } from "../model/
 // A .mmap is a ZIP archive whose map lives in `Document.xml`, namespace
 // http://schemas.mindjet.com/MindManager/Application/2003. The field shapes
 // below are taken from the bundled XSD schemas, so they are authoritative
-// (not guessed). The importer is defensive: it recovers everything it
-// understands, warns about what it deliberately drops, and throws a useful
-// error when handed something that is not a MindManager map.
+// (not guessed), and the text/structure import is confirmed against real
+// feature-rich MindManager exports (owner-validated 2026-06-19). The importer
+// is defensive: it recovers everything it understands, warns about what it
+// deliberately drops, and throws a useful error when handed something that is
+// not a MindManager map.
 //
 // Imported: topic tree + text (Text@PlainText), notes
 // (NotesGroup>NotesXhtmlData@PreviewPlainText), stock icons (Icon@IconType),

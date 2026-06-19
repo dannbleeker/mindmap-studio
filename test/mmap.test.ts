@@ -259,8 +259,8 @@ describe("parseMmap", () => {
   });
 
   // One realistic map exercising every feature at once — the rich features are
-  // each covered in isolation above, but Dann's real sample used none of them, so
-  // this guards that they all decode correctly together.
+  // each covered in isolation above, so this guards that they all decode together.
+  // (Confirmed against real feature-rich MindManager exports, owner-validated 2026-06-19.)
   it("imports a map using every feature together", () => {
     const { doc, warnings } = parseMmap(
       mmapOf(`${MAP_OPEN}
@@ -326,6 +326,8 @@ function countWith(node: MapNode, pred: (n: MapNode) => boolean): number {
 // Opt-in integration check against a REAL MindManager export. CI-safe: it skips
 // when MMAP_FILE is unset, so the repo never depends on a personal file. Run it
 // locally with:  $env:MMAP_FILE="C:\path\to\file.mmap"; pnpm test
+// (The owner ran this against real feature-rich .mmap files on 2026-06-19 — import
+// confirmed; CI still skips by default since no real file is committed.)
 const realFile = process.env.MMAP_FILE;
 describe.skipIf(!realFile)("parseMmap — real .mmap (MMAP_FILE)", () => {
   it("imports the real map and reports what survives vs. is lost", () => {

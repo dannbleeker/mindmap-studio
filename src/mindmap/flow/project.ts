@@ -84,7 +84,9 @@ export function project(
   ): void => {
     // A node's own `branchColor` override (if set) recolours it AND its subtree (inherited via the
     // `color` passed down to children); otherwise it keeps the inherited auto-palette colour.
-    const nodeColor = node.branchColor ?? color;
+    // `|| color` (not `??`): an imported/hand-edited "" branchColor must fall back to the palette
+    // colour, not pass through as an empty stroke (setBranchColor already normalises "" → undefined).
+    const nodeColor = node.branchColor || color;
     nodes.push({
       id: node.id,
       type: "topic",

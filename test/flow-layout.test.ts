@@ -296,4 +296,33 @@ describe("flow layout (per-subtree columns + height-proportional gaps + fishbone
     expect(a1.x).toBeLessThan(a.x); // further along the bone (leftward)
     expect(Math.abs(a1.y)).toBeGreaterThan(Math.abs(a.y)); // and further from the spine → diagonal
   });
+
+  it("fishbone places sub-causes at ANY depth (depth ≥3 no longer collapse to the origin)", () => {
+    const fdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "fb3",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            children: [
+              { id: "a1", topic: "A1", children: [{ id: "a1x", topic: "A1x", children: [] }] },
+            ],
+          },
+        ],
+      },
+    };
+    const p = project(fdoc);
+    const pos = computeLayout(p.nodes, p.edges, () => ({ width: 100, height: 40 }), "fishbone");
+    const a1 = pos.get("a1");
+    const a1x = pos.get("a1x");
+    if (!a1 || !a1x) throw new Error("depth-3 fishbone node was not placed");
+    expect(Number.isFinite(a1x.x) && Number.isFinite(a1x.y)).toBe(true);
+    expect(a1x.x !== 0 || a1x.y !== 0).toBe(true); // not stacked on the spine head at the origin
+    expect(a1x.x).toBeLessThan(a1.x); // continues further out along the same bone than its parent
+  });
 });

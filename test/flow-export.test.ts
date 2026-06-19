@@ -227,6 +227,25 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(out).not.toContain(">?<"); // and never the old "?" fallback
   });
 
+  it("keeps the 📅 glyph on the due-date chip (canvas == export parity)", () => {
+    const ddoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "due",
+      title: "D",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "hi", topic: "Hi", task: { due: "2026-06-20" }, children: [] }],
+      },
+    };
+    const drects = new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 80, h: 40 }],
+      ["hi", { x: 200, y: 0, w: 80, h: 40 }],
+    ]);
+    const out = buildFlowSvg(ddoc, drects, palette, cssVar);
+    expect(out).toContain("📅"); // the calendar glyph the canvas DateChip shows must survive into the export
+  });
+
   it("draws a directional arrowhead on the cross-link (a filled triangle at the target)", () => {
     // a 3-vertex triangle filled with the cross-link colour — the relationship's arrowhead
     // (branch ribbons fill with branch colours; the dashed line uses stroke, not fill)

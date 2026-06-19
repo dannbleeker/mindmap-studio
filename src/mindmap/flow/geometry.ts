@@ -73,8 +73,8 @@ export function boundaryPath(
     parts.push("Z");
     return parts.join(" ");
   }
-  // roundRect (default)
-  const rr = 16;
+  // roundRect (default) — clamp the corner radius so a small box can't invert (H/V run backwards).
+  const rr = Math.min(16, w / 2, h / 2);
   return [
     `M ${r2(x + rr)} ${r2(y)}`,
     `H ${r2(x + w - rr)} A ${rr} ${rr} 0 0 1 ${r2(x + w)} ${r2(y + rr)}`,

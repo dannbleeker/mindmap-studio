@@ -182,7 +182,7 @@ export function buildFlowSvg(
   const bd = doc.backdrop ? backdropGeometry(doc.backdrop) : null;
   const nodeBg = cssVar["--bgcolor"] ?? "#ffffff";
   const color = cssVar["--color"] ?? "#2c2c2a";
-  const rootBg = cssVar["--root-bgcolor"] ?? "#26215c";
+  const rootBg = cssVar["--root-bgcolor"] ?? "#1b8a5e"; // match TopicNode's var(--mm-root-bg, …) fallback
   const rootColor = cssVar["--root-color"] ?? "#ffffff";
   const pageBg = doc.meta?.background || cssVar["--main-bgcolor"] || "#ffffff";
 
@@ -575,7 +575,7 @@ export function buildFlowSvg(
     }
     if (d.due) {
       const over = isOverdue(d.due, d.progress?.progress ?? 0, today);
-      const label = formatDateShort(d.due);
+      const label = `📅 ${formatDateShort(d.due)}`; // match the canvas DateChip (Chip.tsx) — keep the glyph
       const chipW = label.length * 6.2 + 10;
       const chipY = r.y + r.h - 20;
       parts.push(

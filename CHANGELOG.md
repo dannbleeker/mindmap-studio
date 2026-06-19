@@ -989,8 +989,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
-- **Exports now match the canvas for wrapped text, callouts, indicators, collapsed branches and
-  images.** Several things rendered on screen but were dropped or distorted in the SVG / PNG / PDF
+- **Canvas-fidelity bug-hunt fixes (post-merge sweep of the MindManager rendering pass).** A review
+  of the just-landed markers/layouts/connectors/relationships/boundaries code surfaced a cluster of
+  defects, now fixed with tests: the **fishbone layout** now positions sub-causes at **any depth**
+  (depth-3+ nodes used to get no position and stack on the spine head at the origin); an **organic
+  branch that runs perfectly axis-aligned** (a child dragged directly in line with its parent) no
+  longer collapses to an invisible zero-area ribbon (falls back to the chord normal); the export
+  **due-date chip keeps its 📅 glyph** to match the canvas; `fromFlow` now carries a node's **roll-up
+  binding and attachments** through the round-trip (they were silently dropped); `boundaryPath`
+  **clamps its corner radius** so a small rounded-rect box can't invert; an imported empty-string
+  branch colour now **falls back to the palette** instead of emitting an empty stroke; and the export
+  root-background fallback colour matches the canvas. All canvas==export-invariant or round-trip
+  correctness fixes — no behaviour change to normal maps. Several things rendered on screen but were dropped or distorted in the SVG / PNG / PDF
   export; they now render identically (canvas == export): long topic labels **word-wrap** inside their
   box instead of overflowing; a **multi-line callout** grows to fit instead of clipping to one strip;
   the **note / hyperlink / attachment** indicators are drawn (they used to vanish); a **collapsed

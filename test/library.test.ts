@@ -15,13 +15,6 @@ describe("library backup I/O", () => {
     expect(parseLibrary(serializeLibrary(docs))).toEqual(docs);
   });
 
-  it("preserves a workbook's sheetGroup so its sheets stay grouped on import", () => {
-    const s1 = { ...map("s1", "Sheet 1"), meta: { sheetGroup: "wb" } };
-    const s2 = { ...map("s2", "Sheet 2"), meta: { sheetGroup: "wb" } };
-    const back = parseLibrary(serializeLibrary([s1, s2]));
-    expect(back.map((m) => m.meta?.sheetGroup)).toEqual(["wb", "wb"]);
-  });
-
   it("rejects a single-map .json (not a library backup)", () => {
     const single = JSON.stringify(map("a", "Alpha"));
     expect(() => parseLibrary(single)).toThrow(/library backup/);

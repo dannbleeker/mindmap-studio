@@ -47,8 +47,6 @@ function db(): Promise<IDBPDatabase<MindMapDB>> {
 export interface MapSummary {
   id: string;
   title: string;
-  /** Workbook id (maps sharing it are sheets of one workbook). */
-  sheetGroup?: string;
 }
 
 export async function saveMap(doc: MindMapDoc): Promise<void> {
@@ -70,7 +68,7 @@ export async function deleteMap(id: string): Promise<void> {
 export async function listMaps(): Promise<MapSummary[]> {
   const docs = await (await db()).getAll("maps");
   return docs
-    .map((doc) => ({ id: doc.id, title: doc.title, sheetGroup: doc.meta?.sheetGroup }))
+    .map((doc) => ({ id: doc.id, title: doc.title }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 

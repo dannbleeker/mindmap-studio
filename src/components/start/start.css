@@ -372,11 +372,6 @@
   gap: 4px;
   margin-top: 2px;
 }
-.st-tag-soft {
-  background: var(--st-divider);
-  color: var(--st-muted);
-}
-
 /* --- kebab --- */
 .st-kebab {
   position: relative;

@@ -40,14 +40,13 @@ export interface ToolbarPanels {
   setNumbered: (fn: (v: boolean) => boolean) => void;
 }
 
-/** Map/library state + the map-level actions (open, new, sheets, duplicate, delete, present, roll-ups). */
+/** Map/library state + the map-level actions (open, new, duplicate, delete, present, roll-ups). */
 export interface ToolbarMap {
   doc: MindMapDoc;
   liveDoc: MindMapDoc;
   maps: MapSummary[];
   mapOptions: MapSummary[];
   switchMap: (id: string) => void;
-  addSheet: () => void;
   /** Load a new doc from a template/example builder (the "+ New…" menu). */
   load: (doc: MindMapDoc) => void;
   duplicateMap: () => void;
@@ -377,11 +376,6 @@ export function Toolbar({
                   icon={mi("copy")}
                   label="Duplicate map"
                   onSelect={() => map.duplicateMap()}
-                />
-                <MenuItem
-                  icon={mi("grid")}
-                  label="Add sheet to workbook"
-                  onSelect={() => map.addSheet()}
                 />
                 <MenuItem
                   icon={mi("trash")}

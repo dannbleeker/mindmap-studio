@@ -93,8 +93,6 @@ GitHub Pages).
   switches to free layout so you drop topics into its regions; **−/+** changes the ring/stage count.
   The frame renders into image exports too.
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header.
-- **Multiple sheets per file** — group maps as **sheets** of one workbook: **▦ + Sheet** adds a
-  sheet, a sheet tab strip switches between them, and **⤓ Workbook** exports all sheets to one file.
 - **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
   capped at 30, stored in IndexedDB, deleted with the map.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on

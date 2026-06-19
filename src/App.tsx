@@ -715,46 +715,6 @@ export function App() {
     load(copy);
   }
 
-  // Multiple sheets per file: maps sharing meta.sheetGroup are sheets of one workbook.
-  async function addSheet() {
-    const cur = liveDocRef.current;
-    const promoted = !cur.meta?.sheetGroup; // a standalone map becomes sheet 1 of a new workbook
-    const group = cur.meta?.sheetGroup ?? crypto.randomUUID();
-    if (promoted) {
-      const tagged: MindMapDoc = { ...cur, meta: { ...cur.meta, sheetGroup: group } };
-      liveDocRef.current = tagged;
-      setLiveDoc(tagged);
-      setDoc(tagged);
-      await saveMap(tagged);
-    }
-    // +1 for the new sheet, +1 more if we just promoted the current map (not yet in `maps`).
-    const count = maps.filter((m) => m.sheetGroup === group).length + (promoted ? 2 : 1);
-    const sheet = buildTemplate("blank");
-    sheet.title = `Sheet ${count}`;
-    sheet.root = { ...sheet.root, topic: sheet.title };
-    sheet.meta = { ...sheet.meta, sheetGroup: group };
-    load(sheet);
-  }
-
-  async function exportWorkbook() {
-    const group = liveDocRef.current.meta?.sheetGroup;
-    if (!group) return;
-    try {
-      await saveMap(liveDocRef.current); // flush current edits into the workbook
-      const sheets: MindMapDoc[] = [];
-      for (const s of maps.filter((m) => m.sheetGroup === group)) {
-        const d = await loadMap(s.id);
-        if (d) sheets.push(d);
-      }
-      downloadBlob(
-        new Blob([serializeLibrary(sheets)], { type: "application/json" }),
-        "mindmap-workbook.json",
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-  }
-
   async function deleteCurrent() {
     // Delete immediately + offer Undo (re-saves the map), instead of a blocking confirm (#9).
     const deleted = structuredClone(liveDocRef.current);
@@ -882,11 +842,7 @@ export function App() {
   // Keep the current map selectable even before its first save lands.
   const mapOptions = maps.some((m) => m.id === doc.id)
     ? maps
-    : [{ id: doc.id, title: doc.title, sheetGroup: liveDoc.meta?.sheetGroup }, ...maps];
-
-  // Sheets of the current workbook (maps sharing this map's sheetGroup) — the sheet tab strip.
-  const currentGroup = liveDoc.meta?.sheetGroup;
-  const sheets = currentGroup ? mapOptions.filter((m) => m.sheetGroup === currentGroup) : [];
+    : [{ id: doc.id, title: doc.title }, ...maps];
 
   // The toolbar prop groups, built once and shared with both <Toolbar> and the ⌘K command registry
   // (buildEditorCommands) so the two surfaces can't drift — one source of truth for editor actions.
@@ -907,7 +863,6 @@ export function App() {
       maps,
       mapOptions,
       switchMap,
-      addSheet,
       load,
       duplicateMap,
       deleteCurrent,
@@ -1135,57 +1090,6 @@ export function App() {
             )}
           </div>
           <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-            {sheets.length > 1 && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  padding: "4px 12px",
-                  background: "#f4f3fb",
-                  borderBottom: "1px solid #e2e0d8",
-                  overflowX: "auto",
-                  flexShrink: 0,
-                }}
-              >
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#8a8780", marginRight: 2 }}>
-                  SHEETS
-                </span>
-                {sheets.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => switchMap(s.id)}
-                    aria-pressed={s.id === doc.id}
-                    style={{
-                      ...controlStyle,
-                      padding: "2px 10px",
-                      fontWeight: s.id === doc.id ? 700 : 400,
-                      background: s.id === doc.id ? "#fff" : "transparent",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {s.title || "(untitled)"}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={addSheet}
-                  style={{ ...controlStyle, padding: "2px 8px" }}
-                  title="Add a sheet"
-                >
-                  ＋
-                </button>
-                <button
-                  type="button"
-                  onClick={exportWorkbook}
-                  style={{ ...controlStyle, padding: "2px 8px", marginLeft: "auto" }}
-                  title="Export this workbook (all sheets) as one .json"
-                >
-                  ⤓ Workbook
-                </button>
-              </div>
-            )}
             <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
               <MindMap
                 key={playback ? `pb:${playback.index}` : `${doc.id}:${restoreRev}`}

@@ -79,7 +79,6 @@ function setup(
       { id: "m2", title: "Map Two" },
     ],
     switchMap: vi.fn(),
-    addSheet: vi.fn(),
     load: vi.fn(),
     duplicateMap: vi.fn(),
     deleteCurrent: vi.fn(),

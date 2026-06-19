@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 185,
+  "reviewedThroughChangelogBullets": 186,
   "areas": [
     "editing",
     "notes",
@@ -534,15 +534,6 @@
       "name": "Multi-map library (switch / new / delete)",
       "area": "library",
       "since": "2026-06-11",
-      "manual": true,
-      "book": true,
-      "bookExample": true
-    },
-    {
-      "id": "multiple-sheets",
-      "name": "Multiple sheets per file — group maps as workbook sheets (▦ +Sheet, sheet tab strip, ⤓ Workbook export/import)",
-      "area": "library",
-      "since": "2026-06-15",
       "manual": true,
       "book": true,
       "bookExample": true

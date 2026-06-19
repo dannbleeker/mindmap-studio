@@ -9,7 +9,6 @@ export interface MapEntry {
   title: string;
   nodeCount: number;
   updatedAt?: number;
-  sheetGroup?: string;
 }
 
 const KEBAB: { key: string; label: string }[] = [
@@ -60,10 +59,7 @@ export function MapCard({
             </div>
           </details>
         </div>
-        <div className="st-card-meta">
-          {meta.join(" · ")}
-          {entry.sheetGroup ? <span className="st-tag st-tag-soft">sheet</span> : null}
-        </div>
+        <div className="st-card-meta">{meta.join(" · ")}</div>
       </div>
     </div>
   );

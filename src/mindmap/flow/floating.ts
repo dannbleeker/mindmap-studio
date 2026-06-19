@@ -1,4 +1,5 @@
 import type { InternalNode } from "@xyflow/react";
+import type { LayoutKind } from "../contract";
 
 // Floating-edge geometry: connect a node's border to another's, on the ray between their
 // centres — so edges route correctly in ANY layout (side, org-chart, radial, fishbone, …)
@@ -70,13 +71,27 @@ export function childrenAxis(parent: Box, children: Box[]): "h" | "v" {
   return sx >= sy ? "h" : "v";
 }
 
+/** The fan axis dictated by the layout's ORIENTATION: horizontal layouts attach children on a
+ *  left/right side, vertical (org-chart) layouts on top/bottom. Other layouts (radial / timeline /
+ *  fishbone / grid / brace / freeform) return undefined → the axis is inferred per parent from the
+ *  children's spread (the original behaviour). Forcing the axis by orientation stops a parent whose
+ *  children carry tall subtrees from being mis-read as vertical — which made a child in a horizontal
+ *  map attach top/bottom and enter "from below" instead of from the parent-facing side. */
+export function axisForLayoutKind(kind: LayoutKind): "h" | "v" | undefined {
+  if (kind === "side" || kind === "left" || kind === "right") return "h";
+  if (kind === "org-down" || kind === "org-up") return "v";
+  return undefined;
+}
+
 /** Each parent's dominant child-axis ("h"/"v"), keyed by parent id — group the non-crosslink edges
  *  by source and run childrenAxis over the children's boxes. Shared by the live canvas (FlowMindMap's
  *  sync) and the SVG exporter so both pick the SAME branch attach sides (canvas == export). `rectOf`
- *  maps a node id to its box (undefined if unknown). Pure. */
+ *  maps a node id to its box (undefined if unknown). `axisHint` (from `axisForLayoutKind`) forces the
+ *  axis for every parent when the layout has a fixed orientation; absent → infer per parent. Pure. */
 export function computeAxisByParent(
   edges: readonly { source: string; target: string; data?: { crosslink?: boolean } | null }[],
   rectOf: (id: string) => Box | null | undefined,
+  axisHint?: "h" | "v",
 ): Map<string, "h" | "v"> {
   const kids = new Map<string, Box[]>();
   for (const e of edges) {
@@ -90,7 +105,7 @@ export function computeAxisByParent(
   const out = new Map<string, "h" | "v">();
   for (const [pid, cbs] of kids) {
     const pb = rectOf(pid);
-    if (pb) out.set(pid, childrenAxis(pb, cbs));
+    if (pb) out.set(pid, axisHint ?? childrenAxis(pb, cbs));
   }
   return out;
 }

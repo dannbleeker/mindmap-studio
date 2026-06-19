@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { SelectedOverlay } from "../mindmap";
 import { InspectorResizer } from "./InspectorResizer";
+import { SWATCHES, fieldLabel, seg, segRow } from "./inspectorControls";
 
 // OverlayInspector — the right panel shown when an overlay object (boundary box / summary bracket /
 // callout bubble) is selected, in place of the node InfoPanel / EdgeInspector / MapPanel. Edits the
@@ -13,20 +14,6 @@ const KIND_LABEL: Record<SelectedOverlay["kind"], string> = {
   callout: "Callout",
 };
 
-// A small set of overlay colours + the accent default; "" resets to the kind's default accent.
-// The picked colour re-tints the whole object (stroke/fill/label) on canvas and in every export.
-const SWATCHES = ["#8b87e0", "#e0697f", "#3f9e6e", "#d98a2b", "#3b82c4", "#111827"];
-
-const fieldLabel: CSSProperties = {
-  fontSize: 11,
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
-  color: "var(--ed-faint)",
-  margin: "12px 0 5px",
-};
-const segRow: CSSProperties = { display: "flex", flexWrap: "wrap", gap: 4 };
-
 const controlStyle: CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
@@ -38,19 +25,6 @@ const controlStyle: CSSProperties = {
   fontSize: 13,
   padding: "4px 7px",
 };
-
-function seg(active: boolean): CSSProperties {
-  return {
-    border: `1px solid ${active ? "var(--ed-accent)" : "var(--ed-border)"}`,
-    background: active ? "var(--ed-accent-tint)" : "var(--ed-card)",
-    color: active ? "var(--ed-accent)" : "var(--ed-ink)",
-    borderRadius: 7,
-    cursor: "pointer",
-    fontSize: 12.5,
-    fontWeight: 600,
-    padding: "3px 9px",
-  };
-}
 
 const SHAPE_LABEL = {
   roundRect: "Rounded",

@@ -169,22 +169,26 @@ export function taperedRibbonPath(
   side: AttachSide,
   trunkHW: number,
   tipHW: number,
+  bow = 0,
 ): string {
   const horizontal = side === "left" || side === "right";
   const dx = tx - sx;
   const dy = ty - sy;
-  // Straight-out departure along the side; ease in along the child's near-edge normal.
-  const c1x = horizontal ? sx + dx * 0.5 : sx;
-  const c1y = horizontal ? sy : sy + dy * 0.5;
-  const c2x = horizontal ? tx - dx * 0.5 : tx;
-  const c2y = horizontal ? ty : ty - dy * 0.5;
+  // Chord normal (also the degenerate-tangent fallback below).
+  const chordLen = Math.hypot(dx, dy) || 1;
+  const cnx = -dy / chordLen;
+  const cny = dx / chordLen;
+  // Straight-out departure along the side; ease in along the child's near-edge normal — plus an
+  // optional perpendicular `bow` that arcs the WHOLE curve aside to route around an intervening box
+  // (bow === 0 → byte-identical to the un-bowed ribbon, so branches with a clear path don't move).
+  const c1x = (horizontal ? sx + dx * 0.5 : sx) + cnx * bow;
+  const c1y = (horizontal ? sy : sy + dy * 0.5) + cny * bow;
+  const c2x = (horizontal ? tx - dx * 0.5 : tx) + cnx * bow;
+  const c2y = (horizontal ? ty : ty - dy * 0.5) + cny * bow;
   // Offset perpendicular to the local tangent at each end, not the chord — even taper. When an end
   // segment is degenerate (axis-aligned overlap: dx===0 on a horizontal side, dy===0 on a vertical
   // one → zero-length tangent), fall back to the CHORD normal so the ribbon keeps its width instead
   // of collapsing to a zero-area, invisible path.
-  const chordLen = Math.hypot(dx, dy) || 1;
-  const cnx = -dy / chordLen;
-  const cny = dx / chordLen;
   const sl = Math.hypot(c1x - sx, c1y - sy);
   const spx = sl < 1e-6 ? cnx : -(c1y - sy) / sl;
   const spy = sl < 1e-6 ? cny : (c1x - sx) / sl;
@@ -342,11 +346,88 @@ export interface BranchRender {
   dash: string;
 }
 
+/** The perpendicular `bow` (signed offset of the tapered ribbon's control points) needed to route a
+ *  branch AROUND any `obstacles` (other node boxes) its straight path would otherwise pass behind —
+ *  0 when the path is already clear (so a clear branch is byte-identical to before). Samples the
+ *  centerline cubic against each nearby box, then grows the bow toward the clear side until no sample
+ *  sits inside a box (+`margin`). Pure → the canvas (sync stashes it on `data.attachBow`) and the SVG
+ *  exporter both call it with the same boxes, so canvas == export. Only meaningful for the tapered
+ *  ribbon (the default organic branch). */
+export function bowToClear(
+  parent: Box,
+  child: Box,
+  side: AttachSide,
+  obstacles: readonly Box[],
+  margin = 8,
+): number {
+  if (obstacles.length === 0) return 0;
+  const { sx, sy, tx, ty } = branchEndpoints(parent, child, side);
+  const horizontal = side === "left" || side === "right";
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const len = Math.hypot(dx, dy) || 1;
+  const cnx = -dy / len;
+  const cny = dx / len;
+  const b1x = horizontal ? sx + dx * 0.5 : sx;
+  const b1y = horizontal ? sy : sy + dy * 0.5;
+  const b2x = horizontal ? tx - dx * 0.5 : tx;
+  const b2y = horizontal ? ty : ty - dy * 0.5;
+  // Only boxes overlapping the chord's bounding box can be in the way — a cheap pre-filter.
+  const minX = Math.min(sx, tx) - margin;
+  const maxX = Math.max(sx, tx) + margin;
+  const minY = Math.min(sy, ty) - margin;
+  const maxY = Math.max(sy, ty) + margin;
+  const near = obstacles.filter(
+    (o) =>
+      o.cx + o.w / 2 >= minX &&
+      o.cx - o.w / 2 <= maxX &&
+      o.cy + o.h / 2 >= minY &&
+      o.cy - o.h / 2 <= maxY,
+  );
+  if (near.length === 0) return 0;
+  // Deepest box penetration of the bowed centerline + which side of the chord the offending box is on.
+  const probe = (bow: number): { pen: number; sign: number } => {
+    const c1x = b1x + cnx * bow;
+    const c1y = b1y + cny * bow;
+    const c2x = b2x + cnx * bow;
+    const c2y = b2y + cny * bow;
+    let pen = 0;
+    let sign = 0;
+    for (const o of near) {
+      for (let i = 1; i <= 12; i++) {
+        const t = i / 13;
+        const u = 1 - t;
+        const px = u * u * u * sx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * tx;
+        const py = u * u * u * sy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ty;
+        const p = Math.min(
+          o.w / 2 + margin - Math.abs(px - o.cx),
+          o.h / 2 + margin - Math.abs(py - o.cy),
+        );
+        if (p > pen) {
+          pen = p;
+          sign = Math.sign((o.cx - sx) * cnx + (o.cy - sy) * cny) || 1;
+        }
+      }
+    }
+    return { pen, sign };
+  };
+  const first = probe(0);
+  if (first.pen <= 0) return 0;
+  const dir = -first.sign; // bow toward the side away from the obstacle
+  let bow = 0;
+  for (let step = 1; step <= 8; step++) {
+    bow = dir * step * (first.pen + margin);
+    if (probe(bow).pen <= 0) break;
+  }
+  return bow;
+}
+
 /** Resolve a branch edge to its path + paint, honouring the map's connector style + a per-branch dash.
  *  ONE shared decision so the live canvas (BranchEdge) and the SVG exporter render identically
  *  (canvas == export). `attachSide` is the per-parent fan side; `elbow` marks an org-chart branch
  *  (used only for the adaptive "organic" style). A dashed branch can't be a filled ribbon, so it
- *  falls back to a uniform stroked curve. */
+ *  falls back to a uniform stroked curve. `bow` arcs the tapered ribbon around an intervening box
+ *  (from `bowToClear`; 0 = straight, the default — only the tapered ribbon honours it). */
 export function branchRender(
   parent: Box,
   child: Box,
@@ -358,6 +439,7 @@ export function branchRender(
     connectorStyle?: ConnectorStyle;
     dash?: "solid" | "dashed" | "dotted";
   },
+  bow = 0,
 ): BranchRender {
   const color = data.branchColor ?? "#999";
   const dashArr = data.dash === "dashed" ? "6 4" : data.dash === "dotted" ? "2 4" : "";
@@ -367,7 +449,7 @@ export function branchRender(
     const ep = branchEndpoints(parent, child, attachSide);
     const { trunk, tip } = branchWidths(data.depth ?? 1);
     return {
-      d: taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, attachSide, trunk, tip),
+      d: taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, attachSide, trunk, tip, bow),
       fill: color,
       stroke: null,
       width: 0,

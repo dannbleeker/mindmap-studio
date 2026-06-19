@@ -12,6 +12,7 @@ import {
   type Box,
   attachSideFor,
   axisForLayoutKind,
+  bowToClear,
   branchRender,
   computeAxisByParent,
   crosslinkBezier,
@@ -386,6 +387,9 @@ export function buildFlowSvg(
     },
     axisForLayoutKind(kind),
   );
+  // All node boxes — obstacle-aware routing bows a branch around any box in its straight path
+  // (the SAME computation FlowMindMap.sync() stashes on data.attachBow → canvas == export).
+  const allBranchBoxes = [...rects.entries()].map(([id, r]) => ({ id, box: boxOf(r) }));
 
   // Edges.
   for (const e of edges) {
@@ -431,9 +435,18 @@ export function buildFlowSvg(
       const parent = boxOf(sr);
       const child = boxOf(tr);
       const side: AttachSide = attachSideFor(parent, child, axisByParent.get(e.source) ?? "h");
-      // Same shared decision the canvas uses (connector style + branch colour + dash) → canvas ==
-      // export. A filled ribbon for the organic taper; a uniform stroke for elbow/curved/straight/dash.
-      const br = branchRender(parent, child, side, e.data ?? {});
+      const obstacles = allBranchBoxes
+        .filter((b) => b.id !== e.source && b.id !== e.target)
+        .map((b) => b.box);
+      // Same shared decision the canvas uses (connector style + branch colour + dash + obstacle bow) →
+      // canvas == export. A filled ribbon for the organic taper; a uniform stroke for the others.
+      const br = branchRender(
+        parent,
+        child,
+        side,
+        e.data ?? {},
+        bowToClear(parent, child, side, obstacles),
+      );
       if (br.fill) {
         parts.push(`<path d="${br.d}" fill="${br.fill}"/>`);
       } else {

@@ -82,6 +82,10 @@ export type EdgeData = {
   /** Which side of the parent this branch springs from — one shared origin per parent-side, computed
    *  per parent in sync() so siblings stay consistent (no crossed fan). Branch edges only. */
   attachSide?: AttachSide;
+  /** Perpendicular bow that routes this branch's tapered ribbon AROUND an intervening node box (0 =
+   *  straight through, the default). Computed per branch in sync() from the other node boxes; the SVG
+   *  exporter recomputes it the same way (canvas == export). Branch edges only. */
+  attachBow?: number;
   /** Render as a right-angle org-chart elbow (uniform stroke) instead of the organic tapered ribbon.
    *  Set in project() when the branch's governing layout is org-down/org-up. Branch edges only. */
   elbow?: boolean;

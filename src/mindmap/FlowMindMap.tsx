@@ -53,7 +53,13 @@ import { TopicNode } from "./flow/TopicNode";
 import { type BraceGroup, computeBraces } from "./flow/brace";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
-import { type Box, attachSideFor, axisForLayoutKind, computeAxisByParent } from "./flow/floating";
+import {
+  type Box,
+  attachSideFor,
+  axisForLayoutKind,
+  bowToClear,
+  computeAxisByParent,
+} from "./flow/floating";
 import {
   type History,
   createHistory,
@@ -450,6 +456,10 @@ function FlowInner({
         return { cx: p.x + z.width / 2, cy: p.y + z.height / 2, w: z.width, h: z.height };
       };
       const axisByParent = computeAxisByParent(proj.edges, rectOf, axisForLayoutKind(kind));
+      // All node boxes — obstacle-aware routing bows each branch around any box in its straight path.
+      const allBoxes = proj.nodes
+        .map((n) => ({ id: n.id, box: rectOf(n.id) }))
+        .filter((b): b is { id: string; box: Box } => b.box !== null);
       setEdges(
         proj.edges.map((e) => {
           let data = e.data;
@@ -458,7 +468,18 @@ function FlowInner({
             const cb = rectOf(e.target);
             const attachSide =
               pb && cb ? attachSideFor(pb, cb, axisByParent.get(e.source) ?? "h") : undefined;
-            data = { ...(e.data as EdgeData), attachSide };
+            const attachBow =
+              pb && cb && attachSide
+                ? bowToClear(
+                    pb,
+                    cb,
+                    attachSide,
+                    allBoxes
+                      .filter((b) => b.id !== e.source && b.id !== e.target)
+                      .map((b) => b.box),
+                  )
+                : 0;
+            data = { ...(e.data as EdgeData), attachSide, attachBow };
           }
           if (lit) {
             data = {

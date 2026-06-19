@@ -3,11 +3,9 @@
 // rules — XML escaping and the deterministic OPC zip — so they can't drift between formats.
 
 import { strToU8, zipSync } from "fflate";
-
-// XML element-content escape (text lands inside element bodies like <w:t> / <a:t> / <t>).
-export function escapeXml(text: string): string {
-  return text.replace(/[&<>]/g, (c) => (c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;"));
-}
+// OOXML text lands inside element bodies (<w:t> / <a:t> / <t>), so content escaping (& < >) is what
+// the .docx / .pptx / .xlsx builders need; re-exported under the existing name they import.
+export { escapeXmlContent as escapeXml } from "./xml";
 
 // ZIP's DOS timestamp can't predate 1980; pin every entry so the same input always produces
 // byte-identical output instead of carrying wall-clock time.

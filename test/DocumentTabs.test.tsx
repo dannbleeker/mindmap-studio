@@ -64,6 +64,24 @@ describe("DocumentTabs", () => {
     expect(onClose).toHaveBeenCalledWith("a");
   });
 
+  it("fires onReorder when a tab is dragged onto another", () => {
+    const onReorder = vi.fn();
+    render(
+      <DocumentTabs
+        docs={docs}
+        activeId="a"
+        onActivate={() => {}}
+        onClose={() => {}}
+        onNew={() => {}}
+        onReorder={onReorder}
+      />,
+    );
+    const containers = screen.getAllByRole("tab").map((b) => b.closest(".mm-doctab") as Element);
+    fireEvent.dragStart(containers[0]);
+    fireEvent.drop(containers[1]);
+    expect(onReorder).toHaveBeenCalledWith(0, 1);
+  });
+
   it("falls back to a placeholder label for an untitled map", () => {
     render(
       <DocumentTabs

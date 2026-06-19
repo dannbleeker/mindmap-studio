@@ -107,6 +107,9 @@ export function App() {
   // Per-tab canvas sessions (viewport + undo/redo), captured on switch-away and restored on switch-back
   // so the recently-used tabs are lossless. An LRU Map capped at MAX_SESSIONS; one-shot on restore.
   const sessionCache = useRef<Map<string, CanvasSession>>(new Map());
+  // Flips true once the boot effect has decided the initial map/view, so the URL ?map= sync doesn't
+  // write the pre-boot sampleDoc placeholder before boot has read the deep-link.
+  const booted = useRef(false);
   const [maps, setMaps] = useState<MapSummary[]>([]);
   // Start screen vs editor. Default to the editor so a returning user's last map restores without a
   // flash; the boot effect flips to "start" only when there's no map to restore (first run / empty
@@ -189,7 +192,7 @@ export function App() {
   // Open-document tabs: which maps are open + which is active (persisted). The active map's state
   // still lives in the doc/liveDoc singletons below — this registry just follows it (load() calls
   // ensureOpen) and drives the tab strip; switching a tab reloads that map.
-  const { openIds, ensureOpen, closeTab, restoreSession } = useOpenDocuments();
+  const { openIds, ensureOpen, closeTab, reorder, restoreSession } = useOpenDocuments();
   const [outlineFilter, setOutlineFilter] = useState("");
   // Named styles ("styles organizer"), persisted app-wide so a look is reusable across maps.
   const [namedStyles, setNamedStyles] = useState<NamedStyle[]>(() => {
@@ -832,9 +835,13 @@ export function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // A ?map=<id> deep-link (shareable / bookmarkable) opens that map as the active tab — even on a
+      // first visit with no saved session.
+      const deepLinkId = new URLSearchParams(window.location.search).get("map");
       const session = await getTabSession().catch(() => null);
       if (cancelled) return;
-      if (!session) {
+      booted.current = true; // boot has decided; the URL ?map= sync may now run
+      if (!session && !deepLinkId) {
         setView("start");
         return;
       }
@@ -844,17 +851,23 @@ export function App() {
       if (cancelled) return;
       setMaps(lib);
       const existing = new Set(lib.map((m) => m.id));
-      const validIds = session.openTabIds.filter((id) => existing.has(id));
-      // Restore the persisted active tab; if its map is gone, fall back to the first surviving tab so
-      // a single dead map doesn't drop the whole workspace.
-      const activeId = existing.has(session.activeTabId)
-        ? session.activeTabId
-        : (validIds[0] ?? null);
+      let openTabIds = session ? session.openTabIds.filter((id) => existing.has(id)) : [];
+      // Active map: a valid deep-link wins (and joins the open set); else the persisted active tab;
+      // else the first surviving tab. A single dead map doesn't drop the whole workspace.
+      let activeId: string | null = null;
+      if (deepLinkId && existing.has(deepLinkId)) {
+        activeId = deepLinkId;
+        if (!openTabIds.includes(deepLinkId)) openTabIds = [...openTabIds, deepLinkId];
+      } else if (session && existing.has(session.activeTabId)) {
+        activeId = session.activeTabId;
+      } else {
+        activeId = openTabIds[0] ?? null;
+      }
       const restored = activeId ? await loadMap(activeId).catch(() => null) : null;
       if (cancelled) return;
       if (restored && activeId) {
         restoreSession({
-          openTabIds: validIds.length ? validIds : [activeId],
+          openTabIds: openTabIds.length ? openTabIds : [activeId],
           activeTabId: activeId,
         });
         load(restored);
@@ -875,6 +888,27 @@ export function App() {
   useEffect(() => {
     sessionCache.current.delete(doc.id);
   }, [doc.id, restoreRev]);
+
+  // Keep the URL's ?map= in sync with the active map (so it's shareable / bookmarkable); clear it on
+  // the start screen. replaceState — no history spam. Other params (?layout, ?theme) are preserved.
+  useEffect(() => {
+    if (!booted.current) return; // don't write the pre-boot sampleDoc placeholder into the URL
+    try {
+      const url = new URL(window.location.href);
+      const want = view === "editor" ? doc.id : null;
+      if (want) {
+        if (url.searchParams.get("map") !== want) {
+          url.searchParams.set("map", want);
+          window.history.replaceState(null, "", url);
+        }
+      } else if (url.searchParams.has("map")) {
+        url.searchParams.delete("map");
+        window.history.replaceState(null, "", url);
+      }
+    } catch {
+      // best-effort; deep-link sync is non-critical
+    }
+  }, [doc.id, view]);
 
   // Press "/" to jump to the Find box (ignored while typing in a field/node).
   useEffect(() => {
@@ -1041,6 +1075,7 @@ export function App() {
             onActivate={switchMap}
             onClose={closeMapTab}
             onNew={() => load(buildTemplate("blank"))}
+            onReorder={reorder}
           />
         )}
 

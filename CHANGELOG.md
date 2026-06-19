@@ -32,6 +32,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   restored on return for the last few tabs (older ones reopen fit-to-view, fresh history). One-shot,
   so a version restore still starts clean.
 
+- **Reorder tabs + shareable map links.** Drag a document tab to reorder it. The active map is now
+  reflected in the URL as **`?map=<id>`** (so a map is bookmarkable / shareable), and opening a
+  `?map=` link loads that map straight into the editor — even on a first visit.
+
 - **Boundary shapes + styling.** A boundary can now be a **rounded rectangle, sharp rectangle,
   ellipse, scalloped cloud, or polygon** (its outline is real SVG geometry, not a CSS box), with a
   **soft gradient fill**, an optional **dashed / dotted** outline, and its title drawn as a **tab fused

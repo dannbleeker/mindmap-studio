@@ -96,4 +96,28 @@ describe("useOpenDocuments", () => {
     });
     expect(result.current.openIds).toEqual(["c"]);
   });
+
+  it("reorder moves a tab to a new index", () => {
+    const { result } = renderHook(() => useOpenDocuments());
+    act(() => {
+      result.current.ensureOpen("a");
+      result.current.ensureOpen("b");
+      result.current.ensureOpen("c");
+    });
+    act(() => result.current.reorder(0, 2)); // move "a" to the end
+    expect(result.current.openIds).toEqual(["b", "c", "a"]);
+    act(() => result.current.reorder(2, 0)); // and back to the front
+    expect(result.current.openIds).toEqual(["a", "b", "c"]);
+  });
+
+  it("reorder ignores identical / out-of-range indices", () => {
+    const { result } = renderHook(() => useOpenDocuments());
+    act(() => {
+      result.current.ensureOpen("a");
+      result.current.ensureOpen("b");
+    });
+    act(() => result.current.reorder(1, 1)); // no-op
+    act(() => result.current.reorder(0, 9)); // out of range → no-op
+    expect(result.current.openIds).toEqual(["a", "b"]);
+  });
 });

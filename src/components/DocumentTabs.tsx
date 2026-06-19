@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { EditorIcon } from "./EditorIcons";
 
 export interface DocTab {
@@ -11,6 +12,8 @@ interface DocumentTabsProps {
   onActivate: (id: string) => void;
   onClose: (id: string) => void;
   onNew: () => void;
+  /** Drag a tab to a new index. When omitted, tabs aren't draggable. */
+  onReorder?: (from: number, to: number) => void;
 }
 
 /**
@@ -18,15 +21,45 @@ interface DocumentTabsProps {
  * Pure + prop-driven — the open set, persistence, and load/switch logic live in App + the
  * useOpenDocuments registry. Middle-click or the × closes a tab; the + opens a new map.
  */
-export function DocumentTabs({ docs, activeId, onActivate, onClose, onNew }: DocumentTabsProps) {
+export function DocumentTabs({
+  docs,
+  activeId,
+  onActivate,
+  onClose,
+  onNew,
+  onReorder,
+}: DocumentTabsProps) {
+  const dragFrom = useRef<number | null>(null);
   return (
     <div className="mm-doctabs" role="tablist" aria-label="Open documents">
       <div className="mm-doctabs-scroll">
-        {docs.map((d) => {
+        {docs.map((d, i) => {
           const active = d.id === activeId;
           const label = d.title || "Untitled map";
           return (
-            <div key={d.id} className="mm-doctab" data-active={active || undefined}>
+            <div
+              key={d.id}
+              className="mm-doctab"
+              data-active={active || undefined}
+              draggable={onReorder ? true : undefined}
+              onDragStart={
+                onReorder
+                  ? () => {
+                      dragFrom.current = i;
+                    }
+                  : undefined
+              }
+              onDragOver={onReorder ? (e) => e.preventDefault() : undefined}
+              onDrop={
+                onReorder
+                  ? (e) => {
+                      e.preventDefault();
+                      if (dragFrom.current !== null) onReorder(dragFrom.current, i);
+                      dragFrom.current = null;
+                    }
+                  : undefined
+              }
+            >
               <button
                 type="button"
                 role="tab"

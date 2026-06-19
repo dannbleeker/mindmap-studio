@@ -41,6 +41,18 @@ export function useOpenDocuments() {
     return neighbour;
   }, []);
 
+  /** Move an open tab from one index to another (drag-to-reorder); no-op for out-of-range/identical. */
+  const reorder = useCallback((from: number, to: number) => {
+    setOpenIds((prev) => {
+      if (from === to || from < 0 || to < 0 || from >= prev.length || to >= prev.length)
+        return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }, []);
+
   /** Seed the registry from a persisted session on boot (before the active map is loaded). */
   const restoreSession = useCallback((session: TabSession) => {
     const ids = session.openTabIds.length ? session.openTabIds : [session.activeTabId];
@@ -60,5 +72,5 @@ export function useOpenDocuments() {
     void setTabSession({ openTabIds: openIds, activeTabId: activeId ?? "" });
   }, [openIds, activeId]);
 
-  return { openIds, activeId, ensureOpen, closeTab, restoreSession };
+  return { openIds, activeId, ensureOpen, closeTab, reorder, restoreSession };
 }

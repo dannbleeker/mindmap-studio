@@ -64,6 +64,61 @@ describe("DocumentTabs", () => {
     expect(onClose).toHaveBeenCalledWith("a");
   });
 
+  // Minimal DataTransfer stand-in (jsdom doesn't implement one); shared across a drag's events.
+  const makeDT = () => {
+    const data: Record<string, string> = {};
+    return {
+      effectAllowed: "",
+      get types() {
+        return Object.keys(data);
+      },
+      setData(k: string, v: string) {
+        data[k] = v;
+      },
+      getData(k: string) {
+        return data[k] ?? "";
+      },
+    };
+  };
+
+  it("fires onReorder when a tab is dragged onto another", () => {
+    const onReorder = vi.fn();
+    render(
+      <DocumentTabs
+        docs={docs}
+        activeId="a"
+        onActivate={() => {}}
+        onClose={() => {}}
+        onNew={() => {}}
+        onReorder={onReorder}
+      />,
+    );
+    const containers = screen.getAllByRole("tab").map((b) => b.closest(".mm-doctab") as Element);
+    const dt = makeDT(); // one transfer object for the whole drag (start → drop)
+    fireEvent.dragStart(containers[0], { dataTransfer: dt });
+    fireEvent.drop(containers[1], { dataTransfer: dt });
+    expect(onReorder).toHaveBeenCalledWith(0, 1);
+  });
+
+  it("ignores a non-tab drop (e.g. a dragged link/text) — no spurious reorder", () => {
+    const onReorder = vi.fn();
+    render(
+      <DocumentTabs
+        docs={docs}
+        activeId="a"
+        onActivate={() => {}}
+        onClose={() => {}}
+        onNew={() => {}}
+        onReorder={onReorder}
+      />,
+    );
+    const containers = screen.getAllByRole("tab").map((b) => b.closest(".mm-doctab") as Element);
+    const foreign = makeDT(); // a drag that never started on a tab (no TAB_DND payload)
+    foreign.setData("text/plain", "hello");
+    fireEvent.drop(containers[1], { dataTransfer: foreign });
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
   it("falls back to a placeholder label for an untitled map", () => {
     render(
       <DocumentTabs

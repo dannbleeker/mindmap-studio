@@ -1,5 +1,10 @@
 import { EditorIcon } from "./EditorIcons";
 
+// dataTransfer MIME tag identifying a document-tab drag. Carrying the source index on the drag (vs a
+// shared ref) means tabs only accept tab drags — not a link/text drop — and there's no stale index
+// left over from an aborted drag.
+const TAB_DND = "application/x-mm-tab";
+
 export interface DocTab {
   id: string;
   title: string;
@@ -11,6 +16,8 @@ interface DocumentTabsProps {
   onActivate: (id: string) => void;
   onClose: (id: string) => void;
   onNew: () => void;
+  /** Drag a tab to a new index. When omitted, tabs aren't draggable. */
+  onReorder?: (from: number, to: number) => void;
 }
 
 /**
@@ -18,15 +25,54 @@ interface DocumentTabsProps {
  * Pure + prop-driven — the open set, persistence, and load/switch logic live in App + the
  * useOpenDocuments registry. Middle-click or the × closes a tab; the + opens a new map.
  */
-export function DocumentTabs({ docs, activeId, onActivate, onClose, onNew }: DocumentTabsProps) {
+export function DocumentTabs({
+  docs,
+  activeId,
+  onActivate,
+  onClose,
+  onNew,
+  onReorder,
+}: DocumentTabsProps) {
   return (
     <div className="mm-doctabs" role="tablist" aria-label="Open documents">
       <div className="mm-doctabs-scroll">
-        {docs.map((d) => {
+        {docs.map((d, i) => {
           const active = d.id === activeId;
           const label = d.title || "Untitled map";
           return (
-            <div key={d.id} className="mm-doctab" data-active={active || undefined}>
+            <div
+              key={d.id}
+              className="mm-doctab"
+              data-active={active || undefined}
+              draggable={onReorder ? true : undefined}
+              onDragStart={
+                onReorder
+                  ? (e) => {
+                      e.dataTransfer.setData(TAB_DND, String(i));
+                      e.dataTransfer.effectAllowed = "move";
+                    }
+                  : undefined
+              }
+              onDragOver={
+                onReorder
+                  ? (e) => {
+                      // Accept ONLY a tab drag (not a link/text drop the canvas also handles).
+                      if (e.dataTransfer.types.includes(TAB_DND)) e.preventDefault();
+                    }
+                  : undefined
+              }
+              onDrop={
+                onReorder
+                  ? (e) => {
+                      const raw = e.dataTransfer.getData(TAB_DND);
+                      if (raw === "") return; // not a tab drag → ignore
+                      e.preventDefault();
+                      const from = Number(raw);
+                      if (Number.isInteger(from)) onReorder(from, i);
+                    }
+                  : undefined
+              }
+            >
               <button
                 type="button"
                 role="tab"

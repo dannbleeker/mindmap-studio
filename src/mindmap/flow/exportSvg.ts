@@ -257,6 +257,33 @@ function emitSummaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[] 
   return out;
 }
 
+/** SVG for the diagram backdrop frame (onion / funnel / Venn), behind everything. */
+function emitBackdrop(bd: ReturnType<typeof backdropGeometry>): string[] {
+  return bd.shapes.map((s) =>
+    s.type === "circle"
+      ? `<circle cx="${r2(s.cx ?? 0)}" cy="${r2(s.cy ?? 0)}" r="${r2(s.r ?? 0)}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`
+      : `<path d="${s.d ?? ""}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`,
+  );
+}
+
+/** SVG for the anchored callout bubbles (dashed connector + sticky-note bubble + wrapped text),
+ *  drawn on top — the same per-callout resolver the canvas uses (canvas == export). */
+function emitCallouts(callouts: CalloutBox[]): string[] {
+  const out: string[] = [];
+  for (const c of callouts) {
+    const cs = resolveCalloutStyle(c.color);
+    const tspans = c.lines
+      .map((l, i) => `<tspan x="${r2(c.x + 8)}"${i > 0 ? ` dy="16"` : ""}>${esc(l)}</tspan>`)
+      .join("");
+    out.push(
+      `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${cs.connector}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
+      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${r2(c.h)}" rx="8" fill="${cs.bg}" stroke="${cs.stroke}"/>`,
+      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${cs.text}">${tspans}</text>`,
+    );
+  }
+  return out;
+}
+
 export function buildFlowSvg(
   doc: MindMapDoc,
   rects: Map<string, NodeRect>,
@@ -313,15 +340,7 @@ export function buildFlowSvg(
   const parts: string[] = [];
 
   // Dedicated diagram backdrop (onion / funnel / Venn frame), behind everything else.
-  if (bd) {
-    for (const s of bd.shapes) {
-      parts.push(
-        s.type === "circle"
-          ? `<circle cx="${r2(s.cx ?? 0)}" cy="${r2(s.cy ?? 0)}" r="${r2(s.r ?? 0)}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`
-          : `<path d="${s.d ?? ""}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`,
-      );
-    }
-  }
+  if (bd) parts.push(...emitBackdrop(bd));
 
   // Boundaries (behind everything), then summary brackets — extracted emitters; the same geometry +
   // resolvers the canvas overlays use, so the bytes are identical (canvas == export).
@@ -645,19 +664,8 @@ export function buildFlowSvg(
     }
   }
 
-  // Callouts (anchored bubbles, drawn on top): dashed connector + sticky-note bubble + text.
-  // Per-callout colours from the SAME resolver the canvas uses (canvas == export).
-  for (const c of callouts) {
-    const cs = resolveCalloutStyle(c.color);
-    const tspans = c.lines
-      .map((l, i) => `<tspan x="${r2(c.x + 8)}"${i > 0 ? ` dy="16"` : ""}>${esc(l)}</tspan>`)
-      .join("");
-    parts.push(
-      `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${cs.connector}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
-      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${r2(c.h)}" rx="8" fill="${cs.bg}" stroke="${cs.stroke}"/>`,
-      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${cs.text}">${tspans}</text>`,
-    );
-  }
+  // Callouts (anchored bubbles, drawn on top) — extracted emitter (canvas == export).
+  parts.push(...emitCallouts(callouts));
 
   // Per-map background image (a data: URL): an <image> covering the whole viewBox, on top of the
   // page-background rect but beneath every node/edge/boundary — mirrors the on-canvas layer so

@@ -5,6 +5,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Removed
+
+- **Retired the sheets / workbook feature.** Maps could be grouped into a workbook via a shared
+  `meta.sheetGroup` and switched through an in-canvas sheet strip (**▦ + Sheet**, **⤓ Workbook**
+  export). That's gone — each former sheet was already its own standalone map on disk, so they now
+  appear as ordinary maps in the library with no data lost (only the grouping). This clears the way
+  for the upcoming flat **one-tab-per-document** model.
+
 ### Added
 
 - **Boundary shapes + styling.** A boundary can now be a **rounded rectangle, sharp rectangle,

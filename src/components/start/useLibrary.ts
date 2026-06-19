@@ -22,7 +22,6 @@ export function useLibrary(rev: number): MapEntry[] {
             title: d.title,
             nodeCount: docNodeCount(d),
             updatedAt: d.meta?.updatedAt,
-            sheetGroup: d.meta?.sheetGroup,
           })),
         );
       })

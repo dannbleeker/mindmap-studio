@@ -73,7 +73,6 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   // Map / file
   add("present", "Present", "map", () => map.present());
   add("duplicate-map", "Duplicate map", "map", () => map.duplicateMap());
-  add("add-sheet", "Add sheet to workbook", "map", () => map.addSheet());
   add("delete-map", "Delete map", "map", () => map.deleteCurrent());
   add("refresh-rollups", "Refresh all roll-ups", "map", () => map.refreshRollupsNow());
   add("search-all", "Search across every map", "map", () => nav.openSearchAll());

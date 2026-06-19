@@ -13,12 +13,11 @@ import {
   setLastOpened,
 } from "../src/store/mapStore";
 
-const docOf = (id: string, title: string, sheetGroup?: string): MindMapDoc => ({
+const docOf = (id: string, title: string): MindMapDoc => ({
   schemaVersion: 1,
   id,
   title,
   root: { id: "r", topic: title, children: [{ id: "c", topic: "child", children: [] }] },
-  ...(sheetGroup ? { meta: { sheetGroup } } : {}),
 });
 
 // fake-indexeddb gives this file its own fresh database; tests within it share that DB and run in
@@ -94,19 +93,14 @@ describe("mapStore — getAllMaps / listMaps", () => {
     expect((await getAllMaps()).some((d) => d.id === "g3")).toBe(false);
   });
 
-  it("listMaps sorts by title and carries each map's sheetGroup", async () => {
-    await saveMap(docOf("s-c", "Zeta", "wb-1"));
-    await saveMap(docOf("s-a", "Acme", "wb-1"));
-    await saveMap(docOf("s-b", "Mid")); // no sheet group
+  it("listMaps sorts by title across the whole library", async () => {
+    await saveMap(docOf("s-c", "Zeta"));
+    await saveMap(docOf("s-a", "Acme"));
+    await saveMap(docOf("s-b", "Mid"));
     const list = await listMaps();
-    // titles are in ascending order across the whole library
     const titles = list.map((m) => m.title);
     const sorted = [...titles].sort((a, b) => a.localeCompare(b));
     expect(titles).toEqual(sorted);
-    // sheetGroup is propagated (and absent when the map has none)
-    expect(list.find((m) => m.id === "s-a")?.sheetGroup).toBe("wb-1");
-    expect(list.find((m) => m.id === "s-c")?.sheetGroup).toBe("wb-1");
-    expect(list.find((m) => m.id === "s-b")?.sheetGroup).toBeUndefined();
   });
 });
 

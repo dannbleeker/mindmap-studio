@@ -209,21 +209,6 @@ detail maps -- and keep it current with a click rather than re-copying by hand. 
 node as a window onto the source, not a place to edit: the mirrored branches are refreshed
 wholesale, so do the editing in the source map and roll it up again.
 
-## Sheets: one file, many maps
-
-Cross-map links turn a *library* of separate maps into an atlas. **Sheets** do the opposite:
-they bind several maps into *one file*. Click **▦ + Sheet** and the current map becomes the
-first sheet of a **workbook**; a **sheet tab strip** appears above the canvas, and each tab is a
-complete, independent map -- its own layout, its own history, its own export. Use it when a single
-piece of work has several faces that belong together: a project with a plan, a risk map, and a
-stakeholder map; a workshop with one sheet per exercise. **⤓ Workbook** exports every sheet to a
-single `.json`, and re-importing it keeps them grouped, so the whole set travels as one.
-
-The line between sheets and cross-map links is worth drawing. A **link** is a doorway between maps
-that otherwise live their own lives in the library; **sheets** are maps that are genuinely *parts
-of one document* you want to keep, move, and share as a unit. Reach for a link when the maps are
-independent and occasionally connected; reach for a sheet when they're chapters of the same thing.
-
 ## A working rhythm for big maps
 
 Put together, the loop looks like this: **collapse all** to see the shape, open the
@@ -259,10 +244,7 @@ feel how much calmer a big map gets when you drive it at the right altitude inst
 at the whole thing at once. Two more lenses: tag a handful of nodes `todo` / `doing` / `done` and
 hit **▦ Board** to read the same map as columns; and, if you keep an overview map, bind a node to
 another via the **⤵ Roll-up** menu and click **🔄 Roll-ups** to pull its branches in -- a dashboard
-that refreshes itself. Save any filter you liked as a preset while you're at it. Finally, if you
-keep a few maps that are really parts of one project,
-click **▦ + Sheet** to fold them into a single workbook and flip between them on the tab strip --
-then **⤓ Workbook** to save the whole set as one file.
+that refreshes itself. Save any filter you liked as a preset while you're at it.
 
 A few more ways to cut a big map down to what matters. Open the **marker and tag index** and
 click a tag -- it lists every node carrying it and jumps you there, no scrolling. Turn on

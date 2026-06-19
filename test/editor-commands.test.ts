@@ -91,7 +91,6 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       maps: [],
       mapOptions: [],
       switchMap: vi.fn(),
-      addSheet: vi.fn(),
       load: vi.fn(),
       duplicateMap: vi.fn(),
       deleteCurrent: vi.fn(),

@@ -39,6 +39,25 @@ export function resolveLinkStyle(s: {
   };
 }
 
+/** Level-based topic classification (MindManager reads hierarchy from shape alone): a depth-1 main is
+ *  FILLED with the branch colour, depth-2 keeps the bordered card, and a depth-3+ leaf drops the box
+ *  for a short branch-colour underline. A manual background/border always wins (the node reverts to a
+ *  normal card). Single source for the live node (TopicNode) AND the SVG exporter so the two can never
+ *  classify the same node differently — the canvas==export invariant; each maps these flags to its own
+ *  CSS / SVG tokens. Pure. */
+export function resolveLevelBox(p: {
+  isRoot: boolean;
+  geom: boolean;
+  depth: number;
+  style?: { background?: string; border?: string };
+}): { filledMain: boolean; underlineLeaf: boolean } {
+  const styled = !p.isRoot && !p.geom;
+  return {
+    filledMain: styled && p.depth === 1 && !p.style?.background,
+    underlineLeaf: styled && p.depth >= 3 && !p.style?.background && !p.style?.border,
+  };
+}
+
 // Boundary enclosure box.
 export const BOUNDARY_PAD = 16;
 export const BOUNDARY_STROKE = "#8b87e0";

@@ -7,10 +7,10 @@ import { sanitizeRich } from "../../io/richText";
 import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
-import { formatDateShort, isOverdue, todayISO } from "../../taskDate";
+import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
 import { useEditing } from "./editing";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
-import { levelFontSize, readableTextOn } from "./style";
+import { levelFontSize, readableTextOn, resolveLevelBox } from "./style";
 import type { TopicNode as TopicNodeT } from "./types";
 
 // Custom topic node: a rounded box honouring the model's NodeStyle, with marker emoji, the
@@ -197,8 +197,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   // FILLED with the branch colour; depth-2 keep the bordered white card; depth-3+ leaves drop the box
   // for a short branch-colour underline under the text. A manual NodeStyle key always wins — set a
   // background or border and the node reverts to a normal card.
-  const filledMain = !isRoot && !geom && depth === 1 && !style?.background;
-  const underlineLeaf = !isRoot && !geom && depth >= 3 && !style?.background && !style?.border;
+  const { filledMain, underlineLeaf } = resolveLevelBox({ isRoot, geom, depth, style });
 
   const box: CSSProperties = isRoot
     ? {
@@ -255,13 +254,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   // Inline task-info line (MindManager schedule/assignment row): start ▸ duration ▸ resources. The
   // priority / progress / due chips render above; this surfaces the remaining task fields the canvas
   // used to drop. Mirrored in the exporter (canvas == export).
-  const taskInfo = [
-    start ? `▶ ${formatDateShort(start)}` : null,
-    durationDays ? `${durationDays}d` : null,
-    resources?.length ? `@${resources.join(", ")}` : null,
-  ]
-    .filter(Boolean)
-    .join("   ·   ");
+  const taskInfo = taskInfoLine({ start, durationDays, resources });
 
   return (
     <div

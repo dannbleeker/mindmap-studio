@@ -990,6 +990,13 @@ describe("flow ops — node timestamps", () => {
     expect(sticky.doc.floatingTopics?.[0]?.createdAt).toBe(CLOCK);
   });
 
+  it("setNodePos / setNodeLayout / setRollup bump modifiedAt (the shared mutateAnyNode touch)", () => {
+    // Guards the extracted mutateAnyNode helper: a dropped touch() would slip past the other tests.
+    expect(findNode(setNodePos(base(), "a", 5, 6).doc, "a")?.modifiedAt).toBe(CLOCK);
+    expect(findNode(setNodeLayout(base(), "a", "org-down").doc, "a")?.modifiedAt).toBe(CLOCK);
+    expect(findNode(setRollup(base(), "a", "mapX").doc, "a")?.modifiedAt).toBe(CLOCK);
+  });
+
   it("a content edit bumps modifiedAt and preserves createdAt", () => {
     const created = addChild(base(), "a");
     const id = created.selectId as string;

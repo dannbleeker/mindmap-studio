@@ -14,6 +14,23 @@ export function formatDateShort(iso: string): string {
   return `${MONTHS[Number(m[2]) - 1] ?? "?"} ${Number(m[3])}`;
 }
 
+/** The inline task-info row (MindManager schedule/assignment line): "▶ start · Nd · @resources",
+ *  with only the present fields shown. Single source so the live node (TopicNode) and the SVG
+ *  exporter emit byte-identical text — canvas == export. Pure. */
+export function taskInfoLine(task: {
+  start?: string;
+  durationDays?: number;
+  resources?: string[];
+}): string {
+  return [
+    task.start ? `▶ ${formatDateShort(task.start)}` : null,
+    task.durationDays ? `${task.durationDays}d` : null,
+    task.resources?.length ? `@${task.resources.join(", ")}` : null,
+  ]
+    .filter(Boolean)
+    .join("   ·   ");
+}
+
 /** Today's local date as "YYYY-MM-DD". The only clock-reading helper (kept out of the tested set). */
 export function todayISO(): string {
   const d = new Date();

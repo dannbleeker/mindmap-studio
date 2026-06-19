@@ -18,6 +18,7 @@ import {
   CROSSLINK_COLOR,
   resolveBoundaryStyle,
   resolveCalloutStyle,
+  resolveLevelBox,
   resolveSummaryStyle,
 } from "../src/mindmap/flow/style";
 import type { CrossLink, MindMapDoc } from "../src/model/types";
@@ -670,6 +671,37 @@ describe("flow exportSvg — level styling, task-info, org elbows (canvas == exp
       '<line x1="602" y1="35" x2="718" y2="35" stroke="#E8593C" stroke-width="2"/>',
     );
     expect(out).not.toContain('<rect x="600"'); // the leaf draws no card rect
+  });
+
+  it("renders a depth-2 node as a bordered card (branch-colour 1.5px stroke, white fill)", () => {
+    const out = buildFlowSvg(ldoc, lrects, palette, cssVar);
+    expect(out).toContain(
+      '<rect x="400" y="0" width="120" height="36" rx="11" fill="#ffffff" stroke="#E8593C" stroke-width="1.5"/>',
+    );
+  });
+
+  it("resolveLevelBox classifies depth/style identically for canvas + export (one source)", () => {
+    const at = (depth: number, extra = {}) =>
+      resolveLevelBox({ isRoot: false, geom: false, depth, ...extra });
+    expect(resolveLevelBox({ isRoot: true, geom: false, depth: 0 })).toEqual({
+      filledMain: false,
+      underlineLeaf: false,
+    });
+    expect(at(1)).toEqual({ filledMain: true, underlineLeaf: false });
+    expect(at(1, { style: { background: "#eee" } })).toEqual({
+      filledMain: false,
+      underlineLeaf: false,
+    }); // a manual background reverts to a normal card
+    expect(at(2)).toEqual({ filledMain: false, underlineLeaf: false }); // bordered card
+    expect(at(3)).toEqual({ filledMain: false, underlineLeaf: true });
+    expect(at(3, { style: { border: "1px solid #000" } })).toEqual({
+      filledMain: false,
+      underlineLeaf: false,
+    }); // a manual border reverts the leaf to a card
+    expect(resolveLevelBox({ isRoot: false, geom: true, depth: 1 })).toEqual({
+      filledMain: false,
+      underlineLeaf: false,
+    }); // a geometric shape opts out of level styling
   });
 
   it("draws the inline task-info line (start ▸ duration ▸ resources)", () => {

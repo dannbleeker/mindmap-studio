@@ -2,7 +2,7 @@ import { markerImage } from "../../icons";
 import type { MapNode, MindMapDoc } from "../../model/types";
 import { priorityColor, priorityLabel } from "../../priority";
 import { checkPath, piePath } from "../../progress";
-import { formatDateShort, isOverdue } from "../../taskDate";
+import { formatDateShort, isOverdue, taskInfoLine } from "../../taskDate";
 import type { LayoutKind } from "../contract";
 import { arrowHeadPath } from "./arrowhead";
 import { backdropGeometry } from "./backdrop";
@@ -31,6 +31,7 @@ import {
   readableTextOn,
   resolveBoundaryStyle,
   resolveCalloutStyle,
+  resolveLevelBox,
   resolveLinkStyle,
   resolveSummaryStyle,
   summaryLabel,
@@ -448,8 +449,12 @@ export function buildFlowSvg(
     // Level-based styling — mirrors the canvas TopicNode (canvas == export): depth-1 mains are FILLED
     // with the branch colour; depth-3+ leaves drop the box for a branch-colour underline. Manual style
     // (a set background / border) wins and reverts the node to a normal bordered card.
-    const filledMain = !d.isRoot && !geom && d.depth === 1 && !st?.background;
-    const underlineLeaf = !d.isRoot && !geom && d.depth >= 3 && !st?.background && !st?.border;
+    const { filledMain, underlineLeaf } = resolveLevelBox({
+      isRoot: d.isRoot,
+      geom,
+      depth: d.depth,
+      style: st,
+    });
     const fill = d.isRoot
       ? rootBg
       : filledMain
@@ -529,13 +534,11 @@ export function buildFlowSvg(
 
     // The priority/progress/due chips sit in a reserved strip at the bottom; the inline task-info line
     // (start ▸ duration ▸ resources) sits just above them. Both reserved so the title doesn't overlap.
-    const taskInfo = [
-      d.start ? `▶ ${formatDateShort(d.start)}` : null,
-      d.durationDays ? `${d.durationDays}d` : null,
-      d.resources?.length ? `@${d.resources.join(", ")}` : null,
-    ]
-      .filter(Boolean)
-      .join("   ·   ");
+    const taskInfo = taskInfoLine({
+      start: d.start,
+      durationDays: d.durationDays,
+      resources: d.resources,
+    });
     const chipRow = d.progress || d.due || d.priority || d.attachmentCount ? 20 : 0;
     const pieReserve = chipRow + (taskInfo ? 15 : 0);
 

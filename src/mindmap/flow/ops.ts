@@ -947,13 +947,14 @@ export function mergeStyle(doc: MindMapDoc, id: string, patch: Partial<NodeStyle
 
 // --- free-canvas (whiteboard) mode -----------------------------------------
 
-/** Set a node's explicit free-canvas position (top-left, flow coords). Searches the tree and
- *  floating topics, so any node can be placed; a no-op (same doc) if the id isn't found. */
-export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): OpResult {
+/** Clone the doc, find a node by id ANYWHERE (central tree OR a floating-topic subtree), apply `fn`
+ *  to it and bump its modified timestamp, then return the new doc — or the SAME doc reference untouched
+ *  when the id isn't found. The shared scaffold behind setNodePos / setNodeLayout / setRollup. */
+function mutateAnyNode(doc: MindMapDoc, id: string, fn: (node: MapNode) => void): OpResult {
   const next = structuredClone(doc);
   const walk = (n: MapNode): boolean => {
     if (n.id === id) {
-      n.pos = { x, y };
+      fn(n);
       touch(n, opsClock());
       return true;
     }
@@ -969,6 +970,14 @@ export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): O
     }
   }
   return { doc: hit ? next : doc };
+}
+
+/** Set a node's explicit free-canvas position (top-left, flow coords). Searches the tree and
+ *  floating topics, so any node can be placed; a no-op (same doc) if the id isn't found. */
+export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): OpResult {
+  return mutateAnyNode(doc, id, (n) => {
+    n.pos = { x, y };
+  });
 }
 
 // --- dedicated diagram backdrops (onion / funnel / Venn) -------------------
@@ -1008,25 +1017,9 @@ export function setBackdropColor(doc: MindMapDoc, color: string): OpResult {
 /** Per-branch layout: set (or clear, with undefined / "") a node's subtree layout override.
  *  Searches the tree and floating topics; a no-op (same doc) if the id isn't found. */
 export function setNodeLayout(doc: MindMapDoc, id: string, kind: string | undefined): OpResult {
-  const next = structuredClone(doc);
-  const walk = (n: MapNode): boolean => {
-    if (n.id === id) {
-      n.layout = kind || undefined;
-      touch(n, opsClock());
-      return true;
-    }
-    return n.children.some(walk);
-  };
-  let hit = walk(next.root);
-  if (!hit) {
-    for (const f of next.floatingTopics ?? []) {
-      if (walk(f)) {
-        hit = true;
-        break;
-      }
-    }
-  }
-  return { doc: hit ? next : doc };
+  return mutateAnyNode(doc, id, (n) => {
+    n.layout = kind || undefined;
+  });
 }
 
 // --- automated multi-map roll-ups -----------------------------------------
@@ -1034,25 +1027,9 @@ export function setNodeLayout(doc: MindMapDoc, id: string, kind: string | undefi
 /** Bind (or unbind, with undefined / "") a node to a roll-up source map id. The node's children then
  *  mirror that map, refreshed by `refreshRollups`. Searches tree + floating; no-op if id not found. */
 export function setRollup(doc: MindMapDoc, id: string, mapId: string | undefined): OpResult {
-  const next = structuredClone(doc);
-  const walk = (n: MapNode): boolean => {
-    if (n.id === id) {
-      n.rollup = mapId || undefined;
-      touch(n, opsClock());
-      return true;
-    }
-    return n.children.some(walk);
-  };
-  let hit = walk(next.root);
-  if (!hit) {
-    for (const f of next.floatingTopics ?? []) {
-      if (walk(f)) {
-        hit = true;
-        break;
-      }
-    }
-  }
-  return { doc: hit ? next : doc };
+  return mutateAnyNode(doc, id, (n) => {
+    n.rollup = mapId || undefined;
+  });
 }
 
 /** Every distinct roll-up source map id referenced in the doc (tree + floating topics). */

@@ -21,9 +21,10 @@
 // intentionally not imported — only the plain-text topic tree + notes.
 
 import { XMLParser } from "fast-xml-parser";
-import { strFromU8, unzipSync } from "fflate";
+import { strFromU8 } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { escapeXml, zipOoxml } from "./ooxml";
+import { unzipOrThrow } from "./zip";
 
 const TWIPS_PER_LEVEL = 360; // 0.25" of left indent per outline level
 
@@ -174,12 +175,7 @@ export function fromDocx(bytes: Uint8Array): MindMapDoc {
   dxCounter = 0;
 
   // Unzip and locate word/document.xml.
-  let files: Record<string, Uint8Array>;
-  try {
-    files = unzipSync(bytes);
-  } catch {
-    throw new Error("Not a valid .docx file (could not unzip)");
-  }
+  const files = unzipOrThrow(bytes, ".docx");
   const xmlEntry = files["word/document.xml"];
   if (!xmlEntry) throw new Error("No word/document.xml found in .docx");
 

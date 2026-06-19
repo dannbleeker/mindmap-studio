@@ -1,6 +1,7 @@
-import { strFromU8, unzipSync } from "fflate";
+import { strFromU8 } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
+import { unzipOrThrow } from "./zip";
 
 // MindMeister `.mind` importer (import-only).
 //
@@ -78,12 +79,7 @@ function toNode(n: Json): MapNode {
  */
 export function fromMind(bytes: Uint8Array): MindMapDoc {
   mmId = 0;
-  let files: Record<string, Uint8Array>;
-  try {
-    files = unzipSync(bytes);
-  } catch {
-    throw new Error("Not a valid .mind file (could not unzip)");
-  }
+  const files = unzipOrThrow(bytes, ".mind");
   const mapJson = files["map.json"];
   if (!mapJson) throw new Error("Not a valid .mind file (no map.json)");
 

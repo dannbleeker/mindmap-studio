@@ -1,7 +1,8 @@
 import { XMLParser } from "fast-xml-parser";
-import { strFromU8, unzipSync } from "fflate";
+import { strFromU8 } from "fflate";
 import type { CrossLink, MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
+import { unzipOrThrow } from "./zip";
 
 // iThoughts `.itmz` -> canonical model (import only).
 //
@@ -91,12 +92,7 @@ function topicToNode(o: Xml, uuidMap: Map<string, string>): MapNode {
 export function fromIthoughts(bytes: Uint8Array): MindMapDoc {
   itN = 0;
 
-  let files: Record<string, Uint8Array>;
-  try {
-    files = unzipSync(bytes);
-  } catch {
-    throw new Error("Not a valid .itmz file (could not unzip)");
-  }
+  const files = unzipOrThrow(bytes, ".itmz");
 
   const xmlBytes = files[MAPDATA_PATH];
   if (!xmlBytes) throw new Error("Not a valid .itmz file (no mapdata.xml)");

@@ -1,7 +1,8 @@
 import { XMLParser } from "fast-xml-parser";
-import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
+import { strFromU8, strToU8, zipSync } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
+import { unzipOrThrow } from "./zip";
 
 // XMind `.xmind` <-> canonical model (two-way).
 //
@@ -137,12 +138,7 @@ function fromXmindXml(xmlBytes: Uint8Array): MindMapDoc {
 
 export function fromXmind(bytes: Uint8Array): MindMapDoc {
   xmId = 0;
-  let files: Record<string, Uint8Array>;
-  try {
-    files = unzipSync(bytes);
-  } catch {
-    throw new Error("Not a valid .xmind file (could not unzip)");
-  }
+  const files = unzipOrThrow(bytes, ".xmind");
 
   // Modern XMind (2020+): content.json takes priority.
   const content = files["content.json"];

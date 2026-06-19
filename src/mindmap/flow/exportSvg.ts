@@ -12,7 +12,7 @@ import {
   type Box,
   attachSideFor,
   branchRender,
-  childrenAxis,
+  computeAxisByParent,
   crosslinkBezier,
   floatingPoints,
 } from "./floating";
@@ -375,23 +375,11 @@ export function buildFlowSvg(
   }
 
   // Branch attach-side per parent — one shared origin per side so sibling branches fan without
-  // crossing. Computed from the same rects + helper the canvas uses in sync() (canvas == export).
-  const axisByParent = new Map<string, "h" | "v">();
-  {
-    const kids = new Map<string, NodeRect[]>();
-    for (const e of edges) {
-      if (e.data?.crosslink) continue;
-      const cr = rects.get(e.target);
-      if (!cr) continue;
-      const a = kids.get(e.source);
-      if (a) a.push(cr);
-      else kids.set(e.source, [cr]);
-    }
-    for (const [pid, crs] of kids) {
-      const pr = rects.get(pid);
-      if (pr) axisByParent.set(pid, childrenAxis(boxOf(pr), crs.map(boxOf)));
-    }
-  }
+  // crossing. The SAME computation the canvas uses in sync() (canvas == export).
+  const axisByParent = computeAxisByParent(edges, (id) => {
+    const r = rects.get(id);
+    return r ? boxOf(r) : undefined;
+  });
 
   // Edges.
   for (const e of edges) {

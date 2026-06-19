@@ -1,5 +1,9 @@
-import { useRef } from "react";
 import { EditorIcon } from "./EditorIcons";
+
+// dataTransfer MIME tag identifying a document-tab drag. Carrying the source index on the drag (vs a
+// shared ref) means tabs only accept tab drags — not a link/text drop — and there's no stale index
+// left over from an aborted drag.
+const TAB_DND = "application/x-mm-tab";
 
 export interface DocTab {
   id: string;
@@ -29,7 +33,6 @@ export function DocumentTabs({
   onNew,
   onReorder,
 }: DocumentTabsProps) {
-  const dragFrom = useRef<number | null>(null);
   return (
     <div className="mm-doctabs" role="tablist" aria-label="Open documents">
       <div className="mm-doctabs-scroll">
@@ -44,18 +47,28 @@ export function DocumentTabs({
               draggable={onReorder ? true : undefined}
               onDragStart={
                 onReorder
-                  ? () => {
-                      dragFrom.current = i;
+                  ? (e) => {
+                      e.dataTransfer.setData(TAB_DND, String(i));
+                      e.dataTransfer.effectAllowed = "move";
                     }
                   : undefined
               }
-              onDragOver={onReorder ? (e) => e.preventDefault() : undefined}
+              onDragOver={
+                onReorder
+                  ? (e) => {
+                      // Accept ONLY a tab drag (not a link/text drop the canvas also handles).
+                      if (e.dataTransfer.types.includes(TAB_DND)) e.preventDefault();
+                    }
+                  : undefined
+              }
               onDrop={
                 onReorder
                   ? (e) => {
+                      const raw = e.dataTransfer.getData(TAB_DND);
+                      if (raw === "") return; // not a tab drag → ignore
                       e.preventDefault();
-                      if (dragFrom.current !== null) onReorder(dragFrom.current, i);
-                      dragFrom.current = null;
+                      const from = Number(raw);
+                      if (Number.isInteger(from)) onReorder(from, i);
                     }
                   : undefined
               }

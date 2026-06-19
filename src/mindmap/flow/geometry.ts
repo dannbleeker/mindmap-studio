@@ -84,6 +84,13 @@ export function boundaryPath(
   ].join(" ");
 }
 
+/** The colour token from a CSS border shorthand ("2px solid #e23" -> "#e23"), or null if none.
+ *  Shared by the live node's geometric-shape stroke (TopicNode) + the SVG exporter's parseBorder, so
+ *  the same border colour resolves identically on canvas and in export. */
+export function matchBorderColor(border: string | undefined): string | null {
+  return border?.match(/#[0-9a-f]{3,8}|rgba?\([^)]+\)/i)?.[0] ?? null;
+}
+
 /** Dash array for a boundary/line dash style ("" = solid). */
 export function dashArray(dash: "solid" | "dashed" | "dotted" | undefined): string {
   return dash === "dashed" ? "6 5" : dash === "dotted" ? "2 4" : "";

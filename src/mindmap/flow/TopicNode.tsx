@@ -9,6 +9,7 @@ import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
 import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
 import { useEditing } from "./editing";
+import { matchBorderColor } from "./geometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import { levelFontSize, readableTextOn, resolveLevelBox } from "./style";
 import type { TopicNode as TopicNodeT } from "./types";
@@ -190,7 +191,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const geom = isGeometric(shape);
   const ins = geom ? shapeInset(shape) : null;
   const shapeFill = style?.background ?? "var(--mm-node-bg, #faf9f5)";
-  const shapeStroke = style?.border?.match(/#[0-9a-f]{3,8}|rgba?\([^)]+\)/i)?.[0] ?? branchColor;
+  const shapeStroke = matchBorderColor(style?.border) ?? branchColor;
   const shapeStrokeW = style?.border ? Number.parseFloat(style.border) || 2 : 2;
 
   // Level-based topic styling (MindManager reads its hierarchy from shape alone): depth-1 mains are

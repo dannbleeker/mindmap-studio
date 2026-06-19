@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   type Box,
   attachSideFor,
+  axisForLayoutKind,
   branchEndpoints,
   branchRender,
   branchWidths,
   childrenAxis,
+  computeAxisByParent,
   crosslinkBezier,
   elbowPath,
   taperedRibbonPath,
@@ -30,6 +32,30 @@ describe("branch geometry", () => {
     expect(attachSideFor(p, box(-200, 10), "h")).toBe("left");
     expect(attachSideFor(p, box(10, 200), "v")).toBe("bottom");
     expect(attachSideFor(p, box(10, -200), "v")).toBe("top");
+  });
+
+  it("axisForLayoutKind pins the fan axis to the layout orientation", () => {
+    expect(axisForLayoutKind("side")).toBe("h");
+    expect(axisForLayoutKind("left")).toBe("h");
+    expect(axisForLayoutKind("right")).toBe("h");
+    expect(axisForLayoutKind("org-down")).toBe("v");
+    expect(axisForLayoutKind("org-up")).toBe("v");
+    // Layouts without a fixed orientation keep inferring per parent.
+    expect(axisForLayoutKind("radial")).toBeUndefined();
+    expect(axisForLayoutKind("timeline")).toBeUndefined();
+  });
+
+  it("computeAxisByParent: the orientation hint overrides the inferred axis", () => {
+    // Two children far apart vertically but close horizontally — their subtrees stacked them, so the
+    // spread is read as "v" (this is what made a child in a horizontal map enter "from below").
+    const boxes: Record<string, Box> = { p: box(0, 0), a: box(120, -300), b: box(120, 300) };
+    const rect = (id: string): Box | undefined => boxes[id];
+    const edges = [
+      { source: "p", target: "a" },
+      { source: "p", target: "b" },
+    ];
+    expect(computeAxisByParent(edges, rect).get("p")).toBe("v"); // inferred (pre-fix)
+    expect(computeAxisByParent(edges, rect, "h").get("p")).toBe("h"); // orientation-forced → left/right
   });
 
   it("branchEndpoints: ONE origin on the parent's near side + each child entered at its near end", () => {

@@ -15,6 +15,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Branch attach side follows the layout orientation.** A branch could enter a topic from *below* in
+  a horizontally-oriented map: the fan axis was inferred from the children's spread, so a parent whose
+  children carry tall subtrees was mis-read as vertical. The axis is now pinned to the layout's
+  orientation (horizontal layouts attach left/right, org-charts top/bottom; radial/timeline still
+  infer) — so a child connects on its parent-facing side. Shared by the canvas + SVG export.
+
 - **Duplicate React key warning from the shortcuts cheat-sheet.** The always-mounted `ShortcutsDialog`
   keyed each row by its `action`, but one action ("Add a child topic") has two bindings (`Tab` and
   `Ctrl/⌘ + Enter`) — so every editor session flooded the console with "two children with the same

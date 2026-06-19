@@ -11,6 +11,7 @@ import {
   type AttachSide,
   type Box,
   attachSideFor,
+  axisForLayoutKind,
   branchRender,
   computeAxisByParent,
   crosslinkBezier,
@@ -377,10 +378,14 @@ export function buildFlowSvg(
 
   // Branch attach-side per parent — one shared origin per side so sibling branches fan without
   // crossing. The SAME computation the canvas uses in sync() (canvas == export).
-  const axisByParent = computeAxisByParent(edges, (id) => {
-    const r = rects.get(id);
-    return r ? boxOf(r) : undefined;
-  });
+  const axisByParent = computeAxisByParent(
+    edges,
+    (id) => {
+      const r = rects.get(id);
+      return r ? boxOf(r) : undefined;
+    },
+    axisForLayoutKind(kind),
+  );
 
   // Edges.
   for (const e of edges) {

@@ -53,7 +53,7 @@ import { TopicNode } from "./flow/TopicNode";
 import { type BraceGroup, computeBraces } from "./flow/brace";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
-import { type Box, attachSideFor, computeAxisByParent } from "./flow/floating";
+import { type Box, attachSideFor, axisForLayoutKind, computeAxisByParent } from "./flow/floating";
 import {
   type History,
   createHistory,
@@ -449,7 +449,7 @@ function FlowInner({
         const z = sizeOf(id);
         return { cx: p.x + z.width / 2, cy: p.y + z.height / 2, w: z.width, h: z.height };
       };
-      const axisByParent = computeAxisByParent(proj.edges, rectOf);
+      const axisByParent = computeAxisByParent(proj.edges, rectOf, axisForLayoutKind(kind));
       setEdges(
         proj.edges.map((e) => {
           let data = e.data;

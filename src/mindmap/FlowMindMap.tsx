@@ -34,6 +34,7 @@ import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
 import { useIsMobile } from "../useIsMobile";
 import {
+  type CanvasSession,
   type LayoutKind,
   type MindMapHandle,
   type MindMapProps,
@@ -53,7 +54,13 @@ import { type BraceGroup, computeBraces } from "./flow/brace";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
 import { type Box, attachSideFor, computeAxisByParent } from "./flow/floating";
-import { createHistory, record, redo as redoHistory, undo as undoHistory } from "./flow/history";
+import {
+  type History,
+  createHistory,
+  record,
+  redo as redoHistory,
+  undo as undoHistory,
+} from "./flow/history";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import {
   type OpResult,
@@ -274,6 +281,7 @@ function FlowInner({
   onMapLink,
   onHistory,
   onDelete,
+  initialSession,
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
@@ -338,12 +346,19 @@ function FlowInner({
   const [coachDismissed, setCoachDismissed] = useState(false);
   // During a drag-to-reparent, the node the dragged topic would drop under (highlighted live). (#11)
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
-  const { fitView, getNodes, setCenter } = useReactFlow();
+  const { fitView, getNodes, setCenter, getViewport } = useReactFlow();
   const initialized = useNodesInitialized();
 
   // Refs so the stable callbacks below always read the latest values.
   const docRef = useRef(doc);
-  const historyRef = useRef(createHistory<MindMapDoc>());
+  // Seed from a restored tab session (lossless tab switching) when one is supplied; else fresh.
+  // Captured once at mount: App deletes the cached session right after restore (one-shot), so reading
+  // the live prop later would flip ReactFlow's fitView false→true and re-fit away the restored
+  // viewport. FlowInner remounts on a real tab/version change (its key), so this stays correct.
+  const mountSession = useRef(initialSession);
+  const historyRef = useRef<History<MindMapDoc>>(
+    mountSession.current?.history ?? createHistory<MindMapDoc>(),
+  );
   const paletteRef = useRef(palette);
   paletteRef.current = palette;
   const directionRef = useRef<LayoutKind>(direction);
@@ -380,6 +395,12 @@ function FlowInner({
   onHistoryRef.current = onHistory;
   const onDeleteRef = useRef(onDelete);
   onDeleteRef.current = onDelete;
+  // On mount, report the (possibly restored) history depths so the chrome's undo/redo buttons match a
+  // restored tab session. A fresh canvas reports nothing-to-undo, which is also correct.
+  useEffect(() => {
+    const h = historyRef.current;
+    onHistoryRef.current?.(h.past.length > 0, h.future.length > 0);
+  }, []);
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
@@ -1141,6 +1162,8 @@ function FlowInner({
         return new Blob([svg], { type: "image/svg+xml" });
       },
       fit: () => fitView({ duration: 300 }),
+      // Snapshot viewport + undo/redo stacks so the tab switcher can restore them on a remount.
+      getSession: (): CanvasSession => ({ viewport: getViewport(), history: historyRef.current }),
       focusNode: focusNodeById,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
       setSelectedNote: (note) => withSelected((id) => apply(setNote(docRef.current, id, note))),
@@ -1274,6 +1297,7 @@ function FlowInner({
     [
       fitView,
       getNodes,
+      getViewport,
       apply,
       withSelected,
       withSelectedAll,
@@ -1353,7 +1377,11 @@ function FlowInner({
           proOptions={{ hideAttribution: true }}
           minZoom={0.2}
           maxZoom={3}
-          fitView
+          // Restore a saved viewport (lossless tab switch) when present; else fit to view on mount.
+          // Read from the mount-captured session so a later re-render (after App clears the one-shot
+          // cache) can't flip fitView back on and re-fit away the restored viewport.
+          fitView={!mountSession.current?.viewport}
+          defaultViewport={mountSession.current?.viewport}
           // Left-drag the background to pan (the gesture most people reach for first); the +/−/fit
           // controls stay too. Scroll / ⌘-scroll zooms (React Flow's defaults). Hold Shift and drag
           // to rubber-band a marquee selection; Shift/Ctrl/Cmd-click extends the selection. (#6)

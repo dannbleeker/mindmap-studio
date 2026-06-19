@@ -713,4 +713,30 @@ describe("FlowMindMap canvas", () => {
     expect(lastDoc().summaries).toBeUndefined();
     expect(onSelectOverlay).toHaveBeenLastCalledWith(null);
   });
+
+  it("restores a tab session: seeds the undo history (reports it) and round-trips via getSession", () => {
+    const prior = baseDoc("prior"); // a prior snapshot to seed the undo stack with
+    const onHistory = vi.fn();
+    const { h } = mount(baseDoc(), {
+      initialSession: {
+        viewport: { x: 10, y: 20, zoom: 1.5 },
+        history: { past: [prior], future: [] },
+      },
+      onHistory,
+    });
+    // The restored undo depth is reported on mount, so the chrome's Undo button enables.
+    expect(onHistory).toHaveBeenCalledWith(true, false);
+    // getSession round-trips the seeded history + returns a viewport object.
+    const session = h.getSession();
+    expect(session.history.past).toHaveLength(1);
+    expect(session.history.past[0].id).toBe("prior");
+    expect(typeof session.viewport.zoom).toBe("number");
+  });
+
+  it("a fresh canvas (no initialSession) reports an empty history + captures one via getSession", () => {
+    const onHistory = vi.fn();
+    const { h } = mount(baseDoc(), { onHistory });
+    expect(onHistory).toHaveBeenCalledWith(false, false); // nothing to undo/redo on a fresh mount
+    expect(h.getSession().history.past).toHaveLength(0);
+  });
 });

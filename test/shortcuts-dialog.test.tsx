@@ -30,6 +30,19 @@ describe("ShortcutsDialog (#2)", () => {
     expect(screen.getByText("Open the command palette (do anything)")).toBeTruthy();
   });
 
+  it("renders without a duplicate React key warning when an action has two bindings", () => {
+    // "Add a child topic" is bound to BOTH Tab and Ctrl/⌘+Enter, so the row key can't be `action`
+    // alone (that flooded the console with "two children with the same key" on every editor render).
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(<ShortcutsDialog open={true} onClose={() => {}} />);
+    expect(screen.getAllByText("Add a child topic").length).toBe(2); // both bindings render
+    const dupKeyWarning = err.mock.calls.some((args) =>
+      args.some((a) => typeof a === "string" && a.includes("same key")),
+    );
+    expect(dupKeyWarning).toBe(false);
+    err.mockRestore();
+  });
+
   it("closes via the ✕ button", () => {
     const onClose = vi.fn();
     render(<ShortcutsDialog open={true} onClose={onClose} />);

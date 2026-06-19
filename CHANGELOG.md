@@ -13,6 +13,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   appear as ordinary maps in the library with no data lost (only the grouping). This clears the way
   for the upcoming flat **one-tab-per-document** model.
 
+### Fixed
+
+- **Duplicate React key warning from the shortcuts cheat-sheet.** The always-mounted `ShortcutsDialog`
+  keyed each row by its `action`, but one action ("Add a child topic") has two bindings (`Tab` and
+  `Ctrl/⌘ + Enter`) — so every editor session flooded the console with "two children with the same
+  key". Rows now key on keys + action.
+
 ### Added
 
 - **Open documents as tabs.** Maps you open now appear as a **flat tab strip** under the toolbar —

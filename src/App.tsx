@@ -757,6 +757,7 @@ export function App() {
     const deleted = structuredClone(liveDocRef.current);
     try {
       await deleteMap(deleted.id);
+      sessionCache.current.delete(deleted.id); // its stashed canvas session goes with it
       // Drop its tab and prefer the adjacent open tab; only fall back to the library / a blank map
       // when no other tab is open.
       const neighbour = closeTab(deleted.id);
@@ -798,6 +799,9 @@ export function App() {
       }
     }
     const neighbour = closeTab(mapId);
+    // Drop any stashed canvas session so reopening this map later starts fresh (not a stale viewport
+    // + undo stack from before it was closed).
+    sessionCache.current.delete(mapId);
     if (!wasActive) return;
     const next = neighbour ? await loadMap(neighbour).catch(() => null) : null;
     if (next) load(next);

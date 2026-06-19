@@ -352,8 +352,12 @@ function FlowInner({
   // Refs so the stable callbacks below always read the latest values.
   const docRef = useRef(doc);
   // Seed from a restored tab session (lossless tab switching) when one is supplied; else fresh.
+  // Captured once at mount: App deletes the cached session right after restore (one-shot), so reading
+  // the live prop later would flip ReactFlow's fitView false→true and re-fit away the restored
+  // viewport. FlowInner remounts on a real tab/version change (its key), so this stays correct.
+  const mountSession = useRef(initialSession);
   const historyRef = useRef<History<MindMapDoc>>(
-    initialSession?.history ?? createHistory<MindMapDoc>(),
+    mountSession.current?.history ?? createHistory<MindMapDoc>(),
   );
   const paletteRef = useRef(palette);
   paletteRef.current = palette;
@@ -1374,8 +1378,10 @@ function FlowInner({
           minZoom={0.2}
           maxZoom={3}
           // Restore a saved viewport (lossless tab switch) when present; else fit to view on mount.
-          fitView={!initialSession?.viewport}
-          defaultViewport={initialSession?.viewport}
+          // Read from the mount-captured session so a later re-render (after App clears the one-shot
+          // cache) can't flip fitView back on and re-fit away the restored viewport.
+          fitView={!mountSession.current?.viewport}
+          defaultViewport={mountSession.current?.viewport}
           // Left-drag the background to pan (the gesture most people reach for first); the +/−/fit
           // controls stay too. Scroll / ⌘-scroll zooms (React Flow's defaults). Hold Shift and drag
           // to rubber-band a marquee selection; Shift/Ctrl/Cmd-click extends the selection. (#6)

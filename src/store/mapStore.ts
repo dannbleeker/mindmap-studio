@@ -86,6 +86,35 @@ export async function getLastOpened(): Promise<string | null> {
   return (await (await db()).get("meta", "lastOpened")) ?? null;
 }
 
+/** The open document tabs (map ids, in tab order) + the active one. Persisted so a reload restores
+ *  the whole workspace, not just the single last-opened map. */
+export interface TabSession {
+  openTabIds: string[];
+  activeTabId: string;
+}
+
+export async function setTabSession(session: TabSession): Promise<void> {
+  await (await db()).put("meta", JSON.stringify(session), "tabSession");
+}
+
+/** Read the persisted tab session. Falls back to the legacy single `lastOpened` map for users
+ *  upgrading from before tabs (so their last map still reopens as the sole tab). */
+export async function getTabSession(): Promise<TabSession | null> {
+  const raw = await (await db()).get("meta", "tabSession");
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as TabSession;
+      if (Array.isArray(parsed.openTabIds) && typeof parsed.activeTabId === "string") {
+        return parsed;
+      }
+    } catch {
+      // corrupt entry → fall through to the legacy migration
+    }
+  }
+  const last = await getLastOpened();
+  return last ? { openTabIds: [last], activeTabId: last } : null;
+}
+
 // --- version history -------------------------------------------------------
 // Per-map snapshots: the app saves one on a throttle while editing + on demand,
 // capped at MAX_VERSIONS (oldest pruned). Restoring just loads a snapshot's doc.

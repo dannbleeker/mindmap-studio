@@ -1,0 +1,59 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { type TabSession, setTabSession } from "../store/mapStore";
+
+/**
+ * The open-document tab registry: which maps are open (in tab order) and which is active. It does
+ * NOT own the document state — `doc`/`liveDoc`/selection stay in App as the single active map. The
+ * registry just tracks the open set and follows the active map: App calls `ensureOpen(doc.id)` from
+ * its load path, so opening/switching a map registers/activates its tab. Switching tabs reloads the
+ * map from the store (cheap; lossless-for-recent caching is a later step).
+ *
+ * The set + active id are persisted (TabSession) so a reload restores the whole workspace.
+ */
+export function useOpenDocuments() {
+  const [openIds, setOpenIds] = useState<string[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  // Mirror of openIds for synchronous reads inside closeTab (state updaters mustn't compute return
+  // values — they don't run at call time and double-invoke under StrictMode).
+  const openIdsRef = useRef<string[]>([]);
+  openIdsRef.current = openIds;
+
+  /** Register a map as a tab (if not already open) and make it the active tab. Idempotent. */
+  const ensureOpen = useCallback((mapId: string) => {
+    setOpenIds((prev) => (prev.includes(mapId) ? prev : [...prev, mapId]));
+    setActiveId(mapId);
+  }, []);
+
+  /**
+   * Close a tab. Removes it from the open set and, if it was the active tab, advances the active id
+   * to a neighbour (or null when none remain). Returns the neighbour map id so the caller can load
+   * it (or null to fall back to the start screen).
+   */
+  const closeTab = useCallback((mapId: string): string | null => {
+    const prev = openIdsRef.current;
+    const idx = prev.indexOf(mapId);
+    if (idx === -1) return null;
+    const remaining = prev.filter((id) => id !== mapId);
+    const neighbour = remaining[idx] ?? remaining[idx - 1] ?? null;
+    setOpenIds(remaining);
+    setActiveId((cur) => (cur === mapId ? neighbour : cur));
+    return neighbour;
+  }, []);
+
+  /** Seed the registry from a persisted session on boot (before the active map is loaded). */
+  const restoreSession = useCallback((session: TabSession) => {
+    const ids = session.openTabIds.length ? session.openTabIds : [session.activeTabId];
+    setOpenIds(ids);
+    setActiveId(session.activeTabId);
+  }, []);
+
+  // Persist whenever the set or active id changes. Guarded on a non-null active id so the initial
+  // empty state (mount, or the start screen with nothing open) never clobbers a stored session
+  // before boot has read it.
+  useEffect(() => {
+    if (activeId === null) return;
+    void setTabSession({ openTabIds: openIds, activeTabId: activeId });
+  }, [openIds, activeId]);
+
+  return { openIds, activeId, ensureOpen, closeTab, restoreSession };
+}

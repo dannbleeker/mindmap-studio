@@ -21,7 +21,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { EditorIcon, type EditorIconName } from "../components/EditorIcons";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors } from "../design/tokens";
 import { MARKER_PALETTE, markerImage } from "../icons";
@@ -47,6 +46,7 @@ import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
+import { NodePopover } from "./flow/NodePopover";
 import { Summaries } from "./flow/Summaries";
 import { TopicNode } from "./flow/TopicNode";
 import { type BraceGroup, computeBraces } from "./flow/brace";
@@ -226,43 +226,6 @@ function themeVars(theme: MindMapProps["theme"]): CSSProperties {
     "--mm-line-color": v["--line-color"],
     background: v["--main-bgcolor"],
   } as CSSProperties;
-}
-
-/** One button in the inline node popover (the on-selection quick-action toolbar). */
-function PopBtn({
-  icon,
-  label,
-  danger,
-  onClick,
-}: {
-  icon: EditorIconName;
-  label: string;
-  danger?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className="nodrag nopan"
-      title={label}
-      aria-label={label}
-      onClick={onClick}
-      style={{
-        width: 30,
-        height: 30,
-        borderRadius: 7,
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        color: danger ? "#b23b3a" : colors.muted,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <EditorIcon name={icon} size={16} />
-    </button>
-  );
 }
 
 function FlowInner({
@@ -1408,53 +1371,14 @@ function FlowInner({
             selectedId={selectedOverlay?.kind === "callout" ? selectedOverlay.id : null}
             onSelect={handleSelectCallout}
           />
-          {/* Inline contextual popover — quick structural actions above the selected node. Uses the
-              same internal handlers as the keyboard + right-click menu, and React Flow's NodeToolbar
-              for node-tracked positioning (stays put through pan/zoom). Hidden while inline-editing. */}
-          {selectedId && editingId !== selectedId
-            ? (() => {
-                const sid = selectedId;
-                const sel = findAnyNode(renderDoc, sid);
-                const isRootSel = sid === renderDoc.root.id;
-                const hasKids = (sel?.children?.length ?? 0) > 0;
-                return (
-                  <NodeToolbar nodeId={sid} isVisible position={Position.Top} offset={10}>
-                    <div
-                      className="nodrag nopan"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        background: colors.white,
-                        border: `1px solid ${colors.border}`,
-                        borderRadius: 11,
-                        padding: 4,
-                        boxShadow: "0 10px 30px rgba(40,30,16,0.18)",
-                      }}
-                    >
-                      {/* Add child / sibling are re-homed onto the node itself as the hover ＋
-                          affordances (#1); this popover keeps the rest of the quick actions. */}
-                      <PopBtn icon="text" label="Rename" onClick={() => startEdit(sid)} />
-                      {hasKids ? (
-                        <PopBtn
-                          icon="minus"
-                          label="Collapse / expand"
-                          onClick={() => apply(toggleCollapse(docRef.current, sid))}
-                        />
-                      ) : null}
-                      {!isRootSel ? (
-                        <PopBtn
-                          icon="trash"
-                          label="Delete"
-                          danger
-                          onClick={() => deleteNodeWithUndo(sid)}
-                        />
-                      ) : null}
-                    </div>
-                  </NodeToolbar>
-                );
-              })()
-            : null}
+          <NodePopover
+            selectedId={selectedId}
+            editingId={editingId}
+            doc={renderDoc}
+            onRename={startEdit}
+            onToggleCollapse={(id) => apply(toggleCollapse(docRef.current, id))}
+            onDelete={deleteNodeWithUndo}
+          />
           {/* Empty-map coachmark — anchored under the root via NodeToolbar so it tracks pan/zoom.
               Canvas-only (never authored into buildFlowSvg), so exports stay unchanged. */}
           {showCoach ? (

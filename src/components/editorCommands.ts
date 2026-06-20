@@ -44,6 +44,7 @@ const EXPORTS = (io: ToolbarProps["io"]): [string, string, () => void][] => [
   ["mermaid", ".mmd (Mermaid)", io.exportMermaid],
   ["xmind", ".xmind (XMind)", io.exportXmind],
   ["smmx", ".smmx (SimpleMind)", io.exportSmmx],
+  ["mmap", ".mmap (MindManager)", io.exportMmap],
   ["png", ".png (image)", io.exportPng],
   ["svg", ".svg (vector)", io.exportSvg],
   ["html", ".html (standalone)", io.exportHtml],

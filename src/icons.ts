@@ -61,6 +61,45 @@ export function mindManagerIconToEmoji(name: string): string {
   return MM_ICON_MAP[name.trim().toLowerCase()] ?? name;
 }
 
+// Curated inverse for the `.mmap` writer: emoji -> a single canonical MindManager IconType (PascalCase,
+// as MindManager emits `urn:mindjet:<Name>`). MM_ICON_MAP is many-to-one (🚩 has 6 source names, ✅ has
+// 4), so the inverse must pick one canonical name per emoji — a colour-flag variant collapses to `Flag`,
+// etc. Emoji with no MindManager stock-icon equivalent (📌 🔴 🟡 🟢 ⏳ 🎯) are intentionally absent and
+// skipped by the writer rather than emitted as junk IconTypes. Round-trips via mindManagerIconToEmoji.
+const EMOJI_TO_MM: Record<string, string> = {
+  "1️⃣": "Priority1",
+  "2️⃣": "Priority2",
+  "3️⃣": "Priority3",
+  "4️⃣": "Priority4",
+  "5️⃣": "Priority5",
+  "6️⃣": "Priority6",
+  "7️⃣": "Priority7",
+  "8️⃣": "Priority8",
+  "9️⃣": "Priority9",
+  "👍": "ThumbsUp",
+  "👎": "ThumbsDown",
+  "🚩": "Flag",
+  "🙂": "SmileyHappy",
+  "😐": "SmileyNeutral",
+  "🙁": "SmileySad",
+  "✅": "Check",
+  "❌": "Cross",
+  "⭐": "Star",
+  "❗": "Important",
+  "❓": "Question",
+  "💡": "Idea",
+  "⬆️": "ArrowUp",
+  "⬇️": "ArrowDown",
+  "⬅️": "ArrowLeft",
+  "➡️": "ArrowRight",
+};
+
+/** A canonical MindManager IconType for an emoji marker, or null when MindManager has no equivalent
+ *  (the `.mmap` writer then omits it). Pure + deterministic. */
+export function emojiToMindManagerIcon(emoji: string): string | null {
+  return EMOJI_TO_MM[emoji.trim()] ?? null;
+}
+
 // ── Flat vector marker icons ──────────────────────────────────────────────────────────────────────
 // A flat, single-family icon set replacing the OS colour emoji — crisp at node size and IDENTICAL on
 // every machine and in every export (emoji render differently per platform + rasterizer). Keyed by the

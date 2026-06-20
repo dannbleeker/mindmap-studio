@@ -47,6 +47,7 @@ export interface MapExports {
   exportFreemind: () => Promise<void>;
   exportXmind: () => Promise<void>;
   exportSmmx: () => Promise<void>;
+  exportMmap: () => Promise<void>;
   exportPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
@@ -117,6 +118,16 @@ export function useMapExports(
       const { toSmmx } = await import("./io/smmx");
       const bytes = toSmmx(getDoc()) as BlobPart;
       download(new Blob([bytes], { type: "application/octet-stream" }), `${baseName()}.smmx`);
+    },
+    // MindManager .mmap — a ZIP (Document.xml); lazy (mmap.ts pulls fflate). Inverse of the
+    // .mmap importer; round-trips topics/notes/links/icons + the two-sided side.
+    async exportMmap() {
+      const { toMmap } = await import("./io/mmap");
+      const bytes = toMmap(getDoc()) as BlobPart;
+      download(
+        new Blob([bytes], { type: "application/vnd.mindjet.mindmanager" }),
+        `${baseName()}.mmap`,
+      );
     },
     // png/svg/html/pdf all embed the rendered SVG via cleanSvg() (sanitize + native-text).
     async exportPng() {

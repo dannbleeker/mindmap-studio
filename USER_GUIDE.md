@@ -487,7 +487,7 @@ For getting ideas down quickly, three header tools:
 
 | Format | Notes |
 |---|---|
-| `.mmap` | MindManager export — recovers topics, notes, icons, hyperlinks, relationships, boundaries, floating topics (one-way, lossy by design) |
+| `.mmap` | MindManager export — recovers topics, notes, icons, hyperlinks, relationships, boundaries, floating topics (lossy by design; the `.mmap` export below is the return trip) |
 | `.md` / `.markdown` | Markdown outline — `#`/`##`/`###` headings **and** nested bullets (also imports **Markmap** files, stripping any `---` frontmatter; its `title:` becomes the map title) |
 | `.json` | A native MindMap Studio map — **lossless** |
 | `.opml` | OPML outline (Freeplane, OmniOutliner, Workflowy, …) |
@@ -543,6 +543,7 @@ Pick a format from the **⬆ Export…** menu:
 | `.mmd` | Mermaid `mindmap` text — paste into Markdown, GitHub, or docs that render Mermaid |
 | `.xmind` | XMind (2020+) — topic tree, notes, links, tags, plus floating topics + relationships |
 | `.smmx` | SimpleMind — topic tree, notes, web links, relations, plus floating topics |
+| `.mmap` | MindManager — topic tree, notes, hyperlinks, icons, relationships, and the two-sided side; the mirror of the `.mmap` importer (round-trips back into Studio for these fields) |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
 | `.html` (interactive) | A single self-contained HTML file — the map as a **collapsible, searchable** outline: fold branches, filter topics, zoom/pan (no app, no backend, offline) |

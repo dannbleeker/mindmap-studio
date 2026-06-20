@@ -39,6 +39,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       "exportMermaid",
       "exportXmind",
       "exportSmmx",
+      "exportMmap",
       "exportOpml",
       "exportFreemind",
       "exportPng",
@@ -132,11 +133,11 @@ describe("buildEditorCommands", () => {
     expect(cmds.length).toBeGreaterThan(40);
   });
 
-  it("covers every export format (16) and each defers to its io handler", () => {
+  it("covers every export format (17) and each defers to its io handler", () => {
     const props = mkProps();
     const cmds = buildEditorCommands(props);
     const exports = cmds.filter((c) => c.kind === "export");
-    expect(exports).toHaveLength(16);
+    expect(exports).toHaveLength(17);
     byId(props).get("export:json")?.run();
     expect(props.io.exportJson).toHaveBeenCalled();
     byId(props).get("export:pptx")?.run();

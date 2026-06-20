@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
-import { strToU8, zipSync } from "fflate";
+import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { parseMmap } from "../src/import/mmap";
-import type { MapNode } from "../src/model/types";
+import { toMmap } from "../src/io/mmap";
+import type { MapNode, MindMapDoc } from "../src/model/types";
 
 // Synthetic Document.xml shaped like a real MindManager export (namespace
 // http://schemas.mindjet.com/MindManager/Application/2003). Field shapes match
@@ -357,6 +358,221 @@ describe("parseMmap", () => {
   });
 });
 
+// --- writer (toMmap) -------------------------------------------------------------------------------
+
+const docXml = (bytes: Uint8Array): string => strFromU8(unzipSync(bytes)["Document.xml"]);
+const findByTopic = (n: MapNode, t: string): MapNode | undefined => {
+  if (n.topic === t) return n;
+  for (const c of n.children) {
+    const hit = findByTopic(c, t);
+    if (hit) return hit;
+  }
+  return undefined;
+};
+
+// A feature-rich doc: two-sided mains, a note/hyperlink/icons leaf, a relation, a floating topic.
+const richDoc = (): MindMapDoc => ({
+  schemaVersion: 1,
+  id: "doc1",
+  title: "Root",
+  root: {
+    id: "root",
+    topic: "Root",
+    children: [
+      {
+        id: "a",
+        topic: "Alpha",
+        side: "left",
+        note: "a note",
+        hyperlink: "https://ok.test/",
+        icons: ["🚩", "✅", "📌"],
+        collapsed: true,
+        children: [{ id: "a1", topic: "Alpha 1", children: [] }],
+      },
+      { id: "b", topic: "Beta", side: "right", children: [] },
+    ],
+  },
+  links: [{ id: "l1", from: "a", to: "b", label: "rel" }],
+  floatingTopics: [{ id: "f1", topic: "Floater", children: [] }],
+});
+
+describe("toMmap → parseMmap round-trip", () => {
+  it("round-trips tree, text, note, hyperlink, icons, side, links, floating", () => {
+    const { doc } = parseMmap(toMmap(richDoc()));
+    expect(doc.root.topic).toBe("Root");
+    expect(doc.root.children.map((c) => c.topic)).toEqual(["Alpha", "Beta"]);
+    const alpha = findByTopic(doc.root, "Alpha") as MapNode;
+    expect(alpha.children.map((c) => c.topic)).toEqual(["Alpha 1"]);
+    expect(alpha.note).toBe("a note");
+    expect(alpha.hyperlink).toBe("https://ok.test/");
+    expect(alpha.icons).toEqual(["🚩", "✅"]); // 📌 has no MindManager icon → dropped
+    expect(alpha.side).toBe("left");
+    expect((findByTopic(doc.root, "Beta") as MapNode).side).toBe("right");
+    // Links compared by endpoint topic (ids are re-keyed to OId on import).
+    const idOf = (t: string) => findByTopic(doc.root, t)?.id;
+    expect(doc.links?.length).toBe(1);
+    expect(doc.links?.[0].from).toBe(idOf("Alpha"));
+    expect(doc.links?.[0].to).toBe(idOf("Beta"));
+    expect(doc.links?.[0].label).toBe("rel");
+    expect(doc.floatingTopics?.map((f) => f.topic)).toEqual(["Floater"]);
+  });
+});
+
+describe("toMmap", () => {
+  it("is byte-deterministic (no time/randomness)", () => {
+    expect(toMmap(richDoc())).toEqual(toMmap(richDoc()));
+  });
+
+  it("escapes user text and drops dangerous hyperlinks", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: 'A & B < C > "D" </ap:Text>',
+        hyperlink: "javascript:alert(1)",
+        children: [],
+      },
+    };
+    const xml = docXml(toMmap(doc));
+    expect(xml).toContain("&amp;");
+    expect(xml).toContain("&lt;");
+    expect(xml).toContain("&quot;");
+    expect(xml).not.toContain("javascript:"); // dropped at the boundary
+    expect(xml).not.toContain("<ap:Hyperlink");
+    const back = parseMmap(toMmap(doc)).doc;
+    expect(back.root.topic).toBe('A & B < C > "D" </ap:Text>'); // decodes back exactly
+    expect(back.root.hyperlink).toBeUndefined();
+  });
+
+  it("maps emoji to canonical IconTypes and omits non-MindManager markers", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: { id: "r", topic: "R", icons: ["🚩", "✅", "1️⃣", "📌"], children: [] },
+    };
+    const xml = docXml(toMmap(doc));
+    expect(xml).toContain("urn:mindjet:Flag");
+    expect(xml).toContain("urn:mindjet:Check");
+    expect(xml).toContain("urn:mindjet:Priority1");
+    expect(xml).not.toContain("📌");
+  });
+
+  it("emits the side offset on depth-1 mains + LeftAndRight, never deeper", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "L",
+            topic: "L",
+            side: "left",
+            children: [{ id: "d1", topic: "Deep", side: "right", children: [] }],
+          },
+          { id: "R2", topic: "R2", side: "right", children: [] },
+        ],
+      },
+    };
+    const xml = docXml(toMmap(doc));
+    expect(xml).toContain('CX="-2."'); // left main
+    expect(xml).toContain('CX="2."'); // right main
+    expect(xml).toContain("urn:mindjet:LeftAndRight");
+    // exactly the two mains carry an offset — the depth-2 "Deep" side is ignored
+    expect((xml.match(/<ap:Offset /g) ?? []).length).toBe(2);
+  });
+
+  it("emits OneBoundary only when a boundary equals a topic's full subtree", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "s", topic: "Sub", children: [{ id: "s1", topic: "S1", children: [] }] },
+          { id: "o", topic: "Other", children: [] },
+        ],
+      },
+      boundaries: [
+        { id: "b1", nodeIds: ["s", "s1"] }, // == Sub's subtree → emitted
+        { id: "b2", nodeIds: ["s", "o"] }, // arbitrary cross-branch → dropped
+      ],
+    };
+    const xml = docXml(toMmap(doc));
+    expect((xml.match(/<ap:OneBoundary/g) ?? []).length).toBe(1);
+    expect(parseMmap(toMmap(doc)).doc.boundaries?.length).toBe(1);
+  });
+
+  it("normalises CR/CRLF to LF so multi-line text round-trips (no raw CR survives)", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: { id: "r", topic: "line1\r\nline2", note: "n1\rn2", children: [] },
+    };
+    expect(docXml(toMmap(doc))).not.toContain("\r");
+    const back = parseMmap(toMmap(doc)).doc;
+    expect(back.root.topic).toBe("line1\nline2");
+    expect(back.root.note).toBe("n1\nn2");
+  });
+
+  it("strips XML-illegal control characters so the document stays well-formed", () => {
+    const nul = String.fromCharCode(0);
+    const bs = String.fromCharCode(8);
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: { id: "r", topic: `a${nul}b`, note: `x${bs}y`, children: [] },
+    };
+    const xml = docXml(toMmap(doc));
+    // no C0 control char survives except TAB / LF (checked by code, not a control-char regex)
+    expect(
+      [...xml].every((ch) => {
+        const c = ch.charCodeAt(0);
+        return c >= 0x20 || c === 0x09 || c === 0x0a;
+      }),
+    ).toBe(true);
+    const back = parseMmap(toMmap(doc)).doc;
+    expect(back.root.topic).toBe("ab");
+    expect(back.root.note).toBe("xy");
+  });
+
+  it("never emits a side offset or LeftAndRight inside a floating subtree", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: { id: "r", topic: "R", children: [] },
+      floatingTopics: [
+        { id: "f", topic: "F", children: [{ id: "fc", topic: "FC", side: "left", children: [] }] },
+      ],
+    };
+    const xml = docXml(toMmap(doc));
+    expect(xml).not.toContain("<ap:Offset");
+    expect(xml).not.toContain("LeftAndRight");
+  });
+
+  it("gives the map element an OId distinct from every node, even a colliding id", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: { id: "urn:mindmap-studio:map", topic: "R", children: [] },
+    };
+    const oids = [...docXml(toMmap(doc)).matchAll(/OId="([^"]+)"/g)].map((m) => m[1]);
+    expect(oids[0]).not.toBe(oids[1]); // <ap:Map> vs the root <ap:Topic>
+    expect(new Set(oids).size).toBe(oids.length); // all unique
+  });
+});
+
 function countWith(node: MapNode, pred: (n: MapNode) => boolean): number {
   let n = pred(node) ? 1 : 0;
   for (const child of node.children) n += countWith(child, pred);
@@ -409,5 +625,20 @@ describe.skipIf(!realFile)("parseMmap — real .mmap (MMAP_FILE)", () => {
 
     expect(doc.root.topic.length).toBeGreaterThan(0);
     expect(count).toBeGreaterThan(1);
+  });
+});
+
+// Re-emit a REAL map and re-import it: proves the writer faithfully re-encodes a real-origin doc
+// (a stronger check than synthetic round-trips). CI-safe — skips without MMAP_FILE.
+describe.skipIf(!realFile)("toMmap — real .mmap re-emit (MMAP_FILE)", () => {
+  it("re-emits a real-origin map that re-imports with the same shape", () => {
+    const first = parseMmap(new Uint8Array(readFileSync(realFile as string))).doc;
+    const second = parseMmap(toMmap(first)).doc;
+    const count = (n: MapNode): number => 1 + n.children.reduce((s, c) => s + count(c), 0);
+    expect(count(second.root)).toBe(count(first.root));
+    expect(second.root.topic).toBe(first.root.topic);
+    expect(second.root.children.map((c) => c.topic)).toEqual(
+      first.root.children.map((c) => c.topic),
+    );
   });
 });

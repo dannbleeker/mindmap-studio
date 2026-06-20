@@ -204,13 +204,13 @@ function emitBoundaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[]
     const da = dashArray(b.dash);
     const dashAttr = da ? ` stroke-dasharray="${da}"` : "";
     out.push(
-      `<defs><linearGradient id="${esc(gid)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bs.fillTop}"/><stop offset="1" stop-color="${bs.fillBottom}"/></linearGradient></defs>`,
-      `<path d="${boundaryPath(b.shape, x, y, w, h)}" fill="url(#${esc(gid)})" stroke="${bs.stroke}" stroke-width="1.5"${dashAttr}/>`,
+      `<defs><linearGradient id="${esc(gid)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${esc(bs.fillTop)}"/><stop offset="1" stop-color="${esc(bs.fillBottom)}"/></linearGradient></defs>`,
+      `<path d="${boundaryPath(b.shape, x, y, w, h)}" fill="url(#${esc(gid)})" stroke="${esc(bs.stroke)}" stroke-width="1.5"${dashAttr}/>`,
     );
     const label = boundaryLabel(b.label);
     if (label) {
       out.push(
-        `<rect x="${r2(x + 14)}" y="${r2(y - 19)}" width="${r2(label.length * 6.6 + 14)}" height="19" rx="6" fill="${bs.stroke}"/>`,
+        `<rect x="${r2(x + 14)}" y="${r2(y - 19)}" width="${r2(label.length * 6.6 + 14)}" height="19" rx="6" fill="${esc(bs.stroke)}"/>`,
         `<text x="${r2(x + 20)}" y="${r2(y - 5.5)}" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
       );
     }
@@ -247,15 +247,15 @@ function emitSummaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[] 
     const capX = onLeft ? spineX + SUMMARY_BRACKET_W : spineX - SUMMARY_BRACKET_W;
     const ss = resolveSummaryStyle(s.color);
     out.push(
-      `<path d="M ${r2(capX)} ${r2(y0)} L ${r2(spineX)} ${r2(y0)} L ${r2(spineX)} ${r2(y1)} L ${r2(capX)} ${r2(y1)}" fill="none" stroke="${ss.stroke}" stroke-width="2"/>`,
+      `<path d="M ${r2(capX)} ${r2(y0)} L ${r2(spineX)} ${r2(y0)} L ${r2(spineX)} ${r2(y1)} L ${r2(capX)} ${r2(y1)}" fill="none" stroke="${esc(ss.stroke)}" stroke-width="2"/>`,
     );
     const label = summaryLabel(s.label);
     const midY = (y0 + y1) / 2;
     const lw = label.length * 7 + 12;
     const lx = onLeft ? spineX - 6 - lw : spineX + 6;
     out.push(
-      `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${ss.labelBg}" stroke="${ss.labelBorder}"/>`,
-      `<text x="${r2(lx + 6)}" y="${r2(midY + 4)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${ss.labelColor}">${esc(label)}</text>`,
+      `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${esc(ss.labelBg)}" stroke="${esc(ss.labelBorder)}"/>`,
+      `<text x="${r2(lx + 6)}" y="${r2(midY + 4)}" font-family="sans-serif" font-size="12" font-weight="600" fill="${esc(ss.labelColor)}">${esc(label)}</text>`,
     );
   }
   return out;
@@ -265,8 +265,8 @@ function emitSummaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[] 
 function emitBackdrop(bd: ReturnType<typeof backdropGeometry>): string[] {
   return bd.shapes.map((s) =>
     s.type === "circle"
-      ? `<circle cx="${r2(s.cx ?? 0)}" cy="${r2(s.cy ?? 0)}" r="${r2(s.r ?? 0)}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`
-      : `<path d="${s.d ?? ""}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"/>`,
+      ? `<circle cx="${r2(s.cx ?? 0)}" cy="${r2(s.cy ?? 0)}" r="${r2(s.r ?? 0)}" fill="${esc(s.fill)}" stroke="${esc(s.stroke)}" stroke-width="2"/>`
+      : `<path d="${s.d ?? ""}" fill="${esc(s.fill)}" stroke="${esc(s.stroke)}" stroke-width="2"/>`,
   );
 }
 
@@ -280,9 +280,9 @@ function emitCallouts(callouts: CalloutBox[]): string[] {
       .map((l, i) => `<tspan x="${r2(c.x + 8)}"${i > 0 ? ` dy="16"` : ""}>${esc(l)}</tspan>`)
       .join("");
     out.push(
-      `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${cs.connector}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
-      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${r2(c.h)}" rx="8" fill="${cs.bg}" stroke="${cs.stroke}"/>`,
-      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${cs.text}">${tspans}</text>`,
+      `<line x1="${r2(c.ax)}" y1="${r2(c.ay)}" x2="${r2(c.x)}" y2="${r2(c.y + 10)}" stroke="${esc(cs.connector)}" stroke-width="1.5" stroke-dasharray="3 3"/>`,
+      `<rect x="${r2(c.x)}" y="${r2(c.y)}" width="${r2(c.w)}" height="${r2(c.h)}" rx="8" fill="${esc(cs.bg)}" stroke="${esc(cs.stroke)}"/>`,
+      `<text x="${r2(c.x + 8)}" y="${r2(c.y + 15)}" font-family="sans-serif" font-size="12" fill="${esc(cs.text)}">${tspans}</text>`,
     );
   }
   return out;
@@ -416,19 +416,19 @@ export function buildFlowSvg(
         : crosslinkBezier(sx, sy, tx, ty, e.data?.curve).path;
       const dashAttr = dasharray ? ` stroke-dasharray="${dasharray}"` : "";
       parts.push(
-        `<path d="${linePath}" fill="none" stroke="${clColor}" stroke-width="${clWidth}"${dashAttr}/>`,
+        `<path d="${linePath}" fill="none" stroke="${esc(clColor)}" stroke-width="${clWidth}"${dashAttr}/>`,
       );
       // Directional arrowhead(s) — same builder the canvas uses, at whichever end(s) carry one.
       // Arrowhead scales with the line weight (a thick relationship gets a proportionally larger head).
       const headSize = 6 + clWidth * 2;
       if (arrowAtTarget)
-        parts.push(`<path d="${arrowHeadPath(tx, ty, sx, sy, headSize)}" fill="${clColor}"/>`);
+        parts.push(`<path d="${arrowHeadPath(tx, ty, sx, sy, headSize)}" fill="${esc(clColor)}"/>`);
       if (arrowAtSource)
-        parts.push(`<path d="${arrowHeadPath(sx, sy, tx, ty, headSize)}" fill="${clColor}"/>`);
+        parts.push(`<path d="${arrowHeadPath(sx, sy, tx, ty, headSize)}" fill="${esc(clColor)}"/>`);
       const label = typeof e.label === "string" ? e.label : "";
       if (label) {
         parts.push(
-          `<text x="${r2((sx + tx) / 2)}" y="${r2((sy + ty) / 2 - 4)}" text-anchor="middle" font-family="sans-serif" font-size="12" fill="${clColor}">${esc(label)}</text>`,
+          `<text x="${r2((sx + tx) / 2)}" y="${r2((sy + ty) / 2 - 4)}" text-anchor="middle" font-family="sans-serif" font-size="12" fill="${esc(clColor)}">${esc(label)}</text>`,
         );
       }
     } else if (!braces) {
@@ -444,11 +444,11 @@ export function buildFlowSvg(
       // A filled ribbon for the organic taper; a uniform stroke for elbow/curved/straight/dashed.
       const br = branchRender(parent, child, side, e.data ?? {}, bow);
       if (br.fill) {
-        parts.push(`<path d="${br.d}" fill="${br.fill}"/>`);
+        parts.push(`<path d="${br.d}" fill="${esc(br.fill)}"/>`);
       } else {
         const dashAttr = br.dash ? ` stroke-dasharray="${br.dash}"` : "";
         parts.push(
-          `<path d="${br.d}" fill="none" stroke="${br.stroke}" stroke-width="${br.width}" stroke-linejoin="round"${dashAttr}/>`,
+          `<path d="${br.d}" fill="none" stroke="${esc(br.stroke ?? "")}" stroke-width="${br.width}" stroke-linejoin="round"${dashAttr}/>`,
         );
       }
     }

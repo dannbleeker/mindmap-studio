@@ -1,4 +1,13 @@
-import { type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Kanban } from "./Kanban";
 import {
   FilterPanel,
@@ -22,7 +31,6 @@ import { OverlayInspector } from "./components/OverlayInspector";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { Toolbar, type ToolbarProps } from "./components/Toolbar";
 import { buildEditorCommands } from "./components/editorCommands";
-import { StartScreen } from "./components/start/StartScreen";
 import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
 import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
@@ -55,7 +63,6 @@ import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
 import { noteCounts } from "./noteFormat";
 import { backlinksFor, outlineNumbers, outlineRows } from "./outline";
-import { Presentation } from "./present/Presentation";
 import {
   type ToastAction,
   type ToastKind,
@@ -83,6 +90,17 @@ import { useFind } from "./useFind";
 import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
+
+// Lazy-loaded so they never sit in the entry bundle (the size-budget gates the entry chunk only),
+// matching the canvas's own code-split idiom (src/mindmap/index.tsx). The Start screen is shown only
+// on a fresh boot with no open document — an async decision, so deferring its chunk is invisible to the
+// common (returning-user) path; the Presentation deck loads only when the user clicks Present.
+const StartScreen = lazy(() =>
+  import("./components/start/StartScreen").then((m) => ({ default: m.StartScreen })),
+);
+const Presentation = lazy(() =>
+  import("./present/Presentation").then((m) => ({ default: m.Presentation })),
+);
 
 // How many recently-used document tabs keep their canvas session (viewport + undo/redo) cached for
 // lossless switching; beyond this the least-recently-used session is dropped (that tab reopens fresh).
@@ -1045,7 +1063,11 @@ export function App() {
   };
 
   if (view === "start") {
-    return <StartScreen theme={theme} onOpen={openFromStart} onImportFiles={importFromStart} />;
+    return (
+      <Suspense fallback={null}>
+        <StartScreen theme={theme} onOpen={openFromStart} onImportFiles={importFromStart} />
+      </Suspense>
+    );
   }
 
   return (
@@ -1493,7 +1515,11 @@ export function App() {
         </div>
       </div>
 
-      {presentDoc && <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />}
+      {presentDoc && (
+        <Suspense fallback={null}>
+          <Presentation doc={presentDoc} onExit={() => setPresentDoc(null)} />
+        </Suspense>
+      )}
 
       {/* Search all maps — controlled <Dialog>; on open, load every map (live current map merged over
           its saved copy) so search sees the latest edits, then focus the query field. */}

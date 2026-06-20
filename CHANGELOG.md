@@ -75,6 +75,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   an optimal Longest-Processing-Time split (a size-5 branch among four size-1 branches lands 5/4, not 7/2).
   The pinned side is lossless in `.json`; canvas == export (one shared layout pass).
 
+- **.mmap import keeps the two-sided arrangement.** A MindManager import now reads each main branch's
+  left/right side from the sign of its topic offset (`CX`), so a two-sided MindManager map lands with its
+  branches on the same sides they had there. A side is only read for a main branch — deeper topics' offsets
+  are layout nudges, not sides — and any branch MindManager left unpinned falls back to auto-balance.
+
 - **Obstacle-aware branch routing (safety net).** A tapered branch now bows around an unrelated topic
   box its straight path would otherwise pass behind — computed once per branch from the node boxes and
   mirrored in the SVG export (canvas == export). Conservative by construction: a branch is either fully

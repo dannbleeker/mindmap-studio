@@ -19,8 +19,9 @@ import type { Boundary, CrossLink, MapNode, MindMapDoc, NodeId } from "../model/
 // (NotesGroup>NotesXhtmlData@PreviewPlainText), stock icons (Icon@IconType),
 // hyperlinks (Hyperlink@Url), relationships (Relationships>Relationship>2x
 // ConnectionGroup>Connection>ObjectReference@OIdRef), boundaries
-// (Topic>OneBoundary, over the topic's subtree), and floating topics
-// (FloatingTopics). Out of scope: the task/PM layer (warned, not imported).
+// (Topic>OneBoundary, over the topic's subtree), floating topics
+// (FloatingTopics), and each main branch's two-sided side (Offset@CX sign,
+// depth-1 only). Out of scope: the task/PM layer (warned, not imported).
 
 export interface MmapImportResult {
   doc: MindMapDoc;
@@ -89,7 +90,7 @@ function makeId(): string {
   return `n${idCounter}`;
 }
 
-function topicToNode(topic: Xml, ctx: ParseContext): MapNode {
+function topicToNode(topic: Xml, ctx: ParseContext, depth = 0): MapNode {
   const node: MapNode = {
     id: String(topic?.[`${ATTR}OId`] ?? makeId()),
     topic: extractText(topic),
@@ -106,6 +107,15 @@ function topicToNode(topic: Xml, ctx: ParseContext): MapNode {
   const icons = extractIcons(topic);
   if (icons.length > 0) node.icons = icons;
 
+  // Two-sided map: a MAIN branch (depth 1) records which half it sits on via the sign of its
+  // horizontal offset from the central topic — MindManager stamps CX < 0 for the left side and
+  // CX > 0 for the right (the magnitude is just a layout nudge). Deeper topics carry offsets too,
+  // but a "side" only has meaning for a root child, so gate strictly on depth === 1.
+  if (depth === 1) {
+    const cx = Number(topic?.Offset?.[`${ATTR}CX`]);
+    if (Number.isFinite(cx) && cx !== 0) node.side = cx < 0 ? "left" : "right";
+  }
+
   // Task scheduling data (dates, priority, progress) is out of scope (no PM
   // layer) — flag it rather than silently dropping it.
   if (topic?.Task) {
@@ -114,7 +124,9 @@ function topicToNode(topic: Xml, ctx: ParseContext): MapNode {
     );
   }
 
-  node.children = asList(topic?.SubTopics?.Topic).map((child) => topicToNode(child, ctx));
+  node.children = asList(topic?.SubTopics?.Topic).map((child) =>
+    topicToNode(child, ctx, depth + 1),
+  );
 
   // A boundary drawn on this topic encloses its subtree.
   if (topic?.OneBoundary) {

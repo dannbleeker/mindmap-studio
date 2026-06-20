@@ -21,6 +21,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   every load/import boundary (IndexedDB read, `.json` open, library restore), so a damaged map renders
   salvaged (possibly empty) instead of crashing. A well-formed map passes through unchanged.
 
+- **A render crash now shows a recovery panel, not a blank screen.** A top-level error boundary wraps the
+  app: any uncaught UI error is caught and replaced with a friendly panel ("your maps are saved safely on
+  this device") offering **Reload** and **Start fresh** (which clears the open-tab session + `?map=`
+  deep-link to escape a map that crashes on every load), instead of tearing down the tree to a white
+  screen. Inline-styled so it can't itself depend on whatever failed.
+
 - **Reparenting works across the floating/tree boundary.** Dragging a *detached* (floating) topic onto
   the tree — or a tree topic onto a floating one — silently snapped back: `reparent` only searched the
   central tree, so it no-op'd whenever a floating topic was the drag source or target, even though the

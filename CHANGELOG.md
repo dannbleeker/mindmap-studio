@@ -15,6 +15,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **A corrupt saved map no longer white-screens the app.** A map whose stored structure had drifted (a
+  missing or non-array `children`, a non-object node) threw in the projector and blanked the whole
+  editor — unrecoverable on the boot-restore path. Docs are now normalised to a projectable shape at
+  every load/import boundary (IndexedDB read, `.json` open, library restore), so a damaged map renders
+  salvaged (possibly empty) instead of crashing. A well-formed map passes through unchanged.
+
 - **Reparenting works across the floating/tree boundary.** Dragging a *detached* (floating) topic onto
   the tree — or a tree topic onto a floating one — silently snapped back: `reparent` only searched the
   central tree, so it no-op'd whenever a floating topic was the drag source or target, even though the

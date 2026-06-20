@@ -427,9 +427,12 @@ function FlowInner({
       const kind = newDoc.meta?.freeform ? "freeform" : directionRef.current;
       const proj = project(newDoc, paletteRef.current, numberedRef.current, kind);
       const est = estimateSizeOf(proj.nodes);
-      const measured = getNodes();
+      // Index the live React Flow nodes by id ONCE. sizeOf is called a multiple of N times per layout
+      // pass (d3 separation / eachBefore / place walks), so a per-call measured.find() made sync() O(N²)
+      // on large maps; a Map lookup keeps the same size VALUES (canvas == export unaffected).
+      const measuredById = new Map(getNodes().map((n) => [n.id, n]));
       const sizeOf = (id: string) => {
-        const m = measured.find((n) => n.id === id);
+        const m = measuredById.get(id);
         return m?.measured?.width && m?.measured?.height
           ? { width: m.measured.width, height: m.measured.height }
           : est(id);
@@ -450,17 +453,25 @@ function FlowInner({
       const selEdge = selectedEdgeIdRef.current;
       // Branch attach-side per parent: one shared origin per side so sibling branches fan without
       // crossing. Computed from the just-laid-out rects; exportSvg mirrors it → canvas == export.
-      const rectOf = (id: string): Box | null => {
-        const p = pos.get(id);
-        if (!p) return null;
-        const z = sizeOf(id);
-        return { cx: p.x + z.width / 2, cy: p.y + z.height / 2, w: z.width, h: z.height };
-      };
+      // Each node's box, computed ONCE per sync into a Map — was recomputed via rectOf at 4+ call sites
+      // (per parent in computeAxisByParent, per node for allBoxes, per edge endpoint below), each of which
+      // re-ran sizeOf. Box VALUES are identical, so attachSide/attachBow and canvas == export are unchanged.
+      const boxById = new Map<string, Box>();
+      for (const n of proj.nodes) {
+        const p = pos.get(n.id);
+        if (!p) continue;
+        const z = sizeOf(n.id);
+        boxById.set(n.id, {
+          cx: p.x + z.width / 2,
+          cy: p.y + z.height / 2,
+          w: z.width,
+          h: z.height,
+        });
+      }
+      const rectOf = (id: string): Box | null => boxById.get(id) ?? null;
       const axisByParent = computeAxisByParent(proj.edges, rectOf, axisForLayoutKind(kind));
       // All node boxes — obstacle-aware routing bows each branch around any box in its straight path.
-      const allBoxes = proj.nodes
-        .map((n) => ({ id: n.id, box: rectOf(n.id) }))
-        .filter((b): b is { id: string; box: Box } => b.box !== null);
+      const allBoxes = [...boxById.entries()].map(([id, box]) => ({ id, box }));
       setEdges(
         proj.edges.map((e) => {
           let data = e.data;

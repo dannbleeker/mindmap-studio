@@ -35,7 +35,6 @@ import { todayISO } from "../taskDate";
 import { useIsMobile } from "../useIsMobile";
 import {
   type CanvasSession,
-  type LayoutKind,
   type MindMapHandle,
   type MindMapProps,
   type SelectedOverlay,
@@ -136,6 +135,7 @@ import {
 import { project } from "./flow/project";
 import { CROSSLINK_COLOR, CROSSLINK_WIDTH } from "./flow/style";
 import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
+import { useLatestRef } from "./flow/useLatestRef";
 import { mindManagerTheme } from "./theme";
 
 // React Flow canvas — a fully editable engine. Inline topic editing (double-click / F2),
@@ -360,50 +360,33 @@ function FlowInner({
   const historyRef = useRef<History<MindMapDoc>>(
     mountSession.current?.history ?? createHistory<MindMapDoc>(),
   );
-  const paletteRef = useRef(palette);
-  paletteRef.current = palette;
-  const directionRef = useRef<LayoutKind>(direction);
-  directionRef.current = direction;
-  const numberedRef = useRef(numbered);
-  numberedRef.current = numbered;
-  const litIdsRef = useRef(litIds);
-  litIdsRef.current = litIds;
-  const selectedRef = useRef<string | null>(null);
-  selectedRef.current = selectedId;
-  const selectedIdsRef = useRef<Set<string>>(selectedIds);
-  selectedIdsRef.current = selectedIds;
-  const selectedEdgeIdRef = useRef<string | null>(null);
-  selectedEdgeIdRef.current = selectedEdgeId;
-  const onSelectEdgeRef = useRef(onSelectEdge);
-  onSelectEdgeRef.current = onSelectEdge;
-  const selectedOverlayRef = useRef<SelectedOverlay | null>(null);
-  selectedOverlayRef.current = selectedOverlay;
-  const onSelectOverlayRef = useRef(onSelectOverlay);
-  onSelectOverlayRef.current = onSelectOverlay;
-  const editingRef = useRef<string | null>(null);
-  editingRef.current = editingId;
-  const linkingFromRef = useRef<string | null>(null);
-  linkingFromRef.current = linkingFrom;
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-  const onSelectRef = useRef(onSelect);
-  onSelectRef.current = onSelect;
-  const onMapLinkRef = useRef(onMapLink);
-  onMapLinkRef.current = onMapLink;
-  const onOpenNoteRef = useRef(onOpenNote);
-  onOpenNoteRef.current = onOpenNote;
-  const onHistoryRef = useRef(onHistory);
-  onHistoryRef.current = onHistory;
-  const onDeleteRef = useRef(onDelete);
-  onDeleteRef.current = onDelete;
+  // Mirror refs: each tracks the latest prop/state so the stable callbacks below read live values
+  // without re-creating. (docRef/historyRef/mountSession are NOT mirrors — they hold their own state.)
+  const paletteRef = useLatestRef(palette);
+  const directionRef = useLatestRef(direction);
+  const numberedRef = useLatestRef(numbered);
+  const litIdsRef = useLatestRef(litIds);
+  const selectedRef = useLatestRef(selectedId);
+  const selectedIdsRef = useLatestRef(selectedIds);
+  const selectedEdgeIdRef = useLatestRef(selectedEdgeId);
+  const onSelectEdgeRef = useLatestRef(onSelectEdge);
+  const selectedOverlayRef = useLatestRef(selectedOverlay);
+  const onSelectOverlayRef = useLatestRef(onSelectOverlay);
+  const editingRef = useLatestRef(editingId);
+  const linkingFromRef = useLatestRef(linkingFrom);
+  const onChangeRef = useLatestRef(onChange);
+  const onSelectRef = useLatestRef(onSelect);
+  const onMapLinkRef = useLatestRef(onMapLink);
+  const onOpenNoteRef = useLatestRef(onOpenNote);
+  const onHistoryRef = useLatestRef(onHistory);
+  const onDeleteRef = useLatestRef(onDelete);
   // On mount, report the (possibly restored) history depths so the chrome's undo/redo buttons match a
   // restored tab session. A fresh canvas reports nothing-to-undo, which is also correct.
   useEffect(() => {
     const h = historyRef.current;
     onHistoryRef.current?.(h.past.length > 0, h.future.length > 0);
   }, []);
-  const themeRef = useRef(theme);
-  themeRef.current = theme;
+  const themeRef = useLatestRef(theme);
 
   // Re-project + re-layout from a doc (with measured sizes when available, else estimated).
   const sync = useCallback(
@@ -858,8 +841,7 @@ function FlowInner({
   }, [editingId]);
 
   // Report the selection count up (the inspector switches to bulk mode when >1).
-  const onSelectionCountRef = useRef(onSelectionCount);
-  onSelectionCountRef.current = onSelectionCount;
+  const onSelectionCountRef = useLatestRef(onSelectionCount);
   useEffect(() => {
     onSelectionCountRef.current?.(selectedIds.size);
   }, [selectedIds]);
@@ -867,16 +849,14 @@ function FlowInner({
   // Report a per-field "mixed" summary of the selection, so the inspector can blank-out + label a
   // task field the selected topics disagree on (instead of showing the anchor's value). Keyed on the
   // live doc too, so a bulk edit re-fires and collapses "Mixed" → the just-applied uniform value.
-  const onSelectionFieldsRef = useRef(onSelectionFields);
-  onSelectionFieldsRef.current = onSelectionFields;
+  const onSelectionFieldsRef = useLatestRef(onSelectionFields);
   useEffect(() => {
     onSelectionFieldsRef.current?.(selectionFields(renderDoc, selectedIds));
   }, [selectedIds, renderDoc]);
 
   // Markers/tags-on-all-vs-some summary for tri-state bulk chips. Keyed on the live doc too, so a
   // bulk toggle re-fires and a value flips between "all" and "some" as topics gain/lose it.
-  const onSelectionMarkerTagsRef = useRef(onSelectionMarkerTags);
-  onSelectionMarkerTagsRef.current = onSelectionMarkerTags;
+  const onSelectionMarkerTagsRef = useLatestRef(onSelectionMarkerTags);
   useEffect(() => {
     onSelectionMarkerTagsRef.current?.({
       markers: selectionMarkers(renderDoc, selectedIds),

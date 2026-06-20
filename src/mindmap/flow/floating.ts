@@ -346,21 +346,24 @@ export interface BranchRender {
   dash: string;
 }
 
-/** The perpendicular `bow` (signed offset of the tapered ribbon's control points) needed to route a
- *  branch AROUND any `obstacles` (other node boxes) its straight path would otherwise pass behind —
- *  0 when the path is already clear (so a clear branch is byte-identical to before). Samples the
- *  centerline cubic against each nearby box, then grows the bow toward the clear side until no sample
- *  sits inside a box (+`margin`). Pure → the canvas (sync stashes it on `data.attachBow`) and the SVG
- *  exporter both call it with the same boxes, so canvas == export. Only meaningful for the tapered
- *  ribbon (the default organic branch). */
+/** The perpendicular `bow` (signed offset of the tapered ribbon's control points) that routes a branch
+ *  AROUND any node box (`others`, minus the two endpoint nodes `srcId`/`tgtId`) its straight path would
+ *  otherwise pass behind. Returns 0 when the path is already clear (so a clear branch is byte-identical
+ *  to before) AND when no displacement up to `maxBow` clears it — i.e. it NEVER returns a bow that still
+ *  crosses a box: a branch is either fully cleared or left straight. Tries BOTH perpendicular directions
+ *  and keeps the smallest |bow| that clears every nearby box. Pure → the canvas (sync stashes it on
+ *  `data.attachBow`) and the SVG exporter both call it with the same boxes, so canvas == export. Only
+ *  the tapered ribbon honours it. */
 export function bowToClear(
   parent: Box,
   child: Box,
   side: AttachSide,
-  obstacles: readonly Box[],
+  others: readonly { id: string; box: Box }[],
+  srcId: string,
+  tgtId: string,
   margin = 8,
 ): number {
-  if (obstacles.length === 0) return 0;
+  if (others.length === 0) return 0;
   const { sx, sy, tx, ty } = branchEndpoints(parent, child, side);
   const horizontal = side === "left" || side === "right";
   const dx = tx - sx;
@@ -372,54 +375,80 @@ export function bowToClear(
   const b1y = horizontal ? sy : sy + dy * 0.5;
   const b2x = horizontal ? tx - dx * 0.5 : tx;
   const b2y = horizontal ? ty : ty - dy * 0.5;
-  // Only boxes overlapping the chord's bounding box can be in the way — a cheap pre-filter.
-  const minX = Math.min(sx, tx) - margin;
-  const maxX = Math.max(sx, tx) + margin;
-  const minY = Math.min(sy, ty) - margin;
-  const maxY = Math.max(sy, ty) + margin;
-  const near = obstacles.filter(
-    (o) =>
-      o.cx + o.w / 2 >= minX &&
-      o.cx - o.w / 2 <= maxX &&
-      o.cy + o.h / 2 >= minY &&
-      o.cy - o.h / 2 <= maxY,
-  );
-  if (near.length === 0) return 0;
-  // Deepest box penetration of the bowed centerline + which side of the chord the offending box is on.
-  const probe = (bow: number): { pen: number; sign: number } => {
+  // Cap the displacement so a bow can't fling wildly, but leave enough room to actually clear a box
+  // wider than the branch is long (a short branch passing a big sibling needs a bow > its own length).
+  const maxBow = Math.min(Math.max(len * 1.5, 180), 360);
+  // Boxes (minus the endpoint nodes) overlapping the chord's bbox inflated by `pad`. The un-bowed cubic
+  // stays inside the chord bbox, so band(margin) is all that can block a straight branch; a bowed branch
+  // sweeps up to ~maxBow perpendicular, so band(maxBow+margin) is everything any bow ≤ maxBow can hit.
+  const band = (pad: number): Box[] => {
+    const loX = Math.min(sx, tx) - pad;
+    const hiX = Math.max(sx, tx) + pad;
+    const loY = Math.min(sy, ty) - pad;
+    const hiY = Math.max(sy, ty) + pad;
+    const out: Box[] = [];
+    for (const o of others) {
+      if (o.id === srcId || o.id === tgtId) continue;
+      const b = o.box;
+      if (
+        b.cx + b.w / 2 >= loX &&
+        b.cx - b.w / 2 <= hiX &&
+        b.cy + b.h / 2 >= loY &&
+        b.cy - b.h / 2 <= hiY
+      )
+        out.push(b);
+    }
+    return out;
+  };
+  // Deepest penetration of the bowed centerline into ANY box in `boxes` (>0 = inside box+margin).
+  const deepest = (bow: number, boxes: readonly Box[]): number => {
     const c1x = b1x + cnx * bow;
     const c1y = b1y + cny * bow;
     const c2x = b2x + cnx * bow;
     const c2y = b2y + cny * bow;
-    let pen = 0;
-    let sign = 0;
-    for (const o of near) {
-      for (let i = 1; i <= 12; i++) {
-        const t = i / 13;
+    let pen = Number.NEGATIVE_INFINITY;
+    for (const b of boxes) {
+      // Sample t ∈ [0, 1] INCLUSIVE — the endpoints (t=0/1) matter: a box sitting on a fixed branch
+      // endpoint can't be cleared by any bow (the cubic always passes through it), so it must be seen
+      // and the branch left straight rather than displaced with the endpoint still inside the box.
+      for (let i = 0; i <= 21; i++) {
+        const t = i / 21;
         const u = 1 - t;
         const px = u * u * u * sx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * tx;
         const py = u * u * u * sy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ty;
         const p = Math.min(
-          o.w / 2 + margin - Math.abs(px - o.cx),
-          o.h / 2 + margin - Math.abs(py - o.cy),
+          b.w / 2 + margin - Math.abs(px - b.cx),
+          b.h / 2 + margin - Math.abs(py - b.cy),
         );
-        if (p > pen) {
-          pen = p;
-          sign = Math.sign((o.cx - sx) * cnx + (o.cy - sy) * cny) || 1;
-        }
+        if (p > pen) pen = p;
       }
     }
-    return { pen, sign };
+    return pen;
   };
-  const first = probe(0);
-  if (first.pen <= 0) return 0;
-  const dir = -first.sign; // bow toward the side away from the obstacle
-  let bow = 0;
-  for (let step = 1; step <= 8; step++) {
-    bow = dir * step * (first.pen + margin);
-    if (probe(bow).pen <= 0) break;
+  // Fast path (the common case — a clear branch): only the tight band can block the straight cubic, and
+  // if nothing there is penetrated the branch is already clear, so skip the wider scan entirely.
+  const tight = band(margin);
+  if (tight.length === 0 || deepest(0, tight) <= 0) return 0;
+  // It grazes → search BOTH perpendicular directions over the full swept region for the smallest |bow|
+  // that clears every box; keep the smaller. If neither direction clears within maxBow (boxes straddling
+  // the chord, or a box over an endpoint), return 0 — leave the branch straight rather than displace it
+  // into something it still overlaps.
+  const wide = band(maxBow + margin);
+  const step = Math.max(4, margin);
+  let best = 0;
+  let bestAbs = Number.POSITIVE_INFINITY;
+  for (const dir of [-1, 1] as const) {
+    for (let bow = dir * step; Math.abs(bow) <= maxBow; bow += dir * step) {
+      if (deepest(bow, wide) <= 0) {
+        if (Math.abs(bow) < bestAbs) {
+          bestAbs = Math.abs(bow);
+          best = bow;
+        }
+        break;
+      }
+    }
   }
-  return bow;
+  return best;
 }
 
 /** Resolve a branch edge to its path + paint, honouring the map's connector style + a per-branch dash.
@@ -469,4 +498,16 @@ export function branchRender(
         : curvedPath(parent, child, attachSide); // "curved", or a dashed taper
   const width = Math.max(1.6, 3.4 - (data.depth ?? 1) * 0.5);
   return { d, fill: null, stroke: color, width, dash: dashArr };
+}
+
+/** Whether a branch renders as the organic tapered ribbon — the ONLY style that honours `bow`. Mirrors
+ *  branchRender's `effective === "taper" && !dashArr`, so callers skip the obstacle-bow computation for
+ *  elbow/straight/curved/dashed branches (where the bow would be discarded). One source of truth. */
+export function isTaperBranch(data: {
+  elbow?: boolean;
+  connectorStyle?: ConnectorStyle;
+  dash?: "solid" | "dashed" | "dotted";
+}): boolean {
+  const cs = data.connectorStyle ?? "organic";
+  return cs === "organic" && !data.elbow && data.dash !== "dashed" && data.dash !== "dotted";
 }

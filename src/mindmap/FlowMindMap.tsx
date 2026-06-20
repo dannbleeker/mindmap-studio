@@ -59,6 +59,7 @@ import {
   axisForLayoutKind,
   bowToClear,
   computeAxisByParent,
+  isTaperBranch,
 } from "./flow/floating";
 import {
   type History,
@@ -468,16 +469,10 @@ function FlowInner({
             const cb = rectOf(e.target);
             const attachSide =
               pb && cb ? attachSideFor(pb, cb, axisByParent.get(e.source) ?? "h") : undefined;
+            // Only the tapered ribbon honours the bow → skip the work for elbow/straight/curved/dashed.
             const attachBow =
-              pb && cb && attachSide
-                ? bowToClear(
-                    pb,
-                    cb,
-                    attachSide,
-                    allBoxes
-                      .filter((b) => b.id !== e.source && b.id !== e.target)
-                      .map((b) => b.box),
-                  )
+              pb && cb && attachSide && isTaperBranch(e.data ?? {})
+                ? bowToClear(pb, cb, attachSide, allBoxes, e.source, e.target)
                 : 0;
             data = { ...(e.data as EdgeData), attachSide, attachBow };
           }

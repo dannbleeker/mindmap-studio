@@ -51,16 +51,9 @@ import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { Summaries } from "./flow/Summaries";
 import { TopicNode } from "./flow/TopicNode";
 import { type BraceGroup, computeBraces } from "./flow/brace";
+import { buildFlowState } from "./flow/buildFlowState";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
-import {
-  type Box,
-  attachSideFor,
-  axisForLayoutKind,
-  bowToClear,
-  computeAxisByParent,
-  isTaperBranch,
-} from "./flow/floating";
 import {
   type History,
   createHistory,
@@ -425,83 +418,20 @@ function FlowInner({
       // Free-canvas mode overrides the picked layout: nodes sit at their own `pos`. The kind also
       // drives project()'s org-chart elbow stamping, so compute it before projecting.
       const kind = newDoc.meta?.freeform ? "freeform" : directionRef.current;
-      const proj = project(newDoc, paletteRef.current, numberedRef.current, kind);
-      const est = estimateSizeOf(proj.nodes);
-      // Index the live React Flow nodes by id ONCE. sizeOf is called a multiple of N times per layout
-      // pass (d3 separation / eachBefore / place walks), so a per-call measured.find() made sync() O(N²)
-      // on large maps; a Map lookup keeps the same size VALUES (canvas == export unaffected).
-      const measuredById = new Map(getNodes().map((n) => [n.id, n]));
-      const sizeOf = (id: string) => {
-        const m = measuredById.get(id);
-        return m?.measured?.width && m?.measured?.height
-          ? { width: m.measured.width, height: m.measured.height }
-          : est(id);
-      };
-      const pos = computeLayout(proj.nodes, proj.edges, sizeOf, kind);
-      const selIds = selectedIdsRef.current;
-      const lit = litIdsRef.current;
-      setNodes(
-        proj.nodes.map((n) => ({
-          ...n,
-          position: pos.get(n.id) ?? { x: 0, y: 0 },
-          selected: selIds.has(n.id),
-          data: lit ? { ...n.data, dimmed: !lit.has(n.id) } : n.data,
-        })),
-      );
-      // Brace map hides the tapered branch ribbons (the "{" forks replace them); cross-links stay.
-      const brace = kind === "brace";
-      const selEdge = selectedEdgeIdRef.current;
-      // Branch attach-side per parent: one shared origin per side so sibling branches fan without
-      // crossing. Computed from the just-laid-out rects; exportSvg mirrors it → canvas == export.
-      // Each node's box, computed ONCE per sync into a Map — was recomputed via rectOf at 4+ call sites
-      // (per parent in computeAxisByParent, per node for allBoxes, per edge endpoint below), each of which
-      // re-ran sizeOf. Box VALUES are identical, so attachSide/attachBow and canvas == export are unchanged.
-      const boxById = new Map<string, Box>();
-      for (const n of proj.nodes) {
-        const p = pos.get(n.id);
-        if (!p) continue;
-        const z = sizeOf(n.id);
-        boxById.set(n.id, {
-          cx: p.x + z.width / 2,
-          cy: p.y + z.height / 2,
-          w: z.width,
-          h: z.height,
-        });
-      }
-      const rectOf = (id: string): Box | null => boxById.get(id) ?? null;
-      const axisByParent = computeAxisByParent(proj.edges, rectOf, axisForLayoutKind(kind));
-      // All node boxes — obstacle-aware routing bows each branch around any box in its straight path.
-      const allBoxes = [...boxById.entries()].map(([id, box]) => ({ id, box }));
-      setEdges(
-        proj.edges.map((e) => {
-          let data = e.data;
-          if (!e.data?.crosslink) {
-            const pb = rectOf(e.source);
-            const cb = rectOf(e.target);
-            const attachSide =
-              pb && cb ? attachSideFor(pb, cb, axisByParent.get(e.source) ?? "h") : undefined;
-            // Only the tapered ribbon honours the bow → skip the work for elbow/straight/curved/dashed.
-            const attachBow =
-              pb && cb && attachSide && isTaperBranch(e.data ?? {})
-                ? bowToClear(pb, cb, attachSide, allBoxes, e.source, e.target)
-                : 0;
-            data = { ...(e.data as EdgeData), attachSide, attachBow };
-          }
-          if (lit) {
-            data = {
-              ...(data as EdgeData),
-              dimmed: !(lit.has(e.source) && lit.has(e.target)),
-            };
-          }
-          return {
-            ...e,
-            // Persist the selected relationship's halo across re-projection (mirrors the node path).
-            selected: e.id === selEdge,
-            ...(brace && !e.data?.crosslink ? { hidden: true } : {}),
-            data,
-          };
-        }),
-      );
+      // The whole model→canvas transform (project → layout → attachSide/attachBow → selection/dimming
+      // flags) is the pure, unit-tested buildFlowState(); sync() only owns the React side effects.
+      const { nodes, edges } = buildFlowState({
+        doc: newDoc,
+        palette: paletteRef.current,
+        numbered: numberedRef.current,
+        kind,
+        measured: getNodes(),
+        selectedIds: selectedIdsRef.current,
+        selectedEdgeId: selectedEdgeIdRef.current,
+        litIds: litIdsRef.current,
+      });
+      setNodes(nodes);
+      setEdges(edges);
     },
     [getNodes, setNodes, setEdges],
   );

@@ -338,6 +338,14 @@
 .mm-menu-item:hover {
   background: var(--ed-page);
 }
+/* Keyboard focus ring for the primitive control button (controlStyle carries none) — the toolbar /
+ * dialog / inspector buttons all render .mm-prim-btn, so keyboard users get a visible focus indicator.
+ * :focus-visible → shown only for keyboard nav, never on mouse click. Matches the menu-chip idiom. */
+.mm-prim-btn:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+}
+
 /* Keyboard focus inside a menu (roving Arrow/Home/End) — a clear ring without moving layout. */
 .mm-menu-item:focus-visible {
   outline: none;

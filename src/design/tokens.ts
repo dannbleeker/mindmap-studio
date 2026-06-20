@@ -47,8 +47,11 @@ export function editorThemeVars(theme: CanvasTheme): CSSProperties {
     "--ed-divider": dark ? "rgba(255,255,255,0.06)" : "#efece4",
     "--ed-ink": ink,
     "--ed-ink2": dark ? "#bdb8ad" : "#5c574e",
-    "--ed-muted": dark ? "#8f8a80" : "#938d81",
-    "--ed-faint": dark ? "#6d695f" : "#b6b0a4",
+    // Light-mode muted/faint darkened to meet WCAG AA (4.5:1) on the near-white card/page — the old
+    // #938d81 (3.3:1) / #b6b0a4 (2.2:1) failed for body text. Kept as light as compliance allows, warm
+    // hue + muted-darker-than-faint preserved. Dark mode (light-on-dark, already high-contrast) unchanged.
+    "--ed-muted": dark ? "#8f8a80" : "#706a5f",
+    "--ed-faint": dark ? "#6d695f" : "#7a7468",
     "--ed-accent": EDITOR_ACCENT,
     "--ed-accent-hover": EDITOR_ACCENT_HOVER,
     "--ed-accent-tint": dark ? "rgba(27,138,94,0.18)" : "rgba(27,138,94,0.10)",
@@ -70,8 +73,9 @@ export const colors = {
   text: "#23211c",
   /** Muted label text (section sub-labels, inline field labels). */
   muted: "#5c574e",
-  /** Fainter secondary text (counts, hints, empty-state copy). */
-  faint: "#938d81",
+  /** Fainter secondary text (counts, hints, empty-state copy). Darkened from #938d81 (3.3:1) to meet
+   *  WCAG AA 4.5:1 on the white panel surface. */
+  faint: "#706a5f",
   /** Placeholder / disabled-ish copy in the notes editor empty states. */
   placeholder: "#b6b0a4",
 

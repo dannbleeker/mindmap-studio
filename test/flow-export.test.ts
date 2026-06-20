@@ -397,6 +397,46 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     expect(vbW).toBeGreaterThanOrEqual(600); // bounds extended to the 600-wide onion
   });
 
+  it("escapes user-set colours in every emitted attribute (no SVG attribute breakout)", () => {
+    // Colours come from the model and can carry a hand-edited/imported value. They land in quoted SVG
+    // attributes the export builds by hand, so a value with a quote would break out and inject markup.
+    // The canvas is safe (React escapes), but the export string must escape too — defence in depth on
+    // top of svgSanitize. esc() is a no-op for real colours, so canvas == export is unchanged.
+    const MAL = '#f00"/><script>alert(1)</script>';
+    const malDoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "mal",
+      title: "Mal",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            branchColor: MAL, // → branch ribbon fill/stroke
+            callouts: [{ id: "co", text: "hi", dx: 40, dy: 0, color: MAL }],
+            children: [],
+          },
+          { id: "b", topic: "B", side: "left", children: [] },
+        ],
+      },
+      links: [{ id: "lk", from: "a", to: "b", label: "rel", color: MAL }], // → crosslink stroke/fill/text
+      boundaries: [{ id: "bd", nodeIds: ["a", "b"], label: "grp", color: MAL }], // → gradient/stroke/tab
+      summaries: [{ id: "sm", nodeIds: ["a", "b"], label: "sum", color: MAL }], // → bracket/label
+      backdrop: { kind: "onion", rings: 2, color: MAL }, // → backdrop fill/stroke
+    };
+    const malRects = new Map<string, NodeRect>([
+      ["r", { x: 400, y: 300, w: 120, h: 50 }],
+      ["a", { x: 600, y: 200, w: 100, h: 40 }],
+      ["b", { x: 180, y: 380, w: 100, h: 40 }],
+    ]);
+    const out = buildFlowSvg(malDoc, malRects, palette, cssVar);
+    expect(out).not.toContain("<script>"); // no injected element
+    expect(out).not.toContain('"/><script'); // no attribute breakout of the raw payload
+    expect(out).toContain("&lt;script&gt;"); // the colour DID reach the export — and was neutralised
+  });
+
   it("brace mode emits fork connectors (stroked path) and drops the tapered ribbons", () => {
     const bdoc: MindMapDoc = {
       schemaVersion: 1,

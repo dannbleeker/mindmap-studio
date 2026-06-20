@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 
 // A generic ⌘K command palette: fuzzy (subsequence) search over a list of commands, arrow-key nav,
 // Enter to run, Esc / click-outside to close. The Start screen and the editor both build a
@@ -67,6 +67,8 @@ export function CommandPalette({
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listId = useId();
+  const optionId = (i: number) => `${listId}-opt-${i}`;
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -129,14 +131,32 @@ export function CommandPalette({
     textTransform: "uppercase",
     opacity: 0.5,
   } as const;
+  // Visually-hidden live region so screen-reader users hear the result count change as they type.
+  const srOnly = {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: "hidden",
+    clip: "rect(0,0,0,0)",
+    whiteSpace: "nowrap",
+    border: 0,
+  } as const;
 
   return (
-    <div className="st-cmdk-backdrop">
-      <div className="st-cmdk">
+    <div className="st-cmdk-backdrop" role="presentation">
+      <div className="st-cmdk" role="dialog" aria-modal="true" aria-label="Command palette">
         <input
           ref={inputRef}
           className="st-cmdk-input"
           placeholder={placeholder}
+          aria-label={placeholder}
+          role="combobox"
+          aria-expanded={items.length > 0}
+          aria-controls={listId}
+          aria-autocomplete="list"
+          aria-activedescendant={items.length ? optionId(active) : undefined}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
@@ -152,19 +172,34 @@ export function CommandPalette({
             }
           }}
         />
-        <div className="st-cmdk-list">
+        <div
+          className="st-cmdk-list"
+          id={listId}
+          role="listbox"
+          aria-label="Commands"
+          tabIndex={-1}
+        >
           {items.length === 0 ? (
             <div className="st-cmdk-empty">No matches.</div>
           ) : (
             items.map((c, i) => (
               <Fragment key={c.id}>
-                {recentCount > 0 && i === 0 ? <div style={sectionStyle}>Recent</div> : null}
+                {recentCount > 0 && i === 0 ? (
+                  <div style={sectionStyle} role="presentation">
+                    Recent
+                  </div>
+                ) : null}
                 {recentCount > 0 && i === recentCount ? (
-                  <div style={sectionStyle}>All commands</div>
+                  <div style={sectionStyle} role="presentation">
+                    All commands
+                  </div>
                 ) : null}
                 <button
                   type="button"
                   className="st-cmdk-item"
+                  id={optionId(i)}
+                  role="option"
+                  aria-selected={i === active}
                   data-active={i === active}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => run(c)}
@@ -175,6 +210,11 @@ export function CommandPalette({
               </Fragment>
             ))
           )}
+        </div>
+        <div aria-live="polite" style={srOnly}>
+          {items.length === 0
+            ? "No matches"
+            : `${items.length} command${items.length === 1 ? "" : "s"}`}
         </div>
       </div>
     </div>

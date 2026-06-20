@@ -110,4 +110,31 @@ describe("CommandPalette (generic)", () => {
     );
     expect(screen.getByText("Recent")).toBeTruthy();
   });
+
+  it("exposes dialog + combobox/listbox/option roles with the active descendant wired", () => {
+    render(
+      <CommandPalette
+        commands={[
+          { id: "a", label: "Alpha", kind: "view", run: () => {} },
+          { id: "b", label: "Bravo", kind: "view", run: () => {} },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    screen.getByRole("dialog"); // throws if absent
+    const list = screen.getByRole("listbox");
+    const input = screen.getByRole("combobox");
+    const options = screen.getAllByRole("option");
+    expect(options).toHaveLength(2);
+    // First option highlighted; the input points at it so a screen reader announces it.
+    expect(options[0].getAttribute("aria-selected")).toBe("true");
+    expect(options[1].getAttribute("aria-selected")).toBe("false");
+    expect(input.getAttribute("aria-controls")).toBe(list.id);
+    expect(input.getAttribute("aria-activedescendant")).toBe(options[0].id);
+    // Arrowing moves both the selection and the active descendant.
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    const after = screen.getAllByRole("option");
+    expect(after[1].getAttribute("aria-selected")).toBe("true");
+    expect(input.getAttribute("aria-activedescendant")).toBe(after[1].id);
+  });
 });

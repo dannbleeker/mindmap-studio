@@ -169,22 +169,26 @@ export function taperedRibbonPath(
   side: AttachSide,
   trunkHW: number,
   tipHW: number,
+  bow = 0,
 ): string {
   const horizontal = side === "left" || side === "right";
   const dx = tx - sx;
   const dy = ty - sy;
-  // Straight-out departure along the side; ease in along the child's near-edge normal.
-  const c1x = horizontal ? sx + dx * 0.5 : sx;
-  const c1y = horizontal ? sy : sy + dy * 0.5;
-  const c2x = horizontal ? tx - dx * 0.5 : tx;
-  const c2y = horizontal ? ty : ty - dy * 0.5;
+  // Chord normal (also the degenerate-tangent fallback below).
+  const chordLen = Math.hypot(dx, dy) || 1;
+  const cnx = -dy / chordLen;
+  const cny = dx / chordLen;
+  // Straight-out departure along the side; ease in along the child's near-edge normal — plus an
+  // optional perpendicular `bow` that arcs the WHOLE curve aside to route around an intervening box
+  // (bow === 0 → byte-identical to the un-bowed ribbon, so branches with a clear path don't move).
+  const c1x = (horizontal ? sx + dx * 0.5 : sx) + cnx * bow;
+  const c1y = (horizontal ? sy : sy + dy * 0.5) + cny * bow;
+  const c2x = (horizontal ? tx - dx * 0.5 : tx) + cnx * bow;
+  const c2y = (horizontal ? ty : ty - dy * 0.5) + cny * bow;
   // Offset perpendicular to the local tangent at each end, not the chord — even taper. When an end
   // segment is degenerate (axis-aligned overlap: dx===0 on a horizontal side, dy===0 on a vertical
   // one → zero-length tangent), fall back to the CHORD normal so the ribbon keeps its width instead
   // of collapsing to a zero-area, invisible path.
-  const chordLen = Math.hypot(dx, dy) || 1;
-  const cnx = -dy / chordLen;
-  const cny = dx / chordLen;
   const sl = Math.hypot(c1x - sx, c1y - sy);
   const spx = sl < 1e-6 ? cnx : -(c1y - sy) / sl;
   const spy = sl < 1e-6 ? cny : (c1x - sx) / sl;
@@ -342,11 +346,121 @@ export interface BranchRender {
   dash: string;
 }
 
+/** The perpendicular `bow` (signed offset of the tapered ribbon's control points) that routes a branch
+ *  AROUND any node box (`others`, minus the two endpoint nodes `srcId`/`tgtId`) its straight path would
+ *  otherwise pass behind. Returns 0 when the path is already clear (so a clear branch is byte-identical
+ *  to before) AND when no displacement up to `maxBow` clears it — i.e. it NEVER returns a bow that still
+ *  crosses a box: a branch is either fully cleared or left straight. Tries BOTH perpendicular directions
+ *  and keeps the smallest |bow| that clears every nearby box. Pure → the canvas (sync stashes it on
+ *  `data.attachBow`) and the SVG exporter both call it with the same boxes, so canvas == export. Only
+ *  the tapered ribbon honours it. */
+export function bowToClear(
+  parent: Box,
+  child: Box,
+  side: AttachSide,
+  others: readonly { id: string; box: Box }[],
+  srcId: string,
+  tgtId: string,
+  margin = 8,
+): number {
+  if (others.length === 0) return 0;
+  const { sx, sy, tx, ty } = branchEndpoints(parent, child, side);
+  const horizontal = side === "left" || side === "right";
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const len = Math.hypot(dx, dy) || 1;
+  const cnx = -dy / len;
+  const cny = dx / len;
+  const b1x = horizontal ? sx + dx * 0.5 : sx;
+  const b1y = horizontal ? sy : sy + dy * 0.5;
+  const b2x = horizontal ? tx - dx * 0.5 : tx;
+  const b2y = horizontal ? ty : ty - dy * 0.5;
+  // Cap the displacement so a bow can't fling wildly, but leave enough room to actually clear a box
+  // wider than the branch is long (a short branch passing a big sibling needs a bow > its own length).
+  const maxBow = Math.min(Math.max(len * 1.5, 180), 360);
+  // Sample the centerline finely enough (~4px spacing, scaled to the bowed curve's length) that a short
+  // obstacle box can't slip BETWEEN two samples — a coarse sampler would judge such a box cleared and
+  // accept a bow whose true centerline still crosses it (the displaced-and-still-crossing failure).
+  const samples = Math.min(Math.max(Math.ceil((len + maxBow) / 4), 120), 400);
+  // Boxes (minus the endpoint nodes) overlapping the chord's bbox inflated by `pad`. The un-bowed cubic
+  // stays inside the chord bbox, so band(margin) is all that can block a straight branch; a bowed branch
+  // sweeps up to ~maxBow perpendicular, so band(maxBow+margin) is everything any bow ≤ maxBow can hit.
+  const band = (pad: number): Box[] => {
+    const loX = Math.min(sx, tx) - pad;
+    const hiX = Math.max(sx, tx) + pad;
+    const loY = Math.min(sy, ty) - pad;
+    const hiY = Math.max(sy, ty) + pad;
+    const out: Box[] = [];
+    for (const o of others) {
+      if (o.id === srcId || o.id === tgtId) continue;
+      const b = o.box;
+      if (
+        b.cx + b.w / 2 >= loX &&
+        b.cx - b.w / 2 <= hiX &&
+        b.cy + b.h / 2 >= loY &&
+        b.cy - b.h / 2 <= hiY
+      )
+        out.push(b);
+    }
+    return out;
+  };
+  // Deepest penetration of the bowed centerline into ANY box in `boxes` (>0 = inside box+margin).
+  const deepest = (bow: number, boxes: readonly Box[]): number => {
+    const c1x = b1x + cnx * bow;
+    const c1y = b1y + cny * bow;
+    const c2x = b2x + cnx * bow;
+    const c2y = b2y + cny * bow;
+    let pen = Number.NEGATIVE_INFINITY;
+    for (const b of boxes) {
+      // Sample t ∈ [0, 1] INCLUSIVE — the endpoints (t=0/1) matter: a box sitting on a fixed branch
+      // endpoint can't be cleared by any bow (the cubic always passes through it), so it must be seen
+      // and the branch left straight rather than displaced with the endpoint still inside the box.
+      for (let i = 0; i <= samples; i++) {
+        const t = i / samples;
+        const u = 1 - t;
+        const px = u * u * u * sx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * tx;
+        const py = u * u * u * sy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ty;
+        const p = Math.min(
+          b.w / 2 + margin - Math.abs(px - b.cx),
+          b.h / 2 + margin - Math.abs(py - b.cy),
+        );
+        if (p > pen) pen = p;
+      }
+    }
+    return pen;
+  };
+  // Fast path (the common case — a clear branch): only the tight band can block the straight cubic, and
+  // if nothing there is penetrated the branch is already clear, so skip the wider scan entirely.
+  const tight = band(margin);
+  if (tight.length === 0 || deepest(0, tight) <= 0) return 0;
+  // It grazes → search BOTH perpendicular directions over the full swept region for the smallest |bow|
+  // that clears every box; keep the smaller. If neither direction clears within maxBow (boxes straddling
+  // the chord, or a box over an endpoint), return 0 — leave the branch straight rather than displace it
+  // into something it still overlaps.
+  const wide = band(maxBow + margin);
+  const step = Math.max(4, margin);
+  let best = 0;
+  let bestAbs = Number.POSITIVE_INFINITY;
+  for (const dir of [-1, 1] as const) {
+    for (let bow = dir * step; Math.abs(bow) <= maxBow; bow += dir * step) {
+      if (deepest(bow, wide) <= 0) {
+        if (Math.abs(bow) < bestAbs) {
+          bestAbs = Math.abs(bow);
+          best = bow;
+        }
+        break;
+      }
+    }
+  }
+  return best;
+}
+
 /** Resolve a branch edge to its path + paint, honouring the map's connector style + a per-branch dash.
  *  ONE shared decision so the live canvas (BranchEdge) and the SVG exporter render identically
  *  (canvas == export). `attachSide` is the per-parent fan side; `elbow` marks an org-chart branch
  *  (used only for the adaptive "organic" style). A dashed branch can't be a filled ribbon, so it
- *  falls back to a uniform stroked curve. */
+ *  falls back to a uniform stroked curve. `bow` arcs the tapered ribbon around an intervening box
+ *  (from `bowToClear`; 0 = straight, the default — only the tapered ribbon honours it). */
 export function branchRender(
   parent: Box,
   child: Box,
@@ -358,6 +472,7 @@ export function branchRender(
     connectorStyle?: ConnectorStyle;
     dash?: "solid" | "dashed" | "dotted";
   },
+  bow = 0,
 ): BranchRender {
   const color = data.branchColor ?? "#999";
   const dashArr = data.dash === "dashed" ? "6 4" : data.dash === "dotted" ? "2 4" : "";
@@ -367,7 +482,7 @@ export function branchRender(
     const ep = branchEndpoints(parent, child, attachSide);
     const { trunk, tip } = branchWidths(data.depth ?? 1);
     return {
-      d: taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, attachSide, trunk, tip),
+      d: taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, attachSide, trunk, tip, bow),
       fill: color,
       stroke: null,
       width: 0,
@@ -387,4 +502,16 @@ export function branchRender(
         : curvedPath(parent, child, attachSide); // "curved", or a dashed taper
   const width = Math.max(1.6, 3.4 - (data.depth ?? 1) * 0.5);
   return { d, fill: null, stroke: color, width, dash: dashArr };
+}
+
+/** Whether a branch renders as the organic tapered ribbon — the ONLY style that honours `bow`. Mirrors
+ *  branchRender's `effective === "taper" && !dashArr`, so callers skip the obstacle-bow computation for
+ *  elbow/straight/curved/dashed branches (where the bow would be discarded). One source of truth. */
+export function isTaperBranch(data: {
+  elbow?: boolean;
+  connectorStyle?: ConnectorStyle;
+  dash?: "solid" | "dashed" | "dotted";
+}): boolean {
+  const cs = data.connectorStyle ?? "organic";
+  return cs === "organic" && !data.elbow && data.dash !== "dashed" && data.dash !== "dotted";
 }

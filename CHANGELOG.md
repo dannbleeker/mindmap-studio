@@ -28,6 +28,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Obstacle-aware branch routing (safety net).** A tapered branch now bows around an unrelated topic
+  box its straight path would otherwise pass behind — computed once per branch from the node boxes and
+  mirrored in the SVG export (canvas == export). Conservative by construction: a branch is either fully
+  cleared *or* left straight, never displaced while still crossing a box; only the organic ribbon honours
+  it, and a clear branch is byte-identical to before. With the orientation-axis fix above, today's
+  layouts rarely graze, so this is a dormant guard for denser maps rather than a constant transform.
+
 - **Open documents as tabs.** Maps you open now appear as a **flat tab strip** under the toolbar —
   one tab per document, the active one underlined — replacing the old map dropdown's lone view.
   Opening a map (from the library, a cross-map link, or **+**) adds a tab; the **×** (or middle-click)

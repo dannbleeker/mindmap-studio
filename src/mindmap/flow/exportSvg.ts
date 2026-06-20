@@ -12,10 +12,12 @@ import {
   type Box,
   attachSideFor,
   axisForLayoutKind,
+  bowToClear,
   branchRender,
   computeAxisByParent,
   crosslinkBezier,
   floatingPoints,
+  isTaperBranch,
 } from "./floating";
 import { type Rect, boundaryPath, dashArray, matchBorderColor, r2 } from "./geometry";
 import { type HopSegment, hopPath } from "./lineJumps";
@@ -386,6 +388,9 @@ export function buildFlowSvg(
     },
     axisForLayoutKind(kind),
   );
+  // All node boxes — obstacle-aware routing bows a branch around any box in its straight path
+  // (the SAME computation FlowMindMap.sync() stashes on data.attachBow → canvas == export).
+  const allBranchBoxes = [...rects.entries()].map(([id, r]) => ({ id, box: boxOf(r) }));
 
   // Edges.
   for (const e of edges) {
@@ -431,9 +436,13 @@ export function buildFlowSvg(
       const parent = boxOf(sr);
       const child = boxOf(tr);
       const side: AttachSide = attachSideFor(parent, child, axisByParent.get(e.source) ?? "h");
-      // Same shared decision the canvas uses (connector style + branch colour + dash) → canvas ==
-      // export. A filled ribbon for the organic taper; a uniform stroke for elbow/curved/straight/dash.
-      const br = branchRender(parent, child, side, e.data ?? {});
+      // Same shared decision + the SAME obstacle bow the canvas computes in sync() → canvas == export.
+      // Only the tapered ribbon honours the bow, so skip it for the other styles (as sync does).
+      const bow = isTaperBranch(e.data ?? {})
+        ? bowToClear(parent, child, side, allBranchBoxes, e.source, e.target)
+        : 0;
+      // A filled ribbon for the organic taper; a uniform stroke for elbow/curved/straight/dashed.
+      const br = branchRender(parent, child, side, e.data ?? {}, bow);
       if (br.fill) {
         parts.push(`<path d="${br.d}" fill="${br.fill}"/>`);
       } else {

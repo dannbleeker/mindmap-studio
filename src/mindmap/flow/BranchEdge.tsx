@@ -22,7 +22,13 @@ function BranchEdgeImpl({ source, target, data }: EdgeProps<FlowEdge>) {
   const side = data?.attachSide ?? attachSideFor(parent, child, childrenAxis(parent, [child]));
   // One shared decision (floating.ts) picks the path + paint from the map's connector style and the
   // branch's colour / dash, so the canvas matches the SVG exporter exactly (canvas == export).
-  const { d, fill, stroke, width, dash } = branchRender(parent, child, side, data ?? {});
+  const { d, fill, stroke, width, dash } = branchRender(
+    parent,
+    child,
+    side,
+    data ?? {},
+    data?.attachBow ?? 0,
+  );
   return (
     <path
       d={d}

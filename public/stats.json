@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-20T05:27:13.173Z",
-  "commit": "dc1a405",
+  "generatedAt": "2026-06-20T05:36:44.461Z",
+  "commit": "fe1a5d9",
   "headline": {
-    "linesTsJs": 41197,
-    "tests": 1086,
+    "linesTsJs": 41237,
+    "tests": 1087,
     "lineCoveragePct": 83.52,
-    "commits": 591,
+    "commits": 593,
     "ageDays": 8,
     "trackedFiles": 306,
     "featureManualPct": 100,
@@ -21,7 +21,7 @@
     {
       "category": "Unit tests",
       "files": 105,
-      "lines": 14956
+      "lines": 14996
     },
     {
       "category": "Build scripts",
@@ -56,35 +56,35 @@
       "total": 1021
     },
     "branches": {
-      "pct": 85.94,
-      "covered": 4012,
-      "total": 4668
+      "pct": 86.11,
+      "covered": 4030,
+      "total": 4680
     }
   },
   "tests": {
-    "unit": 1086,
+    "unit": 1087,
     "e2e": 0,
-    "durationMs": 39384,
+    "durationMs": 41999,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 11963
+        "ms": 13556
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 5320
+        "ms": 5547
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 4907
+        "ms": 5496
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3738
+        "ms": 4262
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1623
+        "ms": 2005
       }
     ]
   },
@@ -158,7 +158,7 @@
       },
       {
         "file": "mindmap/flow/exportSvg.ts",
-        "commits": 39
+        "commits": 40
       },
       {
         "file": "mindmap/contract.ts",
@@ -279,21 +279,21 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 8,
-    "commits": 591,
-    "commits7d": 494,
+    "commits": 593,
+    "commits7d": 496,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 318
+        "count": 319
       },
       {
         "name": "github-actions[bot]",
-        "count": 273
+        "count": 274
       }
     ],
     "churn30d": {
-      "added": 81770,
-      "removed": 25230
+      "added": 81862,
+      "removed": 25282
     },
     "changelogEntries": 192
   }

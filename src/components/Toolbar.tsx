@@ -491,6 +491,17 @@ export function Toolbar({
         <Menu trigger={menuTrigger("fit", "View")} triggerTitle="View actions" sheet={isMobile}>
           <MenuItem icon={mi("fit")} label="Fit map to screen" onSelect={() => m()?.fit()} />
           <MenuItem
+            icon={mi("balance")}
+            label="Balance map (even out both sides)"
+            disabled={canvas.layout !== "side" || !!liveDoc.meta?.freeform}
+            title={
+              canvas.layout === "side" && !liveDoc.meta?.freeform
+                ? "Clear any pinned sides and redistribute the main branches evenly"
+                : "Only the two-sided (Both sides) layout has sides to balance"
+            }
+            onSelect={() => m()?.balanceMap()}
+          />
+          <MenuItem
             icon={mi("minus")}
             label="Collapse all branches"
             onSelect={() => m()?.setAllExpanded(false)}

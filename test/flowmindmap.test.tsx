@@ -367,11 +367,12 @@ describe("FlowMindMap canvas", () => {
     reopen();
     clickItem("Collapse / expand");
     reopen();
-    // Branch-layout override <select>.
+    // Branch-layout override <select> (now one of two selects — the other is "Map side").
     run(() =>
-      fireEvent.change(within(openMenu() as HTMLElement).getByRole("combobox"), {
-        target: { value: "org-down" },
-      }),
+      fireEvent.change(
+        within(openMenu() as HTMLElement).getByRole("combobox", { name: /branch layout/i }),
+        { target: { value: "org-down" } },
+      ),
     );
     // Esc closes the menu (the close-on-Escape effect).
     reopen();
@@ -381,6 +382,16 @@ describe("FlowMindMap canvas", () => {
     reopen();
     clickItem("Delete");
     expect(onChange).toHaveBeenCalled();
+  });
+
+  it("pins a main branch to a side and re-balances via the handle (Balance map)", () => {
+    const { h, onChange } = mount();
+    run(() => h.setNodeSide("a", "left"));
+    const pinned = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(pinned.root.children.find((c) => c.id === "a")?.side).toBe("left");
+    run(() => h.balanceMap());
+    const balanced = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(balanced.root.children.every((c) => c.side === undefined)).toBe(true);
   });
 
   it("context menu exposes Add note + inline marker/priority quick-setters (#3)", () => {

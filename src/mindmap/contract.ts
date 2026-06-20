@@ -102,6 +102,12 @@ export interface MindMapHandle {
   replaceTopics: (query: string, replacement: string) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
   setAllExpanded: (expanded: boolean) => void;
+  /** Pin a main branch to the left/right half of the two-sided ("side") map, or `undefined` to let it
+   *  auto-balance again. Inert on non-root nodes / other layouts. */
+  setNodeSide: (id: string, side: "left" | "right" | undefined) => void;
+  /** Re-balance the two-sided map: clear every main branch's pinned side so the auto-balancer
+   *  redistributes them evenly by subtree weight. */
+  balanceMap: () => void;
   /** Toggle free-canvas (whiteboard) mode. Enabling seeds each node's `pos` from its current
    *  on-screen position, so the switch is seamless; then nodes drag freely instead of re-parenting. */
   setFreeform: (on: boolean) => void;

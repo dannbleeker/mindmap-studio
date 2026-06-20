@@ -336,6 +336,10 @@ map re-flows into the new shape without losing any edits:
   that subtree differently from the rest of the map (e.g. an org-chart branch inside a radial map);
   pick **Default (map)** to clear it. The subtree is kept clear of its siblings, and the choice
   travels with the map.
+- **Balancing the two sides** — in **Both sides**, the main branches are split left/right automatically
+  to keep the map evenly weighted. To override it, right-click a main branch → **Map side → Left / Right**
+  to pin it to a half (the rest re-balance around it), or **Auto** to release the pin. **View ▾ → Balance
+  map** (also in ⌘K) clears every pin and redistributes the branches evenly again.
 - **🧲 Free layout (whiteboard)** — a toggle (next to the layout picker), not a layout. Turn it on and
   you can **drag any topic anywhere** — it stays put and the auto-layout pauses. Combined with node
   shapes and directional arrows, this is how you build a **place-anywhere flowchart, concept map, or

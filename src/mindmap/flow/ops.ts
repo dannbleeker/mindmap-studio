@@ -313,7 +313,35 @@ export function deleteNode(doc: MindMapDoc, id: string): OpResult {
   return { doc: next, selectId };
 }
 
-/** Move a subtree under a new parent (guards against cycles). */
+/** Locate a node ANYWHERE it can be reparented from — the central tree, a top-level floating topic,
+ *  or a node nested inside a floating topic's subtree — and return a `remove()` that detaches it from
+ *  whichever container holds it. Null for the root (no parent to detach from) or an unknown id. */
+function locateRemovable(
+  doc: MindMapDoc,
+  id: string,
+): { node: MapNode; remove: () => void } | null {
+  const inTree = locate(doc.root, id);
+  if (inTree?.parent) {
+    const { parent, index } = inTree;
+    return { node: inTree.node, remove: () => parent.children.splice(index, 1) };
+  }
+  if (inTree) return null; // the root itself — not reparentable
+  const floats = doc.floatingTopics ?? [];
+  const fi = floats.findIndex((f) => f.id === id);
+  if (fi >= 0) return { node: floats[fi], remove: () => floats.splice(fi, 1) };
+  for (const f of floats) {
+    const sub = locate(f, id);
+    if (sub?.parent) {
+      const { parent, index } = sub;
+      return { node: sub.node, remove: () => parent.children.splice(index, 1) };
+    }
+  }
+  return null;
+}
+
+/** Move a subtree under a new parent (guards against cycles). Works across the tree/floating boundary:
+ *  a floating topic can be dragged INTO the tree (or under another floating topic), and a tree node onto
+ *  a floating topic — the drag UI already resolves floating nodes as drop targets, so this op must too. */
 export function reparent(
   doc: MindMapDoc,
   id: string,
@@ -322,14 +350,16 @@ export function reparent(
 ): OpResult {
   if (id === newParentId) return { doc };
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  const dest = locate(next.root, newParentId);
-  if (!loc || !loc.parent || !dest) return { doc };
-  if (isDescendant(loc.node, newParentId)) return { doc }; // would create a cycle
-  loc.parent.children.splice(loc.index, 1);
-  const at = index ?? dest.node.children.length;
-  dest.node.children.splice(at, 0, loc.node);
-  dest.node.collapsed = false;
+  const src = locateRemovable(next, id);
+  const destParent = findAnyNode(next, newParentId);
+  if (!src || !destParent) return { doc };
+  if (isDescendant(src.node, newParentId)) return { doc }; // would create a cycle
+  src.remove();
+  const at = index ?? destParent.children.length;
+  destParent.children.splice(at, 0, src.node);
+  destParent.collapsed = false;
+  // A floating topic moved into the tree empties the array; drop it so the doc stays clean (lossless).
+  if (next.floatingTopics && next.floatingTopics.length === 0) next.floatingTopics = undefined;
   return { doc: next, selectId: id };
 }
 

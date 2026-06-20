@@ -92,6 +92,10 @@ const base = (): MindMapDoc => ({
 });
 
 const kids = (doc: MindMapDoc, id: string) => findNode(doc, id)?.children.map((c) => c.id) ?? [];
+// Floating-aware children lookup (findNode only walks the central tree; floating subtrees need this).
+const achildren = (doc: MindMapDoc, id: string) =>
+  findAnyNode(doc, id)?.children.map((c) => c.id) ?? [];
+const floatIds = (doc: MindMapDoc) => (doc.floatingTopics ?? []).map((t) => t.id);
 
 // Freeze the ops clock so timestamp-stamping ops (create/content) are deterministic across the suite.
 const CLOCK = 1_700_000_000_000;
@@ -621,6 +625,77 @@ describe("flow ops — reparent edge cases", () => {
     const d = base();
     expect(reparent(d, "a", "ghost").doc).toBe(d); // unknown new parent
     expect(reparent(d, "r", "a").doc).toBe(d); // the root has no parent to detach from
+  });
+
+  it("keeps cross-link + boundary references valid when an endpoint is reparented", () => {
+    // base() carries link a1→b and boundary [a1, a2]; moving a1 keeps its id, so the refs survive.
+    const { doc } = reparent(base(), "a1", "b");
+    expect(doc.links?.[0]).toMatchObject({ from: "a1", to: "b" });
+    expect(doc.boundaries?.[0].nodeIds).toContain("a1");
+    expect(kids(doc, "b")).toContain("a1");
+  });
+});
+
+describe("flow ops — reparent across the floating/tree boundary", () => {
+  // A non-freeform doc with two top-level floating topics (the drag UI resolves these as drop targets,
+  // so reparent must handle them too — it previously silently no-op'd, snapping the drag back).
+  const withFloating = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "Root",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [{ id: "a", topic: "A", children: [{ id: "a1", topic: "A1", children: [] }] }],
+    },
+    floatingTopics: [
+      { id: "f", topic: "F", children: [{ id: "f1", topic: "F1", children: [] }] },
+      { id: "g", topic: "G", children: [] },
+    ],
+  });
+
+  it("attaches a floating topic (with its subtree) into the tree", () => {
+    const { doc } = reparent(withFloating(), "f", "a");
+    expect(kids(doc, "a")).toEqual(["a1", "f"]);
+    expect(kids(doc, "f")).toEqual(["f1"]); // f is now in the tree → subtree came along
+    expect(floatIds(doc)).toEqual(["g"]); // f left, g stays
+  });
+
+  it("drops floatingTopics to undefined when the last one moves into the tree", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "R",
+      root: { id: "r", topic: "R", children: [{ id: "a", topic: "A", children: [] }] },
+      floatingTopics: [{ id: "f", topic: "F", children: [] }],
+    };
+    const { doc } = reparent(d, "f", "a");
+    expect(kids(doc, "a")).toEqual(["f"]);
+    expect(doc.floatingTopics).toBeUndefined();
+  });
+
+  it("moves a tree node onto a floating topic (joining its detached subtree)", () => {
+    const { doc } = reparent(withFloating(), "a", "g");
+    expect(kids(doc, "r")).toEqual([]); // a left the tree
+    expect(achildren(doc, "g")).toEqual(["a"]); // g (still floating) now holds a
+    expect(achildren(doc, "a")).toEqual(["a1"]); // a's own subtree intact
+  });
+
+  it("nests one floating topic under another", () => {
+    const { doc } = reparent(withFloating(), "g", "f");
+    expect(floatIds(doc)).toEqual(["f"]); // g left the array
+    expect(achildren(doc, "f")).toEqual(["f1", "g"]);
+  });
+
+  it("moves a node out of a floating subtree into the tree", () => {
+    const { doc } = reparent(withFloating(), "f1", "a");
+    expect(kids(doc, "a")).toEqual(["a1", "f1"]);
+    expect(achildren(doc, "f")).toEqual([]); // f1 left f's subtree (f is still floating)
+  });
+
+  it("guards a cycle when a floating topic would move under its own descendant", () => {
+    const d = withFloating();
+    expect(reparent(d, "f", "f1").doc).toBe(d); // f under its own child → no-op
   });
 });
 

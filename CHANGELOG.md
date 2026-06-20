@@ -15,6 +15,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Reparenting works across the floating/tree boundary.** Dragging a *detached* (floating) topic onto
+  the tree — or a tree topic onto a floating one — silently snapped back: `reparent` only searched the
+  central tree, so it no-op'd whenever a floating topic was the drag source or target, even though the
+  drop UI accepted it. It now moves the subtree correctly in both directions (and nests floating-under-
+  floating), pruning an emptied floating list. Tree→tree behaviour is byte-identical.
+
+- **Accessibility: ⌘K screen-reader support, readable secondary text, visible keyboard focus.** The ⌘K
+  command palette now exposes the ARIA combobox/listbox pattern, so the highlighted command is announced
+  as you arrow through it. The muted/faint secondary-text colours were darkened to meet WCAG AA contrast
+  (they failed at ~2–3:1 on the light surfaces). And the primitive control button gained a
+  `:focus-visible` ring, so keyboard focus is visible across the toolbar, dialogs and inspector.
+
 - **Branch attach side follows the layout orientation.** A branch could enter a topic from *below* in
   a horizontally-oriented map: the fan axis was inferred from the children's spread, so a parent whose
   children carry tall subtrees was mis-read as vertical. The axis is now pinned to the layout's
@@ -25,6 +37,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   keyed each row by its `action`, but one action ("Add a child topic") has two bindings (`Tab` and
   `Ctrl/⌘ + Enter`) — so every editor session flooded the console with "two children with the same
   key". Rows now key on keys + action.
+
+### Security
+
+- **Hardened the SVG export against colour-injection.** Every user-settable colour (boundary, summary,
+  callout, backdrop, relationship and per-branch) now passes through the HTML-escaper before landing in
+  a quoted SVG attribute — so a hand-edited or imported colour like `"/><script>…` can't break out of
+  the attribute and inject markup into an exported file. Defense-in-depth on top of the export sanitiser;
+  a no-op for real colours, so canvas == export is unchanged.
+
+### Performance
+
+- **Faster editing on large maps + a lighter entry bundle.** The canvas re-projection (`sync`, run on
+  every edit) was O(N²) — a per-node linear scan for measured sizes (invoked many times per layout pass),
+  repeated node-box computations, and an un-memoised size estimator; all three are now indexed/memoised,
+  with identical geometry (canvas == export untouched). Separately, the Start screen and Presentation
+  deck are now lazy-loaded, trimming the initial bundle ~11 kB gz.
 
 ### Added
 

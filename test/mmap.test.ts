@@ -37,7 +37,47 @@ function mmapOf(xml: string): Uint8Array {
   return zipSync({ "Document.xml": strToU8(xml) });
 }
 
+// Two-sided ("balance") map: MindManager records a main branch's side as the sign of its horizontal
+// offset (CX) from the central topic — negative = left, positive = right. Deeper topics carry offsets
+// too (layout nudges), which must NOT be read as a side. Shapes mirror a real export.
+const TWO_SIDED_XML = `${MAP_OPEN}
+  <ap:OneTopic>
+    <ap:Topic OId="1">
+      <ap:Text PlainText="Areas of Focus" />
+      <ap:SubTopics>
+        <ap:Topic OId="2">
+          <ap:Text PlainText="Right branch" />
+          <ap:Offset CX="2." CY="0." />
+          <ap:SubTopics>
+            <ap:Topic OId="4">
+              <ap:Text PlainText="Deep nudged" />
+              <ap:Offset CX="-2." CY="0." />
+            </ap:Topic>
+          </ap:SubTopics>
+        </ap:Topic>
+        <ap:Topic OId="3">
+          <ap:Text PlainText="Left branch" />
+          <ap:Offset CX="-2." CY="0." />
+        </ap:Topic>
+        <ap:Topic OId="5"><ap:Text PlainText="Auto branch" /></ap:Topic>
+      </ap:SubTopics>
+    </ap:Topic>
+  </ap:OneTopic>
+</ap:Map>`;
+
 describe("parseMmap", () => {
+  it("imports the two-sided arrangement: each main branch's side from its offset sign (depth-1 only)", () => {
+    const { doc } = parseMmap(mmapOf(TWO_SIDED_XML));
+    const [right, left, auto] = doc.root.children;
+    expect(right.topic).toBe("Right branch");
+    expect(right.side).toBe("right"); // CX > 0 → right half
+    expect(left.side).toBe("left"); // CX < 0 → left half
+    expect(auto.side).toBeUndefined(); // no offset → let the app auto-balance
+    // A deeper topic's offset is a layout nudge, not a side — must stay unset.
+    expect(right.children[0].topic).toBe("Deep nudged");
+    expect(right.children[0].side).toBeUndefined();
+  });
+
   it("extracts the topic tree from a synthetic .mmap", () => {
     const { doc } = parseMmap(mmapOf(DOCUMENT_XML));
     expect(doc.title).toBe("Q3 Retail Plan");

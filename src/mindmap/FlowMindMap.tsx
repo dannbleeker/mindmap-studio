@@ -61,6 +61,7 @@ import {
   redo as redoHistory,
   undo as undoHistory,
 } from "./flow/history";
+import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import {
   type OpResult,
@@ -961,54 +962,59 @@ function FlowInner({
     [apply],
   );
 
-  // Keyboard tree-building (when a node is selected and we're not inline-editing or in a field).
+  // Keyboard tree-building (when a node is selected and we're not inline-editing or in a field). The
+  // pure key→intent mapping lives in flow/keyIntent.ts; here we only wire the listener + dispatch.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && linkingFromRef.current) {
-        setLinkingFrom(null);
-        return;
-      }
-      if (e.key === "Escape") setDropTargetId(null); // clear a stray drag-reparent indicator
-      if (editingRef.current) return;
-      const t = e.target as HTMLElement | null;
-      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName)))
-        return;
-      // Undo/redo work regardless of selection.
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
-        e.preventDefault();
-        if (e.shiftKey) redoAction();
-        else undoAction();
-        return;
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
-        e.preventDefault();
-        redoAction();
-        return;
-      }
-      const id = selectedRef.current;
-      if (!id) return;
-      if (e.key === "Enter") {
-        e.preventDefault();
-        // Ctrl/⌘+Enter adds a child; plain Enter adds a sibling.
-        if (e.ctrlKey || e.metaKey) apply(addChild(docRef.current, id), true);
-        else apply(addSibling(docRef.current, id), true);
-      } else if (e.key === "Tab" && !e.shiftKey) {
-        e.preventDefault();
-        apply(addChild(docRef.current, id), true);
-      } else if (e.key === "Tab" && e.shiftKey) {
-        e.preventDefault();
-        apply(outdent(docRef.current, id));
-      } else if (e.key === "Delete") {
-        e.preventDefault();
-        deleteNodeWithUndo(id);
-      } else if (e.key === "F2") {
-        e.preventDefault();
-        startEdit(id);
-      } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        // Type-to-edit (MindManager-style): start typing on a selected node to enter edit mode,
-        // replacing the topic with the typed character (caret at the end).
-        e.preventDefault();
-        startEdit(id, e.key);
+      const intent = keyIntent(
+        {
+          key: e.key,
+          ctrlKey: e.ctrlKey,
+          metaKey: e.metaKey,
+          shiftKey: e.shiftKey,
+          altKey: e.altKey,
+          target: e.target as HTMLElement | null,
+        },
+        {
+          editing: !!editingRef.current,
+          selectedId: selectedRef.current,
+          linking: !!linkingFromRef.current,
+        },
+      );
+      if (!intent) return;
+      // Every intent but the two clears consumes the key.
+      if (intent.kind !== "clearLinking" && intent.kind !== "clearDropTarget") e.preventDefault();
+      switch (intent.kind) {
+        case "clearLinking":
+          setLinkingFrom(null);
+          break;
+        case "clearDropTarget":
+          setDropTargetId(null); // clear a stray drag-reparent indicator
+          break;
+        case "undo":
+          undoAction();
+          break;
+        case "redo":
+          redoAction();
+          break;
+        case "addChild":
+          apply(addChild(docRef.current, intent.id), true);
+          break;
+        case "addSibling":
+          apply(addSibling(docRef.current, intent.id), true);
+          break;
+        case "outdent":
+          apply(outdent(docRef.current, intent.id));
+          break;
+        case "delete":
+          deleteNodeWithUndo(intent.id);
+          break;
+        case "rename":
+          startEdit(intent.id);
+          break;
+        case "typeEdit":
+          startEdit(intent.id, intent.seed);
+          break;
       }
     };
     document.addEventListener("keydown", onKey);

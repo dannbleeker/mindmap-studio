@@ -31,7 +31,13 @@ const DEFAULT_SIZE: LayoutSize = { width: 120, height: 36 };
 /** Estimate a node's rendered size from its content (used before React Flow measures it). */
 export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
   const byId = new Map(nodes.map((n) => [n.id, n]));
+  // Memoise per id: the returned size is a pure function of the node's data, but sizeOf is invoked many
+  // times per layout pass (and for every unmeasured node on first render), so without this each call
+  // re-ran wrapText. Same values, just computed once.
+  const cache = new Map<string, LayoutSize>();
   return (id) => {
+    const cached = cache.get(id);
+    if (cached) return cached;
     const d = byId.get(id)?.data;
     if (!d) return DEFAULT_SIZE;
     // Size scales with the per-depth font (root largest → deep leaves smallest), so the layout
@@ -54,7 +60,9 @@ export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
       wrapped.length * (fs * 1.25) +
       16 +
       (d.tags?.length ? 22 : 0);
-    return { width, height };
+    const size = { width, height };
+    cache.set(id, size);
+    return size;
   };
 }
 

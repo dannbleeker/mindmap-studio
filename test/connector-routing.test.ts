@@ -22,6 +22,17 @@ const box = (cx: number, cy: number, w = 100, h = 30): Box => ({ cx, cy, w, h })
 const withId = (boxes: Box[]): { id: string; box: Box }[] =>
   boxes.map((b, i) => ({ id: `o${i}`, box: b }));
 
+// Deterministic PRNG (mulberry32) so the fuzz case is reproducible — no Math.random flake.
+function rng(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // Deepest penetration (>0 = inside) of the BOWED centerline cubic into `o`, sampled densely along the
 // curve at margin 0 — i.e. a TRUE box overlap, independent of bowToClear's internal sampling/margin.
 function maxPenetration(parent: Box, child: Box, side: AttachSide, o: Box, bow: number): number {
@@ -37,8 +48,10 @@ function maxPenetration(parent: Box, child: Box, side: AttachSide, o: Box, bow: 
   const c2x = (horizontal ? tx - dx * 0.5 : tx) + cnx * bow;
   const c2y = (horizontal ? ty : ty - dy * 0.5) + cny * bow;
   let pen = Number.NEGATIVE_INFINITY;
-  for (let i = 0; i <= 200; i++) {
-    const t = i / 200;
+  // A deliberately dense oracle (far finer than bowToClear's own sampler) so this catches any aliasing
+  // where the implementation's coarser sampling would step over a short box.
+  for (let i = 0; i <= 800; i++) {
+    const t = i / 800;
     const u = 1 - t;
     const px = u * u * u * sx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * tx;
     const py = u * u * u * sy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ty;
@@ -126,6 +139,19 @@ describe("obstacle-aware branch routing", () => {
     bowAndAssertClearOrStraight(parent, child, "left", [top, bot]);
   });
 
+  it("sampler aliasing: a short box between samples is not stepped over (dense sampler)", () => {
+    // The 22-point sampler stepped over this 30px-tall box and accepted bow=-248 that still crossed it
+    // by ~6px. The dense oracle below catches that; the contract must hold with the densified sampler.
+    const parent = box(472, 514, 43, 46);
+    const child = box(666, 198, 96, 42);
+    const obstacles = [
+      box(496.1, 473.1, 88, 30),
+      box(561.6, 284.3, 35, 78),
+      box(362.7, 574.6, 39, 78),
+    ];
+    bowAndAssertClearOrStraight(parent, child, "top", obstacles);
+  });
+
   it("a box covering a branch endpoint can't be cleared → stays straight (no wild bow)", () => {
     // The cubic always passes through the fixed endpoints, so a box over the child entry can never be
     // cleared by any bow. Must fall back to 0, not fling a huge useless displacement.
@@ -133,6 +159,40 @@ describe("obstacle-aware branch routing", () => {
     const child = box(120, 70, 120, 26);
     const onEntry = box(173, 74, 80, 40); // sits on the child's entry anchor
     expect(bowToClear(parent, child, "left", withId([onEntry]), "src", "tgt")).toBe(0);
+  });
+
+  it("fuzz: clear-or-straight holds over thousands of random layouts (no displaced-crossing)", () => {
+    const rand = rng(0x1a2b3c4d);
+    const sides: AttachSide[] = ["left", "right", "top", "bottom"];
+    let bowed = 0;
+    const offenders: string[] = [];
+    for (let n = 0; n < 4000; n++) {
+      const parent = box(
+        100 + rand() * 600,
+        100 + rand() * 600,
+        40 + rand() * 80,
+        28 + rand() * 30,
+      );
+      const child = box(100 + rand() * 600, 100 + rand() * 600, 40 + rand() * 90, 28 + rand() * 30);
+      const side = sides[Math.floor(rand() * 4)];
+      const obstacles: Box[] = [];
+      const k = Math.floor(rand() * 4);
+      for (let j = 0; j < k; j++)
+        obstacles.push(
+          box(100 + rand() * 600, 100 + rand() * 600, 35 + rand() * 110, 28 + rand() * 60),
+        );
+      const others = withId(obstacles);
+      const bow = bowToClear(parent, child, side, others, "src", "tgt");
+      if (bow === 0) continue;
+      bowed++;
+      for (const o of others) {
+        // > 0.01 (not 0) absorbs floating-point boundary noise; a real displaced-crossing is several px.
+        if (maxPenetration(parent, child, side, o.box, bow) > 0.01)
+          offenders.push(`n=${n} side=${side} bow=${bow.toFixed(1)} still crosses ${o.id}`);
+      }
+    }
+    expect(offenders.slice(0, 8)).toEqual([]); // a returned bow NEVER leaves a branch crossing a box
+    expect(bowed).toBeGreaterThan(100); // and the fuzz genuinely exercises the bow path
   });
 
   it("the screenshot tree: every branch is clear-or-straight against all non-endpoint boxes", () => {

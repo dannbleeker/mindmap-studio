@@ -378,6 +378,10 @@ export function bowToClear(
   // Cap the displacement so a bow can't fling wildly, but leave enough room to actually clear a box
   // wider than the branch is long (a short branch passing a big sibling needs a bow > its own length).
   const maxBow = Math.min(Math.max(len * 1.5, 180), 360);
+  // Sample the centerline finely enough (~4px spacing, scaled to the bowed curve's length) that a short
+  // obstacle box can't slip BETWEEN two samples — a coarse sampler would judge such a box cleared and
+  // accept a bow whose true centerline still crosses it (the displaced-and-still-crossing failure).
+  const samples = Math.min(Math.max(Math.ceil((len + maxBow) / 4), 120), 400);
   // Boxes (minus the endpoint nodes) overlapping the chord's bbox inflated by `pad`. The un-bowed cubic
   // stays inside the chord bbox, so band(margin) is all that can block a straight branch; a bowed branch
   // sweeps up to ~maxBow perpendicular, so band(maxBow+margin) is everything any bow ≤ maxBow can hit.
@@ -411,8 +415,8 @@ export function bowToClear(
       // Sample t ∈ [0, 1] INCLUSIVE — the endpoints (t=0/1) matter: a box sitting on a fixed branch
       // endpoint can't be cleared by any bow (the cubic always passes through it), so it must be seen
       // and the branch left straight rather than displaced with the endpoint still inside the box.
-      for (let i = 0; i <= 21; i++) {
-        const t = i / 21;
+      for (let i = 0; i <= samples; i++) {
+        const t = i / samples;
         const u = 1 - t;
         const px = u * u * u * sx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * tx;
         const py = u * u * u * sy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ty;

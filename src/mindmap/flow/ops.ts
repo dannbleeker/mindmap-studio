@@ -1052,6 +1052,33 @@ export function setNodeLayout(doc: MindMapDoc, id: string, kind: string | undefi
   });
 }
 
+/** Pin a main branch to the left/right half of the two-sided ("side") map — or `undefined` to let it
+ *  auto-balance again. Only the root's direct children honour `side` (project's assignSides); on any
+ *  other node it's stored but inert. */
+export function setNodeSide(
+  doc: MindMapDoc,
+  id: string,
+  side: "left" | "right" | undefined,
+): OpResult {
+  return mutateAnyNode(doc, id, (n) => {
+    n.side = side;
+  });
+}
+
+/** Balance the two-sided map: clear every main branch's pinned `side` so the auto-balancer (assignSides)
+ *  redistributes them evenly by subtree weight. A no-op (same doc) when nothing is pinned. */
+export function balanceMap(doc: MindMapDoc): OpResult {
+  const next = structuredClone(doc);
+  let changed = false;
+  for (const child of next.root.children) {
+    if (child.side !== undefined) {
+      child.side = undefined;
+      changed = true;
+    }
+  }
+  return { doc: changed ? next : doc };
+}
+
 // --- automated multi-map roll-ups -----------------------------------------
 
 /** Bind (or unbind, with undefined / "") a node to a roll-up source map id. The node's children then

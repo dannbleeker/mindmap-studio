@@ -34,17 +34,35 @@ function subtreeSize(node: MapNode): number {
   return 1 + node.children.reduce((sum, c) => sum + subtreeSize(c), 0);
 }
 
-/** Assign each root-child to a side: honour an explicit `side`, else balance by subtree size. */
+/** Assign each root-child to a side of the two-sided map. A pinned `side` is honoured (and counted);
+ *  the unpinned branches are balanced by subtree size with Longest-Processing-Time — heaviest first,
+ *  each placed on the currently-lighter side — which gives a tighter split than the old in-order greedy
+ *  (the "Balance map" command clears all pins so this pure auto-balance reasserts). Result preserves the
+ *  children's original order. */
 function assignSides(children: MapNode[]): ("left" | "right")[] {
+  const sizes = children.map(subtreeSize);
+  const result: ("left" | "right")[] = new Array(children.length);
   let left = 0;
   let right = 0;
-  return children.map((child) => {
-    const size = subtreeSize(child);
-    const side = child.side ?? (right <= left ? "right" : "left");
-    if (side === "right") right += size;
-    else left += size;
-    return side;
+  const auto: number[] = [];
+  children.forEach((child, i) => {
+    if (child.side) {
+      result[i] = child.side;
+      if (child.side === "right") right += sizes[i];
+      else left += sizes[i];
+    } else {
+      auto.push(i);
+    }
   });
+  // Heaviest unpinned branch first → the lighter side; deterministic tie-break by original index.
+  auto.sort((a, b) => sizes[b] - sizes[a] || a - b);
+  for (const i of auto) {
+    const side: "left" | "right" = right <= left ? "right" : "left";
+    result[i] = side;
+    if (side === "right") right += sizes[i];
+    else left += sizes[i];
+  }
+  return result;
 }
 
 /** Org-chart layouts (vertical hierarchy) draw right-angle elbow connectors, not the organic taper. */

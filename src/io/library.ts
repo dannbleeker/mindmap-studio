@@ -1,3 +1,4 @@
+import { normalizeDoc } from "../model/normalize";
 import type { MindMapDoc } from "../model/types";
 
 // Whole-library backup: every map bundled into one JSON file, and the inverse.
@@ -37,7 +38,7 @@ export function parseLibrary(text: string): MindMapDoc[] {
   const maps = (data as { maps: unknown[] }).maps;
   return maps.map((m) => {
     if (!isValidDoc(m)) throw new Error("Library backup contains an invalid map");
-    return m;
+    return normalizeDoc(m); // salvage a schema-drifted map to a projectable shape
   });
 }
 

@@ -1,4 +1,5 @@
 import { type DBSchema, type IDBPDatabase, openDB } from "idb";
+import { normalizeDoc } from "../model/normalize";
 import type { MapNode, MindMapDoc } from "../model/types";
 
 // Local-first multi-map library. Each map is stored under its id; a small `meta`
@@ -57,7 +58,10 @@ export async function saveMap(doc: MindMapDoc): Promise<void> {
 }
 
 export async function loadMap(id: string): Promise<MindMapDoc | null> {
-  return (await (await db()).get("maps", id)) ?? null;
+  const m = (await (await db()).get("maps", id)) ?? null;
+  // Salvage a corrupt/partial stored map to a projectable shape — otherwise a bad `children` array
+  // throws in project() and white-screens the app (unrecoverable on the boot-restore path).
+  return m ? normalizeDoc(m as MindMapDoc) : null;
 }
 
 export async function deleteMap(id: string): Promise<void> {

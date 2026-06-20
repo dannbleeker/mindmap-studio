@@ -2,6 +2,7 @@
 // (lossy or derived), this round-trips the full doc — notes, links, boundaries,
 // icons, tags — so a map can be saved and restored exactly. Pure + deterministic.
 
+import { normalizeDoc } from "../model/normalize";
 import type { MindMapDoc } from "../model/types";
 
 export function serializeDoc(doc: MindMapDoc): string {
@@ -24,5 +25,6 @@ export function parseDoc(text: string): MindMapDoc {
   ) {
     throw new Error("Not a MindMap Studio .json file");
   }
-  return data as MindMapDoc;
+  // Coerce a hand-edited / schema-drifted file to a projectable shape (real children arrays etc.).
+  return normalizeDoc(data as MindMapDoc);
 }

@@ -133,7 +133,12 @@ import {
   toggleIcon,
 } from "./flow/ops";
 import { project } from "./flow/project";
-import { CROSSLINK_COLOR, CROSSLINK_WIDTH } from "./flow/style";
+import {
+  type OverlaySelect,
+  resolveSelectedEdge,
+  resolveSelectedNode,
+  resolveSelectedOverlay,
+} from "./flow/selectionResolve";
 import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { useLatestRef } from "./flow/useLatestRef";
 import { mindManagerTheme } from "./theme";
@@ -384,26 +389,12 @@ function FlowInner({
   );
 
   const fireSelect = useCallback((id: string | null) => {
-    const n = id ? findNode(docRef.current, id) : null;
-    onSelectRef.current?.(n ? { id: n.id, topic: n.topic, note: n.note ?? "" } : null);
+    onSelectRef.current?.(resolveSelectedNode(docRef.current, id));
   }, []);
 
   // Emit the selected relationship (resolved, defaults filled) to the app's EdgeInspector, or null.
   const fireSelectEdge = useCallback((id: string | null) => {
-    const l = id ? (docRef.current.links ?? []).find((x) => x.id === id) : null;
-    onSelectEdgeRef.current?.(
-      l
-        ? {
-            id: l.id,
-            label: l.label ?? "",
-            arrow: l.arrow ?? "to",
-            color: l.color ?? CROSSLINK_COLOR,
-            width: l.width ?? CROSSLINK_WIDTH,
-            dash: l.dash ?? "dashed",
-            curve: l.curve,
-          }
-        : null,
-    );
+    onSelectEdgeRef.current?.(resolveSelectedEdge(docRef.current, id));
   }, []);
 
   // Clear any selected relationship (when a node / the pane is selected — they're mutually exclusive).
@@ -416,58 +407,17 @@ function FlowInner({
 
   // Resolve + emit the selected overlay (boundary/summary/callout) to the OverlayInspector, or null.
   // The label is the raw stored value (the inspector edits it; the canvas applies display defaults).
-  const fireSelectOverlay = useCallback(
-    (sel: { kind: SelectedOverlay["kind"]; id: string; nodeId?: string } | null) => {
-      if (!sel) {
-        setSelectedOverlay(null);
-        onSelectOverlayRef.current?.(null);
-        return;
-      }
-      const doc = docRef.current;
-      let label: string | undefined;
-      let color: string | undefined;
-      let shape: SelectedOverlay["shape"];
-      let dash: SelectedOverlay["dash"];
-      if (sel.kind === "boundary") {
-        const b = (doc.boundaries ?? []).find((x) => x.id === sel.id);
-        label = b?.label;
-        color = b?.color;
-        shape = b?.shape;
-        dash = b?.dash;
-      } else if (sel.kind === "summary") {
-        const s = (doc.summaries ?? []).find((x) => x.id === sel.id);
-        label = s?.label;
-        color = s?.color;
-      } else {
-        const node = sel.nodeId ? findAnyNode(doc, sel.nodeId) : null;
-        const found = node?.callouts?.find((c) => c.id === sel.id);
-        if (!found) return; // callout gone
-        label = found.text;
-        color = found.color;
-      }
-      // boundary/summary may legitimately have no label; only bail if the object itself is missing.
-      if (sel.kind !== "callout") {
-        const exists =
-          sel.kind === "boundary"
-            ? (doc.boundaries ?? []).some((b) => b.id === sel.id)
-            : (doc.summaries ?? []).some((s) => s.id === sel.id);
-        if (!exists) return;
-      }
-      const resolved: SelectedOverlay = {
-        kind: sel.kind,
-        id: sel.id,
-        nodeId: sel.nodeId,
-        label: label ?? "",
-        deletable: true,
-        color,
-        shape,
-        dash,
-      };
-      setSelectedOverlay(resolved);
-      onSelectOverlayRef.current?.(resolved);
-    },
-    [],
-  );
+  const fireSelectOverlay = useCallback((sel: OverlaySelect | null) => {
+    if (!sel) {
+      setSelectedOverlay(null);
+      onSelectOverlayRef.current?.(null);
+      return;
+    }
+    const resolved = resolveSelectedOverlay(docRef.current, sel);
+    if (!resolved) return; // the overlay is gone — leave the current selection unchanged
+    setSelectedOverlay(resolved);
+    onSelectOverlayRef.current?.(resolved);
+  }, []);
 
   // Clear any selected overlay (mutually exclusive with node + edge selection).
   const clearOverlaySelection = useCallback(() => {

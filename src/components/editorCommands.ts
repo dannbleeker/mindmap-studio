@@ -88,6 +88,13 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
 
   // View
   add("fit", "Fit map to screen", "view", () => m()?.fit());
+  add(
+    "balance-map",
+    "Balance map (even out both sides)",
+    "view",
+    () => m()?.balanceMap(),
+    canvas.layout === "side" && !map.liveDoc.meta?.freeform,
+  );
   add("collapse-all", "Collapse all branches", "view", () => m()?.setAllExpanded(false));
   add("expand-all", "Expand all branches", "view", () => m()?.setAllExpanded(true));
   add(

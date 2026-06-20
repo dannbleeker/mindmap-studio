@@ -69,6 +69,7 @@ import {
   addSibling,
   addStickyNote,
   addSubtree,
+  balanceMap,
   bulkToggleIcon,
   bulkToggleTag,
   clearBackdrop,
@@ -115,6 +116,7 @@ import {
   setLinkStyle,
   setNodeLayout,
   setNodePos,
+  setNodeSide,
   setNote,
   setPriority,
   setProgress,
@@ -1040,6 +1042,8 @@ function FlowInner({
         return res.count;
       },
       setAllExpanded: (expanded) => apply(setAllExpanded(docRef.current, expanded)),
+      setNodeSide: (id, side) => apply(setNodeSide(docRef.current, id, side)),
+      balanceMap: () => apply(balanceMap(docRef.current)),
       setFreeform: (on) => {
         if (on) {
           // Seed each node's pos from where it currently sits, so the switch is seamless.
@@ -1470,6 +1474,38 @@ function FlowInner({
                       <option value="brace">Brace</option>
                     </select>
                   </label>
+                  {/* Map side — pin a main branch to a half of the two-sided map (else auto-balance).
+                      Only meaningful for a root child in the "side" layout. */}
+                  {direction === "side" &&
+                  !renderDoc.meta?.freeform &&
+                  renderDoc.root.children.some((c) => c.id === menu.id) ? (
+                    <label
+                      className="mm-menu-label"
+                      style={{ display: "block", textTransform: "none", letterSpacing: 0 }}
+                    >
+                      Map side
+                      <select
+                        className="mm-select"
+                        defaultValue={findNode(docRef.current, menu.id)?.side ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          apply(
+                            setNodeSide(
+                              docRef.current,
+                              menu.id,
+                              v === "left" || v === "right" ? v : undefined,
+                            ),
+                          );
+                          setMenu(null);
+                        }}
+                        style={{ width: "100%", marginTop: 4 }}
+                      >
+                        <option value="">Auto (balance)</option>
+                        <option value="left">Left side</option>
+                        <option value="right">Right side</option>
+                      </select>
+                    </label>
+                  ) : null}
                   <MenuLabel>Branch colour</MenuLabel>
                   <div className="mm-menu-row">
                     {["#c2701a", "#3f6fb0", "#1b8a5e", "#b23b6a", "#8a6d2f", "#6a5acd"].map((c) => {

@@ -68,6 +68,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Balance map + manual side control (two-sided layout).** Right-click a main branch in the **Both
+  sides** layout and pick **Map side → Left / Right / Auto** to pin it to a half (or let it auto-balance);
+  the other branches balance around any pins. **View ▾ → Balance map** (also ⌘K) clears every pin and
+  redistributes the main branches evenly — MindManager's "Balance map", except the auto-balance now uses
+  an optimal Longest-Processing-Time split (a size-5 branch among four size-1 branches lands 5/4, not 7/2).
+  The pinned side is lossless in `.json`; canvas == export (one shared layout pass).
+
 - **Obstacle-aware branch routing (safety net).** A tapered branch now bows around an unrelated topic
   box its straight path would otherwise pass behind — computed once per branch from the node boxes and
   mirrored in the SVG export (canvas == export). Conservative by construction: a branch is either fully

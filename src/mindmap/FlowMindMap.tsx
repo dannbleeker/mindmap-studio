@@ -1,10 +1,6 @@
 import "@xyflow/react/dist/style.css";
 import {
   Controls,
-  MiniMap,
-  NodeToolbar,
-  Panel,
-  Position,
   ReactFlow,
   ReactFlowProvider,
   useEdgesState,
@@ -44,6 +40,7 @@ import { Boundaries } from "./flow/Boundaries";
 import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
+import { CoachMark, DropLabel, MinimapPanel } from "./flow/CanvasOverlays";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { NodePopover } from "./flow/NodePopover";
@@ -1329,67 +1326,10 @@ function FlowInner({
             onToggleCollapse={(id) => apply(toggleCollapse(docRef.current, id))}
             onDelete={deleteNodeWithUndo}
           />
-          {/* Empty-map coachmark — anchored under the root via NodeToolbar so it tracks pan/zoom.
-              Canvas-only (never authored into buildFlowSvg), so exports stay unchanged. */}
-          {showCoach ? (
-            <NodeToolbar
-              nodeId={renderDoc.root.id}
-              isVisible
-              position={Position.Bottom}
-              offset={18}
-            >
-              <div className="mm-coachmark nodrag nopan">
-                <strong>Start your map</strong>
-                <span>
-                  Press <kbd>Tab</kbd> for a child · <kbd>Enter</kbd> for a sibling · double-click
-                  to rename
-                </span>
-              </div>
-            </NodeToolbar>
-          ) : null}
-          {/* Drag-to-reparent label (#11): names the topic the dragged node will become a child of,
-              anchored on the highlighted target. Canvas-only — never authored into exports. */}
-          {dropTargetId
-            ? (() => {
-                const t = findAnyNode(renderDoc, dropTargetId);
-                return (
-                  <NodeToolbar nodeId={dropTargetId} isVisible position={Position.Top} offset={8}>
-                    <div className="mm-drop-label nodrag nopan">
-                      ↳ Make child of “{t?.topic?.trim() || "topic"}”
-                    </div>
-                  </NodeToolbar>
-                );
-              })()
-            : null}
+          <CoachMark show={showCoach} rootId={renderDoc.root.id} />
+          <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
           <Controls showInteractive={false} />
-          {minimapOpen ? (
-            <MiniMap
-              pannable
-              zoomable
-              nodeColor={(node) => (node.data as TopicNodeT["data"])?.branchColor ?? "#bbb"}
-              nodeStrokeWidth={3}
-              style={{ marginBottom: 30 }}
-            />
-          ) : null}
-          <Panel position="bottom-right">
-            <button
-              type="button"
-              onClick={toggleMinimap}
-              title={minimapOpen ? "Hide minimap" : "Show minimap"}
-              style={{
-                font: "12px system-ui, sans-serif",
-                padding: "2px 8px",
-                borderRadius: 6,
-                border: `1px solid ${colors.menu.border}`,
-                background: `var(--mm-node-bg, ${colors.menu.fallbackBg})`,
-                color: `var(--mm-color, ${colors.menu.fallbackColor})`,
-                cursor: "pointer",
-                boxShadow: "0 1px 3px #0002",
-              }}
-            >
-              {minimapOpen ? "Minimap ▾" : "Minimap ▴"}
-            </button>
-          </Panel>
+          <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
         </ReactFlow>
         {menu ? (
           <ContextMenu

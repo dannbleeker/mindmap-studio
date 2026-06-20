@@ -31,6 +31,9 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
 - **SimpleMind (`.smmx`)** -- the native format of the cross-platform SimpleMind app. Carries
   the topic tree, notes, web links, and relations, plus floating topics, so the map opens
   natively in SimpleMind on desktop or mobile.
+- **MindManager (`.mmap`)** -- MindManager's own format. Writes the topic tree, notes,
+  hyperlinks, stock icons, relationships, and the two-sided left/right arrangement -- the
+  mirror of the `.mmap` importer, so a map you started here can go back to a MindManager user.
 - **PNG** and **SVG** -- the map as a picture. PNG for slides and chat; SVG when you want
   a crisp, scalable image that survives zooming.
 - **HTML** -- a self-contained web page of the map, openable in any browser with nothing
@@ -110,11 +113,17 @@ topic tree and text, notes, stock icons (rendered as emoji markers), hyperlinks,
 relationships, boundaries, and floating topics. It was built against MindManager's own
 published schema rather than guessed at, so the common cases come through faithfully.
 
-It is deliberately **one-way and lossy**: MindManager carries project data --
-task scheduling, resources, Gantt information -- that MindMap Studio doesn't model, and
-the importer tells you when it has left something behind rather than pretending the map
-came across whole. The bridge is for *migrating* a map, not for living in both tools at
-once.
+There is now also an **off-ramp**: **Export -> MindManager (`.mmap`)** writes the same parts
+back out -- tree, notes, hyperlinks, icons, relationships, and the two-sided left/right
+arrangement -- so a map you built here can land on a MindManager user's desk. It is the
+mirror of the importer, and a map round-trips back into MindMap Studio with those fields
+intact. MindManager is strict about its format, so confirm an exported file opens in your
+MindManager version before relying on it.
+
+Both directions are deliberately **lossy on project data**: MindManager carries task
+scheduling, resources, and Gantt information that MindMap Studio doesn't model, and the
+importer tells you when it has left something behind rather than pretending the map came
+across whole.
 
 > **Why lossy is the honest choice.** A converter that silently drops what it can't
 > represent leaves you to discover the gaps later, usually at the worst moment. The

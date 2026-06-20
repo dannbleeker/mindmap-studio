@@ -87,6 +87,7 @@ export interface ToolbarIo {
   exportMermaid: () => void;
   exportXmind: () => void;
   exportSmmx: () => void;
+  exportMmap: () => void;
   exportOpml: () => void;
   exportFreemind: () => void;
   exportPng: () => void;
@@ -217,6 +218,7 @@ export function Toolbar({
         [".mmd (Mermaid)", io.exportMermaid],
         [".xmind (XMind)", io.exportXmind],
         [".smmx (SimpleMind)", io.exportSmmx],
+        [".mmap (MindManager)", io.exportMmap],
       ],
     },
     {

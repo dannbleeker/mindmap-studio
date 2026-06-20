@@ -68,6 +68,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Export to MindManager (`.mmap`).** The mirror of the `.mmap` importer — **Export → MindManager
+  (`.mmap`)** (also in ⌘K) writes MindManager's own format carrying the topic tree, notes, hyperlinks,
+  stock icons, relationships, boundaries, floating topics, and the **two-sided left/right arrangement**,
+  so a map you built here can go back to a MindManager user. A map round-trips back into MindMap Studio
+  losslessly for those fields (mapping verified by a `parseMmap(toMmap(doc))` round-trip + a real-file
+  re-emit test). Project data (task scheduling/resources) is dropped, as on import. Deterministic and
+  offline; dangerous hyperlinks are stripped on the way out.
+
 - **Balance map + manual side control (two-sided layout).** Right-click a main branch in the **Both
   sides** layout and pick **Map side → Left / Right / Auto** to pin it to a half (or let it auto-balance);
   the other branches balance around any pins. **View ▾ → Balance map** (also ⌘K) clears every pin and

@@ -106,6 +106,7 @@ import {
   setCalloutText,
   setConnectorStyle,
   setDue,
+  setExpandedToLevel,
   setFreeform,
   setHyperlink,
   setImage,
@@ -1042,6 +1043,7 @@ function FlowInner({
         return res.count;
       },
       setAllExpanded: (expanded) => apply(setAllExpanded(docRef.current, expanded)),
+      setExpandedToLevel: (level) => apply(setExpandedToLevel(docRef.current, level)),
       setNodeSide: (id, side) => apply(setNodeSide(docRef.current, id, side)),
       balanceMap: () => apply(balanceMap(docRef.current)),
       setFreeform: (on) => {

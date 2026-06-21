@@ -12,6 +12,7 @@ import type {
   TaskInfo,
 } from "../../model/types";
 import type { SelectionFields } from "../contract";
+import { walkTree } from "./nodeWalk";
 
 // Pure tree-edit transforms on the canonical MindMapDoc. Each returns a NEW doc (the input
 // is never mutated) plus, where relevant, the id to select next. This is the model-first
@@ -409,11 +410,21 @@ export function toggleCollapse(doc: MindMapDoc, id: string): OpResult {
 /** Collapse (false) or expand (true) every branch below the root. */
 export function setAllExpanded(doc: MindMapDoc, expanded: boolean): OpResult {
   const next = structuredClone(doc);
-  const walk = (node: MapNode, isRoot: boolean) => {
-    if (!isRoot && node.children.length > 0) node.collapsed = !expanded;
-    for (const c of node.children) walk(c, false);
-  };
-  walk(next.root, true);
+  walkTree(next.root, (node, depth) => {
+    if (depth > 0 && node.children.length > 0) node.collapsed = !expanded;
+  });
+  return { doc: next };
+}
+
+/** Expand the central tree to `level` and collapse below it: a topic with children is collapsed iff
+ *  its depth ≥ level (root = depth 0). Level 1 shows only the top branches (collapsed); higher levels
+ *  reveal more tiers — MindManager's "detail level" control. `level` is clamped to ≥ 1. */
+export function setExpandedToLevel(doc: MindMapDoc, level: number): OpResult {
+  const lvl = Math.max(1, Math.trunc(level));
+  const next = structuredClone(doc);
+  walkTree(next.root, (node, depth) => {
+    if (depth > 0 && node.children.length > 0) node.collapsed = depth >= lvl;
+  });
   return { doc: next };
 }
 

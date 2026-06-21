@@ -102,6 +102,9 @@ export interface MindMapHandle {
   replaceTopics: (query: string, replacement: string) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
   setAllExpanded: (expanded: boolean) => void;
+  /** Expand the map to a detail level: topics deeper than `level` collapse (level 1 = top branches
+   *  only). MindManager's detail-level control. */
+  setExpandedToLevel: (level: number) => void;
   /** Pin a main branch to the left/right half of the two-sided ("side") map, or `undefined` to let it
    *  auto-balance again. Inert on non-root nodes / other layouts. */
   setNodeSide: (id: string, side: "left" | "right" | undefined) => void;

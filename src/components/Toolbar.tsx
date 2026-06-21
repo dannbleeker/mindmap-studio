@@ -542,6 +542,15 @@ export function Toolbar({
             label="Expand all branches"
             onSelect={() => m()?.setAllExpanded(true)}
           />
+          <MenuLabel>Detail level</MenuLabel>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <MenuItem
+              key={n}
+              icon={mi("layers")}
+              label={`Show level ${n}`}
+              onSelect={() => m()?.setExpandedToLevel(n)}
+            />
+          ))}
           <MenuItem
             icon={mi("balance")}
             label="Focus the selected branch"

@@ -29,6 +29,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
     back to a plain download for Save and the existing import picker for Open; IndexedDB autosave is
     unchanged, so nothing is ever lost. New module `src/io/fileSystem.ts` (feature-detected) keeps the
     rest of the app oblivious to which path is live.
+  - **Open MindManager `.mmap` files by double-click (import-only).** The manifest also registers
+    `.mmap`/`.mmp` as file handlers, and `.mmap` is offered in the **Open file…** picker. Opening one
+    runs the existing one-way `.mmap` importer (lossy by design — task/PM data, rich text, images, etc.
+    are dropped, and the drops are listed in the import banner) and lands it as an ordinary **library**
+    map. There is **no** save-back to `.mmap`; a banner + toast prompt you to **Save as… `.mmst`** to
+    keep it as a file. (Chromium desktop only; Windows won't make the PWA the default for `.mmap` over
+    an installed MindManager unless you opt in.)
 
 ### Removed
 

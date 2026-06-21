@@ -151,10 +151,15 @@ export default defineConfig({
           { src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
           { src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
         ],
-        // Register the app as a handler for its native `.mmst` files. When the installed PWA is set
-        // as the default app (Windows / ChromeOS, Chromium only), double-clicking a `.mmst` launches
-        // it and hands the file to `window.launchQueue` (consumed in App.tsx). Chromium desktop only.
-        file_handlers: [{ action: "./", accept: { "application/json": [".mmst"] } }],
+        // Register the app as a handler for its native `.mmst` files, and for MindManager `.mmap`
+        // files (import-only — opening one converts it into a library map; see App.tsx launchQueue +
+        // src/import/mmap.ts). When the installed PWA is set as the default app (Windows / ChromeOS,
+        // Chromium only), double-clicking such a file launches it and hands the file to
+        // `window.launchQueue`. Chromium desktop only.
+        file_handlers: [
+          { action: "./", accept: { "application/json": [".mmst"] } },
+          { action: "./", accept: { "application/octet-stream": [".mmap", ".mmp"] } },
+        ],
         // Route an opened file into the already-running window instead of spawning a new one.
         launch_handler: { client_mode: "focus-existing" },
       },

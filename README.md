@@ -105,6 +105,9 @@ GitHub Pages).
   `.json`. On Chromium desktop (Chrome/Edge), an **installed** copy can be set as the default app for
   `.mmst`, so double-clicking one in Windows Explorer opens it here. Browsers without the File System
   Access API (Firefox/Safari) fall back to a download/upload, and IndexedDB autosave still applies.
+  An installed copy also registers for MindManager **`.mmap`** files: double-clicking (or **Open
+  file…**) one **imports** it into the library (one-way + lossy — there's no save-back to `.mmap`;
+  use *Save as… `.mmst`* to keep it as a file).
 - **Relationships** — draw a labelled, **directional** arrow (arrowhead at the target) between two
   nodes: right-click a node → **Link to…**, then click the target (with an optional label).
   Double-click a relationship to relabel it, right-click to delete. Imported `.mmap` relationships

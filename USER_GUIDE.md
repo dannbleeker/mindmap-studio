@@ -468,7 +468,8 @@ put it in version control. MindMap Studio's native file is **`.mmst`** (the same
 
 In **More ▸ File** (or the **⌘K** command palette):
 
-- **Open file…** (`Ctrl/⌘ + O`) — pick a `.mmst` (or `.json`) and open it.
+- **Open file…** (`Ctrl/⌘ + O`) — pick a `.mmst` (or `.json`) and open it. You can also pick a
+  MindManager **`.mmap`** here — see *Opening MindManager files* below.
 - **Save to file** (`Ctrl/⌘ + S`) — save the current map back to its linked file, with no dialog. The
   first time (no file linked yet) this acts like *Save as…*.
 - **Save as…** (`Ctrl/⌘ + Shift + S`) — choose a new file/location.
@@ -491,6 +492,20 @@ Windows can associate `.mmst` files with it: right-click a `.mmst` ▸ **Open wi
 ▸ pick MindMap Studio ▸ *Always*. After that, **double-clicking a `.mmst` in File Explorer opens it
 directly in the app** (in the already-running window if one is open). This is a Chromium-desktop
 feature; it isn't available in Firefox/Safari or on mobile.
+
+### Opening MindManager files (`.mmap`)
+
+An installed copy also registers for MindManager **`.mmap`** files, so you can double-click one in File
+Explorer (after setting the default the same way as above) or pick it via **Open file…**. Opening a
+`.mmap` **imports** it — it's a one-way conversion, so MindManager-only things are dropped (task /
+scheduling data, rich text, embedded images, attachments, per-topic styling, and the like); whatever
+was dropped is listed in the import banner.
+
+**Important — `.mmap` is import-only, and you can't save back to it.** An opened `.mmap` becomes an
+ordinary map in your **library** (autosaved to the browser as usual, so your edits aren't lost), but it
+is **not** linked to the `.mmap` file — *Save* won't write `.mmap`. To keep your changes as a file, use
+**Save as…** to write a **`.mmst`**; after that it behaves like any native file (Save / autosave to
+disk). Re-opening the same `.mmap` again imports a fresh copy.
 
 ---
 

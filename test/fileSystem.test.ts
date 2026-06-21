@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   NATIVE_EXT,
   ensureWritePermission,
+  isNativeExt,
   openMapFile,
   pickSaveHandle,
   readMapFile,
@@ -92,6 +93,19 @@ describe("supportsFileSystemAccess", () => {
   });
 });
 
+describe("isNativeExt", () => {
+  it("treats .mmst and .json as native (case-insensitive)", () => {
+    expect(isNativeExt("plan.mmst")).toBe(true);
+    expect(isNativeExt("PLAN.MMST")).toBe(true);
+    expect(isNativeExt("export.json")).toBe(true);
+  });
+
+  it("treats .mmap / .mmp as non-native (one-way import)", () => {
+    expect(isNativeExt("legacy.mmap")).toBe(false);
+    expect(isNativeExt("old.mmp")).toBe(false);
+  });
+});
+
 describe("read / write round-trip", () => {
   it("readMapFile parses a serialized doc", async () => {
     const doc = docOf("Round trip");
@@ -133,12 +147,24 @@ describe("ensureWritePermission", () => {
 });
 
 describe("openMapFile / pickSaveHandle", () => {
-  it("openMapFile returns the doc and handle", async () => {
+  it("openMapFile reads a native .mmst as kind 'native' with the doc + handle", async () => {
     const { handle } = fakeHandle("open.mmst", { content: serializeDoc(docOf("Opened")) });
     window.showOpenFilePicker = vi.fn(async () => [handle]);
     const res = await openMapFile();
-    expect(res?.doc.title).toBe("Opened");
-    expect(res?.handle.name).toBe("open.mmst");
+    expect(res?.kind).toBe("native");
+    if (res?.kind !== "native") throw new Error("expected native");
+    expect(res.doc.title).toBe("Opened");
+    expect(res.handle.name).toBe("open.mmst");
+  });
+
+  it("openMapFile classifies a .mmap as kind 'import' (no parse, handle only)", async () => {
+    const { handle } = fakeHandle("legacy.mmap", { content: "PK not json" });
+    window.showOpenFilePicker = vi.fn(async () => [handle]);
+    const res = await openMapFile();
+    expect(res?.kind).toBe("import");
+    if (res?.kind !== "import") throw new Error("expected import");
+    expect(res.handle.name).toBe("legacy.mmap");
+    expect(res).not.toHaveProperty("doc"); // parsing/import is deferred to the caller
   });
 
   it("openMapFile returns null when the user cancels", async () => {

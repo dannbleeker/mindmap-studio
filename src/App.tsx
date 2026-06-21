@@ -43,6 +43,7 @@ import { fileToAttachment } from "./io/attachment";
 import {
   downloadMapFile,
   ensureWritePermission,
+  isNativeExt,
   openMapFile,
   pickSaveHandle,
   readMapFromHandle,
@@ -564,19 +565,43 @@ export function App() {
     [bindFileHandle, load, showHint],
   );
 
+  // Open a foreign file (a MindManager `.mmap`) as a one-way import: convert its bytes into a fresh
+  // library map via the shared import dispatcher and DON'T bind a handle — there's no save-back to
+  // `.mmap` (lossy by design). The map autosaves to IndexedDB like any other; the leading banner note
+  // + toast tell the user to Save as… a `.mmst` to keep it as a file.
+  const importForeignFile = useCallback(
+    async (handle: FileSystemFileHandle) => {
+      const bytes = new Uint8Array(await (await handle.getFile()).arrayBuffer());
+      const { parseMmap } = await import("./import/mmap"); // lazy: keeps the importer out of the entry
+      const { doc: next, warnings } = parseMmap(bytes);
+      next.id = crypto.randomUUID(); // an import is a new library map, not a re-openable native file
+      load(next, [
+        "Imported from MindManager — saved to your library. You can't save back to .mmap; use “Save as…” to keep it as a .mmst file.",
+        ...warnings,
+      ]);
+      setFileName(null); // library-only: not bound to a disk file
+      setDirty(false);
+      setView("editor");
+      showHint(`Imported ${handle.name} — use “Save as…” to keep it as a .mmst file.`);
+    },
+    [load, showHint],
+  );
+
   const openFile = useCallback(async () => {
     if (!supportsFileSystemAccess()) {
-      // No native picker — reuse the import <input>, which already accepts .mmst/.json and more.
+      // No native picker — reuse the import <input>, which already accepts .mmst/.json/.mmap and more.
       document.getElementById("mmap-input")?.click();
       return;
     }
     try {
       const res = await openMapFile();
-      if (res) await adoptOpenedFile(res.doc, res.handle);
+      if (!res) return;
+      if (res.kind === "import") await importForeignFile(res.handle);
+      else await adoptOpenedFile(res.doc, res.handle);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
-  }, [adoptOpenedFile]);
+  }, [adoptOpenedFile, importForeignFile]);
 
   // "Save As" — pick a destination, write it, and remember the handle for plain Saves afterwards.
   const saveFileAs = useCallback(async () => {
@@ -714,13 +739,16 @@ export function App() {
       if (!handle) return;
       void (async () => {
         try {
-          await adoptOpenedFile(await readMapFromHandle(handle), handle);
+          // `.mmst`/`.json` open natively (bound for save-back); `.mmap` imports one-way.
+          if (isNativeExt(handle.name))
+            await adoptOpenedFile(await readMapFromHandle(handle), handle);
+          else await importForeignFile(handle);
         } catch (err) {
           setError(err instanceof Error ? err.message : String(err));
         }
       })();
     });
-  }, [adoptOpenedFile]);
+  }, [adoptOpenedFile, importForeignFile]);
 
   // --- paste text → map ---
   function pasteAsNewMap() {

@@ -17,13 +17,25 @@ export const NATIVE_EXT = ".mmst";
 /** MIME type recorded for the native file — the content is JSON. */
 export const NATIVE_MIME = "application/json";
 
-/** Picker filter: Save offers only `.mmst`; Open also accepts a bare `.json` (same bytes). */
+/** Extensions we can open *natively* (parse losslessly + bind for save-back): our own format + JSON. */
+const NATIVE_EXTS = [NATIVE_EXT, ".json"];
+/** Extensions we open as a one-way *import* (converted to a library map, never written back). */
+const IMPORT_EXTS = [".mmap", ".mmp"];
+
+/** Picker filter: Save offers only `.mmst`; Open accepts native files + importable MindManager files. */
 const SAVE_TYPES: FilePickerAcceptType[] = [
   { description: "MindMap Studio map", accept: { [NATIVE_MIME]: [NATIVE_EXT] } },
 ];
 const OPEN_TYPES: FilePickerAcceptType[] = [
-  { description: "MindMap Studio map", accept: { [NATIVE_MIME]: [NATIVE_EXT, ".json"] } },
+  { description: "MindMap Studio map", accept: { [NATIVE_MIME]: NATIVE_EXTS } },
+  { description: "MindManager map (import)", accept: { "application/octet-stream": IMPORT_EXTS } },
 ];
+
+/** True for a file we open natively (`.mmst`/`.json`) vs one we import one-way (`.mmap`). */
+export function isNativeExt(name: string): boolean {
+  const lower = name.toLowerCase();
+  return NATIVE_EXTS.some((ext) => lower.endsWith(ext));
+}
 
 /** True when the browser exposes the File System Access pickers (Chromium desktop, HTTPS/localhost). */
 export function supportsFileSystemAccess(): boolean {
@@ -71,11 +83,18 @@ export async function ensureWritePermission(
   return (await handle.requestPermission?.(opts)) === "granted";
 }
 
-/** Open the system file picker and read the chosen map. Returns null if the user cancels. */
-export async function openMapFile(): Promise<{
-  doc: MindMapDoc;
-  handle: FileSystemFileHandle;
-} | null> {
+/**
+ * The picker can return either kind of file, known only after the user picks:
+ * - `native`  — `.mmst`/`.json`: parsed losslessly here, and the handle is bound for save-back.
+ * - `import`  — `.mmap`/`.mmp`: a one-way MindManager import; the caller converts the handle's bytes
+ *   into a new library map (no save-back binding). Parsing is deferred so the importer stays lazy.
+ */
+export type OpenResult =
+  | { kind: "native"; doc: MindMapDoc; handle: FileSystemFileHandle }
+  | { kind: "import"; handle: FileSystemFileHandle };
+
+/** Open the system file picker and classify the chosen file. Returns null if the user cancels. */
+export async function openMapFile(): Promise<OpenResult | null> {
   if (!window.showOpenFilePicker) return null;
   let handle: FileSystemFileHandle | undefined;
   try {
@@ -89,7 +108,8 @@ export async function openMapFile(): Promise<{
     throw err;
   }
   if (!handle) return null;
-  return { doc: await readMapFromHandle(handle), handle };
+  if (!isNativeExt(handle.name)) return { kind: "import", handle };
+  return { kind: "native", doc: await readMapFromHandle(handle), handle };
 }
 
 /** "Save As" — pick a destination and return its handle (caller then writes + remembers it). */

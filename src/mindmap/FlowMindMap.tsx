@@ -85,7 +85,9 @@ import {
   findNode,
   groupBranch,
   groupSummary,
+  indent,
   mergeStyle,
+  moveSibling,
   outdent,
   pasteBranch,
   removeAttachment,
@@ -927,6 +929,15 @@ function FlowInner({
           break;
         case "outdent":
           apply(outdent(docRef.current, intent.id));
+          break;
+        case "indent":
+          apply(indent(docRef.current, intent.id));
+          break;
+        case "moveUp":
+          apply(moveSibling(docRef.current, intent.id, "up"));
+          break;
+        case "moveDown":
+          apply(moveSibling(docRef.current, intent.id, "down"));
           break;
         case "delete":
           deleteNodeWithUndo(intent.id);

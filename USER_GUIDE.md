@@ -100,6 +100,9 @@ Keyboard-first, just like MindManager:
 - **Ctrl + B / I / U** — while editing a topic: bold / italic / underline the selection
 - **⌘K / Ctrl-K** — open the [command palette](#the-toolbar) to search and run any action
 - **Drag** a node onto another — re-parent it
+- **Ctrl/⌘ + Shift + ↑ / ↓** — move the topic up / down among its siblings
+- **Alt + Shift + ← / →** — promote (outdent) / demote (indent) the topic
+- **Ctrl/⌘ + V** (with a topic selected, not typing) — paste a clipboard image onto the topic
 - **Ctrl + Z / Ctrl + Shift + Z** (or Ctrl + Y) — **undo / redo** (kept in sync with what's saved)
 - Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down)
 

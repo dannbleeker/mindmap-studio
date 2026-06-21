@@ -27,6 +27,7 @@ import {
   groupSummary,
   indent,
   mergeStyle,
+  moveSibling,
   nodePath,
   outdent,
   pasteBranch,
@@ -141,6 +142,13 @@ describe("flow ops — structural", () => {
     const { doc } = indent(base(), "a2");
     expect(kids(doc, "a")).toEqual(["a1"]);
     expect(kids(doc, "a1")).toEqual(["a2"]);
+  });
+
+  it("moveSibling swaps with the adjacent sibling and no-ops at the ends", () => {
+    expect(kids(moveSibling(base(), "a", "down").doc, "r")).toEqual(["b", "a"]);
+    expect(kids(moveSibling(base(), "b", "up").doc, "r")).toEqual(["b", "a"]);
+    expect(kids(moveSibling(base(), "a", "up").doc, "r")).toEqual(["a", "b"]); // first → no-op
+    expect(kids(moveSibling(base(), "a1", "down").doc, "a")).toEqual(["a2", "a1"]);
   });
 
   it("deleteNode removes the subtree and prunes dangling links + boundaries", () => {

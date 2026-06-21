@@ -91,6 +91,28 @@ describe("keyIntent", () => {
     for (const [e, want] of cases) expect(keyIntent(ev(e), st())).toEqual(want);
   });
 
+  it("maps reorder + promote/demote shortcuts (Ctrl/⌘+Shift+↑/↓, Alt+Shift+←/→)", () => {
+    const cases: [Partial<KeyEventLike>, KeyIntent][] = [
+      [
+        { key: "ArrowUp", ctrlKey: true, shiftKey: true },
+        { kind: "moveUp", id: "n1" },
+      ],
+      [
+        { key: "ArrowDown", metaKey: true, shiftKey: true },
+        { kind: "moveDown", id: "n1" },
+      ],
+      [
+        { key: "ArrowLeft", altKey: true, shiftKey: true },
+        { kind: "outdent", id: "n1" },
+      ],
+      [
+        { key: "ArrowRight", altKey: true, shiftKey: true },
+        { kind: "indent", id: "n1" },
+      ],
+    ];
+    for (const [e, want] of cases) expect(keyIntent(ev(e), st())).toEqual(want);
+  });
+
   it("type-to-edit only fires for an unmodified single printable char", () => {
     expect(keyIntent(ev({ key: "a", ctrlKey: true }), st())).toBeNull();
     expect(keyIntent(ev({ key: "a", metaKey: true }), st())).toBeNull();

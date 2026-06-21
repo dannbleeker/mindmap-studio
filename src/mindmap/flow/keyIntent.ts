@@ -9,6 +9,9 @@ export type KeyIntent =
   | { kind: "addChild"; id: string }
   | { kind: "addSibling"; id: string }
   | { kind: "outdent"; id: string }
+  | { kind: "indent"; id: string }
+  | { kind: "moveUp"; id: string }
+  | { kind: "moveDown"; id: string }
   | { kind: "delete"; id: string }
   | { kind: "rename"; id: string }
   | { kind: "typeEdit"; id: string; seed: string }
@@ -50,6 +53,13 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") return { kind: "redo" };
   const id = state.selectedId;
   if (!id) return null;
+  // Reorder among siblings (Ctrl/⌘+Shift+↑/↓) and promote/demote (Alt+Shift+←/→) — MindManager-style
+  // restructuring without the mouse. Checked before the single-char type-edit guard (arrows are multi-char).
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "ArrowUp") return { kind: "moveUp", id };
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "ArrowDown")
+    return { kind: "moveDown", id };
+  if (e.altKey && e.shiftKey && e.key === "ArrowLeft") return { kind: "outdent", id };
+  if (e.altKey && e.shiftKey && e.key === "ArrowRight") return { kind: "indent", id };
   if (e.key === "Enter")
     return e.ctrlKey || e.metaKey ? { kind: "addChild", id } : { kind: "addSibling", id };
   if (e.key === "Tab" && !e.shiftKey) return { kind: "addChild", id };

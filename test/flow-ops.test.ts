@@ -27,6 +27,7 @@ import {
   groupSummary,
   indent,
   mergeStyle,
+  moveInTree,
   moveSibling,
   nodePath,
   outdent,
@@ -168,6 +169,31 @@ describe("flow ops — structural", () => {
     expect(kids(doc, "a")).toContain("b");
     // cycle: can't move a under its own descendant a1
     expect(kids(reparent(base(), "a", "a1").doc, "r")).toEqual(["a", "b"]);
+  });
+
+  it("moveInTree nests a node as a child of the target (where='child')", () => {
+    const { doc, selectId } = moveInTree(base(), "b", "a", "child");
+    expect(selectId).toBe("b");
+    expect(kids(doc, "r")).toEqual(["a"]);
+    expect(kids(doc, "a")).toEqual(["a1", "a2", "b"]);
+  });
+
+  it("moveInTree places a node before / after a sibling, fixing the index after removal", () => {
+    // b before a1 (different parent): b lands first under a
+    expect(kids(moveInTree(base(), "b", "a1", "before").doc, "a")).toEqual(["b", "a1", "a2"]);
+    // a1 after a2 (same parent): removing a1 first, then insert after a2 → ["a2","a1"]
+    expect(kids(moveInTree(base(), "a1", "a2", "after").doc, "a")).toEqual(["a2", "a1"]);
+    // a2 before a1 (same parent reorder) → ["a2","a1"]
+    expect(kids(moveInTree(base(), "a2", "a1", "before").doc, "a")).toEqual(["a2", "a1"]);
+  });
+
+  it("moveInTree guards self-drops, cycles, and a dragged root", () => {
+    // self-drop → unchanged
+    expect(kids(moveInTree(base(), "a", "a", "child").doc, "a")).toEqual(["a1", "a2"]);
+    // cycle: drop a under its own descendant a1 → unchanged
+    expect(kids(moveInTree(base(), "a", "a1", "child").doc, "r")).toEqual(["a", "b"]);
+    // dragging the root → unchanged
+    expect(kids(moveInTree(base(), "r", "a", "child").doc, "r")).toEqual(["a", "b"]);
   });
 });
 

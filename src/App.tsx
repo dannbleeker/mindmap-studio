@@ -1568,6 +1568,11 @@ export function App() {
                 numbered={panels.numbered}
                 onFilterChange={setOutlineFilter}
                 onPick={(id) => mapRef.current?.focusNode(id)}
+                onRename={(id, topic) => mapRef.current?.renameNode(id, topic)}
+                onIndent={(id, dir) => mapRef.current?.indentNode(id, dir)}
+                onMove={(dragId, targetId, where) =>
+                  mapRef.current?.moveOutlineNode(dragId, targetId, where)
+                }
               />
             )}
             {panels.indexOpen && (

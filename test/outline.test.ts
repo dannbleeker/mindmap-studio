@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { MapNode, MindMapDoc } from "../src/model/types";
-import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "../src/outline";
+import {
+  backlinksFor,
+  markerTagIndex,
+  outlineDropWhere,
+  outlineNumbers,
+  outlineRows,
+} from "../src/outline";
 
 const root: MapNode = {
   id: "r",
@@ -82,6 +88,16 @@ describe("markerTagIndex", () => {
       markers: [],
       tags: [],
     });
+  });
+});
+
+describe("outlineDropWhere", () => {
+  it("maps the pointer's vertical position to before / child / after", () => {
+    expect(outlineDropWhere(0)).toBe("before");
+    expect(outlineDropWhere(0.1)).toBe("before");
+    expect(outlineDropWhere(0.5)).toBe("child"); // the broad middle nests as a child
+    expect(outlineDropWhere(0.9)).toBe("after");
+    expect(outlineDropWhere(1)).toBe("after");
   });
 });
 

@@ -141,6 +141,15 @@ export interface MindMapHandle {
   groupSummary: (id: string) => boolean;
   /** Rename the map — sets the root topic; doc.title follows (the same path as inline root rename). */
   renameMap: (title: string) => void;
+  /** Set a specific node's topic text by id (the editable outline's inline rename); root rename
+   *  updates doc.title too. No-op if the id isn't found. */
+  renameNode: (id: string, topic: string) => void;
+  /** Promote (outdent) or demote (indent) a specific node by id — the outline's ◂ ▸ controls, the
+   *  same ops as the Alt+Shift+←/→ keys. No-op when the move isn't possible. */
+  indentNode: (id: string, dir: "in" | "out") => void;
+  /** Restructure the central tree from an outline drag: place `dragId` before/after `targetId`, or as
+   *  its child. No-op on a self/cycle/root drag. */
+  moveOutlineNode: (dragId: string, targetId: string, where: "before" | "after" | "child") => void;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
   /** Set the per-map canvas background image (a data: URL); "" clears it. Drawn behind everything,

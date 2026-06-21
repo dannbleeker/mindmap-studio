@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Editable outline panel.** The outline rail is no longer read-only navigation: **double-click** a
+  row to rename it inline, use the **◂ ▸** controls to promote / demote a topic (the same indent /
+  outdent ops as Alt+Shift+←/→), and **drag a row** to restructure the map — drop it before, after, or
+  onto another topic (the broad middle nests it as a child). New `moveInTree` op + pure
+  `outlineDropWhere`; backed by id-addressed `renameNode` / `indentNode` / `moveOutlineNode` on the
+  canvas handle so every change is a normal undoable, autosaved edit.
+
 - **Branch-colour topic fills (tint & gradient).** The topic format bar gains two fill treatments
   derived from a topic's branch colour (or its explicit fill colour): a soft **tint** wash and a
   vertical **gradient** — MindManager's filled-topic look without picking exact colours. Pure

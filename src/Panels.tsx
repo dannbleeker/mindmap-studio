@@ -31,6 +31,7 @@ import {
   type IndexEntry,
   type IndexHit,
   markerTagIndex,
+  outlineDropWhere,
   outlineNumbers,
   outlineRows,
 } from "./outline";
@@ -317,16 +318,43 @@ export function OutlinePanel({
   numbered,
   onFilterChange,
   onPick,
+  onRename,
+  onIndent,
+  onMove,
 }: {
   root: MapNode;
   filter: string;
   numbered?: boolean;
   onFilterChange: (value: string) => void;
   onPick: (id: string) => void;
+  /** Commit an inline rename of a topic (double-click a row to edit). */
+  onRename?: (id: string, topic: string) => void;
+  /** Promote (out) / demote (in) a topic — the ◂ ▸ controls. */
+  onIndent?: (id: string, dir: "in" | "out") => void;
+  /** Drag-reorder: drop `dragId` before/after `targetId`, or nest it as a child. */
+  onMove?: (dragId: string, targetId: string, where: "before" | "child" | "after") => void;
 }) {
+  const editable = !!(onRename && onIndent && onMove);
   const q = filter.trim().toLowerCase();
   const rows = outlineRows(root).filter((row) => !q || row.topic.toLowerCase().includes(q));
   const numbers = numbered ? outlineNumbers(root) : undefined;
+  const [editId, setEditId] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  // The current drag's target + intent, for the drop indicator (cleared on drop / leave).
+  const [drop, setDrop] = useState<{ id: string; where: "before" | "child" | "after" } | null>(
+    null,
+  );
+  const dragId = useRef<string | null>(null);
+
+  const startEdit = (id: string, topic: string) => {
+    setEditId(id);
+    setDraft(topic);
+  };
+  const commitEdit = () => {
+    if (editId && onRename) onRename(editId, draft.trim());
+    setEditId(null);
+  };
+
   return (
     <Panel>
       <Input
@@ -337,28 +365,109 @@ export function OutlinePanel({
         style={{ width: "auto", margin: "8px 10px 4px" }}
       />
       <div style={{ overflowY: "auto", padding: "4px 0 8px" }}>
-        {rows.map((row) => (
-          <button
-            key={row.id}
-            type="button"
-            onClick={() => onPick(row.id)}
-            title={row.topic}
-            style={{
-              ...listRow,
-              padding: "3px 10px",
-              paddingLeft: 10 + row.depth * 14,
-            }}
-          >
-            {row.hasNote ? "📝 " : ""}
-            {numbers?.get(row.id) ? `${numbers.get(row.id)} ` : ""}
-            {row.topic || "(untitled)"}
-            {row.progress !== undefined ? (
-              <span style={{ marginLeft: 6, fontSize: fontSize.xs, color: colors.faint }}>
-                {row.progress}%
-              </span>
-            ) : null}
-          </button>
-        ))}
+        {rows.map((row) => {
+          const isEditing = editId === row.id;
+          const dropHere = drop?.id === row.id ? drop.where : null;
+          // Dragging is disabled on the root + while filtering (the flat filtered view hides structure).
+          const canDrag = editable && row.depth > 0 && !q;
+          return (
+            <div
+              key={row.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                paddingLeft: row.depth * 14,
+                background: dropHere === "child" ? "var(--ed-accent-tint)" : undefined,
+                borderTop:
+                  dropHere === "before" ? "2px solid var(--ed-accent)" : "2px solid transparent",
+                borderBottom:
+                  dropHere === "after" ? "2px solid var(--ed-accent)" : "2px solid transparent",
+              }}
+              draggable={canDrag}
+              onDragStart={(e) => {
+                dragId.current = row.id;
+                e.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(e) => {
+                if (!editable || !dragId.current || dragId.current === row.id) return;
+                e.preventDefault();
+                const r = e.currentTarget.getBoundingClientRect();
+                const where = outlineDropWhere((e.clientY - r.top) / r.height);
+                setDrop({ id: row.id, where });
+              }}
+              onDragLeave={() => setDrop((d) => (d?.id === row.id ? null : d))}
+              onDrop={(e) => {
+                e.preventDefault();
+                const src = dragId.current;
+                dragId.current = null;
+                const d = drop;
+                setDrop(null);
+                if (src && src !== row.id && onMove) onMove(src, row.id, d?.where ?? "child");
+              }}
+              onDragEnd={() => {
+                dragId.current = null;
+                setDrop(null);
+              }}
+            >
+              {isEditing ? (
+                <input
+                  // biome-ignore lint/a11y/noAutofocus: an inline editor opened by an explicit gesture.
+                  autoFocus
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onBlur={commitEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") commitEdit();
+                    else if (e.key === "Escape") setEditId(null);
+                  }}
+                  aria-label="Rename topic"
+                  style={{ ...inputStyle, flex: 1, margin: "1px 6px", padding: "2px 6px" }}
+                />
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onPick(row.id)}
+                    onDoubleClick={() => editable && startEdit(row.id, row.topic)}
+                    title={editable ? `${row.topic} — double-click to rename` : row.topic}
+                    style={{ ...listRow, padding: "3px 4px 3px 6px", flex: 1, width: "auto" }}
+                  >
+                    {row.hasNote ? "📝 " : ""}
+                    {numbers?.get(row.id) ? `${numbers.get(row.id)} ` : ""}
+                    {row.topic || "(untitled)"}
+                    {row.progress !== undefined ? (
+                      <span style={{ marginLeft: 6, fontSize: fontSize.xs, color: colors.faint }}>
+                        {row.progress}%
+                      </span>
+                    ) : null}
+                  </button>
+                  {editable && row.depth > 0 && (
+                    <span style={{ display: "inline-flex", gap: 2, paddingRight: 6 }}>
+                      <button
+                        type="button"
+                        onClick={() => onIndent?.(row.id, "out")}
+                        title="Promote (outdent)"
+                        aria-label="Promote topic"
+                        style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
+                      >
+                        ◂
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onIndent?.(row.id, "in")}
+                        title="Demote (indent)"
+                        aria-label="Demote topic"
+                        style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
+                      >
+                        ▸
+                      </button>
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
     </Panel>
   );

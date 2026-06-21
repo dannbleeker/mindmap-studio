@@ -1082,6 +1082,95 @@ export function PlaybackBar({
   );
 }
 
+/** The guided-walk bar — step through topics one at a time with a spotlight + speaker notes (the
+ *  presentation tour). State (current index, the ordered topic list) lives in App. */
+export function WalkBar({
+  index,
+  total,
+  topic,
+  note,
+  onPrev,
+  onNext,
+  onExit,
+}: {
+  index: number;
+  total: number;
+  topic: string;
+  note?: string;
+  onPrev: () => void;
+  onNext: () => void;
+  onExit: () => void;
+}) {
+  const btn: CSSProperties = { padding: "2px 9px", fontSize: fontSize.md };
+  return (
+    <div
+      role="toolbar"
+      aria-label="Guided walk"
+      style={{
+        position: "absolute",
+        left: "50%",
+        bottom: 16,
+        transform: "translateX(-50%)",
+        zIndex: 11,
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        padding: "8px 12px",
+        background: "rgba(255,255,255,0.97)",
+        border: `1px solid ${colors.playbackBorder}`,
+        borderRadius: radius.xl,
+        boxShadow: "0 6px 24px rgba(31,27,77,0.18)",
+        maxWidth: "min(620px, calc(100% - 24px))",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <Button onClick={onPrev} disabled={index <= 0} style={btn} aria-label="Previous topic">
+          ◀
+        </Button>
+        <span
+          style={{
+            flex: 1,
+            minWidth: 120,
+            textAlign: "center",
+            fontSize: fontSize.md,
+            fontWeight: fontWeight.semibold,
+            color: colors.text,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {topic || "(untitled)"}
+        </span>
+        <Button onClick={onNext} disabled={index >= total - 1} style={btn} aria-label="Next topic">
+          ▶
+        </Button>
+        <span style={{ fontSize: fontSize.sm, color: colors.muted, whiteSpace: "nowrap" }}>
+          {index + 1} / {total}
+        </span>
+        <Button onClick={onExit} style={btn} title="Exit walk (Esc)">
+          Exit
+        </Button>
+      </div>
+      {note?.trim() ? (
+        <div
+          style={{
+            maxHeight: 96,
+            overflowY: "auto",
+            fontSize: fontSize.sm,
+            color: colors.muted,
+            whiteSpace: "pre-wrap",
+            borderTop: `1px solid ${colors.border}`,
+            paddingTop: 5,
+          }}
+        >
+          {note}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /** A reusable, named per-node style (the "styles organizer"); persisted app-wide. */
 export interface NamedStyle {
   id: string;

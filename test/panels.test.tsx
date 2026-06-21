@@ -15,6 +15,7 @@ import {
   StatsPanel,
   StyleBar,
   StylesPanel,
+  WalkBar,
 } from "../src/Panels";
 import type { SelectedNode, SelectionFields } from "../src/mindmap";
 import type { MapNode, MindMapDoc } from "../src/model/types";
@@ -566,6 +567,41 @@ describe("MarkerTagIndex (interaction)", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "Delete tag risk" }));
     expect(onDeleteTag).toHaveBeenCalledWith("risk");
+  });
+});
+
+describe("WalkBar", () => {
+  it("shows the current topic, position, note, and steps via the controls", async () => {
+    const onNext = vi.fn();
+    const onPrev = vi.fn();
+    const onExit = vi.fn();
+    render(
+      <WalkBar
+        index={1}
+        total={4}
+        topic="Second"
+        note="speaker note"
+        onPrev={onPrev}
+        onNext={onNext}
+        onExit={onExit}
+      />,
+    );
+    expect(screen.getByText("Second")).toBeTruthy();
+    expect(screen.getByText("2 / 4")).toBeTruthy();
+    expect(screen.getByText("speaker note")).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "Next topic" }));
+    expect(onNext).toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Exit" }));
+    expect(onExit).toHaveBeenCalled();
+  });
+
+  it("disables Prev on the first topic and Next on the last", () => {
+    const { rerender } = render(
+      <WalkBar index={0} total={3} topic="A" onPrev={noop} onNext={noop} onExit={noop} />,
+    );
+    expect(screen.getByRole("button", { name: "Previous topic" })).toHaveProperty("disabled", true);
+    rerender(<WalkBar index={2} total={3} topic="C" onPrev={noop} onNext={noop} onExit={noop} />);
+    expect(screen.getByRole("button", { name: "Next topic" })).toHaveProperty("disabled", true);
   });
 });
 

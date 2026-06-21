@@ -81,6 +81,8 @@ export interface ToolbarCanvas {
   applyDesign: (id: string) => void;
   /** Drill in: re-root the canvas view at the selected topic (focus-on-topic). */
   drillIn: () => void;
+  /** Start the guided walk (step through every topic in outline order with a spotlight + notes). */
+  startWalk: () => void;
   /** Align / distribute the selected free-canvas nodes (freeform mode). */
   alignSelection: (mode: "left" | "hcenter" | "right" | "top" | "vmiddle" | "bottom") => void;
   distributeSelection: (axis: "h" | "v") => void;
@@ -592,6 +594,11 @@ export function Toolbar({
             label="Drill into the selected topic"
             disabled={!canvas.selected}
             onSelect={() => canvas.drillIn()}
+          />
+          <MenuItem
+            icon={mi("present")}
+            label="Guided walk (step through topics)"
+            onSelect={() => canvas.startWalk()}
           />
           <MenuLabel>Format</MenuLabel>
           <MenuItem

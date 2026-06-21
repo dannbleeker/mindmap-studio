@@ -99,6 +99,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     () => m()?.balanceMap(),
     canvas.layout === "side" && !map.liveDoc.meta?.freeform,
   );
+  add("guided-walk", "Start guided walk", "view", () => canvas.startWalk());
   add("collapse-all", "Collapse all branches", "view", () => m()?.setAllExpanded(false));
   add("expand-all", "Expand all branches", "view", () => m()?.setAllExpanded(true));
   for (const n of [1, 2, 3, 4, 5])

@@ -19,6 +19,7 @@ import {
   PlaybackBar,
   StatsPanel,
   StylesPanel,
+  WalkBar,
 } from "./Panels";
 import { Breadcrumb, type Crumb } from "./components/Breadcrumb";
 import { CommandPalette } from "./components/CommandPalette";
@@ -395,16 +396,55 @@ export function App() {
   useEffect(() => {
     if (drillId && !findAnyNode(liveDoc, drillId)) setDrillId(null);
   }, [drillId, liveDoc]);
+  // Guided walk (presentation tour): step through every topic in outline order with a spotlight +
+  // speaker notes. `walk` is the current step index (null = off); the order is the depth-first outline.
+  const [walk, setWalk] = useState<number | null>(null);
+  const walkOrder = useMemo(() => outlineRows(liveDoc.root).map((r) => r.id), [liveDoc]);
+  const walkNode = walk != null ? findAnyNode(liveDoc, walkOrder[walk] ?? "") : null;
+  const startWalk = () => {
+    if (walkOrder.length > 0) setWalk(0);
+  };
+  const exitWalk = useCallback(() => {
+    setWalk(null);
+    setFocus(null);
+  }, []);
+  // On each step: spotlight the topic (reuse the focus dim pipeline) and centre it on the canvas.
+  // (Reads the doc via liveDocRef so it re-runs only when the step changes, not on every edit.)
+  useEffect(() => {
+    if (walk == null) return;
+    const id = walkOrder[walk];
+    const node = id ? findAnyNode(liveDocRef.current, id) : null;
+    if (!node) return;
+    setFocus({ id, topic: node.topic });
+    requestAnimationFrame(() => mapRef.current?.focusNode(id));
+  }, [walk, walkOrder]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setFocus(null);
         setDrillId(null);
+        setWalk(null);
+        return;
+      }
+      // While walking, ←/→ step through topics (ignored when typing in a field/editor).
+      if (walk != null && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
+        const el = document.activeElement;
+        const typing =
+          el instanceof HTMLElement &&
+          (el.isContentEditable ||
+            el.tagName === "INPUT" ||
+            el.tagName === "TEXTAREA" ||
+            el.tagName === "SELECT");
+        if (typing) return;
+        e.preventDefault();
+        const delta = e.key === "ArrowRight" ? 1 : -1;
+        setWalk((i) => (i == null ? i : Math.max(0, Math.min(walkOrder.length - 1, i + delta))));
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [walk, walkOrder.length]);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   // First-run "3 things to try" card (#13): shown once for a brand-new user, dismissed for good on
@@ -1380,6 +1420,7 @@ export function App() {
       drillIn: () => {
         if (selected) setDrillId(selected.id);
       },
+      startWalk,
       alignSelection: (mode) => mapRef.current?.alignSelection(mode),
       distributeSelection: (axis) => mapRef.current?.distributeSelection(axis),
       selectedCount,
@@ -1782,6 +1823,19 @@ export function App() {
                   onExit={() => setPlayback(null)}
                 />
               )}
+              {walk != null && walkNode && !playback ? (
+                <WalkBar
+                  index={walk}
+                  total={walkOrder.length}
+                  topic={walkNode.topic}
+                  note={walkNode.note}
+                  onPrev={() => setWalk((i) => (i == null ? i : Math.max(0, i - 1)))}
+                  onNext={() =>
+                    setWalk((i) => (i == null ? i : Math.min(walkOrder.length - 1, i + 1)))
+                  }
+                  onExit={exitWalk}
+                />
+              ) : null}
             </div>
           </div>
           {panels.infoOpen ? (

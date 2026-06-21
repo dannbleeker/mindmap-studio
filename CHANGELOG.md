@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Guided walk (presentation tour).** A new **Canvas ▸ Guided walk** (and ⌘K) steps through every
+  topic in outline order with a spotlight (the focus dim) + auto-centre + the topic's note shown as
+  speaker notes — a lightweight presentation between drill-in and full-screen Present. **←/→** step,
+  **Esc** exits; a bottom bar shows position, title, and the note.
+
 - **Drag-to-relate.** Hovering a topic now reveals a small grip on its right edge — drag it onto
   another topic to draw a relationship (cross-link) in one gesture, MindManager-style. The existing
   "Link to…" click flow still works; this just adds the faster drag path (React Flow loose-mode

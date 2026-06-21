@@ -79,6 +79,8 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       setHistoryOpen: vi.fn(),
       boardOpen: false,
       setBoardOpen: vi.fn(),
+      statsOpen: false,
+      setStatsOpen: vi.fn(),
       infoOpen: false,
       setInfoOpen: vi.fn(),
       infoMinimized: false,
@@ -153,9 +155,9 @@ describe("buildEditorCommands", () => {
     expect(props.io.exportPptx).toHaveBeenCalled();
   });
 
-  it("covers all 7 side-panel toggles and all 10 layouts", () => {
+  it("covers all 8 side-panel toggles and all 10 layouts", () => {
     const cmds = buildEditorCommands(mkProps());
-    expect(cmds.filter((c) => c.kind === "panel")).toHaveLength(7);
+    expect(cmds.filter((c) => c.kind === "panel")).toHaveLength(8);
     expect(cmds.filter((c) => c.kind === "layout")).toHaveLength(10);
   });
 

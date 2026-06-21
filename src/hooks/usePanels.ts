@@ -75,6 +75,8 @@ export interface PanelsState {
   setHistoryOpen: React.Dispatch<React.SetStateAction<boolean>>;
   boardOpen: boolean;
   setBoardOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  statsOpen: boolean;
+  setStatsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   numbered: boolean;
   setNumbered: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -143,6 +145,7 @@ export function usePanels(): UsePanels {
   const [stylesOpen, setStylesOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [boardOpen, setBoardOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
 
   // Persist the open-panel layout (only the durable four) so the workspace restores next time.
   useEffect(() => {
@@ -239,6 +242,8 @@ export function usePanels(): UsePanels {
       setHistoryOpen,
       boardOpen,
       setBoardOpen,
+      statsOpen,
+      setStatsOpen,
       numbered,
       setNumbered,
     },

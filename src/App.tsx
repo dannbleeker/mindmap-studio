@@ -17,6 +17,7 @@ import {
   type NamedStyle,
   OutlinePanel,
   PlaybackBar,
+  StatsPanel,
   StylesPanel,
 } from "./Panels";
 import { Breadcrumb, type Crumb } from "./components/Breadcrumb";
@@ -1589,6 +1590,7 @@ export function App() {
                 onDeleteTag={(t) => mapRef.current?.deleteTag(t)}
               />
             )}
+            {panels.statsOpen && <StatsPanel doc={liveDoc} />}
             {panels.filterOpen && (
               <FilterPanel
                 root={liveDoc.root}

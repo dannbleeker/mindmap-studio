@@ -32,6 +32,8 @@ export interface ToolbarPanels {
   setHistoryOpen: (fn: (v: boolean) => boolean) => void;
   boardOpen: boolean;
   setBoardOpen: (fn: (v: boolean) => boolean) => void;
+  statsOpen: boolean;
+  setStatsOpen: (fn: (v: boolean) => boolean) => void;
   infoOpen: boolean;
   setInfoOpen: (fn: (v: boolean) => boolean) => void;
   infoMinimized: boolean;
@@ -517,6 +519,13 @@ export function Toolbar({
             checked={panels.boardOpen}
             trailing={mi("check")}
             onSelect={() => panels.setBoardOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("grid")}
+            label="Map statistics"
+            checked={panels.statsOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setStatsOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("note")}

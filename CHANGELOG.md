@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Map statistics panel.** A new **View ▸ Map statistics** panel (⌘K too) summarises the whole map
+  at a glance — topic / leaf / depth counts, task health (tasks, completed %, **overdue**), and content
+  tallies (notes, attachments, distinct tags & markers, relationships, boundaries). Numbers come from a
+  pure `mapStats()` so they're unit-tested independently.
+
+- **SmartRules-lite — more conditional-format triggers.** Conditional styles can now match **overdue**
+  tasks, **priority ≤ N** (1=High), **topic text contains…**, and **has attachment** — alongside the
+  existing tag / marker / completed triggers. Extends the pure `matchesRule` / `describeRule` core
+  (so canvas == export) and the Styles panel's rule builder.
+
 - **Tag autocomplete + map-wide tag manager.** The inspector's *Add a tag* box now suggests tags
   already used in the map (a `<datalist>`), so naming stays consistent. The **Markers & tags** panel
   becomes a manager for tags: **✎** renames a tag everywhere (rename to an existing name **merges**

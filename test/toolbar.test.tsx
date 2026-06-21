@@ -98,6 +98,7 @@ function setup(
     pasteFormat: vi.fn(),
     canPasteFormat: false,
     shuffleBranchColors: vi.fn(),
+    drillIn: vi.fn(),
   };
   const find = {
     query: "",

@@ -111,6 +111,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       pasteFormat: vi.fn(),
       canPasteFormat: false,
       shuffleBranchColors: vi.fn(),
+      drillIn: vi.fn(),
     },
     find: {
       query: "",

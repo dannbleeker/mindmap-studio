@@ -4,10 +4,14 @@ import { mindManagerIconToEmoji } from "../icons";
 import { isDangerousUrl } from "../io/urlSafety";
 import type {
   Boundary,
+  Callout,
   CrossLink,
+  MapAttachment,
+  MapImage,
   MapNode,
   MindMapDoc,
   NodeId,
+  NodeShape,
   NodeStyle,
   TaskInfo,
 } from "../model/types";
@@ -23,22 +27,25 @@ import type {
 // deliberately drops, and throws a useful error when handed something that is
 // not a MindManager map.
 //
-// Imported: topic tree + text (Text@PlainText), notes (full NotesXhtmlData XHTML
-// body, falling back to @PreviewPlainText), stock icons (Icon@IconType), user
-// tags (TextLabels>TextLabel@TextLabelName), per-topic colour + font (Topic>Color
-// @FillColor/@LineColor and Text>Font@Color/@Name/@Size/@Bold/@Underline), task
-// info (Task@StartDate/@DeadlineDate/@TaskPriority/@TaskPercentage/@Resources),
-// hyperlinks (Hyperlink@Url), relationships (Relationships>Relationship>2x
-// ConnectionGroup>Connection>ObjectReference@OIdRef), boundaries
-// (Topic>OneBoundary, over the topic's subtree), floating topics
-// (FloatingTopics), and each main branch's two-sided side (Offset@CX sign,
-// depth-1 only).
+// Imported: topic tree + text (Text@PlainText), rich-text runs (Text>FontRange →
+// topicRich), notes (full NotesXhtmlData XHTML body, falling back to
+// @PreviewPlainText), stock icons (Icon@IconType), user tags
+// (TextLabels>TextLabel@TextLabelName), per-topic colour/font/shape (Topic>Color,
+// Text>Font, SubTopicShape), task info (Task@StartDate/@DeadlineDate/
+// @TaskPriority/@TaskPercentage/@Resources), embedded images
+// (OneImage>…>cor:Uri mmarch://bin/) and attachments (AttachmentGroup>…>cor:Uri),
+// hyperlinks (Hyperlink@Url), relationships + their styling (colour/width/dash/
+// arrowheads), boundaries + their styling (colour/shape/dash), callouts
+// (FloatingTopics w/ CalloutFloatingTopicShape), the map background colour
+// (StyleGroup>BackgroundFill), floating topics, and each main branch's two-sided
+// side (Offset@CX sign, depth-1 only).
 //
 // Still dropped (no model home / out of scope, by design): theme-only styling
-// (topics with no explicit colour inherit the StyleGroup theme we don't resolve),
-// summary brackets (their span is positional/implicit in the schema), embedded
-// images + attachments (Phase B), the Gantt/resource-scheduling layer beyond the
-// per-topic task fields above, SmartRules, spreadsheets, and live OLE objects.
+// (topics with no explicit attributes inherit the StyleGroup theme we don't
+// resolve), summary brackets (their span is positional/implicit in the schema),
+// vector (EMF/WMF) images without a raster fallback, the Gantt/resource-scheduling
+// layer beyond the per-topic task fields above, SmartRules, spreadsheets, and live
+// OLE objects.
 
 export interface MmapImportResult {
   doc: MindMapDoc;
@@ -53,6 +60,10 @@ type Xml = any;
 interface ParseContext {
   warnings: string[];
   boundaries: Boundary[];
+  /** The unzipped archive — image/attachment bytes live here under `bin/<uuid>.bin`. */
+  files: Record<string, Uint8Array>;
+  /** Callout topics lifted onto their parent (counted so the honesty check doesn't flag them). */
+  calloutCount: number;
 }
 
 function asList<T>(x: T | T[] | undefined | null): T[] {
@@ -151,6 +162,8 @@ function extractStyle(topic: Xml): NodeStyle | undefined {
     if (truthyAttr(font[`${ATTR}Bold`])) style.fontWeight = "bold";
     if (truthyAttr(font[`${ATTR}Underline`])) style.textDecoration = "underline";
   }
+  const shape = mapShape(topic);
+  if (shape) style.shape = shape;
   return Object.keys(style).length > 0 ? style : undefined;
 }
 
@@ -181,6 +194,241 @@ function extractTask(topic: Xml): TaskInfo | undefined {
     .filter(Boolean);
   if (resources.length > 0) info.resources = resources;
   return Object.keys(info).length > 0 ? info : undefined;
+}
+
+// --- Phase B/C: binaries, rich text, shapes, styling, callouts ------------------------------------
+
+/** Base64-encode bytes (for data: URLs). btoa exists in browsers and Node ≥16. */
+function toBase64(bytes: Uint8Array): string {
+  let bin = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
+}
+
+/** Text of a `cor:Uri` node (string, or {#text}). */
+function uriText(u: Xml): string | undefined {
+  if (typeof u === "string") return u;
+  const t = u?.["#text"];
+  return typeof t === "string" ? t : undefined;
+}
+
+/** Resolve an `mmarch://bin/<uuid>.bin` reference to the archive entry's bytes (case/basename tolerant). */
+function resolveBin(uri: unknown, files: Record<string, Uint8Array>): Uint8Array | undefined {
+  if (typeof uri !== "string") return undefined;
+  const path = uri.replace(/^mmarch:\/\//i, "").replace(/^\/+/, "");
+  if (files[path]) return files[path];
+  const lower = path.toLowerCase();
+  const base = lower.split("/").pop();
+  const key = Object.keys(files).find(
+    (k) => k.toLowerCase() === lower || k.toLowerCase().split("/").pop() === base,
+  );
+  return key ? files[key] : undefined;
+}
+
+const EXT_MIME: Record<string, string> = {
+  pdf: "application/pdf",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  svg: "image/svg+xml",
+  txt: "text/plain",
+  csv: "text/csv",
+  md: "text/markdown",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  zip: "application/zip",
+};
+function mimeFromName(name: string): string {
+  return EXT_MIME[name.split(".").pop()?.toLowerCase() ?? ""] ?? "application/octet-stream";
+}
+
+// Browser-renderable raster image types (Metafile = EMF/WMF can't render in a browser).
+const IMAGE_MIME: Record<string, string> = { PngImage: "image/png", IconImage: "image/png" };
+
+/** Embedded topic image: Topic>OneImage>Image>ImageData>cor:Uri (mmarch://bin/…), with a raster
+ *  AlternateImageData fallback for vector primaries. Optional ImageSize (mm) → capped display px. */
+function extractImage(topic: Xml, ctx: ParseContext): MapImage | undefined {
+  const img = topic?.OneImage?.Image;
+  if (!img) return undefined;
+  const fromData = (d: Xml): MapImage | undefined => {
+    if (!d) return undefined;
+    const type = String(d[`${ATTR}ImageType`] ?? "").replace(/^urn:mindjet:/, "");
+    const mime = IMAGE_MIME[type];
+    if (!mime) return undefined; // e.g. MetafileImage — not browser-renderable
+    const bytes = resolveBin(uriText(d.Uri), ctx.files);
+    return bytes ? { url: `data:${mime};base64,${toBase64(bytes)}` } : undefined;
+  };
+  const result = fromData(img.ImageData) ?? fromData(img.AlternateImageData);
+  if (!result) {
+    ctx.warnings.push("An embedded image was skipped (unsupported format or missing data).");
+    return undefined;
+  }
+  // ImageSize is in millimetres; convert at 96dpi and cap the on-canvas display (aspect preserved).
+  let w = Number(img.ImageSize?.[`${ATTR}Width`]);
+  let h = Number(img.ImageSize?.[`${ATTR}Height`]);
+  w = Number.isFinite(w) && w > 0 ? (w / 25.4) * 96 : 0;
+  h = Number.isFinite(h) && h > 0 ? (h / 25.4) * 96 : 0;
+  const MAX = 280;
+  if (w > MAX) {
+    h *= MAX / w;
+    w = MAX;
+  }
+  if (h > MAX) {
+    w *= MAX / h;
+    h = MAX;
+  }
+  if (w > 0) result.width = Math.round(w);
+  if (h > 0) result.height = Math.round(h);
+  return result;
+}
+
+/** Embedded attachments: Topic>AttachmentGroup>AttachmentData>cor:Uri (mmarch://bin/…). The real
+ *  filename only survives in @FileName (the archive entry is a generic .bin). Folders are skipped. */
+function extractAttachments(topic: Xml, ctx: ParseContext): MapAttachment[] {
+  const out: MapAttachment[] = [];
+  for (const a of asList(topic?.AttachmentGroup?.AttachmentData)) {
+    if (String(a?.[`${ATTR}Type`] ?? "").replace(/^urn:mindjet:/, "") === "Folder") continue;
+    const bytes = resolveBin(uriText(a?.Uri), ctx.files);
+    if (!bytes) continue;
+    const name = String(a?.[`${ATTR}FileName`] ?? "attachment");
+    out.push({
+      name,
+      dataUrl: `data:${mimeFromName(name)};base64,${toBase64(bytes)}`,
+      size: bytes.length,
+    });
+  }
+  return out;
+}
+
+function escapeRich(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+interface RunAttr {
+  b?: boolean;
+  i?: boolean;
+  u?: boolean;
+  s?: boolean;
+  color?: string;
+}
+
+function wrapRun(text: string, a: RunAttr): string {
+  let inner = escapeRich(text).replace(/\n/g, "<br>");
+  if (a.b) inner = `<strong>${inner}</strong>`;
+  if (a.i) inner = `<em>${inner}</em>`;
+  if (a.u) inner = `<u>${inner}</u>`;
+  if (a.s) inner = `<s>${inner}</s>`;
+  if (a.color) inner = `<span style="color: ${a.color}">${inner}</span>`;
+  return inner;
+}
+
+/** Rich-text runs: Text>FontRange[@From,@To,@Bold,@Italic,@Underline,@Strikethrough,@Color] over the
+ *  PlainText (UTF-16 offsets). Build the canvas's sanitised inline-HTML subset directly (we only emit
+ *  allow-listed tags + a safe colour span, so it needs no DOMParser pass). undefined = no formatting. */
+function extractRich(topic: Xml, plain: string): string | undefined {
+  const ranges = asList(topic?.Text?.FontRange);
+  if (ranges.length === 0 || plain.length === 0) return undefined;
+  const attrs: RunAttr[] = Array.from({ length: plain.length }, () => ({}));
+  let any = false;
+  for (const r of ranges) {
+    const from = Math.max(0, Math.trunc(Number(r?.[`${ATTR}From`]) || 0));
+    const toRaw = Number(r?.[`${ATTR}To`]);
+    const to = Number.isFinite(toRaw) ? Math.min(plain.length, Math.trunc(toRaw)) : plain.length;
+    const a: RunAttr = {};
+    if (truthyAttr(r[`${ATTR}Bold`])) a.b = true;
+    if (truthyAttr(r[`${ATTR}Italic`])) a.i = true;
+    if (truthyAttr(r[`${ATTR}Underline`])) a.u = true;
+    if (truthyAttr(r[`${ATTR}Strikethrough`])) a.s = true;
+    const color = argbToHex(r[`${ATTR}Color`]);
+    if (color) a.color = color;
+    if (!a.b && !a.i && !a.u && !a.s && !a.color) continue;
+    for (let idx = from; idx < to; idx++) attrs[idx] = { ...attrs[idx], ...a };
+    any = true;
+  }
+  if (!any) return undefined;
+  const sig = (a: RunAttr) =>
+    `${a.b ? 1 : 0}${a.i ? 1 : 0}${a.u ? 1 : 0}${a.s ? 1 : 0}|${a.color ?? ""}`;
+  let html = "";
+  for (let i = 0; i < plain.length; ) {
+    let j = i + 1;
+    while (j < plain.length && sig(attrs[j]) === sig(attrs[i])) j++;
+    html += wrapRun(plain.slice(i, j), attrs[i]);
+    i = j;
+  }
+  return html;
+}
+
+/** Geometric topic shapes that map to a model NodeShape; Rectangle/RoundedRectangle ≈ the default
+ *  look (skipped), and None/Line/Image have no equivalent. */
+function mapShape(topic: Xml): NodeShape | undefined {
+  switch (
+    String(topic?.SubTopicShape?.[`${ATTR}SubTopicShape`] ?? "").replace(/^urn:mindjet:/, "")
+  ) {
+    case "Oval":
+    case "Circle":
+      return "ellipse";
+    case "Hexagon":
+      return "hexagon";
+    case "Octagon":
+      return "octagon";
+    default:
+      return undefined;
+  }
+}
+
+/** MindManager line-dash enum → the model's three styles. */
+function mapDash(v: unknown): "solid" | "dashed" | "dotted" | undefined {
+  const s = String(v ?? "").replace(/^urn:mindjet:/, "");
+  if (/dot/i.test(s)) return "dotted";
+  if (/dash/i.test(s)) return "dashed";
+  if (/solid/i.test(s)) return "solid";
+  return undefined;
+}
+
+/** Boundary outline shape enum → the model's boundary shapes. */
+function mapBoundaryShape(v: unknown): Boundary["shape"] | undefined {
+  const s = String(v ?? "").replace(/^urn:mindjet:/, "");
+  if (/curvedrectangle|roundedrectangle/i.test(s)) return "roundRect";
+  if (/rectangle/i.test(s)) return "rect";
+  if (/scallop|wave|curved|cloud/i.test(s)) return "cloud";
+  if (/zigzag|polygon/i.test(s)) return "polygon";
+  return undefined;
+}
+
+function isCalloutTopic(t: Xml): boolean {
+  // The marker is an empty self-closing element → parses to "" (falsy); test for the key's presence.
+  return t != null && typeof t === "object" && "CalloutFloatingTopicShape" in t;
+}
+
+let calloutCounter = 0;
+/** Callouts are floating topics under a parent carrying CalloutFloatingTopicShape — lifted onto the
+ *  parent node as annotation bubbles. (Their MindManager offsets are a different scale, so we stagger
+ *  them with sensible defaults rather than reuse the raw offset.) */
+function extractCallouts(topic: Xml, ctx: ParseContext): Callout[] {
+  const callouts: Callout[] = [];
+  asList(topic?.FloatingTopics?.Topic)
+    .filter(isCalloutTopic)
+    .forEach((c, idx) => {
+      const color = argbToHex(c?.Color?.[`${ATTR}FillColor`]);
+      calloutCounter += 1;
+      callouts.push({
+        id: `c${calloutCounter}`,
+        text: extractText(c),
+        dx: 140,
+        dy: idx * 64,
+        ...(color ? { color } : {}),
+      });
+      ctx.calloutCount += 1;
+    });
+  return callouts;
 }
 
 function extractIcons(topic: Xml): string[] {
@@ -238,8 +486,20 @@ function topicToNode(topic: Xml, ctx: ParseContext, depth = 0): MapNode {
   const style = extractStyle(topic);
   if (style) node.style = style;
 
+  const rich = extractRich(topic, node.topic);
+  if (rich) node.topicRich = rich;
+
   const task = extractTask(topic);
   if (task) node.task = task;
+
+  const image = extractImage(topic, ctx);
+  if (image) node.image = image;
+
+  const attachments = extractAttachments(topic, ctx);
+  if (attachments.length > 0) node.attachments = attachments;
+
+  const callouts = extractCallouts(topic, ctx);
+  if (callouts.length > 0) node.callouts = callouts;
 
   // Two-sided map: a MAIN branch (depth 1) records which half it sits on via the sign of its
   // horizontal offset from the central topic — MindManager stamps CX < 0 for the left side and
@@ -254,33 +514,69 @@ function topicToNode(topic: Xml, ctx: ParseContext, depth = 0): MapNode {
     topicToNode(child, ctx, depth + 1),
   );
 
-  // A boundary drawn on this topic encloses its subtree.
+  // A boundary drawn on this topic encloses its subtree; carry its explicit styling when present.
   if (topic?.OneBoundary) {
-    ctx.boundaries.push({ id: `b${ctx.boundaries.length + 1}`, nodeIds: subtreeIds(node) });
+    const b = topic.OneBoundary.Boundary ?? {};
+    const boundary: Boundary = { id: `b${ctx.boundaries.length + 1}`, nodeIds: subtreeIds(node) };
+    const color =
+      argbToHex(b?.Color?.[`${ATTR}LineColor`]) ?? argbToHex(b?.Color?.[`${ATTR}FillColor`]);
+    if (color) boundary.color = color;
+    const shape = mapBoundaryShape(b?.BoundaryShape?.[`${ATTR}BoundaryShape`]);
+    if (shape) boundary.shape = shape;
+    const dash = mapDash(b?.LineStyle?.[`${ATTR}LineDashStyle`]);
+    if (dash) boundary.dash = dash;
+    ctx.boundaries.push(boundary);
   }
 
   return node;
 }
 
+/** Arrowheads from the two endpoints' ConnectionShape (NoArrow|Arrow). Returns undefined to keep the
+ *  historical default ("to") when the file doesn't say. */
+function relArrow(cgs: Xml[]): CrossLink["arrow"] | undefined {
+  const shapeOf = (cg: Xml) =>
+    String(cg?.Connection?.DefaultConnectionStyle?.[`${ATTR}ConnectionShape`] ?? "");
+  const has = (s: string) => /arrow/i.test(s) && !/noarrow/i.test(s);
+  const f = shapeOf(cgs[0]);
+  const t = shapeOf(cgs[1]);
+  if (!f && !t) return undefined; // unspecified → leave the default
+  const fa = has(f);
+  const ta = has(t);
+  if (fa && ta) return "both";
+  if (fa) return "from";
+  if (ta) return "to";
+  return "none";
+}
+
 function extractRelationships(map: Xml): CrossLink[] {
   const links: CrossLink[] = [];
   asList(map?.Relationships?.Relationship).forEach((rel, i) => {
-    const oids = asList(rel?.ConnectionGroup)
+    const cgs = asList(rel?.ConnectionGroup);
+    const oids = cgs
       .map((cg) => cg?.Connection?.ObjectReference?.[`${ATTR}OIdRef`])
       .filter(Boolean)
       .map(String);
-    if (oids.length >= 2) {
-      const label = extractText(rel);
-      links.push({ id: `r${i + 1}`, from: oids[0], to: oids[1], ...(label ? { label } : {}) });
-    }
+    if (oids.length < 2) return;
+    const link: CrossLink = { id: `r${i + 1}`, from: oids[0], to: oids[1] };
+    const label = extractText(rel);
+    if (label) link.label = label;
+    const color = argbToHex(rel?.Color?.[`${ATTR}LineColor`]);
+    if (color) link.color = color;
+    const width = Number(rel?.LineStyle?.[`${ATTR}LineWidth`]);
+    if (Number.isFinite(width) && width > 0) link.width = width;
+    const dash = mapDash(rel?.LineStyle?.[`${ATTR}LineDashStyle`]);
+    if (dash) link.dash = dash;
+    const arrow = relArrow(cgs);
+    if (arrow) link.arrow = arrow;
+    links.push(link);
   });
   return links;
 }
 
 export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
-  const ctx: ParseContext = { warnings: [], boundaries: [] };
-
   const files = unzipSync(zipBytes);
+  const ctx: ParseContext = { warnings: [], boundaries: [], files, calloutCount: 0 };
+
   const entryName = Object.keys(files).find((k) => /(^|\/)document\.xml$/i.test(k));
   if (!entryName) {
     throw new Error(
@@ -305,20 +601,25 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
   }
 
   idCounter = 0;
+  calloutCounter = 0;
   const root = topicToNode(rootTopic, ctx);
 
-  // Map-level floating topics (legends, sticky notes outside the central tree).
+  // Map-level floating topics (legends, sticky notes outside the central tree). Callout-shaped floaters
+  // under the root were already lifted onto it as callouts (topicToNode), so exclude them here.
   const floatingTopics = [
     ...asList(map?.FloatingTopics?.Topic),
-    ...asList(rootTopic?.FloatingTopics?.Topic),
+    ...asList(rootTopic?.FloatingTopics?.Topic).filter((t) => !isCalloutTopic(t)),
   ].map((t) => topicToNode(t, ctx));
 
   const links = extractRelationships(map);
 
-  // Honesty check: warn about any topics still left behind.
+  // Per-map canvas background colour from the theme's BackgroundFill (colour only).
+  const background = argbToHex(map?.StyleGroup?.BackgroundFill?.[`${ATTR}FillColor`]);
+
+  // Honesty check: warn about any topics still left behind (callouts count as imported).
   const totalTopics = (xml.match(/<ap:Topic[\s>]/g) ?? []).length;
   const importedTopics =
-    countNodes(root) + floatingTopics.reduce((sum, f) => sum + countNodes(f), 0);
+    countNodes(root) + floatingTopics.reduce((sum, f) => sum + countNodes(f), 0) + ctx.calloutCount;
   if (totalTopics > importedTopics) {
     ctx.warnings.push(
       `${totalTopics - importedTopics} topic(s) outside the central hierarchy (floating/detached) were not imported.`,
@@ -340,7 +641,7 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
     ...(links.length > 0 ? { links } : {}),
     ...(ctx.boundaries.length > 0 ? { boundaries: ctx.boundaries } : {}),
     ...(floatingTopics.length > 0 ? { floatingTopics } : {}),
-    meta: { source: "mmap" },
+    meta: { source: "mmap", ...(background ? { background } : {}) },
   };
 
   return { doc, warnings: ctx.warnings };

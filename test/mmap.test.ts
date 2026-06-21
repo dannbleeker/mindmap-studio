@@ -198,6 +198,158 @@ describe("parseMmap", () => {
     expect(doc.root.style).toBeUndefined();
   });
 
+  // --- Phase B/C ---------------------------------------------------------------------------------
+
+  it("imports rich-text runs (FontRange) into topicRich, keeping the plain topic", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1">
+    <ap:Text PlainText="Hello world">
+      <ap:FontRange From="0" To="5" Bold="true" />
+      <ap:FontRange From="6" To="11" Color="ffcc0000" />
+    </ap:Text>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.topic).toBe("Hello world");
+    expect(doc.root.topicRich).toBe(
+      `<strong>Hello</strong> <span style="color: #cc0000">world</span>`,
+    );
+  });
+
+  it("imports a geometric topic shape (SubTopicShape → style.shape)", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Oval one" />
+    <ap:SubTopicShape SubTopicShape="urn:mindjet:Oval" />
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.style?.shape).toBe("ellipse");
+  });
+
+  it("imports an embedded image from bin/ as a data URL (OneImage → mmarch://)", () => {
+    const bytes = new Uint8Array([1, 2, 3, 4, 5]);
+    const { doc } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Pic" />
+    <ap:OneImage><ap:Image>
+      <ap:ImageData ImageType="urn:mindjet:PngImage"><ap:Uri>mmarch://bin/img1.bin</ap:Uri></ap:ImageData>
+      <ap:ImageSize Width="25.4" Height="25.4" />
+    </ap:Image></ap:OneImage>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+        "bin/img1.bin": bytes,
+      }),
+    );
+    expect(doc.root.image?.url).toBe(`data:image/png;base64,${btoa("\x01\x02\x03\x04\x05")}`);
+    expect(doc.root.image?.width).toBe(96); // 25.4mm @96dpi = 96px
+    expect(doc.root.image?.height).toBe(96);
+  });
+
+  it("skips a vector (EMF) image with no raster fallback, with a warning", () => {
+    const { doc, warnings } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Vector" />
+    <ap:OneImage><ap:Image>
+      <ap:ImageData ImageType="urn:mindjet:MetafileImage"><ap:Uri>mmarch://bin/v.bin</ap:Uri></ap:ImageData>
+    </ap:Image></ap:OneImage>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+        "bin/v.bin": new Uint8Array([9, 9]),
+      }),
+    );
+    expect(doc.root.image).toBeUndefined();
+    expect(warnings.some((w) => /embedded image was skipped/i.test(w))).toBe(true);
+  });
+
+  it("imports an embedded attachment, recovering the real name from @FileName", () => {
+    const bytes = new Uint8Array([65, 66, 67]); // "ABC"
+    const { doc } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Files" />
+    <ap:AttachmentGroup>
+      <ap:AttachmentData FileName="report.pdf" Type="urn:mindjet:File"><ap:Uri>mmarch://bin/att1.bin</ap:Uri></ap:AttachmentData>
+    </ap:AttachmentGroup>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+        "bin/att1.bin": bytes,
+      }),
+    );
+    expect(doc.root.attachments).toEqual([
+      { name: "report.pdf", dataUrl: `data:application/pdf;base64,${btoa("ABC")}`, size: 3 },
+    ]);
+  });
+
+  it("imports relationship styling (colour / width / dash / arrowheads)", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:SubTopics>
+      <ap:Topic OId="2"><ap:Text PlainText="A" /></ap:Topic>
+      <ap:Topic OId="3"><ap:Text PlainText="B" /></ap:Topic>
+    </ap:SubTopics>
+  </ap:Topic></ap:OneTopic>
+  <ap:Relationships><ap:Relationship>
+    <ap:Color LineColor="ffff0000" />
+    <ap:LineStyle LineWidth="3" LineDashStyle="urn:mindjet:Dash" />
+    <ap:ConnectionGroup><ap:Connection><ap:ObjectReference OIdRef="2" /><ap:DefaultConnectionStyle ConnectionShape="urn:mindjet:NoArrow" /></ap:Connection></ap:ConnectionGroup>
+    <ap:ConnectionGroup><ap:Connection><ap:ObjectReference OIdRef="3" /><ap:DefaultConnectionStyle ConnectionShape="urn:mindjet:Arrow" /></ap:Connection></ap:ConnectionGroup>
+  </ap:Relationship></ap:Relationships>
+</ap:Map>`),
+    );
+    expect(doc.links).toEqual([
+      { id: "r1", from: "2", to: "3", color: "#ff0000", width: 3, dash: "dashed", arrow: "to" },
+    ]);
+  });
+
+  it("imports boundary styling (colour / shape / dash)", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:SubTopics><ap:Topic OId="2"><ap:Text PlainText="Grouped" />
+      <ap:OneBoundary><ap:Boundary>
+        <ap:Color LineColor="ff00ff00" />
+        <ap:LineStyle LineDashStyle="urn:mindjet:Dot" />
+        <ap:BoundaryShape BoundaryShape="urn:mindjet:CurvedRectangle" />
+      </ap:Boundary></ap:OneBoundary>
+    </ap:Topic></ap:SubTopics>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.boundaries).toEqual([
+      { id: "b1", nodeIds: ["2"], color: "#00ff00", shape: "roundRect", dash: "dotted" },
+    ]);
+  });
+
+  it("lifts a callout floating-topic onto its parent (not a floating branch)", () => {
+    const { doc, warnings } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:FloatingTopics><ap:Topic OId="7"><ap:Text PlainText="Note bubble" />
+      <ap:CalloutFloatingTopicShape />
+    </ap:Topic></ap:FloatingTopics>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.callouts).toEqual([{ id: "c1", text: "Note bubble", dx: 140, dy: 0 }]);
+    expect(doc.floatingTopics).toBeUndefined(); // not double-imported as a floating branch
+    expect(warnings.some((w) => /outside the central hierarchy/.test(w))).toBe(false);
+  });
+
+  it("imports the map background colour (StyleGroup>BackgroundFill)", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:StyleGroup><ap:BackgroundFill FillColor="ffeeeeee" /></ap:StyleGroup>
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" /></ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.meta?.background).toBe("#eeeeee");
+  });
+
   it("generates an id for a topic that has no OId", () => {
     const { doc } = parseMmap(
       mmapOf(`${MAP_OPEN}

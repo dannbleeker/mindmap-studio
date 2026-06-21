@@ -286,8 +286,9 @@ whole map, and exiting brings back the rest with all its links and boundaries.
 
 ### Find & Replace
 
-Type in **Find** to jump between matching topics **and notes** — press **Enter** repeatedly to
-cycle hits (an `n/total` counter shows where you are). Type in the **Replace** box and click
+Type in **Find** and every matching topic is **ringed on the canvas** as you type, so you can see all
+hits at once; press **Enter** repeatedly to jump between them (an `n/total` counter shows where you
+are). Clearing the box removes the rings. Type in the **Replace** box and click
 **Replace all** to rewrite the search text across every matching topic. Press **`/`** anywhere
 (when you're not typing) to jump straight to Find.
 

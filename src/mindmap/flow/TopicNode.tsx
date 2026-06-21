@@ -224,6 +224,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     attachmentCount,
     attachmentNames,
     dimmed,
+    matched,
     dropTarget,
   } = data;
   // Conditional-formatting style sits *under* the node's own style (manual styling wins).
@@ -391,8 +392,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         cursor: isEditing ? "text" : "pointer",
         // Read-only Power Filter: fade nodes that aren't on a path to a match.
         opacity: dimmed ? 0.22 : 1,
-        // Drag-a-marker drop target highlight.
-        outline: markerDragOver ? "2px dashed #1b8a5e" : undefined,
+        // Drag-a-marker drop target highlight, else a Find-result highlight ring.
+        outline: markerDragOver ? "2px dashed #1b8a5e" : matched ? "2px solid #f5a623" : undefined,
         outlineOffset: 2,
         transition: "opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
       }}

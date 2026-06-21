@@ -83,7 +83,7 @@ import {
   initPwaUpdateToast,
 } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
-import { type LibraryHit, searchLibrary } from "./search";
+import { type LibraryHit, findDocMatches, searchLibrary } from "./search";
 import { stickerImage } from "./stickers";
 import {
   type MapSummary,
@@ -200,6 +200,12 @@ export function App() {
   });
   const { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace } =
     useFind(mapRef, () => liveDocRef.current);
+  // Live Find-result set → a highlight ring on every matching topic (the canvas reads `highlightIds`).
+  // Recomputed as you type or edit; null when the Find box is empty.
+  const searchMatchIds = useMemo(
+    () => (query.trim() ? new Set(findDocMatches(liveDoc, query)) : null),
+    [query, liveDoc],
+  );
 
   function changeLayout(value: LayoutKind) {
     setLayout(value);
@@ -1634,6 +1640,7 @@ export function App() {
                 direction={layout}
                 numbered={panels.numbered}
                 litIds={playback ? null : litIds}
+                highlightIds={playback ? null : searchMatchIds}
                 drillId={playback ? null : drillId}
                 onChange={(d) => {
                   if (playback) return; // read-only while reviewing history

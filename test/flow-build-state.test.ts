@@ -91,6 +91,15 @@ describe("buildFlowState", () => {
     expect(build().nodes.every((n) => n.data.dimmed === undefined)).toBe(true);
   });
 
+  it("flags Find results with `matched`; no matched key when there's no active search", () => {
+    const found = build({ highlightIds: new Set(["a", "a1"]) });
+    const byId = new Map(found.nodes.map((n) => [n.id, n]));
+    expect(byId.get("a")?.data.matched).toBe(true);
+    expect(byId.get("a1")?.data.matched).toBe(true);
+    expect(byId.get("b")?.data.matched).toBe(false);
+    expect(build().nodes.every((n) => n.data.matched === undefined)).toBe(true);
+  });
+
   it("stamps every branch edge's attachSide/attachBow to match the shared floating.ts geometry (canvas==export)", () => {
     const kind = "left" as const;
     const { nodes, edges } = build({ kind });

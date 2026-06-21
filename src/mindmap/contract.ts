@@ -307,6 +307,8 @@ export interface MindMapProps {
   numbered?: boolean;
   /** Read-only Power Filter: ids to keep lit; all other nodes/edges dim. null/undefined = off. */
   litIds?: Set<string> | null;
+  /** Find results: node ids to draw with a highlight ring. null/undefined = no active search. */
+  highlightIds?: Set<string> | null;
   /** Drill-in (focus-on-topic): re-root the *view* at this node id so its subtree fills the canvas.
    *  A pure view transform — edits still apply to the full map. null/undefined = the whole map. */
   drillId?: string | null;

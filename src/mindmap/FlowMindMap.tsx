@@ -1,5 +1,6 @@
 import "@xyflow/react/dist/style.css";
 import {
+  ConnectionMode,
   Controls,
   ReactFlow,
   ReactFlowProvider,
@@ -1319,7 +1320,15 @@ function FlowInner({
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           nodesDraggable
-          nodesConnectable={false}
+          // Drag-to-relate: pulling from a topic's hover handle onto another topic draws a cross-link
+          // (loose mode lets the drag end anywhere on the target node, not just its anchor handle).
+          nodesConnectable
+          connectionMode={ConnectionMode.Loose}
+          onConnect={(c) => {
+            if (c.source && c.target && c.source !== c.target) {
+              apply(addLink(docRef.current, c.source, c.target));
+            }
+          }}
           deleteKeyCode={null}
           zoomOnDoubleClick={false}
           colorMode={(theme ?? mindManagerTheme).type}

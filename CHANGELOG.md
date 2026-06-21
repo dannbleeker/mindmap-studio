@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Drag-to-relate.** Hovering a topic now reveals a small grip on its right edge — drag it onto
+  another topic to draw a relationship (cross-link) in one gesture, MindManager-style. The existing
+  "Link to…" click flow still works; this just adds the faster drag path (React Flow loose-mode
+  connections → the shared `addLink` op, so the link is identical).
+
 - **Paste a spreadsheet selection as topics.** The **Paste text → topics** dialog now recognises a
   table copied from Excel / Google Sheets (or any TSV/CSV block): each **row becomes a topic**, extra
   columns become its **note** (labelled by the header row when present), and a **Tags** column becomes

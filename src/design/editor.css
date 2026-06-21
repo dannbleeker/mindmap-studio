@@ -651,6 +651,19 @@
   pointer-events: none;
 }
 
+/* Drag-to-relate grip — hidden until the topic is hovered (or the grip itself is), so it's
+   discoverable without cluttering every node. React Flow renders handles inside .react-flow__node. */
+.react-flow__node .mm-relate-handle {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.react-flow__node:hover .mm-relate-handle {
+  opacity: 0.55;
+}
+.react-flow__node .mm-relate-handle:hover {
+  opacity: 1;
+}
+
 /* Empty-map onboarding coachmark (#1) — anchored under the root, theme-reactive via --ed-*. */
 .mm-coachmark {
   display: flex;

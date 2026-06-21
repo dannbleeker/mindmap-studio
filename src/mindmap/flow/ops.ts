@@ -86,6 +86,26 @@ export function findNode(doc: MindMapDoc, id: string): MapNode | null {
   return locate(doc.root, id)?.node ?? null;
 }
 
+/** A read-only "view" of the map re-rooted at `drillId` (drill-in / focus-on-topic): the drilled node
+ *  becomes the root (expanded), and the map-level overlays are dropped while drilled (they reference
+ *  the wider map). Returns the doc UNCHANGED when there's no/invalid drill or it targets the real root,
+ *  so callers can use it unconditionally. Pure — edits still run against the full doc, so drilling is a
+ *  pure view transform (no model split, no merge-back). */
+export function viewDoc(doc: MindMapDoc, drillId: string | null | undefined): MindMapDoc {
+  if (!drillId || drillId === doc.root.id) return doc;
+  const node = findNode(doc, drillId);
+  if (!node) return doc;
+  return {
+    ...doc,
+    root: { ...node, collapsed: false },
+    links: [],
+    boundaries: [],
+    summaries: [],
+    floatingTopics: [],
+    backdrop: undefined,
+  };
+}
+
 /** The ancestor chain (root → parent, excluding the node itself) and depth of a node in the central
  *  tree; depth 0 = the root. Returns null if the id isn't in the central tree (e.g. a floating
  *  topic). Pure — feeds the inspector's breadcrumb + facts line. */

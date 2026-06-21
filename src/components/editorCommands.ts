@@ -121,6 +121,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     },
     !!sel,
   );
+  add("drill-in", "Drill into the selected topic", "view", () => canvas.drillIn(), !!sel);
   add("toggle-numbering", "Toggle outline numbering", "view", () => panels.setNumbered((v) => !v));
   add("toggle-line-jumps", "Toggle line jumps", "view", () =>
     m()?.setLineJumps(!map.liveDoc.meta?.lineJumps),

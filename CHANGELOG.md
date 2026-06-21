@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Drill in (focus on topic).** Re-root the canvas at the selected topic so its subtree fills the
+  view — MindManager's "focus on topic" (view menu / ⌘K "Drill into the selected topic"). A bar shows
+  what you're drilled into with **Exit (Esc)**, and the breadcrumb becomes the drill navigator (click
+  an ancestor to re-root there, the map root to exit). It's **fully editable** while drilled and
+  **non-destructive**: it's a pure view transform (`viewDoc`) — every edit, undo, and autosave still
+  operates on the whole map, so exiting restores the full map with all cross-links/boundaries intact.
+
 - **Canvas breadcrumb bar.** When a topic is selected, a thin location bar above the canvas shows its
   path (Root › Branch › …); click any crumb to centre that ancestor — MindManager's breadcrumb,
   handy for navigating big maps. (The path was previously only in the inspector header.)

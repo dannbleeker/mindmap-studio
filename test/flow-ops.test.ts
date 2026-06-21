@@ -67,6 +67,7 @@ import {
   setTopicRich,
   toggleCollapse,
   toggleIcon,
+  viewDoc,
 } from "../src/mindmap/flow/ops";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 
@@ -176,6 +177,23 @@ describe("flow ops — content", () => {
     expect(findNode(collapsed, "a")?.collapsed).toBe(true);
     expect(findNode(collapsed, "r")?.collapsed).toBeUndefined(); // root stays open
     expect(findNode(setAllExpanded(collapsed, true).doc, "a")?.collapsed).toBe(false);
+  });
+
+  it("viewDoc re-roots at the drill target and drops map-level overlays (full doc otherwise)", () => {
+    const v = viewDoc(base(), "a");
+    expect(v.root.id).toBe("a");
+    expect(v.root.collapsed).toBe(false); // the drilled node is shown expanded
+    expect(v.root.children.map((c) => c.id)).toEqual(["a1", "a2"]);
+    expect(v.links).toEqual([]); // map-level links/boundaries hidden while drilled
+    expect(v.boundaries).toEqual([]);
+    // No/invalid/root drill → the full doc unchanged (callers can use it unconditionally).
+    expect(viewDoc(base(), null)).toEqual(base());
+    expect(viewDoc(base(), "missing")).toEqual(base());
+    expect(viewDoc(base(), "r")).toEqual(base());
+    // Pure: the drilled node in the source is not mutated.
+    const src = base();
+    viewDoc(src, "a");
+    expect(findNode(src, "a")?.collapsed).toBeUndefined();
   });
 
   it("assignBranchColors gives each top branch a cycled colour (no-op on empty palette)", () => {

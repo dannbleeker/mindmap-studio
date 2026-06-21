@@ -132,6 +132,7 @@ import {
   setTopicRich,
   toggleCollapse,
   toggleIcon,
+  viewDoc,
 } from "./flow/ops";
 import { project } from "./flow/project";
 import {
@@ -240,6 +241,7 @@ function FlowInner({
   direction = "side",
   numbered = false,
   litIds = null,
+  drillId = null,
   onChange,
   onSelect,
   onSelectionCount,
@@ -256,9 +258,13 @@ function FlowInner({
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
   const isMobile = useIsMobile();
+  // Drill-in (#4): re-root the *view* at `drillId` so its subtree fills the canvas. `viewDoc` returns
+  // the full doc unchanged when not drilled, so the normal path is untouched; edits still run on the
+  // full doc (docRef), making drilling a pure view transform.
+  const viewOf = useMemo(() => viewDoc(doc, drillId), [doc, drillId]);
   const projected = useMemo(
-    () => project(doc, palette, numbered, doc.meta?.freeform ? "freeform" : direction),
-    [doc, palette, numbered, direction],
+    () => project(viewOf, palette, numbered, viewOf.meta?.freeform ? "freeform" : direction),
+    [viewOf, palette, numbered, direction],
   );
   const initialNodes = useMemo(() => {
     const pos = computeLayout(
@@ -333,6 +339,7 @@ function FlowInner({
   // without re-creating. (docRef/historyRef/mountSession are NOT mirrors — they hold their own state.)
   const paletteRef = useLatestRef(palette);
   const directionRef = useLatestRef(direction);
+  const drillIdRef = useLatestRef(drillId);
   const numberedRef = useLatestRef(numbered);
   const litIdsRef = useLatestRef(litIds);
   const selectedRef = useLatestRef(selectedId);
@@ -361,7 +368,10 @@ function FlowInner({
   const sync = useCallback(
     (newDoc: MindMapDoc, nextSelected?: string | null) => {
       docRef.current = newDoc;
-      setRenderDoc(newDoc);
+      // The view is re-rooted when drilled (pure transform); docRef stays the FULL doc so every edit,
+      // undo, and onChange still operate on the whole map. Overlays read renderDoc, so it's the view.
+      const view = viewDoc(newDoc, drillIdRef.current);
+      setRenderDoc(view);
       // A structural op passes its result node as the next anchor → selection collapses to it. A
       // bulk edit passes nothing → the multi-selection set is preserved across the re-render.
       if (nextSelected !== undefined) {
@@ -374,7 +384,7 @@ function FlowInner({
       // The whole model→canvas transform (project → layout → attachSide/attachBow → selection/dimming
       // flags) is the pure, unit-tested buildFlowState(); sync() only owns the React side effects.
       const { nodes, edges } = buildFlowState({
-        doc: newDoc,
+        doc: view,
         palette: paletteRef.current,
         numbered: numberedRef.current,
         kind,
@@ -388,6 +398,19 @@ function FlowInner({
     },
     [getNodes, setNodes, setEdges],
   );
+
+  // Re-project + refit when the drill target changes (enter / exit / switch). Skips the initial mount
+  // so it doesn't fight the restored-session viewport; thereafter a drill change re-roots and fits.
+  const drillMounted = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: sync reads drillIdRef; refit only on change.
+  useEffect(() => {
+    if (!drillMounted.current) {
+      drillMounted.current = true;
+      return;
+    }
+    sync(docRef.current);
+    requestAnimationFrame(() => fitView({ duration: 300 }));
+  }, [drillId, sync, fitView]);
 
   const fireSelect = useCallback((id: string | null) => {
     onSelectRef.current?.(resolveSelectedNode(docRef.current, id));

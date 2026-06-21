@@ -74,6 +74,8 @@ export interface ToolbarCanvas {
   canPasteFormat: boolean;
   /** Auto-colour the top branches from the theme palette. */
   shuffleBranchColors: () => void;
+  /** Drill in: re-root the canvas view at the selected topic (focus-on-topic). */
+  drillIn: () => void;
 }
 
 /** The find / replace form state + actions. */
@@ -566,6 +568,12 @@ export function Toolbar({
               canvas.selected &&
               canvas.setFocus({ id: canvas.selected.id, topic: canvas.selected.topic })
             }
+          />
+          <MenuItem
+            icon={mi("layers")}
+            label="Drill into the selected topic"
+            disabled={!canvas.selected}
+            onSelect={() => canvas.drillIn()}
           />
           <MenuLabel>Format</MenuLabel>
           <MenuItem

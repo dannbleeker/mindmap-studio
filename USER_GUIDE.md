@@ -272,6 +272,15 @@ to talk through one part of a busy map without deleting or collapsing anything. 
 click **Show all** in the banner to bring the rest back. (Like the Power Filter, it only changes
 opacity — nothing is removed.)
 
+### Drill into a topic
+
+Where **Focus** only dims, **Drill in** *re-roots* the canvas at the selected topic so its subtree
+fills the screen — MindManager's "focus on topic". Select a topic and choose **Drill into the selected
+topic** (view menu or **⌘K**). A bar shows what you're drilled into; press **Esc** or **Exit** to come
+back out, and use the [breadcrumb](#breadcrumb-bar) to re-root at an ancestor (or click the map root to
+exit). You can **keep editing while drilled** — it's just a view, so every change still belongs to the
+whole map, and exiting brings back the rest with all its links and boundaries.
+
 ### Find & Replace
 
 Type in **Find** to jump between matching topics **and notes** — press **Enter** repeatedly to

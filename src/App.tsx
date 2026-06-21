@@ -367,13 +367,23 @@ export function App() {
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
   const focusLit = useMemo(() => (focus ? focusSet(liveDoc, focus.id) : null), [focus, liveDoc]);
   const litIds = focusLit && focusLit.size > 0 ? focusLit : (filterHits?.lit ?? null);
-  // Drop a focus whose node has been deleted, and let Esc clear it.
+  // Drill-in (focus-on-topic): the node whose subtree fills the canvas (a pure view re-root). Null =
+  // the whole map. Editing still works while drilled — the canvas keeps editing the full doc.
+  const [drillId, setDrillId] = useState<string | null>(null);
+  const drillTopic = drillId ? (findAnyNode(liveDoc, drillId)?.topic ?? null) : null;
+  // Drop a focus/drill whose node has been deleted, and let Esc clear them.
   useEffect(() => {
     if (focus && (!focusLit || focusLit.size === 0)) setFocus(null);
   }, [focus, focusLit]);
   useEffect(() => {
+    if (drillId && !findAnyNode(liveDoc, drillId)) setDrillId(null);
+  }, [drillId, liveDoc]);
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFocus(null);
+      if (e.key === "Escape") {
+        setFocus(null);
+        setDrillId(null);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -1296,6 +1306,9 @@ export function App() {
       pasteFormat,
       canPasteFormat: copiedStyle !== null,
       shuffleBranchColors: () => mapRef.current?.shuffleBranchColors(),
+      drillIn: () => {
+        if (selected) setDrillId(selected.id);
+      },
     },
     find: { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace },
     io: {
@@ -1467,8 +1480,43 @@ export function App() {
           </div>
         )}
 
+        {drillId && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              padding: "4px 12px",
+              background: "#e9f6ef",
+              borderBottom: "1px solid #bfe6d2",
+              fontSize: 13,
+              color: "#14573a",
+            }}
+          >
+            <span>
+              ⤢ Drilled into: <strong>{drillTopic || "(untitled)"}</strong>
+            </span>
+            <button
+              type="button"
+              onClick={() => setDrillId(null)}
+              style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
+            >
+              Exit (Esc)
+            </button>
+          </div>
+        )}
+
         {crumbs.length > 1 && (
-          <Breadcrumb crumbs={crumbs} onPick={(id) => mapRef.current?.focusNode(id)} />
+          <Breadcrumb
+            crumbs={crumbs}
+            // While drilled, the breadcrumb is the drill navigator: click an ancestor to re-root there,
+            // or the map root to exit. Otherwise a crumb just centres that node.
+            onPick={(id) => {
+              if (drillId) setDrillId(id === liveDoc.root.id ? null : id);
+              else mapRef.current?.focusNode(id);
+            }}
+          />
         )}
 
         <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
@@ -1552,6 +1600,7 @@ export function App() {
                 direction={layout}
                 numbered={panels.numbered}
                 litIds={playback ? null : litIds}
+                drillId={playback ? null : drillId}
                 onChange={(d) => {
                   if (playback) return; // read-only while reviewing history
                   liveDocRef.current = d;

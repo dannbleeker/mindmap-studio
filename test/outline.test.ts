@@ -113,6 +113,27 @@ describe("outlineNumbers", () => {
   it("returns an empty map for a childless root", () => {
     expect(outlineNumbers({ id: "x", topic: "Bare", children: [] }).size).toBe(0);
   });
+
+  it("renders the legal-outline scheme (I, I.A, II) by level", () => {
+    const nums = outlineNumbers(tagged, "outline");
+    expect(nums.get("a")).toBe("I"); // depth 0 → upper Roman
+    expect(nums.get("a1")).toBe("I.A"); // depth 1 → upper alpha
+    expect(nums.get("b")).toBe("II");
+  });
+
+  it("cycles outline glyphs by depth (I, A, 1, a, i) and handles wide/deep counts", () => {
+    // A 6-level-deep chain exercises the depth cycle and the wrap back to Roman at level 5.
+    let node: MapNode = { id: "n6", topic: "L6", children: [] };
+    for (let d = 5; d >= 1; d--) node = { id: `n${d}`, topic: `L${d}`, children: [node] };
+    const root: MapNode = { id: "r", topic: "R", children: [node] };
+    const nums = outlineNumbers(root, "outline");
+    expect(nums.get("n1")).toBe("I");
+    expect(nums.get("n2")).toBe("I.A");
+    expect(nums.get("n3")).toBe("I.A.1");
+    expect(nums.get("n4")).toBe("I.A.1.a");
+    expect(nums.get("n5")).toBe("I.A.1.a.i");
+    expect(nums.get("n6")).toBe("I.A.1.a.i.I"); // level 5 wraps back to upper Roman
+  });
 });
 
 const linkDoc = (): MindMapDoc => ({

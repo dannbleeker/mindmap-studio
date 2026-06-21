@@ -646,6 +646,19 @@ export function Toolbar({
             active={panels.numbered}
             onClick={() => panels.setNumbered((v) => !v)}
           />
+          {panels.numbered ? (
+            <TBtn
+              icon="layers"
+              label={
+                liveDoc.meta?.numberStyle === "outline"
+                  ? "Numbering: outline (I, A, 1, a) — switch to decimal"
+                  : "Numbering: decimal (1, 1.1) — switch to outline"
+              }
+              onClick={() =>
+                m()?.setNumberStyle(liveDoc.meta?.numberStyle === "outline" ? "decimal" : "outline")
+              }
+            />
+          ) : null}
           <TBtn
             icon="link"
             label="Line jumps where relationships cross"

@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Outline numbering schemes.** When numbering is shown you can switch between **decimal**
+  (1, 1.1, 1.1.1) and the **legal outline** (I, I.A, I.A.1, I.A.1.a … cycling I/A/1/a/i by level) from
+  the numbering control in the toolbar — MindManager's numbering options. The scheme is a per-map
+  property (`meta.numberStyle`, lossless) shared by the canvas, the outline panel, and the inspector.
+
 - **Word count & reading time.** The **Map statistics** panel now totals every topic title + note
   into a word count and an estimated reading time (~200 wpm); the inspector's facts line shows a
   per-topic "~N min read" for longer topics. Pure `countWords` + extended `mapStats`.

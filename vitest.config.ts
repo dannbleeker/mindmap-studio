@@ -43,6 +43,7 @@ export default defineConfig({
       ["test/shortcuts-dialog.test.tsx", "jsdom"],
       ["test/first-run-card.test.tsx", "jsdom"],
       ["test/fileSystem.test.ts", "jsdom"],
+      ["test/breadcrumb.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.

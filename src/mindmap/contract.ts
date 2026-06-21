@@ -88,6 +88,10 @@ export interface MindMapHandle {
    *  stash it when switching away from a document tab and restore it (via `initialSession`) on a
    *  remount, making tab switches lossless for the recently-used set. */
   getSession: () => CanvasSession;
+  /** The live viewport (pan/zoom) — captured by Saved Views so a perspective can be jumped back to. */
+  getViewport: () => { x: number; y: number; zoom: number };
+  /** Restore a viewport (pan/zoom), animated — the Saved Views "jump to" action. */
+  setViewport: (viewport: { x: number; y: number; zoom: number }) => void;
   /** Apply an image to the currently-selected node; false if nothing is selected. */
   setSelectedImage: (image: MapImage) => boolean;
   /** Set the note on the currently-selected node; false if nothing is selected. */

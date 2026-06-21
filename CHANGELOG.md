@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Saved views.** Bookmark a perspective on a map — its **pan/zoom + drill-in target + active Power
+  Filter** — and jump back to it from **View ▸ Saved views**. Persisted per map. New canvas
+  `getViewport` / `setViewport` handle methods, a pure `addView` / `removeView` + a `useSavedViews`
+  store.
+
 - **Dockable note editor.** A **View ▸ Note editor (dockable)** panel (and ⌘K) puts the selected
   topic's note in a full-height rail editor — more room than the inspector's compact box — reusing the
   same rich note editor + draft pipeline. Handy for knowledge maps with long notes.

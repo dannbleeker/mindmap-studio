@@ -134,6 +134,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       runReplace: vi.fn(),
     },
     io,
+    views: { list: [], onSave: vi.fn(), onApply: vi.fn(), onDelete: vi.fn() },
     history: { canUndo: false, canRedo: false, undo: vi.fn(), redo: vi.fn() },
     showHint: vi.fn(),
   };

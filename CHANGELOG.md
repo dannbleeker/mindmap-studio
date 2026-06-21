@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Spell-check toggle.** A toolbar toggle (and ⌘K) turns on the browser's native spell-check in the
+  topic + note editors — **off by default** (no red squiggles in screenshots/exports), persisted when
+  on. Threaded through the editing context (topics) and the note editors.
+
 - **Isolate branch (collapse others).** **View ▸ Isolate branch** (and ⌘K) collapses every other top
   branch and reveals the path to the selected topic — a fast "focus on this line" that stays editable
   in place (unlike drill-in, which re-roots the view). New pure `isolateBranch` op.

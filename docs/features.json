@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 241,
+  "reviewedThroughChangelogBullets": 242,
   "areas": [
     "editing",
     "notes",
@@ -1478,6 +1478,15 @@
       "id": "isolate-branch",
       "name": "Isolate branch — collapse other top branches and reveal the path to a topic",
       "area": "navigation",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "spellcheck-toggle",
+      "name": "Spell-check toggle for the topic + note editors",
+      "area": "editing",
       "since": "2026-06-21",
       "manual": false,
       "book": false,

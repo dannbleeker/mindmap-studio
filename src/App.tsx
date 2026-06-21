@@ -1714,6 +1714,7 @@ export function App() {
                 onChange={onNoteChange}
                 onBlur={flushNote}
                 onClose={() => panels.setNoteEditorOpen(false)}
+                spellCheck={panels.spellcheck}
               />
             )}
             {panels.filterOpen && (
@@ -1781,6 +1782,7 @@ export function App() {
                 theme={theme.theme}
                 direction={layout}
                 numbered={panels.numbered}
+                spellcheck={panels.spellcheck}
                 litIds={playback ? null : litIds}
                 hideUnmatched={!playback && filter.hide && panels.filterOpen}
                 highlightIds={playback ? null : searchMatchIds}
@@ -1967,6 +1969,7 @@ export function App() {
                   }
                 }}
                 onClearFillImage={() => mapRef.current?.setSelectedStyle({ fillImage: "" })}
+                spellCheck={panels.spellcheck}
                 onAddTag={(t) => {
                   const cur = selectedNode?.tags ?? [];
                   if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);

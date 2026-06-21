@@ -333,6 +333,8 @@ export interface MindMapProps {
   direction?: LayoutKind;
   /** Show hierarchical outline numbers (1, 1.2, …) as a prefix on each topic (view-only). */
   numbered?: boolean;
+  /** Enable native browser spell-check in the topic editors (view setting; off by default). */
+  spellcheck?: boolean;
   /** Read-only Power Filter: ids to keep lit; all other nodes/edges dim. null/undefined = off. */
   litIds?: Set<string> | null;
   /** Power Filter "hide" mode: when true, non-lit nodes/edges are removed from the canvas instead of

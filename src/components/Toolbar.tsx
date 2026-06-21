@@ -44,6 +44,8 @@ export interface ToolbarPanels {
   setInfoMinimized: (fn: (v: boolean) => boolean) => void;
   numbered: boolean;
   setNumbered: (fn: (v: boolean) => boolean) => void;
+  spellcheck: boolean;
+  setSpellcheck: (fn: (v: boolean) => boolean) => void;
 }
 
 /** Map/library state + the map-level actions (open, new, duplicate, delete, present, roll-ups). */
@@ -743,6 +745,12 @@ export function Toolbar({
             label="Legend (markers / tags / rules in use)"
             active={!!liveDoc.meta?.legend}
             onClick={() => m()?.setLegend(!liveDoc.meta?.legend)}
+          />
+          <TBtn
+            icon="text"
+            label="Spell-check the topic + note editors"
+            active={panels.spellcheck}
+            onClick={() => panels.setSpellcheck((v) => !v)}
           />
         </div>
         <span className="mm-vdiv" />

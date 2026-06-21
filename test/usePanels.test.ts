@@ -24,12 +24,19 @@ describe("usePanels — panel toggles + persistence", () => {
     expect(p.statsOpen).toBe(false);
     expect(p.noteEditorOpen).toBe(false);
     expect(p.numbered).toBe(false);
+    expect(p.spellcheck).toBe(false);
   });
 
   it("restores the durable panels (outline/index/info/numbered) from seeded localStorage", () => {
     localStorage.setItem(
       "mindmap-panels",
-      JSON.stringify({ outlineOpen: true, indexOpen: true, infoOpen: true, numbered: true }),
+      JSON.stringify({
+        outlineOpen: true,
+        indexOpen: true,
+        infoOpen: true,
+        numbered: true,
+        spellcheck: true,
+      }),
     );
     const { result } = renderHook(() => usePanels());
     const p = result.current.panels;
@@ -37,6 +44,7 @@ describe("usePanels — panel toggles + persistence", () => {
     expect(p.indexOpen).toBe(true);
     expect(p.infoOpen).toBe(true);
     expect(p.numbered).toBe(true);
+    expect(p.spellcheck).toBe(true);
   });
 
   it("does NOT persist the session-only panels (styles/history/board/filter) across a remount", () => {

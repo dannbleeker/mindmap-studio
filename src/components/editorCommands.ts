@@ -173,6 +173,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     canDistribute,
   );
   add("toggle-numbering", "Toggle outline numbering", "view", () => panels.setNumbered((v) => !v));
+  add("toggle-spellcheck", "Toggle spell-check", "view", () => panels.setSpellcheck((v) => !v));
   add("toggle-line-jumps", "Toggle line jumps", "view", () =>
     m()?.setLineJumps(!map.liveDoc.meta?.lineJumps),
   );

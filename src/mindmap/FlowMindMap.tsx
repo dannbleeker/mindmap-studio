@@ -255,6 +255,7 @@ function FlowInner({
   theme,
   direction = "side",
   numbered = false,
+  spellcheck = false,
   litIds = null,
   hideUnmatched = false,
   highlightIds = null,
@@ -721,8 +722,10 @@ function FlowInner({
       },
       // Drop a marker dragged from the palette onto a node — toggles it on that topic.
       dropMarker: (id: string, marker: string) => apply(toggleIcon(docRef.current, id, marker)),
+      // Native browser spell-check on the topic editors (view setting; off by default).
+      spellcheck,
     };
-  }, [editingId, editSeed, startEdit, apply, focusNodeById, selectOnly, fireSelect]);
+  }, [editingId, editSeed, startEdit, apply, focusNodeById, selectOnly, fireSelect, spellcheck]);
 
   // Flatten every node's callouts for the overlay, from the live doc (so freshly-added ones show).
   const calloutItems = useMemo<CalloutAnchor[]>(() => {

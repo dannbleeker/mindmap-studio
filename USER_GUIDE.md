@@ -497,9 +497,12 @@ feature; it isn't available in Firefox/Safari or on mobile.
 
 An installed copy also registers for MindManager **`.mmap`** files, so you can double-click one in File
 Explorer (after setting the default the same way as above) or pick it via **Open file…**. Opening a
-`.mmap` **imports** it — it's a one-way conversion, so MindManager-only things are dropped (task /
-scheduling data, rich text, embedded images, attachments, per-topic styling, and the like); whatever
-was dropped is listed in the import banner.
+`.mmap` **imports** it — a one-way conversion. It recovers the topic tree, **notes**, **tags**,
+**markers/icons**, **hyperlinks**, **relationships**, **boundaries**, the two-sided arrangement,
+**task info** (start/due dates, priority, progress), and **explicit per-topic colours & fonts**. Some
+MindManager-only things are still dropped — theme-inherited (non-explicit) styling, embedded images and
+attachments, rich-text runs, and summary brackets — and whatever was dropped is listed in the import
+banner.
 
 **Important — `.mmap` is import-only, and you can't save back to it.** An opened `.mmap` becomes an
 ordinary map in your **library** (autosaved to the browser as usual, so your edits aren't lost), but it

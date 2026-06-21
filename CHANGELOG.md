@@ -7,6 +7,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Richer MindManager `.mmap` import (Phase A).** Opening a `.mmap` now recovers a lot more than the
+  bare structure — all into existing model fields, so it shows on the canvas and survives a Save-as
+  `.mmst`:
+  - **Per-topic task info** — start/due dates, priority (`Prio1..5`→1..5), and progress
+    (`TaskPercentage`→0..1). Previously detected-and-dropped with a warning; now imported (the
+    inspector, Power Filter, and Kanban board already support these fields). Resources come across too.
+  - **Full notes** — the complete `NotesXhtmlData` XHTML body (flattened to text), instead of only the
+    truncated `PreviewPlainText`.
+  - **User tags** — `TextLabels` import as node tags.
+  - **Per-topic colour & font** — explicit fill/line colour and font (family/size/bold/underline/colour)
+    map to node style (ARGB alpha-first → `#rrggbb`; fully-transparent fills are left to the theme).
+
+  Still intentionally lossy (theme-only styling, summaries, embedded images/attachments, and the
+  Gantt/resource layer) — see `NEXT_STEPS.md` for the deferred Phase B/C items.
+
 - **New worked example: "GTD Areas of Focus."** A filled-in map of David Allen's GTD **Horizon 2**
   (the 20,000-ft view) — standing roles/responsibilities (Professional / Personal / Community) rather
   than projects or next actions, with status markers and a note explaining how the horizon is used.

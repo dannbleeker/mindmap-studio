@@ -62,6 +62,8 @@ function setup(
     setBoardOpen: vi.fn(),
     statsOpen: false,
     setStatsOpen: vi.fn(),
+    noteEditorOpen: false,
+    setNoteEditorOpen: vi.fn(),
     infoOpen: false,
     setInfoOpen: vi.fn(),
     infoMinimized: false,

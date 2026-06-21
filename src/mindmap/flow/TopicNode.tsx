@@ -436,6 +436,25 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       <Handle type="target" id="tr" position={Position.Right} style={HANDLE} />
       <Handle type="source" id="sl" position={Position.Left} style={HANDLE} />
       <Handle type="source" id="sr" position={Position.Right} style={HANDLE} />
+      {/* Drag-to-relate grip — a visible dot on hover; pull it onto another topic to draw a
+          cross-link. Not on the root/floating chrome differences; loose mode lets it drop anywhere. */}
+      {!isRoot && (
+        <Handle
+          type="source"
+          id="relate"
+          position={Position.Right}
+          className="mm-relate-handle nodrag"
+          title="Drag onto another topic to link them"
+          style={{
+            width: 11,
+            height: 11,
+            right: -6,
+            border: "2px solid #fff",
+            background: branchColor,
+            boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
+          }}
+        />
+      )}
       {geom && shape ? (
         <svg
           width="100%"

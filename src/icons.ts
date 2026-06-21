@@ -14,6 +14,59 @@ export const MARKER_PALETTE = [
   "🎯",
 ];
 
+// The full, searchable marker library (a superset of MARKER_PALETTE). Each entry carries a name +
+// keywords so the inspector's marker search can match by meaning ("done" → ✅, "warning" → ⚠️), not
+// just the glyph. MARKER_PALETTE stays the curated default shown when no search is active; this catalog
+// is what the search box filters over. Additive: markers without a flat vector (MARKER_BODY) fall back
+// to their literal emoji on the canvas, same as any imported glyph.
+export interface MarkerInfo {
+  icon: string;
+  name: string;
+  keywords: readonly string[];
+}
+
+export const MARKER_CATALOG: readonly MarkerInfo[] = [
+  { icon: "✅", name: "Check", keywords: ["done", "complete", "ok", "yes", "tick", "approved"] },
+  { icon: "❗", name: "Important", keywords: ["urgent", "alert", "exclamation", "attention"] },
+  { icon: "❓", name: "Question", keywords: ["help", "unknown", "ask", "unsure"] },
+  { icon: "⭐", name: "Star", keywords: ["favorite", "favourite", "highlight", "best"] },
+  { icon: "🚩", name: "Flag", keywords: ["mark", "milestone", "review"] },
+  { icon: "📌", name: "Pin", keywords: ["pinned", "fixed", "location", "note"] },
+  { icon: "🔴", name: "Red", keywords: ["status", "stop", "blocked", "high", "dot"] },
+  { icon: "🟡", name: "Yellow", keywords: ["status", "caution", "medium", "wip", "dot"] },
+  { icon: "🟢", name: "Green", keywords: ["status", "go", "ok", "low", "ready", "dot"] },
+  { icon: "🔵", name: "Blue", keywords: ["status", "info", "dot"] },
+  { icon: "🟠", name: "Orange", keywords: ["status", "warning", "dot"] },
+  { icon: "🟣", name: "Purple", keywords: ["status", "dot"] },
+  { icon: "⏳", name: "Pending", keywords: ["wait", "later", "time", "hourglass", "progress"] },
+  { icon: "💡", name: "Idea", keywords: ["insight", "lightbulb", "suggestion", "tip"] },
+  { icon: "🎯", name: "Target", keywords: ["goal", "objective", "focus", "aim"] },
+  { icon: "❌", name: "Cross", keywords: ["no", "wrong", "cancel", "remove", "reject", "fail"] },
+  { icon: "⚠️", name: "Warning", keywords: ["caution", "risk", "danger", "attention"] },
+  { icon: "🔥", name: "Hot", keywords: ["urgent", "priority", "trending", "critical"] },
+  { icon: "🏁", name: "Finish", keywords: ["done", "goal", "milestone", "end", "complete"] },
+  { icon: "📅", name: "Calendar", keywords: ["date", "schedule", "deadline", "due", "time"] },
+  { icon: "🔒", name: "Locked", keywords: ["secure", "private", "fixed", "protected"] },
+  { icon: "🔑", name: "Key", keywords: ["access", "important", "secret", "critical"] },
+  { icon: "💰", name: "Money", keywords: ["cost", "budget", "price", "revenue", "finance"] },
+  { icon: "📞", name: "Call", keywords: ["phone", "contact", "follow up", "meeting"] },
+  { icon: "✏️", name: "Edit", keywords: ["draft", "wip", "change", "revise", "todo"] },
+  { icon: "📊", name: "Chart", keywords: ["data", "report", "metrics", "analysis", "stats"] },
+  { icon: "👍", name: "Thumbs up", keywords: ["yes", "approve", "good", "like", "agree"] },
+  { icon: "👎", name: "Thumbs down", keywords: ["no", "reject", "bad", "dislike", "disagree"] },
+];
+
+/** Markers matching a free-text query (name / keyword / glyph, case-insensitive, all tokens must hit).
+ *  An empty query returns the whole catalog. Pure + deterministic — the inspector renders the result. */
+export function searchMarkers(query: string): string[] {
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return MARKER_CATALOG.map((m) => m.icon);
+  return MARKER_CATALOG.filter((m) => {
+    const hay = `${m.name} ${m.keywords.join(" ")} ${m.icon}`.toLowerCase();
+    return tokens.every((t) => hay.includes(t));
+  }).map((m) => m.icon);
+}
+
 // Map common MindManager stock-icon names (urn:mindjet:<Name>) to emoji so
 // imported icons render as glyphs instead of literal text. Unknown names are
 // kept as-is so no information is lost. Matched case-insensitively.
@@ -121,6 +174,11 @@ const MARKER_BODY: Record<string, string> = {
   "🔴": dot("#e23b3b"),
   "🟡": dot("#f4b400"),
   "🟢": dot("#2e9e5b"),
+  "🔵": dot("#3b8bd4"),
+  "🟠": dot("#e0832e"),
+  "🟣": dot("#9b5cc4"),
+  "❌": `<path d="M4.4 4.4l7.2 7.2M11.6 4.4l-7.2 7.2" fill="none" stroke="#e23b3b" stroke-width="2.2" stroke-linecap="round"/>`,
+  "⚠️": `<path d="M8 2.2l6.2 11H1.8z" fill="#f4b400" stroke="#caa400" stroke-width="0.6" stroke-linejoin="round"/><rect x="7.1" y="6" width="1.8" height="4" rx="0.9" fill="#3a2e00"/><circle cx="8" cy="11.4" r="1.05" fill="#3a2e00"/>`,
   "⏳": `<path d="M4 3.2h8M4 12.8h8" stroke="#9a6b2f" stroke-width="1.5" stroke-linecap="round"/><path d="M5 3.6h6L8 8z" fill="#e0a72e"/><path d="M5 12.4h6L8 8z" fill="#e0a72e"/>`,
   "💡": `<circle cx="8" cy="6.5" r="4" fill="#f4c430"/><rect x="6.2" y="10" width="3.6" height="3.4" rx="1" fill="#9a8a5a"/><rect x="6.6" y="11.4" width="2.8" height="0.8" fill="#fff" opacity="0.55"/>`,
   "🎯": `<circle cx="8" cy="8" r="6" fill="#e23b3b"/><circle cx="8" cy="8" r="3.9" fill="#fff"/><circle cx="8" cy="8" r="1.8" fill="#e23b3b"/>`,

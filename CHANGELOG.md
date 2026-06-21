@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Searchable marker library.** The inspector's marker bar gains a search box that finds markers by
+  name, keyword or glyph (e.g. "done" → ✅, "warning" → ⚠️, "budget" → 💰) over a richer catalog
+  (`MARKER_CATALOG`) — clear the box to fall back to the curated default palette. New markers are
+  free to toggle and drag onto any topic like the existing ones.
+
 - **Find highlights every match on the canvas.** Typing in the **Find** box now rings every matching
   topic (live, as you type), so you can see all hits at once; **Enter** still steps through them with
   the n/total counter. Clearing the box removes the highlights.

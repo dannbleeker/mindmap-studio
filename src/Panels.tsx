@@ -15,7 +15,7 @@ import {
 } from "./design/primitives";
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
-import { markerImage } from "./icons";
+import { markerImage, searchMarkers } from "./icons";
 import { formatBytes } from "./io/attachment";
 import {
   MARKER_DND_TYPE,
@@ -1943,12 +1943,32 @@ export function MarkerBar({
   partial?: readonly string[];
   onToggle: (marker: string) => void;
 }) {
+  const [query, setQuery] = useState("");
+  // No query → the curated default palette; otherwise the searched superset (by name / keyword / glyph).
+  const shown = query.trim() ? searchMarkers(query) : markers;
   return (
     <div style={{ ...barRow, gap: 4 }}>
       <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)", marginRight: 4 }}>
         Markers:
       </span>
-      {markers.map((marker) => {
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Find a marker…"
+        aria-label="Search markers"
+        style={{
+          ...inputStyle,
+          width: 110,
+          padding: "2px 6px",
+          fontSize: fontSize.sm,
+          marginRight: 2,
+        }}
+      />
+      {query.trim() && shown.length === 0 && (
+        <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)" }}>No markers</span>
+      )}
+      {shown.map((marker) => {
         const on = active?.includes(marker);
         const some = !on && partial?.includes(marker);
         return (

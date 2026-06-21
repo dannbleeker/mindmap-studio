@@ -69,6 +69,7 @@ import {
   addSibling,
   addStickyNote,
   addSubtree,
+  assignBranchColors,
   balanceMap,
   bulkToggleIcon,
   bulkToggleTag,
@@ -1066,6 +1067,11 @@ function FlowInner({
       setBackdropRings: (delta) => apply(setBackdropRings(docRef.current, delta)),
       clearBackdrop: () => apply(clearBackdrop(docRef.current)),
       setSelectedStyle: (patch) => withSelectedAll((doc, id) => mergeStyle(doc, id, patch)),
+      copySelectedStyle: () => {
+        const id = selectedRef.current;
+        return id ? (findAnyNode(docRef.current, id)?.style ?? {}) : null;
+      },
+      shuffleBranchColors: () => apply(assignBranchColors(docRef.current, paletteRef.current)),
       setSelectedHyperlink: (url) =>
         withSelected((id) => apply(setHyperlink(docRef.current, id, url))),
       groupBranch: (id) => {

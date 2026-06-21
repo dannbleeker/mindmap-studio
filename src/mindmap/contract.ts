@@ -121,8 +121,14 @@ export interface MindMapHandle {
   setBackdropRings: (delta: number) => void;
   /** Remove the map's diagram backdrop. */
   clearBackdrop: () => void;
-  /** Merge a style patch into the selected node ("" / null clears a key); false if none selected. */
+  /** Merge a style patch into the selected node(s) ("" / null clears a key); false if none selected.
+   *  Applies to the whole selection (bulk). */
   setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
+  /** Read the anchor selected node's style (the Format-Painter "copy"); null if nothing is selected.
+   *  Returns an empty object for a selected-but-unstyled node. Paste with `setSelectedStyle`. */
+  copySelectedStyle: () => NodeStyle | null;
+  /** Auto-colour the top branches from the active theme palette (one-click "restyle branches"). */
+  shuffleBranchColors: () => void;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
   setSelectedHyperlink: (url: string) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */

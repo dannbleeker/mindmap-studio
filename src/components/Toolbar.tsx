@@ -67,6 +67,13 @@ export interface ToolbarCanvas {
   handleImage: (event: ChangeEvent<HTMLInputElement>) => void;
   /** Per-map canvas background image picker. */
   handleBackgroundImage: (event: ChangeEvent<HTMLInputElement>) => void;
+  /** Format Painter: copy the selected topic's style / paste it across the selection. */
+  copyFormat: () => void;
+  pasteFormat: () => void;
+  /** Whether a style has been copied (enables "Paste format"). */
+  canPasteFormat: boolean;
+  /** Auto-colour the top branches from the theme palette. */
+  shuffleBranchColors: () => void;
 }
 
 /** The find / replace form state + actions. */
@@ -559,6 +566,24 @@ export function Toolbar({
               canvas.selected &&
               canvas.setFocus({ id: canvas.selected.id, topic: canvas.selected.topic })
             }
+          />
+          <MenuLabel>Format</MenuLabel>
+          <MenuItem
+            icon={mi("copy")}
+            label="Copy format"
+            disabled={!canvas.selected}
+            onSelect={() => canvas.copyFormat()}
+          />
+          <MenuItem
+            icon={mi("paste")}
+            label="Paste format"
+            disabled={!canvas.selected || !canvas.canPasteFormat}
+            onSelect={() => canvas.pasteFormat()}
+          />
+          <MenuItem
+            icon={mi("palette")}
+            label="Auto-colour branches"
+            onSelect={() => canvas.shuffleBranchColors()}
           />
         </Menu>
         <span className="mm-vdiv" />

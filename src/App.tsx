@@ -71,7 +71,7 @@ import {
 } from "./mindmap";
 import { findAnyNode, nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
-import type { MapNode, MindMapDoc } from "./model/types";
+import type { MapNode, MindMapDoc, NodeStyle } from "./model/types";
 import { noteCounts } from "./noteFormat";
 import { backlinksFor, outlineNumbers, outlineRows } from "./outline";
 import {
@@ -441,6 +441,27 @@ export function App() {
   // Message-only shorthand used across the toolbar handlers. Memoised so the file-action callbacks
   // that depend on it stay stable (the Ctrl+S/O key handler binds them once).
   const showHint = useCallback((message: string) => showToast("info", message), [showToast]);
+
+  // Format Painter: copy the selected topic's style, then paste it across a (multi-)selection. The
+  // copied style lives in App state so the "Paste format" affordance can enable/disable reactively.
+  const [copiedStyle, setCopiedStyle] = useState<NodeStyle | null>(null);
+  const copyFormat = () => {
+    const style = mapRef.current?.copySelectedStyle();
+    if (!style) {
+      showHint("Select a topic first, then Copy format.");
+      return;
+    }
+    setCopiedStyle(style);
+    showHint(
+      Object.keys(style).length > 0
+        ? "Format copied — select topic(s) and Paste format."
+        : "That topic has no custom format to copy.",
+    );
+  };
+  const pasteFormat = () => {
+    if (!copiedStyle) return;
+    if (!mapRef.current?.setSelectedStyle(copiedStyle)) showHint("Select a topic first.");
+  };
 
   // Register the PWA self-updater once: a new deploy surfaces a "Refresh now" toast
   // through showToast (no-op in dev — the service worker is disabled there).
@@ -1262,6 +1283,10 @@ export function App() {
       setFocus,
       handleImage,
       handleBackgroundImage,
+      copyFormat,
+      pasteFormat,
+      canPasteFormat: copiedStyle !== null,
+      shuffleBranchColors: () => mapRef.current?.shuffleBranchColors(),
     },
     find: { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace },
     io: {

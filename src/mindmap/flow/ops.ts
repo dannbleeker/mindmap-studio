@@ -623,6 +623,18 @@ export function setBranchColor(doc: MindMapDoc, id: string, color: string): OpRe
   return { doc: next };
 }
 
+/** Auto-colour the map: give each top-level branch a distinct connector colour, cycling `colors`
+ *  (their subtrees inherit it at render time). A one-click "restyle branches" — clears to a clean
+ *  per-branch palette. No-op when `colors` is empty. */
+export function assignBranchColors(doc: MindMapDoc, colors: string[]): OpResult {
+  if (colors.length === 0) return { doc };
+  const next = structuredClone(doc);
+  next.root.children.forEach((child, i) => {
+    child.branchColor = colors[i % colors.length];
+  });
+  return { doc: next };
+}
+
 /** Set the line style of a node's incoming branch connector; "solid" (the default) clears it. */
 export function setLineDash(
   doc: MindMapDoc,

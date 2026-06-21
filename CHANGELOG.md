@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Align & distribute (free-canvas).** In whiteboard/freeform mode, select 2+ topics and align them
+  to a shared edge or centre (left / centre / right / top / middle / bottom), or distribute 3+ evenly
+  (horizontal / vertical) — view menu + ⌘K. Pure `alignNodes` / `distributeNodes` ops using measured
+  node sizes.
+- **Status bar.** A slim bar at the bottom of the canvas shows the visible topic count, the current
+  selection size, and the live zoom % (complements the existing minimap + zoom controls).
+
 - **Drill in (focus on topic).** Re-root the canvas at the selected topic so its subtree fills the
   view — MindManager's "focus on topic" (view menu / ⌘K "Drill into the selected topic"). A bar shows
   what you're drilled into with **Exit (Esc)**, and the breadcrumb becomes the drill navigator (click

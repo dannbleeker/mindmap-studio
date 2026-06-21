@@ -40,7 +40,7 @@ import { Boundaries } from "./flow/Boundaries";
 import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
-import { CoachMark, DropLabel, MinimapPanel } from "./flow/CanvasOverlays";
+import { CoachMark, DropLabel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { NodePopover } from "./flow/NodePopover";
@@ -69,6 +69,7 @@ import {
   addSibling,
   addStickyNote,
   addSubtree,
+  alignNodes,
   assignBranchColors,
   balanceMap,
   bulkToggleIcon,
@@ -79,6 +80,7 @@ import {
   deleteLink,
   deleteNode,
   deleteSummary,
+  distributeNodes,
   findAnyNode,
   findNode,
   groupBranch,
@@ -134,6 +136,7 @@ import {
   toggleIcon,
   viewDoc,
 } from "./flow/ops";
+import type { NodeSizes } from "./flow/ops";
 import { project } from "./flow/project";
 import {
   type OverlaySelect,
@@ -965,6 +968,14 @@ function FlowInner({
     [apply],
   );
 
+  // Measured on-canvas node sizes (id → w/h), for align/distribute (centre + right/bottom need widths).
+  const measuredSizes = useCallback((): NodeSizes => {
+    const out: NodeSizes = {};
+    for (const n of getNodes())
+      out[n.id] = { w: n.measured?.width ?? 0, h: n.measured?.height ?? 0 };
+    return out;
+  }, [getNodes]);
+
   // Apply a pure cross-link op to the selected relationship edge (the edge-inspector path); false if
   // no edge is selected. Mirrors withSelected for nodes.
   const withSelectedLink = useCallback(
@@ -1097,6 +1108,10 @@ function FlowInner({
         return id ? (findAnyNode(docRef.current, id)?.style ?? {}) : null;
       },
       shuffleBranchColors: () => apply(assignBranchColors(docRef.current, paletteRef.current)),
+      alignSelection: (mode) =>
+        apply(alignNodes(docRef.current, selectedIdsRef.current, mode, measuredSizes())),
+      distributeSelection: (axis) =>
+        apply(distributeNodes(docRef.current, selectedIdsRef.current, axis, measuredSizes())),
       setSelectedHyperlink: (url) =>
         withSelected((id) => apply(setHyperlink(docRef.current, id, url))),
       groupBranch: (id) => {
@@ -1193,6 +1208,7 @@ function FlowInner({
       withSelectedAll,
       withSelectedLink,
       withSelectedOverlay,
+      measuredSizes,
       clearOverlaySelection,
       fireSelectOverlay,
       focusNodeById,
@@ -1366,6 +1382,7 @@ function FlowInner({
           <CoachMark show={showCoach} rootId={renderDoc.root.id} />
           <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
           <Controls showInteractive={false} />
+          <StatusBar topics={nodes.length} selected={selectedIds.size} />
           <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
         </ReactFlow>
         {menu ? (

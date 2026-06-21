@@ -4,6 +4,7 @@ import {
   Controls,
   ReactFlow,
   ReactFlowProvider,
+  ViewportPortal,
   useEdgesState,
   useNodesInitialized,
   useNodesState,
@@ -153,6 +154,7 @@ import {
   resolveSelectedNode,
   resolveSelectedOverlay,
 } from "./flow/selectionResolve";
+import { type GuideLine, computeSnap } from "./flow/snap";
 import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { useLatestRef } from "./flow/useLatestRef";
 import { mindManagerTheme } from "./theme";
@@ -336,6 +338,8 @@ function FlowInner({
   const [coachDismissed, setCoachDismissed] = useState(false);
   // During a drag-to-reparent, the node the dragged topic would drop under (highlighted live). (#11)
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+  // Free-canvas alignment guide lines shown while dragging (cleared on drag stop).
+  const [guides, setGuides] = useState<GuideLine[]>([]);
   const { fitView, getNodes, setCenter, getViewport, setViewport } = useReactFlow();
   const initialized = useNodesInitialized();
 
@@ -587,20 +591,49 @@ function FlowInner({
 
   // Live drop-target highlight while dragging (skipped in free-canvas mode, where a drag just moves
   // the node). The exact node this resolves is the one handleDragStop will re-parent under.
+  // The dragged box + the other nodes' boxes, for free-canvas alignment snapping. Pulled from the live
+  // React Flow nodes (measured sizes), excluding the dragged node.
+  const snapFor = useCallback(
+    (dragId: string, dragPos: { x: number; y: number }) => {
+      const nodes = getNodes();
+      const dn = nodes.find((n) => n.id === dragId);
+      const w = dn?.measured?.width ?? 0;
+      const h = dn?.measured?.height ?? 0;
+      const others = nodes
+        .filter((n) => n.id !== dragId && n.measured?.width && n.measured?.height)
+        .map((n) => ({
+          x: n.position.x,
+          y: n.position.y,
+          w: n.measured?.width ?? 0,
+          h: n.measured?.height ?? 0,
+        }));
+      return computeSnap({ x: dragPos.x, y: dragPos.y, w, h }, others);
+    },
+    [getNodes],
+  );
+
   const handleDrag = useCallback(
     (dragId: string, dragPos: { x: number; y: number }) => {
-      setDropTargetId(docRef.current.meta?.freeform ? null : findReparentTarget(dragId, dragPos));
+      if (docRef.current.meta?.freeform) {
+        setDropTargetId(null);
+        // Preview alignment guides while dragging; the node itself snaps into place on release (below).
+        setGuides(snapFor(dragId, dragPos).guides);
+        return;
+      }
+      setDropTargetId(findReparentTarget(dragId, dragPos));
     },
-    [findReparentTarget],
+    [findReparentTarget, snapFor],
   );
 
   // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back. In free-canvas
-  // mode a drag instead persists the node's new position (no re-parenting).
+  // mode a drag instead persists the node's new (alignment-snapped) position (no re-parenting).
   const handleDragStop = useCallback(
     (dragId: string, dropPos: { x: number; y: number }) => {
       setDropTargetId(null);
       if (docRef.current.meta?.freeform) {
-        apply(setNodePos(docRef.current, dragId, dropPos.x, dropPos.y));
+        setGuides([]);
+        const snap = snapFor(dragId, dropPos);
+        apply(setNodePos(docRef.current, dragId, snap.x, snap.y));
         return;
       }
       const targetId = findReparentTarget(dragId, dropPos);
@@ -608,7 +641,7 @@ function FlowInner({
       if (r.doc !== docRef.current) apply(r);
       else sync(docRef.current); // snap back to the computed layout
     },
-    [apply, sync, findReparentTarget],
+    [apply, sync, findReparentTarget, snapFor],
   );
 
   // Centre + select a node by id (shared by the imperative handle and the in-map jump links).
@@ -1448,6 +1481,23 @@ function FlowInner({
           <CoachMark show={showCoach} rootId={renderDoc.root.id} />
           <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
           {renderDoc.meta?.legend ? <LegendPanel doc={renderDoc} /> : null}
+          {guides.length > 0 ? (
+            <ViewportPortal>
+              {guides.map((g, i) => (
+                <div
+                  key={`${g.axis}:${g.pos}:${i}`}
+                  style={{
+                    position: "absolute",
+                    background: "#f5a623",
+                    pointerEvents: "none",
+                    ...(g.axis === "x"
+                      ? { left: g.pos, top: g.start, width: 1, height: g.end - g.start }
+                      : { left: g.start, top: g.pos, height: 1, width: g.end - g.start }),
+                  }}
+                />
+              ))}
+            </ViewportPortal>
+          ) : null}
           <Controls showInteractive={false} />
           <StatusBar topics={nodes.length} selected={selectedIds.size} />
           <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />

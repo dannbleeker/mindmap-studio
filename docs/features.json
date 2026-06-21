@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 239,
+  "reviewedThroughChangelogBullets": 240,
   "areas": [
     "editing",
     "notes",
@@ -1460,6 +1460,15 @@
       "id": "saved-views",
       "name": "Saved views — bookmark pan/zoom + drill + filter and jump back",
       "area": "navigation",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "align-guides",
+      "name": "Smart alignment guides + snapping (free-canvas drag)",
+      "area": "structure",
       "since": "2026-06-21",
       "manual": false,
       "book": false,

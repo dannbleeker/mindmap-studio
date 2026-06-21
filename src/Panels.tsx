@@ -1349,6 +1349,8 @@ export function InfoPanel({
   backlinks,
   onFollowBacklink,
   onMinimize,
+  onSetFillImage,
+  onClearFillImage,
   width,
   onResize,
   breadcrumb,
@@ -1407,6 +1409,9 @@ export function InfoPanel({
    *  an outgoing link. */
   onFollowBacklink: (id: string) => void;
   onMinimize: () => void;
+  /** Set / clear the topic's fill image (covers the whole card). */
+  onSetFillImage?: (file: File) => void;
+  onClearFillImage?: () => void;
 }) {
   const [tagInput, setTagInput] = useState("");
   const [tab, setTab] = useState<InfoTab>("details");
@@ -1606,7 +1611,43 @@ export function InfoPanel({
                     ) : null
                   ) : (
                     // Markers now lead the Details tab (#7); Style keeps the per-item sticker grid.
-                    <StickerBar stickers={STICKERS} onPick={onPickSticker} />
+                    <>
+                      <StickerBar stickers={STICKERS} onPick={onPickSticker} />
+                      {onSetFillImage ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            padding: "4px 10px",
+                          }}
+                        >
+                          <label style={{ ...styleBtn, fontSize: fontSize.sm, cursor: "pointer" }}>
+                            Fill image…
+                            <input
+                              type="file"
+                              accept="image/*"
+                              style={{ display: "none" }}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                e.target.value = "";
+                                if (f) onSetFillImage(f);
+                              }}
+                            />
+                          </label>
+                          {node?.style?.fillImage && onClearFillImage ? (
+                            <button
+                              type="button"
+                              onClick={onClearFillImage}
+                              title="Remove the fill image"
+                              style={{ ...styleBtn, fontSize: fontSize.sm }}
+                            >
+                              Clear fill image
+                            </button>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </>
                   )}
                 </>
               )}

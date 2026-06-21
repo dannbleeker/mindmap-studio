@@ -49,11 +49,12 @@ export function resolveLevelBox(p: {
   isRoot: boolean;
   geom: boolean;
   depth: number;
-  style?: { background?: string; border?: string; fill?: string };
+  style?: { background?: string; border?: string; fill?: string; fillImage?: string };
 }): { filledMain: boolean; underlineLeaf: boolean } {
   const styled = !p.isRoot && !p.geom;
-  // A branch-derived fill (tint/gradient) renders the node as a normal card, like a manual background.
-  const filled = !!p.style?.background || !!p.style?.fill;
+  // A branch-derived fill (tint/gradient) or an image fill renders the node as a normal card, like a
+  // manual background.
+  const filled = !!p.style?.background || !!p.style?.fill || !!p.style?.fillImage;
   return {
     filledMain: styled && p.depth === 1 && !filled,
     underlineLeaf: styled && p.depth >= 3 && !filled && !p.style?.border,

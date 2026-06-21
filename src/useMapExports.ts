@@ -6,6 +6,7 @@ import { toMermaid } from "./io/mermaid";
 import { sanitizeSvg } from "./io/svgSanitize";
 import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
+import { outlineNumbers } from "./outline";
 
 function download(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -65,6 +66,8 @@ export interface MapExports {
 export function useMapExports(
   mapRef: RefObject<MindMapHandle | null>,
   getDoc: () => MindMapDoc,
+  /** When true, the Markdown export bakes in outline numbers (mirrors the on-screen numbering). */
+  numbered?: () => boolean,
 ): MapExports {
   const baseName = () => getDoc().title || "mindmap";
 
@@ -85,7 +88,9 @@ export function useMapExports(
       );
     },
     exportMarkdown() {
-      download(new Blob([toMarkdown(getDoc())], { type: "text/markdown" }), `${baseName()}.md`);
+      const d = getDoc();
+      const nums = numbered?.() ? outlineNumbers(d.root, d.meta?.numberStyle) : undefined;
+      download(new Blob([toMarkdown(d, nums)], { type: "text/markdown" }), `${baseName()}.md`);
     },
     // Mermaid `mindmap` text (mermaid.ts is dependency-free, so static-imported).
     exportMermaid() {

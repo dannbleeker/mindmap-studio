@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Outline numbers in copy / Markdown export.** When outline numbering is on, **Copy outline** and the
+  **Markdown export** now bake the numbers (`1.2`, `I.A`, … honouring the chosen scheme) into each
+  topic line. Off when numbering is off, so the Markdown still round-trips. `toMarkdown` gains an
+  optional numbers map.
+
 - **Spell-check toggle.** A toolbar toggle (and ⌘K) turns on the browser's native spell-check in the
   topic + note editors — **off by default** (no red squiggles in screenshots/exports), persisted when
   on. Threaded through the editing context (topics) and the note editors.

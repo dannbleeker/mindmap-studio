@@ -6,11 +6,17 @@ import type { MapNode, MindMapDoc } from "../model/types";
 // of its descendants, two spaces per level. This round-trips the topic tree;
 // per-node extras (icons, notes) live on the model, not in the markdown.
 
-export function toMarkdown(doc: MindMapDoc): string {
+// `numbers` (optional) prefixes each topic with its outline number ("1.2", "I.A", …) — used by the
+// "bake outline numbers" option for copy/export. Omitted = the plain, round-trippable form.
+export function toMarkdown(doc: MindMapDoc, numbers?: ReadonlyMap<string, string>): string {
   const lines = [`# ${doc.root.topic}`];
+  const prefix = (id: string) => {
+    const n = numbers?.get(id);
+    return n ? `${n} ` : "";
+  };
   const walk = (node: MapNode, depth: number) => {
     for (const child of node.children) {
-      lines.push(`${"  ".repeat(depth)}- ${child.topic}`);
+      lines.push(`${"  ".repeat(depth)}- ${prefix(child.id)}${child.topic}`);
       walk(child, depth + 1);
     }
   };

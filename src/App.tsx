@@ -58,7 +58,7 @@ import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
 import { toMarkdown } from "./io/markdown";
-import { parseOutline } from "./io/pasteOutline";
+import { parsePaste } from "./io/pasteTable";
 import {
   type CanvasSession,
   type LayoutKind,
@@ -839,7 +839,7 @@ export function App() {
 
   // --- paste text → map ---
   function pasteAsNewMap() {
-    const forest = parseOutline(pasteText);
+    const forest = parsePaste(pasteText);
     if (forest.length === 0) {
       showHint("Nothing to add — paste an outline first.");
       return;
@@ -859,7 +859,7 @@ export function App() {
   }
 
   function pasteUnderSelected() {
-    const forest = parseOutline(pasteText);
+    const forest = parsePaste(pasteText);
     if (forest.length === 0) {
       showHint("Nothing to add — paste an outline first.");
       return;
@@ -2161,8 +2161,9 @@ export function App() {
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
           <strong style={{ color: "#26215c" }}>Paste text → topics</strong>
           <p style={{ margin: 0, fontSize: 13, color: "#73726c" }}>
-            Paste an outline, a bullet list, or Markdown. Indentation (or <code>#</code> headings)
-            sets the hierarchy.
+            Paste an outline, a bullet list, or Markdown — indentation (or <code>#</code> headings)
+            sets the hierarchy. A spreadsheet selection (Excel / Sheets) becomes one topic per row,
+            with extra columns as the note and a <code>Tags</code> column as tags.
           </p>
           <textarea
             value={pasteText}
@@ -2189,7 +2190,7 @@ export function App() {
             }}
           >
             <span style={{ fontSize: 12, color: "#8a8780" }}>
-              {countForest(parseOutline(pasteText))} topics
+              {countForest(parsePaste(pasteText))} topics
             </span>
             <span style={{ display: "flex", gap: 6 }}>
               <button

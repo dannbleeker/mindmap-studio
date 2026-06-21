@@ -49,12 +49,14 @@ export function resolveLevelBox(p: {
   isRoot: boolean;
   geom: boolean;
   depth: number;
-  style?: { background?: string; border?: string };
+  style?: { background?: string; border?: string; fill?: string };
 }): { filledMain: boolean; underlineLeaf: boolean } {
   const styled = !p.isRoot && !p.geom;
+  // A branch-derived fill (tint/gradient) renders the node as a normal card, like a manual background.
+  const filled = !!p.style?.background || !!p.style?.fill;
   return {
-    filledMain: styled && p.depth === 1 && !p.style?.background,
-    underlineLeaf: styled && p.depth >= 3 && !p.style?.background && !p.style?.border,
+    filledMain: styled && p.depth === 1 && !filled,
+    underlineLeaf: styled && p.depth >= 3 && !filled && !p.style?.border,
   };
 }
 
@@ -159,6 +161,45 @@ export function readableTextOn(hex: string): string {
   };
   const lum = 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
   return lum > 0.5 ? "#1a1a1a" : "#ffffff";
+}
+
+export type TopicFillMode = "tint" | "gradient";
+
+export interface ResolvedTopicFill {
+  /** CSS `background` value for the live rectangular card (a solid colour or a `linear-gradient`). */
+  css: string;
+  /** A single representative colour — used as the geometric-shape fill and the SVG solid fallback. */
+  solid: string;
+  /** Gradient stops when the mode is `gradient` (the exporter draws a per-node `<linearGradient>`),
+   *  else null. */
+  gradient: { top: string; bottom: string } | null;
+  /** Black/white text that stays readable on this fill. */
+  text: string;
+}
+
+/** Resolve a topic's branch-derived fill (tint / gradient) to concrete render values, or null when no
+ *  fill mode is set (the caller then keeps today's flat-fill path). The base colour is the topic's
+ *  explicit `background` when present, otherwise its `branchColor`. Pure + shared by the live canvas
+ *  node and the SVG exporter so a filled topic looks identical in both (canvas == export). */
+export function resolveTopicFill(p: {
+  mode?: TopicFillMode;
+  background?: string;
+  branchColor: string;
+}): ResolvedTopicFill | null {
+  if (!p.mode) return null;
+  const base = p.background || p.branchColor;
+  if (p.mode === "tint") {
+    const solid = mix(base, "#ffffff", 0.8);
+    return { css: solid, solid, gradient: null, text: readableTextOn(solid) };
+  }
+  const top = mix(base, "#ffffff", 0.24);
+  const bottom = mix(base, "#000000", 0.08);
+  return {
+    css: `linear-gradient(180deg, ${top} 0%, ${bottom} 100%)`,
+    solid: base,
+    gradient: { top, bottom },
+    text: readableTextOn(base),
+  };
 }
 
 export interface ResolvedBoundaryStyle {

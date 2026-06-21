@@ -230,9 +230,25 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
         type="button"
         style={styleBtn}
         title="No fill"
-        onClick={() => onStyle({ background: "" })}
+        onClick={() => onStyle({ background: "", fill: undefined })}
       >
         ✕
+      </button>
+      <button
+        type="button"
+        style={styleBtn}
+        title="Branch-colour tint"
+        onClick={() => onStyle({ fill: "tint" })}
+      >
+        ◧
+      </button>
+      <button
+        type="button"
+        style={styleBtn}
+        title="Gradient fill"
+        onClick={() => onStyle({ fill: "gradient" })}
+      >
+        ◨
       </button>
       {label("Border")}
       {BORDER_SWATCHES.map((c) =>
@@ -278,6 +294,7 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
             border: "",
             borderRadius: "",
             shape: undefined,
+            fill: undefined,
             color: "",
             fontWeight: "",
             fontFamily: "",

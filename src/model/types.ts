@@ -52,6 +52,9 @@ export interface NodeStyle {
   /** Fill treatment derived from the topic's branch colour (or its explicit `background`): a soft
    *  branch-colour `tint`, or a vertical `gradient`. Absent = a flat fill (today's look). */
   fill?: "tint" | "gradient";
+  /** Image that fills the whole topic (a data: URL), covering the card — distinct from the side
+   *  `image`. Takes precedence over `background` / `fill`. Lossless in .json; ignored by flat formats. */
+  fillImage?: string;
 }
 
 export interface MapImage {

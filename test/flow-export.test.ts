@@ -951,6 +951,26 @@ describe("flow exportSvg — branch-derived topic fills (canvas == export)", () 
     expect(out).not.toContain("linearGradient");
     expect(out).toMatch(/<rect[^>]*fill="#[0-9a-f]{6}"/i);
   });
+
+  it("renders an image-fill topic as a rounded-clipped cover <image> + scrim", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "if",
+      title: "IF",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "a", topic: "A", style: { fillImage: PNG }, children: [] }],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain('<clipPath id="nclip-a">');
+    expect(out).toMatch(
+      /<image[^>]*preserveAspectRatio="xMidYMid slice"[^>]*clip-path="url\(#nclip-a\)"/,
+    );
+    expect(out).toContain('fill="rgba(0,0,0,0.32)"'); // readability scrim
+    expect(out).toContain(PNG); // the data URL is embedded
+  });
 });
 
 describe("arrowHeadPath (shared relationship arrowhead)", () => {

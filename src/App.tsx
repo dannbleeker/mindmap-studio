@@ -1820,6 +1820,16 @@ export function App() {
                   const ok = mapRef.current?.setSelectedStyle(patch);
                   if (!ok) showHint("Select a node first, then style it.");
                 }}
+                onSetFillImage={async (file) => {
+                  try {
+                    const { url } = await fileToMapImage(file);
+                    const ok = mapRef.current?.setSelectedStyle({ fillImage: url });
+                    if (!ok) showHint("Select a topic first, then set its fill image.");
+                  } catch (err) {
+                    showHint(err instanceof Error ? err.message : "Could not set the fill image");
+                  }
+                }}
+                onClearFillImage={() => mapRef.current?.setSelectedStyle({ fillImage: "" })}
                 onAddTag={(t) => {
                   const cur = selectedNode?.tags ?? [];
                   if (!cur.includes(t)) mapRef.current?.setSelectedTags([...cur, t]);

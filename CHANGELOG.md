@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Image fill for topics.** A topic can be filled with a picture that covers the whole card (the
+  Style tab's **Fill image…**), distinct from the side `image` — MindManager's "fill with image". The
+  canvas paints it as a cover background with a readable text scrim; the SVG/PNG/PDF export draws a
+  rounded-clipped cover `<image>` + scrim so canvas == export. New `NodeStyle.fillImage` (data URL,
+  lossless in `.json`).
+
 - **Marker groups (single-select sets).** Markers are now grouped like MindManager's Map Markers —
   **Priority** (1–9), **Status** (the colour dots), **Mood**, and **Vote** (👍/👎). A topic carries at
   most one marker per group, so picking another in the same group replaces it; markers outside a group

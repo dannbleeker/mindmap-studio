@@ -516,9 +516,14 @@ export function buildFlowSvg(
           : underlineLeaf
             ? "none"
             : (st?.background ?? nodeBg);
+    // Image fill: a picture covers the whole card (rounded-clipped), with a scrim so the title reads.
+    const imageFill =
+      !d.isRoot && !isGeometric(shape) && !underlineLeaf ? st?.fillImage : undefined;
     const textColor = d.isRoot
       ? rootColor
-      : (st?.color ?? tf?.text ?? (filledMain ? readableTextOn(d.branchColor) : color));
+      : imageFill
+        ? (st?.color ?? "#ffffff")
+        : (st?.color ?? tf?.text ?? (filledMain ? readableTextOn(d.branchColor) : color));
     const radius = d.isRoot
       ? 16
       : underlineLeaf
@@ -543,6 +548,18 @@ export function buildFlowSvg(
       // No box — a short branch-colour underline under the text (matches the canvas border-bottom).
       parts.push(
         `<line x1="${r2(r.x + 2)}" y1="${r2(r.y + r.h - 1)}" x2="${r2(r.x + r.w - 2)}" y2="${r2(r.y + r.h - 1)}" stroke="${esc(d.branchColor)}" stroke-width="2"/>`,
+      );
+    } else if (imageFill) {
+      // Backing card + a rounded-clipped cover image + a dark scrim (matches the canvas textShadow),
+      // then the border on top so it isn't hidden by the picture.
+      const clip = `nclip-${esc(n.id)}`;
+      const rect = `x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" rx="${radius}"`;
+      parts.push(
+        `<defs><clipPath id="${clip}"><rect ${rect}/></clipPath></defs>`,
+        `<rect ${rect} fill="${esc(nodeBg)}"/>`,
+        `<image x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" href="${esc(imageFill)}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clip})"/>`,
+        `<rect ${rect} fill="rgba(0,0,0,0.32)" clip-path="url(#${clip})"/>`,
+        `<rect ${rect} fill="none"${strokeAttr || ` stroke="${esc(d.branchColor)}" stroke-width="1.5"`}/>`,
       );
     } else {
       parts.push(

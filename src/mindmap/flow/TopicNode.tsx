@@ -333,18 +333,22 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           textAlign: "center",
         }
       : {
-          background:
-            topicFill?.css ??
-            style?.background ??
-            (filledMain
-              ? branchColor
-              : underlineLeaf
-                ? "transparent"
-                : "var(--mm-node-bg, #ffffff)"),
-          color:
-            style?.color ??
-            topicFill?.text ??
-            (filledMain ? readableTextOn(branchColor) : "var(--mm-color, #23211c)"),
+          background: style?.fillImage
+            ? `center/cover no-repeat url("${style.fillImage}")`
+            : (topicFill?.css ??
+              style?.background ??
+              (filledMain
+                ? branchColor
+                : underlineLeaf
+                  ? "transparent"
+                  : "var(--mm-node-bg, #ffffff)")),
+          // An image fill needs a readable text colour + scrim regardless of the picture beneath it.
+          color: style?.fillImage
+            ? (style?.color ?? "#ffffff")
+            : (style?.color ??
+              topicFill?.text ??
+              (filledMain ? readableTextOn(branchColor) : "var(--mm-color, #23211c)")),
+          textShadow: style?.fillImage ? "0 1px 3px rgba(0,0,0,0.85)" : undefined,
           // Underline leaves carry only a bottom rule — set border-bottom alone (no `border`
           // shorthand) so React doesn't warn about mixing shorthand + longhand.
           border:

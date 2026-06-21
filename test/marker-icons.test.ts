@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MARKER_PALETTE, markerImage } from "../src/icons";
+import { MARKER_CATALOG, MARKER_PALETTE, markerImage, searchMarkers } from "../src/icons";
 
 // The flat vector marker set replaces OS colour emoji — every palette marker must resolve to a
 // platform-consistent data: URL (rendered as an <img>/<image> on canvas + export); an unknown marker
@@ -18,5 +18,39 @@ describe("marker vector icons", () => {
 
   it("is deterministic", () => {
     expect(markerImage("⭐")).toBe(markerImage("⭐"));
+  });
+});
+
+// The searchable marker library is a superset of the curated palette; searchMarkers matches by name,
+// keyword or glyph so the inspector can find a marker by meaning.
+describe("searchMarkers", () => {
+  it("returns the whole catalog for an empty query", () => {
+    expect(searchMarkers("")).toEqual(MARKER_CATALOG.map((m) => m.icon));
+    expect(searchMarkers("   ")).toHaveLength(MARKER_CATALOG.length);
+  });
+
+  it("is a superset of the curated palette", () => {
+    const all = new Set(searchMarkers(""));
+    for (const m of MARKER_PALETTE) expect(all.has(m), m).toBe(true);
+  });
+
+  it("matches by keyword and by name, case-insensitively", () => {
+    expect(searchMarkers("done")).toContain("✅");
+    expect(searchMarkers("warning")).toContain("⚠️");
+    expect(searchMarkers("STAR")).toContain("⭐");
+    expect(searchMarkers("budget")).toContain("💰");
+  });
+
+  it("matches by the glyph itself", () => {
+    expect(searchMarkers("🎯")).toEqual(["🎯"]);
+  });
+
+  it("requires every token to hit (AND semantics)", () => {
+    expect(searchMarkers("status dot")).toContain("🔵");
+    expect(searchMarkers("status zzz")).toEqual([]);
+  });
+
+  it("returns an empty list when nothing matches", () => {
+    expect(searchMarkers("nonexistentxyz")).toEqual([]);
   });
 });

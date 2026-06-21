@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-21T18:49:40.470Z",
-  "commit": "7e99fd9",
+  "generatedAt": "2026-06-21T18:55:27.179Z",
+  "commit": "b85c636",
   "headline": {
-    "linesTsJs": 48084,
-    "tests": 1260,
-    "lineCoveragePct": 82.71,
-    "commits": 697,
+    "linesTsJs": 48201,
+    "tests": 1263,
+    "lineCoveragePct": 82.72,
+    "commits": 699,
     "ageDays": 10,
-    "trackedFiles": 342,
-    "featureManualPct": 80,
-    "featureBookPct": 80,
-    "featureExamplePct": 80
+    "trackedFiles": 344,
+    "featureManualPct": 79.5,
+    "featureBookPct": 79.5,
+    "featureExamplePct": 79.5
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 157,
-      "lines": 28678
+      "files": 158,
+      "lines": 28753
     },
     {
       "category": "Unit tests",
-      "files": 123,
-      "lines": 17684
+      "files": 124,
+      "lines": 17726
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 82.71,
-      "covered": 16782,
-      "total": 20288
+      "pct": 82.72,
+      "covered": 16830,
+      "total": 20344
     },
     "statements": {
-      "pct": 82.71,
-      "covered": 16782,
-      "total": 20288
+      "pct": 82.72,
+      "covered": 16830,
+      "total": 20344
     },
     "functions": {
-      "pct": 82.93,
-      "covered": 1016,
-      "total": 1225
+      "pct": 82.95,
+      "covered": 1022,
+      "total": 1232
     },
     "branches": {
-      "pct": 85.86,
-      "covered": 4843,
-      "total": 5640
+      "pct": 85.9,
+      "covered": 4857,
+      "total": 5654
     }
   },
   "tests": {
-    "unit": 1260,
+    "unit": 1263,
     "e2e": 0,
-    "durationMs": 46369,
+    "durationMs": 44868,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 14630
+        "ms": 15151
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6762
+        "ms": 6481
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 6469
+        "ms": 6380
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3473
+        "ms": 3829
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1743
+        "ms": 1718
       }
     ]
   },
@@ -119,7 +119,7 @@
       },
       {
         "name": "components/Toolbar.tsx",
-        "lines": 1005
+        "lines": 1022
       }
     ]
   },
@@ -188,30 +188,30 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 275.6,
+    "jsGzipKb": 275.9,
     "cssGzipKb": 7.9,
-    "totalGzipKb": 283.6,
-    "entryGzipKb": 127.2,
+    "totalGzipKb": 283.8,
+    "entryGzipKb": 127.5,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 17068,
     "chapters": 11,
-    "appLoc": 28678,
-    "docToCodeRatio": 0.6
+    "appLoc": 28753,
+    "docToCodeRatio": 0.59
   },
   "featureCoverage": {
-    "total": 155,
+    "total": 156,
     "manual": 124,
-    "manualPct": 80,
+    "manualPct": 79.5,
     "book": 124,
-    "bookPct": 80,
+    "bookPct": 79.5,
     "bookExample": 124,
-    "bookExamplePct": 80,
+    "bookExamplePct": 79.5,
     "byArea": {
       "editing": {
-        "total": 16,
+        "total": 17,
         "manual": 14,
         "book": 14
       },
@@ -351,6 +351,11 @@
         {
           "id": "copy-table",
           "name": "Copy map as a table (TSV) — Topic / Depth / Note / Tags to the clipboard",
+          "since": "2026-06-21"
+        },
+        {
+          "id": "map-parts",
+          "name": "Map parts — insert a ready-made mini-structure (SWOT / pros-cons / 5W1H / agenda)",
           "since": "2026-06-21"
         },
         {
@@ -511,6 +516,11 @@
           "since": "2026-06-21"
         },
         {
+          "id": "map-parts",
+          "name": "Map parts — insert a ready-made mini-structure (SWOT / pros-cons / 5W1H / agenda)",
+          "since": "2026-06-21"
+        },
+        {
           "id": "detail-levels",
           "name": "Detail levels — expand the map to a chosen depth",
           "since": "2026-06-20"
@@ -591,16 +601,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 10,
-    "commits": 697,
-    "commits7d": 407,
+    "commits": 699,
+    "commits7d": 409,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 351
+        "count": 352
       },
       {
         "name": "github-actions[bot]",
-        "count": 319
+        "count": 320
       },
       {
         "name": "Claude",
@@ -608,9 +618,9 @@
       }
     ],
     "churn30d": {
-      "added": 92526,
-      "removed": 28016
+      "added": 92730,
+      "removed": 28079
     },
-    "changelogEntries": 233
+    "changelogEntries": 234
   }
 }

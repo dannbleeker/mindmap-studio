@@ -20,7 +20,7 @@ import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
 import { matchBorderColor } from "./geometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
-import { levelFontSize, readableTextOn, resolveLevelBox } from "./style";
+import { levelFontSize, readableTextOn, resolveLevelBox, resolveTopicFill } from "./style";
 import type { TopicNode as TopicNodeT } from "./types";
 
 // Custom topic node: a rounded box honouring the model's NodeStyle, with marker emoji, the
@@ -294,7 +294,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const shape = isRoot ? undefined : style?.shape;
   const geom = isGeometric(shape);
   const ins = geom ? shapeInset(shape) : null;
-  const shapeFill = style?.background ?? "var(--mm-node-bg, #faf9f5)";
+  // Branch-derived fill (tint/gradient); null when no fill mode is set → keep the flat-fill path.
+  const topicFill = isRoot
+    ? null
+    : resolveTopicFill({ mode: style?.fill, background: style?.background, branchColor });
+  const shapeFill = topicFill?.solid ?? style?.background ?? "var(--mm-node-bg, #faf9f5)";
   const shapeStroke = matchBorderColor(style?.border) ?? branchColor;
   const shapeStrokeW = style?.border ? Number.parseFloat(style.border) || 2 : 2;
 
@@ -330,6 +334,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         }
       : {
           background:
+            topicFill?.css ??
             style?.background ??
             (filledMain
               ? branchColor
@@ -337,7 +342,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 ? "transparent"
                 : "var(--mm-node-bg, #ffffff)"),
           color:
-            style?.color ?? (filledMain ? readableTextOn(branchColor) : "var(--mm-color, #23211c)"),
+            style?.color ??
+            topicFill?.text ??
+            (filledMain ? readableTextOn(branchColor) : "var(--mm-color, #23211c)"),
           // Underline leaves carry only a bottom rule — set border-bottom alone (no `border`
           // shorthand) so React doesn't warn about mixing shorthand + longhand.
           border:

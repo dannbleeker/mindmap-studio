@@ -913,6 +913,46 @@ describe("flow exportSvg — canvas == export parity (wrap, callouts, indicators
   });
 });
 
+describe("flow exportSvg — branch-derived topic fills (canvas == export)", () => {
+  const rr = (id: string, w: number, h: number) =>
+    new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 120, h: 50 }],
+      [id, { x: 200, y: 0, w, h }],
+    ]);
+
+  it("emits a per-node <linearGradient> + url(#) fill for a gradient-filled topic", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "g",
+      title: "G",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "a", topic: "A", style: { fill: "gradient" }, children: [] }],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain('<linearGradient id="nfill-a"');
+    expect(out).toContain('fill="url(#nfill-a)"');
+  });
+
+  it("paints a tint as a flat colour (no gradient def)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "t",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "a", topic: "A", style: { fill: "tint" }, children: [] }],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).not.toContain("linearGradient");
+    expect(out).toMatch(/<rect[^>]*fill="#[0-9a-f]{6}"/i);
+  });
+});
+
 describe("arrowHeadPath (shared relationship arrowhead)", () => {
   it("builds a 3-vertex triangle with its tip at the target, pointing away from the source", () => {
     const d = arrowHeadPath(100, 0, 0, 0, 9); // horizontal, pointing +x

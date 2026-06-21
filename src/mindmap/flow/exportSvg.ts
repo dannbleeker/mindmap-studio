@@ -37,6 +37,7 @@ import {
   resolveLevelBox,
   resolveLinkStyle,
   resolveSummaryStyle,
+  resolveTopicFill,
   summaryLabel,
 } from "./style";
 import { wrapText } from "./text";
@@ -489,16 +490,35 @@ export function buildFlowSvg(
       depth: d.depth,
       style: st,
     });
+    // Branch-derived fill (tint/gradient); a gradient emits a per-node <linearGradient> def, the
+    // canvas paints the same stops via a CSS linear-gradient (canvas == export).
+    const tf = d.isRoot
+      ? null
+      : resolveTopicFill({
+          mode: st?.fill,
+          background: st?.background,
+          branchColor: d.branchColor,
+        });
+    const gradId = tf?.gradient ? `nfill-${esc(n.id)}` : null;
+    if (tf?.gradient && gradId) {
+      parts.push(
+        `<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${esc(tf.gradient.top)}"/><stop offset="1" stop-color="${esc(tf.gradient.bottom)}"/></linearGradient></defs>`,
+      );
+    }
     const fill = d.isRoot
       ? rootBg
-      : filledMain
-        ? d.branchColor
-        : underlineLeaf
-          ? "none"
-          : (st?.background ?? nodeBg);
+      : tf
+        ? gradId
+          ? `url(#${gradId})`
+          : tf.solid
+        : filledMain
+          ? d.branchColor
+          : underlineLeaf
+            ? "none"
+            : (st?.background ?? nodeBg);
     const textColor = d.isRoot
       ? rootColor
-      : (st?.color ?? (filledMain ? readableTextOn(d.branchColor) : color));
+      : (st?.color ?? tf?.text ?? (filledMain ? readableTextOn(d.branchColor) : color));
     const radius = d.isRoot
       ? 16
       : underlineLeaf

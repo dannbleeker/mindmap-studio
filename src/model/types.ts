@@ -49,6 +49,9 @@ export interface NodeStyle {
   border?: string;
   fontFamily?: string;
   textDecoration?: string;
+  /** Fill treatment derived from the topic's branch colour (or its explicit `background`): a soft
+   *  branch-colour `tint`, or a vertical `gradient`. Absent = a flat fill (today's look). */
+  fill?: "tint" | "gradient";
 }
 
 export interface MapImage {

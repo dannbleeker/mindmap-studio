@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-21T18:55:27.179Z",
-  "commit": "b85c636",
+  "generatedAt": "2026-06-21T19:02:54.570Z",
+  "commit": "105c3bb",
   "headline": {
-    "linesTsJs": 48201,
-    "tests": 1263,
-    "lineCoveragePct": 82.72,
-    "commits": 699,
+    "linesTsJs": 48246,
+    "tests": 1265,
+    "lineCoveragePct": 82.71,
+    "commits": 701,
     "ageDays": 10,
     "trackedFiles": 344,
-    "featureManualPct": 79.5,
-    "featureBookPct": 79.5,
-    "featureExamplePct": 79.5
+    "featureManualPct": 79,
+    "featureBookPct": 79,
+    "featureExamplePct": 79
   },
   "code": [
     {
       "category": "App code (src)",
       "files": 158,
-      "lines": 28753
+      "lines": 28784
     },
     {
       "category": "Unit tests",
       "files": 124,
-      "lines": 17726
+      "lines": 17740
     },
     {
       "category": "Build scripts",
@@ -31,7 +31,7 @@
     {
       "category": "Styles (CSS)",
       "files": 3,
-      "lines": 1689
+      "lines": 1720
     },
     {
       "category": "Docs (Markdown)",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 82.72,
-      "covered": 16830,
-      "total": 20344
+      "pct": 82.71,
+      "covered": 16846,
+      "total": 20366
     },
     "statements": {
-      "pct": 82.72,
-      "covered": 16830,
-      "total": 20344
+      "pct": 82.71,
+      "covered": 16846,
+      "total": 20366
     },
     "functions": {
-      "pct": 82.95,
-      "covered": 1022,
-      "total": 1232
+      "pct": 82.83,
+      "covered": 1023,
+      "total": 1235
     },
     "branches": {
-      "pct": 85.9,
-      "covered": 4857,
-      "total": 5654
+      "pct": 85.91,
+      "covered": 4869,
+      "total": 5667
     }
   },
   "tests": {
-    "unit": 1263,
+    "unit": 1265,
     "e2e": 0,
-    "durationMs": 44868,
+    "durationMs": 47965,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 15151
+        "ms": 15010
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6481
+        "ms": 6433
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 6380
+        "ms": 5882
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3829
+        "ms": 3878
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1718
+        "ms": 1954
       }
     ]
   },
@@ -111,7 +111,7 @@
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 1691
+        "lines": 1695
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -154,7 +154,7 @@
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 81
+        "commits": 82
       },
       {
         "file": "mindmap/contract.ts",
@@ -188,9 +188,9 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 275.9,
-    "cssGzipKb": 7.9,
-    "totalGzipKb": 283.8,
+    "jsGzipKb": 276,
+    "cssGzipKb": 8,
+    "totalGzipKb": 284,
     "entryGzipKb": 127.5,
     "budgetKb": 150,
     "withinBudget": true
@@ -198,20 +198,20 @@
   "docs": {
     "bookWords": 17068,
     "chapters": 11,
-    "appLoc": 28753,
+    "appLoc": 28784,
     "docToCodeRatio": 0.59
   },
   "featureCoverage": {
-    "total": 156,
+    "total": 157,
     "manual": 124,
-    "manualPct": 79.5,
+    "manualPct": 79,
     "book": 124,
-    "bookPct": 79.5,
+    "bookPct": 79,
     "bookExample": 124,
-    "bookExamplePct": 79.5,
+    "bookExamplePct": 79,
     "byArea": {
       "editing": {
-        "total": 17,
+        "total": 18,
         "manual": 14,
         "book": 14
       },
@@ -356,6 +356,11 @@
         {
           "id": "map-parts",
           "name": "Map parts — insert a ready-made mini-structure (SWOT / pros-cons / 5W1H / agenda)",
+          "since": "2026-06-21"
+        },
+        {
+          "id": "task-checkbox",
+          "name": "Quick task toggle — a hover checkbox to cycle not-a-task / to-do / done",
           "since": "2026-06-21"
         },
         {
@@ -521,6 +526,11 @@
           "since": "2026-06-21"
         },
         {
+          "id": "task-checkbox",
+          "name": "Quick task toggle — a hover checkbox to cycle not-a-task / to-do / done",
+          "since": "2026-06-21"
+        },
+        {
           "id": "detail-levels",
           "name": "Detail levels — expand the map to a chosen depth",
           "since": "2026-06-20"
@@ -601,16 +611,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 10,
-    "commits": 699,
-    "commits7d": 409,
+    "commits": 701,
+    "commits7d": 411,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 352
+        "count": 353
       },
       {
         "name": "github-actions[bot]",
-        "count": 320
+        "count": 321
       },
       {
         "name": "Claude",
@@ -618,9 +628,9 @@
       }
     ],
     "churn30d": {
-      "added": 92730,
-      "removed": 28079
+      "added": 92890,
+      "removed": 28139
     },
-    "changelogEntries": 234
+    "changelogEntries": 235
   }
 }

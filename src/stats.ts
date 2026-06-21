@@ -34,6 +34,16 @@ export interface MapStats {
   links: number;
   /** Boundary enclosures. */
   boundaries: number;
+  /** Total words across every topic title + note (the map's reading load). */
+  words: number;
+  /** Estimated reading time in minutes (words ÷ 200, rounded up; 0 for an empty map). */
+  readingMinutes: number;
+}
+
+/** Whitespace-delimited word count of a string (empty/blank → 0). Pure. */
+export function countWords(text: string): number {
+  const t = text.trim();
+  return t ? t.split(/\s+/).length : 0;
 }
 
 /** Compute a map's statistics in a single walk of the central tree (+ scalar doc tallies). Pure. */
@@ -46,6 +56,7 @@ export function mapStats(doc: MindMapDoc, today: string = todayISO()): MapStats 
   let overdue = 0;
   let notes = 0;
   let attachments = 0;
+  let words = 0;
   const tags = new Set<string>();
   const markers = new Set<string>();
 
@@ -54,6 +65,7 @@ export function mapStats(doc: MindMapDoc, today: string = todayISO()): MapStats 
     if (depth > maxDepth) maxDepth = depth;
     if (n.children.length === 0) leaves++;
     if (n.note?.trim()) notes++;
+    words += countWords(n.topic) + countWords(n.note ?? "");
     attachments += n.attachments?.length ?? 0;
     for (const t of n.tags ?? []) tags.add(t);
     for (const ic of n.icons ?? []) markers.add(ic);
@@ -81,5 +93,7 @@ export function mapStats(doc: MindMapDoc, today: string = todayISO()): MapStats 
     markers: markers.size,
     links: doc.links?.length ?? 0,
     boundaries: doc.boundaries?.length ?? 0,
+    words,
+    readingMinutes: Math.ceil(words / 200),
   };
 }

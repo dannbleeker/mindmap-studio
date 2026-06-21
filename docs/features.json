@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 201,
+  "reviewedThroughChangelogBullets": 232,
   "areas": [
     "editing",
     "notes",
@@ -1131,6 +1131,276 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "files-mmst",
+      "name": "Work with maps as files on disk (.mmst): Open / Save / autosave + Windows file association",
+      "area": "library",
+      "since": "2026-06-19",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "gtd-areas-example",
+      "name": "GTD Areas of Focus worked example",
+      "area": "library",
+      "since": "2026-06-19",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "detail-levels",
+      "name": "Detail levels — expand the map to a chosen depth",
+      "area": "structure",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "format-painter",
+      "name": "Format painter — copy a topic's style and paste it across the selection",
+      "area": "styling",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "auto-colour-branches",
+      "name": "Auto-colour branches from the theme palette",
+      "area": "styling",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "rich-text-toolbar",
+      "name": "Inline rich-text mini-toolbar (bold / italic / underline / colour) while editing",
+      "area": "notes",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "hover-peek",
+      "name": "Hover-peek for notes & attachments",
+      "area": "notes",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "drag-markers",
+      "name": "Drag markers from the inspector onto topics",
+      "area": "markers",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "canvas-breadcrumb",
+      "name": "Canvas breadcrumb bar — click an ancestor to centre it",
+      "area": "navigation",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "drill-in",
+      "name": "Drill in (focus on topic) — re-root the view at a topic's subtree",
+      "area": "navigation",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "status-bar",
+      "name": "Canvas status bar — visible topic count, selection size, live zoom",
+      "area": "navigation",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "align-distribute",
+      "name": "Align & distribute selected topics (free-canvas mode)",
+      "area": "structure",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "keyboard-restructure",
+      "name": "Keyboard restructuring — move topics up/down, promote/demote",
+      "area": "editing",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "paste-image",
+      "name": "Paste an image from the clipboard onto a topic",
+      "area": "images",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "find-highlight-all",
+      "name": "Find highlights every match on the canvas",
+      "area": "navigation",
+      "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "marker-library",
+      "name": "Searchable marker library",
+      "area": "markers",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "marker-groups",
+      "name": "Marker groups (single-select sets: Priority / Status / Mood / Vote)",
+      "area": "markers",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "tag-manager",
+      "name": "Tag autocomplete + map-wide tag manager (rename / merge / delete)",
+      "area": "markers",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "topic-fills",
+      "name": "Branch-colour topic fills (tint & gradient)",
+      "area": "styling",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "image-fill",
+      "name": "Image fill for topics (a picture covering the whole card)",
+      "area": "images",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "design-gallery",
+      "name": "Design gallery — one-click theme + connector looks",
+      "area": "styling",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "smartrules",
+      "name": "Conditional-format triggers: overdue / priority / text-contains / has-attachment",
+      "area": "styling",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "editable-outline",
+      "name": "Editable outline panel — rename, promote/demote, drag-reorder",
+      "area": "structure",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "numbering-schemes",
+      "name": "Outline numbering schemes (decimal / legal outline)",
+      "area": "structure",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "map-statistics",
+      "name": "Map statistics panel (+ word count & reading time)",
+      "area": "navigation",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "filter-hide-extract",
+      "name": "Power Filter hide mode + extract matches to a new map",
+      "area": "navigation",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "map-legend",
+      "name": "On-canvas map legend (markers / tags / rules), carried into exports",
+      "area": "navigation",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "paste-table",
+      "name": "Paste a spreadsheet selection as topics (row → topic, columns → note / tags)",
+      "area": "import",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "drag-relate",
+      "name": "Drag-to-relate — draw a cross-link by dragging from a topic's grip",
+      "area": "editing",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "guided-walk",
+      "name": "Guided walk — step through topics with a spotlight + speaker notes",
+      "area": "presentation",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
     }
   ]
 }

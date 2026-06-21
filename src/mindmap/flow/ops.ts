@@ -300,6 +300,18 @@ export function indent(doc: MindMapDoc, id: string): OpResult {
   return { doc: next, selectId: loc.node.id };
 }
 
+/** Swap `id` with its previous/next sibling (reorder among siblings). No-op at an end. */
+export function moveSibling(doc: MindMapDoc, id: string, dir: "up" | "down"): OpResult {
+  const next = structuredClone(doc);
+  const loc = locate(next.root, id);
+  if (!loc || !loc.parent) return { doc };
+  const sibs = loc.parent.children;
+  const j = dir === "up" ? loc.index - 1 : loc.index + 1;
+  if (j < 0 || j >= sibs.length) return { doc };
+  [sibs[loc.index], sibs[j]] = [sibs[j], sibs[loc.index]];
+  return { doc: next, selectId: loc.node.id };
+}
+
 /** Remove a node's subtree; prune dangling links/boundaries; select a neighbour. */
 export function deleteNode(doc: MindMapDoc, id: string): OpResult {
   const probe = locate(doc.root, id);

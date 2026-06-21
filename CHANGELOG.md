@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Keyboard restructuring.** Reorder a topic among its siblings with **Ctrl/⌘+Shift+↑/↓**, and
+  promote/demote it with **Alt+Shift+←/→** — MindManager-style move-up/down + outdent/indent without
+  the mouse. New `moveSibling` op (reusing the existing `indent`/`outdent`).
+- **Paste an image onto a topic.** With a topic selected, **Ctrl/⌘+V** an image from the clipboard to
+  set it as that topic's image (ignored while typing in a field/note, so text paste still works).
+
 - **Align & distribute (free-canvas).** In whiteboard/freeform mode, select 2+ topics and align them
   to a shared edge or centre (left / centre / right / top / middle / bottom), or distribute 3+ evenly
   (horizontal / vertical) — view menu + ⌘K. Pure `alignNodes` / `distributeNodes` ops using measured

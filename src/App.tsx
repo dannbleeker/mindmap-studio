@@ -85,6 +85,7 @@ import {
 } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
 import { type LibraryHit, findDocMatches, searchLibrary } from "./search";
+import { countWords } from "./stats";
 import { stickerImage } from "./stickers";
 import {
   type MapSummary,
@@ -308,11 +309,14 @@ export function App() {
     const outlineNo = outlineNumbers(liveDoc.root).get(selected.id);
     const counts = noteCounts(selectedNode.note ?? "");
     const kids = selectedNode.children.length;
+    // Reading load of this topic (its title + note) — words ÷ 200 wpm, surfaced only when non-trivial.
+    const topicWords = countWords(selectedNode.topic) + counts.words;
     const facts = [
       outlineNo ? `#${outlineNo}` : null,
       `depth ${path?.depth ?? 0}`,
       `${kids} ${kids === 1 ? "child" : "children"}`,
       counts.chars ? `note ${counts.words}w · ${counts.chars}c` : null,
+      topicWords >= 50 ? `~${Math.ceil(topicWords / 200)} min read` : null,
     ]
       .filter(Boolean)
       .join(" · ");

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MindMapDoc } from "../src/model/types";
-import { mapStats } from "../src/stats";
+import { countWords, mapStats } from "../src/stats";
 
 // mapStats summarises a map in one walk — structure, task health, and content tallies — for the
 // Map-statistics panel. Pure + deterministic (overdue is anchored on the passed `today`).
@@ -55,6 +55,24 @@ describe("mapStats", () => {
     expect(s.markers).toBe(2); // ⭐, ❗
     expect(s.links).toBe(1);
     expect(s.boundaries).toBe(1);
+    // words: Root(1) + Alpha(1)+"a note"(2) + A1(1) + Bravo(1) = 6 → <200 so ~1 min
+    expect(s.words).toBe(6);
+    expect(s.readingMinutes).toBe(1);
+  });
+
+  it("counts words across titles + notes and rounds reading time up", () => {
+    expect(countWords("")).toBe(0);
+    expect(countWords("  ")).toBe(0);
+    expect(countWords("one two   three")).toBe(3);
+    const big = Array.from({ length: 250 }, () => "w").join(" ");
+    const s = mapStats({
+      schemaVersion: 1,
+      id: "w",
+      title: "R",
+      root: { id: "r", topic: "R", note: big, children: [] },
+    });
+    expect(s.words).toBe(251); // "R" + 250 note words
+    expect(s.readingMinutes).toBe(2); // ceil(251/200)
   });
 
   it("reports zero completion + no overdue for a task-free map", () => {

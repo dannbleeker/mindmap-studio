@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Word count & reading time.** The **Map statistics** panel now totals every topic title + note
+  into a word count and an estimated reading time (~200 wpm); the inspector's facts line shows a
+  per-topic "~N min read" for longer topics. Pure `countWords` + extended `mapStats`.
+
 - **Map statistics panel.** A new **View ▸ Map statistics** panel (⌘K too) summarises the whole map
   at a glance — topic / leaf / depth counts, task health (tasks, completed %, **overdue**), and content
   tallies (notes, attachments, distinct tags & markers, relationships, boundaries). Numbers come from a

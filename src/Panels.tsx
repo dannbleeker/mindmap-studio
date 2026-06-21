@@ -640,6 +640,8 @@ export function StatsPanel({ doc }: { doc: MindMapDoc }) {
         {row("Completed", `${s.completed} / ${s.tasks} (${pct}%)`)}
         {row("Overdue", s.overdue, s.overdue > 0 ? "#b23b3a" : undefined)}
         <PanelSection>Content</PanelSection>
+        {row("Words", s.words)}
+        {row("Reading time", s.readingMinutes <= 1 ? "~1 min" : `~${s.readingMinutes} min`)}
         {row("Notes", s.notes)}
         {row("Attachments", s.attachments)}
         {row("Distinct tags", s.tags)}

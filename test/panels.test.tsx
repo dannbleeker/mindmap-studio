@@ -2,7 +2,7 @@
 // later Panels refactor (Phase D): each panel must mount without throwing AND show a known piece of
 // user-visible content. Assertions target visible text / roles / labels — NOT internal structure —
 // so they keep passing after the panels are rebuilt on shared primitives.
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -474,6 +474,50 @@ describe("OutlinePanel (interaction)", () => {
     const researchIdx = buttons.findIndex((b) => b.textContent?.includes("Research"));
     const surveysIdx = buttons.findIndex((b) => b.textContent?.includes("Surveys"));
     expect(surveysIdx).toBeGreaterThan(researchIdx);
+  });
+
+  it("renders read-only (no promote/demote controls) when no edit callbacks are given", () => {
+    render(<OutlinePanel root={sampleRoot()} filter="" onFilterChange={noop} onPick={noop} />);
+    expect(screen.queryByRole("button", { name: "Promote topic" })).toBeNull();
+  });
+
+  it("commits an inline rename on double-click + Enter", async () => {
+    const onRename = vi.fn();
+    render(
+      <OutlinePanel
+        root={sampleRoot()}
+        filter=""
+        onFilterChange={noop}
+        onPick={noop}
+        onRename={onRename}
+        onIndent={noop}
+        onMove={noop}
+      />,
+    );
+    await userEvent.dblClick(screen.getByRole("button", { name: /Research/ }));
+    const input = screen.getByRole("textbox", { name: "Rename topic" });
+    await userEvent.clear(input);
+    await userEvent.type(input, "Discovery{Enter}");
+    expect(onRename).toHaveBeenCalledWith("a", "Discovery");
+  });
+
+  it("promotes / demotes a topic via the ◂ ▸ controls", async () => {
+    const onIndent = vi.fn();
+    render(
+      <OutlinePanel
+        root={sampleRoot()}
+        filter=""
+        onFilterChange={noop}
+        onPick={noop}
+        onRename={noop}
+        onIndent={onIndent}
+        onMove={noop}
+      />,
+    );
+    // Promote the "Surveys" (a1) row specifically — scope the query to its row.
+    const row = screen.getByText("Surveys").closest("div") as HTMLElement;
+    await userEvent.click(within(row).getByRole("button", { name: "Promote topic" }));
+    expect(onIndent).toHaveBeenCalledWith("a1", "out");
   });
 });
 

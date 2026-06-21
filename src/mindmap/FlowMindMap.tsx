@@ -87,6 +87,7 @@ import {
   groupSummary,
   indent,
   mergeStyle,
+  moveInTree,
   moveSibling,
   outdent,
   pasteBranch,
@@ -1140,6 +1141,11 @@ function FlowInner({
         return Boolean(findNode(docRef.current, id));
       },
       renameMap: (title) => apply(setTopic(docRef.current, docRef.current.root.id, title)),
+      renameNode: (id, topic) => apply(setTopic(docRef.current, id, topic)),
+      indentNode: (id, dir) =>
+        apply(dir === "in" ? indent(docRef.current, id) : outdent(docRef.current, id)),
+      moveOutlineNode: (dragId, targetId, where) =>
+        apply(moveInTree(docRef.current, dragId, targetId, where)),
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),
       setLineJumps: (on) => apply(setLineJumps(docRef.current, on)),

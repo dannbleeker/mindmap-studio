@@ -31,6 +31,16 @@ export function outlineRows(root: MapNode): OutlineRow[] {
   return rows;
 }
 
+/** Where an outline drag should land given the pointer's vertical position within the hovered row
+ *  (`ratio` 0 = top edge, 1 = bottom edge): the top quarter drops the dragged topic *before* the row,
+ *  the bottom quarter *after* it, and the broad middle nests it as a *child* (the "drag under"
+ *  gesture). Pure — the panel reads pointer geometry, this decides the intent. */
+export function outlineDropWhere(ratio: number): "before" | "child" | "after" {
+  if (ratio < 0.25) return "before";
+  if (ratio > 0.75) return "after";
+  return "child";
+}
+
 export interface IndexHit {
   id: string;
   topic: string;

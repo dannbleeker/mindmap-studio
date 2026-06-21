@@ -396,6 +396,43 @@ export function reparent(
   return { doc: next, selectId: id };
 }
 
+/** Reorder / restructure within the central tree from an outline drag: place `dragId` relative to
+ *  `targetId` — `before` it, `after` it, or as its last `child`. Guards self-drops + cycles; a no-op
+ *  (same doc) when an id is missing, the root is dragged, or the target is the dragged node's own
+ *  descendant. The outline only shows the central hierarchy, so both ids live in `doc.root`. */
+export function moveInTree(
+  doc: MindMapDoc,
+  dragId: string,
+  targetId: string,
+  where: "before" | "after" | "child",
+): OpResult {
+  if (dragId === targetId) return { doc };
+  const next = structuredClone(doc);
+  const src = locateRemovable(next, dragId);
+  if (!src) return { doc }; // missing, or the root itself (not reparentable)
+  if (isDescendant(src.node, targetId)) return { doc }; // would create a cycle
+  if (where === "child") {
+    const dest = findAnyNode(next, targetId);
+    if (!dest) return { doc };
+    src.remove();
+    dest.children.push(src.node);
+    dest.collapsed = false;
+  } else {
+    src.remove();
+    // Re-locate the target AFTER removal so the sibling index is correct (it may have shifted).
+    const loc = locate(next.root, targetId);
+    if (!loc) return { doc };
+    if (!loc.parent) {
+      next.root.children.push(src.node); // target is the root — can't be a sibling; nest under it
+    } else {
+      loc.parent.children.splice(loc.index + (where === "after" ? 1 : 0), 0, src.node);
+    }
+  }
+  touch(src.node, opsClock());
+  if (next.floatingTopics && next.floatingTopics.length === 0) next.floatingTopics = undefined;
+  return { doc: next, selectId: dragId };
+}
+
 // --- content edits ---------------------------------------------------------
 
 /** Set a node's topic text (renaming the root also updates the doc title). */

@@ -719,6 +719,24 @@ export function Toolbar({
                   }}
                 />
                 <MenuItem
+                  icon={mi("layers")}
+                  label="Group selection (boundary)"
+                  disabled={canvas.selectedCount < 2}
+                  title={
+                    canvas.selectedCount < 2
+                      ? "Select 2+ topics to group them in one boundary"
+                      : undefined
+                  }
+                  onSelect={() => {
+                    const ok = m()?.groupSelection();
+                    showHint(
+                      ok
+                        ? "Selection grouped — double-click the label to rename."
+                        : "Select 2+ topics first.",
+                    );
+                  }}
+                />
+                <MenuItem
                   icon={mi("balance")}
                   label="Summary bracket"
                   disabled={!canvas.selected}

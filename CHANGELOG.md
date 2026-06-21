@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Group a selection in a boundary.** Beyond "group branch" (a subtree), **Insert ▸ Group selection
+  (boundary)** (and ⌘K) now wraps any **2+ selected topics** in one filled boundary box — MindManager
+  boundaries around an arbitrary set. New pure `groupNodes`, sharing an extracted `addBoundaryForNodes`
+  core with `groupBranch`.
+
 - **Quick task toggle (topic checkbox).** Hovering a topic now shows a checkbox on its left edge —
   click to cycle **not-a-task → to-do → done** (a checked box stays visible) — MindManager's task tick,
   without opening the inspector. Pure `cycleTaskProgress`; the existing progress pie still handles

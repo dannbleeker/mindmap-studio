@@ -197,6 +197,15 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     !!sel,
   );
   add(
+    "insert-group-selection",
+    "Group selection (boundary)",
+    "insert",
+    () => {
+      m()?.groupSelection();
+    },
+    canvas.selectedCount >= 2,
+  );
+  add(
     "insert-summary",
     "Summary bracket",
     "insert",

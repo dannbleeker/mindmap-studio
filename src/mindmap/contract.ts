@@ -163,6 +163,11 @@ export interface MindMapHandle {
   setRules: (rules: ConditionalRule[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */
   setSelectedTags: (tags: string[]) => boolean;
+  /** Rename a tag map-wide (central tree + floating topics); renaming to an existing tag MERGES them.
+   *  The tag manager's rename/merge. No-op on a blank target or when nothing carries the tag. */
+  renameTag: (from: string, to: string) => void;
+  /** Delete a tag from every node in the map (the tag manager's delete). */
+  deleteTag: (tag: string) => void;
   /** Set the selected node's task completion (0..1), or clear it with undefined; false if none. */
   setSelectedProgress: (progress: number | undefined) => boolean;
   /** Set the selected node's due date ("YYYY-MM-DD"), or clear with ""; false if nothing selected. */

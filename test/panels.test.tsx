@@ -530,6 +530,42 @@ describe("MarkerTagIndex (interaction)", () => {
     await userEvent.click(researchButtons[0]);
     expect(onPick).toHaveBeenCalledWith("a");
   });
+
+  it("stays read-only (no tag manager controls) without the manager callbacks", () => {
+    render(<MarkerTagIndex root={sampleRoot()} onPick={noop} />);
+    expect(screen.queryByRole("button", { name: "Delete tag risk" })).toBeNull();
+  });
+
+  it("renames/merges a tag map-wide via the ✎ control", async () => {
+    const onRenameTag = vi.fn();
+    render(
+      <MarkerTagIndex
+        root={sampleRoot()}
+        onPick={noop}
+        onRenameTag={onRenameTag}
+        onDeleteTag={noop}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Rename tag risk" }));
+    const input = screen.getByRole("textbox", { name: "Rename tag risk" });
+    await userEvent.clear(input);
+    await userEvent.type(input, "danger{Enter}");
+    expect(onRenameTag).toHaveBeenCalledWith("risk", "danger");
+  });
+
+  it("deletes a tag map-wide via the ✕ control", async () => {
+    const onDeleteTag = vi.fn();
+    render(
+      <MarkerTagIndex
+        root={sampleRoot()}
+        onPick={noop}
+        onRenameTag={noop}
+        onDeleteTag={onDeleteTag}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Delete tag risk" }));
+    expect(onDeleteTag).toHaveBeenCalledWith("risk");
+  });
 });
 
 describe("FilterPanel (interaction)", () => {

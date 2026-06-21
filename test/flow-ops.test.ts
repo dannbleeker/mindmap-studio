@@ -20,6 +20,7 @@ import {
   deleteLink,
   deleteNode,
   deleteSummary,
+  deleteTag,
   distributeNodes,
   findAnyNode,
   findNode,
@@ -33,6 +34,7 @@ import {
   outdent,
   pasteBranch,
   removeAttachment,
+  renameTag,
   reparent,
   replaceTopics,
   selectionFields,
@@ -201,6 +203,53 @@ describe("flow ops — content", () => {
   it("setTopic renames a node; renaming the root updates the title", () => {
     expect(findNode(setTopic(base(), "a", "AA").doc, "a")?.topic).toBe("AA");
     expect(setTopic(base(), "r", "New").doc.title).toBe("New");
+  });
+
+  it("renameTag renames a tag map-wide and MERGES (dedupes) into an existing one", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "t",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", tags: ["old", "keep"], children: [] },
+          { id: "b", topic: "B", tags: ["new", "old"], children: [] },
+        ],
+      },
+    };
+    // plain rename
+    const renamed = renameTag(d, "old", "fresh").doc;
+    expect(findNode(renamed, "a")?.tags).toEqual(["keep", "fresh"]);
+    // merge: old → new where new already present on b (no duplicate)
+    const merged = renameTag(d, "old", "new").doc;
+    expect(findNode(merged, "b")?.tags).toEqual(["new"]);
+    expect(findNode(merged, "a")?.tags).toEqual(["keep", "new"]);
+    // blank target / rename-to-self / unused tag → unchanged reference
+    expect(renameTag(d, "old", "  ").doc).toBe(d);
+    expect(renameTag(d, "old", "old").doc).toBe(d);
+    expect(renameTag(d, "missing", "x").doc).toBe(d);
+  });
+
+  it("deleteTag removes a tag from every node (dropping an emptied tags array)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "t",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", tags: ["x", "y"], children: [] },
+          { id: "b", topic: "B", tags: ["x"], children: [] },
+        ],
+      },
+    };
+    const out = deleteTag(d, "x").doc;
+    expect(findNode(out, "a")?.tags).toEqual(["y"]);
+    expect(findNode(out, "b")?.tags).toBeUndefined(); // emptied → dropped
+    expect(deleteTag(d, "missing").doc).toBe(d);
   });
 
   it("toggleCollapse flips a parent and is a no-op for a leaf", () => {

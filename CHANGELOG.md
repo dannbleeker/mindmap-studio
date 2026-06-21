@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Design gallery.** A new **Canvas ▸ Design** menu applies a coordinated one-click "look" — canvas
+  theme + branch connector style together (Classic / Blueprint / Midnight / Sunrise / Diagram) —
+  MindManager's Design tab. Pure `DESIGNS` data over the existing theme + connector controls (no new
+  styling mechanism).
+
 - **Power Filter: hide mode + extract to a new map.** The Power Filter can now **hide** non-matching
   topics (a clean spotlight) instead of only fading them, and **Extract matches to a new map** prunes
   the current matches (plus their ancestors, so the structure holds) into a fresh library map — leaving

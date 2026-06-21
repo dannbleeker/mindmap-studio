@@ -100,6 +100,7 @@ function setup(
     pasteFormat: vi.fn(),
     canPasteFormat: false,
     shuffleBranchColors: vi.fn(),
+    applyDesign: vi.fn(),
     drillIn: vi.fn(),
     alignSelection: vi.fn(),
     distributeSelection: vi.fn(),

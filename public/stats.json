@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-21T19:40:59.077Z",
-  "commit": "9163efb",
+  "generatedAt": "2026-06-21T20:24:08.635Z",
+  "commit": "29f5fa7",
   "headline": {
-    "linesTsJs": 48916,
-    "tests": 1281,
-    "lineCoveragePct": 82.16,
-    "commits": 711,
+    "linesTsJs": 48983,
+    "tests": 1283,
+    "lineCoveragePct": 82.15,
+    "commits": 713,
     "ageDays": 10,
     "trackedFiles": 350,
-    "featureManualPct": 76.5,
-    "featureBookPct": 76.5,
-    "featureExamplePct": 76.5
+    "featureManualPct": 76.1,
+    "featureBookPct": 76.1,
+    "featureExamplePct": 76.1
   },
   "code": [
     {
       "category": "App code (src)",
       "files": 161,
-      "lines": 29299
+      "lines": 29347
     },
     {
       "category": "Unit tests",
       "files": 127,
-      "lines": 17895
+      "lines": 17914
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 82.16,
-      "covered": 17036,
-      "total": 20733
+      "pct": 82.15,
+      "covered": 17065,
+      "total": 20771
     },
     "statements": {
-      "pct": 82.16,
-      "covered": 17036,
-      "total": 20733
+      "pct": 82.15,
+      "covered": 17065,
+      "total": 20771
     },
     "functions": {
-      "pct": 82.36,
-      "covered": 1032,
-      "total": 1253
+      "pct": 82.24,
+      "covered": 1033,
+      "total": 1256
     },
     "branches": {
-      "pct": 85.96,
-      "covered": 4905,
-      "total": 5706
+      "pct": 85.99,
+      "covered": 4918,
+      "total": 5719
     }
   },
   "tests": {
-    "unit": 1281,
+    "unit": 1283,
     "e2e": 0,
-    "durationMs": 46265,
+    "durationMs": 36599,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 14748
+        "ms": 11545
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6109
+        "ms": 5419
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5782
+        "ms": 5168
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3516
+        "ms": 2759
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1611
+        "ms": 1238
       }
     ]
   },
@@ -111,15 +111,15 @@
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 1755
+        "lines": 1761
       },
       {
         "name": "mindmap/flow/ops.ts",
-        "lines": 1386
+        "lines": 1406
       },
       {
         "name": "components/Toolbar.tsx",
-        "lines": 1086
+        "lines": 1096
       }
     ]
   },
@@ -154,11 +154,11 @@
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 85
+        "commits": 86
       },
       {
         "file": "mindmap/contract.ts",
-        "commits": 52
+        "commits": 53
       },
       {
         "file": "Panels.tsx",
@@ -166,7 +166,7 @@
       },
       {
         "file": "mindmap/flow/ops.ts",
-        "commits": 48
+        "commits": 49
       }
     ],
     "risky": [
@@ -188,27 +188,27 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 277.7,
+    "jsGzipKb": 277.9,
     "cssGzipKb": 8,
-    "totalGzipKb": 285.7,
-    "entryGzipKb": 128.7,
+    "totalGzipKb": 285.9,
+    "entryGzipKb": 128.9,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 17068,
     "chapters": 11,
-    "appLoc": 29299,
+    "appLoc": 29347,
     "docToCodeRatio": 0.58
   },
   "featureCoverage": {
-    "total": 162,
+    "total": 163,
     "manual": 124,
-    "manualPct": 76.5,
+    "manualPct": 76.1,
     "book": 124,
-    "bookPct": 76.5,
+    "bookPct": 76.1,
     "bookExample": 124,
-    "bookExamplePct": 76.5,
+    "bookExamplePct": 76.1,
     "byArea": {
       "editing": {
         "total": 18,
@@ -216,7 +216,7 @@
         "book": 14
       },
       "navigation": {
-        "total": 32,
+        "total": 33,
         "manual": 24,
         "book": 24
       },
@@ -386,6 +386,11 @@
         {
           "id": "align-guides",
           "name": "Smart alignment guides + snapping (free-canvas drag)",
+          "since": "2026-06-21"
+        },
+        {
+          "id": "isolate-branch",
+          "name": "Isolate branch — collapse other top branches and reveal the path to a topic",
           "since": "2026-06-21"
         },
         {
@@ -581,6 +586,11 @@
           "since": "2026-06-21"
         },
         {
+          "id": "isolate-branch",
+          "name": "Isolate branch — collapse other top branches and reveal the path to a topic",
+          "since": "2026-06-21"
+        },
+        {
           "id": "detail-levels",
           "name": "Detail levels — expand the map to a chosen depth",
           "since": "2026-06-20"
@@ -661,16 +671,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 10,
-    "commits": 711,
+    "commits": 713,
     "commits7d": 419,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 358
+        "count": 359
       },
       {
         "name": "github-actions[bot]",
-        "count": 326
+        "count": 327
       },
       {
         "name": "Claude",
@@ -678,9 +688,9 @@
       }
     ],
     "churn30d": {
-      "added": 93992,
-      "removed": 28452
+      "added": 94141,
+      "removed": 28511
     },
-    "changelogEntries": 240
+    "changelogEntries": 241
   }
 }

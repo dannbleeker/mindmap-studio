@@ -1,6 +1,7 @@
 import type { ChangeEvent, FormEvent, ReactNode, RefObject } from "react";
 import { BrainstormTimer } from "../BrainstormTimer";
 import { Menu, MenuCheckboxItem, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
+import { DESIGNS } from "../designs";
 import { buildExample, examples } from "../examples";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import { canvasThemes } from "../mindmap/theme";
@@ -76,6 +77,8 @@ export interface ToolbarCanvas {
   canPasteFormat: boolean;
   /** Auto-colour the top branches from the theme palette. */
   shuffleBranchColors: () => void;
+  /** Apply a design preset (theme + connector style) from the gallery. */
+  applyDesign: (id: string) => void;
   /** Drill in: re-root the canvas view at the selected topic (focus-on-topic). */
   drillIn: () => void;
   /** Align / distribute the selected free-canvas nodes (freeform mode). */
@@ -770,6 +773,20 @@ export function Toolbar({
           <Menu trigger={menuTrigger("palette", "Canvas")} triggerTitle="Canvas" sheet={isMobile}>
             {(close) => (
               <>
+                <MenuLabel>Design</MenuLabel>
+                {DESIGNS.map((d) => (
+                  <MenuItem
+                    key={d.id}
+                    icon={mi("palette")}
+                    label={d.name}
+                    title={d.note}
+                    onSelect={() => {
+                      canvas.applyDesign(d.id);
+                      close();
+                    }}
+                  />
+                ))}
+                <MenuSeparator />
                 <MenuLabel>Theme</MenuLabel>
                 <div style={{ padding: "2px 6px" }}>
                   <select

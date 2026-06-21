@@ -35,6 +35,7 @@ import { Toolbar, type ToolbarProps } from "./components/Toolbar";
 import { buildEditorCommands } from "./components/editorCommands";
 import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
+import { designById } from "./designs";
 import { type FilterCriteria, filterResult, filterToDoc, focusSet, isFilterActive } from "./filter";
 import { clampIndex, togglePlay } from "./historyPlayback";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
@@ -1369,6 +1370,13 @@ export function App() {
       pasteFormat,
       canPasteFormat: copiedStyle !== null,
       shuffleBranchColors: () => mapRef.current?.shuffleBranchColors(),
+      applyDesign: (id: string) => {
+        const design = designById(id);
+        if (!design) return;
+        setThemeId(design.themeId); // canvas theme (React state)
+        mapRef.current?.setConnectorStyle(design.connectorStyle); // map-wide connector (undoable)
+        showHint(`Applied the ${design.name} design.`);
+      },
       drillIn: () => {
         if (selected) setDrillId(selected.id);
       },

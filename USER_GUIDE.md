@@ -306,7 +306,9 @@ Named styles are kept locally and reusable across maps, so a house style is one 
 ### Collapse / expand
 
 **⊟** collapses every branch to a level-1 overview; **⊞** expands the whole tree. **Fit**
-re-frames the map.
+re-frames the map. The **Detail level** items (in the same menu, and via **⌘K**) show the map to an
+exact depth — **Show level 1** reveals only the top branches, **level 2** one tier more, and so on —
+the quickest way to step a big map between an overview and full detail (MindManager's detail levels).
 
 ### Minimap & zoom
 

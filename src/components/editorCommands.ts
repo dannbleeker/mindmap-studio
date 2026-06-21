@@ -101,6 +101,8 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   );
   add("collapse-all", "Collapse all branches", "view", () => m()?.setAllExpanded(false));
   add("expand-all", "Expand all branches", "view", () => m()?.setAllExpanded(true));
+  for (const n of [1, 2, 3, 4, 5])
+    add(`expand-level:${n}`, `Show detail level ${n}`, "view", () => m()?.setExpandedToLevel(n));
   add(
     "focus-branch",
     "Focus the selected branch",

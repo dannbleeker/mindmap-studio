@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Detail levels (expand the map to a depth).** A new **Detail level** group in the view menu (and
+  ⌘K) — **Show level 1…5** — collapses everything below the chosen depth, so you can step a large map
+  from a top-branch overview to full detail in one click (MindManager's detail-level control).
+  Complements the existing Collapse-all / Expand-all. New `setExpandedToLevel` op + `walkTree` helper.
+
 - **Richer MindManager `.mmap` import.** Opening a `.mmap` now recovers a lot more than the bare
   structure — all into existing model fields, so it shows on the canvas and survives a Save-as `.mmst`:
   - **Per-topic task info** — start/due dates, priority (`Prio1..5`→1..5), and progress

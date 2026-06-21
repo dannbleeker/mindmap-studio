@@ -43,6 +43,7 @@ import {
   setBoundaryLabel,
   setCalloutColor,
   setDue,
+  setExpandedToLevel,
   setFreeform,
   setHyperlink,
   setImage,
@@ -174,6 +175,17 @@ describe("flow ops — content", () => {
     expect(findNode(collapsed, "a")?.collapsed).toBe(true);
     expect(findNode(collapsed, "r")?.collapsed).toBeUndefined(); // root stays open
     expect(findNode(setAllExpanded(collapsed, true).doc, "a")?.collapsed).toBe(false);
+  });
+
+  it("setExpandedToLevel collapses topics at/below the level, expands above it", () => {
+    // base(): r(0) → a(1, has children a1/a2) → ...; b(1, leaf). Only `a` is a collapsible branch.
+    const l1 = setExpandedToLevel(base(), 1).doc; // level 1 → depth-1 branches collapse
+    expect(findNode(l1, "a")?.collapsed).toBe(true);
+    expect(findNode(l1, "r")?.collapsed).toBeUndefined(); // root never collapses
+    const l2 = setExpandedToLevel(base(), 2).doc; // level 2 → depth-1 branch expands again
+    expect(findNode(l2, "a")?.collapsed).toBe(false);
+    // Clamp: level 0 behaves like level 1 (≥1).
+    expect(findNode(setExpandedToLevel(base(), 0).doc, "a")?.collapsed).toBe(true);
   });
 
   it("setNote / toggleIcon / mergeStyle update and clear cleanly", () => {

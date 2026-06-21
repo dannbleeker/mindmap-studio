@@ -248,6 +248,9 @@ export interface MindMapDoc {
     /** Outline-numbering scheme used when numbering is shown: "decimal" (1, 1.1, 1.1.1 — the default)
      *  or "outline" (the legal outline I, A, 1, a, i by level). Absent = "decimal". Lossless in .json. */
     numberStyle?: NumberStyle;
+    /** Show the map legend (markers / tags / conditional rules in use) on the canvas + in exports.
+     *  Off by default. Lossless in .json, ignored by flat exporters. */
+    legend?: boolean;
   };
 }
 

@@ -92,6 +92,13 @@ export function markerGroupOf(marker: string): string | null {
   return GROUP_OF.get(marker) ?? null;
 }
 
+const NAME_OF = new Map(MARKER_CATALOG.map((m) => [m.icon, m.name]));
+
+/** The human name for a marker (from the catalogue), or null for an unknown/imported glyph. */
+export function markerName(marker: string): string | null {
+  return NAME_OF.get(marker) ?? null;
+}
+
 /** Toggle a marker in an icons list with group semantics: toggling a present marker removes it;
  *  toggling a new one adds it AND drops any other member of its single-select group (so a topic keeps
  *  at most one Priority / Status / Mood / Vote marker). Free markers just toggle. Pure. */

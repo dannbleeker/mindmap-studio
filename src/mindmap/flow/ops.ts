@@ -714,6 +714,13 @@ export function setLineJumps(doc: MindMapDoc, on: boolean): OpResult {
   return { doc: next };
 }
 
+/** Toggle the map legend (markers / tags / rules overlay + export); false clears the flag. */
+export function setLegend(doc: MindMapDoc, on: boolean): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, legend: on || undefined };
+  return { doc: next };
+}
+
 /** Set the map's outline-numbering scheme; "decimal" (the default) clears the override. */
 export function setNumberStyle(doc: MindMapDoc, style: NumberStyle): OpResult {
   const next = structuredClone(doc);

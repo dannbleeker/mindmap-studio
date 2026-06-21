@@ -1,4 +1,5 @@
 import { markerImage } from "../../icons";
+import { buildLegend } from "../../legend";
 import type { MapNode, MindMapDoc } from "../../model/types";
 import { priorityColor, priorityLabel } from "../../priority";
 import { checkPath, piePath } from "../../progress";
@@ -719,5 +720,47 @@ export function buildFlowSvg(
     ? `<image x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" href="${esc(doc.meta.backgroundImage)}" preserveAspectRatio="xMidYMid slice"/>`
     : "";
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vbX)} ${r2(vbY)} ${r2(vbW)} ${r2(vbH)}" width="${r2(vbW)}" height="${r2(vbH)}"><rect x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" fill="${esc(pageBg)}"/>${bgImage}${parts.join("")}</svg>`;
+  // Map legend (top-left), drawn on top of everything when meta.legend is on — the same rows the
+  // on-canvas LegendPanel shows (shared buildLegend), so the legend reads the same on screen + export.
+  const legend = doc.meta?.legend ? emitLegend(doc, vbX, vbY) : "";
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vbX)} ${r2(vbY)} ${r2(vbW)} ${r2(vbH)}" width="${r2(vbW)}" height="${r2(vbH)}"><rect x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" fill="${esc(pageBg)}"/>${bgImage}${parts.join("")}${legend}</svg>`;
+}
+
+/** SVG for the map legend box anchored at the viewBox's top-left — one row per marker / tag / rule
+ *  (the shared buildLegend rows). Markers draw their vector tile; tags/rules a coloured swatch. */
+function emitLegend(doc: MindMapDoc, vbX: number, vbY: number): string {
+  const entries = buildLegend(doc);
+  if (entries.length === 0) return "";
+  const x = vbX + 12;
+  const y = vbY + 12;
+  const rowH = 17;
+  const longest = Math.max(6, ...entries.map((e) => e.label.length));
+  const w = Math.min(240, 28 + longest * 6.2);
+  const h = 22 + entries.length * rowH;
+  const out: string[] = [
+    `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" rx="6" fill="#ffffff" stroke="rgba(0,0,0,0.18)" stroke-width="1"/>`,
+    `<text x="${r2(x + 9)}" y="${r2(y + 15)}" font-family="sans-serif" font-size="11" font-weight="600" fill="#6b6b6b">Legend</text>`,
+  ];
+  entries.forEach((e, i) => {
+    const ry = y + 24 + i * rowH;
+    const img = e.icon ? markerImage(e.icon) : null;
+    if (e.kind === "marker" && img) {
+      out.push(`<image x="${r2(x + 9)}" y="${r2(ry)}" width="12" height="12" href="${esc(img)}"/>`);
+    } else if (e.kind === "marker" && e.icon) {
+      out.push(
+        `<text x="${r2(x + 9)}" y="${r2(ry + 10)}" font-family="sans-serif" font-size="11">${esc(e.icon)}</text>`,
+      );
+    } else {
+      const fill = e.color ?? "#1b8a5e";
+      const rx = e.kind === "tag" ? 5 : 2;
+      out.push(
+        `<rect x="${r2(x + 9)}" y="${r2(ry)}" width="11" height="11" rx="${rx}" fill="${esc(fill)}"/>`,
+      );
+    }
+    out.push(
+      `<text x="${r2(x + 25)}" y="${r2(ry + 10)}" font-family="sans-serif" font-size="11" fill="#23211c">${esc(e.label)}</text>`,
+    );
+  });
+  return out.join("");
 }

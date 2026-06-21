@@ -973,6 +973,40 @@ describe("flow exportSvg — branch-derived topic fills (canvas == export)", () 
   });
 });
 
+describe("flow exportSvg — map legend", () => {
+  const rr = (id: string, w: number, h: number) =>
+    new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 120, h: 50 }],
+      [id, { x: 200, y: 0, w, h }],
+    ]);
+
+  it("draws a legend box with a row per marker / tag / rule when meta.legend is on", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "lg",
+      title: "L",
+      meta: { legend: true },
+      root: {
+        id: "r",
+        topic: "R",
+        icons: ["⭐"],
+        tags: ["q3"],
+        children: [{ id: "a", topic: "A", children: [] }],
+      },
+      rules: [{ id: "x", kind: "tag", value: "q3", style: { background: "#fee2e2" } }],
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain(">Legend</text>");
+    expect(out).toContain(">q3</text>"); // the tag row
+    expect(out).toContain(">tag q3</text>"); // the rule row (describeRule)
+    expect(out).toContain('fill="#fee2e2"'); // the rule's colour swatch
+  });
+
+  it("omits the legend when meta.legend is unset", () => {
+    expect(buildFlowSvg(doc, rects, palette, cssVar)).not.toContain(">Legend</text>");
+  });
+});
+
 describe("arrowHeadPath (shared relationship arrowhead)", () => {
   it("builds a 3-vertex triangle with its tip at the target, pointing away from the source", () => {
     const d = arrowHeadPath(100, 0, 0, 0, 9); // horizontal, pointing +x

@@ -61,6 +61,7 @@ import {
 } from "./flow/history";
 import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
+import { LinkEditContext } from "./flow/linkEdit";
 import {
   type OpResult,
   addAttachment,
@@ -342,6 +343,8 @@ function FlowInner({
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   // Free-canvas alignment guide lines shown while dragging (cleared on drag stop).
   const [guides, setGuides] = useState<GuideLine[]>([]);
+  // The cross-link whose label is being inline-edited on the canvas (double-click), or null.
+  const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
   const { fitView, getNodes, setCenter, getViewport, setViewport } = useReactFlow();
   const initialized = useNodesInitialized();
 
@@ -726,6 +729,19 @@ function FlowInner({
       spellcheck,
     };
   }, [editingId, editSeed, startEdit, apply, focusNodeById, selectOnly, fireSelect, spellcheck]);
+
+  // Inline relationship-label editing (double-click a cross-link). Mirrors the topic editing context.
+  const linkEditApi = useMemo(
+    () => ({
+      editingId: editingLinkId,
+      commit: (id: string, label: string) => {
+        apply(setLinkLabel(docRef.current, id, label.trim()));
+        setEditingLinkId(null);
+      },
+      cancel: () => setEditingLinkId(null),
+    }),
+    [editingLinkId, apply],
+  );
 
   // Flatten every node's callouts for the overlay, from the live doc (so freshly-added ones show).
   const calloutItems = useMemo<CalloutAnchor[]>(() => {
@@ -1320,437 +1336,449 @@ function FlowInner({
 
   return (
     <EditingContext.Provider value={editingApi}>
-      <div
-        style={{
-          height: "100%",
-          width: "100%",
-          ...themeVars(theme),
-          // Per-map background overrides the theme's canvas colour (reads the live mirror).
-          ...(renderDoc.meta?.background ? { background: renderDoc.meta.background } : {}),
-        }}
-        // Drop a link (or text) from the browser onto the canvas → a new floating topic.
-        onDragOver={(e) => {
-          if (
-            e.dataTransfer.types.includes("text/uri-list") ||
-            e.dataTransfer.types.includes("text/plain")
-          ) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "copy";
-          }
-        }}
-        onDrop={(e) => {
-          const raw = (
-            e.dataTransfer.getData("text/uri-list") ||
-            e.dataTransfer.getData("text/plain") ||
-            ""
-          ).trim();
-          const first = raw.split(/\r?\n/).find((l) => l && !l.startsWith("#")) ?? "";
-          if (!first) return;
-          e.preventDefault();
-          let topic = first;
-          let link: string | undefined;
-          if (/^https?:\/\//i.test(first) && !isDangerousUrl(first)) {
-            link = first;
-            try {
-              topic = new URL(first).hostname.replace(/^www\./, "") || first;
-            } catch {
-              topic = first;
-            }
-          }
-          apply(addFloatingTopic(docRef.current, topic, link));
-        }}
-        // Double-click the empty canvas to drop a new floating topic and edit it straight away (#6).
-        // Node double-clicks stopPropagation (→ inline edit), so only bare-pane double-clicks reach
-        // here; the target guard keeps clicks on the controls / minimap from creating stray topics.
-        onDoubleClick={(e) => {
-          if ((e.target as HTMLElement)?.classList?.contains("react-flow__pane")) {
-            apply(addFloatingTopic(docRef.current, ""), true);
-          }
-        }}
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          nodesDraggable
-          // Drag-to-relate: pulling from a topic's hover handle onto another topic draws a cross-link
-          // (loose mode lets the drag end anywhere on the target node, not just its anchor handle).
-          nodesConnectable
-          connectionMode={ConnectionMode.Loose}
-          onConnect={(c) => {
-            if (c.source && c.target && c.source !== c.target) {
-              apply(addLink(docRef.current, c.source, c.target));
+      <LinkEditContext.Provider value={linkEditApi}>
+        <div
+          style={{
+            height: "100%",
+            width: "100%",
+            ...themeVars(theme),
+            // Per-map background overrides the theme's canvas colour (reads the live mirror).
+            ...(renderDoc.meta?.background ? { background: renderDoc.meta.background } : {}),
+          }}
+          // Drop a link (or text) from the browser onto the canvas → a new floating topic.
+          onDragOver={(e) => {
+            if (
+              e.dataTransfer.types.includes("text/uri-list") ||
+              e.dataTransfer.types.includes("text/plain")
+            ) {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "copy";
             }
           }}
-          deleteKeyCode={null}
-          zoomOnDoubleClick={false}
-          colorMode={(theme ?? mindManagerTheme).type}
-          proOptions={{ hideAttribution: true }}
-          minZoom={0.2}
-          maxZoom={3}
-          // Restore a saved viewport (lossless tab switch) when present; else fit to view on mount.
-          // Read from the mount-captured session so a later re-render (after App clears the one-shot
-          // cache) can't flip fitView back on and re-fit away the restored viewport.
-          fitView={!mountSession.current?.viewport}
-          defaultViewport={mountSession.current?.viewport}
-          // Left-drag the background to pan (the gesture most people reach for first); the +/−/fit
-          // controls stay too. Scroll / ⌘-scroll zooms (React Flow's defaults). Hold Shift and drag
-          // to rubber-band a marquee selection; Shift/Ctrl/Cmd-click extends the selection. (#6)
-          panOnDrag
-          selectionKeyCode="Shift"
-          multiSelectionKeyCode={["Shift", "Meta", "Control"]}
-          onSelectionChange={onSelectionChange}
-          onNodeClick={(ev, node) => {
-            // In "Link to…" mode, the next click on a *different* node completes the relationship.
-            if (linkingFrom && node.id !== linkingFrom) {
-              const label = window.prompt("Relationship label (optional):", "") ?? "";
-              apply(addLink(docRef.current, linkingFrom, node.id, label));
-              setLinkingFrom(null);
-              return;
+          onDrop={(e) => {
+            const raw = (
+              e.dataTransfer.getData("text/uri-list") ||
+              e.dataTransfer.getData("text/plain") ||
+              ""
+            ).trim();
+            const first = raw.split(/\r?\n/).find((l) => l && !l.startsWith("#")) ?? "";
+            if (!first) return;
+            e.preventDefault();
+            let topic = first;
+            let link: string | undefined;
+            if (/^https?:\/\//i.test(first) && !isDangerousUrl(first)) {
+              link = first;
+              try {
+                topic = new URL(first).hostname.replace(/^www\./, "") || first;
+              } catch {
+                topic = first;
+              }
             }
-            setLinkingFrom(null);
-            setMenu(null);
-            clearEdgeSelection();
-            clearOverlaySelection();
-            // A modified click extends the selection — React Flow toggles it and we mirror the
-            // result via onSelectionChange; a plain click is a single (anchor) select.
-            if (ev.shiftKey || ev.metaKey || ev.ctrlKey) return;
-            selectOnly(node.id);
-            fireSelect(node.id);
+            apply(addFloatingTopic(docRef.current, topic, link));
           }}
-          onEdgeClick={(_, edge) => {
-            // Selecting a relationship opens the EdgeInspector; clear node + overlay (mutually
-            // exclusive), and the menu / link-draw gesture.
-            if (edge.type !== "crosslink") return;
-            setMenu(null);
-            setLinkingFrom(null);
-            selectOnly(null);
-            fireSelect(null);
-            clearOverlaySelection();
-            setSelectedEdgeId(edge.id);
-            fireSelectEdge(edge.id);
-          }}
-          onPaneClick={() => {
-            setLinkingFrom(null);
-            selectOnly(null);
-            fireSelect(null);
-            clearEdgeSelection();
-            clearOverlaySelection();
-            setMenu(null);
-          }}
-          onNodeContextMenu={(e, node) => {
-            e.preventDefault();
-            clearEdgeSelection();
-            clearOverlaySelection();
-            selectOnly(node.id);
-            fireSelect(node.id);
-            setMenu({ x: e.clientX, y: e.clientY, id: node.id });
-          }}
-          onNodeDrag={(_, node) => handleDrag(node.id, node.position)}
-          onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
-          onEdgeContextMenu={(e, edge) => {
-            e.preventDefault();
-            if (edge.type !== "crosslink") return;
-            if (window.confirm("Delete this relationship?"))
-              apply(deleteLink(docRef.current, edge.id));
+          // Double-click the empty canvas to drop a new floating topic and edit it straight away (#6).
+          // Node double-clicks stopPropagation (→ inline edit), so only bare-pane double-clicks reach
+          // here; the target guard keeps clicks on the controls / minimap from creating stray topics.
+          onDoubleClick={(e) => {
+            if ((e.target as HTMLElement)?.classList?.contains("react-flow__pane")) {
+              apply(addFloatingTopic(docRef.current, ""), true);
+            }
           }}
         >
-          <BackgroundImage url={renderDoc.meta?.backgroundImage} />
-          <DiagramBackdrop backdrop={renderDoc.backdrop} />
-          <BraceConnectors braces={braces} />
-          <Boundaries
-            boundaries={boundaries}
-            selectedId={selectedOverlay?.kind === "boundary" ? selectedOverlay.id : null}
-            onSelect={handleSelectBoundary}
-          />
-          <Summaries
-            summaries={summaries}
-            onRename={handleRenameSummary}
-            selectedId={selectedOverlay?.kind === "summary" ? selectedOverlay.id : null}
-            onSelect={handleSelectSummaryOverlay}
-          />
-          <Callouts
-            items={calloutItems}
-            onCommit={handleCommitCallout}
-            onDelete={handleDeleteCallout}
-            selectedId={selectedOverlay?.kind === "callout" ? selectedOverlay.id : null}
-            onSelect={handleSelectCallout}
-          />
-          <NodePopover
-            selectedId={selectedId}
-            editingId={editingId}
-            doc={renderDoc}
-            onRename={startEdit}
-            onToggleCollapse={(id) => apply(toggleCollapse(docRef.current, id))}
-            onDelete={deleteNodeWithUndo}
-          />
-          <CoachMark show={showCoach} rootId={renderDoc.root.id} />
-          <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
-          {renderDoc.meta?.legend ? <LegendPanel doc={renderDoc} /> : null}
-          {guides.length > 0 ? (
-            <ViewportPortal>
-              {guides.map((g, i) => (
-                <div
-                  key={`${g.axis}:${g.pos}:${i}`}
-                  style={{
-                    position: "absolute",
-                    background: "#f5a623",
-                    pointerEvents: "none",
-                    ...(g.axis === "x"
-                      ? { left: g.pos, top: g.start, width: 1, height: g.end - g.start }
-                      : { left: g.start, top: g.pos, height: 1, width: g.end - g.start }),
-                  }}
-                />
-              ))}
-            </ViewportPortal>
-          ) : null}
-          <Controls showInteractive={false} />
-          <StatusBar topics={nodes.length} selected={selectedIds.size} />
-          <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
-        </ReactFlow>
-        {menu ? (
-          <ContextMenu
-            x={menu.x}
-            y={menu.y}
-            onClose={() => setMenu(null)}
-            menuAriaLabel="Topic actions"
-            sheet={isMobile}
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            nodesDraggable
+            // Drag-to-relate: pulling from a topic's hover handle onto another topic draws a cross-link
+            // (loose mode lets the drag end anywhere on the target node, not just its anchor handle).
+            nodesConnectable
+            connectionMode={ConnectionMode.Loose}
+            onConnect={(c) => {
+              if (c.source && c.target && c.source !== c.target) {
+                apply(addLink(docRef.current, c.source, c.target));
+              }
+            }}
+            deleteKeyCode={null}
+            zoomOnDoubleClick={false}
+            colorMode={(theme ?? mindManagerTheme).type}
+            proOptions={{ hideAttribution: true }}
+            minZoom={0.2}
+            maxZoom={3}
+            // Restore a saved viewport (lossless tab switch) when present; else fit to view on mount.
+            // Read from the mount-captured session so a later re-render (after App clears the one-shot
+            // cache) can't flip fitView back on and re-fit away the restored viewport.
+            fitView={!mountSession.current?.viewport}
+            defaultViewport={mountSession.current?.viewport}
+            // Left-drag the background to pan (the gesture most people reach for first); the +/−/fit
+            // controls stay too. Scroll / ⌘-scroll zooms (React Flow's defaults). Hold Shift and drag
+            // to rubber-band a marquee selection; Shift/Ctrl/Cmd-click extends the selection. (#6)
+            panOnDrag
+            selectionKeyCode="Shift"
+            multiSelectionKeyCode={["Shift", "Meta", "Control"]}
+            onSelectionChange={onSelectionChange}
+            onNodeClick={(ev, node) => {
+              // In "Link to…" mode, the next click on a *different* node completes the relationship.
+              if (linkingFrom && node.id !== linkingFrom) {
+                const label = window.prompt("Relationship label (optional):", "") ?? "";
+                apply(addLink(docRef.current, linkingFrom, node.id, label));
+                setLinkingFrom(null);
+                return;
+              }
+              setLinkingFrom(null);
+              setMenu(null);
+              clearEdgeSelection();
+              clearOverlaySelection();
+              // A modified click extends the selection — React Flow toggles it and we mirror the
+              // result via onSelectionChange; a plain click is a single (anchor) select.
+              if (ev.shiftKey || ev.metaKey || ev.ctrlKey) return;
+              selectOnly(node.id);
+              fireSelect(node.id);
+            }}
+            onEdgeClick={(_, edge) => {
+              // Selecting a relationship opens the EdgeInspector; clear node + overlay (mutually
+              // exclusive), and the menu / link-draw gesture.
+              if (edge.type !== "crosslink") return;
+              setMenu(null);
+              setLinkingFrom(null);
+              selectOnly(null);
+              fireSelect(null);
+              clearOverlaySelection();
+              setSelectedEdgeId(edge.id);
+              fireSelectEdge(edge.id);
+            }}
+            onEdgeDoubleClick={(_, edge) => {
+              // Inline-edit a relationship's label right on the canvas (double-click the line).
+              if (edge.type === "crosslink") setEditingLinkId(edge.id);
+            }}
+            onPaneClick={() => {
+              setLinkingFrom(null);
+              selectOnly(null);
+              fireSelect(null);
+              clearEdgeSelection();
+              clearOverlaySelection();
+              setMenu(null);
+            }}
+            onNodeContextMenu={(e, node) => {
+              e.preventDefault();
+              clearEdgeSelection();
+              clearOverlaySelection();
+              selectOnly(node.id);
+              fireSelect(node.id);
+              setMenu({ x: e.clientX, y: e.clientY, id: node.id });
+            }}
+            onNodeDrag={(_, node) => handleDrag(node.id, node.position)}
+            onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
+            onEdgeContextMenu={(e, edge) => {
+              e.preventDefault();
+              if (edge.type !== "crosslink") return;
+              if (window.confirm("Delete this relationship?"))
+                apply(deleteLink(docRef.current, edge.id));
+            }}
           >
-            {(() => {
-              const id = menu.id;
-              const items: [string, () => void, boolean?][] = [
-                ["Add child", () => apply(addChild(docRef.current, id), true)],
-                ["Add sibling", () => apply(addSibling(docRef.current, id), true)],
-                ["Rename", () => startEdit(id)],
-                [
-                  "Add note",
-                  () => {
-                    selectOnly(id);
-                    fireSelect(id);
-                    onOpenNoteRef.current?.();
-                  },
-                ],
-                ["Link to…", () => setLinkingFrom(id)],
-                ["Add callout", () => apply(addCallout(docRef.current, id))],
-                ["Group in boundary", () => apply(groupBranch(docRef.current, id))],
-                ["Summarize branch", () => apply(groupSummary(docRef.current, id))],
-                [
-                  "Copy branch",
-                  () => {
-                    const n = findAnyNode(docRef.current, id);
-                    if (n) setBranch(structuredClone(n));
-                  },
-                ],
-              ];
-              // Cross-map paste: show only when the branch clipboard has something (it persists in
-              // localStorage, so a branch copied in another map shows up here too).
-              const clip = getBranch();
-              if (clip)
-                items.push([
-                  "Paste branch here",
-                  () => apply(pasteBranch(docRef.current, id, clip)),
-                ]);
-              items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
-              items.push(["Delete", () => deleteNodeWithUndo(id), true]);
-              // Live marker/priority state so the quick-setters reflect the node (and toggle off).
-              const node = findAnyNode(docRef.current, id);
-              const activeMarkers = node?.icons ?? [];
-              const curPriority = node?.task?.priority;
-              return (
-                <>
-                  {items.map(([label, fn, danger]) => (
-                    <MenuItem
-                      key={label}
-                      label={label}
-                      danger={danger}
-                      shortcut={MENU_SHORTCUT[label]}
-                      onSelect={fn}
-                    />
-                  ))}
-                  <MenuSeparator />
-                  {/* Inline marker quick-setter (the "Set marker" submenu): toggle several without
+            <BackgroundImage url={renderDoc.meta?.backgroundImage} />
+            <DiagramBackdrop backdrop={renderDoc.backdrop} />
+            <BraceConnectors braces={braces} />
+            <Boundaries
+              boundaries={boundaries}
+              selectedId={selectedOverlay?.kind === "boundary" ? selectedOverlay.id : null}
+              onSelect={handleSelectBoundary}
+            />
+            <Summaries
+              summaries={summaries}
+              onRename={handleRenameSummary}
+              selectedId={selectedOverlay?.kind === "summary" ? selectedOverlay.id : null}
+              onSelect={handleSelectSummaryOverlay}
+            />
+            <Callouts
+              items={calloutItems}
+              onCommit={handleCommitCallout}
+              onDelete={handleDeleteCallout}
+              selectedId={selectedOverlay?.kind === "callout" ? selectedOverlay.id : null}
+              onSelect={handleSelectCallout}
+            />
+            <NodePopover
+              selectedId={selectedId}
+              editingId={editingId}
+              doc={renderDoc}
+              onRename={startEdit}
+              onToggleCollapse={(id) => apply(toggleCollapse(docRef.current, id))}
+              onDelete={deleteNodeWithUndo}
+            />
+            <CoachMark show={showCoach} rootId={renderDoc.root.id} />
+            <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
+            {renderDoc.meta?.legend ? <LegendPanel doc={renderDoc} /> : null}
+            {guides.length > 0 ? (
+              <ViewportPortal>
+                {guides.map((g, i) => (
+                  <div
+                    key={`${g.axis}:${g.pos}:${i}`}
+                    style={{
+                      position: "absolute",
+                      background: "#f5a623",
+                      pointerEvents: "none",
+                      ...(g.axis === "x"
+                        ? { left: g.pos, top: g.start, width: 1, height: g.end - g.start }
+                        : { left: g.start, top: g.pos, height: 1, width: g.end - g.start }),
+                    }}
+                  />
+                ))}
+              </ViewportPortal>
+            ) : null}
+            <Controls showInteractive={false} />
+            <StatusBar topics={nodes.length} selected={selectedIds.size} />
+            <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
+          </ReactFlow>
+          {menu ? (
+            <ContextMenu
+              x={menu.x}
+              y={menu.y}
+              onClose={() => setMenu(null)}
+              menuAriaLabel="Topic actions"
+              sheet={isMobile}
+            >
+              {(() => {
+                const id = menu.id;
+                const items: [string, () => void, boolean?][] = [
+                  ["Add child", () => apply(addChild(docRef.current, id), true)],
+                  ["Add sibling", () => apply(addSibling(docRef.current, id), true)],
+                  ["Rename", () => startEdit(id)],
+                  [
+                    "Add note",
+                    () => {
+                      selectOnly(id);
+                      fireSelect(id);
+                      onOpenNoteRef.current?.();
+                    },
+                  ],
+                  ["Link to…", () => setLinkingFrom(id)],
+                  ["Add callout", () => apply(addCallout(docRef.current, id))],
+                  ["Group in boundary", () => apply(groupBranch(docRef.current, id))],
+                  ["Summarize branch", () => apply(groupSummary(docRef.current, id))],
+                  [
+                    "Copy branch",
+                    () => {
+                      const n = findAnyNode(docRef.current, id);
+                      if (n) setBranch(structuredClone(n));
+                    },
+                  ],
+                ];
+                // Cross-map paste: show only when the branch clipboard has something (it persists in
+                // localStorage, so a branch copied in another map shows up here too).
+                const clip = getBranch();
+                if (clip)
+                  items.push([
+                    "Paste branch here",
+                    () => apply(pasteBranch(docRef.current, id, clip)),
+                  ]);
+                items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
+                items.push(["Delete", () => deleteNodeWithUndo(id), true]);
+                // Live marker/priority state so the quick-setters reflect the node (and toggle off).
+                const node = findAnyNode(docRef.current, id);
+                const activeMarkers = node?.icons ?? [];
+                const curPriority = node?.task?.priority;
+                return (
+                  <>
+                    {items.map(([label, fn, danger]) => (
+                      <MenuItem
+                        key={label}
+                        label={label}
+                        danger={danger}
+                        shortcut={MENU_SHORTCUT[label]}
+                        onSelect={fn}
+                      />
+                    ))}
+                    <MenuSeparator />
+                    {/* Inline marker quick-setter (the "Set marker" submenu): toggle several without
                       closing, mirroring the inspector's MarkerBar but reachable in one right-click. */}
-                  <MenuLabel>Markers</MenuLabel>
-                  <div className="mm-menu-row">
-                    {MARKER_PALETTE.map((m) => {
-                      const on = activeMarkers.includes(m);
-                      return (
+                    <MenuLabel>Markers</MenuLabel>
+                    <div className="mm-menu-row">
+                      {MARKER_PALETTE.map((m) => {
+                        const on = activeMarkers.includes(m);
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            className="mm-menu-chip"
+                            aria-pressed={on}
+                            aria-label={`${on ? "Remove" : "Add"} marker ${m}`}
+                            data-on={on || undefined}
+                            onClick={() => apply(toggleIcon(docRef.current, id, m))}
+                          >
+                            {markerImage(m) ? (
+                              <img src={markerImage(m) as string} alt={m} width={16} height={16} />
+                            ) : (
+                              m
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {/* Inline priority quick-setter (the "Set priority" submenu). */}
+                    <MenuLabel>Priority</MenuLabel>
+                    <div className="mm-menu-row">
+                      {PRIORITY_LEVELS.map((p) => (
                         <button
-                          key={m}
+                          key={p}
                           type="button"
                           className="mm-menu-chip"
-                          aria-pressed={on}
-                          aria-label={`${on ? "Remove" : "Add"} marker ${m}`}
-                          data-on={on || undefined}
-                          onClick={() => apply(toggleIcon(docRef.current, id, m))}
+                          aria-pressed={curPriority === p}
+                          data-on={curPriority === p || undefined}
+                          onClick={() =>
+                            apply(
+                              setPriority(docRef.current, id, curPriority === p ? undefined : p),
+                            )
+                          }
                         >
-                          {markerImage(m) ? (
-                            <img src={markerImage(m) as string} alt={m} width={16} height={16} />
-                          ) : (
-                            m
-                          )}
+                          {PRIORITY_LABEL[p]}
                         </button>
-                      );
-                    })}
-                  </div>
-                  {/* Inline priority quick-setter (the "Set priority" submenu). */}
-                  <MenuLabel>Priority</MenuLabel>
-                  <div className="mm-menu-row">
-                    {PRIORITY_LEVELS.map((p) => (
+                      ))}
                       <button
-                        key={p}
                         type="button"
                         className="mm-menu-chip"
-                        aria-pressed={curPriority === p}
-                        data-on={curPriority === p || undefined}
-                        onClick={() =>
-                          apply(setPriority(docRef.current, id, curPriority === p ? undefined : p))
-                        }
+                        aria-pressed={!curPriority}
+                        data-on={!curPriority || undefined}
+                        onClick={() => apply(setPriority(docRef.current, id, undefined))}
                       >
-                        {PRIORITY_LABEL[p]}
+                        None
                       </button>
-                    ))}
-                    <button
-                      type="button"
-                      className="mm-menu-chip"
-                      aria-pressed={!curPriority}
-                      data-on={!curPriority || undefined}
-                      onClick={() => apply(setPriority(docRef.current, id, undefined))}
-                    >
-                      None
-                    </button>
-                  </div>
-                  <MenuSeparator />
-                  <label
-                    className="mm-menu-label"
-                    style={{ display: "block", textTransform: "none", letterSpacing: 0 }}
-                  >
-                    Branch layout
-                    <select
-                      className="mm-select"
-                      defaultValue={findNode(docRef.current, menu.id)?.layout ?? ""}
-                      onChange={(e) => {
-                        apply(setNodeLayout(docRef.current, menu.id, e.target.value || undefined));
-                        setMenu(null);
-                      }}
-                      style={{ width: "100%", marginTop: 4 }}
-                    >
-                      <option value="">Default (map)</option>
-                      <option value="org-down">Org chart ↓</option>
-                      <option value="org-up">Org chart ↑</option>
-                      <option value="right">Right</option>
-                      <option value="left">Left</option>
-                      <option value="radial">Radial</option>
-                      <option value="timeline">Timeline</option>
-                      <option value="fishbone">Fishbone</option>
-                      <option value="grid">Grid</option>
-                      <option value="brace">Brace</option>
-                    </select>
-                  </label>
-                  {/* Map side — pin a main branch to a half of the two-sided map (else auto-balance).
-                      Only meaningful for a root child in the "side" layout. */}
-                  {direction === "side" &&
-                  !renderDoc.meta?.freeform &&
-                  renderDoc.root.children.some((c) => c.id === menu.id) ? (
+                    </div>
+                    <MenuSeparator />
                     <label
                       className="mm-menu-label"
                       style={{ display: "block", textTransform: "none", letterSpacing: 0 }}
                     >
-                      Map side
+                      Branch layout
                       <select
                         className="mm-select"
-                        defaultValue={findNode(docRef.current, menu.id)?.side ?? ""}
+                        defaultValue={findNode(docRef.current, menu.id)?.layout ?? ""}
                         onChange={(e) => {
-                          const v = e.target.value;
                           apply(
-                            setNodeSide(
-                              docRef.current,
-                              menu.id,
-                              v === "left" || v === "right" ? v : undefined,
-                            ),
+                            setNodeLayout(docRef.current, menu.id, e.target.value || undefined),
                           );
                           setMenu(null);
                         }}
                         style={{ width: "100%", marginTop: 4 }}
                       >
-                        <option value="">Auto (balance)</option>
-                        <option value="left">Left side</option>
-                        <option value="right">Right side</option>
+                        <option value="">Default (map)</option>
+                        <option value="org-down">Org chart ↓</option>
+                        <option value="org-up">Org chart ↑</option>
+                        <option value="right">Right</option>
+                        <option value="left">Left</option>
+                        <option value="radial">Radial</option>
+                        <option value="timeline">Timeline</option>
+                        <option value="fishbone">Fishbone</option>
+                        <option value="grid">Grid</option>
+                        <option value="brace">Brace</option>
                       </select>
                     </label>
-                  ) : null}
-                  <MenuLabel>Branch colour</MenuLabel>
-                  <div className="mm-menu-row">
-                    {["#c2701a", "#3f6fb0", "#1b8a5e", "#b23b6a", "#8a6d2f", "#6a5acd"].map((c) => {
-                      const on = findNode(docRef.current, id)?.branchColor === c;
-                      return (
-                        <button
-                          key={c}
-                          type="button"
-                          className="mm-menu-chip"
-                          aria-label={`Branch colour ${c}`}
-                          aria-pressed={on}
-                          data-on={on || undefined}
-                          onClick={() => apply(setBranchColor(docRef.current, id, on ? "" : c))}
-                          style={{ background: c, width: 18, height: 18, padding: 0 }}
-                        />
-                      );
-                    })}
-                    <button
-                      type="button"
-                      className="mm-menu-chip"
-                      onClick={() => apply(setBranchColor(docRef.current, id, ""))}
-                    >
-                      Default
-                    </button>
-                  </div>
-                  <MenuLabel>Branch line</MenuLabel>
-                  <div className="mm-menu-row">
-                    {(["solid", "dashed", "dotted"] as const).map((d) => {
-                      const on = (findNode(docRef.current, id)?.lineDash ?? "solid") === d;
-                      return (
-                        <button
-                          key={d}
-                          type="button"
-                          className="mm-menu-chip"
-                          aria-pressed={on}
-                          data-on={on || undefined}
-                          onClick={() => apply(setLineDash(docRef.current, id, d))}
+                    {/* Map side — pin a main branch to a half of the two-sided map (else auto-balance).
+                      Only meaningful for a root child in the "side" layout. */}
+                    {direction === "side" &&
+                    !renderDoc.meta?.freeform &&
+                    renderDoc.root.children.some((c) => c.id === menu.id) ? (
+                      <label
+                        className="mm-menu-label"
+                        style={{ display: "block", textTransform: "none", letterSpacing: 0 }}
+                      >
+                        Map side
+                        <select
+                          className="mm-select"
+                          defaultValue={findNode(docRef.current, menu.id)?.side ?? ""}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            apply(
+                              setNodeSide(
+                                docRef.current,
+                                menu.id,
+                                v === "left" || v === "right" ? v : undefined,
+                              ),
+                            );
+                            setMenu(null);
+                          }}
+                          style={{ width: "100%", marginTop: 4 }}
                         >
-                          {d}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              );
-            })()}
-          </ContextMenu>
-        ) : null}
-        {linkingFrom ? (
-          <div
-            style={{
-              position: "absolute",
-              top: 8,
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 20,
-              padding: "5px 12px",
-              background: `var(--mm-root-bg, ${colors.menu.linkBg})`,
-              color: `var(--mm-root-color, ${colors.menu.linkColor})`,
-              borderRadius: 8,
-              font: "13px system-ui, sans-serif",
-              boxShadow: "0 2px 10px #0004",
-              pointerEvents: "none",
-            }}
-          >
-            Click a target node to draw a relationship · Esc to cancel
-          </div>
-        ) : null}
-      </div>
+                          <option value="">Auto (balance)</option>
+                          <option value="left">Left side</option>
+                          <option value="right">Right side</option>
+                        </select>
+                      </label>
+                    ) : null}
+                    <MenuLabel>Branch colour</MenuLabel>
+                    <div className="mm-menu-row">
+                      {["#c2701a", "#3f6fb0", "#1b8a5e", "#b23b6a", "#8a6d2f", "#6a5acd"].map(
+                        (c) => {
+                          const on = findNode(docRef.current, id)?.branchColor === c;
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              className="mm-menu-chip"
+                              aria-label={`Branch colour ${c}`}
+                              aria-pressed={on}
+                              data-on={on || undefined}
+                              onClick={() => apply(setBranchColor(docRef.current, id, on ? "" : c))}
+                              style={{ background: c, width: 18, height: 18, padding: 0 }}
+                            />
+                          );
+                        },
+                      )}
+                      <button
+                        type="button"
+                        className="mm-menu-chip"
+                        onClick={() => apply(setBranchColor(docRef.current, id, ""))}
+                      >
+                        Default
+                      </button>
+                    </div>
+                    <MenuLabel>Branch line</MenuLabel>
+                    <div className="mm-menu-row">
+                      {(["solid", "dashed", "dotted"] as const).map((d) => {
+                        const on = (findNode(docRef.current, id)?.lineDash ?? "solid") === d;
+                        return (
+                          <button
+                            key={d}
+                            type="button"
+                            className="mm-menu-chip"
+                            aria-pressed={on}
+                            data-on={on || undefined}
+                            onClick={() => apply(setLineDash(docRef.current, id, d))}
+                          >
+                            {d}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
+            </ContextMenu>
+          ) : null}
+          {linkingFrom ? (
+            <div
+              style={{
+                position: "absolute",
+                top: 8,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 20,
+                padding: "5px 12px",
+                background: `var(--mm-root-bg, ${colors.menu.linkBg})`,
+                color: `var(--mm-root-color, ${colors.menu.linkColor})`,
+                borderRadius: 8,
+                font: "13px system-ui, sans-serif",
+                boxShadow: "0 2px 10px #0004",
+                pointerEvents: "none",
+              }}
+            >
+              Click a target node to draw a relationship · Esc to cancel
+            </div>
+          ) : null}
+        </div>
+      </LinkEditContext.Provider>
     </EditingContext.Provider>
   );
 }

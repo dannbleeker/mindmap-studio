@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Inline relationship label editing.** Double-click a relationship line to edit its label **in place**
+  on the canvas (Enter / blur commits, Esc cancels) — previously inspector-only. Reuses the
+  `setLinkLabel` op via a small link-edit context.
+
 - **Per-topic wrap width.** The topic format bar's **Wrap** control (Narrow / Medium / Wide / None)
   sets a max width so a long label **wraps** instead of stretching across the canvas — MindManager's
   topic-width control. New `NodeStyle.maxWidth`, honoured by the layout estimate, the canvas, and the

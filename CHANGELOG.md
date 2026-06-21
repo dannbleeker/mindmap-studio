@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **New worked example: "GTD Areas of Focus."** A filled-in map of David Allen's GTD **Horizon 2**
+  (the 20,000-ft view) — standing roles/responsibilities (Professional / Personal / Community) rather
+  than projects or next actions, with status markers and a note explaining how the horizon is used.
+  Joins the existing "GTD natural planning" example in the **+ New… ▸ Examples** menu.
+
 - **Work with maps as files on disk (`.mmst`).** Beyond the always-on IndexedDB library, a map can now
   be opened from and saved to a real file, like a desktop app: **Open file…** (Ctrl/⌘+O), **Save**
   (Ctrl/⌘+S — writes back to the bound file with no dialog), and **Save as…** (Ctrl/⌘+Shift+S), all in

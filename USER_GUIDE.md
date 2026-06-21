@@ -449,10 +449,11 @@ children are replaced on each refresh, so edit the **source** map, not the pulle
 
 ### Examples
 
-The same **+ New…** menu has an **Examples** group: 13 *complete*, worked maps to open and
+The same **+ New…** menu has an **Examples** group: 14 *complete*, worked maps to open and
 adapt — Product launch plan, Meeting notes, Decision log, Quarterly OKRs, Team retrospective,
-a worked SWOT, Incident runbook, GTD natural planning, Talk/content outline, Personal
-knowledge map, Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
+a worked SWOT, Incident runbook, GTD natural planning, GTD Areas of Focus (the 20,000-ft
+"horizon" of standing responsibilities), Talk/content outline, Personal knowledge map,
+Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
 templates (empty frames), examples are filled in — the quickest way to see a finished map and
 learn a feature by reading one that uses it. Opening one creates a fresh, editable copy.
 

@@ -67,6 +67,41 @@ export function searchMarkers(query: string): string[] {
   }).map((m) => m.icon);
 }
 
+// ── Marker groups (single-select sets) ──────────────────────────────────────────────────────────
+// MindManager's Map Markers are grouped: a topic carries at most one marker from a group (one
+// Priority, one Status, …), so picking another in the same group replaces it. Markers not in any
+// group stay free multi-toggles. Pure data + helpers; the toggle op applies the semantics.
+export interface MarkerGroup {
+  id: string;
+  name: string;
+  members: readonly string[];
+}
+
+export const MARKER_GROUPS: readonly MarkerGroup[] = [
+  { id: "priority", name: "Priority", members: ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"] },
+  { id: "status", name: "Status", members: ["🔴", "🟡", "🟢", "🔵", "🟠", "🟣"] },
+  { id: "mood", name: "Mood", members: ["🙂", "😐", "🙁"] },
+  { id: "vote", name: "Vote", members: ["👍", "👎"] },
+];
+
+const GROUP_OF = new Map<string, string>();
+for (const g of MARKER_GROUPS) for (const m of g.members) GROUP_OF.set(m, g.id);
+
+/** The single-select group id a marker belongs to, or null when it's a free (multi-toggle) marker. */
+export function markerGroupOf(marker: string): string | null {
+  return GROUP_OF.get(marker) ?? null;
+}
+
+/** Toggle a marker in an icons list with group semantics: toggling a present marker removes it;
+ *  toggling a new one adds it AND drops any other member of its single-select group (so a topic keeps
+ *  at most one Priority / Status / Mood / Vote marker). Free markers just toggle. Pure. */
+export function toggleMarkerInList(icons: readonly string[], marker: string): string[] {
+  if (icons.includes(marker)) return icons.filter((m) => m !== marker);
+  const group = markerGroupOf(marker);
+  const kept = group ? icons.filter((m) => markerGroupOf(m) !== group) : [...icons];
+  return [...kept, marker];
+}
+
 // Map common MindManager stock-icon names (urn:mindjet:<Name>) to emoji so
 // imported icons render as glyphs instead of literal text. Unknown names are
 // kept as-is so no information is lost. Matched case-insensitively.

@@ -359,6 +359,9 @@ describe("flow ops — content", () => {
     expect(
       findNode(toggleIcon(toggleIcon(base(), "a", "⭐").doc, "a", "⭐").doc, "a")?.icons,
     ).toBeUndefined();
+    // single-select group: adding a second status marker replaces the first (at most one per group)
+    const status = toggleIcon(toggleIcon(base(), "a", "🔴").doc, "a", "🟢").doc;
+    expect(findNode(status, "a")?.icons).toEqual(["🟢"]);
     const styled = mergeStyle(base(), "a", { background: "#fff", color: "#000" }).doc;
     expect(findNode(styled, "a")?.style).toEqual({ background: "#fff", color: "#000" });
     expect(findNode(mergeStyle(styled, "a", { background: "" }).doc, "a")?.style).toEqual({

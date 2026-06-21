@@ -1,3 +1,4 @@
+import { toggleMarkerInList } from "../../icons";
 import type {
   BackdropKind,
   Boundary,
@@ -815,10 +816,9 @@ export function toggleIcon(doc: MindMapDoc, id: string, icon: string): OpResult 
   // single or bulk toggle on a floating topic silently no-ops (the bulk op decides via findAnyNode).
   const node = findAnyNode(next, id);
   if (!node) return { doc };
-  const icons = node.icons ?? [];
-  const i = icons.indexOf(icon);
-  if (i >= 0) icons.splice(i, 1);
-  else icons.push(icon);
+  // Group semantics live in toggleMarkerInList: adding a grouped marker drops any sibling in its
+  // single-select group (Priority / Status / …), so a topic keeps at most one per group.
+  const icons = toggleMarkerInList(node.icons ?? [], icon);
   node.icons = icons.length > 0 ? icons : undefined;
   touch(node, opsClock());
   return { doc: next };

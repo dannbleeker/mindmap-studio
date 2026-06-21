@@ -294,6 +294,23 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
         <option value="serif">Serif</option>
         <option value="monospace">Mono</option>
       </select>
+      {label("Wrap")}
+      <select
+        value=""
+        onChange={(e) => {
+          if (e.target.value)
+            onStyle({ maxWidth: e.target.value === "none" ? "" : e.target.value });
+        }}
+        title="Wrap long topics to a width"
+        aria-label="Topic wrap width"
+        style={{ ...styleBtn, padding: "2px 4px", fontSize: 12 }}
+      >
+        <option value="">Width…</option>
+        <option value="160px">Narrow</option>
+        <option value="220px">Medium</option>
+        <option value="300px">Wide</option>
+        <option value="none">None</option>
+      </select>
       <button
         type="button"
         style={{ ...styleBtn, fontSize: 12 }}
@@ -309,6 +326,8 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
             fontWeight: "",
             fontFamily: "",
             textDecoration: "",
+            fillImage: "",
+            maxWidth: "",
           })
         }
       >

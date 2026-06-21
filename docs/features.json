@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 243,
+  "reviewedThroughChangelogBullets": 244,
   "areas": [
     "editing",
     "notes",
@@ -1496,6 +1496,15 @@
       "id": "numbered-export",
       "name": "Bake outline numbers into the copied outline / Markdown export",
       "area": "export",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "topic-wrap-width",
+      "name": "Per-topic wrap width (long topics wrap instead of stretching)",
+      "area": "styling",
       "since": "2026-06-21",
       "manual": false,
       "book": false,

@@ -17,7 +17,12 @@ import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { markerImage } from "./icons";
 import { formatBytes } from "./io/attachment";
-import type { MarkerTagSummary, SelectedNode, SelectionFields } from "./mindmap";
+import {
+  MARKER_DND_TYPE,
+  type MarkerTagSummary,
+  type SelectedNode,
+  type SelectionFields,
+} from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
 import type { ConditionalRule, MapNode, NodeShape, NodeStyle } from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
@@ -1950,12 +1955,17 @@ export function MarkerBar({
           <button
             key={marker}
             type="button"
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData(MARKER_DND_TYPE, marker);
+              e.dataTransfer.effectAllowed = "copy";
+            }}
             onClick={() => onToggle(marker)}
             aria-pressed={on}
             title={
               some
                 ? `${marker} is on some selected topics — click to add to all`
-                : `Toggle ${marker} on the selected topic(s)`
+                : `Toggle ${marker} on the selected topic(s) — or drag it onto any topic`
             }
             style={{
               border: `1px ${some ? "dashed" : "solid"} ${on || some ? "var(--ed-accent)" : "var(--ed-border)"}`,

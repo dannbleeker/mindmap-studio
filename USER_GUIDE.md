@@ -151,8 +151,10 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
   [outline](#outline-panel) and on the topic itself; **hover the topic's 📝 to peek** at the note in a
   small card, or **click it to jump straight to the note** (selecting the topic and opening this panel
   on the Notes tab). A topic's 📎 chip lists its attached file names on hover.
-- **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it; active markers are
-  highlighted. Imported MindManager icons map to these glyphs automatically.
+- **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it on the selected topic(s);
+  active markers are highlighted. You can also **drag a marker chip onto any topic** on the canvas to
+  apply it there (the topic highlights as you hover). Imported MindManager icons map to these glyphs
+  automatically.
 - **Stickers** — click a sticker in the grid (star, heart, check / cross badge, flag, idea, warning,
   info, speech bubble, thumbs up / down, target, rocket, lock, key, clock, pin, fire, question, arrow)
   to drop a built-in illustration on the node — no file needed. A sticker becomes the node's

@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Drag markers onto topics.** The marker chips in the inspector are now draggable — drag one onto any
+  topic on the canvas to toggle it there (the topic highlights as a drop target), MindManager's Map
+  Markers gesture. Clicking a chip still toggles it on the current selection.
+
 - **Inline rich-text mini-toolbar.** While editing a topic, a small floating **B / I / U + colour**
   bar appears above it (MindManager's inline format bar) — discoverable buttons for the formatting that
   was previously keyboard-only (Ctrl+B/I/U still work). Writes to the existing sanitised `topicRich`.

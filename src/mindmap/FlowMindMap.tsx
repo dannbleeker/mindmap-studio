@@ -640,6 +640,8 @@ function FlowInner({
         fireSelect(id);
         onOpenNoteRef.current?.();
       },
+      // Drop a marker dragged from the palette onto a node — toggles it on that topic.
+      dropMarker: (id: string, marker: string) => apply(toggleIcon(docRef.current, id, marker)),
     };
   }, [editingId, editSeed, startEdit, apply, focusNodeById, selectOnly, fireSelect]);
 

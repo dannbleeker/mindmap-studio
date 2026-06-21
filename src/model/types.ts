@@ -55,6 +55,9 @@ export interface NodeStyle {
   /** Image that fills the whole topic (a data: URL), covering the card — distinct from the side
    *  `image`. Takes precedence over `background` / `fill`. Lossless in .json; ignored by flat formats. */
   fillImage?: string;
+  /** Max topic width as a CSS px string (e.g. "180px"): a long label wraps to this width instead of
+   *  stretching. Honoured by the layout estimate, the canvas, and the SVG export. */
+  maxWidth?: string;
 }
 
 export interface MapImage {

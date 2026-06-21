@@ -357,6 +357,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           borderBottom: !style?.border && underlineLeaf ? `2px solid ${branchColor}` : undefined,
           borderRadius: style?.borderRadius ?? (underlineLeaf ? 0 : "11px"),
           padding: underlineLeaf ? "3px 8px 4px" : "6px 12px",
+          // Per-topic wrap width: a long label wraps to this width instead of stretching.
+          maxWidth: style?.maxWidth,
+          overflowWrap: style?.maxWidth ? "anywhere" : undefined,
           fontSize: style?.fontSize ?? levelFontSize(depth),
           fontWeight: style?.fontWeight ?? (filledMain ? 600 : undefined),
           fontFamily: style?.fontFamily,

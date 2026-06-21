@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Per-topic wrap width.** The topic format bar's **Wrap** control (Narrow / Medium / Wide / None)
+  sets a max width so a long label **wraps** instead of stretching across the canvas — MindManager's
+  topic-width control. New `NodeStyle.maxWidth`, honoured by the layout estimate, the canvas, and the
+  SVG export (canvas == export).
+
 - **Outline numbers in copy / Markdown export.** When outline numbering is on, **Copy outline** and the
   **Markdown export** now bake the numbers (`1.2`, `I.A`, … honouring the chosen scheme) into each
   topic line. Off when numbering is off, so the Markdown still round-trips. `toMarkdown` gains an

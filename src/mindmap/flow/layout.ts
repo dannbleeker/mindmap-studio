@@ -47,10 +47,14 @@ export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
     const longest = Math.max(1, ...rawLines.map((l) => l.length));
     // Markers now sit in their own fixed-height row above the title (~16px tiles).
     const markerRow = d.icons?.length ? 18 : 0;
-    const width = Math.min(
+    // Per-topic wrap width caps the estimate (and re-wraps for height) so a constrained topic reserves
+    // the right slot before React Flow measures it.
+    const cap = d.style?.maxWidth ? Number.parseFloat(d.style.maxWidth) : undefined;
+    let width = Math.min(
       320,
       Math.max(64, longest * fs * 0.46 + 30, (d.icons?.length ?? 0) * 16 + 12),
     );
+    if (cap && Number.isFinite(cap)) width = Math.min(width, Math.max(64, cap));
     // Reserve height for the WRAPPED line count (the box wraps at ~width), not just the explicit
     // newlines — so a long single-line topic that wraps on screen doesn't overflow its reserved box.
     const wrapped = wrapText(d.topic, Math.max(16, width - 30), fs);

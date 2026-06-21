@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-21T17:26:09.352Z",
-  "commit": "d8a770b",
+  "generatedAt": "2026-06-21T17:35:35.627Z",
+  "commit": "23f25c0",
   "headline": {
-    "linesTsJs": 47772,
-    "tests": 1254,
-    "lineCoveragePct": 82.85,
-    "commits": 691,
+    "linesTsJs": 47961,
+    "tests": 1256,
+    "lineCoveragePct": 82.73,
+    "commits": 693,
     "ageDays": 9,
     "trackedFiles": 340,
     "featureManualPct": 100,
@@ -16,12 +16,12 @@
     {
       "category": "App code (src)",
       "files": 156,
-      "lines": 28470
+      "lines": 28621
     },
     {
       "category": "Unit tests",
       "files": 122,
-      "lines": 17580
+      "lines": 17618
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 82.85,
-      "covered": 16675,
-      "total": 20126
+      "pct": 82.73,
+      "covered": 16753,
+      "total": 20250
     },
     "statements": {
-      "pct": 82.85,
-      "covered": 16675,
-      "total": 20126
+      "pct": 82.73,
+      "covered": 16753,
+      "total": 20250
     },
     "functions": {
-      "pct": 83,
-      "covered": 1011,
-      "total": 1218
+      "pct": 82.95,
+      "covered": 1012,
+      "total": 1220
     },
     "branches": {
-      "pct": 85.87,
-      "covered": 4832,
-      "total": 5627
+      "pct": 85.86,
+      "covered": 4836,
+      "total": 5632
     }
   },
   "tests": {
-    "unit": 1254,
+    "unit": 1256,
     "e2e": 0,
-    "durationMs": 45706,
+    "durationMs": 46875,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 13644
+        "ms": 14328
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 5853
+        "ms": 6704
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5501
+        "ms": 5556
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3729
+        "ms": 4118
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1667
+        "ms": 1715
       }
     ]
   },
@@ -103,11 +103,11 @@
     "biggestFiles": [
       {
         "name": "Panels.tsx",
-        "lines": 2373
+        "lines": 2462
       },
       {
         "name": "App.tsx",
-        "lines": 2230
+        "lines": 2284
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
@@ -119,7 +119,7 @@
       },
       {
         "name": "components/Toolbar.tsx",
-        "lines": 992
+        "lines": 999
       }
     ]
   },
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 145
+        "commits": 146
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
@@ -162,7 +162,7 @@
       },
       {
         "file": "Panels.tsx",
-        "commits": 48
+        "commits": 49
       },
       {
         "file": "mindmap/flow/ops.ts",
@@ -173,7 +173,7 @@
       {
         "file": "App.tsx",
         "pct": 0,
-        "commits": 145
+        "commits": 146
       }
     ]
   },
@@ -188,17 +188,17 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 274.9,
+    "jsGzipKb": 275.4,
     "cssGzipKb": 7.9,
-    "totalGzipKb": 282.9,
-    "entryGzipKb": 126.5,
+    "totalGzipKb": 283.4,
+    "entryGzipKb": 127,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 17068,
     "chapters": 11,
-    "appLoc": 28470,
+    "appLoc": 28621,
     "docToCodeRatio": 0.6
   },
   "featureCoverage": {
@@ -279,16 +279,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 9,
-    "commits": 691,
+    "commits": 693,
     "commits7d": 411,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 348
+        "count": 349
       },
       {
         "name": "github-actions[bot]",
-        "count": 316
+        "count": 317
       },
       {
         "name": "Claude",
@@ -296,9 +296,9 @@
       }
     ],
     "churn30d": {
-      "added": 91504,
-      "removed": 27897
+      "added": 91731,
+      "removed": 27930
     },
-    "changelogEntries": 231
+    "changelogEntries": 232
   }
 }

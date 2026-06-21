@@ -458,6 +458,41 @@ learn a feature by reading one that uses it. Opening one creates a fresh, editab
 
 ---
 
+## Working with files
+
+Your maps always autosave into the browser (the [library](#the-map-library)), but you can also keep a
+map as a **file on disk** — to store it in a folder, sync it through Dropbox/OneDrive, email it, or
+put it in version control. MindMap Studio's native file is **`.mmst`** (the same lossless format as a
+`.json` export, just a distinct extension so your computer can associate it with the app).
+
+In **More ▸ File** (or the **⌘K** command palette):
+
+- **Open file…** (`Ctrl/⌘ + O`) — pick a `.mmst` (or `.json`) and open it.
+- **Save to file** (`Ctrl/⌘ + S`) — save the current map back to its linked file, with no dialog. The
+  first time (no file linked yet) this acts like *Save as…*.
+- **Save as…** (`Ctrl/⌘ + Shift + S`) — choose a new file/location.
+
+Once a map is linked to a file, your edits **autosave through to that file** as you work — so the disk
+copy stays current without you pressing Save. The window/tab title shows the file name, with a **●** in
+front whenever the file is briefly behind your latest edit; if you try to close the tab with unsaved
+file changes, the browser warns you first. The link is remembered, so reopening the app reconnects the
+map to its file.
+
+> **Browser support.** Open/Save-to-the-same-file and file autosave use the **File System Access API**,
+> available in **Chrome, Edge, and other Chromium browsers on desktop**. In Firefox, Safari, and on
+> mobile, **Save** downloads a `.mmst` file and **Open** uses the normal file picker instead — and your
+> work still autosaves to the browser, so nothing is lost.
+
+### Make it your default app for `.mmst` (Windows)
+
+If you **install** MindMap Studio as an app (the install button in Chrome/Edge, or *Apps ▸ Install*),
+Windows can associate `.mmst` files with it: right-click a `.mmst` ▸ **Open with ▸ Choose another app**
+▸ pick MindMap Studio ▸ *Always*. After that, **double-clicking a `.mmst` in File Explorer opens it
+directly in the app** (in the already-running window if one is open). This is a Chromium-desktop
+feature; it isn't available in Firefox/Safari or on mobile.
+
+---
+
 ## Importing
 
 ### Paste text → map

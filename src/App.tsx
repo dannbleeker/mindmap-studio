@@ -40,6 +40,16 @@ import { usePanels } from "./hooks/usePanels";
 import { useVersionHistory } from "./hooks/useVersionHistory";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
+import {
+  downloadMapFile,
+  ensureWritePermission,
+  openMapFile,
+  pickSaveHandle,
+  readMapFromHandle,
+  suggestedFileName,
+  supportsFileSystemAccess,
+  writeMapToHandle,
+} from "./io/fileSystem";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
@@ -80,7 +90,9 @@ import {
   getTabSession,
   listMaps,
   loadMap,
+  loadMapHandle,
   saveMap,
+  saveMapHandle,
   setLastOpened,
 } from "./store/mapStore";
 import { todayISO } from "./taskDate";
@@ -121,6 +133,19 @@ export function App() {
   const [liveDoc, setLiveDoc] = useState<MindMapDoc>(sampleDoc);
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Debounced write-through to the linked disk file (separate from the IndexedDB autosave above — disk
+  // writes are heavier and only happen when a map is bound to a `.mmst` with granted permission).
+  const fileSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Per-map disk-file binding (map id → FileSystemFileHandle), mirrored in IndexedDB so it survives a
+  // reload. Present only for maps opened from / saved to a file; absent maps live in the library only.
+  const handleCache = useRef<Map<string, FileSystemFileHandle>>(new Map());
+  // The active map's linked file name (drives the title bar + File menu); null when it's library-only.
+  const [fileName, setFileName] = useState<string | null>(null);
+  // True when the linked file is behind the in-memory edits (the IndexedDB copy is always current; this
+  // tracks only the disk file, gating the title-bar ● marker and the unsaved-changes unload guard).
+  const [dirty, setDirty] = useState(false);
+  const dirtyRef = useRef(false);
+  dirtyRef.current = dirty;
   const mapRef = useRef<MindMapHandle>(null);
   // Per-tab canvas sessions (viewport + undo/redo), captured on switch-away and restored on switch-back
   // so the recently-used tabs are lossless. An LRU Map capped at MAX_SESSIONS; one-shot on restore.
@@ -412,8 +437,9 @@ export function App() {
     hintTimer.current = setTimeout(() => setToast(null), opts?.durationMs ?? 4000);
   }, []);
 
-  // Message-only shorthand used across the toolbar handlers.
-  const showHint = (message: string) => showToast("info", message);
+  // Message-only shorthand used across the toolbar handlers. Memoised so the file-action callbacks
+  // that depend on it stay stable (the Ctrl+S/O key handler binds them once).
+  const showHint = useCallback((message: string) => showToast("info", message), [showToast]);
 
   // Register the PWA self-updater once: a new deploy surfaces a "Refresh now" toast
   // through showToast (no-op in dev — the service worker is disabled there).
@@ -509,10 +535,192 @@ export function App() {
     saveTimer.current = setTimeout(() => persist(liveDocRef.current, true), 500);
   }
 
+  // --- disk files (open / save / save-as / autosave-to-file) -----------------
+  // The library (IndexedDB) is always the safety net; these add real `.mmst` files on disk. On a
+  // browser without the File System Access API (Firefox/Safari/mobile) Open falls back to the import
+  // <input> and Save to a plain download — feature-detected so the menu items always do *something*.
+
+  // Bind a map to a file handle: cache it, mirror to IndexedDB, and reflect it in the title bar.
+  const bindFileHandle = useCallback(async (id: string, handle: FileSystemFileHandle) => {
+    handleCache.current.set(id, handle);
+    await saveMapHandle(id, handle).catch(() => {
+      // handle persistence is best-effort (e.g. private mode) — the in-memory cache still works
+    });
+    if (id === liveDocRef.current.id) setFileName(handle.name);
+  }, []);
+
+  // Adopt a doc read from a file as the active map, keeping its embedded id so re-saving overwrites the
+  // same library entry (an id-less hand-built file gets a fresh one). Shared by Open + the launch queue.
+  const adoptOpenedFile = useCallback(
+    async (opened: MindMapDoc, handle: FileSystemFileHandle) => {
+      if (!opened.id) opened.id = crypto.randomUUID();
+      await bindFileHandle(opened.id, handle);
+      load(opened);
+      setFileName(handle.name);
+      setDirty(false);
+      setView("editor");
+      showHint(`Opened ${handle.name}`);
+    },
+    [bindFileHandle, load, showHint],
+  );
+
+  const openFile = useCallback(async () => {
+    if (!supportsFileSystemAccess()) {
+      // No native picker — reuse the import <input>, which already accepts .mmst/.json and more.
+      document.getElementById("mmap-input")?.click();
+      return;
+    }
+    try {
+      const res = await openMapFile();
+      if (res) await adoptOpenedFile(res.doc, res.handle);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [adoptOpenedFile]);
+
+  // "Save As" — pick a destination, write it, and remember the handle for plain Saves afterwards.
+  const saveFileAs = useCallback(async () => {
+    const d = liveDocRef.current;
+    if (!supportsFileSystemAccess()) {
+      downloadMapFile(d);
+      showHint(`Downloaded ${suggestedFileName(d)}`);
+      return;
+    }
+    try {
+      const handle = await pickSaveHandle(d);
+      if (!handle) return; // cancelled
+      await writeMapToHandle(handle, d);
+      await bindFileHandle(d.id, handle);
+      setDirty(false);
+      showHint(`Saved ${handle.name}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [bindFileHandle, showHint]);
+
+  // "Save" (Ctrl+S) — write back to the bound file with no dialog; first save (or no API) defers to
+  // Save As / download. Prompts once for write permission if the browser dropped it this session.
+  const saveFile = useCallback(async () => {
+    const d = liveDocRef.current;
+    if (!supportsFileSystemAccess()) {
+      downloadMapFile(d);
+      showHint(`Downloaded ${suggestedFileName(d)}`);
+      return;
+    }
+    const handle = handleCache.current.get(d.id);
+    if (!handle) {
+      await saveFileAs();
+      return;
+    }
+    try {
+      if (!(await ensureWritePermission(handle, true))) {
+        showHint("Couldn't save — permission to write the file was denied.");
+        return;
+      }
+      await writeMapToHandle(handle, d);
+      setDirty(false);
+      showHint(`Saved ${handle.name}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [saveFileAs, showHint]);
+
+  // Background write-through after an edit — silent (never prompts): only writes when the browser still
+  // holds write permission, so a denied/revoked grant simply leaves the IndexedDB copy as the record.
+  function scheduleFileSave() {
+    if (fileSaveTimer.current) clearTimeout(fileSaveTimer.current);
+    fileSaveTimer.current = setTimeout(async () => {
+      const d = liveDocRef.current;
+      const handle = handleCache.current.get(d.id);
+      if (!handle) return;
+      if (!(await ensureWritePermission(handle, false))) return; // don't prompt during autosave
+      try {
+        await writeMapToHandle(handle, d);
+        if (d.id === liveDocRef.current.id) setDirty(false);
+      } catch {
+        // best-effort; the IndexedDB autosave still holds the edit
+      }
+    }, 1500);
+  }
+
   // Refresh the history list whenever the panel opens.
   useEffect(() => {
     if (panels.historyOpen) refreshVersions();
   }, [panels.historyOpen, refreshVersions]);
+
+  // Reconnect the active map to its disk file (if any) when it changes: resolve the handle from the
+  // in-memory cache or IndexedDB and show its name. `handle.name` needs no permission, so the title
+  // bar fills in without a prompt; reading/writing re-checks permission on demand.
+  useEffect(() => {
+    let cancelled = false;
+    setDirty(false);
+    (async () => {
+      let handle = handleCache.current.get(doc.id) ?? null;
+      if (!handle) {
+        handle = await loadMapHandle(doc.id).catch(() => null);
+        if (handle) handleCache.current.set(doc.id, handle);
+      }
+      if (!cancelled) setFileName(handle?.name ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [doc.id]);
+
+  // Reflect the linked file + unsaved-to-disk state in the tab/window title (a ● marks unsaved file
+  // changes — the in-app library is always saved). Plain "MindMap Studio" when no file is bound.
+  useEffect(() => {
+    document.title = fileName
+      ? `${dirty ? "● " : ""}${fileName} — MindMap Studio`
+      : "MindMap Studio";
+  }, [fileName, dirty]);
+
+  // Warn before leaving with unsaved changes to a linked file. Only fires when a file is bound and
+  // behind (dirtyRef) — a library-only map autosaves to IndexedDB, so it never blocks the unload.
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (dirtyRef.current) e.preventDefault();
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
+
+  // Ctrl/⌘+S save to file, +Shift save-as, Ctrl/⌘+O open — preventDefault so the browser's own
+  // save/open dialogs don't hijack them. Bound once; the callbacks are stable (useCallback).
+  useEffect(() => {
+    if (view !== "editor") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === "s") {
+        e.preventDefault();
+        void (e.shiftKey ? saveFileAs() : saveFile());
+      } else if (k === "o" && !e.shiftKey) {
+        e.preventDefault();
+        void openFile();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [view, saveFile, saveFileAs, openFile]);
+
+  // File-association launch (installed PWA, Windows/ChromeOS): when the app is opened by double-clicking
+  // a `.mmst`, the OS hands us file handles here. Registered once; see vite.config.ts `file_handlers`.
+  useEffect(() => {
+    const queue = window.launchQueue;
+    if (!queue) return;
+    queue.setConsumer((params) => {
+      const handle = params.files?.[0];
+      if (!handle) return;
+      void (async () => {
+        try {
+          await adoptOpenedFile(await readMapFromHandle(handle), handle);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : String(err));
+        }
+      })();
+    });
+  }, [adoptOpenedFile]);
 
   // --- paste text → map ---
   function pasteAsNewMap() {
@@ -565,7 +773,8 @@ export function App() {
       const { fromMermaid } = await import("./io/mermaid");
       return { doc: fromMermaid(await file.text()), warnings: [] };
     }
-    if (name.endsWith(".json")) {
+    if (name.endsWith(".json") || name.endsWith(".mmst")) {
+      // `.mmst` is MindMap Studio's native file — the same lossless schema-v1 JSON.
       return { doc: parseDoc(await file.text()), warnings: [] };
     }
     if (name.endsWith(".opml")) {
@@ -1048,6 +1257,11 @@ export function App() {
       exportLibrary,
       copyOutline,
       handleFile,
+      openFile,
+      saveFile,
+      saveFileAs,
+      fileName,
+      dirty,
     },
     history: {
       canUndo,
@@ -1277,6 +1491,11 @@ export function App() {
                   liveDocRef.current = d;
                   setLiveDoc(d);
                   scheduleSave();
+                  // If this map is bound to a disk file, mark it unsaved-to-disk and write through.
+                  if (handleCache.current.has(d.id)) {
+                    setDirty(true);
+                    scheduleFileSave();
+                  }
                   if (!firstRunSeen) dismissFirstRun(); // the first edit retires the tips card (#13)
                 }}
                 onSelect={handleSelect}

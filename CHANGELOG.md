@@ -5,6 +5,26 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Added
+
+- **Work with maps as files on disk (`.mmst`).** Beyond the always-on IndexedDB library, a map can now
+  be opened from and saved to a real file, like a desktop app: **Open file…** (Ctrl/⌘+O), **Save**
+  (Ctrl/⌘+S — writes back to the bound file with no dialog), and **Save as…** (Ctrl/⌘+Shift+S), all in
+  the **More ▸ File** menu and the ⌘K palette. Once a map is linked to a file, edits **autosave through
+  to it** (debounced, and silently — a background write never pops a permission prompt), the window
+  title shows the filename with a ● while the file is behind, and an unsaved-changes guard warns before
+  you leave. The bound file handle is remembered (IndexedDB) so the link survives reloads. `.mmst` is
+  MindMap Studio's native extension and holds the same lossless schema-v1 JSON as `.json` (so a `.mmst`
+  imports anywhere a `.json` does, and vice-versa).
+  - **Windows file association.** The PWA manifest now declares a `file_handlers` entry for `.mmst`
+    plus `launch_handler: focus-existing`. On Chromium desktop (Chrome/Edge), an **installed** copy can
+    be set as the default app for `.mmst`, so double-clicking one in Explorer opens it in the running
+    app (handled via `window.launchQueue`).
+  - **Graceful fallback.** Browsers without the File System Access API (Firefox/Safari, mobile) fall
+    back to a plain download for Save and the existing import picker for Open; IndexedDB autosave is
+    unchanged, so nothing is ever lost. New module `src/io/fileSystem.ts` (feature-detected) keeps the
+    rest of the app oblivious to which path is live.
+
 ### Removed
 
 - **Retired the sheets / workbook feature.** Maps could be grouped into a workbook via a shared

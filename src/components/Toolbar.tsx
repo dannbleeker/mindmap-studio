@@ -102,6 +102,13 @@ export interface ToolbarIo {
   exportLibrary: () => void;
   copyOutline: () => void;
   handleFile: (event: ChangeEvent<HTMLInputElement>) => void;
+  /** Native disk-file actions (File System Access API, with a download/upload fallback). */
+  openFile: () => void;
+  saveFile: () => void;
+  saveFileAs: () => void;
+  /** The active map's linked file name (null = library-only) + whether it's unsaved to disk. */
+  fileName: string | null;
+  dirty: boolean;
 }
 
 export interface ToolbarProps {
@@ -372,6 +379,28 @@ export function Toolbar({
           >
             {(close) => (
               <>
+                <MenuLabel>
+                  File{io.fileName ? ` — ${io.dirty ? "● " : ""}${io.fileName}` : ""}
+                </MenuLabel>
+                <MenuItem
+                  icon={mi("import")}
+                  label="Open file… (Ctrl+O)"
+                  onSelect={() => {
+                    io.openFile();
+                    close();
+                  }}
+                />
+                <MenuItem
+                  icon={mi("export")}
+                  label="Save to file (Ctrl+S)"
+                  onSelect={() => io.saveFile()}
+                />
+                <MenuItem
+                  icon={mi("export")}
+                  label="Save as… (Ctrl+Shift+S)"
+                  onSelect={() => io.saveFileAs()}
+                />
+                <MenuSeparator />
                 <MenuLabel>Map</MenuLabel>
                 <MenuItem icon={mi("present")} label="Present" onSelect={() => map.present()} />
                 <MenuItem
@@ -388,11 +417,11 @@ export function Toolbar({
                 <MenuSeparator />
                 <MenuLabel>Import / backup</MenuLabel>
                 <label className="mm-menu-item">
-                  <EditorIcon name="import" size={15} /> Open files…
+                  <EditorIcon name="import" size={15} /> Import files…
                   <input
                     id="mmap-input"
                     type="file"
-                    accept=".mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
+                    accept=".mmst,.mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
                     multiple
                     onChange={(e) => {
                       io.handleFile(e);

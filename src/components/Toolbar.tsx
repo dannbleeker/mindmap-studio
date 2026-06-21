@@ -76,6 +76,12 @@ export interface ToolbarCanvas {
   shuffleBranchColors: () => void;
   /** Drill in: re-root the canvas view at the selected topic (focus-on-topic). */
   drillIn: () => void;
+  /** Align / distribute the selected free-canvas nodes (freeform mode). */
+  alignSelection: (mode: "left" | "hcenter" | "right" | "top" | "vmiddle" | "bottom") => void;
+  distributeSelection: (axis: "h" | "v") => void;
+  /** How many nodes are selected + whether the map is in free-canvas mode (gates the Arrange tools). */
+  selectedCount: number;
+  freeform: boolean;
 }
 
 /** The find / replace form state + actions. */
@@ -592,6 +598,34 @@ export function Toolbar({
             icon={mi("palette")}
             label="Auto-colour branches"
             onSelect={() => canvas.shuffleBranchColors()}
+          />
+          <MenuLabel>Arrange (free layout)</MenuLabel>
+          {(
+            [
+              ["left", "Align left"],
+              ["hcenter", "Align centres (horizontal)"],
+              ["right", "Align right"],
+              ["top", "Align top"],
+              ["vmiddle", "Align middles (vertical)"],
+              ["bottom", "Align bottom"],
+            ] as const
+          ).map(([mode, label]) => (
+            <MenuItem
+              key={mode}
+              label={label}
+              disabled={!canvas.freeform || canvas.selectedCount < 2}
+              onSelect={() => canvas.alignSelection(mode)}
+            />
+          ))}
+          <MenuItem
+            label="Distribute horizontally"
+            disabled={!canvas.freeform || canvas.selectedCount < 3}
+            onSelect={() => canvas.distributeSelection("h")}
+          />
+          <MenuItem
+            label="Distribute vertically"
+            disabled={!canvas.freeform || canvas.selectedCount < 3}
+            onSelect={() => canvas.distributeSelection("v")}
           />
         </Menu>
         <span className="mm-vdiv" />

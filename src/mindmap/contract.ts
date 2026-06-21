@@ -129,6 +129,10 @@ export interface MindMapHandle {
   copySelectedStyle: () => NodeStyle | null;
   /** Auto-colour the top branches from the active theme palette (one-click "restyle branches"). */
   shuffleBranchColors: () => void;
+  /** Align the selected free-canvas nodes to a shared edge/centre (freeform mode; needs 2+ selected). */
+  alignSelection: (mode: "left" | "hcenter" | "right" | "top" | "vmiddle" | "bottom") => void;
+  /** Evenly space the selected free-canvas nodes along an axis (freeform mode; needs 3+ selected). */
+  distributeSelection: (axis: "h" | "v") => void;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
   setSelectedHyperlink: (url: string) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */

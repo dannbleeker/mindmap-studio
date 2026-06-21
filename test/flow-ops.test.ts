@@ -9,6 +9,7 @@ import {
   addSibling,
   addStickyNote,
   addSubtree,
+  alignNodes,
   applyRollups,
   assignBranchColors,
   bulkToggleIcon,
@@ -19,6 +20,7 @@ import {
   deleteLink,
   deleteNode,
   deleteSummary,
+  distributeNodes,
   findAnyNode,
   findNode,
   groupBranch,
@@ -177,6 +179,48 @@ describe("flow ops — content", () => {
     expect(findNode(collapsed, "a")?.collapsed).toBe(true);
     expect(findNode(collapsed, "r")?.collapsed).toBeUndefined(); // root stays open
     expect(findNode(setAllExpanded(collapsed, true).doc, "a")?.collapsed).toBe(false);
+  });
+
+  it("alignNodes aligns positioned nodes to a shared edge/centre (using measured sizes)", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", pos: { x: 0, y: 0 }, children: [] },
+          { id: "b", topic: "B", pos: { x: 50, y: 100 }, children: [] },
+        ],
+      },
+      meta: { freeform: true },
+    };
+    const sizes = { a: { w: 40, h: 20 }, b: { w: 20, h: 20 } };
+    expect(
+      alignNodes(doc, ["a", "b"], "left", sizes).doc.root.children.map((c) => c.pos?.x),
+    ).toEqual([0, 0]);
+    // right: align right edges → x = maxRight - width (maxRight = max(0+40, 50+20)=70)
+    expect(
+      alignNodes(doc, ["a", "b"], "right", sizes).doc.root.children.map((c) => c.pos?.x),
+    ).toEqual([30, 50]);
+    // fewer than 2 positioned nodes → no-op
+    expect(alignNodes(doc, ["a"], "left", sizes).doc).toEqual(doc);
+  });
+
+  it("distributeNodes evenly spaces 3+ nodes by centre along an axis", () => {
+    const node = (id: string, x: number) => ({ id, topic: id, pos: { x, y: 0 }, children: [] });
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "R",
+      root: { id: "r", topic: "R", children: [node("a", 0), node("b", 10), node("c", 100)] },
+      meta: { freeform: true },
+    };
+    const sizes = { a: { w: 0, h: 0 }, b: { w: 0, h: 0 }, c: { w: 0, h: 0 } };
+    // centres 0,?,100 → even step 50 → middle node centre 50 (width 0 → x 50)
+    expect(distributeNodes(doc, ["a", "b", "c"], "h", sizes).doc.root.children[1].pos?.x).toBe(50);
+    expect(distributeNodes(doc, ["a", "b"], "h", sizes).doc).toEqual(doc); // <3 → no-op
   });
 
   it("viewDoc re-roots at the drill target and drops map-level overlays (full doc otherwise)", () => {

@@ -342,6 +342,8 @@ there. Below it, the zoom controls — **−**, a live **percentage**, **+**, an
 precise, stepped zoom (the mouse wheel zooms too). Handy for orienting on a large map and for
 lining one up before a screenshot or screen-share. When the overview is in the way, the
 **Minimap ▾** button collapses it (click **Minimap ▴** to bring it back); the choice is remembered.
+A slim **status bar** along the bottom shows the topic count, how many topics are selected, and the
+live zoom %.
 
 ### Layout
 
@@ -371,7 +373,9 @@ map re-flows into the new shape without losing any edits:
   shapes and directional arrows, this is how you build a **place-anywhere flowchart, concept map, or
   whiteboard**. Turning it on keeps everything where it is; turning it off returns to the auto-layout
   (your positions are remembered, so you can switch back). Try the **Whiteboard (free layout)**
-  example in **+ New…**.
+  example in **+ New…**. In free layout you can also **align & distribute** several topics: select 2+
+  and pick *Align left / centre / right / top / middle / bottom*, or select 3+ and *Distribute
+  horizontally / vertically* (view menu or **⌘K**) to tidy them onto a clean grid.
 - **◎ Diagram (backdrops)** — adds a geometric **frame** behind your topics and switches to free
   layout so you drop topics into its regions: an **onion** (concentric rings), a **funnel** (stacked
   stages), or a **Venn** (2 or 3 overlapping circles). Use **−/+** to change the ring/stage count

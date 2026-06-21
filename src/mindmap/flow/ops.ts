@@ -1053,6 +1053,83 @@ export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): O
   });
 }
 
+/** Edge/centre to align free-canvas nodes to. */
+export type AlignMode = "left" | "hcenter" | "right" | "top" | "vmiddle" | "bottom";
+/** Measured on-canvas size of a node (from the renderer), keyed by id — needed for centre/right
+ *  alignment + distribution. */
+export type NodeSizes = Record<string, { w: number; h: number }>;
+
+interface ArrangeBox {
+  node: MapNode;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+function arrangeBoxes(doc: MindMapDoc, ids: Iterable<string>, sizes: NodeSizes): ArrangeBox[] {
+  const out: ArrangeBox[] = [];
+  for (const id of ids) {
+    const node = findAnyNode(doc, id);
+    if (!node?.pos) continue; // only free-canvas (positioned) nodes can be arranged
+    const s = sizes[id] ?? { w: 0, h: 0 };
+    out.push({ node, x: node.pos.x, y: node.pos.y, w: s.w, h: s.h });
+  }
+  return out;
+}
+
+/** Align free-canvas nodes to a shared edge/centre of the selection's bounding box (freeform only).
+ *  No-op for fewer than 2 positioned nodes. Pure. */
+export function alignNodes(
+  doc: MindMapDoc,
+  ids: Iterable<string>,
+  mode: AlignMode,
+  sizes: NodeSizes,
+): OpResult {
+  const next = structuredClone(doc);
+  const boxes = arrangeBoxes(next, ids, sizes);
+  if (boxes.length < 2) return { doc };
+  const minX = Math.min(...boxes.map((b) => b.x));
+  const maxR = Math.max(...boxes.map((b) => b.x + b.w));
+  const minY = Math.min(...boxes.map((b) => b.y));
+  const maxB = Math.max(...boxes.map((b) => b.y + b.h));
+  const cx = (minX + maxR) / 2;
+  const cy = (minY + maxB) / 2;
+  for (const b of boxes) {
+    const p = b.node.pos as { x: number; y: number };
+    if (mode === "left") p.x = minX;
+    else if (mode === "right") p.x = maxR - b.w;
+    else if (mode === "hcenter") p.x = cx - b.w / 2;
+    else if (mode === "top") p.y = minY;
+    else if (mode === "bottom") p.y = maxB - b.h;
+    else if (mode === "vmiddle") p.y = cy - b.h / 2;
+  }
+  return { doc: next };
+}
+
+/** Evenly space free-canvas nodes between the two extremes (by centre) along an axis (freeform only).
+ *  No-op for fewer than 3 positioned nodes. Pure. */
+export function distributeNodes(
+  doc: MindMapDoc,
+  ids: Iterable<string>,
+  axis: "h" | "v",
+  sizes: NodeSizes,
+): OpResult {
+  const next = structuredClone(doc);
+  const boxes = arrangeBoxes(next, ids, sizes);
+  if (boxes.length < 3) return { doc };
+  const centre = (b: ArrangeBox) => (axis === "h" ? b.x + b.w / 2 : b.y + b.h / 2);
+  boxes.sort((a, b) => centre(a) - centre(b));
+  const first = centre(boxes[0]);
+  const step = (centre(boxes[boxes.length - 1]) - first) / (boxes.length - 1);
+  boxes.forEach((b, i) => {
+    const c = first + i * step;
+    const p = b.node.pos as { x: number; y: number };
+    if (axis === "h") p.x = c - b.w / 2;
+    else p.y = c - b.h / 2;
+  });
+  return { doc: next };
+}
+
 // --- dedicated diagram backdrops (onion / funnel / Venn) -------------------
 
 /** Set (or replace) the map's diagram backdrop. */

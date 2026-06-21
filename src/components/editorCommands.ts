@@ -122,6 +122,32 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     !!sel,
   );
   add("drill-in", "Drill into the selected topic", "view", () => canvas.drillIn(), !!sel);
+  // Arrange (free-canvas only) — needs 2+ selected to align, 3+ to distribute.
+  const canAlign = canvas.freeform && canvas.selectedCount >= 2;
+  const canDistribute = canvas.freeform && canvas.selectedCount >= 3;
+  for (const [mode, label] of [
+    ["left", "Align left"],
+    ["hcenter", "Align centres (horizontal)"],
+    ["right", "Align right"],
+    ["top", "Align top"],
+    ["vmiddle", "Align middles (vertical)"],
+    ["bottom", "Align bottom"],
+  ] as const)
+    add(`align:${mode}`, label, "view", () => canvas.alignSelection(mode), canAlign);
+  add(
+    "distribute-h",
+    "Distribute horizontally",
+    "view",
+    () => canvas.distributeSelection("h"),
+    canDistribute,
+  );
+  add(
+    "distribute-v",
+    "Distribute vertically",
+    "view",
+    () => canvas.distributeSelection("v"),
+    canDistribute,
+  );
   add("toggle-numbering", "Toggle outline numbering", "view", () => panels.setNumbered((v) => !v));
   add("toggle-line-jumps", "Toggle line jumps", "view", () =>
     m()?.setLineJumps(!map.liveDoc.meta?.lineJumps),

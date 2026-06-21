@@ -1309,6 +1309,10 @@ export function App() {
       drillIn: () => {
         if (selected) setDrillId(selected.id);
       },
+      alignSelection: (mode) => mapRef.current?.alignSelection(mode),
+      distributeSelection: (axis) => mapRef.current?.distributeSelection(axis),
+      selectedCount,
+      freeform: !!liveDoc.meta?.freeform,
     },
     find: { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace },
     io: {

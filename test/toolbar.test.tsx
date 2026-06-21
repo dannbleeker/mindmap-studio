@@ -99,6 +99,10 @@ function setup(
     canPasteFormat: false,
     shuffleBranchColors: vi.fn(),
     drillIn: vi.fn(),
+    alignSelection: vi.fn(),
+    distributeSelection: vi.fn(),
+    selectedCount: 0,
+    freeform: false,
   };
   const find = {
     query: "",

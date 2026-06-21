@@ -98,6 +98,16 @@ GitHub Pages).
   capped at 30, stored in IndexedDB, deleted with the map.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
   startup. Works fully offline.
+- **Work with files (`.mmst`)** — open and save maps as real files on disk, like a desktop app:
+  **Open file…** (Ctrl+O), **Save** (Ctrl+S, writes back to the same file with no dialog), and
+  **Save as…** (Ctrl+Shift+S). Once a map is linked to a file, edits **autosave through to it** and
+  the title bar shows a ● until the file is up to date. A `.mmst` is the same lossless schema as
+  `.json`. On Chromium desktop (Chrome/Edge), an **installed** copy can be set as the default app for
+  `.mmst`, so double-clicking one in Windows Explorer opens it here. Browsers without the File System
+  Access API (Firefox/Safari) fall back to a download/upload, and IndexedDB autosave still applies.
+  An installed copy also registers for MindManager **`.mmap`** files: double-clicking (or **Open
+  file…**) one **imports** it into the library (one-way + lossy — there's no save-back to `.mmap`;
+  use *Save as… `.mmst`* to keep it as a file).
 - **Relationships** — draw a labelled, **directional** arrow (arrowhead at the target) between two
   nodes: right-click a node → **Link to…**, then click the target (with an optional label).
   Double-click a relationship to relabel it, right-click to delete. Imported `.mmap` relationships
@@ -135,8 +145,10 @@ replaceable:
   layouts (`layout.ts`), pure edit ops (`ops.ts`), and the native-text SVG exporter (`exportSvg.ts`).
 - `src/import/mmap.ts` — one-way `.mmap` importer (ZIP of `Document.xml`; XSD-sourced mapping).
 - `src/io/` — Markdown, native-JSON, and self-contained-HTML/print I/O.
+- `src/io/fileSystem.ts` — native `.mmst` open/save/autosave via the File System Access API
+  (download/upload fallback + Windows file association through the PWA manifest `file_handlers`).
 - `src/useMapExports.ts` — the header's export handlers (json/md/png/svg/html/pdf).
-- `src/store/mapStore.ts` — IndexedDB-backed multi-map library (autosave + last-opened).
+- `src/store/mapStore.ts` — IndexedDB-backed multi-map library (autosave + last-opened + file handles).
 - `src/present/` — the Walk-Through presentation overlay.
 
 ## Commands

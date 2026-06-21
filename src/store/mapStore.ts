@@ -20,10 +20,13 @@ interface MindMapDB extends DBSchema {
   maps: { key: string; value: MindMapDoc };
   meta: { key: string; value: string };
   versions: { key: string; value: VersionRecord; indexes: { "by-map": string } };
+  // Disk-file binding per map: a FileSystemFileHandle (structured-cloneable) so a map opened from /
+  // saved to a `.mmst` reconnects to it across reloads. Permission is re-checked on use, not here.
+  handles: { key: string; value: FileSystemFileHandle };
 }
 
 const DB_NAME = "mindmap-studio";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 /** Keep at most this many snapshots per map; older ones are pruned. */
 export const MAX_VERSIONS = 30;
 
@@ -39,6 +42,7 @@ function db(): Promise<IDBPDatabase<MindMapDB>> {
           const store = database.createObjectStore("versions", { keyPath: "id" });
           store.createIndex("by-map", "mapId");
         }
+        if (!database.objectStoreNames.contains("handles")) database.createObjectStore("handles");
       },
     });
   }
@@ -67,6 +71,25 @@ export async function loadMap(id: string): Promise<MindMapDoc | null> {
 export async function deleteMap(id: string): Promise<void> {
   await (await db()).delete("maps", id);
   await deleteVersionsForMap(id); // a deleted map's history goes with it
+  await deleteMapHandle(id); // and its disk-file binding
+}
+
+// --- disk-file handles -----------------------------------------------------
+// A map opened from / saved to a `.mmst` keeps a FileSystemFileHandle here, so a later session can
+// reconnect and Save back to the same file. Handles are structured-cloneable, so IndexedDB stores
+// them directly. Permission is NOT persisted by the browser for tab sessions (re-requested on use);
+// an installed PWA can be granted persistent permission.
+
+export async function saveMapHandle(id: string, handle: FileSystemFileHandle): Promise<void> {
+  await (await db()).put("handles", handle, id);
+}
+
+export async function loadMapHandle(id: string): Promise<FileSystemFileHandle | null> {
+  return (await (await db()).get("handles", id)) ?? null;
+}
+
+export async function deleteMapHandle(id: string): Promise<void> {
+  await (await db()).delete("handles", id);
 }
 
 export async function listMaps(): Promise<MapSummary[]> {

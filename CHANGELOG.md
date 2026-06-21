@@ -5,6 +5,38 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Added
+
+- **New worked example: "GTD Areas of Focus."** A filled-in map of David Allen's GTD **Horizon 2**
+  (the 20,000-ft view) — standing roles/responsibilities (Professional / Personal / Community) rather
+  than projects or next actions, with status markers and a note explaining how the horizon is used.
+  Joins the existing "GTD natural planning" example in the **+ New… ▸ Examples** menu.
+
+- **Work with maps as files on disk (`.mmst`).** Beyond the always-on IndexedDB library, a map can now
+  be opened from and saved to a real file, like a desktop app: **Open file…** (Ctrl/⌘+O), **Save**
+  (Ctrl/⌘+S — writes back to the bound file with no dialog), and **Save as…** (Ctrl/⌘+Shift+S), all in
+  the **More ▸ File** menu and the ⌘K palette. Once a map is linked to a file, edits **autosave through
+  to it** (debounced, and silently — a background write never pops a permission prompt), the window
+  title shows the filename with a ● while the file is behind, and an unsaved-changes guard warns before
+  you leave. The bound file handle is remembered (IndexedDB) so the link survives reloads. `.mmst` is
+  MindMap Studio's native extension and holds the same lossless schema-v1 JSON as `.json` (so a `.mmst`
+  imports anywhere a `.json` does, and vice-versa).
+  - **Windows file association.** The PWA manifest now declares a `file_handlers` entry for `.mmst`
+    plus `launch_handler: focus-existing`. On Chromium desktop (Chrome/Edge), an **installed** copy can
+    be set as the default app for `.mmst`, so double-clicking one in Explorer opens it in the running
+    app (handled via `window.launchQueue`).
+  - **Graceful fallback.** Browsers without the File System Access API (Firefox/Safari, mobile) fall
+    back to a plain download for Save and the existing import picker for Open; IndexedDB autosave is
+    unchanged, so nothing is ever lost. New module `src/io/fileSystem.ts` (feature-detected) keeps the
+    rest of the app oblivious to which path is live.
+  - **Open MindManager `.mmap` files by double-click (import-only).** The manifest also registers
+    `.mmap`/`.mmp` as file handlers, and `.mmap` is offered in the **Open file…** picker. Opening one
+    runs the existing one-way `.mmap` importer (lossy by design — task/PM data, rich text, images, etc.
+    are dropped, and the drops are listed in the import banner) and lands it as an ordinary **library**
+    map. There is **no** save-back to `.mmap`; a banner + toast prompt you to **Save as… `.mmst`** to
+    keep it as a file. (Chromium desktop only; Windows won't make the PWA the default for `.mmap` over
+    an installed MindManager unless you opt in.)
+
 ### Removed
 
 - **Retired the sheets / workbook feature.** Maps could be grouped into a workbook via a shared

@@ -440,6 +440,50 @@ const gtd = (): MindMapDoc =>
     ),
   );
 
+// 13b — GTD Areas of Focus (Horizon 2, the "20,000 ft" view): the standing roles and
+// responsibilities you maintain — not projects or next actions, but the buckets you keep "current
+// and complete". Reviewing them surfaces projects to add and ones to drop. Markers flag where each
+// area stands right now (❗ needs attention · ⏳ in progress · ✅ on track).
+const gtdAreas = (): MindMapDoc =>
+  doc(
+    "Areas of Focus — GTD (20,000 ft)",
+    node(
+      "root",
+      "Areas of Focus — GTD (20,000 ft)",
+      [
+        node("prof", "Professional", [
+          leaf("af-team", "Team & people", {
+            icons: ["❗"],
+            note: "Two 1:1s overdue; one report wants a growth conversation.",
+          }),
+          leaf("af-delivery", "Product delivery", { icons: ["⏳"] }),
+          leaf("af-career", "Own career & skills", {
+            note: "Maintain one learning goal per quarter — currently none chosen.",
+          }),
+          leaf("af-budget", "Budget & vendors", { icons: ["✅"] }),
+          leaf("af-stake", "Stakeholders & comms"),
+        ]),
+        node("pers", "Personal", [
+          leaf("af-health", "Health & fitness", {
+            icons: ["⏳"],
+            note: "3× gym/week; annual check-up booked for next month.",
+          }),
+          leaf("af-family", "Family & relationships", { icons: ["❗"] }),
+          leaf("af-finance", "Finances", { icons: ["✅"] }),
+          leaf("af-home", "Home & admin"),
+          leaf("af-grow", "Learning & hobbies"),
+        ]),
+        node("civic", "Community & service", [
+          leaf("af-volunteer", "Volunteering", { icons: ["⏳"] }),
+          leaf("af-mentor", "Mentoring & network"),
+        ]),
+      ],
+      {
+        note: "GTD Horizon 2 — your Areas of Focus / Responsibility: the 4–7 (work) + few (personal) hats you wear that must stay 'current and complete'. Unlike projects, these never finish; you review them (weekly/monthly) to spot projects to start or stop. Keep each area's standard high enough that nothing important quietly slips.",
+      },
+    ),
+  );
+
 // 14 — Flowchart: node shapes carry the step type, directional links label the branches.
 // Best read in the Org chart ↓ layout (a top-down flow).
 const flowchart = (): MindMapDoc =>
@@ -665,6 +709,7 @@ export const examples: MapExample[] = [
   { id: "venn", name: "Venn diagram (3 circles)", build: venn3Diagram },
   { id: "runbook", name: "Incident runbook", build: runbook },
   { id: "gtd", name: "GTD natural planning", build: gtd },
+  { id: "gtd-areas", name: "GTD Areas of Focus", build: gtdAreas },
   { id: "outline", name: "Talk / content outline", build: outline },
   { id: "pkm", name: "Personal knowledge map", build: pkm },
   { id: "study", name: "Study / revision map", build: study },

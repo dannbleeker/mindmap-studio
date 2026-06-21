@@ -72,6 +72,9 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   ) => cmds.push({ id, label, kind, run, enabled, ...extra });
 
   // Map / file
+  add("open-file", "Open file…", "map", () => io.openFile());
+  add("save-file", "Save to file", "map", () => io.saveFile());
+  add("save-file-as", "Save to file as…", "map", () => io.saveFileAs());
   add("present", "Present", "map", () => map.present());
   add("duplicate-map", "Duplicate map", "map", () => map.duplicateMap());
   add("delete-map", "Delete map", "map", () => map.deleteCurrent());

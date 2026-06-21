@@ -449,12 +449,63 @@ children are replaced on each refresh, so edit the **source** map, not the pulle
 
 ### Examples
 
-The same **+ New…** menu has an **Examples** group: 13 *complete*, worked maps to open and
+The same **+ New…** menu has an **Examples** group: 14 *complete*, worked maps to open and
 adapt — Product launch plan, Meeting notes, Decision log, Quarterly OKRs, Team retrospective,
-a worked SWOT, Incident runbook, GTD natural planning, Talk/content outline, Personal
-knowledge map, Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
+a worked SWOT, Incident runbook, GTD natural planning, GTD Areas of Focus (the 20,000-ft
+"horizon" of standing responsibilities), Talk/content outline, Personal knowledge map,
+Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
 templates (empty frames), examples are filled in — the quickest way to see a finished map and
 learn a feature by reading one that uses it. Opening one creates a fresh, editable copy.
+
+---
+
+## Working with files
+
+Your maps always autosave into the browser (the [library](#the-map-library)), but you can also keep a
+map as a **file on disk** — to store it in a folder, sync it through Dropbox/OneDrive, email it, or
+put it in version control. MindMap Studio's native file is **`.mmst`** (the same lossless format as a
+`.json` export, just a distinct extension so your computer can associate it with the app).
+
+In **More ▸ File** (or the **⌘K** command palette):
+
+- **Open file…** (`Ctrl/⌘ + O`) — pick a `.mmst` (or `.json`) and open it. You can also pick a
+  MindManager **`.mmap`** here — see *Opening MindManager files* below.
+- **Save to file** (`Ctrl/⌘ + S`) — save the current map back to its linked file, with no dialog. The
+  first time (no file linked yet) this acts like *Save as…*.
+- **Save as…** (`Ctrl/⌘ + Shift + S`) — choose a new file/location.
+
+Once a map is linked to a file, your edits **autosave through to that file** as you work — so the disk
+copy stays current without you pressing Save. The window/tab title shows the file name, with a **●** in
+front whenever the file is briefly behind your latest edit; if you try to close the tab with unsaved
+file changes, the browser warns you first. The link is remembered, so reopening the app reconnects the
+map to its file.
+
+> **Browser support.** Open/Save-to-the-same-file and file autosave use the **File System Access API**,
+> available in **Chrome, Edge, and other Chromium browsers on desktop**. In Firefox, Safari, and on
+> mobile, **Save** downloads a `.mmst` file and **Open** uses the normal file picker instead — and your
+> work still autosaves to the browser, so nothing is lost.
+
+### Make it your default app for `.mmst` (Windows)
+
+If you **install** MindMap Studio as an app (the install button in Chrome/Edge, or *Apps ▸ Install*),
+Windows can associate `.mmst` files with it: right-click a `.mmst` ▸ **Open with ▸ Choose another app**
+▸ pick MindMap Studio ▸ *Always*. After that, **double-clicking a `.mmst` in File Explorer opens it
+directly in the app** (in the already-running window if one is open). This is a Chromium-desktop
+feature; it isn't available in Firefox/Safari or on mobile.
+
+### Opening MindManager files (`.mmap`)
+
+An installed copy also registers for MindManager **`.mmap`** files, so you can double-click one in File
+Explorer (after setting the default the same way as above) or pick it via **Open file…**. Opening a
+`.mmap` **imports** it — it's a one-way conversion, so MindManager-only things are dropped (task /
+scheduling data, rich text, embedded images, attachments, per-topic styling, and the like); whatever
+was dropped is listed in the import banner.
+
+**Important — `.mmap` is import-only, and you can't save back to it.** An opened `.mmap` becomes an
+ordinary map in your **library** (autosaved to the browser as usual, so your edits aren't lost), but it
+is **not** linked to the `.mmap` file — *Save* won't write `.mmap`. To keep your changes as a file, use
+**Save as…** to write a **`.mmst`**; after that it behaves like any native file (Save / autosave to
+disk). Re-opening the same `.mmap` again imports a fresh copy.
 
 ---
 

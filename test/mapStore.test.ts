@@ -8,7 +8,9 @@ import {
   latestVersionDoc,
   listMaps,
   loadMap,
+  loadMapHandle,
   saveMap,
+  saveMapHandle,
   saveVersion,
   setLastOpened,
 } from "../src/store/mapStore";
@@ -73,6 +75,27 @@ describe("mapStore", () => {
   it("remembers the last-opened map", async () => {
     await setLastOpened("m1");
     expect(await getLastOpened()).toBe("m1");
+  });
+});
+
+describe("mapStore — disk-file handles", () => {
+  // A minimal stand-in for a FileSystemFileHandle; only needs to be structured-cloneable for IndexedDB.
+  const fakeHandle = (name: string) => ({ kind: "file", name }) as unknown as FileSystemFileHandle;
+
+  it("saves, loads, and re-binds a handle by map id", async () => {
+    await saveMapHandle("h1", fakeHandle("plan.mmst"));
+    expect((await loadMapHandle("h1"))?.name).toBe("plan.mmst");
+  });
+
+  it("returns null for a map with no bound file", async () => {
+    expect(await loadMapHandle("never-bound")).toBeNull();
+  });
+
+  it("drops the handle when the map is deleted", async () => {
+    await saveMap(docOf("h2", "Bound"));
+    await saveMapHandle("h2", fakeHandle("bound.mmst"));
+    await deleteMap("h2");
+    expect(await loadMapHandle("h2")).toBeNull();
   });
 });
 

@@ -103,6 +103,15 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("expand-all", "Expand all branches", "view", () => m()?.setAllExpanded(true));
   for (const n of [1, 2, 3, 4, 5])
     add(`expand-level:${n}`, `Show detail level ${n}`, "view", () => m()?.setExpandedToLevel(n));
+  add("copy-format", "Copy format", "view", () => canvas.copyFormat(), !!sel);
+  add(
+    "paste-format",
+    "Paste format",
+    "view",
+    () => canvas.pasteFormat(),
+    !!sel && canvas.canPasteFormat,
+  );
+  add("auto-colour-branches", "Auto-colour branches", "view", () => canvas.shuffleBranchColors());
   add(
     "focus-branch",
     "Focus the selected branch",

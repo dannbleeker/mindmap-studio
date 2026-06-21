@@ -94,6 +94,10 @@ function setup(
     setFocus: vi.fn(),
     handleImage: vi.fn(),
     handleBackgroundImage: vi.fn(),
+    copyFormat: vi.fn(),
+    pasteFormat: vi.fn(),
+    canPasteFormat: false,
+    shuffleBranchColors: vi.fn(),
   };
   const find = {
     query: "",

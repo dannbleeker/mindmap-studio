@@ -10,6 +10,7 @@ import {
   addStickyNote,
   addSubtree,
   applyRollups,
+  assignBranchColors,
   bulkToggleIcon,
   bulkToggleTag,
   clearBackdrop,
@@ -175,6 +176,17 @@ describe("flow ops — content", () => {
     expect(findNode(collapsed, "a")?.collapsed).toBe(true);
     expect(findNode(collapsed, "r")?.collapsed).toBeUndefined(); // root stays open
     expect(findNode(setAllExpanded(collapsed, true).doc, "a")?.collapsed).toBe(false);
+  });
+
+  it("assignBranchColors gives each top branch a cycled colour (no-op on empty palette)", () => {
+    const colored = assignBranchColors(base(), ["#111", "#222"]).doc;
+    expect(findNode(colored, "a")?.branchColor).toBe("#111");
+    expect(findNode(colored, "b")?.branchColor).toBe("#222");
+    // cycles when there are more branches than colours
+    expect(
+      assignBranchColors(base(), ["#111"]).doc.root.children.map((c) => c.branchColor),
+    ).toEqual(["#111", "#111"]);
+    expect(assignBranchColors(base(), []).doc).toEqual(base()); // empty palette = no change
   });
 
   it("setExpandedToLevel collapses topics at/below the level, expands above it", () => {

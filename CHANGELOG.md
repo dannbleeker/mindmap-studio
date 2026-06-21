@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Format Painter + Auto-colour branches.** **Copy format** grabs the selected topic's style and
+  **Paste format** applies it across the (multi-)selection in one undo step (view menu + ⌘K) — reuse a
+  look without the save-a-named-style detour. **Auto-colour branches** repaints each top branch with a
+  distinct colour from the theme palette (a one-click restyle). New `assignBranchColors` op +
+  `copySelectedStyle`/`shuffleBranchColors` on the canvas handle.
+
 - **Detail levels (expand the map to a depth).** A new **Detail level** group in the view menu (and
   ⌘K) — **Show level 1…5** — collapses everything below the chosen depth, so you can step a large map
   from a top-branch overview to full detail in one click (MindManager's detail-level control).

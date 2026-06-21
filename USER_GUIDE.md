@@ -303,6 +303,11 @@ in the **ℹ Info** panel), then in **🎨 Styles** type a name and **Save** to 
 appears in the list — click it to **apply** that style to the selected topic, or **✕** to remove it.
 Named styles are kept locally and reusable across maps, so a house style is one click away.
 
+For one-off reuse there's also a **Format Painter** (view menu / **⌘K**): **Copy format** from a
+styled topic, then select one or many topics and **Paste format** to apply that look in a single step —
+no need to name it first. And **Auto-colour branches** repaints every top branch a distinct colour from
+the current theme palette in one click.
+
 ### Collapse / expand
 
 **⊟** collapses every branch to a level-1 overview; **⊞** expands the whole tree. **Fit**

@@ -107,6 +107,10 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       setFocus: vi.fn(),
       handleImage: vi.fn(),
       handleBackgroundImage: vi.fn(),
+      copyFormat: vi.fn(),
+      pasteFormat: vi.fn(),
+      canPasteFormat: false,
+      shuffleBranchColors: vi.fn(),
     },
     find: {
       query: "",

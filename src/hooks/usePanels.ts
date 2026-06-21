@@ -92,6 +92,9 @@ export interface FilterState {
   setDue: React.Dispatch<React.SetStateAction<DueMode>>;
   priority: number;
   setPriority: React.Dispatch<React.SetStateAction<number>>;
+  /** "Hide" mode: non-matches are removed from the canvas instead of dimmed. */
+  hide: boolean;
+  setHide: React.Dispatch<React.SetStateAction<boolean>>;
   /** Reset every Power-Filter field to its empty value (doesn't close the panel). */
   clear: () => void;
   /** Toggle a marker on/off in the marker multi-select. */
@@ -172,6 +175,7 @@ export function usePanels(): UsePanels {
   const [filterTags, setFilterTags] = useState<string[]>([]);
   const [filterDue, setFilterDue] = useState<DueMode>("");
   const [filterPriority, setFilterPriority] = useState(0);
+  const [filterHide, setFilterHide] = useState(false);
 
   const clearFilter = () => {
     setFilterText("");
@@ -179,6 +183,7 @@ export function usePanels(): UsePanels {
     setFilterTags([]);
     setFilterDue("");
     setFilterPriority(0);
+    setFilterHide(false);
   };
   // Toggling the panel off also clears the filter, so dimming can't outlive a visible control.
   const toggleFilter = () =>
@@ -258,6 +263,8 @@ export function usePanels(): UsePanels {
       setDue: setFilterDue,
       priority: filterPriority,
       setPriority: setFilterPriority,
+      hide: filterHide,
+      setHide: setFilterHide,
       clear: clearFilter,
       toggleMarker: (marker) => setFilterMarkers((list) => toggleIn(list, marker)),
       toggleTag: (tag) => setFilterTags((list) => toggleIn(list, tag)),

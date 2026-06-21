@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Power Filter: hide mode + extract to a new map.** The Power Filter can now **hide** non-matching
+  topics (a clean spotlight) instead of only fading them, and **Extract matches to a new map** prunes
+  the current matches (plus their ancestors, so the structure holds) into a fresh library map — leaving
+  the original untouched. New pure `filterToDoc`; hide mode threads through to the canvas
+  (`hideUnmatched`) and `buildFlowState`.
+
 - **Image fill for topics.** A topic can be filled with a picture that covers the whole card (the
   Style tab's **Fill image…**), distinct from the side `image` — MindManager's "fill with image". The
   canvas paints it as a cover background with a readable text scrim; the SVG/PNG/PDF export draws a

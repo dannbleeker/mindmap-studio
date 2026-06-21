@@ -324,6 +324,9 @@ export interface MindMapProps {
   numbered?: boolean;
   /** Read-only Power Filter: ids to keep lit; all other nodes/edges dim. null/undefined = off. */
   litIds?: Set<string> | null;
+  /** Power Filter "hide" mode: when true, non-lit nodes/edges are removed from the canvas instead of
+   *  dimmed. Inert unless `litIds` is set. */
+  hideUnmatched?: boolean;
   /** Find results: node ids to draw with a highlight ring. null/undefined = no active search. */
   highlightIds?: Set<string> | null;
   /** Drill-in (focus-on-topic): re-root the *view* at this node id so its subtree fills the canvas.

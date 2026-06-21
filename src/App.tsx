@@ -35,7 +35,7 @@ import { Toolbar, type ToolbarProps } from "./components/Toolbar";
 import { buildEditorCommands } from "./components/editorCommands";
 import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
-import { type FilterCriteria, filterResult, focusSet, isFilterActive } from "./filter";
+import { type FilterCriteria, filterResult, filterToDoc, focusSet, isFilterActive } from "./filter";
 import { clampIndex, togglePlay } from "./historyPlayback";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
 import { usePanels } from "./hooks/usePanels";
@@ -1096,6 +1096,23 @@ export function App() {
     load(copy);
   }
 
+  // Power Filter → "Extract matches to a new map": prune the live doc to the lit set (matches +
+  // ancestors) and open it as a fresh library map. No-op (with a hint) when nothing matches.
+  function extractFilterMatches() {
+    const lit = filterHits?.lit;
+    if (!lit || !filterHits || filterHits.matches === 0) {
+      showHint("No matches to extract — adjust the filter first.");
+      return;
+    }
+    const extracted = filterToDoc(liveDocRef.current, lit, crypto.randomUUID());
+    if (!extracted) {
+      showHint("No matches to extract — adjust the filter first.");
+      return;
+    }
+    load(extracted);
+    showHint(`Extracted ${filterHits.matches} matching topics to a new map.`);
+  }
+
   async function deleteCurrent() {
     // Delete immediately + offer Undo (re-saves the map), instead of a blocking confirm (#9).
     const deleted = structuredClone(liveDocRef.current);
@@ -1612,6 +1629,9 @@ export function App() {
                 onToggleTag={filter.toggleTag}
                 onDue={filter.setDue}
                 onPriority={filter.setPriority}
+                hide={filter.hide}
+                onHide={filter.setHide}
+                onExtract={extractFilterMatches}
                 onClear={filter.clear}
                 onSaveFilter={savedFilters.save}
                 onApplyFilter={savedFilters.apply}
@@ -1659,6 +1679,7 @@ export function App() {
                 direction={layout}
                 numbered={panels.numbered}
                 litIds={playback ? null : litIds}
+                hideUnmatched={!playback && filter.hide && panels.filterOpen}
                 highlightIds={playback ? null : searchMatchIds}
                 drillId={playback ? null : drillId}
                 onChange={(d) => {

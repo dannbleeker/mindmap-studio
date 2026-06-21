@@ -10,6 +10,7 @@ import { memo, useMemo } from "react";
 import { arrowHeadPath } from "./arrowhead";
 import { type Box, crosslinkBezier, floatingPoints, getFloatingPoints } from "./floating";
 import { type HopSegment, hopPath } from "./lineJumps";
+import { useLinkEdit } from "./linkEdit";
 import { resolveLinkStyle } from "./style";
 import type { EdgeData, FlowEdge } from "./types";
 
@@ -57,6 +58,7 @@ function collectSegments(
 // reach of the chord), so rename/delete still work.
 
 function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgeProps<FlowEdge>) {
+  const linkEdit = useLinkEdit();
   const s = useInternalNode(source);
   const t = useInternalNode(target);
   // Subscribe to all nodes + edges so the hops re-compute live as ANY node moves or a relationship
@@ -124,7 +126,34 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
           style={{ opacity: dimOpacity }}
         />
       ) : null}
-      {label ? (
+      {linkEdit?.editingId === id ? (
+        <EdgeLabelRenderer>
+          <input
+            // biome-ignore lint/a11y/noAutofocus: inline editor opened by an explicit double-click.
+            autoFocus
+            defaultValue={typeof label === "string" ? label : ""}
+            aria-label="Relationship label"
+            className="nodrag nopan"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") linkEdit.commit(id, (e.target as HTMLInputElement).value);
+              else if (e.key === "Escape") linkEdit.cancel();
+            }}
+            onBlur={(e) => linkEdit.commit(id, e.target.value)}
+            placeholder="label…"
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              fontSize: 12,
+              width: 120,
+              padding: "1px 4px",
+              border: `1px solid ${color}`,
+              borderRadius: 4,
+              pointerEvents: "all",
+            }}
+          />
+        </EdgeLabelRenderer>
+      ) : label ? (
         <EdgeLabelRenderer>
           <div
             style={{

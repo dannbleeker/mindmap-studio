@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Paste a spreadsheet selection as topics.** The **Paste text → topics** dialog now recognises a
+  table copied from Excel / Google Sheets (or any TSV/CSV block): each **row becomes a topic**, extra
+  columns become its **note** (labelled by the header row when present), and a **Tags** column becomes
+  the topic's tags. Indented outlines and Markdown still route to the outline parser. New pure
+  `parseTable` / `tableToForest` / `parsePaste`.
+
 - **Map legend.** A new toolbar toggle adds an auto-generated **Legend** box (top-left) listing every
   marker, tag, and conditional-format rule in use with its meaning — MindManager's legend. It's drawn
   on the canvas *and* in the SVG/PNG/PDF export from one shared `buildLegend`, so screen == export. New

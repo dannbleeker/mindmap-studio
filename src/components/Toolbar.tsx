@@ -668,6 +668,12 @@ export function Toolbar({
             active={!!liveDoc.meta?.lineJumps}
             onClick={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
           />
+          <TBtn
+            icon="layers"
+            label="Legend (markers / tags / rules in use)"
+            active={!!liveDoc.meta?.legend}
+            onClick={() => m()?.setLegend(!liveDoc.meta?.legend)}
+          />
         </div>
         <span className="mm-vdiv" />
         {/* Insert + Canvas menus — content/styling group. */}

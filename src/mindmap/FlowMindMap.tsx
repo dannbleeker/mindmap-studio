@@ -40,7 +40,7 @@ import { Boundaries } from "./flow/Boundaries";
 import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
-import { CoachMark, DropLabel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
+import { CoachMark, DropLabel, LegendPanel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { NodePopover } from "./flow/NodePopover";
@@ -118,6 +118,7 @@ import {
   setFreeform,
   setHyperlink,
   setImage,
+  setLegend,
   setLineDash,
   setLineJumps,
   setLinkArrow,
@@ -1166,6 +1167,7 @@ function FlowInner({
       setLineJumps: (on) => apply(setLineJumps(docRef.current, on)),
       setConnectorStyle: (style) => apply(setConnectorStyle(docRef.current, style)),
       setNumberStyle: (style) => apply(setNumberStyle(docRef.current, style)),
+      setLegend: (on) => apply(setLegend(docRef.current, on)),
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
       renameTag: (from, to) => apply(renameTag(docRef.current, from, to)),
@@ -1422,6 +1424,7 @@ function FlowInner({
           />
           <CoachMark show={showCoach} rootId={renderDoc.root.id} />
           <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
+          {renderDoc.meta?.legend ? <LegendPanel doc={renderDoc} /> : null}
           <Controls showInteractive={false} />
           <StatusBar topics={nodes.length} selected={selectedIds.size} />
           <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />

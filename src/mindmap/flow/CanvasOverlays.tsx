@@ -1,5 +1,7 @@
 import { MiniMap, NodeToolbar, Panel, Position, useStore } from "@xyflow/react";
 import { colors } from "../../design/tokens";
+import { markerImage } from "../../icons";
+import { buildLegend } from "../../legend";
 import type { MindMapDoc } from "../../model/types";
 import { findAnyNode } from "./ops";
 import type { TopicNode } from "./types";
@@ -62,6 +64,59 @@ export function StatusBar({ topics, selected }: { topics: number; selected: numb
         </span>
         {selected > 0 ? <span>{selected} selected</span> : null}
         <span>{Math.round(zoom * 100)}%</span>
+      </div>
+    </Panel>
+  );
+}
+
+/** The map legend (top-left) — every marker / tag / conditional rule in use with its meaning. Shown
+ *  when meta.legend is on; the SVG export draws the same rows (from the shared buildLegend). */
+export function LegendPanel({ doc }: { doc: MindMapDoc }) {
+  const entries = buildLegend(doc);
+  if (entries.length === 0) return null;
+  return (
+    <Panel position="top-left">
+      <div
+        className="nodrag nopan"
+        style={{
+          font: "11px system-ui, sans-serif",
+          padding: "6px 9px",
+          borderRadius: 6,
+          border: `1px solid ${colors.menu.border}`,
+          background: `var(--mm-node-bg, ${colors.menu.fallbackBg})`,
+          color: `var(--mm-color, ${colors.menu.fallbackColor})`,
+          maxWidth: 220,
+          boxShadow: "0 1px 3px #0002",
+        }}
+      >
+        <div style={{ fontWeight: 600, marginBottom: 4, opacity: 0.7 }}>Legend</div>
+        {entries.map((e, i) => (
+          <div
+            key={`${e.kind}:${e.label}:${i}`}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "1px 0" }}
+          >
+            {e.kind === "marker" && e.icon ? (
+              markerImage(e.icon) ? (
+                <img src={markerImage(e.icon) as string} alt="" width={13} height={13} />
+              ) : (
+                <span style={{ width: 13, textAlign: "center" }}>{e.icon}</span>
+              )
+            ) : (
+              <span
+                style={{
+                  width: 11,
+                  height: 11,
+                  borderRadius: e.kind === "tag" ? 6 : 2,
+                  background: e.color ?? colors.accent,
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {e.label}
+            </span>
+          </div>
+        ))}
       </div>
     </Panel>
   );

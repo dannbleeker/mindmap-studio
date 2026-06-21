@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Map legend.** A new toolbar toggle adds an auto-generated **Legend** box (top-left) listing every
+  marker, tag, and conditional-format rule in use with its meaning — MindManager's legend. It's drawn
+  on the canvas *and* in the SVG/PNG/PDF export from one shared `buildLegend`, so screen == export. New
+  `meta.legend` flag + `setLegend` op/handle.
+
 - **Design gallery.** A new **Canvas ▸ Design** menu applies a coordinated one-click "look" — canvas
   theme + branch connector style together (Classic / Blueprint / Midnight / Sunrise / Diagram) —
   MindManager's Design tab. Pure `DESIGNS` data over the existing theme + connector controls (no new

@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Smart alignment guides (free layout).** Dragging a topic in whiteboard/free-canvas mode now shows
+  amber guide lines when its edges or centre line up with nearby topics, and the topic snaps into
+  alignment on release — design-tool-style. Pure `computeSnap` (edges + centres, nearest within a
+  threshold); guides drawn in flow space via React Flow's ViewportPortal.
+
 - **Saved views.** Bookmark a perspective on a map — its **pan/zoom + drill-in target + active Power
   Filter** — and jump back to it from **View ▸ Saved views**. Persisted per map. New canvas
   `getViewport` / `setViewport` handle methods, a pure `addView` / `removeView` + a `useSavedViews`

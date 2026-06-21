@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Auto-marker suggestions.** The inspector's Markers section now offers a **Suggested** row of marker
+  chips inferred from the topic's text (e.g. "urgent" → ❗, "why…?" → ❓, "blocker/risk" → 🚩,
+  "idea" → 💡) — click to apply, opt-in (only shows when something matches and isn't already on the
+  topic). Pure `suggestMarkers` / `suggestNewMarkers`.
+
 - **Group a selection in a boundary.** Beyond "group branch" (a subtree), **Insert ▸ Group selection
   (boundary)** (and ⌘K) now wraps any **2+ selected topics** in one filled boundary box — MindManager
   boundaries around an arbitrary set. New pure `groupNodes`, sharing an extracted `addBoundaryForNodes`

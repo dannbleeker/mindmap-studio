@@ -17,6 +17,7 @@ import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
 import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
 import { markerImage, searchMarkers } from "./icons";
 import { formatBytes } from "./io/attachment";
+import { suggestNewMarkers } from "./markerSuggest";
 import {
   MARKER_DND_TYPE,
   type MarkerTagSummary,
@@ -1778,6 +1779,53 @@ export function InfoPanel({
                           the default inspector view (#7). */}
                       {sectionLabel("Markers")}
                       <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
+                      {(() => {
+                        const suggested = suggestNewMarkers(node.topic, node.icons ?? []);
+                        return suggested.length > 0 ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                              flexWrap: "wrap",
+                              padding: "0 10px 4px",
+                            }}
+                          >
+                            <span style={{ fontSize: fontSize.xs, color: "var(--ed-faint)" }}>
+                              Suggested:
+                            </span>
+                            {suggested.map((m) => (
+                              <button
+                                key={m}
+                                type="button"
+                                onClick={() => onToggleMarker(m)}
+                                title={`Add ${m} (suggested from the topic text)`}
+                                style={{
+                                  border: "1px dashed var(--ed-accent)",
+                                  background: "var(--ed-card)",
+                                  borderRadius: radius.md,
+                                  cursor: "pointer",
+                                  fontSize: fontSize.lg,
+                                  lineHeight: 1,
+                                  padding: "2px 5px",
+                                }}
+                              >
+                                {markerImage(m) ? (
+                                  <img
+                                    src={markerImage(m) as string}
+                                    alt={m}
+                                    width={16}
+                                    height={16}
+                                    style={{ display: "block" }}
+                                  />
+                                ) : (
+                                  m
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        ) : null;
+                      })()}
                       {sectionLabel("Note")}
                       <div style={{ display: "flex", flexDirection: "column", height: 168 }}>
                         <NotesPanel

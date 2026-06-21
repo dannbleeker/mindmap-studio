@@ -53,6 +53,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       "exportXlsx",
       "exportLibrary",
       "copyOutline",
+      "copyTable",
       "handleFile",
     ].map((k) => [k, vi.fn()]),
   ) as unknown as ToolbarProps["io"];

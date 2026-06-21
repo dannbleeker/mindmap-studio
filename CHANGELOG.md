@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Copy map as a table (TSV).** A **Copy as table (TSV)** action (Export menu + ⌘K) puts the whole
+  map on the clipboard as one row per topic — Topic · Depth · Note · Tags — for pasting straight into
+  Excel / Google Sheets. The inverse of the paste-spreadsheet path, so the two round-trip. New pure
+  `mapToRows` / `mapToTsv`.
+
 - **Guided walk (presentation tour).** A new **Canvas ▸ Guided walk** (and ⌘K) steps through every
   topic in outline order with a spotlight (the focus dim) + auto-centre + the topic's note shown as
   speaker notes — a lightweight presentation between drill-in and full-screen Present. **←/→** step,

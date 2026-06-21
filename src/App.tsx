@@ -60,6 +60,7 @@ import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
 import { toMarkdown } from "./io/markdown";
 import { parsePaste } from "./io/pasteTable";
+import { mapToTsv } from "./io/tableExport";
 import {
   type CanvasSession,
   type LayoutKind,
@@ -581,6 +582,17 @@ export function App() {
     try {
       await navigator.clipboard.writeText(toMarkdown(liveDocRef.current));
       showHint("Outline copied to clipboard");
+    } catch {
+      showHint("Couldn't access the clipboard");
+    }
+  }
+
+  // Copy the map as a TSV table (one row per topic: Topic · Depth · Note · Tags) for pasting into
+  // Excel / Sheets — the inverse of the paste-spreadsheet path.
+  async function copyTable() {
+    try {
+      await navigator.clipboard.writeText(mapToTsv(liveDocRef.current));
+      showHint("Map copied as a table (TSV)");
     } catch {
       showHint("Couldn't access the clipboard");
     }
@@ -1447,6 +1459,7 @@ export function App() {
       exportXlsx,
       exportLibrary,
       copyOutline,
+      copyTable,
       handleFile,
       openFile,
       saveFile,

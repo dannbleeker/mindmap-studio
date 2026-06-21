@@ -137,6 +137,7 @@ function setup(
       "exportXlsx",
       "exportLibrary",
       "copyOutline",
+      "copyTable",
       "handleFile",
     ].map((k) => [k, vi.fn()]),
   ) as unknown as Parameters<typeof Toolbar>[0]["io"];

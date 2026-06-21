@@ -123,6 +123,7 @@ export interface ToolbarIo {
   exportXlsx: () => void;
   exportLibrary: () => void;
   copyOutline: () => void;
+  copyTable: () => void;
   handleFile: (event: ChangeEvent<HTMLInputElement>) => void;
   /** Native disk-file actions (File System Access API, with a download/upload fallback). */
   openFile: () => void;
@@ -461,6 +462,11 @@ export function Toolbar({
                   icon={mi("copy")}
                   label="Copy outline to clipboard"
                   onSelect={() => io.copyOutline()}
+                />
+                <MenuItem
+                  icon={mi("copy")}
+                  label="Copy as table (TSV)"
+                  onSelect={() => io.copyTable()}
                 />
                 <MenuItem
                   icon={mi("export")}

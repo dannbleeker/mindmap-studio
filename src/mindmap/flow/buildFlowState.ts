@@ -37,6 +37,8 @@ export interface BuildFlowStateArgs {
   selectedEdgeId: string | null;
   /** Power-filter "lit" set (matches + their ancestors); null = filter off, nothing dimmed. */
   litIds: ReadonlySet<string> | null;
+  /** Find-result set: these nodes get a highlight ring. null = no active search. */
+  highlightIds?: ReadonlySet<string> | null;
 }
 
 export function buildFlowState(args: BuildFlowStateArgs): {
@@ -44,6 +46,7 @@ export function buildFlowState(args: BuildFlowStateArgs): {
   edges: FlowEdge[];
 } {
   const { doc, palette, numbered, kind, measured, selectedIds, selectedEdgeId, litIds } = args;
+  const highlightIds = args.highlightIds ?? null;
   const proj = project(doc, palette, numbered, kind);
   const est = estimateSizeOf(proj.nodes);
   // Index the live nodes by id ONCE; sizeOf is called a multiple of N times per layout pass.
@@ -59,7 +62,14 @@ export function buildFlowState(args: BuildFlowStateArgs): {
     ...n,
     position: pos.get(n.id) ?? { x: 0, y: 0 },
     selected: selectedIds.has(n.id),
-    data: litIds ? { ...n.data, dimmed: !litIds.has(n.id) } : n.data,
+    data:
+      litIds || highlightIds
+        ? {
+            ...n.data,
+            ...(litIds ? { dimmed: !litIds.has(n.id) } : null),
+            ...(highlightIds ? { matched: highlightIds.has(n.id) } : null),
+          }
+        : n.data,
   }));
 
   // Brace map hides the tapered branch ribbons (the "{" forks replace them); cross-links stay.

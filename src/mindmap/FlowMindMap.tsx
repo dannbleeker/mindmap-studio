@@ -246,6 +246,7 @@ function FlowInner({
   direction = "side",
   numbered = false,
   litIds = null,
+  highlightIds = null,
   drillId = null,
   onChange,
   onSelect,
@@ -347,6 +348,7 @@ function FlowInner({
   const drillIdRef = useLatestRef(drillId);
   const numberedRef = useLatestRef(numbered);
   const litIdsRef = useLatestRef(litIds);
+  const highlightIdsRef = useLatestRef(highlightIds);
   const selectedRef = useLatestRef(selectedId);
   const selectedIdsRef = useLatestRef(selectedIds);
   const selectedEdgeIdRef = useLatestRef(selectedEdgeId);
@@ -397,6 +399,7 @@ function FlowInner({
         selectedIds: selectedIdsRef.current,
         selectedEdgeId: selectedEdgeIdRef.current,
         litIds: litIdsRef.current,
+        highlightIds: highlightIdsRef.current,
       });
       setNodes(nodes);
       setEdges(edges);
@@ -837,7 +840,10 @@ function FlowInner({
     setNodes((ns) =>
       ns.map((n) => {
         const dimmed = litIds ? !litIds.has(n.id) : false;
-        return Boolean(n.data.dimmed) === dimmed ? n : { ...n, data: { ...n.data, dimmed } };
+        const matched = highlightIds ? highlightIds.has(n.id) : false;
+        return Boolean(n.data.dimmed) === dimmed && Boolean(n.data.matched) === matched
+          ? n
+          : { ...n, data: { ...n.data, dimmed, matched } };
       }),
     );
     setEdges((es) =>
@@ -848,7 +854,7 @@ function FlowInner({
           : { ...e, data: { ...(e.data as EdgeData), dimmed } };
       }),
     );
-  }, [litIds, setNodes, setEdges]);
+  }, [litIds, highlightIds, setNodes, setEdges]);
 
   // Reflect the live drag-to-reparent target as a node-data flag so TopicNode rings it (#11). Only
   // the target's `data` changes (the equality guard skips the rest); cleared when the drag ends.

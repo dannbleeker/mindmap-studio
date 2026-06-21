@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Find highlights every match on the canvas.** Typing in the **Find** box now rings every matching
+  topic (live, as you type), so you can see all hits at once; **Enter** still steps through them with
+  the n/total counter. Clearing the box removes the highlights.
+
 - **Keyboard restructuring.** Reorder a topic among its siblings with **Ctrl/⌘+Shift+↑/↓**, and
   promote/demote it with **Alt+Shift+←/→** — MindManager-style move-up/down + outdent/indent without
   the mouse. New `moveSibling` op (reusing the existing `indent`/`outdent`).

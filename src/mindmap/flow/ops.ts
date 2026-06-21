@@ -487,6 +487,26 @@ export function setAllExpanded(doc: MindMapDoc, expanded: boolean): OpResult {
   return { doc: next };
 }
 
+/** Isolate the branch containing `id`: collapse every *other* top-level branch and expand the path
+ *  down to `id` so it's revealed — a fast "focus on this line" that stays editable in place (unlike
+ *  drill-in, which re-roots the view). No-op when `id` is the root or isn't in the central tree. */
+export function isolateBranch(doc: MindMapDoc, id: string): OpResult {
+  const path = nodePath(doc, id);
+  if (!path || path.depth === 0) return { doc }; // root or not found
+  // The depth-1 branch this node lives under (or the node itself when it IS a top branch).
+  const topId = path.ancestors[1]?.id ?? id;
+  // Every ancestor below the root + the node itself must be expanded so `id` is visible.
+  const reveal = new Set([...path.ancestors.slice(1).map((a) => a.id), id]);
+  const next = structuredClone(doc);
+  for (const child of next.root.children) {
+    child.collapsed = child.id === topId ? undefined : true;
+  }
+  walkTree(next.root, (node) => {
+    if (reveal.has(node.id)) node.collapsed = undefined;
+  });
+  return { doc: next, selectId: id };
+}
+
 /** Expand the central tree to `level` and collapse below it: a topic with children is collapsed iff
  *  its depth ≥ level (root = depth 0). Level 1 shows only the top branches (collapsed); higher levels
  *  reveal more tiers — MindManager's "detail level" control. `level` is clamped to ≥ 1. */

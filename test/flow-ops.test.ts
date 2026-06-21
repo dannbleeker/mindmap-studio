@@ -28,6 +28,7 @@ import {
   groupNodes,
   groupSummary,
   indent,
+  isolateBranch,
   mergeStyle,
   moveInTree,
   moveSibling,
@@ -211,6 +212,24 @@ describe("flow ops — structural", () => {
     expect(groupNodes(base(), ["a", "ghost"]).doc.boundaries?.at(-1)?.nodeIds).toEqual(["a"]);
     // no valid id → unchanged (only the seed "bd" boundary remains)
     expect(groupNodes(base(), ["ghost"]).doc.boundaries?.length).toBe(1);
+  });
+
+  it("isolateBranch collapses other top branches and reveals the path to the node", () => {
+    // a1 lives under top branch "a"; "b" collapses, "a" stays expanded.
+    const d1 = isolateBranch(base(), "a1");
+    expect(d1.selectId).toBe("a1");
+    expect(findNode(d1.doc, "b")?.collapsed).toBe(true);
+    expect(findNode(d1.doc, "a")?.collapsed).toBeUndefined();
+    // isolating a top branch itself collapses its siblings
+    const d2 = isolateBranch(base(), "b");
+    expect(findNode(d2.doc, "a")?.collapsed).toBe(true);
+    expect(findNode(d2.doc, "b")?.collapsed).toBeUndefined();
+  });
+
+  it("isolateBranch is a no-op for the root / a missing node", () => {
+    const d = base();
+    expect(isolateBranch(d, "r").doc).toBe(d);
+    expect(isolateBranch(d, "ghost").doc).toBe(d);
   });
 });
 

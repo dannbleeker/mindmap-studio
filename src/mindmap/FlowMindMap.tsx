@@ -90,6 +90,7 @@ import {
   groupNodes,
   groupSummary,
   indent,
+  isolateBranch,
   mergeStyle,
   moveInTree,
   moveSibling,
@@ -1202,6 +1203,11 @@ function FlowInner({
       groupSummary: (id) => {
         apply(groupSummary(docRef.current, id));
         return Boolean(findNode(docRef.current, id));
+      },
+      isolateBranch: (id) => {
+        const before = docRef.current;
+        apply(isolateBranch(docRef.current, id));
+        return docRef.current !== before;
       },
       renameMap: (title) => apply(setTopic(docRef.current, docRef.current.root.id, title)),
       renameNode: (id, topic) => apply(setTopic(docRef.current, id, topic)),

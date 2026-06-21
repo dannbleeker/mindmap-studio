@@ -624,6 +624,16 @@ export function Toolbar({
             onSelect={() => canvas.drillIn()}
           />
           <MenuItem
+            icon={mi("layers")}
+            label="Isolate branch (collapse others)"
+            disabled={!canvas.selected}
+            title={canvas.selected ? undefined : "Select a topic in a branch to isolate it"}
+            onSelect={() => {
+              const ok = canvas.selected?.id ? m()?.isolateBranch(canvas.selected.id) : false;
+              showHint(ok ? "Isolated this branch." : "Select a topic in a branch first.");
+            }}
+          />
+          <MenuItem
             icon={mi("present")}
             label="Guided walk (step through topics)"
             onSelect={() => canvas.startWalk()}

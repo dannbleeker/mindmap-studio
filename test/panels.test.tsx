@@ -11,6 +11,7 @@ import {
   InfoPanel,
   MarkerTagIndex,
   type NamedStyle,
+  NoteEditorPanel,
   OutlinePanel,
   StatsPanel,
   StyleBar,
@@ -602,6 +603,31 @@ describe("WalkBar", () => {
     expect(screen.getByRole("button", { name: "Previous topic" })).toHaveProperty("disabled", true);
     rerender(<WalkBar index={2} total={3} topic="C" onPrev={noop} onNext={noop} onExit={noop} />);
     expect(screen.getByRole("button", { name: "Next topic" })).toHaveProperty("disabled", true);
+  });
+});
+
+describe("NoteEditorPanel", () => {
+  it("shows an empty-state hint and a working Close when nothing is selected", async () => {
+    const onClose = vi.fn();
+    render(
+      <NoteEditorPanel selected={null} value="" onChange={noop} onBlur={noop} onClose={onClose} />,
+    );
+    expect(screen.getByText(/Select a topic to edit its note/)).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "Close note editor" }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("embeds the note editor for the selected topic", () => {
+    render(
+      <NoteEditorPanel
+        selected={{ id: "a", topic: "Research", note: "" }}
+        value="hello"
+        onChange={noop}
+        onBlur={noop}
+        onClose={noop}
+      />,
+    );
+    expect(screen.getByText(/Research/)).toBeTruthy();
   });
 });
 

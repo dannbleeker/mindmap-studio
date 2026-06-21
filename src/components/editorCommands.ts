@@ -176,6 +176,9 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("panel-history", "Toggle Version history", "panel", () => panels.setHistoryOpen((v) => !v));
   add("panel-board", "Toggle Board (Kanban)", "panel", () => panels.setBoardOpen((v) => !v));
   add("panel-stats", "Toggle Map statistics", "panel", () => panels.setStatsOpen((v) => !v));
+  add("panel-note-editor", "Toggle Note editor (dockable)", "panel", () =>
+    panels.setNoteEditorOpen((v) => !v),
+  );
   add("panel-info", "Toggle Topic info / inspector", "panel", () => {
     const shown = panels.infoOpen || panels.infoMinimized;
     panels.setInfoMinimized(() => false);

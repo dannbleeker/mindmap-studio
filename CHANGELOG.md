@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Dockable note editor.** A **View ▸ Note editor (dockable)** panel (and ⌘K) puts the selected
+  topic's note in a full-height rail editor — more room than the inspector's compact box — reusing the
+  same rich note editor + draft pipeline. Handy for knowledge maps with long notes.
+
 - **Auto-marker suggestions.** The inspector's Markers section now offers a **Suggested** row of marker
   chips inferred from the topic's text (e.g. "urgent" → ❗, "why…?" → ❓, "blocker/risk" → 🚩,
   "idea" → 💡) — click to apply, opt-in (only shows when something matches and isn't already on the

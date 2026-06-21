@@ -36,6 +36,8 @@ export interface ToolbarPanels {
   setBoardOpen: (fn: (v: boolean) => boolean) => void;
   statsOpen: boolean;
   setStatsOpen: (fn: (v: boolean) => boolean) => void;
+  noteEditorOpen: boolean;
+  setNoteEditorOpen: (fn: (v: boolean) => boolean) => void;
   infoOpen: boolean;
   setInfoOpen: (fn: (v: boolean) => boolean) => void;
   infoMinimized: boolean;
@@ -538,6 +540,13 @@ export function Toolbar({
             checked={panels.statsOpen}
             trailing={mi("check")}
             onSelect={() => panels.setStatsOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("note")}
+            label="Note editor (dockable)"
+            checked={panels.noteEditorOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setNoteEditorOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("note")}

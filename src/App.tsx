@@ -15,6 +15,7 @@ import {
   InfoPanel,
   MarkerTagIndex,
   type NamedStyle,
+  NoteEditorPanel,
   OutlinePanel,
   PlaybackBar,
   StatsPanel,
@@ -1675,6 +1676,15 @@ export function App() {
               />
             )}
             {panels.statsOpen && <StatsPanel doc={liveDoc} />}
+            {panels.noteEditorOpen && (
+              <NoteEditorPanel
+                selected={selected}
+                value={noteDraft}
+                onChange={onNoteChange}
+                onBlur={flushNote}
+                onClose={() => panels.setNoteEditorOpen(false)}
+              />
+            )}
             {panels.filterOpen && (
               <FilterPanel
                 root={liveDoc.root}

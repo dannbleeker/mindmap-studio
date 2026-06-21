@@ -2229,6 +2229,53 @@ export function InfoPanel({
   return aside;
 }
 
+/** A dockable, full-height note editor in the left rail — the same NotesPanel the inspector embeds,
+ *  given more room (for knowledge maps with long notes). Bound to the same note draft + handlers. */
+export function NoteEditorPanel({
+  selected,
+  value,
+  onChange,
+  onBlur,
+  onClose,
+}: {
+  selected: SelectedNode | null;
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <Panel width={320} style={{ minHeight: 0 }}>
+      {selected ? (
+        <NotesPanel
+          selected={selected}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          onClose={onClose}
+        />
+      ) : (
+        <>
+          <div style={{ ...panelTitle, display: "flex", justifyContent: "space-between" }}>
+            <span>📝 Note editor</span>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close note editor"
+              style={{ ...styleBtn, fontSize: fontSize.sm }}
+            >
+              ✕
+            </button>
+          </div>
+          <div style={{ padding: "4px 14px", fontSize: fontSize.sm, color: colors.faint }}>
+            Select a topic to edit its note here.
+          </div>
+        </>
+      )}
+    </Panel>
+  );
+}
+
 export function NotesPanel({
   selected,
   value,

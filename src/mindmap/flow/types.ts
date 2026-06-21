@@ -51,6 +51,8 @@ export type TopicData = {
   priority?: number;
   /** How many files are attached (shown as a 📎 chip; the files live in the model). */
   attachmentCount?: number;
+  /** Attached file names (for the hover-peek tooltip on the 📎 chip). */
+  attachmentNames?: string[];
   /** A detached/floating topic (not part of the central hierarchy). */
   floating: boolean;
   /** Dimmed by the read-only Power Filter (not on a path to a match); view-only opacity. */

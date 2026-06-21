@@ -1,5 +1,13 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { type CSSProperties, memo, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Chip, DateChip } from "../../Chip";
 import { ProgressPie } from "../../ProgressPie";
 import { markerImage } from "../../icons";
@@ -55,6 +63,93 @@ const chipStyle: CSSProperties = {
   background: "rgba(0,0,0,0.06)",
   color: "inherit",
 };
+
+// Text colours offered by the inline rich-text mini-toolbar (red / green / blue / amber / ink).
+const RICH_COLORS = ["#e23b3b", "#1b8a5e", "#3f6fb0", "#b5852a", "#111827"];
+
+/** The floating bold/italic/underline + colour bar shown above a topic while it's being edited
+ *  (MindManager's inline format bar). Buttons preventDefault on mousedown so clicking them keeps the
+ *  contentEditable's selection + focus (no blur/commit); execCommand mirrors the Ctrl+B/I/U path. */
+function RichEditToolbar() {
+  const stop = (e: ReactMouseEvent) => e.preventDefault();
+  const fmt = (cmd: string, value?: string) => document.execCommand(cmd, false, value);
+  const btn: CSSProperties = {
+    width: 22,
+    height: 22,
+    border: "none",
+    borderRadius: 5,
+    background: "transparent",
+    cursor: "pointer",
+    font: "inherit",
+    color: "#1f2933",
+  };
+  return (
+    <div
+      className="nodrag nopan"
+      style={{
+        position: "absolute",
+        top: -34,
+        left: 0,
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        padding: 3,
+        borderRadius: 7,
+        background: "#fff",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+        zIndex: 6,
+      }}
+    >
+      <button
+        type="button"
+        title="Bold (Ctrl/⌘+B)"
+        onMouseDown={stop}
+        onClick={() => fmt("bold")}
+        style={{ ...btn, fontWeight: 800 }}
+      >
+        B
+      </button>
+      <button
+        type="button"
+        title="Italic (Ctrl/⌘+I)"
+        onMouseDown={stop}
+        onClick={() => fmt("italic")}
+        style={{ ...btn, fontStyle: "italic" }}
+      >
+        I
+      </button>
+      <button
+        type="button"
+        title="Underline (Ctrl/⌘+U)"
+        onMouseDown={stop}
+        onClick={() => fmt("underline")}
+        style={{ ...btn, textDecoration: "underline" }}
+      >
+        U
+      </button>
+      <span style={{ width: 1, alignSelf: "stretch", background: "#e4e4e7", margin: "0 2px" }} />
+      {RICH_COLORS.map((c) => (
+        <button
+          key={c}
+          type="button"
+          title={`Text colour ${c}`}
+          aria-label={`Text colour ${c}`}
+          onMouseDown={stop}
+          onClick={() => fmt("foreColor", c)}
+          style={{
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            border: "1px solid rgba(0,0,0,0.15)",
+            background: c,
+            cursor: "pointer",
+            padding: 0,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /** A small task-completion pie on the node (MindManager-style); the exact figure lives in the
  *  tooltip + the Info panel, so the canvas stays uncluttered. When `onCycle` is given (a leaf task,
@@ -126,6 +221,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     resources,
     priority,
     attachmentCount,
+    attachmentNames,
     dimmed,
     dropTarget,
   } = data;
@@ -139,6 +235,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const editRef = useRef<HTMLDivElement>(null);
   // Hover state drives the lift/shadow (#5) and reveals the ＋ add affordances (#1).
   const [hovered, setHovered] = useState(false);
+  // Hover-peek: show the note's text in a small card when the 📝 indicator is hovered (read it
+  // without opening the inspector). Canvas-only.
+  const [peekNote, setPeekNote] = useState(false);
   // Re-sanitise on render too (defence-in-depth: a topicRich could arrive via an imported .json).
   const richHtml = useMemo(() => (topicRich ? sanitizeRich(topicRich) : null), [topicRich]);
 
@@ -384,6 +483,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               {number}
             </span>
           ) : null}
+          {isEditing ? <RichEditToolbar /> : null}
           {isEditing ? (
             <span
               ref={editRef}
@@ -450,6 +550,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 e.stopPropagation();
                 editing?.openNote(id);
               }}
+              onMouseEnter={() => setPeekNote(true)}
+              onMouseLeave={() => setPeekNote(false)}
               style={{
                 marginLeft: 4,
                 border: "none",
@@ -464,6 +566,34 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             </button>
           ) : null}
         </span>
+        {peekNote && note?.trim() ? (
+          // Hover-peek: read the note without opening the inspector. Clamped + scrollable for long notes.
+          <output
+            className="nodrag nopan"
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              marginTop: 6,
+              maxWidth: 280,
+              maxHeight: 160,
+              overflow: "auto",
+              padding: "8px 10px",
+              borderRadius: 8,
+              background: "#fffef7",
+              border: "1px solid #e7dca8",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+              fontSize: 12,
+              lineHeight: 1.45,
+              color: "#3a3320",
+              whiteSpace: "pre-wrap",
+              zIndex: 7,
+            }}
+          >
+            {note.trim().slice(0, 600)}
+            {note.trim().length > 600 ? "…" : ""}
+          </output>
+        ) : null}
         {progress || due || attachmentCount || priority ? (
           <div
             style={{
@@ -494,7 +624,13 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               <DateChip due={due} overdue={isOverdue(due, progress?.progress ?? 0, todayISO())} />
             ) : null}
             {attachmentCount ? (
-              <Chip title={`${attachmentCount} attachment${attachmentCount === 1 ? "" : "s"}`}>
+              <Chip
+                title={
+                  attachmentNames?.length
+                    ? `Attachments:\n${attachmentNames.join("\n")}`
+                    : `${attachmentCount} attachment${attachmentCount === 1 ? "" : "s"}`
+                }
+              >
                 📎 {attachmentCount}
               </Chip>
             ) : null}

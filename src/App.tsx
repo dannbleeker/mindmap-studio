@@ -583,7 +583,9 @@ export function App() {
   // for pasting into an email, chat, or doc.
   async function copyOutline() {
     try {
-      await navigator.clipboard.writeText(toMarkdown(liveDocRef.current));
+      const d = liveDocRef.current;
+      const nums = panels.numbered ? outlineNumbers(d.root, d.meta?.numberStyle) : undefined;
+      await navigator.clipboard.writeText(toMarkdown(d, nums));
       showHint("Outline copied to clipboard");
     } catch {
       showHint("Couldn't access the clipboard");
@@ -1243,7 +1245,11 @@ export function App() {
     exportDocx,
     exportPptx,
     exportXlsx,
-  } = useMapExports(mapRef, () => liveDocRef.current);
+  } = useMapExports(
+    mapRef,
+    () => liveDocRef.current,
+    () => panels.numbered,
+  );
 
   // Restore the last-opened map on startup straight into the editor. With no prior map (first run /
   // empty library) land on the start screen instead of an editor full of the sample map.

@@ -34,6 +34,20 @@ describe("markdown io", () => {
     expect(shape(fromMarkdown(toMarkdown(sample)).root)).toEqual(shape(sample.root));
   });
 
+  it("bakes outline numbers into each topic when a numbers map is given", () => {
+    const numbers = new Map([
+      ["a", "1"],
+      ["a1", "1.1"],
+      ["a2", "1.2"],
+      ["b", "2"],
+    ]);
+    expect(toMarkdown(sample, numbers)).toBe(
+      ["# Plan", "- 1 Strategy", "  - 1.1 Grow EU", "  - 1.2 Cut costs", "- 2 People", ""].join(
+        "\n",
+      ),
+    );
+  });
+
   it("reads the H1 as the root title", () => {
     const doc = fromMarkdown("# My Map\n- one\n- two\n");
     expect(doc.title).toBe("My Map");

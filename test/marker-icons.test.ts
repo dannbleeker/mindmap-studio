@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { MARKER_CATALOG, MARKER_PALETTE, markerImage, searchMarkers } from "../src/icons";
+import {
+  MARKER_CATALOG,
+  MARKER_GROUPS,
+  MARKER_PALETTE,
+  markerGroupOf,
+  markerImage,
+  searchMarkers,
+  toggleMarkerInList,
+} from "../src/icons";
 
 // The flat vector marker set replaces OS colour emoji — every palette marker must resolve to a
 // platform-consistent data: URL (rendered as an <img>/<image> on canvas + export); an unknown marker
@@ -52,5 +60,30 @@ describe("searchMarkers", () => {
 
   it("returns an empty list when nothing matches", () => {
     expect(searchMarkers("nonexistentxyz")).toEqual([]);
+  });
+});
+
+// Marker groups are single-select sets — a topic carries at most one per group, so picking another in
+// the group replaces it; free markers (not in a group) multi-toggle as before.
+describe("marker groups", () => {
+  it("maps grouped markers to their group, free markers to null", () => {
+    expect(markerGroupOf("🔴")).toBe("status");
+    expect(markerGroupOf("🟢")).toBe("status");
+    expect(markerGroupOf("1️⃣")).toBe("priority");
+    expect(markerGroupOf("⭐")).toBeNull();
+  });
+
+  it("every group member resolves back to its group", () => {
+    for (const g of MARKER_GROUPS) for (const m of g.members) expect(markerGroupOf(m)).toBe(g.id);
+  });
+
+  it("toggleMarkerInList replaces a sibling in the same group when adding", () => {
+    expect(toggleMarkerInList(["🔴"], "🟢")).toEqual(["🟢"]); // status: 🔴 → 🟢
+    expect(toggleMarkerInList(["⭐", "🔴"], "🟡")).toEqual(["⭐", "🟡"]); // free marker kept
+  });
+
+  it("toggleMarkerInList removes a present marker (toggle off) and multi-toggles free markers", () => {
+    expect(toggleMarkerInList(["🟢"], "🟢")).toEqual([]);
+    expect(toggleMarkerInList(["⭐"], "❗")).toEqual(["⭐", "❗"]); // both free → coexist
   });
 });

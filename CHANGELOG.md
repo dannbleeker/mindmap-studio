@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Marker groups (single-select sets).** Markers are now grouped like MindManager's Map Markers —
+  **Priority** (1–9), **Status** (the colour dots), **Mood**, and **Vote** (👍/👎). A topic carries at
+  most one marker per group, so picking another in the same group replaces it; markers outside a group
+  still multi-toggle. Pure `markerGroupOf` / `toggleMarkerInList`, applied in `toggleIcon` (so bulk
+  toggles inherit it).
+
 - **Outline numbering schemes.** When numbering is shown you can switch between **decimal**
   (1, 1.1, 1.1.1) and the **legal outline** (I, I.A, I.A.1, I.A.1.a … cycling I/A/1/a/i by level) from
   the numbering control in the toolbar — MindManager's numbering options. The scheme is a per-map

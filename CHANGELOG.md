@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Map parts (insert a mini-structure).** A new **Insert ▸ Map part** group (and ⌘K) drops a
+  ready-made labelled subtree under the selected topic — **SWOT**, **Pros & cons**, **5W1H**, or a
+  **Meeting agenda** — MindManager's map parts. Pure `MAP_PARTS` builders grafted via the existing
+  add-subtree path.
+
 - **Copy map as a table (TSV).** A **Copy as table (TSV)** action (Export menu + ⌘K) puts the whole
   map on the clipboard as one row per topic — Topic · Depth · Note · Tags — for pasting straight into
   Excel / Google Sheets. The inverse of the paste-spreadsheet path, so the two round-trip. New pure

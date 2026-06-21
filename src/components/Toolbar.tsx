@@ -3,6 +3,7 @@ import { BrainstormTimer } from "../BrainstormTimer";
 import { Menu, MenuCheckboxItem, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { DESIGNS } from "../designs";
 import { buildExample, examples } from "../examples";
+import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import { canvasThemes } from "../mindmap/theme";
 import type { CanvasTheme } from "../mindmap/theme";
@@ -746,6 +747,22 @@ export function Toolbar({
                     style={{ display: "none" }}
                   />
                 </label>
+                <MenuSeparator />
+                <MenuLabel>Map part (insert under selected)</MenuLabel>
+                {MAP_PARTS.map((p) => (
+                  <MenuItem
+                    key={p.id}
+                    icon={mi("plus")}
+                    label={p.name}
+                    disabled={!canvas.selected}
+                    title={canvas.selected ? undefined : "Select a topic first to insert under it"}
+                    onSelect={() => {
+                      const part = buildMapPart(p.id);
+                      const ok = part ? m()?.addSubtreeToSelected(part) : false;
+                      showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");
+                    }}
+                  />
+                ))}
                 <MenuSeparator />
                 <MenuLabel>Roll-up (mirror another map)</MenuLabel>
                 <div style={{ padding: "2px 6px" }}>

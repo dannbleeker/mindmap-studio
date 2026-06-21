@@ -93,6 +93,14 @@ export function nextProgressLevel(cur: number): number {
   return LEVELS.find((l) => l > clamp01(cur) + 0.001) ?? 0;
 }
 
+/** The next state for the topic task checkbox, a three-way cycle: not-a-task (undefined) → to-do (0)
+ *  → done (1) → not-a-task. Any partial value jumps to done. Pure (drives the quick task toggle). */
+export function cycleTaskProgress(current: number | undefined): number | undefined {
+  if (current === undefined) return 0;
+  if (current >= 1) return undefined;
+  return 1;
+}
+
 /** SVG path `d` for a tick sized to a circle of radius `r` at (cx,cy) — the ✓ shown at 100%. Pure. */
 export function checkPath(cx: number, cy: number, r: number): string {
   const p = (x: number, y: number) => `${round2(x)} ${round2(y)}`;

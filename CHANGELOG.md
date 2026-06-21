@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Quick task toggle (topic checkbox).** Hovering a topic now shows a checkbox on its left edge —
+  click to cycle **not-a-task → to-do → done** (a checked box stays visible) — MindManager's task tick,
+  without opening the inspector. Pure `cycleTaskProgress`; the existing progress pie still handles
+  fine-grained steps. 
+
 - **Map parts (insert a mini-structure).** A new **Insert ▸ Map part** group (and ⌘K) drops a
   ready-made labelled subtree under the selected topic — **SWOT**, **Pros & cons**, **5W1H**, or a
   **Meeting agenda** — MindManager's map parts. Pure `MAP_PARTS` builders grafted via the existing

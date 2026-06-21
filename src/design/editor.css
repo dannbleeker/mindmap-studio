@@ -664,6 +664,37 @@
   opacity: 1;
 }
 
+/* Quick task toggle — a hover checkbox on a topic's left edge (mirrors the relate grip on the right).
+   Hidden until the topic is hovered (or the box itself), so it stays out of the way. A checked box
+   (☑, set by aria-pressed) stays visible so completed tasks read at a glance. */
+.mm-task-check {
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 17px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ed-ink, #23211c);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.react-flow__node:hover .mm-task-check,
+.mm-task-check[aria-pressed="true"] {
+  opacity: 0.8;
+}
+.mm-task-check:hover {
+  opacity: 1;
+}
+
 /* Empty-map onboarding coachmark (#1) — anchored under the root, theme-reactive via --ed-*. */
 .mm-coachmark {
   display: flex;

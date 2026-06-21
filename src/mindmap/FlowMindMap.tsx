@@ -25,7 +25,7 @@ import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
 import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
-import { nextProgressLevel } from "../progress";
+import { cycleTaskProgress, nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
 import { useIsMobile } from "../useIsMobile";
@@ -673,6 +673,10 @@ function FlowInner({
       cycleProgress: (id: string) => {
         const n = findNode(docRef.current, id);
         if (n) apply(setProgress(docRef.current, id, nextProgressLevel(n.task?.progress ?? 0)));
+      },
+      cycleTask: (id: string) => {
+        const n = findNode(docRef.current, id);
+        if (n) apply(setProgress(docRef.current, id, cycleTaskProgress(n.task?.progress)));
       },
       // Click the node's 📝 indicator → select it and ask the app to open the Notes tab.
       openNote: (id: string) => {

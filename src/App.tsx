@@ -74,7 +74,7 @@ import { findAnyNode, nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc, NodeStyle } from "./model/types";
 import { noteCounts } from "./noteFormat";
-import { backlinksFor, outlineNumbers, outlineRows } from "./outline";
+import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "./outline";
 import {
   type ToastAction,
   type ToastKind,
@@ -338,6 +338,11 @@ export function App() {
   const backlinks = useMemo(
     () => (selected ? backlinksFor(liveDoc, selected.id) : []),
     [selected, liveDoc],
+  );
+  // Every tag already used in the map — drives the inspector's Add-a-tag autocomplete.
+  const allTags = useMemo(
+    () => markerTagIndex(liveDoc.root, liveDoc.floatingTopics).tags.map((e) => e.key),
+    [liveDoc],
   );
   // The selected relationship's endpoint topics (for the EdgeInspector's "From → To" caption),
   // resolved live so renames stay correct.
@@ -1580,6 +1585,8 @@ export function App() {
                 root={liveDoc.root}
                 floatingTopics={liveDoc.floatingTopics}
                 onPick={(id) => mapRef.current?.focusNode(id)}
+                onRenameTag={(from, to) => mapRef.current?.renameTag(from, to)}
+                onDeleteTag={(t) => mapRef.current?.deleteTag(t)}
               />
             )}
             {panels.filterOpen && (
@@ -1813,6 +1820,7 @@ export function App() {
                 onRemoveTag={(t) =>
                   mapRef.current?.setSelectedTags((selectedNode?.tags ?? []).filter((x) => x !== t))
                 }
+                allTags={allTags}
                 onSetProgress={(progress) => {
                   const ok = mapRef.current?.setSelectedProgress(progress);
                   if (!ok) showHint("Select a node first, then set its progress.");

@@ -606,6 +606,47 @@ export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   return { doc: next };
 }
 
+/** Rename a tag everywhere it appears (central tree + floating topics). Renaming to a name a node
+ *  ALREADY carries merges the two (deduped) — that's how the tag manager merges tags. A blank target
+ *  or a rename-to-self is a no-op; the same doc is returned when nothing carried the tag. */
+export function renameTag(doc: MindMapDoc, from: string, to: string): OpResult {
+  const next = to.trim();
+  if (!next || next === from) return { doc };
+  const copy = structuredClone(doc);
+  let changed = false;
+  const walk = (n: MapNode) => {
+    if (n.tags?.includes(from)) {
+      const set = n.tags.filter((t) => t !== from);
+      if (!set.includes(next)) set.push(next);
+      n.tags = set.length > 0 ? set : undefined;
+      touch(n, opsClock());
+      changed = true;
+    }
+    for (const c of n.children) walk(c);
+  };
+  walk(copy.root);
+  for (const f of copy.floatingTopics ?? []) walk(f);
+  return { doc: changed ? copy : doc };
+}
+
+/** Remove a tag from every node in the map (central tree + floating topics). Same doc if unused. */
+export function deleteTag(doc: MindMapDoc, tag: string): OpResult {
+  const copy = structuredClone(doc);
+  let changed = false;
+  const walk = (n: MapNode) => {
+    if (n.tags?.includes(tag)) {
+      const set = n.tags.filter((t) => t !== tag);
+      n.tags = set.length > 0 ? set : undefined;
+      touch(n, opsClock());
+      changed = true;
+    }
+    for (const c of n.children) walk(c);
+  };
+  walk(copy.root);
+  for (const f of copy.floatingTopics ?? []) walk(f);
+  return { doc: changed ? copy : doc };
+}
+
 /** Merge a patch into a node's TaskInfo; a key set to undefined/"" is dropped, and the whole `task`
  *  object falls away once it carries nothing — so clearing the last field stops it being a task. */
 function patchTask(doc: MindMapDoc, id: string, patch: Partial<TaskInfo>): OpResult {

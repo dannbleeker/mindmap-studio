@@ -480,12 +480,22 @@ export function MarkerTagIndex({
   root,
   floatingTopics,
   onPick,
+  onRenameTag,
+  onDeleteTag,
 }: {
   root: MapNode;
   floatingTopics?: MapNode[];
   onPick: (id: string) => void;
+  /** Tag manager: rename a tag map-wide (rename to an existing name MERGES). When omitted, the Tags
+   *  section stays read-only navigation. */
+  onRenameTag?: (from: string, to: string) => void;
+  /** Tag manager: delete a tag from every node. */
+  onDeleteTag?: (tag: string) => void;
 }) {
   const { markers, tags } = markerTagIndex(root, floatingTopics);
+  const manageTags = !!(onRenameTag && onDeleteTag);
+  const [editTag, setEditTag] = useState<string | null>(null);
+  const [tagDraft, setTagDraft] = useState("");
 
   const jump = (hit: IndexHit, key: string) => (
     <button
@@ -499,26 +509,77 @@ export function MarkerTagIndex({
     </button>
   );
 
-  const group = (label: string, entries: IndexEntry[]) => {
+  const commitTagRename = () => {
+    if (editTag && onRenameTag) onRenameTag(editTag, tagDraft.trim());
+    setEditTag(null);
+  };
+
+  const group = (label: string, entries: IndexEntry[], manage = false) => {
     if (entries.length === 0) return null;
     return (
       <div key={label}>
         <PanelSection>{label}</PanelSection>
         {entries.map(({ key, hits }) => (
           <div key={key}>
-            <div
-              style={{
-                padding: "2px 10px",
-                fontSize: fontSize.md,
-                fontWeight: fontWeight.semibold,
-                color: colors.text,
-              }}
-            >
-              {key}{" "}
-              <span style={{ color: colors.faint, fontWeight: fontWeight.normal }}>
-                ({hits.length})
-              </span>
-            </div>
+            {manage && editTag === key ? (
+              <input
+                // biome-ignore lint/a11y/noAutofocus: an inline editor opened by an explicit gesture.
+                autoFocus
+                value={tagDraft}
+                onChange={(e) => setTagDraft(e.target.value)}
+                onBlur={commitTagRename}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitTagRename();
+                  else if (e.key === "Escape") setEditTag(null);
+                }}
+                aria-label={`Rename tag ${key}`}
+                style={{ ...inputStyle, margin: "1px 10px", padding: "2px 6px", width: "auto" }}
+              />
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "2px 10px",
+                  fontSize: fontSize.md,
+                  fontWeight: fontWeight.semibold,
+                  color: colors.text,
+                }}
+              >
+                <span style={{ flex: 1 }}>
+                  {key}{" "}
+                  <span style={{ color: colors.faint, fontWeight: fontWeight.normal }}>
+                    ({hits.length})
+                  </span>
+                </span>
+                {manage ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditTag(key);
+                        setTagDraft(key);
+                      }}
+                      title={`Rename / merge "${key}" — type an existing tag name to merge`}
+                      aria-label={`Rename tag ${key}`}
+                      style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
+                    >
+                      ✎
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteTag?.(key)}
+                      title={`Delete tag "${key}" from every topic`}
+                      aria-label={`Delete tag ${key}`}
+                      style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
+                    >
+                      ✕
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            )}
             {hits.map((hit) => jump(hit, key))}
           </div>
         ))}
@@ -537,7 +598,7 @@ export function MarkerTagIndex({
           </div>
         ) : null}
         {group("Markers", markers)}
-        {group("Tags", tags)}
+        {group("Tags", tags, manageTags)}
       </div>
     </Panel>
   );
@@ -1186,6 +1247,7 @@ export function InfoPanel({
   onStyle,
   onAddTag,
   onRemoveTag,
+  allTags,
   onSetProgress,
   onSetDue,
   onSetStart,
@@ -1239,6 +1301,8 @@ export function InfoPanel({
   onStyle: (patch: Partial<NodeStyle>) => void;
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
+  /** Every tag already used in the map — drives the Add-a-tag autocomplete (a `<datalist>`). */
+  allTags?: readonly string[];
   onSetProgress: (progress: number | undefined) => void;
   onSetDue: (due: string) => void;
   onSetStart: (start: string) => void;
@@ -1509,10 +1573,18 @@ export function InfoPanel({
                             setTagInput("");
                           }
                         }}
+                        list={allTags && allTags.length > 0 ? "mm-tag-suggestions" : undefined}
                         placeholder="Add a tag, press Enter"
                         aria-label="Add a tag"
                         style={{ width: "auto", margin: "0 10px 4px" }}
                       />
+                      {allTags && allTags.length > 0 ? (
+                        <datalist id="mm-tag-suggestions">
+                          {allTags.map((t) => (
+                            <option key={t} value={t} />
+                          ))}
+                        </datalist>
+                      ) : null}
                     </>
                   )}
 

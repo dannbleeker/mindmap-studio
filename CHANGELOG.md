@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Tag autocomplete + map-wide tag manager.** The inspector's *Add a tag* box now suggests tags
+  already used in the map (a `<datalist>`), so naming stays consistent. The **Markers & tags** panel
+  becomes a manager for tags: **✎** renames a tag everywhere (rename to an existing name **merges**
+  the two) and **✕** deletes it from every topic. New pure `renameTag` / `deleteTag` ops + `renameTag`
+  / `deleteTag` on the canvas handle (normal undoable, autosaved edits).
+
 - **Editable outline panel.** The outline rail is no longer read-only navigation: **double-click** a
   row to rename it inline, use the **◂ ▸** controls to promote / demote a topic (the same indent /
   outdent ops as Alt+Shift+←/→), and **drag a row** to restructure the map — drop it before, after, or

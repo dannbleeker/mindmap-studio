@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-06-21T20:50:24.090Z",
-  "commit": "e92805c",
+  "generatedAt": "2026-06-21T20:58:25.653Z",
+  "commit": "004a224",
   "headline": {
-    "linesTsJs": 49133,
+    "linesTsJs": 49211,
     "tests": 1286,
-    "lineCoveragePct": 82.14,
-    "commits": 719,
+    "lineCoveragePct": 82.04,
+    "commits": 721,
     "ageDays": 10,
-    "trackedFiles": 351,
-    "featureManualPct": 74.7,
-    "featureBookPct": 74.7,
-    "featureExamplePct": 74.7
+    "trackedFiles": 352,
+    "featureManualPct": 74.3,
+    "featureBookPct": 74.3,
+    "featureExamplePct": 74.3
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 161,
-      "lines": 29432
+      "files": 162,
+      "lines": 29510
     },
     {
       "category": "Unit tests",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 82.14,
-      "covered": 17109,
-      "total": 20829
+      "pct": 82.04,
+      "covered": 17134,
+      "total": 20884
     },
     "statements": {
-      "pct": 82.14,
-      "covered": 17109,
-      "total": 20829
+      "pct": 82.04,
+      "covered": 17134,
+      "total": 20884
     },
     "functions": {
-      "pct": 82.12,
-      "covered": 1034,
-      "total": 1259
+      "pct": 81.75,
+      "covered": 1035,
+      "total": 1266
     },
     "branches": {
-      "pct": 85.96,
-      "covered": 4932,
-      "total": 5737
+      "pct": 85.95,
+      "covered": 4933,
+      "total": 5739
     }
   },
   "tests": {
     "unit": 1286,
     "e2e": 0,
-    "durationMs": 49266,
+    "durationMs": 49825,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 15837
+        "ms": 15382
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7857
+        "ms": 6819
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 7262
+        "ms": 6670
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4143
+        "ms": 4235
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1942
+        "ms": 1926
       }
     ]
   },
@@ -111,7 +111,7 @@
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 1764
+        "lines": 1792
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -154,7 +154,7 @@
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 87
+        "commits": 88
       },
       {
         "file": "mindmap/contract.ts",
@@ -184,13 +184,13 @@
     "anyCount": 5,
     "tsIgnore": 0,
     "tsExpectError": 0,
-    "biomeIgnore": 28,
+    "biomeIgnore": 29,
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 278.3,
+    "jsGzipKb": 278.5,
     "cssGzipKb": 8,
-    "totalGzipKb": 286.3,
+    "totalGzipKb": 286.5,
     "entryGzipKb": 129.2,
     "budgetKb": 150,
     "withinBudget": true
@@ -198,17 +198,17 @@
   "docs": {
     "bookWords": 17068,
     "chapters": 11,
-    "appLoc": 29432,
+    "appLoc": 29510,
     "docToCodeRatio": 0.58
   },
   "featureCoverage": {
-    "total": 166,
+    "total": 167,
     "manual": 124,
-    "manualPct": 74.7,
+    "manualPct": 74.3,
     "book": 124,
-    "bookPct": 74.7,
+    "bookPct": 74.3,
     "bookExample": 124,
-    "bookExamplePct": 74.7,
+    "bookExamplePct": 74.3,
     "byArea": {
       "editing": {
         "total": 19,
@@ -241,7 +241,7 @@
         "book": 1
       },
       "structure": {
-        "total": 18,
+        "total": 19,
         "manual": 12,
         "book": 12
       },
@@ -406,6 +406,11 @@
         {
           "id": "topic-wrap-width",
           "name": "Per-topic wrap width (long topics wrap instead of stretching)",
+          "since": "2026-06-21"
+        },
+        {
+          "id": "inline-link-label",
+          "name": "Inline relationship label editing (double-click the line)",
           "since": "2026-06-21"
         },
         {
@@ -621,6 +626,11 @@
           "since": "2026-06-21"
         },
         {
+          "id": "inline-link-label",
+          "name": "Inline relationship label editing (double-click the line)",
+          "since": "2026-06-21"
+        },
+        {
           "id": "detail-levels",
           "name": "Detail levels — expand the map to a chosen depth",
           "since": "2026-06-20"
@@ -701,16 +711,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 10,
-    "commits": 719,
-    "commits7d": 423,
+    "commits": 721,
+    "commits7d": 425,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 362
+        "count": 363
       },
       {
         "name": "github-actions[bot]",
-        "count": 330
+        "count": 331
       },
       {
         "name": "Claude",
@@ -718,9 +728,9 @@
       }
     ],
     "churn30d": {
-      "added": 94541,
-      "removed": 28690
+      "added": 95092,
+      "removed": 29140
     },
-    "changelogEntries": 244
+    "changelogEntries": 245
   }
 }

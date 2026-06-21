@@ -22,19 +22,31 @@ push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
 ## Open items
 
-_None actionable._ Both real-file importer validations are now done — **`.mmap`** (a feature-rich
-MindManager export) and **`.smmx`** (a real ~100-topic SimpleMind export), each
-owner-validated **2026-06-19** with zero content loss and guarded by an env-gated integration test
-(`MMAP_FILE` / `SMMX_FILE`). The only remaining importer gap is embedded-image `.mmap` import, under
-*Deferred* below (blocked on an image-bearing sample).
+**MindManager `.mmap` import — Phase B / C** (Phase A shipped: task info, full notes, tags, per-topic
+colour/font). Each lands in an existing model field, gated on a real multi-feature sample for
+validation:
+
+- **Phase B** — embedded **images** (`OneImage>…>cor:Uri = mmarch://bin/<uuid>.bin` → `node.image`
+  data URL; PNG only, EMF/WMF need the raster `AlternateImageData` or a skip-warning), **attachments**
+  (`AttachmentGroup`, recover the real name from `@FileName`), **rich-text runs** (`Text>FontRange`
+  → `topicRich`), and **topic shape** (`SubTopicShape` → `node.style.shape`). Needs a shared
+  `mmarch://bin/` resolver. The old "image-bearing `.mmap`" item folds in here — still blocked on a
+  real image-bearing sample for validation.
+- **Phase C** (opportunistic) — relationship styling (colour/width/dash/arrowheads), boundary
+  styling (colour/shape), callouts, and map background.
+
+Both real-file importer validations remain done — **`.mmap`** and **`.smmx`** — each owner-validated
+**2026-06-19** and guarded by an env-gated integration test (`MMAP_FILE` / `SMMX_FILE`).
 
 ## Deferred / blocked (off the active list)
 
 - **AI assist** — **decided against (2026-06-15).** The biggest category-wide gap, but the only fit
   for a no-backend, local-first app is a keyless copy-prompt → paste-result bridge (or BYO-key),
   which isn't worth building. The manual path already exists: paste an outline / Markdown → map.
-- **Image-bearing `.mmap` import** — blocked on a real image-bearing sample.
 - **`.mmap` writer** — high-risk, low-value (open formats already bridge every tool).
+- **Theme-only `.mmap` styling + summary brackets** — a topic with no explicit colour inherits the
+  MindManager `StyleGroup` theme (we don't resolve it), and summary spans are positional/implicit in
+  the schema; both are low-ROI, left lossy by design.
 - **LaTeX / math** — deferred by decision (heavy KaTeX + ~1 MB offline fonts; not native to MindManager).
 - **True simultaneous multi-map / split view** — the sheet tab strip already covers tabbed
   switching; side-by-side comparison is a large change (selection/notes/style all assume one active

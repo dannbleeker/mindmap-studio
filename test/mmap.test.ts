@@ -106,16 +106,96 @@ describe("parseMmap", () => {
     );
   });
 
-  it("warns about task info but still imports the topic", () => {
+  it("imports per-topic task info (priority/progress/dates/resources) without warning", () => {
     const { doc, warnings } = parseMmap(
       mmapOf(`${MAP_OPEN}
   <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Scheduled work" />
-    <ap:Task ap:Priority="1" />
+    <ap:Task TaskPriority="urn:mindjet:Prio1" TaskPercentage="40"
+             StartDate="2026-06-01T00:00:00" DeadlineDate="2026-06-21T09:30:00"
+             Resources="Ann, Bob" />
   </ap:Topic></ap:OneTopic>
 </ap:Map>`),
     );
     expect(doc.root.topic).toBe("Scheduled work");
-    expect(warnings.some((w) => /task info/i.test(w))).toBe(true);
+    expect(doc.root.task).toEqual({
+      priority: 1,
+      progress: 0.4,
+      start: "2026-06-01",
+      due: "2026-06-21",
+      resources: ["Ann", "Bob"],
+    });
+    // Task fields now land in the model (inspector / filter / Kanban already support them) — no warning.
+    expect(warnings.some((w) => /task/i.test(w))).toBe(false);
+  });
+
+  it("imports the full notes XHTML body, not just the truncated preview", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:NotesGroup><ap:NotesXhtmlData PreviewPlainText="First paragraph…">
+      <html xmlns="http://www.w3.org/1999/xhtml"><body>
+        <p>First paragraph.</p><p>Second paragraph.</p>
+      </body></html>
+    </ap:NotesXhtmlData></ap:NotesGroup>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.note).toBe("First paragraph.\nSecond paragraph.");
+  });
+
+  it("falls back to the notes PreviewPlainText when there is no XHTML body", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:NotesGroup><ap:NotesXhtmlData PreviewPlainText="Just a preview" /></ap:NotesGroup>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.note).toBe("Just a preview");
+  });
+
+  it("imports user tags from TextLabels", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Root" />
+    <ap:TextLabels>
+      <ap:TextLabel TextLabelName="Marketing" />
+      <ap:TextLabel TextLabelName="Q3" />
+    </ap:TextLabels>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.tags).toEqual(["Marketing", "Q3"]);
+  });
+
+  it("imports explicit topic fill/line colour + font as node style (ARGB alpha-first → #rrggbb)", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1">
+    <ap:Text PlainText="Styled"><ap:Font Color="ffcc0000" Name="Georgia" Size="18" Bold="true" /></ap:Text>
+    <ap:Color FillColor="ff96b3df" LineColor="ff333333" />
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.style).toEqual({
+      background: "#96b3df",
+      border: "1px solid #333333",
+      color: "#cc0000",
+      fontFamily: "Georgia",
+      fontSize: "18px",
+      fontWeight: "bold",
+    });
+  });
+
+  it("ignores a fully-transparent fill colour (alpha 00 → no style override)", () => {
+    const { doc } = parseMmap(
+      mmapOf(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Plain" />
+    <ap:Color FillColor="00ffffff" />
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+    );
+    expect(doc.root.style).toBeUndefined();
   });
 
   it("generates an id for a topic that has no OId", () => {

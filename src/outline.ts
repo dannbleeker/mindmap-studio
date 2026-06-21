@@ -1,5 +1,5 @@
 import { classifyLink } from "./mindmap/contract";
-import type { MapNode, MindMapDoc } from "./model/types";
+import type { MapNode, MindMapDoc, NumberStyle } from "./model/types";
 import { progressMap, toPercent } from "./progress";
 
 export interface OutlineRow {
@@ -120,18 +120,78 @@ export function backlinksFor(doc: MindMapDoc, targetId: string): Backlink[] {
   return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
 }
 
-// Hierarchical outline numbers (1, 1.2, 1.2.3, …) for every node *below* the root — the root
-// (the central topic) is the implicit "0" and isn't numbered. Pure; drives the optional
-// auto-numbering view on the canvas + outline panel. Keyed by node id.
-export function outlineNumbers(root: MapNode): Map<string, string> {
+/** 1-based index → uppercase letters (1→A, 26→Z, 27→AA). */
+function toAlpha(n: number): string {
+  let s = "";
+  let x = n;
+  while (x > 0) {
+    const r = (x - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    x = Math.floor((x - 1) / 26);
+  }
+  return s;
+}
+
+/** 1-based index → uppercase Roman numeral (1→I, 4→IV, 9→IX, …). */
+function toRoman(n: number): string {
+  const table: [number, string][] = [
+    [1000, "M"],
+    [900, "CM"],
+    [500, "D"],
+    [400, "CD"],
+    [100, "C"],
+    [90, "XC"],
+    [50, "L"],
+    [40, "XL"],
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"],
+  ];
+  let x = n;
+  let s = "";
+  for (const [v, sym] of table) {
+    while (x >= v) {
+      s += sym;
+      x -= v;
+    }
+  }
+  return s;
+}
+
+/** The glyph for one outline level under the given scheme. `depth` is 0-based (root's children = 0);
+ *  the "outline" scheme cycles I → A → 1 → a → i by level, "decimal" is always the number. */
+function levelGlyph(style: NumberStyle, depth: number, i: number): string {
+  if (style !== "outline") return String(i + 1);
+  switch (depth % 5) {
+    case 0:
+      return toRoman(i + 1);
+    case 1:
+      return toAlpha(i + 1);
+    case 2:
+      return String(i + 1);
+    case 3:
+      return toAlpha(i + 1).toLowerCase();
+    default:
+      return toRoman(i + 1).toLowerCase();
+  }
+}
+
+// Hierarchical outline numbers for every node *below* the root — the root (the central topic) is the
+// implicit "0" and isn't numbered. The scheme is "decimal" (1, 1.1, 1.1.1) or "outline" (the legal
+// outline I, I.A, I.A.1, I.A.1.a …). Pure; drives the optional auto-numbering view on the canvas +
+// outline panel. Keyed by node id.
+export function outlineNumbers(root: MapNode, style: NumberStyle = "decimal"): Map<string, string> {
   const numbers = new Map<string, string>();
-  const walk = (node: MapNode, prefix: string) => {
+  const walk = (node: MapNode, prefix: string, depth: number) => {
     node.children.forEach((child, i) => {
-      const num = prefix ? `${prefix}.${i + 1}` : `${i + 1}`;
+      const seg = levelGlyph(style, depth, i);
+      const num = prefix ? `${prefix}.${seg}` : seg;
       numbers.set(child.id, num);
-      walk(child, num);
+      walk(child, num, depth + 1);
     });
   };
-  walk(root, "");
+  walk(root, "", 0);
   return numbers;
 }

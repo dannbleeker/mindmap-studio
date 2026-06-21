@@ -61,6 +61,7 @@ import {
   setNodeLayout,
   setNodePos,
   setNote,
+  setNumberStyle,
   setPriority,
   setProgress,
   setRollup,
@@ -965,6 +966,13 @@ describe("flow ops — content fill (hyperlink / image / rich text / meta toggle
   it("setLineJumps toggles the per-map flag (false clears it)", () => {
     expect(setLineJumps(base(), true).doc.meta?.lineJumps).toBe(true);
     expect(setLineJumps(setLineJumps(base(), true).doc, false).doc.meta?.lineJumps).toBeUndefined();
+  });
+
+  it("setNumberStyle stores the scheme; decimal clears the override", () => {
+    expect(setNumberStyle(base(), "outline").doc.meta?.numberStyle).toBe("outline");
+    expect(
+      setNumberStyle(setNumberStyle(base(), "outline").doc, "decimal").doc.meta?.numberStyle,
+    ).toBeUndefined();
   });
 
   it("setBackgroundImage sets a data URL and clears it on empty", () => {

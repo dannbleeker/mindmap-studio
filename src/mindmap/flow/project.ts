@@ -80,7 +80,7 @@ export function project(
   const edges: FlowEdge[] = [];
   // Auto-numbering is a view concern: numbers are computed from the tree and shown as a prefix,
   // never written into the model's `topic` (so exports/search/outline stay clean).
-  const numbers = numbered ? outlineNumbers(doc.root) : undefined;
+  const numbers = numbered ? outlineNumbers(doc.root, doc.meta?.numberStyle) : undefined;
   // Task progress rolls up per subtree; compute once for the central tree + each floating root.
   const progress = new Map<string, ProgressInfo>(progressMap(doc.root));
   for (const f of doc.floatingTopics ?? []) for (const [k, v] of progressMap(f)) progress.set(k, v);

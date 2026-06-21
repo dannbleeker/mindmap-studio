@@ -9,6 +9,7 @@ import type {
   MapNode,
   MindMapDoc,
   NodeStyle,
+  NumberStyle,
   TaskInfo,
 } from "../../model/types";
 import type { SelectionFields } from "../contract";
@@ -709,6 +710,13 @@ export function setBackgroundImage(doc: MindMapDoc, url: string): OpResult {
 export function setLineJumps(doc: MindMapDoc, on: boolean): OpResult {
   const next = structuredClone(doc);
   next.meta = { ...next.meta, lineJumps: on || undefined };
+  return { doc: next };
+}
+
+/** Set the map's outline-numbering scheme; "decimal" (the default) clears the override. */
+export function setNumberStyle(doc: MindMapDoc, style: NumberStyle): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, numberStyle: style === "decimal" ? undefined : style };
   return { doc: next };
 }
 

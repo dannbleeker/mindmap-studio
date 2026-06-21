@@ -24,7 +24,14 @@ import {
   type SelectionFields,
 } from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
-import type { ConditionalRule, MapNode, MindMapDoc, NodeShape, NodeStyle } from "./model/types";
+import type {
+  ConditionalRule,
+  MapNode,
+  MindMapDoc,
+  NodeShape,
+  NodeStyle,
+  NumberStyle,
+} from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
 import {
   type Backlink,
@@ -317,6 +324,7 @@ export function OutlinePanel({
   root,
   filter,
   numbered,
+  numberStyle,
   onFilterChange,
   onPick,
   onRename,
@@ -326,6 +334,8 @@ export function OutlinePanel({
   root: MapNode;
   filter: string;
   numbered?: boolean;
+  /** Outline-numbering scheme (decimal / outline); matches the canvas. */
+  numberStyle?: NumberStyle;
   onFilterChange: (value: string) => void;
   onPick: (id: string) => void;
   /** Commit an inline rename of a topic (double-click a row to edit). */
@@ -338,7 +348,7 @@ export function OutlinePanel({
   const editable = !!(onRename && onIndent && onMove);
   const q = filter.trim().toLowerCase();
   const rows = outlineRows(root).filter((row) => !q || row.topic.toLowerCase().includes(q));
-  const numbers = numbered ? outlineNumbers(root) : undefined;
+  const numbers = numbered ? outlineNumbers(root, numberStyle) : undefined;
   const [editId, setEditId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   // The current drag's target + intent, for the drop indicator (cleared on drop / leave).

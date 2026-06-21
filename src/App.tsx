@@ -306,7 +306,7 @@ export function App() {
     if (!selected || !selectedNode) return { breadcrumb: "", facts: "", times: "" };
     const path = nodePath(liveDoc, selected.id);
     const breadcrumb = (path?.ancestors ?? []).map((a) => a.topic || "(untitled)").join(" › ");
-    const outlineNo = outlineNumbers(liveDoc.root).get(selected.id);
+    const outlineNo = outlineNumbers(liveDoc.root, liveDoc.meta?.numberStyle).get(selected.id);
     const counts = noteCounts(selectedNode.note ?? "");
     const kids = selectedNode.children.length;
     // Reading load of this topic (its title + note) — words ÷ 200 wpm, surfaced only when non-trivial.
@@ -1576,6 +1576,7 @@ export function App() {
                 root={liveDoc.root}
                 filter={outlineFilter}
                 numbered={panels.numbered}
+                numberStyle={liveDoc.meta?.numberStyle}
                 onFilterChange={setOutlineFilter}
                 onPick={(id) => mapRef.current?.focusNode(id)}
                 onRename={(id, topic) => mapRef.current?.renameNode(id, topic)}

@@ -7,6 +7,7 @@ import type {
   MapNode,
   MindMapDoc,
   NodeStyle,
+  NumberStyle,
 } from "../model/types";
 import type { MindMapTheme } from "./theme";
 
@@ -159,6 +160,8 @@ export interface MindMapHandle {
   setLineJumps: (on: boolean) => void;
   /** Set the map's branch connector style (organic / curved / elbow / straight). */
   setConnectorStyle: (style: "organic" | "curved" | "elbow" | "straight") => void;
+  /** Set the outline-numbering scheme (decimal / outline); decimal clears the override. */
+  setNumberStyle: (style: NumberStyle) => void;
   /** Replace the map's conditional-formatting rules (empty array clears them). */
   setRules: (rules: ConditionalRule[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */

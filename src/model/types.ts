@@ -242,5 +242,11 @@ export interface MindMapDoc {
      *  "curved", "elbow" (right-angle), or "straight". Absent = "organic". Lossless in .json, ignored
      *  by flat exporters; carried into the image/PDF/HTML export. */
     connectorStyle?: "organic" | "curved" | "elbow" | "straight";
+    /** Outline-numbering scheme used when numbering is shown: "decimal" (1, 1.1, 1.1.1 — the default)
+     *  or "outline" (the legal outline I, A, 1, a, i by level). Absent = "decimal". Lossless in .json. */
+    numberStyle?: NumberStyle;
   };
 }
+
+/** Outline-numbering scheme (see meta.numberStyle). */
+export type NumberStyle = "decimal" | "outline";

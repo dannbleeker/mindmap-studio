@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Inline rich-text mini-toolbar.** While editing a topic, a small floating **B / I / U + colour**
+  bar appears above it (MindManager's inline format bar) — discoverable buttons for the formatting that
+  was previously keyboard-only (Ctrl+B/I/U still work). Writes to the existing sanitised `topicRich`.
+- **Hover-peek for notes & attachments.** Hovering a topic's 📝 indicator shows the note's text in a
+  small card (read it without opening the inspector); the 📎 chip's tooltip now lists the attached file
+  names. (Links already show their URL on hover.)
+
 - **Format Painter + Auto-colour branches.** **Copy format** grabs the selected topic's style and
   **Paste format** applies it across the (multi-)selection in one undo step (view menu + ⌘K) — reuse a
   look without the save-a-named-style detour. **Auto-colour branches** repaints each top branch with a

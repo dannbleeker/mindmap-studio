@@ -138,6 +138,7 @@ export function project(
         resources: node.task?.resources,
         priority: node.task?.priority,
         attachmentCount: node.attachments?.length,
+        attachmentNames: node.attachments?.map((a) => a.name),
         floating,
       },
     });

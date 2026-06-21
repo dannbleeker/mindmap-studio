@@ -148,8 +148,9 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
   lossless `.json` export). Behind the scenes the note is stored as **Markdown** (`#` headings,
   `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, `- lists`, `1. numbered`, `[links](https://…)`),
   so it stays portable across every export. Nodes with a note show a 📝 — in the
-  [outline](#outline-panel) and on the topic itself; **click the topic's 📝 to jump straight to its
-  note** (it selects the topic and opens this panel on the Notes tab).
+  [outline](#outline-panel) and on the topic itself; **hover the topic's 📝 to peek** at the note in a
+  small card, or **click it to jump straight to the note** (selecting the topic and opening this panel
+  on the Notes tab). A topic's 📎 chip lists its attached file names on hover.
 - **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it; active markers are
   highlighted. Imported MindManager icons map to these glyphs automatically.
 - **Stickers** — click a sticker in the grid (star, heart, check / cross badge, flag, idea, warning,
@@ -204,8 +205,9 @@ supplying your own picture. A node holds one image at a time, so a new image or 
 ### Rich-text topics
 
 Per-topic styling restyles the *whole* node; rich text formats *part* of the topic. While
-editing a topic, press **Ctrl + B**, **Ctrl + I**, or **Ctrl + U** to bold, italic, or
-underline — select the characters first, or toggle the format on and keep typing. The
+editing a topic, a small **format bar** appears above it with **B / I / U** buttons and a row of
+text-colour swatches — or use the keyboard: **Ctrl + B**, **Ctrl + I**, **Ctrl + U** to bold, italic,
+or underline. Select the characters first, or toggle the format on and keep typing. The
 formatting is saved with the map and travels in the `.json` export. The plain text is always
 kept alongside it, so the outline, Find, and the Markdown/Office exports stay clean and readable.
 

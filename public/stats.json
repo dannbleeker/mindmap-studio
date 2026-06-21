@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-21T20:42:46.181Z",
-  "commit": "47abcb3",
+  "generatedAt": "2026-06-21T20:50:24.090Z",
+  "commit": "e92805c",
   "headline": {
-    "linesTsJs": 49065,
-    "tests": 1284,
+    "linesTsJs": 49133,
+    "tests": 1286,
     "lineCoveragePct": 82.14,
-    "commits": 717,
+    "commits": 719,
     "ageDays": 10,
-    "trackedFiles": 350,
-    "featureManualPct": 75.2,
-    "featureBookPct": 75.2,
-    "featureExamplePct": 75.2
+    "trackedFiles": 351,
+    "featureManualPct": 74.7,
+    "featureBookPct": 74.7,
+    "featureExamplePct": 74.7
   },
   "code": [
     {
       "category": "App code (src)",
       "files": 161,
-      "lines": 29403
+      "lines": 29432
     },
     {
       "category": "Unit tests",
-      "files": 127,
-      "lines": 17940
+      "files": 128,
+      "lines": 17979
     },
     {
       "category": "Build scripts",
@@ -42,49 +42,49 @@
   "coverage": {
     "lines": {
       "pct": 82.14,
-      "covered": 17092,
-      "total": 20807
+      "covered": 17109,
+      "total": 20829
     },
     "statements": {
       "pct": 82.14,
-      "covered": 17092,
-      "total": 20807
+      "covered": 17109,
+      "total": 20829
     },
     "functions": {
-      "pct": 82.19,
+      "pct": 82.12,
       "covered": 1034,
-      "total": 1258
+      "total": 1259
     },
     "branches": {
-      "pct": 85.95,
-      "covered": 4922,
-      "total": 5726
+      "pct": 85.96,
+      "covered": 4932,
+      "total": 5737
     }
   },
   "tests": {
-    "unit": 1284,
+    "unit": 1286,
     "e2e": 0,
-    "durationMs": 50882,
+    "durationMs": 49266,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 16717
+        "ms": 15837
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7259
+        "ms": 7857
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 7222
+        "ms": 7262
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3984
+        "ms": 4143
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1827
+        "ms": 1942
       }
     ]
   },
@@ -103,7 +103,7 @@
     "biggestFiles": [
       {
         "name": "Panels.tsx",
-        "lines": 2568
+        "lines": 2587
       },
       {
         "name": "App.tsx",
@@ -162,7 +162,7 @@
       },
       {
         "file": "Panels.tsx",
-        "commits": 52
+        "commits": 53
       },
       {
         "file": "mindmap/flow/ops.ts",
@@ -188,27 +188,27 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 278.1,
+    "jsGzipKb": 278.3,
     "cssGzipKb": 8,
-    "totalGzipKb": 286.1,
-    "entryGzipKb": 129.1,
+    "totalGzipKb": 286.3,
+    "entryGzipKb": 129.2,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 17068,
     "chapters": 11,
-    "appLoc": 29403,
+    "appLoc": 29432,
     "docToCodeRatio": 0.58
   },
   "featureCoverage": {
-    "total": 165,
+    "total": 166,
     "manual": 124,
-    "manualPct": 75.2,
+    "manualPct": 74.7,
     "book": 124,
-    "bookPct": 75.2,
+    "bookPct": 74.7,
     "bookExample": 124,
-    "bookExamplePct": 75.2,
+    "bookExamplePct": 74.7,
     "byArea": {
       "editing": {
         "total": 19,
@@ -231,7 +231,7 @@
         "book": 7
       },
       "styling": {
-        "total": 17,
+        "total": 18,
         "manual": 12,
         "book": 12
       },
@@ -401,6 +401,11 @@
         {
           "id": "numbered-export",
           "name": "Bake outline numbers into the copied outline / Markdown export",
+          "since": "2026-06-21"
+        },
+        {
+          "id": "topic-wrap-width",
+          "name": "Per-topic wrap width (long topics wrap instead of stretching)",
           "since": "2026-06-21"
         },
         {
@@ -611,6 +616,11 @@
           "since": "2026-06-21"
         },
         {
+          "id": "topic-wrap-width",
+          "name": "Per-topic wrap width (long topics wrap instead of stretching)",
+          "since": "2026-06-21"
+        },
+        {
           "id": "detail-levels",
           "name": "Detail levels — expand the map to a chosen depth",
           "since": "2026-06-20"
@@ -691,16 +701,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 10,
-    "commits": 717,
-    "commits7d": 421,
+    "commits": 719,
+    "commits7d": 423,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 361
+        "count": 362
       },
       {
         "name": "github-actions[bot]",
-        "count": 329
+        "count": 330
       },
       {
         "name": "Claude",
@@ -708,9 +718,9 @@
       }
     ],
     "churn30d": {
-      "added": 94394,
-      "removed": 28635
+      "added": 94541,
+      "removed": 28690
     },
-    "changelogEntries": 243
+    "changelogEntries": 244
   }
 }

@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-21T19:09:21.645Z",
-  "commit": "d1d97d1",
+  "generatedAt": "2026-06-21T19:14:13.769Z",
+  "commit": "54f2aa4",
   "headline": {
-    "linesTsJs": 48310,
-    "tests": 1267,
-    "lineCoveragePct": 82.67,
-    "commits": 703,
+    "linesTsJs": 48419,
+    "tests": 1271,
+    "lineCoveragePct": 82.54,
+    "commits": 705,
     "ageDays": 10,
-    "trackedFiles": 344,
-    "featureManualPct": 78.5,
-    "featureBookPct": 78.5,
-    "featureExamplePct": 78.5
+    "trackedFiles": 346,
+    "featureManualPct": 78,
+    "featureBookPct": 78,
+    "featureExamplePct": 78
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 158,
-      "lines": 28834
+      "files": 159,
+      "lines": 28914
     },
     {
       "category": "Unit tests",
-      "files": 124,
-      "lines": 17754
+      "files": 125,
+      "lines": 17783
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 82.67,
-      "covered": 16871,
-      "total": 20406
+      "pct": 82.54,
+      "covered": 16894,
+      "total": 20466
     },
     "statements": {
-      "pct": 82.67,
-      "covered": 16871,
-      "total": 20406
+      "pct": 82.54,
+      "covered": 16894,
+      "total": 20466
     },
     "functions": {
-      "pct": 82.72,
-      "covered": 1025,
-      "total": 1239
+      "pct": 82.75,
+      "covered": 1027,
+      "total": 1241
     },
     "branches": {
-      "pct": 85.91,
-      "covered": 4874,
-      "total": 5673
+      "pct": 85.9,
+      "covered": 4881,
+      "total": 5682
     }
   },
   "tests": {
-    "unit": 1267,
+    "unit": 1271,
     "e2e": 0,
-    "durationMs": 46987,
+    "durationMs": 45489,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 14924
+        "ms": 13579
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6488
+        "ms": 6445
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5837
+        "ms": 5639
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3878
+        "ms": 3707
       },
       {
         "file": "test/start-sections.test.tsx",
-        "ms": 1786
+        "ms": 1563
       }
     ]
   },
@@ -103,7 +103,7 @@
     "biggestFiles": [
       {
         "name": "Panels.tsx",
-        "lines": 2462
+        "lines": 2510
       },
       {
         "name": "App.tsx",
@@ -162,7 +162,7 @@
       },
       {
         "file": "Panels.tsx",
-        "commits": 49
+        "commits": 50
       },
       {
         "file": "mindmap/flow/ops.ts",
@@ -188,27 +188,27 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 276.2,
+    "jsGzipKb": 276.6,
     "cssGzipKb": 8,
-    "totalGzipKb": 284.2,
-    "entryGzipKb": 127.7,
+    "totalGzipKb": 284.6,
+    "entryGzipKb": 128,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 17068,
     "chapters": 11,
-    "appLoc": 28834,
+    "appLoc": 28914,
     "docToCodeRatio": 0.59
   },
   "featureCoverage": {
-    "total": 158,
+    "total": 159,
     "manual": 124,
-    "manualPct": 78.5,
+    "manualPct": 78,
     "book": 124,
-    "bookPct": 78.5,
+    "bookPct": 78,
     "bookExample": 124,
-    "bookExamplePct": 78.5,
+    "bookExamplePct": 78,
     "byArea": {
       "editing": {
         "total": 18,
@@ -226,7 +226,7 @@
         "book": 3
       },
       "markers": {
-        "total": 11,
+        "total": 12,
         "manual": 7,
         "book": 7
       },
@@ -366,6 +366,11 @@
         {
           "id": "group-selection",
           "name": "Group a multi-selection of topics in one boundary box",
+          "since": "2026-06-21"
+        },
+        {
+          "id": "marker-suggestions",
+          "name": "Auto-marker suggestions from a topic's text",
           "since": "2026-06-21"
         },
         {
@@ -541,6 +546,11 @@
           "since": "2026-06-21"
         },
         {
+          "id": "marker-suggestions",
+          "name": "Auto-marker suggestions from a topic's text",
+          "since": "2026-06-21"
+        },
+        {
           "id": "detail-levels",
           "name": "Detail levels — expand the map to a chosen depth",
           "since": "2026-06-20"
@@ -621,16 +631,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 10,
-    "commits": 703,
-    "commits7d": 411,
+    "commits": 705,
+    "commits7d": 413,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 354
+        "count": 355
       },
       {
         "name": "github-actions[bot]",
-        "count": 322
+        "count": 323
       },
       {
         "name": "Claude",
@@ -638,9 +648,9 @@
       }
     ],
     "churn30d": {
-      "added": 93038,
-      "removed": 28199
+      "added": 93228,
+      "removed": 28256
     },
-    "changelogEntries": 236
+    "changelogEntries": 237
   }
 }

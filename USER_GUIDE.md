@@ -217,6 +217,12 @@ kept alongside it, so the outline, Find, and the Markdown/Office exports stay cl
 
 ## Navigating
 
+### Breadcrumb bar
+
+Select a topic and a thin **breadcrumb** appears above the canvas showing its path from the root
+(Root › Branch › …). Click any crumb to centre that ancestor — a quick way to climb back up a deep
+branch without scrolling.
+
 ### Outline panel
 
 **☰ Outline** opens a live, indented outline of the whole map. Click any row to jump to that

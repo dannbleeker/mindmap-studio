@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Canvas breadcrumb bar.** When a topic is selected, a thin location bar above the canvas shows its
+  path (Root › Branch › …); click any crumb to centre that ancestor — MindManager's breadcrumb,
+  handy for navigating big maps. (The path was previously only in the inspector header.)
+
 - **Drag markers onto topics.** The marker chips in the inspector are now draggable — drag one onto any
   topic on the canvas to toggle it there (the topic highlights as a drop target), MindManager's Map
   Markers gesture. Clicking a chip still toggles it on the current selection.

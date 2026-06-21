@@ -19,6 +19,7 @@ import {
   PlaybackBar,
   StylesPanel,
 } from "./Panels";
+import { Breadcrumb, type Crumb } from "./components/Breadcrumb";
 import { CommandPalette } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
 import { DocumentTabs } from "./components/DocumentTabs";
@@ -316,6 +317,14 @@ export function App() {
       .filter(Boolean)
       .join(" · ");
     return { breadcrumb, facts, times };
+  }, [selected, selectedNode, liveDoc]);
+  // The canvas breadcrumb trail: root → ancestors → selected, as clickable crumbs. Empty (hidden)
+  // unless something below the root is selected.
+  const crumbs = useMemo<Crumb[]>(() => {
+    if (!selected || !selectedNode) return [];
+    const path = nodePath(liveDoc, selected.id);
+    if (!path) return [];
+    return [...path.ancestors, selectedNode].map((n) => ({ id: n.id, topic: n.topic }));
   }, [selected, selectedNode, liveDoc]);
   // Topics that point AT the selected node (incoming #node= links + relationship edges) — the
   // inspector's "Linked from" jumps. Memoised on the live doc + selection so it doesn't re-walk the
@@ -1456,6 +1465,10 @@ export function App() {
               Show all (Esc)
             </button>
           </div>
+        )}
+
+        {crumbs.length > 1 && (
+          <Breadcrumb crumbs={crumbs} onPick={(id) => mapRef.current?.focusNode(id)} />
         )}
 
         <div style={{ flex: 1, minHeight: 0, display: "flex" }}>

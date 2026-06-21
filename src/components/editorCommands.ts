@@ -82,6 +82,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("search-all", "Search across every map", "map", () => nav.openSearchAll());
   add("paste-topics", "Paste text → topics", "map", () => nav.openPaste());
   add("copy-outline", "Copy outline to clipboard", "map", () => io.copyOutline());
+  add("copy-table", "Copy as table (TSV)", "map", () => io.copyTable());
   add("backup", "Back up whole library", "map", () => io.exportLibrary());
   add("shortcuts", "Keyboard shortcuts", "map", () => nav.openShortcuts());
   add("about", "About MindMap Studio", "map", () => nav.openAbout());

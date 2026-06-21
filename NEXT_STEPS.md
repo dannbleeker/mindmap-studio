@@ -22,18 +22,13 @@ push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
 ## Open items
 
-**MindManager `.mmap` import — Phase B / C** (Phase A shipped: task info, full notes, tags, per-topic
-colour/font). Each lands in an existing model field, gated on a real multi-feature sample for
-validation:
-
-- **Phase B** — embedded **images** (`OneImage>…>cor:Uri = mmarch://bin/<uuid>.bin` → `node.image`
-  data URL; PNG only, EMF/WMF need the raster `AlternateImageData` or a skip-warning), **attachments**
-  (`AttachmentGroup`, recover the real name from `@FileName`), **rich-text runs** (`Text>FontRange`
-  → `topicRich`), and **topic shape** (`SubTopicShape` → `node.style.shape`). Needs a shared
-  `mmarch://bin/` resolver. The old "image-bearing `.mmap`" item folds in here — still blocked on a
-  real image-bearing sample for validation.
-- **Phase C** (opportunistic) — relationship styling (colour/width/dash/arrowheads), boundary
-  styling (colour/shape), callouts, and map background.
+_None actionable._ The MindManager `.mmap` importer is now feature-complete for its scope — Phases A–C
+shipped (task info, full notes, tags, per-topic colour/font/shape, rich-text runs, embedded images +
+attachments, relationship/boundary styling, callouts, map background), each into an existing model
+field and unit-tested. What remains is intentionally lossy (see *Deferred* below). One validation gap
+stands: the **embedded-image / attachment paths want a real multi-feature `.mmap` sample** run through
+the env-gated test (`MMAP_FILE`) to confirm the `mmarch://bin/` resolution + `ImageSize` mapping
+against a genuine export — the synthetic fixtures pass, but no image-bearing real file is committed.
 
 Both real-file importer validations remain done — **`.mmap`** and **`.smmx`** — each owner-validated
 **2026-06-19** and guarded by an env-gated integration test (`MMAP_FILE` / `SMMX_FILE`).

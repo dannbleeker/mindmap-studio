@@ -178,9 +178,15 @@ export interface Summary {
 /** A conditional-formatting rule: topics matching `kind`/`value` get `style` applied (view-only). */
 export interface ConditionalRule {
   id: string;
-  /** What to match: a tag, a marker icon, or completed (task at 100%). */
-  kind: "tag" | "marker" | "completed";
-  /** The tag/marker to match (unused for "completed"). */
+  /** What to match:
+   *  - `tag` / `marker` — the node carries `value`
+   *  - `completed` — task rolled up to 100%
+   *  - `overdue` — a task past its due date and not finished
+   *  - `priority` — task priority at or above `value` (1=High; matches priority ≤ value)
+   *  - `textContains` — the topic text includes `value` (case-insensitive)
+   *  - `hasAttachment` — the node has at least one attached file */
+  kind: "tag" | "marker" | "completed" | "overdue" | "priority" | "textContains" | "hasAttachment";
+  /** The tag/marker/text to match, or the priority threshold (unused for completed/overdue/hasAttachment). */
   value?: string;
   style: NodeStyle;
 }

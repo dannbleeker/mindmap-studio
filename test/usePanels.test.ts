@@ -21,6 +21,7 @@ describe("usePanels — panel toggles + persistence", () => {
     expect(p.stylesOpen).toBe(false);
     expect(p.historyOpen).toBe(false);
     expect(p.boardOpen).toBe(false);
+    expect(p.statsOpen).toBe(false);
     expect(p.numbered).toBe(false);
   });
 

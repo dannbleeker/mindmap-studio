@@ -60,6 +60,8 @@ function setup(
     setHistoryOpen: vi.fn(),
     boardOpen: false,
     setBoardOpen: vi.fn(),
+    statsOpen: false,
+    setStatsOpen: vi.fn(),
     infoOpen: false,
     setInfoOpen: vi.fn(),
     infoMinimized: false,

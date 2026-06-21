@@ -38,6 +38,48 @@ describe("matchesRule", () => {
     expect(matchesRule(node(), r, 0.5)).toBe(false);
     expect(matchesRule(node(), r, undefined)).toBe(false);
   });
+
+  it("matches 'overdue' (past due + unfinished) against the given today", () => {
+    const r = rule({ kind: "overdue", value: undefined });
+    const overdue = node({ task: { due: "2026-01-01", progress: 0.5 } });
+    expect(matchesRule(overdue, r, 0.5, "2026-06-21")).toBe(true);
+    // finished → not overdue; future due → not overdue
+    expect(
+      matchesRule(node({ task: { due: "2026-01-01", progress: 1 } }), r, 1, "2026-06-21"),
+    ).toBe(false);
+    expect(matchesRule(node({ task: { due: "2026-12-31" } }), r, 0, "2026-06-21")).toBe(false);
+  });
+
+  it("matches 'priority' at or above a threshold (1=High; priority ≤ value)", () => {
+    expect(
+      matchesRule(node({ task: { priority: 1 } }), rule({ kind: "priority", value: "2" })),
+    ).toBe(true);
+    expect(
+      matchesRule(node({ task: { priority: 3 } }), rule({ kind: "priority", value: "2" })),
+    ).toBe(false);
+    // no priority, or non-numeric threshold → no match
+    expect(matchesRule(node(), rule({ kind: "priority", value: "2" }))).toBe(false);
+    expect(
+      matchesRule(node({ task: { priority: 1 } }), rule({ kind: "priority", value: "" })),
+    ).toBe(false);
+  });
+
+  it("matches 'textContains' (case-insensitive) and 'hasAttachment'", () => {
+    expect(
+      matchesRule(
+        node({ topic: "Quarterly Budget" }),
+        rule({ kind: "textContains", value: "budget" }),
+      ),
+    ).toBe(true);
+    expect(
+      matchesRule(node({ topic: "Roadmap" }), rule({ kind: "textContains", value: "budget" })),
+    ).toBe(false);
+    const withFile = node({
+      attachments: [{ name: "a.pdf", dataUrl: "data:,", size: 1 }],
+    });
+    expect(matchesRule(withFile, rule({ kind: "hasAttachment", value: undefined }))).toBe(true);
+    expect(matchesRule(node(), rule({ kind: "hasAttachment", value: undefined }))).toBe(false);
+  });
 });
 
 describe("conditionalStyle", () => {
@@ -73,5 +115,9 @@ describe("describeRule", () => {
     expect(describeRule(rule({ kind: "tag", value: "risk" }))).toBe("tag risk");
     expect(describeRule(rule({ kind: "marker", value: "❗" }))).toBe("marker ❗");
     expect(describeRule(rule({ kind: "completed", value: undefined }))).toBe("completed (100%)");
+    expect(describeRule(rule({ kind: "overdue", value: undefined }))).toBe("overdue");
+    expect(describeRule(rule({ kind: "hasAttachment", value: undefined }))).toBe("has attachment");
+    expect(describeRule(rule({ kind: "priority", value: "2" }))).toBe("priority ≤ 2 (1=High)");
+    expect(describeRule(rule({ kind: "textContains", value: "x" }))).toBe('text contains "x"');
   });
 });

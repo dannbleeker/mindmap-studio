@@ -12,11 +12,12 @@ import {
   MarkerTagIndex,
   type NamedStyle,
   OutlinePanel,
+  StatsPanel,
   StyleBar,
   StylesPanel,
 } from "../src/Panels";
 import type { SelectedNode, SelectionFields } from "../src/mindmap";
-import type { MapNode } from "../src/model/types";
+import type { MapNode, MindMapDoc } from "../src/model/types";
 import type { Backlink } from "../src/outline";
 
 // A small but representative tree: a root with two children, one carrying a marker, a tag, a note,
@@ -565,6 +566,21 @@ describe("MarkerTagIndex (interaction)", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "Delete tag risk" }));
     expect(onDeleteTag).toHaveBeenCalledWith("risk");
+  });
+});
+
+describe("StatsPanel", () => {
+  it("renders the map's headline counts", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "R",
+      root: sampleRoot(),
+    };
+    render(<StatsPanel doc={doc} />);
+    expect(screen.getByText(/Map statistics/)).toBeTruthy();
+    expect(screen.getByText("Topics")).toBeTruthy();
+    expect(screen.getByText("Distinct tags")).toBeTruthy();
   });
 });
 

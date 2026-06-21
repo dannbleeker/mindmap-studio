@@ -24,7 +24,7 @@ import {
   type SelectionFields,
 } from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
-import type { ConditionalRule, MapNode, NodeShape, NodeStyle } from "./model/types";
+import type { ConditionalRule, MapNode, MindMapDoc, NodeShape, NodeStyle } from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
 import {
   type Backlink,
@@ -38,6 +38,7 @@ import {
 import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import { describeRule } from "./rules";
+import { mapStats } from "./stats";
 import { STICKERS, type Sticker, stickerDataUrl } from "./stickers";
 import type { VersionMeta } from "./store/mapStore";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
@@ -604,6 +605,52 @@ export function MarkerTagIndex({
   );
 }
 
+// Map statistics: a read-only at-a-glance summary of the whole map (topics, depth, task health,
+// content tallies). Numbers come from the pure mapStats() so they're unit-tested independently.
+export function StatsPanel({ doc }: { doc: MindMapDoc }) {
+  const s = mapStats(doc);
+  const pct = Math.round(s.completion * 100);
+  const row = (label: string, value: string | number, accent?: string) => (
+    <div
+      key={label}
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "baseline",
+        gap: 8,
+        padding: "3px 12px",
+        fontSize: fontSize.md,
+      }}
+    >
+      <span style={{ color: colors.muted }}>{label}</span>
+      <span style={{ fontWeight: fontWeight.semibold, color: accent ?? colors.text }}>{value}</span>
+    </div>
+  );
+  return (
+    <Panel>
+      <div style={panelTitle}>📊 Map statistics</div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        <PanelSection>Structure</PanelSection>
+        {row("Topics", s.topics)}
+        {row("Leaves", s.leaves)}
+        {row("Max depth", s.maxDepth)}
+        {s.floating > 0 ? row("Floating topics", s.floating) : null}
+        <PanelSection>Tasks</PanelSection>
+        {row("Tasks", s.tasks)}
+        {row("Completed", `${s.completed} / ${s.tasks} (${pct}%)`)}
+        {row("Overdue", s.overdue, s.overdue > 0 ? "#b23b3a" : undefined)}
+        <PanelSection>Content</PanelSection>
+        {row("Notes", s.notes)}
+        {row("Attachments", s.attachments)}
+        {row("Distinct tags", s.tags)}
+        {row("Distinct markers", s.markers)}
+        {row("Relationships", s.links)}
+        {row("Boundaries", s.boundaries)}
+      </div>
+    </Panel>
+  );
+}
+
 // Read-only Power Filter: a free-text box plus toggle chips for every marker/tag in the map.
 // Matching topics (and the paths to them) stay lit on the canvas; everything else dims. Nothing
 // is deleted — closing the panel (or Clear) restores the full map.
@@ -1027,8 +1074,11 @@ export function StylesPanel({
   const [value, setValue] = useState("");
   const [fill, setFill] = useState("");
   const [border, setBorder] = useState("");
+  // tag / marker / priority / textContains carry a value; completed / overdue / hasAttachment don't.
+  const needsValue =
+    kind === "tag" || kind === "marker" || kind === "priority" || kind === "textContains";
   const add = () => {
-    if (kind !== "completed" && !value.trim()) return;
+    if (needsValue && !value.trim()) return;
     if (!fill && !border) return;
     const style: NodeStyle = {};
     if (fill) style.background = fill;
@@ -1036,7 +1086,7 @@ export function StylesPanel({
     onAddRule({
       id: crypto.randomUUID(),
       kind,
-      value: kind === "completed" ? undefined : value.trim(),
+      value: needsValue ? value.trim() : undefined,
       style,
     });
     setValue("");
@@ -1086,7 +1136,8 @@ export function StylesPanel({
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <PanelSection>Conditional formatting</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-          Auto-style topics by tag, marker, or completion. Manual styling still wins.
+          Auto-style topics by tag, marker, completion, due date, priority, text, or attachment.
+          Manual styling still wins.
         </div>
         {rules.map((r) => (
           <div
@@ -1120,6 +1171,10 @@ export function StylesPanel({
             <option value="tag">has tag</option>
             <option value="marker">has marker</option>
             <option value="completed">is completed</option>
+            <option value="overdue">is overdue</option>
+            <option value="priority">priority ≤</option>
+            <option value="textContains">text contains</option>
+            <option value="hasAttachment">has attachment</option>
           </Select>
         </div>
         {kind === "tag" ? (
@@ -1144,6 +1199,26 @@ export function StylesPanel({
               </option>
             ))}
           </Select>
+        ) : kind === "priority" ? (
+          <Select
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            aria-label="Rule priority"
+            style={{ width: "auto", margin: "0 10px 4px" }}
+          >
+            <option value="">Pick a priority…</option>
+            <option value="1">1 — High</option>
+            <option value="2">2 — Medium &amp; up</option>
+            <option value="3">3 — Low &amp; up</option>
+          </Select>
+        ) : kind === "textContains" ? (
+          <Input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="topic contains…"
+            aria-label="Rule text"
+            style={{ width: "auto", margin: "0 10px 4px" }}
+          />
         ) : null}
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}

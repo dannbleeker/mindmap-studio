@@ -100,13 +100,13 @@
   },
   {
     "date": "2026-06-21",
-    "linesTsJs": 48524,
-    "coveragePct": 82.55,
-    "tests": 1273,
-    "bundleKb": 284.8,
+    "linesTsJs": 48713,
+    "coveragePct": 82.24,
+    "tests": 1277,
+    "bundleKb": 285.3,
     "mutationScore": null,
-    "featureManualPct": 77.5,
-    "featureBookPct": 77.5,
-    "featureExamplePct": 77.5
+    "featureManualPct": 77,
+    "featureBookPct": 77,
+    "featureExamplePct": 77
   }
 ]

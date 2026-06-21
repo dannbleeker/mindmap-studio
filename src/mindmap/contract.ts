@@ -146,6 +146,9 @@ export interface MindMapHandle {
   groupSelection: () => boolean;
   /** Add a labelled summary bracket around the node and its subtree; false if it isn't found. */
   groupSummary: (id: string) => boolean;
+  /** Isolate a branch: collapse every other top branch + reveal the path to this node. False if the
+   *  node is the root or isn't found. */
+  isolateBranch: (id: string) => boolean;
   /** Rename the map — sets the root topic; doc.title follows (the same path as inline root rename). */
   renameMap: (title: string) => void;
   /** Set a specific node's topic text by id (the editable outline's inline rename); root rename

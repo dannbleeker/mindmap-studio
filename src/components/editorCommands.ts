@@ -102,6 +102,15 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     canvas.layout === "side" && !map.liveDoc.meta?.freeform,
   );
   add("guided-walk", "Start guided walk", "view", () => canvas.startWalk());
+  add(
+    "isolate-branch",
+    "Isolate branch (collapse others)",
+    "view",
+    () => {
+      if (sel) m()?.isolateBranch(sel.id);
+    },
+    !!sel,
+  );
   for (const p of MAP_PARTS)
     add(
       `map-part:${p.id}`,

@@ -561,6 +561,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               ref={editRef}
               contentEditable
               suppressContentEditableWarning
+              spellCheck={editing?.spellcheck ?? false}
               className="nodrag nopan"
               style={{ outline: "none", display: "inline-block", minWidth: 16 }}
               onKeyDown={(e) => {

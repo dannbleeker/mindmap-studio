@@ -34,6 +34,8 @@ export interface EditingApi {
   cycleTask: (id: string) => void;
   /** Select the node and open the inspector on its Notes tab (clicking the node's 📝 indicator). */
   openNote: (id: string) => void;
+  /** Native browser spell-check on the topic editors (a view setting; off by default). */
+  spellcheck: boolean;
   /** Apply a marker dragged from the palette onto this node (drag-and-drop marker application). */
   dropMarker: (id: string, marker: string) => void;
 }

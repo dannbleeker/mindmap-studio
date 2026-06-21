@@ -1471,6 +1471,7 @@ export function InfoPanel({
   onMinimize,
   onSetFillImage,
   onClearFillImage,
+  spellCheck,
   width,
   onResize,
   breadcrumb,
@@ -1532,6 +1533,8 @@ export function InfoPanel({
   /** Set / clear the topic's fill image (covers the whole card). */
   onSetFillImage?: (file: File) => void;
   onClearFillImage?: () => void;
+  /** Native browser spell-check in the note editor (view setting; off by default). */
+  spellCheck?: boolean;
 }) {
   const [tagInput, setTagInput] = useState("");
   const [tab, setTab] = useState<InfoTab>("details");
@@ -1833,6 +1836,7 @@ export function InfoPanel({
                           value={noteDraft}
                           onChange={onNoteChange}
                           onBlur={onNoteBlur}
+                          spellCheck={spellCheck}
                         />
                       </div>
                       {sectionLabel("Tags")}
@@ -2237,12 +2241,14 @@ export function NoteEditorPanel({
   onChange,
   onBlur,
   onClose,
+  spellCheck = false,
 }: {
   selected: SelectedNode | null;
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
   onClose: () => void;
+  spellCheck?: boolean;
 }) {
   return (
     <Panel width={320} style={{ minHeight: 0 }}>
@@ -2253,6 +2259,7 @@ export function NoteEditorPanel({
           onChange={onChange}
           onBlur={onBlur}
           onClose={onClose}
+          spellCheck={spellCheck}
         />
       ) : (
         <>
@@ -2282,6 +2289,7 @@ export function NotesPanel({
   onChange,
   onBlur,
   onClose,
+  spellCheck = false,
 }: {
   selected: SelectedNode | null;
   value: string;
@@ -2289,6 +2297,8 @@ export function NotesPanel({
   onBlur: () => void;
   /** Optional — when omitted (e.g. embedded in the Info panel) the Close button is hidden. */
   onClose?: () => void;
+  /** Native browser spell-check in the note editor (view setting; off by default). */
+  spellCheck?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -2377,6 +2387,7 @@ export function NotesPanel({
             className="mm-note-editor"
             contentEditable
             suppressContentEditableWarning
+            spellCheck={spellCheck}
             role="textbox"
             tabIndex={0}
             aria-multiline="true"

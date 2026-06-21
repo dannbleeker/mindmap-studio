@@ -30,6 +30,7 @@ interface PersistedPanels {
   infoMinimized?: boolean;
   inspectorWidth?: number;
   numbered?: boolean;
+  spellcheck?: boolean;
 }
 
 function readPersistedPanels(): PersistedPanels {
@@ -81,6 +82,9 @@ export interface PanelsState {
   setNoteEditorOpen: React.Dispatch<React.SetStateAction<boolean>>;
   numbered: boolean;
   setNumbered: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Native browser spell-check in the topic + note editors (off by default, persisted). */
+  spellcheck: boolean;
+  setSpellcheck: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface FilterState {
@@ -145,6 +149,7 @@ export function usePanels(): UsePanels {
     clampInspectorWidth(persisted.inspectorWidth),
   );
   const [numbered, setNumbered] = useState(!!persisted.numbered);
+  const [spellcheck, setSpellcheck] = useState(!!persisted.spellcheck);
   // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
   const [filterOpen, setFilterOpen] = useState(false);
   const [stylesOpen, setStylesOpen] = useState(false);
@@ -165,12 +170,13 @@ export function usePanels(): UsePanels {
           infoMinimized,
           inspectorWidth,
           numbered,
+          spellcheck,
         }),
       );
     } catch {
       // preference is best-effort
     }
-  }, [outlineOpen, indexOpen, infoOpen, infoMinimized, inspectorWidth, numbered]);
+  }, [outlineOpen, indexOpen, infoOpen, infoMinimized, inspectorWidth, numbered, spellcheck]);
 
   // --- Power Filter ---
   const [filterText, setFilterText] = useState("");
@@ -256,6 +262,8 @@ export function usePanels(): UsePanels {
       setNoteEditorOpen,
       numbered,
       setNumbered,
+      spellcheck,
+      setSpellcheck,
     },
     filter: {
       text: filterText,

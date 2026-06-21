@@ -90,6 +90,8 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       setInfoMinimized: vi.fn(),
       numbered: false,
       setNumbered: vi.fn(),
+      spellcheck: false,
+      setSpellcheck: vi.fn(),
     },
     map: {
       doc,

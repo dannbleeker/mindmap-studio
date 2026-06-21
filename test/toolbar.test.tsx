@@ -70,6 +70,8 @@ function setup(
     setInfoMinimized: vi.fn(),
     numbered: false,
     setNumbered: vi.fn(),
+    spellcheck: false,
+    setSpellcheck: vi.fn(),
   };
   const map = {
     doc,

@@ -1,4 +1,5 @@
 import { MARKER_PALETTE } from "../icons";
+import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind } from "../mindmap";
 import type { MapNode } from "../model/types";
 import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
@@ -101,6 +102,18 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     canvas.layout === "side" && !map.liveDoc.meta?.freeform,
   );
   add("guided-walk", "Start guided walk", "view", () => canvas.startWalk());
+  for (const p of MAP_PARTS)
+    add(
+      `map-part:${p.id}`,
+      `Insert map part: ${p.name}`,
+      "view",
+      () => {
+        const part = buildMapPart(p.id);
+        const ok = part ? m()?.addSubtreeToSelected(part) : false;
+        showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");
+      },
+      !!sel,
+    );
   add("collapse-all", "Collapse all branches", "view", () => m()?.setAllExpanded(false));
   add("expand-all", "Expand all branches", "view", () => m()?.setAllExpanded(true));
   for (const n of [1, 2, 3, 4, 5])

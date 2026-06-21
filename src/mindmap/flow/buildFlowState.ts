@@ -37,6 +37,8 @@ export interface BuildFlowStateArgs {
   selectedEdgeId: string | null;
   /** Power-filter "lit" set (matches + their ancestors); null = filter off, nothing dimmed. */
   litIds: ReadonlySet<string> | null;
+  /** When true, non-lit nodes/edges are HIDDEN instead of dimmed (the filter's "hide" mode). */
+  hideUnmatched?: boolean;
   /** Find-result set: these nodes get a highlight ring. null = no active search. */
   highlightIds?: ReadonlySet<string> | null;
 }
@@ -47,6 +49,9 @@ export function buildFlowState(args: BuildFlowStateArgs): {
 } {
   const { doc, palette, numbered, kind, measured, selectedIds, selectedEdgeId, litIds } = args;
   const highlightIds = args.highlightIds ?? null;
+  // "Hide" filter mode: when on, non-lit nodes/edges are removed from the canvas (React Flow `hidden`)
+  // instead of dimmed. Matches keep their layout positions, so the map reads as a spotlight.
+  const hideUnmatched = !!args.hideUnmatched && !!litIds;
   const proj = project(doc, palette, numbered, kind);
   const est = estimateSizeOf(proj.nodes);
   // Index the live nodes by id ONCE; sizeOf is called a multiple of N times per layout pass.
@@ -62,6 +67,7 @@ export function buildFlowState(args: BuildFlowStateArgs): {
     ...n,
     position: pos.get(n.id) ?? { x: 0, y: 0 },
     selected: selectedIds.has(n.id),
+    ...(hideUnmatched && litIds && !litIds.has(n.id) ? { hidden: true } : {}),
     data:
       litIds || highlightIds
         ? {
@@ -102,11 +108,15 @@ export function buildFlowState(args: BuildFlowStateArgs): {
     if (litIds) {
       data = { ...(data as EdgeData), dimmed: !(litIds.has(e.source) && litIds.has(e.target)) };
     }
+    // Hide an edge when the brace map hides ribbons OR (in hide-filter mode) either endpoint is unlit.
+    const hidden =
+      (brace && !e.data?.crosslink) ||
+      (hideUnmatched && litIds ? !(litIds.has(e.source) && litIds.has(e.target)) : false);
     return {
       ...e,
       // Persist the selected relationship's halo across re-projection (mirrors the node path).
       selected: e.id === selectedEdgeId,
-      ...(brace && !e.data?.crosslink ? { hidden: true } : {}),
+      ...(hidden ? { hidden: true } : {}),
       data,
     };
   });

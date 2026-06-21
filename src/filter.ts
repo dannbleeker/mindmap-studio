@@ -109,6 +109,37 @@ export function focusSet(doc: MindMapDoc, id: string): Set<string> {
   return lit;
 }
 
+/** Build a NEW map containing only the lit nodes — the Power Filter's "extract matches to a new map".
+ *  Prunes the central tree (+ floating topics) to lit nodes, keeping ancestors so the structure holds,
+ *  and drops cross-links / boundaries / summaries that reference removed nodes. Returns null when the
+ *  lit set is empty (nothing to extract). Pure — the caller assigns it a fresh id + stores it. */
+export function filterToDoc(
+  doc: MindMapDoc,
+  lit: ReadonlySet<string>,
+  newId: string,
+): MindMapDoc | null {
+  if (lit.size === 0 || !lit.has(doc.root.id)) return null;
+  const title = `${doc.title} (filtered)`;
+  const prune = (n: MapNode): MapNode => ({
+    ...n,
+    children: n.children.filter((c) => lit.has(c.id)).map(prune),
+  });
+  const both = <T extends { from: string; to: string }>(l: T) => lit.has(l.from) && lit.has(l.to);
+  const out: MindMapDoc = structuredClone({
+    ...doc,
+    id: newId,
+    title,
+    root: { ...prune(doc.root), topic: title },
+    links: (doc.links ?? []).filter(both),
+    boundaries: (doc.boundaries ?? [])
+      .map((b) => ({ ...b, nodeIds: b.nodeIds.filter((id) => lit.has(id)) }))
+      .filter((b) => b.nodeIds.length > 0),
+    summaries: (doc.summaries ?? []).filter((s) => s.nodeIds.every((id) => lit.has(id))),
+    floatingTopics: (doc.floatingTopics ?? []).filter((f) => lit.has(f.id)).map(prune),
+  });
+  return out;
+}
+
 export function filterResult(doc: MindMapDoc, c: FilterCriteria, today = ""): FilterResult {
   const q = c.text.trim().toLowerCase();
   // Effective (rolled-up) completion per node, so a "done" parent isn't flagged overdue.

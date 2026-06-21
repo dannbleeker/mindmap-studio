@@ -91,6 +91,23 @@ describe("buildFlowState", () => {
     expect(build().nodes.every((n) => n.data.dimmed === undefined)).toBe(true);
   });
 
+  it("hides non-lit nodes/edges in hide mode (matches keep their layout positions)", () => {
+    const hidden = build({ litIds: new Set(["r", "a"]), hideUnmatched: true });
+    const byId = new Map(hidden.nodes.map((n) => [n.id, n]));
+    expect(byId.get("r")?.hidden).toBeFalsy();
+    expect(byId.get("a")?.hidden).toBeFalsy();
+    expect(byId.get("b")?.hidden).toBe(true);
+    expect(byId.get("a1")?.hidden).toBe(true);
+    // edges to a hidden endpoint hide too (r→a stays, a→a1 / r→b go)
+    const edge = (s: string, t: string) =>
+      hidden.edges.find((e) => e.source === s && e.target === t);
+    expect(edge("r", "a")?.hidden).toBeFalsy();
+    expect(edge("a", "a1")?.hidden).toBe(true);
+    // dimming-only (hideUnmatched off) never sets hidden
+    const dim = build({ litIds: new Set(["r", "a"]) });
+    expect(dim.nodes.every((n) => !n.hidden)).toBe(true);
+  });
+
   it("flags Find results with `matched`; no matched key when there's no active search", () => {
     const found = build({ highlightIds: new Set(["a", "a1"]) });
     const byId = new Map(found.nodes.map((n) => [n.id, n]));

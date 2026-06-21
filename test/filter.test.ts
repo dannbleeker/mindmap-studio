@@ -3,6 +3,7 @@ import {
   type FilterCriteria,
   describeCriteria,
   filterResult,
+  filterToDoc,
   focusSet,
   isFilterActive,
 } from "../src/filter";
@@ -164,5 +165,30 @@ describe("focusSet", () => {
 
   it("returns an empty set for an unknown id", () => {
     expect(focusSet(doc, "nope").size).toBe(0);
+  });
+});
+
+describe("filterToDoc", () => {
+  it("prunes the map to the lit set, keeping ancestors and dropping dangling refs", () => {
+    // Lit = the "q3" matches (c, a) + their ancestors (r, m, e).
+    const { lit } = filterResult(doc, crit({ tags: ["q3"] }));
+    const out = filterToDoc(doc, lit, "new-id");
+    expect(out).not.toBeNull();
+    if (!out) return;
+    expect(out.id).toBe("new-id");
+    expect(out.title).toBe("Plan (filtered)");
+    expect(out.root.topic).toBe("Plan (filtered)"); // the central topic follows the new title
+    // Marketing keeps Campaign (c, matched) but drops Budget (bg, unmatched).
+    const marketing = out.root.children.find((n) => n.id === "m");
+    expect(marketing?.children.map((n) => n.id)).toEqual(["c"]);
+    // Engineering keeps API (a).
+    const eng = out.root.children.find((n) => n.id === "e");
+    expect(eng?.children.map((n) => n.id)).toEqual(["a"]);
+    // The unmatched floating "Legend" is dropped.
+    expect(out.floatingTopics ?? []).toEqual([]);
+  });
+
+  it("returns null when nothing matches (empty lit set)", () => {
+    expect(filterToDoc(doc, new Set(), "x")).toBeNull();
   });
 });

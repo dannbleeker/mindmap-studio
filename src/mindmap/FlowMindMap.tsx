@@ -250,6 +250,7 @@ function FlowInner({
   direction = "side",
   numbered = false,
   litIds = null,
+  hideUnmatched = false,
   highlightIds = null,
   drillId = null,
   onChange,
@@ -352,6 +353,7 @@ function FlowInner({
   const drillIdRef = useLatestRef(drillId);
   const numberedRef = useLatestRef(numbered);
   const litIdsRef = useLatestRef(litIds);
+  const hideUnmatchedRef = useLatestRef(hideUnmatched);
   const highlightIdsRef = useLatestRef(highlightIds);
   const selectedRef = useLatestRef(selectedId);
   const selectedIdsRef = useLatestRef(selectedIds);
@@ -403,6 +405,7 @@ function FlowInner({
         selectedIds: selectedIdsRef.current,
         selectedEdgeId: selectedEdgeIdRef.current,
         litIds: litIdsRef.current,
+        hideUnmatched: hideUnmatchedRef.current,
         highlightIds: highlightIdsRef.current,
       });
       setNodes(nodes);
@@ -840,7 +843,16 @@ function FlowInner({
 
   // Apply the read-only Power Filter by toggling node/edge opacity in place — no re-layout, since
   // dimming doesn't change sizes. Lit = matches + their ancestors (computed in App); null = off.
+  // The "hide" mode instead removes non-lit nodes/edges (React Flow `hidden`); that interacts with the
+  // brace-map's own hidden ribbons, so it can't be done in place — a full rebuild gets it right. We
+  // also rebuild on the frame hide turns OFF (wasHideRef) so stale `hidden` flags clear cleanly.
+  const wasHideRef = useRef(false);
   useEffect(() => {
+    if (hideUnmatched || wasHideRef.current) {
+      wasHideRef.current = hideUnmatched;
+      sync(docRef.current);
+      return;
+    }
     setNodes((ns) =>
       ns.map((n) => {
         const dimmed = litIds ? !litIds.has(n.id) : false;
@@ -858,7 +870,7 @@ function FlowInner({
           : { ...e, data: { ...(e.data as EdgeData), dimmed } };
       }),
     );
-  }, [litIds, highlightIds, setNodes, setEdges]);
+  }, [litIds, highlightIds, hideUnmatched, sync, setNodes, setEdges]);
 
   // Reflect the live drag-to-reparent target as a node-data flag so TopicNode rings it (#11). Only
   // the target's `data` changes (the equality guard skips the rest); cleared when the drag ends.

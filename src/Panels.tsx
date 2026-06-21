@@ -681,6 +681,9 @@ export function FilterPanel({
   onToggleTag,
   onDue,
   onPriority,
+  hide = false,
+  onHide,
+  onExtract,
   onClear,
   onSaveFilter,
   onApplyFilter,
@@ -700,6 +703,11 @@ export function FilterPanel({
   onToggleTag: (tag: string) => void;
   onDue: (mode: DueMode) => void;
   onPriority: (priority: number) => void;
+  /** "Hide non-matches" mode (vs the default fade). */
+  hide?: boolean;
+  onHide?: (on: boolean) => void;
+  /** Extract the current matches (+ their ancestors) into a new library map. */
+  onExtract?: () => void;
   onClear: () => void;
   onSaveFilter: (name: string) => void;
   onApplyFilter: (criteria: FilterCriteria) => void;
@@ -789,8 +797,30 @@ export function FilterPanel({
             </Button>
           ) : null}
         </div>
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "2px 10px",
+            fontSize: fontSize.sm,
+            color: colors.text,
+            cursor: "pointer",
+          }}
+        >
+          <input type="checkbox" checked={hide} onChange={(e) => onHide?.(e.target.checked)} />
+          Hide non-matches (instead of fading)
+        </label>
+        {active && onExtract ? (
+          <div style={{ padding: "2px 10px 4px" }}>
+            <Button onClick={onExtract} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
+              Extract matches to a new map
+            </Button>
+          </div>
+        ) : null}
         <div style={{ padding: "6px 10px", fontSize: fontSize.xs, color: colors.faint }}>
-          Read-only: non-matching topics are dimmed, nothing is removed.
+          Read-only: non-matching topics are {hide ? "hidden" : "dimmed"}, the map itself is
+          unchanged.
         </div>
 
         <PanelSection>Saved filters</PanelSection>

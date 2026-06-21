@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { MapNode } from "../src/model/types";
 import {
   checkPath,
+  cycleTaskProgress,
   hasTaskDescendants,
   nextProgressLevel,
   nodeProgress,
@@ -146,6 +147,19 @@ describe("nextProgressLevel", () => {
   it("rounds an off-grid value up to the next quarter", () => {
     expect(nextProgressLevel(0.1)).toBe(0.25);
     expect(nextProgressLevel(0.6)).toBe(0.75);
+  });
+});
+
+describe("cycleTaskProgress", () => {
+  it("cycles not-a-task → to-do → done → not-a-task", () => {
+    expect(cycleTaskProgress(undefined)).toBe(0);
+    expect(cycleTaskProgress(0)).toBe(1);
+    expect(cycleTaskProgress(1)).toBeUndefined();
+  });
+
+  it("jumps any partial value straight to done", () => {
+    expect(cycleTaskProgress(0.5)).toBe(1);
+    expect(cycleTaskProgress(0.25)).toBe(1);
   });
 });
 

@@ -30,6 +30,8 @@ export interface EditingApi {
   openLink: (url: string) => void;
   /** Advance a node's task completion one quarter-step (clicking its on-canvas pie), looping at 100%. */
   cycleProgress: (id: string) => void;
+  /** Quick task toggle (the hover checkbox): cycle not-a-task → to-do → done → not-a-task. */
+  cycleTask: (id: string) => void;
   /** Select the node and open the inspector on its Notes tab (clicking the node's 📝 indicator). */
   openNote: (id: string) => void;
   /** Apply a marker dragged from the palette onto this node (drag-and-drop marker application). */

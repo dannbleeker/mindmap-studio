@@ -455,6 +455,23 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           }}
         />
       )}
+      {/* Quick task toggle — a hover checkbox on the left edge: cycle not-a-task → to-do → done.
+          Hidden on the root and on aggregate (rolled-up) progress; the pie handles fine steps. */}
+      {!isRoot && !progress?.derived && (
+        <button
+          type="button"
+          className="mm-task-check nodrag nopan"
+          aria-label="Toggle task"
+          aria-pressed={(progress?.progress ?? 0) >= 1}
+          title="Mark as task / done (cycle)"
+          onClick={(e) => {
+            e.stopPropagation();
+            editing?.cycleTask(id);
+          }}
+        >
+          {(progress?.progress ?? 0) >= 1 ? "☑" : "☐"}
+        </button>
+      )}
       {geom && shape ? (
         <svg
           width="100%"

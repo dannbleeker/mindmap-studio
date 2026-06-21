@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 234,
+  "reviewedThroughChangelogBullets": 235,
   "areas": [
     "editing",
     "notes",
@@ -1414,6 +1414,15 @@
     {
       "id": "map-parts",
       "name": "Map parts — insert a ready-made mini-structure (SWOT / pros-cons / 5W1H / agenda)",
+      "area": "editing",
+      "since": "2026-06-21",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "task-checkbox",
+      "name": "Quick task toggle — a hover checkbox to cycle not-a-task / to-do / done",
       "area": "editing",
       "since": "2026-06-21",
       "manual": false,

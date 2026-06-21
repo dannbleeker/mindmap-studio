@@ -32,6 +32,8 @@ export interface EditingApi {
   cycleProgress: (id: string) => void;
   /** Select the node and open the inspector on its Notes tab (clicking the node's 📝 indicator). */
   openNote: (id: string) => void;
+  /** Apply a marker dragged from the palette onto this node (drag-and-drop marker application). */
+  dropMarker: (id: string, marker: string) => void;
 }
 
 export const EditingContext = createContext<EditingApi | null>(null);

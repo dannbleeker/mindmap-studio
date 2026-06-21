@@ -16,6 +16,7 @@ import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
 import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
+import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
 import { matchBorderColor } from "./geometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
@@ -238,6 +239,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   // Hover-peek: show the note's text in a small card when the 📝 indicator is hovered (read it
   // without opening the inspector). Canvas-only.
   const [peekNote, setPeekNote] = useState(false);
+  // True while a marker is being dragged over this node (drag-and-drop marker application) — drives a
+  // drop-highlight ring.
+  const [markerDragOver, setMarkerDragOver] = useState(false);
   // Re-sanitise on render too (defence-in-depth: a topicRich could arrive via an imported .json).
   const richHtml = useMemo(() => (topicRich ? sanitizeRich(topicRich) : null), [topicRich]);
 
@@ -387,6 +391,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         cursor: isEditing ? "text" : "pointer",
         // Read-only Power Filter: fade nodes that aren't on a path to a match.
         opacity: dimmed ? 0.22 : 1,
+        // Drag-a-marker drop target highlight.
+        outline: markerDragOver ? "2px dashed #1b8a5e" : undefined,
+        outlineOffset: 2,
         transition: "opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
       }}
       onMouseEnter={() => setHovered(true)}
@@ -394,6 +401,23 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       onDoubleClick={(e) => {
         e.stopPropagation();
         editing?.beginEdit(id);
+      }}
+      // Accept a marker dragged from the palette (#3): highlight on drag-over, toggle on drop.
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes(MARKER_DND_TYPE)) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          if (!markerDragOver) setMarkerDragOver(true);
+        }
+      }}
+      onDragLeave={() => markerDragOver && setMarkerDragOver(false)}
+      onDrop={(e) => {
+        const marker = e.dataTransfer.getData(MARKER_DND_TYPE);
+        if (!marker) return;
+        e.preventDefault();
+        e.stopPropagation();
+        setMarkerDragOver(false);
+        editing?.dropMarker(id, marker);
       }}
     >
       <Handle type="target" id="tl" position={Position.Left} style={HANDLE} />

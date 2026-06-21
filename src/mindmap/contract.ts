@@ -211,6 +211,9 @@ export interface MindMapHandle {
   setBackdropColor: (color: string) => void;
 }
 
+/** DataTransfer MIME for a marker dragged from the palette onto a topic (drag-and-drop markers). */
+export const MARKER_DND_TYPE = "application/x-mm-marker";
+
 /** Prefix marking a node hyperlink as an in-app link to another map. */
 export const MAP_LINK_PREFIX = "#map=";
 

@@ -86,6 +86,7 @@ import {
   findAnyNode,
   findNode,
   groupBranch,
+  groupNodes,
   groupSummary,
   indent,
   mergeStyle,
@@ -1156,6 +1157,12 @@ function FlowInner({
       groupBranch: (id) => {
         apply(groupBranch(docRef.current, id));
         return Boolean(findNode(docRef.current, id));
+      },
+      groupSelection: () => {
+        const ids = [...selectedIdsRef.current];
+        if (ids.length < 2) return false;
+        apply(groupNodes(docRef.current, ids));
+        return true;
       },
       groupSummary: (id) => {
         apply(groupSummary(docRef.current, id));

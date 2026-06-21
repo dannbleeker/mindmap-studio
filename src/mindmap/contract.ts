@@ -138,6 +138,8 @@ export interface MindMapHandle {
   setSelectedHyperlink: (url: string) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
   groupBranch: (id: string) => boolean;
+  /** Group the current multi-selection (2+ topics) in one filled boundary box; false if <2 selected. */
+  groupSelection: () => boolean;
   /** Add a labelled summary bracket around the node and its subtree; false if it isn't found. */
   groupSummary: (id: string) => boolean;
   /** Rename the map — sets the root topic; doc.title follows (the same path as inline root rename). */

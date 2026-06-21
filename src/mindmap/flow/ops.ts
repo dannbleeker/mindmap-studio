@@ -965,6 +965,17 @@ export function deleteLink(doc: MindMapDoc, id: string): OpResult {
   return { doc: next };
 }
 
+/** Add a filled boundary enclosing exactly `nodeIds` (deduped, keeping only ids in the central tree).
+ *  The shared core behind groupBranch (a subtree) and groupNodes (an arbitrary selection). A no-op
+ *  (same doc) when no id resolves; `selectId` follows the first enclosed node. */
+function addBoundaryForNodes(doc: MindMapDoc, nodeIds: string[]): OpResult {
+  const ids = [...new Set(nodeIds)].filter((id) => findNode(doc, id));
+  if (ids.length === 0) return { doc };
+  const next = structuredClone(doc);
+  next.boundaries = [...(next.boundaries ?? []), { id: makeId(), nodeIds: ids }];
+  return { doc: next, selectId: ids[0] };
+}
+
 /** Add a filled boundary around a node and its whole subtree. */
 export function groupBranch(doc: MindMapDoc, id: string): OpResult {
   const node = findNode(doc, id);
@@ -975,9 +986,12 @@ export function groupBranch(doc: MindMapDoc, id: string): OpResult {
     for (const c of n.children) collect(c);
   };
   collect(node);
-  const next = structuredClone(doc);
-  next.boundaries = [...(next.boundaries ?? []), { id: makeId(), nodeIds: ids }];
-  return { doc: next, selectId: id };
+  return { ...addBoundaryForNodes(doc, ids), selectId: id };
+}
+
+/** Add a filled boundary around an arbitrary selection of topics (the multi-select "group" gesture). */
+export function groupNodes(doc: MindMapDoc, ids: Iterable<string>): OpResult {
+  return addBoundaryForNodes(doc, [...ids]);
 }
 
 /** Add a labelled summary bracket around a node and its whole subtree. */

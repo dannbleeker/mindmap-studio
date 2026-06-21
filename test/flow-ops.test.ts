@@ -25,6 +25,7 @@ import {
   findAnyNode,
   findNode,
   groupBranch,
+  groupNodes,
   groupSummary,
   indent,
   mergeStyle,
@@ -197,6 +198,19 @@ describe("flow ops — structural", () => {
     expect(kids(moveInTree(base(), "a", "a1", "child").doc, "r")).toEqual(["a", "b"]);
     // dragging the root → unchanged
     expect(kids(moveInTree(base(), "r", "a", "child").doc, "r")).toEqual(["a", "b"]);
+  });
+
+  it("groupBranch wraps a node + its whole subtree in a new boundary (PREP-A pin)", () => {
+    const { doc, selectId } = groupBranch(base(), "a");
+    expect(selectId).toBe("a");
+    expect(doc.boundaries?.at(-1)?.nodeIds).toEqual(["a", "a1", "a2"]);
+  });
+
+  it("groupNodes wraps an arbitrary selection (deduped, missing ids dropped); none valid = no-op", () => {
+    expect(groupNodes(base(), ["a", "b", "a"]).doc.boundaries?.at(-1)?.nodeIds).toEqual(["a", "b"]);
+    expect(groupNodes(base(), ["a", "ghost"]).doc.boundaries?.at(-1)?.nodeIds).toEqual(["a"]);
+    // no valid id → unchanged (only the seed "bd" boundary remains)
+    expect(groupNodes(base(), ["ghost"]).doc.boundaries?.length).toBe(1);
   });
 });
 

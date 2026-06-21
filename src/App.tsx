@@ -88,6 +88,7 @@ import {
   initPwaUpdateToast,
 } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
+import { useSavedViews } from "./savedViews";
 import { type LibraryHit, findDocMatches, searchLibrary } from "./search";
 import { countWords } from "./stats";
 import { stickerImage } from "./stickers";
@@ -246,6 +247,7 @@ export function App() {
   // live in usePanels; App threads `panels` into <Toolbar> and `filter`/`savedFilters` into the
   // FilterPanel. Auto-numbering (`panels.numbered`) draws hierarchical outline numbers on the canvas.
   const { panels, filter, savedFilters } = usePanels();
+  const savedViews = useSavedViews(liveDoc.id);
   // Open-document tabs: which maps are open + which is active (persisted). The active map's state
   // still lives in the doc/liveDoc singletons below — this registry just follows it (load() calls
   // ensureOpen) and drives the tab strip; switching a tab reloads that map.
@@ -1467,6 +1469,35 @@ export function App() {
       saveFileAs,
       fileName,
       dirty,
+    },
+    views: {
+      list: savedViews.list.map((v) => ({ id: v.id, name: v.name })),
+      onSave: () => {
+        const name = window.prompt("Name this view:", "")?.trim();
+        if (!name) return;
+        const vp = mapRef.current?.getViewport();
+        if (!vp) return;
+        const active = panels.filterOpen && isFilterActive(filter.criteria);
+        savedViews.add(name, {
+          viewport: vp,
+          drillId,
+          criteria: active ? filter.criteria : null,
+        });
+        showHint(`Saved view "${name}".`);
+      },
+      onApply: (id: string) => {
+        const v = savedViews.list.find((x) => x.id === id);
+        if (!v) return;
+        setDrillId(v.drillId);
+        mapRef.current?.setViewport(v.viewport);
+        if (v.criteria) {
+          if (!panels.filterOpen) panels.toggleFilter();
+          savedFilters.apply(v.criteria);
+        } else if (panels.filterOpen) {
+          panels.toggleFilter(); // closing also clears the filter
+        }
+      },
+      onDelete: (id: string) => savedViews.remove(id),
     },
     history: {
       canUndo,

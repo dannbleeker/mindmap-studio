@@ -144,6 +144,7 @@ function setup(
     ].map((k) => [k, vi.fn()]),
   ) as unknown as Parameters<typeof Toolbar>[0]["io"];
   const showHint = vi.fn();
+  const views = { list: [], onSave: vi.fn(), onApply: vi.fn(), onDelete: vi.fn() };
   const history = {
     canUndo: over.canUndo ?? false,
     canRedo: over.canRedo ?? false,
@@ -160,11 +161,12 @@ function setup(
       canvas={canvas}
       find={find}
       io={io}
+      views={views}
       history={history}
       showHint={showHint}
     />,
   );
-  return { handle, nav, panels, map, canvas, find, io, history, showHint };
+  return { handle, nav, panels, map, canvas, find, io, views, history, showHint };
 }
 
 const u = userEvent.setup();

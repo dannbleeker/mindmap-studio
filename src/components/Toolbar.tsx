@@ -137,6 +137,16 @@ export interface ToolbarIo {
   dirty: boolean;
 }
 
+/** Saved views (bookmarked perspectives) for the View menu. */
+export interface ToolbarViews {
+  list: { id: string; name: string }[];
+  /** Capture + name the current view (App prompts for the name). */
+  onSave: () => void;
+  /** Jump to a saved view by id. */
+  onApply: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
 export interface ToolbarProps {
   /** Phone-width: rows scroll horizontally instead of wrapping. */
   isMobile: boolean;
@@ -154,6 +164,7 @@ export interface ToolbarProps {
   canvas: ToolbarCanvas;
   find: ToolbarFind;
   io: ToolbarIo;
+  views: ToolbarViews;
   /** Undo / redo for the Row-1 buttons. canUndo/canRedo are reported live from the canvas history so
    *  the buttons disable correctly; undo/redo fire the action and a transient "Undone"/"Redone" toast. */
   history: { canUndo: boolean; canRedo: boolean; undo: () => void; redo: () => void };
@@ -234,6 +245,7 @@ export function Toolbar({
   canvas,
   find,
   io,
+  views,
   history,
   showHint,
 }: ToolbarProps) {
@@ -662,6 +674,31 @@ export function Toolbar({
             disabled={!canvas.freeform || canvas.selectedCount < 3}
             onSelect={() => canvas.distributeSelection("v")}
           />
+          <MenuLabel>Saved views</MenuLabel>
+          <MenuItem icon={mi("star")} label="Save current view…" onSelect={() => views.onSave()} />
+          {views.list.map((v) => (
+            <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <button
+                type="button"
+                className="mm-menu-item"
+                style={{ flex: 1 }}
+                onClick={() => views.onApply(v.id)}
+              >
+                {mi("fit")}
+                {v.name}
+              </button>
+              <button
+                type="button"
+                className="mm-menu-item"
+                aria-label={`Delete view ${v.name}`}
+                title={`Delete view ${v.name}`}
+                style={{ flex: "0 0 auto" }}
+                onClick={() => views.onDelete(v.id)}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
         </Menu>
         <span className="mm-vdiv" />
         {/* Overlay-toggle group — outline numbering / line-jumps (view-only switches). */}

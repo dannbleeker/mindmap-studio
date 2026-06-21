@@ -336,7 +336,7 @@ function FlowInner({
   const [coachDismissed, setCoachDismissed] = useState(false);
   // During a drag-to-reparent, the node the dragged topic would drop under (highlighted live). (#11)
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
-  const { fitView, getNodes, setCenter, getViewport } = useReactFlow();
+  const { fitView, getNodes, setCenter, getViewport, setViewport } = useReactFlow();
   const initialized = useNodesInitialized();
 
   // Refs so the stable callbacks below always read the latest values.
@@ -1097,6 +1097,8 @@ function FlowInner({
       fit: () => fitView({ duration: 300 }),
       // Snapshot viewport + undo/redo stacks so the tab switcher can restore them on a remount.
       getSession: (): CanvasSession => ({ viewport: getViewport(), history: historyRef.current }),
+      getViewport: () => getViewport(),
+      setViewport: (vp) => setViewport(vp, { duration: 350 }),
       focusNode: focusNodeById,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
       setSelectedNote: (note) => withSelected((id) => apply(setNote(docRef.current, id, note))),
@@ -1258,6 +1260,7 @@ function FlowInner({
       fitView,
       getNodes,
       getViewport,
+      setViewport,
       apply,
       withSelected,
       withSelectedAll,

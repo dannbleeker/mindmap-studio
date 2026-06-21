@@ -102,6 +102,7 @@ function setup(
     shuffleBranchColors: vi.fn(),
     applyDesign: vi.fn(),
     drillIn: vi.fn(),
+    startWalk: vi.fn(),
     alignSelection: vi.fn(),
     distributeSelection: vi.fn(),
     selectedCount: 0,

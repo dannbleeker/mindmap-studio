@@ -1088,9 +1088,14 @@ function FlowInner({
       const id = selectedEdgeIdRef.current;
       if (!id) return false;
       apply(op(docRef.current, id));
+      // Re-resolve the selected edge from the UPDATED doc so the inspector's controls (direction /
+      // width / dash / curve highlights) reflect the edit live — the SelectedEdge handed to the app
+      // is otherwise captured at selection time and would show stale state after a preset / control.
+      // For deleteLink the id no longer resolves → null, which simply clears the inspector.
+      fireSelectEdge(id);
       return true;
     },
-    [apply],
+    [apply, fireSelectEdge],
   );
 
   // Apply a pure op to the selected overlay (the op picks the right transform by kind); false if none.

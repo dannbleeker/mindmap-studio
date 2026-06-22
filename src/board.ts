@@ -43,7 +43,7 @@ export function boardColumns(doc: MindMapDoc): BoardColumn[] {
     };
     const tags = n.tags ?? [];
     if (tags.length === 0) push(UNTAGGED, card);
-    else for (const t of tags) push(t, card);
+    else for (const t of new Set(tags)) push(t, card); // dedupe so a repeated tag can't list a topic twice
     for (const c of n.children) walk(c);
   };
   walk(doc.root);

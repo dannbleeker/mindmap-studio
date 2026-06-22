@@ -99,7 +99,7 @@ function Column({
       <div
         style={{ overflowY: "auto", padding: 8, display: "flex", flexDirection: "column", gap: 6 }}
       >
-        {col.cards.map((card, i) => {
+        {col.cards.map((card) => {
           const overdue = isOverdue(
             card.due,
             card.progress === undefined ? undefined : card.progress / 100,
@@ -107,7 +107,7 @@ function Column({
           );
           return (
             <button
-              key={`${card.id}:${i}`}
+              key={card.id}
               type="button"
               onClick={() => onPick(card.id)}
               title="Jump to this topic on the map"

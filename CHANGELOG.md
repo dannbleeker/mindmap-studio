@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Detach a branch to a floating topic.** Right-click a topic → **Detach to floating topic** pops it
+  and its whole subtree out of the hierarchy into a free-floating topic; a floating topic's menu offers
+  **Re-attach to centre** (or just drag it back in). New pure `detachBranch` op; re-attach reuses
+  `reparent`.
+
 - **Arrow-key topic navigation.** With a topic selected (and not editing), the **arrow keys** move the
   selection through the tree — **←** parent, **→** first child (unless collapsed), **↑ / ↓** previous /
   next sibling — panning the canvas to keep it in view. New pure `nextSelectionId(doc, id, dir)`.

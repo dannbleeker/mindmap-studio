@@ -157,6 +157,9 @@ export interface MindMapHandle {
   /** Isolate a branch: collapse every other top branch + reveal the path to this node. False if the
    *  node is the root or isn't found. */
   isolateBranch: (id: string) => boolean;
+  /** Detach a branch into a free-floating topic (re-attach by dragging it back in). False if the node
+   *  is the root or already floating. */
+  detachBranch: (id: string) => boolean;
   /** Rename the map — sets the root topic; doc.title follows (the same path as inline root rename). */
   renameMap: (title: string) => void;
   /** Set a specific node's topic text by id (the editable outline's inline rename); root rename

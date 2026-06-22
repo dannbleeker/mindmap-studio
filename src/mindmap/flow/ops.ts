@@ -5,6 +5,7 @@ import type {
   Callout,
   ConditionalRule,
   CrossLink,
+  FontScale,
   MapAttachment,
   MapImage,
   MapNode,
@@ -808,6 +809,20 @@ export function setConnectorStyle(
 ): OpResult {
   const next = structuredClone(doc);
   next.meta = { ...next.meta, connectorStyle: style === "organic" ? undefined : style };
+  return { doc: next };
+}
+
+/** Set the map-wide base font family ("" / undefined clears it back to the canvas default). */
+export function setFontFamily(doc: MindMapDoc, family: string | undefined): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, fontFamily: family?.trim() || undefined };
+  return { doc: next };
+}
+
+/** Set the map-wide font-size scale; "comfortable" (the default) clears the override. */
+export function setFontScale(doc: MindMapDoc, scale: FontScale): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, fontScale: scale === "comfortable" ? undefined : scale };
   return { doc: next };
 }
 

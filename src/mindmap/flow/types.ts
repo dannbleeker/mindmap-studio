@@ -57,6 +57,12 @@ export type TopicData = {
   floating: boolean;
   /** Pinned in place (freeform): not draggable, and align / distribute skip it. Shows a lock badge. */
   locked?: boolean;
+  /** Map-wide font-size multiplier (from meta.fontScale) applied on top of the per-depth default; a
+   *  per-node `style.fontSize` still wins. Same value on every node — kept here so the canvas + the
+   *  layout estimate (which both read TopicData) scale identically. Absent = 1×. */
+  fontScale?: number;
+  /** Map-wide base font family (from meta.fontFamily); a per-node `style.fontFamily` still wins. */
+  fontFamily?: string;
   /** Dimmed by the read-only Power Filter (not on a path to a match); view-only opacity. */
   dimmed?: boolean;
   /** A current Find result — drawn with a highlight ring (view-only, canvas-only; never exported). */

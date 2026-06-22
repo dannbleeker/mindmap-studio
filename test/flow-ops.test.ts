@@ -55,6 +55,8 @@ import {
   setCalloutColor,
   setDue,
   setExpandedToLevel,
+  setFontFamily,
+  setFontScale,
   setFreeform,
   setHyperlink,
   setImage,
@@ -81,6 +83,7 @@ import {
   toggleLocked,
   viewDoc,
 } from "../src/mindmap/flow/ops";
+import { fontScaleFactor } from "../src/mindmap/flow/style";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 
 const base = (): MindMapDoc => ({
@@ -391,6 +394,24 @@ describe("flow ops — content", () => {
     const back = reparent(floated, "a", "r").doc;
     expect(kids(back, "r")).toContain("a");
     expect(back.floatingTopics).toBeUndefined(); // array emptied → dropped
+  });
+
+  it("setFontScale / setFontFamily set + clear map typography (comfortable + blank clear)", () => {
+    const scaled = setFontScale(base(), "large").doc;
+    expect(scaled.meta?.fontScale).toBe("large");
+    // "comfortable" is the default → clears the override.
+    expect(setFontScale(scaled, "comfortable").doc.meta?.fontScale).toBeUndefined();
+
+    const famed = setFontFamily(base(), "Georgia, serif").doc;
+    expect(famed.meta?.fontFamily).toBe("Georgia, serif");
+    expect(setFontFamily(famed, "").doc.meta?.fontFamily).toBeUndefined();
+  });
+
+  it("fontScaleFactor maps the scale to a multiplier (comfortable / unset = 1)", () => {
+    expect(fontScaleFactor("compact")).toBe(0.85);
+    expect(fontScaleFactor("large")).toBe(1.2);
+    expect(fontScaleFactor("comfortable")).toBe(1);
+    expect(fontScaleFactor(undefined)).toBe(1);
   });
 
   it("nextSelectionId moves selection by logical tree direction", () => {

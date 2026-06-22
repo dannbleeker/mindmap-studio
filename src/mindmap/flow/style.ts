@@ -3,6 +3,8 @@
 // inline styles (with theme-var fallbacks for node fills); the exporter writes them as
 // concrete SVG attributes. Anything a boundary box or a cross-link draws lives here once.
 
+import type { FontScale } from "../../model/types";
+
 // Cross-link / relationship edge (dashed floating bezier).
 export const CROSSLINK_COLOR = "#8b87e0";
 export const CROSSLINK_WIDTH = 1.5;
@@ -148,6 +150,15 @@ export function levelFontSize(depth: number): number {
   if (depth === 1) return 16; // main topics
   if (depth === 2) return 14;
   return 13; // depth 3+
+}
+
+/** Multiplier for the map's font-size scale, applied on top of `levelFontSize`. "comfortable" (the
+ *  default, including when unset) is 1×. Shared by the layout estimate, the canvas, and the exporter
+ *  so all three reserve + render the same type size. */
+export function fontScaleFactor(scale: FontScale | undefined): number {
+  if (scale === "compact") return 0.85;
+  if (scale === "large") return 1.2;
+  return 1; // comfortable / unset
 }
 
 /** Black or white text that stays readable on a filled `hex` background (WCAG relative luminance).

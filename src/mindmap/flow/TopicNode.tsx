@@ -227,9 +227,15 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     matched,
     dropTarget,
     locked,
+    fontScale = 1,
+    fontFamily: mapFontFamily,
   } = data;
   // Conditional-formatting style sits *under* the node's own style (manual styling wins).
   const style = condStyle ? { ...condStyle, ...ownStyle } : ownStyle;
+  // Map-wide typography: scale the per-depth default size (a manual style.fontSize still wins), and
+  // use the map base family as the fallback when the node has no family of its own.
+  const scaledFont = levelFontSize(depth) * fontScale;
+  const familyFor = (s: typeof style) => s?.fontFamily ?? mapFontFamily;
   const editing = useEditing();
   const isEditing = editing?.editingId === id;
   // Type-to-edit: when edit was started by typing a character on the selected node, seed the editor
@@ -317,7 +323,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         borderRadius: 16,
         padding: "9px 20px",
         fontWeight: 700,
-        fontSize: 20,
+        fontSize: 20 * fontScale,
+        fontFamily: mapFontFamily,
         textAlign: "center",
         border: "none",
       }
@@ -327,9 +334,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           color: style?.color ?? "var(--mm-color, #2c2c2a)",
           border: "none",
           padding: `${6 + ins.top}px ${12 + ins.right}px ${6 + ins.bottom}px ${12 + ins.left}px`,
-          fontSize: style?.fontSize ?? levelFontSize(depth),
+          fontSize: style?.fontSize ?? scaledFont,
           fontWeight: style?.fontWeight,
-          fontFamily: style?.fontFamily,
+          fontFamily: familyFor(style),
           textDecoration: style?.textDecoration,
           textAlign: "center",
         }
@@ -361,9 +368,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           // Per-topic wrap width: a long label wraps to this width instead of stretching.
           maxWidth: style?.maxWidth,
           overflowWrap: style?.maxWidth ? "anywhere" : undefined,
-          fontSize: style?.fontSize ?? levelFontSize(depth),
+          fontSize: style?.fontSize ?? scaledFont,
           fontWeight: style?.fontWeight ?? (filledMain ? 600 : undefined),
-          fontFamily: style?.fontFamily,
+          fontFamily: familyFor(style),
           textDecoration: style?.textDecoration,
           textAlign: "center",
         };

@@ -3,7 +3,7 @@ import { outlineNumbers } from "../../outline";
 import { type ProgressInfo, progressMap } from "../../progress";
 import { conditionalStyle } from "../../rules";
 import type { LayoutKind } from "../contract";
-import { CROSSLINK_COLOR } from "./style";
+import { CROSSLINK_COLOR, fontScaleFactor } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
 
 // Pure projection: canonical MindMapDoc → React Flow nodes + edges (positions are 0,0
@@ -76,6 +76,10 @@ export function project(
 ): ProjectResult {
   const pal = palette.length > 0 ? palette : FALLBACK_PALETTE;
   const connectorStyle = doc.meta?.connectorStyle;
+  // Map-wide typography: one scale factor + base family for every node, so the canvas, the layout
+  // estimate, and the exporter (all read from TopicData) size + render type identically.
+  const fontScale = fontScaleFactor(doc.meta?.fontScale);
+  const fontFamily = doc.meta?.fontFamily;
   const nodes: TopicNode[] = [];
   const edges: FlowEdge[] = [];
   // Auto-numbering is a view concern: numbers are computed from the tree and shown as a prefix,
@@ -141,6 +145,8 @@ export function project(
         attachmentNames: node.attachments?.map((a) => a.name),
         floating,
         locked: node.locked,
+        fontScale,
+        fontFamily,
       },
       // A locked node can't be dragged (move in freeform / reparent in the auto-layouts); undefined
       // leaves React Flow's global `nodesDraggable` in charge for everyone else.

@@ -2,6 +2,7 @@ import type { Ref } from "react";
 import type {
   BackdropKind,
   ConditionalRule,
+  FontScale,
   MapAttachment,
   MapImage,
   MapNode,
@@ -182,6 +183,10 @@ export interface MindMapHandle {
   setConnectorStyle: (style: "organic" | "curved" | "elbow" | "straight") => void;
   /** Set the outline-numbering scheme (decimal / outline); decimal clears the override. */
   setNumberStyle: (style: NumberStyle) => void;
+  /** Set the map-wide base font family ("" clears it back to the canvas default). */
+  setFontFamily: (family: string) => void;
+  /** Set the map-wide font-size scale (compact / comfortable / large); comfortable clears the override. */
+  setFontScale: (scale: FontScale) => void;
   /** Toggle the map legend (markers / tags / rules) on the canvas + in exports. */
   setLegend: (on: boolean) => void;
   /** Replace the map's conditional-formatting rules (empty array clears them). */

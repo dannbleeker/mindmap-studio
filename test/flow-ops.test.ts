@@ -52,6 +52,7 @@ import {
   setBackgroundImage,
   setBoundaryColor,
   setBoundaryLabel,
+  setBranchColor,
   setCalloutColor,
   setDue,
   setExpandedToLevel,
@@ -60,6 +61,7 @@ import {
   setFreeform,
   setHyperlink,
   setImage,
+  setLineDash,
   setLineJumps,
   setLinkArrow,
   setLinkLabel,
@@ -1618,5 +1620,68 @@ describe("flow ops — floating topics are first-class structurally", () => {
     expect(s.summaries?.some((x) => x.nodeIds.includes("f1") && x.nodeIds.includes("f1a"))).toBe(
       true,
     );
+  });
+});
+
+// The inspector shows for a selected floating topic, so its per-node property edits must reach it too
+// (they previously resolved via locate(root) and silently no-opped on floating topics).
+describe("flow ops — floating-topic property edits", () => {
+  const withFloat = (): MindMapDoc => ({
+    ...base(),
+    floatingTopics: [{ id: "f", topic: "F", children: [{ id: "fa", topic: "Fa", children: [] }] }],
+  });
+
+  it("setNote / setBranchColor / setLineDash / setHyperlink reach a floating topic", () => {
+    expect(findAnyNode(setNote(withFloat(), "f", "hi").doc, "f")?.note).toBe("hi");
+    expect(findAnyNode(setBranchColor(withFloat(), "f", "#abc").doc, "f")?.branchColor).toBe(
+      "#abc",
+    );
+    expect(findAnyNode(setLineDash(withFloat(), "f", "dashed").doc, "f")?.lineDash).toBe("dashed");
+    expect(findAnyNode(setHyperlink(withFloat(), "f", "https://x.com").doc, "f")?.hyperlink).toBe(
+      "https://x.com",
+    );
+    // the script-scheme guard still applies on a floating topic
+    expect(
+      findAnyNode(setHyperlink(withFloat(), "f", "javascript:alert(1)").doc, "f")?.hyperlink,
+    ).toBeUndefined();
+  });
+
+  it("task fields (progress/due/priority) and style/image edits reach a floating topic", () => {
+    expect(findAnyNode(setProgress(withFloat(), "f", 0.5).doc, "f")?.task?.progress).toBe(0.5);
+    expect(findAnyNode(setDue(withFloat(), "f", "2026-07-01").doc, "f")?.task?.due).toBe(
+      "2026-07-01",
+    );
+    expect(findAnyNode(setPriority(withFloat(), "f", 1).doc, "f")?.task?.priority).toBe(1);
+    expect(
+      findAnyNode(mergeStyle(withFloat(), "f", { background: "#fff" }).doc, "f")?.style,
+    ).toEqual({ background: "#fff" });
+    const img = { url: "data:image/png;base64,AA==", width: 10, height: 10 };
+    expect(findAnyNode(setImage(withFloat(), "f", img).doc, "f")?.image).toEqual(img);
+  });
+
+  it("attachments add/remove on a floating topic", () => {
+    const att = { name: "n.txt", dataUrl: "data:text/plain;base64,AA==", size: 2 };
+    const added = addAttachment(withFloat(), "f", att).doc;
+    expect(findAnyNode(added, "f")?.attachments?.map((a) => a.name)).toEqual(["n.txt"]);
+    expect(findAnyNode(removeAttachment(added, "f", 0).doc, "f")?.attachments).toBeUndefined();
+  });
+
+  it("setTopic on a floating topic renames it WITHOUT touching the doc title", () => {
+    const out = setTopic(withFloat(), "f", "Renamed").doc;
+    expect(findAnyNode(out, "f")?.topic).toBe("Renamed");
+    expect(out.title).toBe("Root"); // only the real root drives the title
+    // renaming the actual root still updates the title (regression guard for the locate→findAnyNode swap)
+    expect(setTopic(withFloat(), "r", "New title").doc.title).toBe("New title");
+  });
+
+  it("toggleCollapse works on a floating topic with children (and is a no-op on a leaf)", () => {
+    expect(findAnyNode(toggleCollapse(withFloat(), "f").doc, "f")?.collapsed).toBe(true);
+    expect(toggleCollapse(withFloat(), "fa").doc).toEqual(withFloat()); // leaf → no change
+  });
+
+  it("setTopicRich reaches a floating topic without altering the doc title", () => {
+    const out = setTopicRich(withFloat(), "f", "<b>F</b>", "F").doc;
+    expect(findAnyNode(out, "f")?.topicRich).toBe("<b>F</b>");
+    expect(out.title).toBe("Root");
   });
 });

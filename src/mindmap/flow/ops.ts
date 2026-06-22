@@ -511,11 +511,11 @@ export function moveInTree(
 /** Set a node's topic text (renaming the root also updates the doc title). */
 export function setTopic(doc: MindMapDoc, id: string, topic: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  loc.node.topic = topic;
-  if (!loc.parent) next.title = topic || next.title;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  node.topic = topic;
+  if (id === next.root.id) next.title = topic || next.title; // only the real root drives the doc title
+  touch(node, opsClock());
   return { doc: next };
 }
 
@@ -531,21 +531,21 @@ export function setTopicRich(
   plain: string,
 ): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  loc.node.topic = plain;
-  loc.node.topicRich = rich || undefined;
-  if (!loc.parent) next.title = plain || next.title;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  node.topic = plain;
+  node.topicRich = rich || undefined;
+  if (id === next.root.id) next.title = plain || next.title; // only the real root drives the doc title
+  touch(node, opsClock());
   return { doc: next };
 }
 
 /** Toggle a node's collapsed state (no-op for a leaf). */
 export function toggleCollapse(doc: MindMapDoc, id: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc || loc.node.children.length === 0) return { doc };
-  loc.node.collapsed = !loc.node.collapsed;
+  const node = findAnyNode(next, id);
+  if (!node || node.children.length === 0) return { doc };
+  node.collapsed = !node.collapsed;
   return { doc: next };
 }
 
@@ -601,12 +601,12 @@ export function setExpandedToLevel(doc: MindMapDoc, level: number): OpResult {
 /** Set the note on a node (empty or whitespace-only clears it). */
 export function setNote(doc: MindMapDoc, id: string, note: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
   // A blank or whitespace-only note is "no note" — clear it so the 📝 indicator disappears
   // (matches the Outline panel, which has always judged notes by their trimmed content).
-  loc.node.note = note.trim() ? note : undefined;
-  touch(loc.node, opsClock());
+  node.note = note.trim() ? note : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 
@@ -772,13 +772,13 @@ export function deleteTag(doc: MindMapDoc, tag: string): OpResult {
  *  object falls away once it carries nothing — so clearing the last field stops it being a task. */
 function patchTask(doc: MindMapDoc, id: string, patch: Partial<TaskInfo>): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
   const merged: TaskInfo = {};
-  for (const [k, v] of Object.entries({ ...(loc.node.task ?? {}), ...patch }))
+  for (const [k, v] of Object.entries({ ...(node.task ?? {}), ...patch }))
     if (v !== undefined && v !== "") (merged as Record<string, unknown>)[k] = v;
-  loc.node.task = Object.keys(merged).length > 0 ? merged : undefined;
-  touch(loc.node, opsClock());
+  node.task = Object.keys(merged).length > 0 ? merged : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 
@@ -875,10 +875,10 @@ export function setFontScale(doc: MindMapDoc, scale: FontScale): OpResult {
  *  node's subtree at render time. */
 export function setBranchColor(doc: MindMapDoc, id: string, color: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  loc.node.branchColor = color || undefined;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  node.branchColor = color || undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 
@@ -901,53 +901,53 @@ export function setLineDash(
   dash: "solid" | "dashed" | "dotted",
 ): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  loc.node.lineDash = dash === "solid" ? undefined : dash;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  node.lineDash = dash === "solid" ? undefined : dash;
+  touch(node, opsClock());
   return { doc: next };
 }
 
 /** Set a node's hyperlink ("" clears it). */
 export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
   // Drop a script-bearing scheme at the store boundary (mirrors the import + canvas-sync guards) so a
   // javascript:/data:/vbscript: URL never persists on the node or in the lossless .json export.
-  loc.node.hyperlink = url && !isDangerousUrl(url) ? url : undefined;
-  touch(loc.node, opsClock());
+  node.hyperlink = url && !isDangerousUrl(url) ? url : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 
 /** Append a file attachment to a node. */
 export function addAttachment(doc: MindMapDoc, id: string, attachment: MapAttachment): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  loc.node.attachments = [...(loc.node.attachments ?? []), attachment];
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  node.attachments = [...(node.attachments ?? []), attachment];
+  touch(node, opsClock());
   return { doc: next };
 }
 
 /** Remove the attachment at `index` from a node (clearing the array when it empties). */
 export function removeAttachment(doc: MindMapDoc, id: string, index: number): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc?.node.attachments) return { doc };
-  const kept = loc.node.attachments.filter((_, i) => i !== index);
-  loc.node.attachments = kept.length > 0 ? kept : undefined;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id);
+  if (!node?.attachments) return { doc };
+  const kept = node.attachments.filter((_, i) => i !== index);
+  node.attachments = kept.length > 0 ? kept : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 
 /** Set a node's image. */
 export function setImage(doc: MindMapDoc, id: string, image: MapImage): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  loc.node.image = image;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  node.image = image;
+  touch(node, opsClock());
   return { doc: next };
 }
 
@@ -1291,15 +1291,15 @@ export function replaceTopics(
 /** Merge a style patch into a node ("" / null clears a key; an empty style is dropped). */
 export function mergeStyle(doc: MindMapDoc, id: string, patch: Partial<NodeStyle>): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
-  const merged: Record<string, string> = { ...(loc.node.style ?? {}) };
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  const merged: Record<string, string> = { ...(node.style ?? {}) };
   for (const [k, v] of Object.entries(patch)) {
     if (v === "" || v == null) delete merged[k];
     else merged[k] = v;
   }
-  loc.node.style = Object.keys(merged).length > 0 ? (merged as NodeStyle) : undefined;
-  touch(loc.node, opsClock());
+  node.style = Object.keys(merged).length > 0 ? (merged as NodeStyle) : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 

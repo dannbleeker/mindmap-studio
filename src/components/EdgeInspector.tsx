@@ -1,5 +1,6 @@
 import type { SelectedEdge } from "../mindmap";
 import { InspectorResizer } from "./InspectorResizer";
+import { EDGE_PRESETS } from "./edgePresets";
 import { SWATCHES, fieldLabel, seg, segRow } from "./inspectorControls";
 
 // EdgeInspector — the right-panel shown when a relationship (cross-link) edge is selected, in place of
@@ -46,6 +47,7 @@ export function EdgeInspector({
     width?: number;
     dash?: SelectedEdge["dash"];
     curve?: number;
+    arrow?: SelectedEdge["arrow"];
   }) => void;
   onDelete: () => void;
   onMinimize?: () => void;
@@ -95,6 +97,22 @@ export function EdgeInspector({
         )}
       </div>
       <div className="mm-inspector-body">
+        {/* Presets — one click sets the whole look (dash + width + curve + arrowhead). */}
+        <div style={fieldLabel}>Presets</div>
+        <div style={segRow}>
+          {EDGE_PRESETS.map((p) => (
+            <button
+              key={p.name}
+              type="button"
+              title={p.title}
+              onClick={() => onSetStyle(p.patch)}
+              style={seg(false)}
+            >
+              {p.name}
+            </button>
+          ))}
+        </div>
+
         {/* Label */}
         <div style={fieldLabel}>Label</div>
         <input

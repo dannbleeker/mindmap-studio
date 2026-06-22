@@ -1012,12 +1012,20 @@ export function setLinkArrow(doc: MindMapDoc, id: string, arrow: CrossLink["arro
   return { doc: next };
 }
 
-/** Merge a style patch (colour / width / dash) into a cross-link. A field cleared to a falsy value —
- *  or `dash:"dashed"` (the implicit default) — is dropped, so a reset link serialises field-free. */
+/** Merge a style patch (colour / width / dash / curve / arrow) into a cross-link. A field cleared to a
+ *  falsy value — or an implicit default (`dash:"dashed"`, `arrow:"to"`) — is dropped, so a reset link
+ *  serialises field-free. `arrow` is accepted here too so one-click presets set the whole look in a
+ *  single op (one undo step). */
 export function setLinkStyle(
   doc: MindMapDoc,
   id: string,
-  patch: { color?: string; width?: number; dash?: CrossLink["dash"]; curve?: number },
+  patch: {
+    color?: string;
+    width?: number;
+    dash?: CrossLink["dash"];
+    curve?: number;
+    arrow?: CrossLink["arrow"];
+  },
 ): OpResult {
   if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
   const next = structuredClone(doc);
@@ -1034,6 +1042,10 @@ export function setLinkStyle(
       // resets to the gentle auto-bow (so a default link serialises field-free).
       ...("curve" in patch
         ? { curve: patch.curve == null ? undefined : Math.round(patch.curve) }
+        : {}),
+      // Arrow: "to" (or falsy) is the implicit default → dropped, like setLinkArrow.
+      ...("arrow" in patch
+        ? { arrow: patch.arrow && patch.arrow !== "to" ? patch.arrow : undefined }
         : {}),
     };
     // Strip keys now undefined so a cleared field doesn't survive in the lossless .json.

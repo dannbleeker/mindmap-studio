@@ -52,18 +52,29 @@ describe("EdgeInspector", () => {
 
   it("fires onSetArrow with the chosen direction", async () => {
     const { onSetArrow } = setup();
-    await userEvent.click(screen.getByTitle(/both ends/i));
+    // Exact title — the Direction button (the preset row has its own "…both ends" description).
+    await userEvent.click(screen.getByTitle("Arrows at both ends"));
     expect(onSetArrow).toHaveBeenCalledWith("both");
   });
 
   it("fires onSetStyle for width, dash, and a colour reset", async () => {
     const { onSetStyle } = setup();
-    await userEvent.click(screen.getByRole("button", { name: "Thick" }));
+    // The segmented Width button carries aria-pressed; the "Thick" preset button doesn't — use the
+    // pressed filter to target the Width control unambiguously.
+    await userEvent.click(screen.getByRole("button", { name: "Thick", pressed: false }));
     expect(onSetStyle).toHaveBeenCalledWith({ width: 3 });
     await userEvent.click(screen.getByRole("button", { name: "Solid" }));
     expect(onSetStyle).toHaveBeenCalledWith({ dash: "solid" });
     await userEvent.click(screen.getByRole("button", { name: "Default" }));
     expect(onSetStyle).toHaveBeenCalledWith({ color: "" });
+  });
+
+  it("a style preset fires onSetStyle with a full one-click patch", async () => {
+    const { onSetStyle } = setup();
+    await userEvent.click(screen.getByTitle("Solid line with arrowheads at both ends"));
+    expect(onSetStyle).toHaveBeenCalledWith(
+      expect.objectContaining({ arrow: "both", dash: "solid" }),
+    );
   });
 
   it("fires onDelete from the danger button", async () => {

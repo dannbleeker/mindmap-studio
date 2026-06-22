@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Relationship style presets.** The relationship inspector now leads with a **Presets** row — Arrow,
+  Dashed, Dotted, Thick, Curved, Double — so one click sets a cross-link's whole look (dash + width +
+  curve + arrowhead) in a single undo step. `setLinkStyle` now also accepts `arrow`.
+
 - **Per-map typography.** New **Type** controls (canvas row) set a map-wide base **font family** (Sans /
   Serif / Mono, or Default) and a **size scale** (Compact / Comfortable / Large). Both layer under any
   per-topic font override and thread through the layout estimate, the canvas, and the SVG/image export

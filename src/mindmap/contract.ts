@@ -233,12 +233,14 @@ export interface MindMapHandle {
   setLinkLabel: (label: string) => boolean;
   /** Set the selected relationship's arrowhead placement; false if no edge is selected. */
   setLinkArrow: (arrow: SelectedEdge["arrow"]) => boolean;
-  /** Merge a style patch (colour / width / dash) into the selected relationship; false if none. */
+  /** Merge a style patch (colour / width / dash / curve / arrow) into the selected relationship; false
+   *  if none. `arrow` lets a one-click preset set the whole look in a single op. */
   setLinkStyle: (patch: {
     color?: string;
     width?: number;
     dash?: SelectedEdge["dash"];
     curve?: number;
+    arrow?: SelectedEdge["arrow"];
   }) => boolean;
   /** Delete the selected relationship; false if no edge is selected. */
   deleteLink: () => boolean;

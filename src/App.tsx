@@ -205,8 +205,17 @@ export function App() {
     }
     return "side";
   });
-  const { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace } =
-    useFind(mapRef, () => liveDocRef.current);
+  const {
+    query,
+    setQuery,
+    replaceWith,
+    setReplaceWith,
+    replaceScope,
+    setReplaceScope,
+    matchInfo,
+    runSearch,
+    runReplace,
+  } = useFind(mapRef, () => liveDocRef.current);
   // Live Find-result set → a highlight ring on every matching topic (the canvas reads `highlightIds`).
   // Recomputed as you type or edit; null when the Find box is empty.
   const searchMatchIds = useMemo(
@@ -1447,7 +1456,17 @@ export function App() {
       selectedCount,
       freeform: !!liveDoc.meta?.freeform,
     },
-    find: { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace },
+    find: {
+      query,
+      setQuery,
+      replaceWith,
+      setReplaceWith,
+      replaceScope,
+      setReplaceScope,
+      matchInfo,
+      runSearch,
+      runReplace,
+    },
     io: {
       exportJson,
       exportMarkdown,

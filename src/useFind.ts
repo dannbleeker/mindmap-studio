@@ -6,9 +6,12 @@ import { findDocMatches } from "./search";
 // Header "Find" behaviour: match nodes by topic/note, focus each on the canvas,
 // and cycle through hits on repeated Enter. Kept out of App as a self-contained
 // hook; the matching itself lives in the pure, unit-tested `findMatches`.
+export type ReplaceScope = "topics" | "notes" | "both";
+
 export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => MindMapDoc) {
   const [query, setQuery] = useState("");
   const [replaceWith, setReplaceWith] = useState("");
+  const [replaceScope, setReplaceScope] = useState<ReplaceScope>("topics");
   const [matchInfo, setMatchInfo] = useState("");
   const cursor = useRef({ q: "", i: -1 });
 
@@ -28,9 +31,23 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
   }
 
   function runReplace() {
-    const n = mapRef.current?.replaceTopics(query, replaceWith) ?? 0;
+    const scope = {
+      topics: replaceScope !== "notes",
+      notes: replaceScope !== "topics",
+    };
+    const n = mapRef.current?.replaceTopics(query, replaceWith, scope) ?? 0;
     setMatchInfo(n > 0 ? `replaced ${n}` : "no matches");
   }
 
-  return { query, setQuery, replaceWith, setReplaceWith, matchInfo, runSearch, runReplace };
+  return {
+    query,
+    setQuery,
+    replaceWith,
+    setReplaceWith,
+    replaceScope,
+    setReplaceScope,
+    matchInfo,
+    runSearch,
+    runReplace,
+  };
 }

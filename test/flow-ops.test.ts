@@ -1080,6 +1080,28 @@ describe("flow ops — groupBranch + replaceTopics", () => {
     expect(count).toBe(1); // only the literal "a.b", not "a<any>b"
     expect(findNode(doc, "a")?.topic).toBe("Z");
   });
+
+  it("replaceTopics scope: notes-only edits note bodies and leaves topics untouched", () => {
+    const withNote = structuredClone(base());
+    const a = findNode(withNote, "a");
+    if (a) a.note = "alpha note";
+    // "A" topic contains 'a', but notes-only must not touch it.
+    const { doc, count } = replaceTopics(withNote, "a", "X", { notes: true, topics: false });
+    expect(count).toBe(1); // only the note changed
+    expect(findNode(doc, "a")?.topic).toBe("A"); // topic untouched
+    expect(findNode(doc, "a")?.note).toBe("XlphX note");
+  });
+
+  it("replaceTopics scope: both edits a topic and a note as two counted changes", () => {
+    const withNote = structuredClone(base());
+    const a = findNode(withNote, "a");
+    if (a) a.note = "Alpha";
+    const { doc, count } = replaceTopics(withNote, "A", "Z", { topics: true, notes: true });
+    // topic "A"→"Z" plus note "Alpha"→"ZlphZ" (both a's, case-insensitive); plus "A1","A2" → 4 fields
+    expect(count).toBe(4);
+    expect(findNode(doc, "a")?.topic).toBe("Z");
+    expect(findNode(doc, "a")?.note).toBe("ZlphZ");
+  });
 });
 
 describe("flow ops — cross-links (relationships)", () => {

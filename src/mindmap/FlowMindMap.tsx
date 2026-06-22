@@ -1169,8 +1169,8 @@ function FlowInner({
         apply(bulkToggleTag(docRef.current, ids, tag));
         return true;
       },
-      replaceTopics: (query, replacement) => {
-        const res = replaceTopics(docRef.current, query, replacement);
+      replaceTopics: (query, replacement, scope) => {
+        const res = replaceTopics(docRef.current, query, replacement, scope);
         if (res.count > 0) apply({ doc: res.doc });
         return res.count;
       },

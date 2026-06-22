@@ -1124,16 +1124,30 @@ export function replaceTopics(
   doc: MindMapDoc,
   query: string,
   replacement: string,
+  scope: { topics?: boolean; notes?: boolean } = {},
 ): { doc: MindMapDoc; count: number } {
   if (!query) return { doc, count: 0 };
+  // Default to topics (back-compat); callers opt into notes.
+  const inTopics = scope.topics ?? true;
+  const inNotes = scope.notes ?? false;
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = () => new RegExp(escaped, "gi");
   const next = structuredClone(doc);
   let count = 0;
   const walk = (n: MapNode) => {
-    const replaced = n.topic.replace(new RegExp(escaped, "gi"), replacement);
-    if (replaced !== n.topic) {
-      n.topic = replaced;
-      count += 1;
+    if (inTopics) {
+      const replaced = n.topic.replace(re(), replacement);
+      if (replaced !== n.topic) {
+        n.topic = replaced;
+        count += 1;
+      }
+    }
+    if (inNotes && n.note) {
+      const replaced = n.note.replace(re(), replacement);
+      if (replaced !== n.note) {
+        n.note = replaced;
+        count += 1;
+      }
     }
     for (const c of n.children) walk(c);
   };

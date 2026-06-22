@@ -1,4 +1,5 @@
 import { toggleMarkerInList } from "../../icons";
+import { isDangerousUrl } from "../../io/urlSafety";
 import type {
   BackdropKind,
   Boundary,
@@ -868,7 +869,9 @@ export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult
   const next = structuredClone(doc);
   const loc = locate(next.root, id);
   if (!loc) return { doc };
-  loc.node.hyperlink = url || undefined;
+  // Drop a script-bearing scheme at the store boundary (mirrors the import + canvas-sync guards) so a
+  // javascript:/data:/vbscript: URL never persists on the node or in the lossless .json export.
+  loc.node.hyperlink = url && !isDangerousUrl(url) ? url : undefined;
   touch(loc.node, opsClock());
   return { doc: next };
 }

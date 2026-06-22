@@ -354,6 +354,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Security
 
+- **Security review hardening (5 findings).** A full review of the XSS surface (imported files, pasted
+  content, hyperlinks, rich text, notes, SVG) confirmed defense-in-depth across the sanitisers; these
+  close the remaining gaps: (1) the typed-hyperlink store (`setHyperlink`) now strips `javascript:` /
+  `data:` / `vbscript:` schemes, matching the import + canvas-sync guards, so an unsafe scheme never
+  persists or reaches the lossless `.json`; (2) the note editor now **pastes as plain text**, so pasted
+  HTML (e.g. `<img onerror=…>`) can't enter the live `contentEditable`; (3) `normalizeDoc` drops a
+  script-bearing hyperlink and any non-`data:` attachment from an untrusted/hand-edited doc on load
+  (a `javascript:` "attachment" would execute when its download link is clicked); (4) the HTML/print
+  exporters document that their SVG input must be pre-sanitised; (5) the production build now ships a
+  strict **Content-Security-Policy** (`script-src 'self'`, `object-src/base-uri 'none'`, …) — injected
+  at build time so dev/HMR is unaffected, with the inline module-preload polyfill disabled so no inline
+  scripts ship.
+
 - **Hardened the SVG export against colour-injection.** Every user-settable colour (boundary, summary,
   callout, backdrop, relationship and per-branch) now passes through the HTML-escaper before landing in
   a quoted SVG attribute — so a hand-edited or imported colour like `"/><script>…` can't break out of

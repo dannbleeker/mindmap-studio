@@ -478,6 +478,14 @@ export function toggleCollapse(doc: MindMapDoc, id: string): OpResult {
   return { doc: next };
 }
 
+/** Toggle a node's locked (pinned-in-place) flag. Any node can be locked; clears the flag rather than
+ *  storing `false`. */
+export function toggleLocked(doc: MindMapDoc, id: string): OpResult {
+  return mutateAnyNode(doc, id, (n) => {
+    n.locked = n.locked ? undefined : true;
+  });
+}
+
 /** Collapse (false) or expand (true) every branch below the root. */
 export function setAllExpanded(doc: MindMapDoc, expanded: boolean): OpResult {
   const next = structuredClone(doc);
@@ -1223,7 +1231,7 @@ function arrangeBoxes(doc: MindMapDoc, ids: Iterable<string>, sizes: NodeSizes):
   const out: ArrangeBox[] = [];
   for (const id of ids) {
     const node = findAnyNode(doc, id);
-    if (!node?.pos) continue; // only free-canvas (positioned) nodes can be arranged
+    if (!node?.pos || node.locked) continue; // only free-canvas, un-pinned nodes can be arranged
     const s = sizes[id] ?? { w: 0, h: 0 };
     out.push({ node, x: node.pos.x, y: node.pos.y, w: s.w, h: s.h });
   }

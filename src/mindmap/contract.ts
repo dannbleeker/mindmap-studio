@@ -143,6 +143,9 @@ export interface MindMapHandle {
   alignSelection: (mode: "left" | "hcenter" | "right" | "top" | "vmiddle" | "bottom") => void;
   /** Evenly space the selected free-canvas nodes along an axis (freeform mode; needs 3+ selected). */
   distributeSelection: (axis: "h" | "v") => void;
+  /** Toggle a node's locked (pinned-in-place) flag: locked nodes can't be dragged and align /
+   *  distribute skip them. */
+  toggleLocked: (id: string) => void;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
   setSelectedHyperlink: (url: string) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */

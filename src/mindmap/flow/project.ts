@@ -140,7 +140,11 @@ export function project(
         attachmentCount: node.attachments?.length,
         attachmentNames: node.attachments?.map((a) => a.name),
         floating,
+        locked: node.locked,
       },
+      // A locked node can't be dragged (move in freeform / reparent in the auto-layouts); undefined
+      // leaves React Flow's global `nodesDraggable` in charge for everyone else.
+      draggable: node.locked ? false : undefined,
     });
     if (parentId !== undefined) {
       edges.push({

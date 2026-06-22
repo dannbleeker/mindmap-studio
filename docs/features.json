@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 246,
+  "reviewedThroughChangelogBullets": 247,
   "areas": [
     "editing",
     "notes",
@@ -1245,6 +1245,15 @@
       "name": "Align & distribute selected topics (free-canvas mode)",
       "area": "structure",
       "since": "2026-06-20",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "lock-position",
+      "name": "Lock a topic's position (pin in place; un-draggable, align/distribute skip it)",
+      "area": "structure",
+      "since": "2026-06-22",
       "manual": false,
       "book": false,
       "bookExample": false

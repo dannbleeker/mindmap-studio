@@ -1521,3 +1521,102 @@ describe("flow ops — bulk markers / tags (tri-state)", () => {
     expect(findAnyNode(toggleIcon(withFloat, fid, "🚩").doc, fid)?.icons).toContain("🚩");
   });
 });
+
+// Floating topics are first-class for structural edits: the context menu offers Add child / sibling /
+// indent / outdent / move / delete / group / paste on them, so the ops must resolve them too (they used
+// to resolve only the central tree via locate(root) and silently no-op).
+describe("flow ops — floating topics are first-class structurally", () => {
+  // f1 (with child f1a), f2 — two top-level floating topics, plus the usual central tree.
+  const withFloats = (): MindMapDoc => ({
+    ...base(),
+    floatingTopics: [
+      { id: "f1", topic: "F1", children: [{ id: "f1a", topic: "F1a", children: [] }] },
+      { id: "f2", topic: "F2", children: [] },
+    ],
+  });
+
+  it("addChild appends under a top-level floating topic (and expands it)", () => {
+    const { doc, selectId } = addChild(withFloats(), "f2");
+    expect(achildren(doc, "f2")).toEqual([selectId]);
+    expect(findAnyNode(doc, "f2")?.collapsed).toBe(false);
+  });
+
+  it("addChild appends under a node nested inside a floating subtree", () => {
+    const { doc, selectId } = addChild(withFloats(), "f1a");
+    expect(achildren(doc, "f1a")).toEqual([selectId]);
+  });
+
+  it("addSibling on a top-level floating topic adds a new floating topic after it", () => {
+    const { doc, selectId } = addSibling(withFloats(), "f1");
+    expect(floatIds(doc)).toEqual(["f1", selectId, "f2"]);
+    expect(findAnyNode(doc, selectId as string)?.topic).toBe("");
+  });
+
+  it("addSibling on a node inside a floating subtree inserts under the floating parent", () => {
+    const { doc, selectId } = addSibling(withFloats(), "f1a");
+    expect(achildren(doc, "f1")).toEqual(["f1a", selectId]);
+  });
+
+  it("indent nests a top-level floating topic under the previous floating topic", () => {
+    const { doc } = indent(withFloats(), "f2");
+    expect(floatIds(doc)).toEqual(["f1"]);
+    expect(achildren(doc, "f1")).toEqual(["f1a", "f2"]);
+  });
+
+  it("outdent promotes a floating topic's child to its own top-level floating topic", () => {
+    const { doc } = outdent(withFloats(), "f1a");
+    expect(achildren(doc, "f1")).toEqual([]);
+    expect(floatIds(doc)).toEqual(["f1", "f1a", "f2"]);
+  });
+
+  it("moveSibling reorders top-level floating topics", () => {
+    expect(floatIds(moveSibling(withFloats(), "f1", "down").doc)).toEqual(["f2", "f1"]);
+    expect(floatIds(moveSibling(withFloats(), "f1", "up").doc)).toEqual(["f1", "f2"]); // first → no-op
+  });
+
+  it("deleteNode removes a top-level floating topic and selects a neighbour", () => {
+    const { doc, selectId } = deleteNode(withFloats(), "f1");
+    expect(floatIds(doc)).toEqual(["f2"]);
+    expect(selectId).toBe("f2");
+  });
+
+  it("deleteNode drops the floatingTopics array entirely once the last one goes", () => {
+    let d: MindMapDoc = {
+      ...base(),
+      floatingTopics: [{ id: "solo", topic: "Solo", children: [] }],
+    };
+    d = deleteNode(d, "solo").doc;
+    expect(d.floatingTopics).toBeUndefined();
+  });
+
+  it("deleteNode removes a node nested inside a floating subtree", () => {
+    const { doc } = deleteNode(withFloats(), "f1a");
+    expect(findAnyNode(doc, "f1a")).toBeNull();
+    expect(achildren(doc, "f1")).toEqual([]);
+  });
+
+  it("addSubtree grafts a forest under a floating topic", () => {
+    const forest: MapNode[] = [{ id: "x", topic: "X", children: [] }];
+    const { doc, selectId } = addSubtree(withFloats(), "f2", forest);
+    expect(achildren(doc, "f2")).toEqual([selectId]); // re-id'd, so not literally "x"
+    expect(findAnyNode(doc, selectId as string)?.topic).toBe("X");
+  });
+
+  it("pasteBranch nests under a floating-topic parent (instead of a new floating sibling)", () => {
+    const branch: MapNode = { id: "clip", topic: "Clip", children: [] };
+    const { doc, selectId } = pasteBranch(withFloats(), "f2", branch);
+    expect(achildren(doc, "f2")).toEqual([selectId]);
+    expect(floatIds(doc)).toEqual(["f1", "f2"]); // no stray new floating topic
+  });
+
+  it("groupBranch / groupSummary work on a floating topic's branch", () => {
+    const g = groupBranch(withFloats(), "f1").doc;
+    expect(g.boundaries?.some((b) => b.nodeIds.includes("f1") && b.nodeIds.includes("f1a"))).toBe(
+      true,
+    );
+    const s = groupSummary(withFloats(), "f1").doc;
+    expect(s.summaries?.some((x) => x.nodeIds.includes("f1") && x.nodeIds.includes("f1a"))).toBe(
+      true,
+    );
+  });
+});

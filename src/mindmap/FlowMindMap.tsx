@@ -1231,7 +1231,7 @@ function FlowInner({
         withSelected((id) => apply(setHyperlink(docRef.current, id, url))),
       groupBranch: (id) => {
         apply(groupBranch(docRef.current, id));
-        return Boolean(findNode(docRef.current, id));
+        return Boolean(findAnyNode(docRef.current, id));
       },
       groupSelection: () => {
         const ids = [...selectedIdsRef.current];
@@ -1241,7 +1241,7 @@ function FlowInner({
       },
       groupSummary: (id) => {
         apply(groupSummary(docRef.current, id));
-        return Boolean(findNode(docRef.current, id));
+        return Boolean(findAnyNode(docRef.current, id));
       },
       isolateBranch: (id) => {
         const before = docRef.current;

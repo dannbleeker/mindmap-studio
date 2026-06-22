@@ -281,77 +281,121 @@ export function bulkToggleTag(doc: MindMapDoc, ids: Iterable<string>, tag: strin
 
 // --- structural edits ------------------------------------------------------
 
-/** Add an empty sibling after `id` (a root gets a child, since it has no sibling). */
+/** A node plus the array it lives in — the central tree's `parent.children`, or `doc.floatingTopics`
+ *  for a top-level floating topic. `parent` is the MapNode parent (null for a top-level floating topic
+ *  or the root); `container` is null only for the root (which lives in no array). Lets the structural
+ *  ops treat floating topics — and the nodes nested inside them — as first-class. */
+interface SibLoc {
+  node: MapNode;
+  parent: MapNode | null;
+  container: MapNode[] | null;
+  index: number;
+}
+function locateSib(doc: MindMapDoc, id: string): SibLoc | null {
+  const t = locate(doc.root, id);
+  if (t)
+    return {
+      node: t.node,
+      parent: t.parent,
+      container: t.parent ? t.parent.children : null,
+      index: t.index,
+    };
+  const floats = doc.floatingTopics;
+  if (floats) {
+    for (let i = 0; i < floats.length; i++) {
+      if (floats[i].id === id)
+        return { node: floats[i], parent: null, container: floats, index: i };
+      const sub = locate(floats[i], id);
+      if (sub?.parent)
+        return {
+          node: sub.node,
+          parent: sub.parent,
+          container: sub.parent.children,
+          index: sub.index,
+        };
+    }
+  }
+  return null;
+}
+
+/** Add an empty sibling after `id` (the root gets a child, having no sibling). Floating-aware: the
+ *  sibling of a top-level floating topic is a new floating topic. */
 export function addSibling(doc: MindMapDoc, id: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
+  const loc = locateSib(next, id);
   if (!loc) return { doc };
-  if (!loc.parent) return addChild(doc, id);
+  if (!loc.container) return addChild(doc, id); // the root has no siblings
   const sib: MapNode = { id: makeId(), topic: "", children: [] };
   birth(sib, opsClock());
-  loc.parent.children.splice(loc.index + 1, 0, sib);
+  loc.container.splice(loc.index + 1, 0, sib);
   return { doc: next, selectId: sib.id };
 }
 
-/** Append an empty child to `id` and expand it. */
+/** Append an empty child to `id` and expand it (works on a floating topic too). */
 export function addChild(doc: MindMapDoc, id: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc) return { doc };
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
   const child: MapNode = { id: makeId(), topic: "", children: [] };
   birth(child, opsClock());
-  loc.node.children.push(child);
-  loc.node.collapsed = false;
+  node.children.push(child);
+  node.collapsed = false;
   return { doc: next, selectId: child.id };
 }
 
-/** Move `id` up to be a sibling of its parent (no-op if the parent is the root). */
+/** Move `id` up to be a sibling of its parent. For a direct child of a top-level floating topic this
+ *  promotes it to its own top-level floating topic. No-op for the root, a top-level floating topic, or
+ *  a direct child of the root (nowhere higher to go). */
 export function outdent(doc: MindMapDoc, id: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc || !loc.parent) return { doc };
-  const grand = locate(next.root, loc.parent.id);
-  if (!grand || !grand.parent) return { doc };
-  loc.parent.children.splice(loc.index, 1);
-  grand.parent.children.splice(grand.index + 1, 0, loc.node);
+  const loc = locateSib(next, id);
+  if (!loc || !loc.parent || !loc.container) return { doc };
+  const grand = locateSib(next, loc.parent.id);
+  if (!grand || !grand.container) return { doc };
+  loc.container.splice(loc.index, 1);
+  grand.container.splice(grand.index + 1, 0, loc.node);
   return { doc: next, selectId: loc.node.id };
 }
 
-/** Move `id` under its previous sibling (no-op if it's the first child). */
+/** Move `id` under its previous sibling (no-op if it's the first child). Floating-aware: a top-level
+ *  floating topic indents under the previous floating topic. */
 export function indent(doc: MindMapDoc, id: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc || !loc.parent || loc.index === 0) return { doc };
-  const prev = loc.parent.children[loc.index - 1];
-  loc.parent.children.splice(loc.index, 1);
+  const loc = locateSib(next, id);
+  if (!loc || !loc.container || loc.index === 0) return { doc };
+  const prev = loc.container[loc.index - 1];
+  loc.container.splice(loc.index, 1);
   prev.children.push(loc.node);
   prev.collapsed = false;
   return { doc: next, selectId: loc.node.id };
 }
 
-/** Swap `id` with its previous/next sibling (reorder among siblings). No-op at an end. */
+/** Swap `id` with its previous/next sibling (reorder among siblings). No-op at an end. Floating-aware. */
 export function moveSibling(doc: MindMapDoc, id: string, dir: "up" | "down"): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc || !loc.parent) return { doc };
-  const sibs = loc.parent.children;
+  const loc = locateSib(next, id);
+  if (!loc || !loc.container) return { doc };
+  const sibs = loc.container;
   const j = dir === "up" ? loc.index - 1 : loc.index + 1;
   if (j < 0 || j >= sibs.length) return { doc };
   [sibs[loc.index], sibs[j]] = [sibs[j], sibs[loc.index]];
   return { doc: next, selectId: loc.node.id };
 }
 
-/** Remove a node's subtree; prune dangling links/boundaries; select a neighbour. */
+/** Remove a node's subtree; prune dangling links/boundaries; select a neighbour. Works on a central-tree
+ *  node, a top-level floating topic, or a node nested inside one. No-op for the root. */
 export function deleteNode(doc: MindMapDoc, id: string): OpResult {
-  const probe = locate(doc.root, id);
-  if (!probe || !probe.parent) return { doc }; // can't delete the root
+  const probe = locateSib(doc, id);
+  if (!probe || !probe.container) return { doc }; // can't delete the root
   const next = structuredClone(doc);
-  const loc = locate(next.root, id);
-  if (!loc || !loc.parent) return { doc };
-  const parent = loc.parent;
-  parent.children.splice(loc.index, 1);
-  const selectId =
-    parent.children[loc.index]?.id ?? parent.children[loc.index - 1]?.id ?? parent.id;
+  const loc = locateSib(next, id);
+  if (!loc || !loc.container) return { doc };
+  const container = loc.container;
+  container.splice(loc.index, 1);
+  const selectId = container[loc.index]?.id ?? container[loc.index - 1]?.id ?? loc.parent?.id;
+  // Drop an emptied floatingTopics array so a cleared map stays lossless.
+  if (loc.parent === null && next.floatingTopics && next.floatingTopics.length === 0)
+    next.floatingTopics = undefined;
 
   const removed = new Set<string>();
   const collect = (n: MapNode) => {
@@ -587,11 +631,11 @@ function reId(node: MapNode): MapNode {
 export function addSubtree(doc: MindMapDoc, parentId: string, nodes: MapNode[]): OpResult {
   if (nodes.length === 0) return { doc };
   const next = structuredClone(doc);
-  const loc = locate(next.root, parentId);
-  if (!loc) return { doc };
+  const parent = findAnyNode(next, parentId);
+  if (!parent) return { doc };
   const grafted = nodes.map(reId);
-  loc.node.children.push(...grafted);
-  loc.node.collapsed = false;
+  parent.children.push(...grafted);
+  parent.collapsed = false;
   return { doc: next, selectId: grafted[0]?.id };
 }
 
@@ -602,10 +646,10 @@ export function pasteBranch(doc: MindMapDoc, parentId: string | null, node: MapN
   const next = structuredClone(doc);
   const fresh = reId(node);
   if (parentId) {
-    const loc = locate(next.root, parentId);
-    if (loc) {
-      loc.node.children.push(fresh);
-      loc.node.collapsed = false;
+    const parent = findAnyNode(next, parentId);
+    if (parent) {
+      parent.children.push(fresh);
+      parent.collapsed = false;
       return { doc: next, selectId: fresh.id };
     }
   }
@@ -1077,7 +1121,7 @@ export function deleteLink(doc: MindMapDoc, id: string): OpResult {
  *  The shared core behind groupBranch (a subtree) and groupNodes (an arbitrary selection). A no-op
  *  (same doc) when no id resolves; `selectId` follows the first enclosed node. */
 function addBoundaryForNodes(doc: MindMapDoc, nodeIds: string[]): OpResult {
-  const ids = [...new Set(nodeIds)].filter((id) => findNode(doc, id));
+  const ids = [...new Set(nodeIds)].filter((id) => findAnyNode(doc, id));
   if (ids.length === 0) return { doc };
   const next = structuredClone(doc);
   next.boundaries = [...(next.boundaries ?? []), { id: makeId(), nodeIds: ids }];
@@ -1086,7 +1130,7 @@ function addBoundaryForNodes(doc: MindMapDoc, nodeIds: string[]): OpResult {
 
 /** Add a filled boundary around a node and its whole subtree. */
 export function groupBranch(doc: MindMapDoc, id: string): OpResult {
-  const node = findNode(doc, id);
+  const node = findAnyNode(doc, id);
   if (!node) return { doc };
   const ids: string[] = [];
   const collect = (n: MapNode) => {
@@ -1104,7 +1148,7 @@ export function groupNodes(doc: MindMapDoc, ids: Iterable<string>): OpResult {
 
 /** Add a labelled summary bracket around a node and its whole subtree. */
 export function groupSummary(doc: MindMapDoc, id: string): OpResult {
-  const node = findNode(doc, id);
+  const node = findAnyNode(doc, id);
   if (!node) return { doc };
   const ids: string[] = [];
   const collect = (n: MapNode) => {

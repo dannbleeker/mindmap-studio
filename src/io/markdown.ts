@@ -9,14 +9,18 @@ import type { MapNode, MindMapDoc } from "../model/types";
 // `numbers` (optional) prefixes each topic with its outline number ("1.2", "I.A", …) — used by the
 // "bake outline numbers" option for copy/export. Omitted = the plain, round-trippable form.
 export function toMarkdown(doc: MindMapDoc, numbers?: ReadonlyMap<string, string>): string {
-  const lines = [`# ${doc.root.topic}`];
+  // A heading / bullet is a single physical line, so a topic carrying newlines (from a paste or a
+  // note→topic conversion) would split the line — and re-import drops the orphaned continuation, since
+  // it isn't a bullet. Collapse any whitespace run (incl. newlines) to one space so the tree round-trips.
+  const inline = (s: string) => s.replace(/\s+/g, " ").trim();
+  const lines = [`# ${inline(doc.root.topic)}`];
   const prefix = (id: string) => {
     const n = numbers?.get(id);
     return n ? `${n} ` : "";
   };
   const walk = (node: MapNode, depth: number) => {
     for (const child of node.children) {
-      lines.push(`${"  ".repeat(depth)}- ${prefix(child.id)}${child.topic}`);
+      lines.push(`${"  ".repeat(depth)}- ${prefix(child.id)}${inline(child.topic)}`);
       walk(child, depth + 1);
     }
   };

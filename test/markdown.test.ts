@@ -103,6 +103,23 @@ describe("markdown io", () => {
     expect(doc.root.children[1].children.map((c) => c.topic)).toEqual(["b1"]);
   });
 
+  it("collapses newlines in a topic to a single space so the bullet line stays intact", () => {
+    // A multi-line topic must not split into a broken bullet + an orphaned line that re-import drops.
+    const multiline: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: node("r", "Root\nwith break", [node("a", "Help\n\nPlease  now")]),
+    };
+    const md = toMarkdown(multiline);
+    expect(md).toBe(["# Root with break", "- Help Please now", ""].join("\n"));
+    // And it round-trips cleanly (no content lost on re-import).
+    expect(shape(fromMarkdown(md).root)).toEqual({
+      topic: "Root with break",
+      children: [{ topic: "Help Please now", children: [] }],
+    });
+  });
+
   it("attaches an over-indented bullet (no shallower parent) to the root", () => {
     // A first bullet indented past level 1 has no parent on the stack; it should
     // anchor to the root rather than crash.

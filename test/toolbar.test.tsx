@@ -117,6 +117,8 @@ function setup(
     setQuery: vi.fn(),
     replaceWith: "",
     setReplaceWith: vi.fn(),
+    replaceScope: "topics" as const,
+    setReplaceScope: vi.fn(),
     matchInfo: "",
     runSearch: vi.fn((e: { preventDefault: () => void }) => e.preventDefault()),
     runReplace: vi.fn(),

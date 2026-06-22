@@ -103,8 +103,13 @@ export interface MindMapHandle {
   bulkToggleSelectedIcon: (icon: string) => boolean;
   /** Tri-state bulk tag toggle across the whole selection (same semantics). False if none selected. */
   bulkToggleSelectedTag: (tag: string) => boolean;
-  /** Replace the query in every matching node topic; returns the count changed. */
-  replaceTopics: (query: string, replacement: string) => number;
+  /** Replace the query across matching topics and/or note bodies (per `scope`, default topics only);
+   *  returns the count of fields changed. */
+  replaceTopics: (
+    query: string,
+    replacement: string,
+    scope?: { topics?: boolean; notes?: boolean },
+  ) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
   setAllExpanded: (expanded: boolean) => void;
   /** Expand the map to a detail level: topics deeper than `level` collapse (level 1 = top branches

@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 245,
+  "reviewedThroughChangelogBullets": 246,
   "areas": [
     "editing",
     "notes",
@@ -447,6 +447,15 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "replace-scope",
+      "name": "Replace scope: topics, notes, or both",
+      "area": "navigation",
+      "since": "2026-06-22",
+      "manual": false,
+      "book": false,
+      "bookExample": false
     },
     {
       "id": "fuzzy-find",

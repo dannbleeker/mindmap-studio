@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Arrow-key topic navigation.** With a topic selected (and not editing), the **arrow keys** move the
+  selection through the tree — **←** parent, **→** first child (unless collapsed), **↑ / ↓** previous /
+  next sibling — panning the canvas to keep it in view. New pure `nextSelectionId(doc, id, dir)`.
+
 - **Find / Replace in notes.** The header's **Replace all** now takes a scope — **Topics**, **Notes**,
   or **Both** — so the find text can be swapped inside note bodies, not just topic labels. Each changed
   field is counted; topics-only stays the default. New `scope` arg on the `replaceTopics` op + handle.

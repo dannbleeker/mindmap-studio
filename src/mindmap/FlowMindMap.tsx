@@ -95,6 +95,7 @@ import {
   mergeStyle,
   moveInTree,
   moveSibling,
+  nextSelectionId,
   outdent,
   pasteBranch,
   removeAttachment,
@@ -1030,11 +1031,16 @@ function FlowInner({
         case "typeEdit":
           startEdit(intent.id, intent.seed);
           break;
+        case "selectDir": {
+          const next = nextSelectionId(docRef.current, intent.id, intent.dir);
+          if (next) focusNodeById(next);
+          break;
+        }
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [apply, undoAction, redoAction, deleteNodeWithUndo, startEdit]);
+  }, [apply, undoAction, redoAction, deleteNodeWithUndo, startEdit, focusNodeById]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 

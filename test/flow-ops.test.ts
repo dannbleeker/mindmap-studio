@@ -32,6 +32,7 @@ import {
   mergeStyle,
   moveInTree,
   moveSibling,
+  nextSelectionId,
   nodePath,
   outdent,
   pasteBranch,
@@ -338,6 +339,27 @@ describe("flow ops — content", () => {
     // centres 0,?,100 → even step 50 → middle node centre 50 (width 0 → x 50)
     expect(distributeNodes(doc, ["a", "b", "c"], "h", sizes).doc.root.children[1].pos?.x).toBe(50);
     expect(distributeNodes(doc, ["a", "b"], "h", sizes).doc).toEqual(doc); // <3 → no-op
+  });
+
+  it("nextSelectionId moves selection by logical tree direction", () => {
+    const d = base(); // r → [a → [a1, a2], b]
+    expect(nextSelectionId(d, "a", "left")).toBe("r"); // parent
+    expect(nextSelectionId(d, "r", "left")).toBeNull(); // root has no parent
+    expect(nextSelectionId(d, "a", "right")).toBe("a1"); // first child
+    expect(nextSelectionId(d, "b", "right")).toBeNull(); // leaf
+    expect(nextSelectionId(d, "a1", "down")).toBe("a2"); // next sibling
+    expect(nextSelectionId(d, "a2", "down")).toBeNull(); // last sibling
+    expect(nextSelectionId(d, "a2", "up")).toBe("a1"); // prev sibling
+    expect(nextSelectionId(d, "a1", "up")).toBeNull(); // first sibling
+    expect(nextSelectionId(d, "a", "down")).toBe("b"); // a → b
+    expect(nextSelectionId(d, "ghost", "left")).toBeNull(); // unknown id
+  });
+
+  it("nextSelectionId does not descend into a collapsed node", () => {
+    const d = base();
+    const a = findNode(d, "a");
+    if (a) a.collapsed = true;
+    expect(nextSelectionId(d, "a", "right")).toBeNull();
   });
 
   it("viewDoc re-roots at the drill target and drops map-level overlays (full doc otherwise)", () => {

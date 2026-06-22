@@ -117,6 +117,22 @@ describe("keyIntent", () => {
     expect(keyIntent(ev({ key: "a", ctrlKey: true }), st())).toBeNull();
     expect(keyIntent(ev({ key: "a", metaKey: true }), st())).toBeNull();
     expect(keyIntent(ev({ key: "a", altKey: true }), st())).toBeNull();
-    expect(keyIntent(ev({ key: "ArrowLeft" }), st())).toBeNull(); // multi-char key name
+    expect(keyIntent(ev({ key: "Home" }), st())).toBeNull(); // unhandled multi-char key name
+  });
+
+  it("maps bare arrows to logical selection movement (no modifiers)", () => {
+    const cases: [Partial<KeyEventLike>, KeyIntent][] = [
+      [{ key: "ArrowUp" }, { kind: "selectDir", id: "n1", dir: "up" }],
+      [{ key: "ArrowDown" }, { kind: "selectDir", id: "n1", dir: "down" }],
+      [{ key: "ArrowLeft" }, { kind: "selectDir", id: "n1", dir: "left" }],
+      [{ key: "ArrowRight" }, { kind: "selectDir", id: "n1", dir: "right" }],
+    ];
+    for (const [e, want] of cases) expect(keyIntent(ev(e), st())).toEqual(want);
+    // A modifier defers to the restructure shortcuts (not selectDir), and none fire without selection.
+    expect(keyIntent(ev({ key: "ArrowUp", ctrlKey: true, shiftKey: true }), st())).toEqual({
+      kind: "moveUp",
+      id: "n1",
+    });
+    expect(keyIntent(ev({ key: "ArrowUp" }), st({ selectedId: null }))).toBeNull();
   });
 });

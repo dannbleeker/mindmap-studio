@@ -55,6 +55,8 @@ export type TopicData = {
   attachmentNames?: string[];
   /** A detached/floating topic (not part of the central hierarchy). */
   floating: boolean;
+  /** Pinned in place (freeform): not draggable, and align / distribute skip it. Shows a lock badge. */
+  locked?: boolean;
   /** Dimmed by the read-only Power Filter (not on a path to a match); view-only opacity. */
   dimmed?: boolean;
   /** A current Find result — drawn with a highlight ring (view-only, canvas-only; never exported). */

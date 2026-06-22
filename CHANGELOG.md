@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Lock a topic's position.** Right-click a topic → **Lock position** to pin it: in free-canvas mode a
+  locked node can't be dragged and **Align** / **Distribute** skip it, so a carefully-placed topic stays
+  put (a 🔒 badge marks it; unlock from the same menu). New per-node `locked` flag + `toggleLocked` op.
+
 - **Tag → colour mapping.** The **Markers & tags** panel now carries a colour swatch beside each tag:
   pick a colour and every topic with that tag is tinted (⊘ clears it). Implemented as a stable,
   upserted `kind:"tag"` conditional-format rule, so it flows through the existing rule engine, canvas

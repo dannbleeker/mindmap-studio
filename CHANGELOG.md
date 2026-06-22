@@ -12,6 +12,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   upserted `kind:"tag"` conditional-format rule, so it flows through the existing rule engine, canvas
   tint, and legend. New pure `tagColor` / `setTagColor` helpers.
 
+- **Find / Replace in notes.** The header's **Replace all** now takes a scope — **Topics**, **Notes**,
+  or **Both** — so the find text can be swapped inside note bodies, not just topic labels. Each changed
+  field is counted; topics-only stays the default. New `scope` arg on the `replaceTopics` op + handle.
+
 - **Inline relationship label editing.** Double-click a relationship line to edit its label **in place**
   on the canvas (Enter / blur commits, Esc cancels) — previously inspector-only. Reuses the
   `setLinkLabel` op via a small link-edit context.

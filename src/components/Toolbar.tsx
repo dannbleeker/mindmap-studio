@@ -102,6 +102,8 @@ export interface ToolbarFind {
   setQuery: (value: string) => void;
   replaceWith: string;
   setReplaceWith: (value: string) => void;
+  replaceScope: "topics" | "notes" | "both";
+  setReplaceScope: (value: "topics" | "notes" | "both") => void;
   matchInfo: string;
   runSearch: (event: FormEvent) => void;
   runReplace: () => void;
@@ -384,8 +386,20 @@ export function Toolbar({
             aria-label="Replace with"
             style={{ width: 96 }}
           />
+          <select
+            className="mm-input"
+            value={find.replaceScope}
+            onChange={(e) => find.setReplaceScope(e.target.value as "topics" | "notes" | "both")}
+            aria-label="Replace scope"
+            title="Where to replace: topics, notes, or both"
+            style={{ width: 78 }}
+          >
+            <option value="topics">Topics</option>
+            <option value="notes">Notes</option>
+            <option value="both">Both</option>
+          </select>
           <TBtn
-            label="Replace the find text in every matching topic"
+            label="Replace the find text in every match (topics and/or notes per scope)"
             text="Replace all"
             ghost
             onClick={find.runReplace}

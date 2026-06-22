@@ -131,6 +131,8 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       setQuery: vi.fn(),
       replaceWith: "",
       setReplaceWith: vi.fn(),
+      replaceScope: "topics" as const,
+      setReplaceScope: vi.fn(),
       matchInfo: "",
       runSearch: vi.fn(),
       runReplace: vi.fn(),

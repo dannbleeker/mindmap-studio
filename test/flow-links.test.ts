@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { addLink, deleteLink, setLinkLabel } from "../src/mindmap/flow/ops";
+import { EDGE_PRESETS } from "../src/components/edgePresets";
+import { addLink, deleteLink, setLinkLabel, setLinkStyle } from "../src/mindmap/flow/ops";
 import type { MindMapDoc } from "../src/model/types";
 
 const base = (): MindMapDoc => ({
@@ -56,5 +57,29 @@ describe("cross-link ops", () => {
     const d = addLink(base(), "a", "b").doc;
     expect(setLinkLabel(d, "nope", "x").doc).toBe(d);
     expect(deleteLink(d, "nope").doc).toBe(d);
+  });
+
+  it("setLinkStyle sets an arrow override and drops the implicit 'to' default", () => {
+    const d1 = addLink(base(), "a", "b").doc;
+    const id = (d1.links ?? [])[0].id;
+    expect(setLinkStyle(d1, id, { arrow: "both" }).doc.links?.[0]?.arrow).toBe("both");
+    // "to" is the default → the field is dropped (lossless reset).
+    const back = setLinkStyle(setLinkStyle(d1, id, { arrow: "both" }).doc, id, { arrow: "to" }).doc;
+    const link = back.links?.[0];
+    expect(link && "arrow" in link).toBe(false);
+  });
+
+  it("each edge preset applies cleanly in one setLinkStyle call (whole look at once)", () => {
+    const d1 = addLink(base(), "a", "b").doc;
+    const id = (d1.links ?? [])[0].id;
+    for (const preset of EDGE_PRESETS) {
+      const link = setLinkStyle(d1, id, preset.patch).doc.links?.[0];
+      expect(link, preset.name).toBeDefined();
+      // The non-default fields of the preset land on the link.
+      if (preset.patch.dash && preset.patch.dash !== "dashed")
+        expect(link?.dash, preset.name).toBe(preset.patch.dash);
+      if (preset.patch.arrow && preset.patch.arrow !== "to")
+        expect(link?.arrow, preset.name).toBe(preset.patch.arrow);
+    }
   });
 });

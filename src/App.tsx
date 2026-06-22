@@ -104,6 +104,7 @@ import {
   saveMapHandle,
   setLastOpened,
 } from "./store/mapStore";
+import { setTagColor, tagColor } from "./tagColors";
 import { todayISO } from "./taskDate";
 import { buildTemplate } from "./templates";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
@@ -1729,6 +1730,10 @@ export function App() {
                 onPick={(id) => mapRef.current?.focusNode(id)}
                 onRenameTag={(from, to) => mapRef.current?.renameTag(from, to)}
                 onDeleteTag={(t) => mapRef.current?.deleteTag(t)}
+                tagColorOf={(t) => tagColor(liveDoc.rules, t)}
+                onSetTagColor={(t, color) =>
+                  mapRef.current?.setRules(setTagColor(liveDoc.rules, t, color))
+                }
               />
             )}
             {panels.statsOpen && <StatsPanel doc={liveDoc} />}

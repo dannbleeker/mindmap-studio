@@ -299,6 +299,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **The relationship inspector now reflects edits live.** Applying a preset or a direction / width /
+  dash / curve control updated the canvas but left the inspector's own highlights showing
+  selection-time state until you re-selected the edge. The selected relationship is now re-resolved
+  after each edit, so its controls track the change immediately.
+
 - **A corrupt saved map no longer white-screens the app.** A map whose stored structure had drifted (a
   missing or non-array `children`, a non-object node) threw in the projector and blanked the whole
   editor — unrecoverable on the boot-restore path. Docs are now normalised to a projectable shape at

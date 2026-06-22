@@ -615,6 +615,17 @@ describe("FlowMindMap canvas", () => {
       dash: "dotted",
       label: "depends on",
     });
+    // Each edit re-fires onSelectEdge with the freshly-resolved edge (no re-select needed) so the
+    // inspector's controls reflect the change live, not selection-time state.
+    expect(onSelectEdge).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: "l1",
+        arrow: "both",
+        color: "#ff0000",
+        dash: "dotted",
+        label: "depends on",
+      }),
+    );
 
     // Selecting a node clears the edge selection (mutually exclusive).
     run(() => fireEvent.click(nodeEl(container, "a")));

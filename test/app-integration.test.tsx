@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
+import * as mapStore from "../src/store/mapStore";
 
 // Integration cover for App — the orchestration root (previously 0%). Renders the whole app over a
 // fake IndexedDB, opens a map from the Start screen, and drives the editor's wiring: panels, dialogs,
@@ -233,6 +234,29 @@ describe("App (integration)", () => {
       }
     }
     expect(container.querySelector(".mm-editor")).toBeTruthy();
+  });
+
+  it("flushes a pending debounced autosave the instant the tab is hidden", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+    await flush();
+    await openEditor(user, container);
+    // Make an edit so a 500ms-debounced IndexedDB save is queued (scheduleSave).
+    const quick = screen.queryByPlaceholderText(/Quick add/);
+    if (!quick) return; // editor variant without quick-add — nothing to assert
+    await user.click(quick);
+    await user.type(quick, "Closing edit{Enter}");
+    // Don't wait out the debounce: hide the tab now and assert the save fired immediately, proving the
+    // edit isn't lost in the 500ms window on close.
+    const saveSpy = vi.spyOn(mapStore, "saveMap");
+    act(() => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => "hidden",
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await waitFor(() => expect(saveSpy).toHaveBeenCalled());
   });
 
   it("returns to the Start screen via Home and back into a map", async () => {

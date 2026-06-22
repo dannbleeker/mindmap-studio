@@ -563,7 +563,10 @@ export function App() {
 
   function scheduleSave() {
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => persist(liveDocRef.current, true), 500);
+    saveTimer.current = setTimeout(() => {
+      saveTimer.current = null; // mark not-pending so the hidden-flush below skips an already-saved doc
+      persist(liveDocRef.current, true);
+    }, 500);
   }
 
   // --- disk files (open / save / save-as / autosave-to-file) -----------------
@@ -739,6 +742,23 @@ export function App() {
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, []);
+
+  // A library-only map autosaves to IndexedDB on a 500ms debounce, so an edit made just before the tab
+  // is hidden/closed would be lost if that debounce hasn't fired yet. Flush a pending autosave the
+  // moment the page is hidden — visibilitychange is the reliable persistence signal (beforeunload can't
+  // run async work and is unreliable on mobile). The disk write-through (fileSaveTimer) is intentionally
+  // NOT flushed here: it needs a live permission grant and FS writes from a hidden page aren't reliable;
+  // the IndexedDB copy stays the record of truth.
+  useEffect(() => {
+    const onHidden = () => {
+      if (document.visibilityState !== "hidden" || !saveTimer.current) return;
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+      void persist(liveDocRef.current, true);
+    };
+    document.addEventListener("visibilitychange", onHidden);
+    return () => document.removeEventListener("visibilitychange", onHidden);
+  }, [persist]);
 
   // Ctrl/⌘+S save to file, +Shift save-as, Ctrl/⌘+O open — preventDefault so the browser's own
   // save/open dialogs don't hijack them. Bound once; the callbacks are stable (useCallback).

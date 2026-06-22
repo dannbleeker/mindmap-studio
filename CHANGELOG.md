@@ -11,6 +11,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   locked node can't be dragged and **Align** / **Distribute** skip it, so a carefully-placed topic stays
   put (a 🔒 badge marks it; unlock from the same menu). New per-node `locked` flag + `toggleLocked` op.
 
+- **Tag → colour mapping.** The **Markers & tags** panel now carries a colour swatch beside each tag:
+  pick a colour and every topic with that tag is tinted (⊘ clears it). Implemented as a stable,
+  upserted `kind:"tag"` conditional-format rule, so it flows through the existing rule engine, canvas
+  tint, and legend. New pure `tagColor` / `setTagColor` helpers.
+
 - **Find / Replace in notes.** The header's **Replace all** now takes a scope — **Topics**, **Notes**,
   or **Both** — so the find text can be swapped inside note bodies, not just topic labels. Each changed
   field is counted; topics-only stays the default. New `scope` arg on the `replaceTopics` op + handle.

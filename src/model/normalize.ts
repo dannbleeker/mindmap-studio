@@ -43,7 +43,10 @@ function normalizeNode(value: unknown): MapNode {
         typeof a.dataUrl === "string" &&
         a.dataUrl.startsWith("data:"),
     );
-    if (safe.length !== node.attachments.length) node.attachments = safe;
+    // Drop the array entirely when nothing safe remains, so a sanitised node stays lossless (no stray
+    // empty `attachments: []` that a clean node wouldn't carry).
+    if (safe.length !== node.attachments.length)
+      node.attachments = safe.length > 0 ? safe : undefined;
   }
   return node;
 }

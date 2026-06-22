@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Floating topics are first-class for editing.** A floating topic and the nodes inside it now accept
+  the full edit set — **Add child / Add sibling / Indent / Outdent / Move / Delete / Group in boundary /
+  Summarize / Paste branch**, plus every inspector edit (rename, note, branch colour, line style,
+  hyperlink, task fields, style, image, attachments, collapse, callouts). These ops previously resolved
+  only the central tree, so the context-menu actions and inspector edits silently no-op'd on a floating
+  topic even though it rendered and could be selected. Add-sibling/indent/outdent cross the
+  tree↔floating boundary sensibly (a floating topic's child can outdent to its own top-level floating
+  topic; a floating topic can indent under the previous one). Central-tree behaviour is unchanged.
+
 - **Relationship style presets.** The relationship inspector now leads with a **Presets** row — Arrow,
   Dashed, Dotted, Thick, Curved, Double — so one click sets a cross-link's whole look (dash + width +
   curve + arrowhead) in a single undo step. `setLinkStyle` now also accepts `arrow`.
@@ -311,6 +320,30 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   for the upcoming flat **one-tab-per-document** model.
 
 ### Fixed
+
+- **Edits made just before the tab closes are no longer lost.** A library-only map autosaves to
+  IndexedDB on a 500ms debounce, while the `beforeunload` guard only covered file-bound dirtiness — so
+  an edit made within that window before the tab was hidden/closed vanished on the next open. Any pending
+  autosave is now flushed the moment the page is hidden (`visibilitychange`, the reliable persistence
+  signal).
+
+- **Markdown export keeps multi-line topics intact.** A topic carrying a newline (from a paste or a
+  note→topic conversion) split its bullet across two lines, and re-import dropped the orphaned
+  continuation — losing content on round-trip. Topic whitespace is now collapsed to a single space, so
+  the bullet stays one line and the tree round-trips.
+
+- **The Power Filter's overdue / due-soon modes work for every caller.** `filterResult` defaulted its
+  `today` argument to an empty string, which made every date comparison silently fail for any call site
+  that omitted it; it now defaults to the real today.
+
+- **Callout edits reach floating topics.** Adding / editing / recolouring / deleting a callout on a
+  floating topic silently no-op'd (the write ops searched only the central tree, though callouts already
+  rendered on floating topics); `setCalloutColor` also now stamps the node's modified time like its
+  siblings.
+
+- **The import drop zone no longer flickers while dragging.** Moving the cursor over the drop zone's own
+  icon/caption fired `dragleave` and cleared the highlight mid-drag; a drag-depth counter keeps it lit
+  until the drag truly leaves.
 
 - **The relationship inspector now reflects edits live.** Applying a preset or a direction / width /
   dash / curve control updated the canvas but left the inspector's own highlights showing

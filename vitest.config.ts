@@ -46,6 +46,8 @@ export default defineConfig({
       ["test/breadcrumb.test.tsx", "jsdom"],
       ["test/saved-views-hook.test.tsx", "jsdom"],
       ["test/use-version-history.test.tsx", "jsdom"],
+      ["test/use-toast.test.tsx", "jsdom"],
+      ["test/use-format-painter.test.tsx", "jsdom"],
       ["test/app-integration.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only

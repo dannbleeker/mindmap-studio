@@ -40,8 +40,10 @@ import { editorThemeVars } from "./design/tokens";
 import { designById } from "./designs";
 import { type FilterCriteria, filterResult, filterToDoc, focusSet, isFilterActive } from "./filter";
 import { clampIndex, togglePlay } from "./historyPlayback";
+import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
 import { usePanels } from "./hooks/usePanels";
+import { useToast } from "./hooks/useToast";
 import { useVersionHistory } from "./hooks/useVersionHistory";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
@@ -77,16 +79,10 @@ import {
 } from "./mindmap";
 import { findAnyNode, nodePath } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
-import type { MapNode, MindMapDoc, NodeStyle } from "./model/types";
+import type { MapNode, MindMapDoc } from "./model/types";
 import { noteCounts } from "./noteFormat";
 import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "./outline";
-import {
-  type ToastAction,
-  type ToastKind,
-  type ToastOptions,
-  checkForUpdate,
-  initPwaUpdateToast,
-} from "./pwa/pwaUpdate";
+import { checkForUpdate, initPwaUpdateToast } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
 import { useSavedViews } from "./savedViews";
 import { type LibraryHit, findDocMatches, searchLibrary } from "./search";
@@ -174,13 +170,8 @@ export function App() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
-  // Transient toast: a message + an optional action button (e.g. "Refresh now").
-  const [toast, setToast] = useState<{
-    kind: ToastKind;
-    message: string;
-    action?: ToastAction;
-  } | null>(null);
-  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Transient toast: a message + an optional action button (e.g. "Refresh now") — owned by useToast.
+  const { toast, showToast, showHint, dismiss: dismissToast } = useToast();
   const { theme, setThemeId } = useTheme();
   const [layout, setLayout] = useState<LayoutKind>(() => {
     const valid = [
@@ -521,37 +512,8 @@ export function App() {
     mapRef.current?.setSelectedNote(noteDraft);
   }
 
-  // Core toast. Stable (no deps) so it can be injected into the PWA updater once.
-  const showToast = useCallback((kind: ToastKind, message: string, opts?: ToastOptions) => {
-    setToast({ kind, message, action: opts?.action });
-    if (hintTimer.current) clearTimeout(hintTimer.current);
-    hintTimer.current = setTimeout(() => setToast(null), opts?.durationMs ?? 4000);
-  }, []);
-
-  // Message-only shorthand used across the toolbar handlers. Memoised so the file-action callbacks
-  // that depend on it stay stable (the Ctrl+S/O key handler binds them once).
-  const showHint = useCallback((message: string) => showToast("info", message), [showToast]);
-
-  // Format Painter: copy the selected topic's style, then paste it across a (multi-)selection. The
-  // copied style lives in App state so the "Paste format" affordance can enable/disable reactively.
-  const [copiedStyle, setCopiedStyle] = useState<NodeStyle | null>(null);
-  const copyFormat = () => {
-    const style = mapRef.current?.copySelectedStyle();
-    if (!style) {
-      showHint("Select a topic first, then Copy format.");
-      return;
-    }
-    setCopiedStyle(style);
-    showHint(
-      Object.keys(style).length > 0
-        ? "Format copied — select topic(s) and Paste format."
-        : "That topic has no custom format to copy.",
-    );
-  };
-  const pasteFormat = () => {
-    if (!copiedStyle) return;
-    if (!mapRef.current?.setSelectedStyle(copiedStyle)) showHint("Select a topic first.");
-  };
+  // Format Painter (copy a topic's style → paste across a selection) — owned by useFormatPainter.
+  const { copyFormat, pasteFormat, canPasteFormat } = useFormatPainter(mapRef, showHint);
 
   // Paste an image from the clipboard (Ctrl/⌘+V) onto the selected topic — unless focus is in a text
   // field / note editor (so normal text paste still works there). Reuses the node-image pipeline.
@@ -1439,7 +1401,7 @@ export function App() {
       handleBackgroundImage,
       copyFormat,
       pasteFormat,
-      canPasteFormat: copiedStyle !== null,
+      canPasteFormat,
       shuffleBranchColors: () => mapRef.current?.shuffleBranchColors(),
       applyDesign: (id: string) => {
         const design = designById(id);
@@ -1630,7 +1592,7 @@ export function App() {
                 type="button"
                 onClick={() => {
                   toast.action?.run();
-                  setToast(null);
+                  dismissToast();
                 }}
                 style={{ ...controlStyle, padding: "4px 12px" }}
               >

@@ -71,4 +71,16 @@ describe("boardColumns", () => {
     };
     expect(boardColumns(allTagged).map((c) => c.tag)).toEqual(["x"]);
   });
+
+  it("lists a topic once per column even if it carries the same tag twice", () => {
+    // A duplicate tag (from an import or a hand-edited file) must not list — or double-count — a card.
+    const dup: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d3",
+      title: "T",
+      root: { id: "r", topic: "Root", tags: ["dup", "dup"], children: [] },
+    };
+    const col = boardColumns(dup).find((c) => c.tag === "dup");
+    expect(col?.cards.map((x) => x.id)).toEqual(["r"]); // once, not ["r","r"]
+  });
 });

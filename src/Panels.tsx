@@ -1,4 +1,11 @@
-import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type ClipboardEvent as ReactClipboardEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { ProgressPie } from "./ProgressPie";
 import { InspectorResizer } from "./components/InspectorResizer";
 import {
@@ -2371,6 +2378,15 @@ export function NotesPanel({
   const serialize = () => {
     if (ref.current) onChange(htmlToNote(ref.current.innerHTML));
   };
+  // Paste as PLAIN TEXT only: never let pasted HTML (which can carry <img onerror=…> or other active
+  // markup) enter the live contentEditable, where the browser would run it. The note is markdown-backed,
+  // so typed formatting still works; only the paste path is constrained.
+  const onPaste = (e: ReactClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault(); // block the default rich paste regardless — pasted HTML must never enter the DOM
+    const text = e.clipboardData.getData("text/plain");
+    if (typeof document.execCommand === "function") document.execCommand("insertText", false, text);
+    serialize();
+  };
   const exec = (command: string) => {
     ref.current?.focus();
     // Prefer semantic tags (<b>/<i>) over inline-style spans so the serialiser stays simple.
@@ -2448,6 +2464,7 @@ export function NotesPanel({
             aria-label="Node note"
             data-placeholder="Add a note… bold, italic, lists & links supported"
             onInput={serialize}
+            onPaste={onPaste}
             onBlur={onBlur}
             style={{
               flex: 1,

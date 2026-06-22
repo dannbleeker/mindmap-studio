@@ -124,13 +124,53 @@ function userGuidePlugin(): Plugin {
   };
 }
 
+// Content-Security-Policy for the shipped app. Injected into index.html at BUILD time only (apply:
+// "build"), so the dev server + HMR — which need inline scripts — are untouched. A strict policy is
+// possible because (a) we ship no inline scripts (the module-preload polyfill is disabled below, so
+// modern browsers load only hashed external modules) and (b) all dynamic content is allowlist-
+// sanitised before it reaches the DOM. `script-src 'self'` is the key line: it blocks inline event
+// handlers (onerror=…) and javascript: URLs as a belt-and-suspenders backstop to the sanitisers.
+// `style-src` keeps 'unsafe-inline' (inline styles aren't a script-exec vector; React + 3rd-party CSS
+// need it). `object-src 'none'` + `base-uri 'none'` close off plugin and <base> vectors. (Clickjacking
+// protection — frame-ancestors / X-Frame-Options — is header-only; it's ignored in a <meta> and so
+// belongs at the hosting layer.) Only index.html is transformed; the standalone dashboard.html (which
+// calls GitHub) lives in public/ and is copied untouched.
+function cspPlugin(): Plugin {
+  const CSP = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self'",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+    "object-src 'none'",
+    "base-uri 'none'",
+  ].join("; ");
+  return {
+    name: "mindmap-csp",
+    apply: "build",
+    transformIndexHtml(html) {
+      return html.replace(
+        "</title>",
+        `</title>\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`,
+      );
+    },
+  };
+}
+
 // base "./" keeps the build host-agnostic (local preview + a GitHub Pages
 // project/custom-domain deploy without path juggling). Vitest config lives in
 // vitest.config.ts to avoid a dual-vite type clash.
 export default defineConfig({
   base: "./",
+  // No inline module-preload polyfill → the production HTML carries zero inline scripts, so the strict
+  // `script-src 'self'` CSP holds (modern browsers / the PWA target support modulepreload natively).
+  build: { modulePreload: { polyfill: false } },
   plugins: [
     react(),
+    cspPlugin(),
     userGuidePlugin(),
     // Installable, offline-capable PWA: precaches the app shell so it works
     // with no network and can be installed to the home screen / desktop.

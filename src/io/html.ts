@@ -1,8 +1,14 @@
 // Self-contained HTML export: embed the map's SVG in a standalone document that
 // opens anywhere, offline, with no dependencies. Pure + deterministic.
+//
+// SECURITY: `svg` is interpolated verbatim into live markup, so it MUST already be
+// sanitised — pass the output of io/svgSanitize.ts `sanitizeSvg` (the app routes
+// exports through useMapExports.cleanSvg, which does exactly that). Never hand this
+// raw exporter output or untrusted SVG; `title` is escaped here, the SVG body is not.
 
 import { escapeHtmlContent as escapeHtml } from "./htmlEscape";
 
+/** Wrap an ALREADY-SANITISED SVG (see module note) in a standalone HTML document. */
 export function wrapSvgHtml(svg: string, title: string): string {
   return `<!doctype html>
 <html lang="en">
@@ -27,6 +33,7 @@ export function wrapSvgHtml(svg: string, title: string): string {
 // for the browser's "Save as PDF". Pure + deterministic; the app loads this into
 // a hidden iframe and calls print(). Maps are wide, so the page defaults to
 // landscape. No auto-print script here — the caller triggers print on load.
+/** Build a print-to-PDF document from an ALREADY-SANITISED SVG (see module note). */
 export function buildPrintDoc(svg: string, title: string): string {
   return `<!doctype html>
 <html lang="en">

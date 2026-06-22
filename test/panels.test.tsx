@@ -12,6 +12,7 @@ import {
   MarkerTagIndex,
   type NamedStyle,
   NoteEditorPanel,
+  NotesPanel,
   OutlinePanel,
   StatsPanel,
   StyleBar,
@@ -605,6 +606,32 @@ describe("MarkerTagIndex (interaction)", () => {
     );
     expect(screen.getByLabelText("Colour for tag risk")).toBeTruthy(); // swatch present
     expect(screen.queryByRole("button", { name: "Clear colour for tag risk" })).toBeNull();
+  });
+});
+
+describe("NotesPanel (paste hardening, F2)", () => {
+  it("pastes as plain text — pasted HTML never enters the editor", () => {
+    const onChange = vi.fn();
+    render(
+      <NotesPanel
+        selected={{ id: "a", topic: "A", note: "" }}
+        value=""
+        onChange={onChange}
+        onBlur={() => {}}
+      />,
+    );
+    const editor = screen.getByLabelText("Node note");
+    const evil = '<img src=x onerror="alert(1)">hello';
+    const prevented = !fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) => (type === "text/plain" ? "hello" : evil),
+      },
+    });
+    // Default paste is prevented (so the browser never inserts the raw HTML)…
+    expect(prevented).toBe(true);
+    // …and no <img>/active markup ever reaches the live editor, nor onChange.
+    expect(editor.querySelector("img")).toBeNull();
+    for (const call of onChange.mock.calls) expect(String(call[0])).not.toContain("onerror");
   });
 });
 

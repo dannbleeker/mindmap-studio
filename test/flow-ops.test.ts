@@ -414,6 +414,20 @@ describe("flow ops — content", () => {
     expect(fontScaleFactor(undefined)).toBe(1);
   });
 
+  it("setHyperlink stores a safe URL but strips a script-bearing scheme (F1)", () => {
+    expect(findNode(setHyperlink(base(), "a", "https://example.com").doc, "a")?.hyperlink).toBe(
+      "https://example.com",
+    );
+    // javascript:/data:/vbscript: (incl. control-char evasion) are dropped, not stored.
+    expect(
+      findNode(setHyperlink(base(), "a", "javascript:alert(1)").doc, "a")?.hyperlink,
+    ).toBeUndefined();
+    expect(
+      findNode(setHyperlink(base(), "a", "java\tscript:alert(1)").doc, "a")?.hyperlink,
+    ).toBeUndefined();
+    expect(findNode(setHyperlink(base(), "a", "").doc, "a")?.hyperlink).toBeUndefined();
+  });
+
   it("nextSelectionId moves selection by logical tree direction", () => {
     const d = base(); // r → [a → [a1, a2], b]
     expect(nextSelectionId(d, "a", "left")).toBe("r"); // parent

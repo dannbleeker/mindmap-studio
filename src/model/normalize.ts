@@ -1,4 +1,5 @@
-import type { MapNode, MindMapDoc } from "./types";
+import { isDangerousUrl } from "../io/urlSafety";
+import type { MapAttachment, MapNode, MindMapDoc } from "./types";
 
 // Defensive normalisation for docs entering the app from an UNTRUSTED store — IndexedDB (which can
 // hold a partially-written or schema-drifted map) or a hand-edited .json file. The model is a tree the
@@ -22,12 +23,29 @@ function normalizeNode(value: unknown): MapNode {
   const children = Array.isArray(o.children)
     ? o.children.filter((c) => c && typeof c === "object").map(normalizeNode)
     : [];
-  return {
+  const node = {
     ...o,
     id: typeof o.id === "string" && o.id ? o.id : newId(),
     topic: typeof o.topic === "string" ? o.topic : "",
     children,
   } as MapNode;
+  // A stored/hand-edited doc is untrusted (only touched when actually unsafe, so a clean doc passes
+  // through value-identical): strip a script-bearing hyperlink, and keep only attachments that are
+  // genuine inline `data:` URLs — a `javascript:` "attachment" would execute when its <a> is clicked
+  // (the download attribute is ignored for javascript: URLs).
+  if (typeof node.hyperlink === "string" && isDangerousUrl(node.hyperlink))
+    node.hyperlink = undefined;
+  if (Array.isArray(node.attachments)) {
+    const safe = (node.attachments as MapAttachment[]).filter(
+      (a) =>
+        a &&
+        typeof a === "object" &&
+        typeof a.dataUrl === "string" &&
+        a.dataUrl.startsWith("data:"),
+    );
+    if (safe.length !== node.attachments.length) node.attachments = safe;
+  }
+  return node;
 }
 
 /** Make a loaded/parsed doc safe to project: guarantees `root` and every node carry a real children

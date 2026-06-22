@@ -84,6 +84,57 @@ describe("normalizeDoc", () => {
     expect(normalizeDoc(good)).toEqual(good);
   });
 
+  it("strips a script-bearing hyperlink and a non-data: attachment from an untrusted doc (F3)", () => {
+    const hostile = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            hyperlink: "javascript:alert(1)",
+            attachments: [
+              { name: "evil", dataUrl: "javascript:alert(1)", size: 1 },
+              { name: "ok", dataUrl: "data:text/plain;base64,AA==", size: 2 },
+            ],
+            children: [],
+          },
+        ],
+      },
+    } as unknown as MindMapDoc;
+    const a = normalizeDoc(hostile).root.children[0];
+    expect(a.hyperlink).toBeUndefined(); // javascript: dropped
+    expect(a.attachments?.map((x) => x.name)).toEqual(["ok"]); // only the data: attachment kept
+  });
+
+  it("keeps a safe hyperlink + data: attachment untouched", () => {
+    const ok = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            hyperlink: "https://example.com",
+            attachments: [{ name: "f", dataUrl: "data:text/plain;base64,AA==", size: 2 }],
+            children: [],
+          },
+        ],
+      },
+    } as unknown as MindMapDoc;
+    const a = normalizeDoc(ok).root.children[0];
+    expect(a.hyperlink).toBe("https://example.com");
+    expect(a.attachments).toHaveLength(1);
+  });
+
   it("makes a corrupt doc projectable instead of throwing", () => {
     const corrupt = {
       schemaVersion: 1,

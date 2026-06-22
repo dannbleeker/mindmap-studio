@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-22T13:21:57.173Z",
-  "commit": "1f11ac7",
+  "generatedAt": "2026-06-22T18:54:42.870Z",
+  "commit": "743feb6",
   "headline": {
-    "linesTsJs": 51586,
-    "tests": 1390,
+    "linesTsJs": 51598,
+    "tests": 1391,
     "lineCoveragePct": 88.95,
-    "commits": 770,
-    "ageDays": 10,
+    "commits": 772,
+    "ageDays": 11,
     "trackedFiles": 370,
     "featureManualPct": 71.3,
     "featureBookPct": 71.3,
@@ -21,7 +21,7 @@
     {
       "category": "Unit tests",
       "files": 138,
-      "lines": 19587
+      "lines": 19599
     },
     {
       "category": "Build scripts",
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 85.99,
-      "covered": 5508,
-      "total": 6405
+      "covered": 5507,
+      "total": 6404
     }
   },
   "tests": {
-    "unit": 1390,
+    "unit": 1391,
     "e2e": 0,
-    "durationMs": 58976,
+    "durationMs": 56870,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 15216
+        "ms": 13944
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 14191
+        "ms": 13935
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6545
+        "ms": 6239
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5761
+        "ms": 5697
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3593
+        "ms": 3682
       }
     ]
   },
@@ -780,17 +780,17 @@
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
-    "ageDays": 10,
-    "commits": 770,
-    "commits7d": 405,
+    "ageDays": 11,
+    "commits": 772,
+    "commits7d": 399,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 387
+        "count": 388
       },
       {
         "name": "github-actions[bot]",
-        "count": 356
+        "count": 357
       },
       {
         "name": "Claude",
@@ -798,8 +798,8 @@
       }
     ],
     "churn30d": {
-      "added": 99298,
-      "removed": 30658
+      "added": 99329,
+      "removed": 30677
     },
     "changelogEntries": 262
   }

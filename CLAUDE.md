@@ -11,8 +11,11 @@ The full local gate is **one** command, fail-fast, in this order:
 
 ```sh
 pnpm gate
-# tsc --noEmit  →  biome check .  →  knip  →  vitest run  →  vite build  →  size budget
+# tsc --noEmit → biome check . → knip → feature-coverage → vitest run --coverage → vite build → size budget
 ```
+
+The `vitest run --coverage` step enforces a no-regression coverage floor
+(`vitest.config.ts` → `coverage.thresholds`); raise it as coverage climbs.
 
 - Run `pnpm gate` before every push. Nothing is "done" until the gate is green
   **and** CI is green.

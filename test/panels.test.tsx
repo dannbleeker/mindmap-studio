@@ -2,7 +2,7 @@
 // later Panels refactor (Phase D): each panel must mount without throwing AND show a known piece of
 // user-visible content. Assertions target visible text / roles / labels — NOT internal structure —
 // so they keep passing after the panels are rebuilt on shared primitives.
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -568,6 +568,43 @@ describe("MarkerTagIndex (interaction)", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "Delete tag risk" }));
     expect(onDeleteTag).toHaveBeenCalledWith("risk");
+  });
+
+  it("maps a tag to a colour via the swatch (and shows ⊘ to clear an existing colour)", async () => {
+    const onSetTagColor = vi.fn();
+    render(
+      <MarkerTagIndex
+        root={sampleRoot()}
+        onPick={noop}
+        onRenameTag={noop}
+        onDeleteTag={noop}
+        tagColorOf={(t) => (t === "risk" ? "#ff0000" : undefined)}
+        onSetTagColor={onSetTagColor}
+      />,
+    );
+    // The swatch reflects the current colour and pushes a new pick.
+    const swatch = screen.getByLabelText("Colour for tag risk") as HTMLInputElement;
+    expect(swatch.value).toBe("#ff0000");
+    fireEvent.input(swatch, { target: { value: "#00ff00" } });
+    expect(onSetTagColor).toHaveBeenCalledWith("risk", "#00ff00");
+    // A coloured tag offers the ⊘ clear button → clears to undefined.
+    await userEvent.click(screen.getByRole("button", { name: "Clear colour for tag risk" }));
+    expect(onSetTagColor).toHaveBeenCalledWith("risk", undefined);
+  });
+
+  it("hides the ⊘ clear button for a tag with no colour yet", () => {
+    render(
+      <MarkerTagIndex
+        root={sampleRoot()}
+        onPick={noop}
+        onRenameTag={noop}
+        onDeleteTag={noop}
+        tagColorOf={() => undefined}
+        onSetTagColor={noop}
+      />,
+    );
+    expect(screen.getByLabelText("Colour for tag risk")).toBeTruthy(); // swatch present
+    expect(screen.queryByRole("button", { name: "Clear colour for tag risk" })).toBeNull();
   });
 });
 

@@ -23,7 +23,7 @@
     "book:epub": "node scripts/build-book-epub.mjs",
     "book:pdf": "node scripts/build-book-pdf.mjs",
     "stats": "pnpm test:coverage && vite build && pnpm features && pnpm build-stats",
-    "gate": "tsc --noEmit && biome check . && knip && node scripts/check-feature-coverage.mjs && vitest run && vite build && node scripts/size-budget.mjs"
+    "gate": "tsc --noEmit && biome check . && knip && node scripts/check-feature-coverage.mjs && vitest run --coverage && vite build && node scripts/size-budget.mjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.11.0",

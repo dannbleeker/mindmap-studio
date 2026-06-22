@@ -924,15 +924,19 @@ export function toggleIcon(doc: MindMapDoc, id: string, icon: string): OpResult 
 
 // --- callouts (anchored annotation bubbles) --------------------------------
 
+// Callouts attach to ANY node — central-tree or floating topic — and both render (FlowMindMap builds
+// the overlay by walking floatingTopics too) and prune via findAnyNode. So these writes resolve the
+// host with findAnyNode, not locate(root), or a floating topic's callout edits would silently no-op.
+
 /** Add a callout to a node (offset staggered by existing count so they don't stack). */
 export function addCallout(doc: MindMapDoc, nodeId: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, nodeId);
-  if (!loc) return { doc };
-  const callouts = loc.node.callouts ?? [];
+  const node = findAnyNode(next, nodeId);
+  if (!node) return { doc };
+  const callouts = node.callouts ?? [];
   const callout: Callout = { id: makeId(), text: "Note", dx: 48, dy: -28 + callouts.length * 46 };
-  loc.node.callouts = [...callouts, callout];
-  touch(loc.node, opsClock());
+  node.callouts = [...callouts, callout];
+  touch(node, opsClock());
   return { doc: next, selectId: nodeId };
 }
 
@@ -944,11 +948,11 @@ export function setCalloutText(
   text: string,
 ): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, nodeId);
-  const callout = loc?.node.callouts?.find((c) => c.id === calloutId);
-  if (!callout) return { doc };
+  const node = findAnyNode(next, nodeId);
+  const callout = node?.callouts?.find((c) => c.id === calloutId);
+  if (!node || !callout) return { doc };
   callout.text = text;
-  if (loc) touch(loc.node, opsClock());
+  touch(node, opsClock());
   return { doc: next };
 }
 
@@ -960,21 +964,22 @@ export function setCalloutColor(
   color: string,
 ): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, nodeId);
-  const callout = loc?.node.callouts?.find((c) => c.id === calloutId);
-  if (!callout) return { doc };
+  const node = findAnyNode(next, nodeId);
+  const callout = node?.callouts?.find((c) => c.id === calloutId);
+  if (!node || !callout) return { doc };
   callout.color = color || undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 
 /** Remove a callout (clearing the array when it empties). */
 export function deleteCallout(doc: MindMapDoc, nodeId: string, calloutId: string): OpResult {
   const next = structuredClone(doc);
-  const loc = locate(next.root, nodeId);
-  if (!loc?.node.callouts) return { doc };
-  const kept = loc.node.callouts.filter((c) => c.id !== calloutId);
-  loc.node.callouts = kept.length > 0 ? kept : undefined;
-  touch(loc.node, opsClock());
+  const node = findAnyNode(next, nodeId);
+  if (!node?.callouts) return { doc };
+  const kept = node.callouts.filter((c) => c.id !== calloutId);
+  node.callouts = kept.length > 0 ? kept : undefined;
+  touch(node, opsClock());
   return { doc: next };
 }
 

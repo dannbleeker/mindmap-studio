@@ -21,6 +21,7 @@ import {
   deleteNode,
   deleteSummary,
   deleteTag,
+  detachBranch,
   distributeNodes,
   findAnyNode,
   findNode,
@@ -366,6 +367,30 @@ describe("flow ops — content", () => {
     // centres 0,?,100 → even step 50 → middle node centre 50 (width 0 → x 50)
     expect(distributeNodes(doc, ["a", "b", "c"], "h", sizes).doc.root.children[1].pos?.x).toBe(50);
     expect(distributeNodes(doc, ["a", "b"], "h", sizes).doc).toEqual(doc); // <3 → no-op
+  });
+
+  it("detachBranch pops a subtree out of the tree into floatingTopics (with a pos)", () => {
+    const { doc, selectId } = detachBranch(base(), "a"); // a has a1, a2
+    expect(kids(doc, "r")).toEqual(["b"]); // a removed from the central tree
+    expect(floatIds(doc)).toEqual(["a"]); // now a top-level floating topic
+    expect(selectId).toBe("a");
+    const floated = doc.floatingTopics?.[0];
+    expect(floated?.children.map((c) => c.id)).toEqual(["a1", "a2"]); // subtree intact
+    expect(floated?.pos).toBeDefined(); // got a position so it lands somewhere in free-canvas
+  });
+
+  it("detachBranch is a no-op for the root or an already-floating topic", () => {
+    const d = base();
+    expect(detachBranch(d, "r").doc).toBe(d);
+    const floated = detachBranch(d, "b").doc; // b → floating
+    expect(detachBranch(floated, "b").doc).toBe(floated); // already floating → no-op
+  });
+
+  it("reparent re-attaches a floating topic back into the tree (detach round-trip)", () => {
+    const floated = detachBranch(base(), "a").doc;
+    const back = reparent(floated, "a", "r").doc;
+    expect(kids(back, "r")).toContain("a");
+    expect(back.floatingTopics).toBeUndefined(); // array emptied → dropped
   });
 
   it("nextSelectionId moves selection by logical tree direction", () => {

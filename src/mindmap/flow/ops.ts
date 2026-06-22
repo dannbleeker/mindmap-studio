@@ -651,6 +651,26 @@ export function addStickyNote(doc: MindMapDoc, text = "Note"): OpResult {
   return { doc: next, selectId: node.id };
 }
 
+/** Detach a branch into a free-floating topic: pop the node + its whole subtree out of the central
+ *  hierarchy and add it to `floatingTopics` (it keeps a `pos` so it lands somewhere in free-canvas
+ *  mode). No-op for the root or a node that's already a top-level floating topic. Re-attach is just
+ *  `reparent` (drag it back in, or the "re-attach" menu item). */
+export function detachBranch(doc: MindMapDoc, id: string): OpResult {
+  if (id === doc.root.id) return { doc };
+  if ((doc.floatingTopics ?? []).some((f) => f.id === id)) return { doc }; // already floating
+  const next = structuredClone(doc);
+  const src = locateRemovable(next, id);
+  if (!src) return { doc };
+  src.remove();
+  // Give it a position if it has none, staggered by the existing count, so it doesn't stack on others.
+  if (!src.node.pos) {
+    const n = (next.floatingTopics ?? []).length;
+    src.node.pos = { x: 60 + n * 24, y: 60 + n * 24 };
+  }
+  next.floatingTopics = [...(next.floatingTopics ?? []), src.node];
+  return { doc: next, selectId: id };
+}
+
 /** Replace a node's tags (an empty array clears them). */
 export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   const next = structuredClone(doc);

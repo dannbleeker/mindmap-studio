@@ -84,6 +84,7 @@ import {
   deleteNode,
   deleteSummary,
   deleteTag,
+  detachBranch,
   distributeNodes,
   findAnyNode,
   findNode,
@@ -1238,6 +1239,11 @@ function FlowInner({
         apply(isolateBranch(docRef.current, id));
         return docRef.current !== before;
       },
+      detachBranch: (id) => {
+        const before = docRef.current;
+        apply(detachBranch(docRef.current, id));
+        return docRef.current !== before;
+      },
       renameMap: (title) => apply(setTopic(docRef.current, docRef.current.root.id, title)),
       renameNode: (id, topic) => apply(setTopic(docRef.current, id, topic)),
       indentNode: (id, dir) =>
@@ -1589,6 +1595,21 @@ function FlowInner({
                   findAnyNode(docRef.current, id)?.locked ? "Unlock position" : "Lock position",
                   () => apply(toggleLocked(docRef.current, id)),
                 ]);
+                // Detach a central-tree branch out to a floating topic; re-attach a floating one to
+                // the centre. (Either way you can also just drag it.)
+                const isFloatingTop = (docRef.current.floatingTopics ?? []).some(
+                  (f) => f.id === id,
+                );
+                if (isFloatingTop)
+                  items.push([
+                    "Re-attach to centre",
+                    () => apply(reparent(docRef.current, id, docRef.current.root.id)),
+                  ]);
+                else if (id !== docRef.current.root.id)
+                  items.push([
+                    "Detach to floating topic",
+                    () => apply(detachBranch(docRef.current, id)),
+                  ]);
                 items.push(["Delete", () => deleteNodeWithUndo(id), true]);
                 // Live marker/priority state so the quick-setters reflect the node (and toggle off).
                 const node = findAnyNode(docRef.current, id);

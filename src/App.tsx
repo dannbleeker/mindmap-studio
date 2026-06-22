@@ -40,6 +40,8 @@ import { editorThemeVars } from "./design/tokens";
 import { designById } from "./designs";
 import { type FilterCriteria, filterResult, filterToDoc, focusSet, isFilterActive } from "./filter";
 import { clampIndex, togglePlay } from "./historyPlayback";
+import { useClipboardImagePaste } from "./hooks/useClipboardImagePaste";
+import { useCommandPaletteHotkey } from "./hooks/useCommandPaletteHotkey";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
 import { usePanels } from "./hooks/usePanels";
@@ -470,19 +472,8 @@ export function App() {
     }
   }, []);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
-  // In-editor ⌘K command palette (the Start screen has its own). Cmd/Ctrl+K opens it.
-  const [cmdkOpen, setCmdkOpen] = useState(false);
-  useEffect(() => {
-    if (view !== "editor") return;
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setCmdkOpen(true);
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [view]);
+  // In-editor ⌘K command palette (the Start screen has its own); the hook owns the ⌘K hotkey.
+  const [cmdkOpen, setCmdkOpen] = useCommandPaletteHotkey(view === "editor");
   const [libDocs, setLibDocs] = useState<MindMapDoc[]>([]);
   const [libQuery, setLibQuery] = useState("");
   // "Paste text → map": parse a pasted outline into topics, as a new map or under the selection.
@@ -515,35 +506,8 @@ export function App() {
   // Format Painter (copy a topic's style → paste across a selection) — owned by useFormatPainter.
   const { copyFormat, pasteFormat, canPasteFormat } = useFormatPainter(mapRef, showHint);
 
-  // Paste an image from the clipboard (Ctrl/⌘+V) onto the selected topic — unless focus is in a text
-  // field / note editor (so normal text paste still works there). Reuses the node-image pipeline.
-  useEffect(() => {
-    if (view !== "editor") return;
-    const onPaste = (e: ClipboardEvent) => {
-      const el = document.activeElement as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable))
-        return;
-      const item = [...(e.clipboardData?.items ?? [])].find((i) => i.type.startsWith("image/"));
-      const file = item?.getAsFile();
-      if (!file) return;
-      e.preventDefault();
-      (async () => {
-        try {
-          const image = await fileToMapImage(file);
-          const ok = mapRef.current?.setSelectedImage(image);
-          showHint(
-            ok
-              ? "Image pasted onto the selected topic."
-              : "Select a topic first, then paste an image.",
-          );
-        } catch (err) {
-          showHint(err instanceof Error ? err.message : "Couldn't paste that image.");
-        }
-      })();
-    };
-    window.addEventListener("paste", onPaste);
-    return () => window.removeEventListener("paste", onPaste);
-  }, [view, showHint]);
+  // Clipboard image paste (Ctrl/⌘+V onto the selected topic) — owned by the hook (editor view only).
+  useClipboardImagePaste(view === "editor", mapRef, showHint);
 
   // Register the PWA self-updater once: a new deploy surfaces a "Refresh now" toast
   // through showToast (no-op in dev — the service worker is disabled there).

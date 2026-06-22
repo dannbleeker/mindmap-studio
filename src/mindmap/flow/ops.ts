@@ -140,6 +140,31 @@ export function findAnyNode(doc: MindMapDoc, id: string): MapNode | null {
   return null;
 }
 
+/** Logical tree direction for arrow-key selection movement. */
+export type SelectDir = "up" | "down" | "left" | "right";
+
+/** The id selection should move to from `id` in a logical tree direction (arrow-key nav): left =
+ *  parent, right = first child (unless collapsed), up = previous sibling, down = next sibling. Null
+ *  when there's no target (root has no parent, a leaf / collapsed node no child, the ends of a sibling
+ *  row). Central-tree only. Pure. */
+export function nextSelectionId(doc: MindMapDoc, id: string, dir: SelectDir): string | null {
+  const loc = locate(doc.root, id);
+  if (!loc) return null;
+  const { node, parent, index } = loc;
+  switch (dir) {
+    case "left":
+      return parent ? parent.id : null;
+    case "right":
+      return !node.collapsed && node.children.length > 0 ? node.children[0].id : null;
+    case "up":
+      return parent && index > 0 ? parent.children[index - 1].id : null;
+    case "down":
+      return parent && index < parent.children.length - 1 ? parent.children[index + 1].id : null;
+    default:
+      return null;
+  }
+}
+
 /** Summarise the task fields across a multi-node selection: a field is "mixed" when the selected
  *  nodes hold more than one distinct value for it. Lets the inspector blank-out + label a field as
  *  "Mixed" in bulk mode instead of showing (and silently overwriting from) the anchor's value. Pure;

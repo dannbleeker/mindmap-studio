@@ -15,6 +15,7 @@ export type KeyIntent =
   | { kind: "delete"; id: string }
   | { kind: "rename"; id: string }
   | { kind: "typeEdit"; id: string; seed: string }
+  | { kind: "selectDir"; id: string; dir: "up" | "down" | "left" | "right" }
   | null;
 
 export interface KeyState {
@@ -60,6 +61,13 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
     return { kind: "moveDown", id };
   if (e.altKey && e.shiftKey && e.key === "ArrowLeft") return { kind: "outdent", id };
   if (e.altKey && e.shiftKey && e.key === "ArrowRight") return { kind: "indent", id };
+  // Bare arrows move the selection through the tree (left=parent, right=child, up/down=siblings).
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+    if (e.key === "ArrowUp") return { kind: "selectDir", id, dir: "up" };
+    if (e.key === "ArrowDown") return { kind: "selectDir", id, dir: "down" };
+    if (e.key === "ArrowLeft") return { kind: "selectDir", id, dir: "left" };
+    if (e.key === "ArrowRight") return { kind: "selectDir", id, dir: "right" };
+  }
   if (e.key === "Enter")
     return e.ctrlKey || e.metaKey ? { kind: "addChild", id } : { kind: "addSibling", id };
   if (e.key === "Tab" && !e.shiftKey) return { kind: "addChild", id };

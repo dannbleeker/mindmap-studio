@@ -51,6 +51,7 @@ export default defineConfig({
       ["test/use-command-palette-hotkey.test.tsx", "jsdom"],
       ["test/use-clipboard-image-paste.test.tsx", "jsdom"],
       ["test/use-guided-walk.test.tsx", "jsdom"],
+      ["test/use-paste-outline.test.tsx", "jsdom"],
       ["test/app-integration.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only

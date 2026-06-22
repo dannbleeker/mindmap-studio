@@ -226,6 +226,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     dimmed,
     matched,
     dropTarget,
+    locked,
   } = data;
   // Conditional-formatting style sits *under* the node's own style (manual styling wins).
   const style = condStyle ? { ...condStyle, ...ownStyle } : ownStyle;
@@ -640,6 +641,15 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             >
               📝
             </button>
+          ) : null}
+          {locked ? (
+            <span
+              title="Position locked — right-click to unlock"
+              aria-label="Position locked"
+              style={{ marginLeft: 4, opacity: 0.55, fontSize: "0.85em" }}
+            >
+              🔒
+            </span>
           ) : null}
         </span>
         {peekNote && note?.trim() ? (

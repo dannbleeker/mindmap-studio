@@ -77,6 +77,7 @@ import {
   setTopicRich,
   toggleCollapse,
   toggleIcon,
+  toggleLocked,
   viewDoc,
 } from "../src/mindmap/flow/ops";
 import type { MapNode, MindMapDoc } from "../src/model/types";
@@ -297,6 +298,32 @@ describe("flow ops — content", () => {
     expect(findNode(collapsed, "a")?.collapsed).toBe(true);
     expect(findNode(collapsed, "r")?.collapsed).toBeUndefined(); // root stays open
     expect(findNode(setAllExpanded(collapsed, true).doc, "a")?.collapsed).toBe(false);
+  });
+
+  it("toggleLocked flips the locked flag on (true) and off (cleared) for any node", () => {
+    const on = toggleLocked(base(), "a").doc;
+    expect(findNode(on, "a")?.locked).toBe(true);
+    expect(findNode(toggleLocked(on, "a").doc, "a")?.locked).toBeUndefined();
+  });
+
+  it("align / distribute skip a locked node, leaving its position fixed", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", pos: { x: 0, y: 0 }, locked: true, children: [] },
+          { id: "b", topic: "B", pos: { x: 50, y: 100 }, children: [] },
+        ],
+      },
+      meta: { freeform: true },
+    };
+    const sizes = { a: { w: 40, h: 20 }, b: { w: 20, h: 20 } };
+    // Only "b" remains arrangeable → fewer than 2 boxes → no-op (locked "a" never moves).
+    expect(alignNodes(doc, ["a", "b"], "left", sizes).doc).toEqual(doc);
   });
 
   it("alignNodes aligns positioned nodes to a shared edge/centre (using measured sizes)", () => {

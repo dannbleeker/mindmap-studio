@@ -147,6 +147,7 @@ import {
   setTopicRich,
   toggleCollapse,
   toggleIcon,
+  toggleLocked,
   viewDoc,
 } from "./flow/ops";
 import type { NodeSizes } from "./flow/ops";
@@ -638,6 +639,8 @@ function FlowInner({
       setDropTargetId(null);
       if (docRef.current.meta?.freeform) {
         setGuides([]);
+        // A locked node is draggable:false so this rarely fires, but guard the write anyway.
+        if (findAnyNode(docRef.current, dragId)?.locked) return;
         const snap = snapFor(dragId, dropPos);
         apply(setNodePos(docRef.current, dragId, snap.x, snap.y));
         return;
@@ -1213,6 +1216,7 @@ function FlowInner({
         apply(alignNodes(docRef.current, selectedIdsRef.current, mode, measuredSizes())),
       distributeSelection: (axis) =>
         apply(distributeNodes(docRef.current, selectedIdsRef.current, axis, measuredSizes())),
+      toggleLocked: (id) => apply(toggleLocked(docRef.current, id)),
       setSelectedHyperlink: (url) =>
         withSelected((id) => apply(setHyperlink(docRef.current, id, url))),
       groupBranch: (id) => {
@@ -1581,6 +1585,10 @@ function FlowInner({
                     () => apply(pasteBranch(docRef.current, id, clip)),
                   ]);
                 items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
+                items.push([
+                  findAnyNode(docRef.current, id)?.locked ? "Unlock position" : "Lock position",
+                  () => apply(toggleLocked(docRef.current, id)),
+                ]);
                 items.push(["Delete", () => deleteNodeWithUndo(id), true]);
                 // Live marker/priority state so the quick-setters reflect the node (and toggle off).
                 const node = findAnyNode(docRef.current, id);

@@ -513,6 +513,8 @@ export function MarkerTagIndex({
   onPick,
   onRenameTag,
   onDeleteTag,
+  tagColorOf,
+  onSetTagColor,
 }: {
   root: MapNode;
   floatingTopics?: MapNode[];
@@ -522,6 +524,10 @@ export function MarkerTagIndex({
   onRenameTag?: (from: string, to: string) => void;
   /** Tag manager: delete a tag from every node. */
   onDeleteTag?: (tag: string) => void;
+  /** The colour currently mapped to a tag (undefined = none). */
+  tagColorOf?: (tag: string) => string | undefined;
+  /** Tag manager: map a tag to a colour ("" / undefined clears it). Tints every topic carrying it. */
+  onSetTagColor?: (tag: string, color: string | undefined) => void;
 }) {
   const { markers, tags } = markerTagIndex(root, floatingTopics);
   const manageTags = !!(onRenameTag && onDeleteTag);
@@ -586,6 +592,35 @@ export function MarkerTagIndex({
                 </span>
                 {manage ? (
                   <>
+                    {onSetTagColor ? (
+                      <input
+                        type="color"
+                        value={tagColorOf?.(key) ?? "#3b82f6"}
+                        onChange={(e) => onSetTagColor(key, e.target.value)}
+                        title={`Colour for "${key}" — tints every topic with this tag`}
+                        aria-label={`Colour for tag ${key}`}
+                        style={{
+                          width: 18,
+                          height: 18,
+                          padding: 0,
+                          border: `1px solid ${colors.border}`,
+                          borderRadius: 4,
+                          background: "none",
+                          cursor: "pointer",
+                        }}
+                      />
+                    ) : null}
+                    {onSetTagColor && tagColorOf?.(key) ? (
+                      <button
+                        type="button"
+                        onClick={() => onSetTagColor(key, undefined)}
+                        title={`Clear colour for "${key}"`}
+                        aria-label={`Clear colour for tag ${key}`}
+                        style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
+                      >
+                        ⊘
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => {

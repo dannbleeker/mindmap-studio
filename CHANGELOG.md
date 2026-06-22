@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Tag → colour mapping.** The **Markers & tags** panel now carries a colour swatch beside each tag:
+  pick a colour and every topic with that tag is tinted (⊘ clears it). Implemented as a stable,
+  upserted `kind:"tag"` conditional-format rule, so it flows through the existing rule engine, canvas
+  tint, and legend. New pure `tagColor` / `setTagColor` helpers.
+
 - **Inline relationship label editing.** Double-click a relationship line to edit its label **in place**
   on the canvas (Enter / blur commits, Esc cancels) — previously inspector-only. Reuses the
   `setLinkLabel` op via a small link-edit context.

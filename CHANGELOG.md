@@ -296,6 +296,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   the previously-untested `useSavedViews` / `useVersionHistory` hooks and cover this session's
   typography / lock / tag-colour render paths.
 
+- **App is now exercised by an integration test.** A jsdom test renders the whole app over a fake
+  IndexedDB and drives the editor's wiring (open a map, panels, find/replace, undo/redo, ⌘K, menus,
+  inspector edits, Present). This lifted `App.tsx` from 0% → ~51% and **line coverage to ~88%**; because
+  the test loads the full module tree, the coverage report is now complete (the floor reflects the whole
+  app, not the subset that earlier tests happened to import).
+
 ### Removed
 
 - **Retired the sheets / workbook feature.** Maps could be grouped into a workbook via a shared

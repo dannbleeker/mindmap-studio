@@ -46,6 +46,7 @@ export default defineConfig({
       ["test/breadcrumb.test.tsx", "jsdom"],
       ["test/saved-views-hook.test.tsx", "jsdom"],
       ["test/use-version-history.test.tsx", "jsdom"],
+      ["test/app-integration.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.
@@ -59,13 +60,16 @@ export default defineConfig({
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/**/*.d.ts", "src/main.tsx", "src/vite-env.d.ts"],
       reporter: ["text-summary"],
-      // No-regression floor, set just under the live numbers (lines/stmts ~82.7, funcs ~81.8,
-      // branches ~86.1) so routine variance doesn't flake but a real drop fails the gate. Raise these
-      // as coverage climbs. Enforced when the gate runs `vitest run --coverage`.
+      // No-regression floor, set just under the live numbers so routine variance doesn't flake but a
+      // real drop fails the gate. Enforced when the gate runs `vitest run --coverage`. Raise as
+      // coverage climbs. NB: the app-integration test loads the whole tree, so these now reflect the
+      // COMPLETE denominator (lines/stmts ~88.4, funcs ~74.9, branches ~85.9). The functions figure
+      // looks lower than the old 81 only because the denominator is now complete — App's handlers were
+      // previously absent from the report, not because coverage regressed.
       thresholds: {
-        lines: 82,
-        statements: 82,
-        functions: 81,
+        lines: 88,
+        statements: 88,
+        functions: 74,
         branches: 85,
       },
     },

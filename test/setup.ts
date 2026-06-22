@@ -39,6 +39,21 @@ if (hasDom) {
     }
   }
 
+  // <dialog>: jsdom implements the element but not showModal()/close(). The app's <Dialog> wrapper
+  // calls them in an effect, so provide minimal versions that just toggle `open` + fire `close`.
+  const dlg = globalThis.HTMLDialogElement?.prototype as
+    | (HTMLDialogElement & { showModal: () => void; close: () => void })
+    | undefined;
+  if (dlg && typeof dlg.showModal !== "function") {
+    dlg.showModal = function showModal(this: HTMLDialogElement) {
+      this.open = true;
+    };
+    dlg.close = function close(this: HTMLDialogElement) {
+      this.open = false;
+      this.dispatchEvent(new Event("close"));
+    };
+  }
+
   if (typeof globalThis.ResizeObserver === "undefined") {
     globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
   }

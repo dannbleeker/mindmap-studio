@@ -128,6 +128,25 @@ describe("filterResult — due date", () => {
   it("'soon' matches tasks due within the next week (not the overdue or far ones)", () => {
     expect(lit("soon")).toEqual(["r", "soon"]);
   });
+
+  it("defaults `today` to the real today when omitted (overdue still resolves)", () => {
+    // A task due long in the past is overdue regardless of the wall clock — calling without `today`
+    // must still match (the old empty-string default made every date comparison silently fail).
+    const longOverdue: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d2",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [{ id: "old", topic: "Ancient", task: { due: "2000-01-01" }, children: [] }],
+      },
+    };
+    expect([...filterResult(longOverdue, crit({ due: "overdue" })).lit].sort()).toEqual([
+      "old",
+      "r",
+    ]);
+  });
 });
 
 describe("filterResult — priority", () => {

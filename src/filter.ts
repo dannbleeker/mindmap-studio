@@ -1,7 +1,7 @@
 import type { MapNode, MindMapDoc } from "./model/types";
 import { priorityLabel } from "./priority";
 import { progressMap } from "./progress";
-import { isDueSoon, isOverdue } from "./taskDate";
+import { isDueSoon, isOverdue, todayISO } from "./taskDate";
 
 /** Due-date filter mode: any (off), has a date, overdue, or due within ~a week. */
 export type DueMode = "" | "dated" | "overdue" | "soon";
@@ -140,7 +140,13 @@ export function filterToDoc(
   return out;
 }
 
-export function filterResult(doc: MindMapDoc, c: FilterCriteria, today = ""): FilterResult {
+export function filterResult(
+  doc: MindMapDoc,
+  c: FilterCriteria,
+  // Default to the real today so a caller that omits it still gets correct overdue / due-soon results
+  // (an empty string would make every date comparison silently fail). Callers pass it for determinism.
+  today = todayISO(),
+): FilterResult {
   const q = c.text.trim().toLowerCase();
   // Effective (rolled-up) completion per node, so a "done" parent isn't flagged overdue.
   const prog = new Map(progressMap(doc.root));

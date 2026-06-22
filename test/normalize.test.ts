@@ -111,6 +111,27 @@ describe("normalizeDoc", () => {
     expect(a.attachments?.map((x) => x.name)).toEqual(["ok"]); // only the data: attachment kept
   });
 
+  it("drops the attachments array entirely when nothing safe remains (stays lossless)", () => {
+    const allUnsafe = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            attachments: [{ name: "evil", dataUrl: "javascript:alert(1)", size: 1 }],
+            children: [],
+          },
+        ],
+      },
+    } as unknown as MindMapDoc;
+    expect(normalizeDoc(allUnsafe).root.children[0].attachments).toBeUndefined();
+  });
+
   it("keeps a safe hyperlink + data: attachment untouched", () => {
     const ok = {
       schemaVersion: 1,

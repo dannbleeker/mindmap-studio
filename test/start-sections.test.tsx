@@ -108,6 +108,21 @@ describe("ImportView section", () => {
     expect(screen.getByText("Mermaid")).toBeTruthy();
   });
 
+  it("keeps the drop highlight while dragging over its own children (no flicker)", () => {
+    render(<ImportView ctx={mkCtx()} />);
+    const zone = screen.getByRole("button", { name: /drop a file here/i });
+    // Enter the zone, then enter a child (depth 2): still highlighted.
+    fireEvent.dragEnter(zone);
+    expect(zone.style.borderColor).toBe("var(--st-accent)"); // highlighted
+    fireEvent.dragEnter(zone); // crossing onto an inner child fires a second enter
+    // Leaving the child (depth back to 1) must NOT clear the highlight — this is the anti-flicker.
+    fireEvent.dragLeave(zone);
+    expect(zone.style.borderColor).toBe("var(--st-accent)");
+    // Leaving the zone entirely (depth 0) clears it.
+    fireEvent.dragLeave(zone);
+    expect(zone.style.borderColor).toBe("");
+  });
+
   it("hands dropped files to the import pipeline", () => {
     const ctx = mkCtx();
     render(<ImportView ctx={ctx} />);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { StartContext } from "../types";
 
 // Drag-and-drop drop zone + the real supported-format grid (matches App's file <input> accept).
@@ -26,6 +26,10 @@ const FORMATS: { ext: string; name: string }[] = [
 
 export function ImportView({ ctx }: { ctx: StartContext }) {
   const [over, setOver] = useState(false);
+  // dragenter/dragleave also fire as the cursor crosses the drop zone's own children (the icon/text),
+  // so a naive boolean flickers off mid-drag. Count enter vs leave and stay highlighted while the
+  // depth is positive — the highlight only clears once the drag has truly left the whole zone.
+  const dragDepth = useRef(0);
 
   const browse = () => {
     const input = document.createElement("input");
@@ -61,13 +65,18 @@ export function ImportView({ ctx }: { ctx: StartContext }) {
           width: "100%",
         }}
         onClick={browse}
-        onDragOver={(e) => {
-          e.preventDefault();
+        onDragEnter={() => {
+          dragDepth.current += 1;
           setOver(true);
         }}
-        onDragLeave={() => setOver(false)}
+        onDragOver={(e) => e.preventDefault()} // required so the drop is allowed
+        onDragLeave={() => {
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setOver(false);
+        }}
         onDrop={(e) => {
           e.preventDefault();
+          dragDepth.current = 0;
           setOver(false);
           const files = [...e.dataTransfer.files];
           if (files.length) ctx.onImportFiles(files);

@@ -441,7 +441,8 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    requestAnimationFrame(() => fitView({ duration: 300 }));
+    const raf = requestAnimationFrame(() => fitView({ duration: 300 }));
+    return () => cancelAnimationFrame(raf);
   }, [drillId, sync, fitView]);
 
   const fireSelect = useCallback((id: string | null) => {
@@ -894,7 +895,8 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    requestAnimationFrame(() => fitView({ duration: 300 }));
+    const raf = requestAnimationFrame(() => fitView({ duration: 300 }));
+    return () => cancelAnimationFrame(raf);
   }, [direction, sync, fitView]);
 
   // Re-project + re-layout when auto-numbering is toggled (number prefixes change node widths).

@@ -44,6 +44,8 @@ export default defineConfig({
       ["test/first-run-card.test.tsx", "jsdom"],
       ["test/fileSystem.test.ts", "jsdom"],
       ["test/breadcrumb.test.tsx", "jsdom"],
+      ["test/saved-views-hook.test.tsx", "jsdom"],
+      ["test/use-version-history.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.
@@ -57,6 +59,15 @@ export default defineConfig({
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/**/*.d.ts", "src/main.tsx", "src/vite-env.d.ts"],
       reporter: ["text-summary"],
+      // No-regression floor, set just under the live numbers (lines/stmts ~82.7, funcs ~81.8,
+      // branches ~86.1) so routine variance doesn't flake but a real drop fails the gate. Raise these
+      // as coverage climbs. Enforced when the gate runs `vitest run --coverage`.
+      thresholds: {
+        lines: 82,
+        statements: 82,
+        functions: 81,
+        branches: 85,
+      },
     },
   },
 });

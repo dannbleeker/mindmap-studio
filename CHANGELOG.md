@@ -289,6 +289,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
     keep it as a file. (Chromium desktop only; Windows won't make the PWA the default for `.mmap` over
     an installed MindManager unless you opt in.)
 
+### Changed
+
+- **The gate now enforces a test-coverage floor.** `pnpm gate` runs `vitest run --coverage` against a
+  no-regression threshold (`vitest.config.ts`), so a coverage drop fails the build. New unit tests lift
+  the previously-untested `useSavedViews` / `useVersionHistory` hooks and cover this session's
+  typography / lock / tag-colour render paths.
+
 ### Removed
 
 - **Retired the sheets / workbook feature.** Maps could be grouped into a workbook via a shared

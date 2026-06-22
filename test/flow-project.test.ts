@@ -209,4 +209,47 @@ describe("flow project — org-chart elbow stamping + task fields", () => {
     expect(m?.data.durationDays).toBe(5);
     expect(m?.data.resources).toEqual(["Ann", "Bo"]);
   });
+
+  it("stamps map typography (scale factor + family) on every node; defaults to 1× / undefined", () => {
+    const base: MindMapDoc = {
+      schemaVersion: 1,
+      id: "ty",
+      title: "T",
+      root: { id: "r", topic: "R", children: [{ id: "a", topic: "A", children: [] }] },
+    };
+    const plain = project(base).nodes.find((n) => n.id === "a");
+    expect(plain?.data.fontScale).toBe(1); // comfortable / unset → 1×
+    expect(plain?.data.fontFamily).toBeUndefined();
+    const typed = project({
+      ...base,
+      meta: { fontScale: "large", fontFamily: "Georgia, serif" },
+    }).nodes;
+    expect(typed.find((n) => n.id === "a")?.data.fontScale).toBe(1.2); // large
+    expect(typed.find((n) => n.id === "r")?.data.fontScale).toBe(1.2); // applies to every node
+    expect(typed.find((n) => n.id === "a")?.data.fontFamily).toBe("Georgia, serif");
+    expect(project({ ...base, meta: { fontScale: "compact" } }).nodes[0].data.fontScale).toBe(0.85);
+  });
+
+  it("carries a node's locked flag through to its TopicData + draggable:false", () => {
+    const ldoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "lk",
+      title: "L",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "p", topic: "Pinned", locked: true, children: [] },
+          { id: "u", topic: "Unpinned", children: [] },
+        ],
+      },
+    };
+    const { nodes } = project(ldoc);
+    const pinned = nodes.find((n) => n.id === "p");
+    const free = nodes.find((n) => n.id === "u");
+    expect(pinned?.data.locked).toBe(true);
+    expect(pinned?.draggable).toBe(false);
+    expect(free?.data.locked).toBeUndefined();
+    expect(free?.draggable).toBeUndefined(); // undefined → inherits the global nodesDraggable
+  });
 });

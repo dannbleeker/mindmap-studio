@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Per-map typography.** New **Type** controls (canvas row) set a map-wide base **font family** (Sans /
+  Serif / Mono, or Default) and a **size scale** (Compact / Comfortable / Large). Both layer under any
+  per-topic font override and thread through the layout estimate, the canvas, and the SVG/image export
+  (canvas == export). New `meta.fontFamily` / `meta.fontScale` + `setFontFamily` / `setFontScale` ops.
+
 - **Detach a branch to a floating topic.** Right-click a topic → **Detach to floating topic** pops it
   and its whole subtree out of the hierarchy into a free-floating topic; a floating topic's menu offers
   **Re-attach to centre** (or just drag it back in). New pure `detachBranch` op; re-attach reuses

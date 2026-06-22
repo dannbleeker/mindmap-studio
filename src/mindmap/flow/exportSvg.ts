@@ -614,7 +614,8 @@ export function buildFlowSvg(
     const chipRow = d.progress || d.due || d.priority || d.attachmentCount ? 20 : 0;
     const pieReserve = chipRow + (taskInfo ? 15 : 0);
 
-    const fontSize = Number.parseFloat(st?.fontSize ?? "") || levelFontSize(d.depth);
+    const fontSize =
+      Number.parseFloat(st?.fontSize ?? "") || levelFontSize(d.depth) * (d.fontScale ?? 1);
     // Wrap to the box's content width — the SAME wrap the canvas gets from CSS max-width — so a long
     // label stays inside its box in the export instead of overflowing (canvas == export).
     // Underline leaves use a tighter 8px horizontal padding on the canvas (vs PAD=12); match it so the
@@ -643,7 +644,7 @@ export function buildFlowSvg(
           fontSize,
           textColor,
           d.isRoot ? "700" : (st?.fontWeight ?? (filledMain ? "600" : undefined)),
-          st?.fontFamily,
+          st?.fontFamily ?? d.fontFamily,
           "middle",
           numberPrefix,
         ),

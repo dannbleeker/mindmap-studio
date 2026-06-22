@@ -258,8 +258,20 @@ export interface MindMapDoc {
     /** Show the map legend (markers / tags / conditional rules in use) on the canvas + in exports.
      *  Off by default. Lossless in .json, ignored by flat exporters. */
     legend?: boolean;
+    /** Map-wide base font family (CSS family list) used as the default for every topic; a per-topic
+     *  `NodeStyle.fontFamily` still overrides it. Absent = the canvas default. Lossless in .json,
+     *  carried into the SVG/image/PDF export (canvas == export). */
+    fontFamily?: string;
+    /** Map-wide font-size scale applied on top of the per-depth defaults: "compact" (0.85×),
+     *  "comfortable" (1×, the default), or "large" (1.2×). A per-topic `NodeStyle.fontSize` still
+     *  overrides it. Absent = "comfortable". Threaded through the layout estimate, the canvas, and the
+     *  export so all three agree. Lossless in .json. */
+    fontScale?: FontScale;
   };
 }
 
 /** Outline-numbering scheme (see meta.numberStyle). */
 export type NumberStyle = "decimal" | "outline";
+
+/** Map-wide font-size scale (see meta.fontScale). */
+export type FontScale = "compact" | "comfortable" | "large";

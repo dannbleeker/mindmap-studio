@@ -40,9 +40,9 @@ export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
     if (cached) return cached;
     const d = byId.get(id)?.data;
     if (!d) return DEFAULT_SIZE;
-    // Size scales with the per-depth font (root largest → deep leaves smallest), so the layout
-    // reserves the right slot before React Flow measures the real node.
-    const fs = levelFontSize(d.depth);
+    // Size scales with the per-depth font (root largest → deep leaves smallest) AND the map-wide
+    // typography scale, so the layout reserves the right slot before React Flow measures the node.
+    const fs = levelFontSize(d.depth) * (d.fontScale ?? 1);
     const rawLines = d.topic.split("\n");
     const longest = Math.max(1, ...rawLines.map((l) => l.length));
     // Markers now sit in their own fixed-height row above the title (~16px tiles).

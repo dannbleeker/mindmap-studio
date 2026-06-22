@@ -1095,6 +1095,31 @@ export function Toolbar({
           <option value="straight">Straight</option>
         </select>
         <span className="mm-vdiv" />
+        <span className="mm-eyebrow">Type</span>
+        <select
+          className="mm-select"
+          value={liveDoc.meta?.fontFamily ?? ""}
+          onChange={(e) => m()?.setFontFamily(e.target.value)}
+          aria-label="Base font family"
+          title="Map-wide base font (a per-topic font still overrides it)"
+        >
+          <option value="">Default</option>
+          <option value="Inter, system-ui, sans-serif">Sans</option>
+          <option value="Georgia, 'Times New Roman', serif">Serif</option>
+          <option value="'Courier New', ui-monospace, monospace">Mono</option>
+        </select>
+        <select
+          className="mm-select"
+          value={liveDoc.meta?.fontScale ?? "comfortable"}
+          onChange={(e) => m()?.setFontScale(e.target.value as "compact" | "comfortable" | "large")}
+          aria-label="Font size scale"
+          title="Map-wide text size (a per-topic size still overrides it)"
+        >
+          <option value="compact">Compact</option>
+          <option value="comfortable">Comfortable</option>
+          <option value="large">Large</option>
+        </select>
+        <span className="mm-vdiv" />
         <input
           className="mm-input"
           placeholder="Quick add… ⏎"

@@ -81,10 +81,17 @@ either way the hops are baked into your exports exactly as you see them on scree
 Not everything has to connect to the root. A **floating topic** is a node (or small
 sub-tree) that sits on the canvas unattached -- a parking lot for ideas you're not ready
 to place, a caption, a note-to-self. MindMap Studio renders floating topics imported from
-other tools in a labelled "Floating topics" branch -- and they're fully editable, so they
-double as a staging area you can rename, grow, and prune while you decide where something
-belongs. Drag one onto a branch and it joins the tree; drag a branch topic out and it
-floats free.
+other tools in a labelled "Floating topics" branch.
+
+A floating topic is a **first-class node**, not a second-class sticky: everything you do to a
+central topic, you can do here. Press **Tab** to add a child or **Enter** for a sibling; **Tab /
+Shift+Tab** indent and outdent (outdent a floating topic's child far enough and it becomes its own
+floating topic; indent one floating topic under another to nest them); right-click to **group it in a
+boundary**, **summarize** it, **paste a branch** beneath it, or **delete** it. Every inspector edit --
+a note, a colour, task dates and progress, a hyperlink, markers and tags, a callout -- applies the same
+way. So a floating cluster is a genuine **staging area**: build it out as far as you like off to the
+side, then **drag it onto a branch** and the whole sub-tree joins the map. Drag a branch topic *out*
+and it floats free again.
 
 ## Sticky notes
 

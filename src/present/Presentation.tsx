@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
 import { presenterContext } from "./presenter";
@@ -162,6 +162,16 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
   const slides = presentationSlides(doc);
   const [index, setIndex] = useState(0);
   const [presenter, setPresenter] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Focus management for the full-screen overlay (it behaves as a modal dialog): move focus into it on
+  // enter so keyboard + screen-reader users land inside the presentation, and restore focus to whatever
+  // was focused before (the canvas / the menu item that opened it) on exit, instead of stranding it.
+  useEffect(() => {
+    const prevFocus = document.activeElement as HTMLElement | null;
+    overlayRef.current?.focus();
+    return () => prevFocus?.focus?.();
+  }, []);
 
   const next = useCallback(
     () => setIndex((i) => Math.min(i + 1, slides.length - 1)),
@@ -191,7 +201,16 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
   const slide = slides[index];
 
   return (
-    <div style={overlayStyle} aria-label="Presentation">
+    <div
+      ref={overlayRef}
+      style={overlayStyle}
+      // biome-ignore lint/a11y/useSemanticElements: a custom full-screen overlay, not a native <dialog>
+      // (we don't want showModal/top-layer/backdrop semantics) — role="dialog" + aria-modal is correct.
+      role="dialog"
+      aria-modal="true"
+      aria-label="Presentation"
+      tabIndex={-1}
+    >
       {/* The audience slide + the (optional) presenter sidebar share one row, so
           turning on presenter view never changes the slide content itself. */}
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>

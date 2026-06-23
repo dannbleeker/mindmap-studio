@@ -79,6 +79,23 @@ describe("Presentation overlay", () => {
     expect(onExit).toHaveBeenCalledTimes(1);
   });
 
+  it("is a focusable modal dialog and restores focus to the opener on unmount", () => {
+    // A button stands in for whatever was focused when Present was opened (e.g. a menu item).
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+    opener.focus();
+    expect(document.activeElement).toBe(opener);
+
+    const { unmount } = render(<Presentation doc={doc} onExit={vi.fn()} />);
+    const dialog = screen.getByRole("dialog", { name: "Presentation" });
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
+    expect(document.activeElement).toBe(dialog); // focus moved into the overlay on enter
+
+    unmount();
+    expect(document.activeElement).toBe(opener); // focus restored to the opener on exit
+    opener.remove();
+  });
+
   it("presenter sidebar shows notes / no-notes, agenda, and jumps on click", () => {
     render(<Presentation doc={doc} onExit={vi.fn()} />);
     // Turn on presenter view via the button (covers aria-pressed + ctrlOnStyle path).

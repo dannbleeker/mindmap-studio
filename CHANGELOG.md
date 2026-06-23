@@ -321,6 +321,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Focus management for the full-screen overlays.** The **Present** overlay and the **⌘K command
+  palette** are custom modals that grabbed focus on open but never returned it: dismissing them left
+  keyboard focus stranded on `<body>`, so you had to click back into the canvas to regain control.
+  Both now restore focus to whatever opened them on exit (the command palette only on cancel — running
+  a command lets that command keep the focus it moved to), and Present is exposed as a `role="dialog"`
+  `aria-modal` surface. (Every other modal already rides the native `<dialog>` wrapper, which handles
+  this for free.)
+
 - **Replace All now reaches floating topics.** Find searched the whole map (tree + floating topics),
   but Replace All walked only the central tree — so it silently skipped matches Find had shown in a
   floating topic, and the changed-count came up short. Replace now walks floating topics too.

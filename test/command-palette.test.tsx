@@ -111,6 +111,35 @@ describe("CommandPalette (generic)", () => {
     expect(screen.getByText("Recent")).toBeTruthy();
   });
 
+  it("restores focus to the opener on Escape, but not after running a command", () => {
+    // Opener stands in for whatever had focus when ⌘K opened (a toolbar button, the canvas, …).
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+
+    // Cancel path: Escape → focus returns to the opener.
+    opener.focus();
+    const a = render(<CommandPalette commands={cmds()} onClose={vi.fn()} />);
+    expect(document.activeElement).toBe(screen.getByRole("combobox")); // input focused on open
+    a.unmount(); // simulate the parent unmounting the palette after onClose
+    expect(document.activeElement).toBe(opener);
+
+    // Run path: a command ran → focus is left for the command to own (NOT yanked back to the opener).
+    opener.focus();
+    const run = vi.fn();
+    const b = render(
+      <CommandPalette commands={[{ id: "x", label: "X", kind: "view", run }]} onClose={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByText("X"));
+    expect(run).toHaveBeenCalledTimes(1);
+    const elsewhere = document.createElement("input"); // pretend the command moved focus somewhere
+    document.body.appendChild(elsewhere);
+    elsewhere.focus();
+    b.unmount();
+    expect(document.activeElement).toBe(elsewhere); // not restored to opener
+    opener.remove();
+    elsewhere.remove();
+  });
+
   it("exposes dialog + combobox/listbox/option roles with the active descendant wired", () => {
     render(
       <CommandPalette

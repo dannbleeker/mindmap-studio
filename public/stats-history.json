@@ -123,7 +123,7 @@
   {
     "date": "2026-06-23",
     "linesTsJs": 51690,
-    "coveragePct": 88.96,
+    "coveragePct": 89.13,
     "tests": 1394,
     "bundleKb": 288.7,
     "mutationScore": null,

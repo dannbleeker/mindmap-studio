@@ -321,6 +321,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Replace All now reaches floating topics.** Find searched the whole map (tree + floating topics),
+  but Replace All walked only the central tree — so it silently skipped matches Find had shown in a
+  floating topic, and the changed-count came up short. Replace now walks floating topics too.
+
+- **The board no longer lists a topic twice for a repeated tag.** A topic carrying the same tag more than
+  once (from an import or a hand-edited file) appeared — and was counted — twice in that column; tags are
+  now de-duplicated when bucketing, and Kanban cards use a stable key.
+
 - **Edits made just before the tab closes are no longer lost.** A library-only map autosaves to
   IndexedDB on a 500ms debounce, while the `beforeunload` guard only covered file-bound dirtiness — so
   an edit made within that window before the tab was hidden/closed vanished on the next open. Any pending

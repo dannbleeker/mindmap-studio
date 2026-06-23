@@ -67,11 +67,25 @@ export function CommandPalette({
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Restore focus to whatever opened the palette when it's *cancelled* (Esc / click-outside), so
+  // keyboard control isn't dropped to <body>. NOT restored after running a command — a command often
+  // moves focus on purpose (opens a dialog, focuses a topic), and we mustn't yank it back.
+  const openerRef = useRef<HTMLElement | null>(null);
+  const ranRef = useRef(false);
   const listId = useId();
   const optionId = (i: number) => `${listId}-opt-${i}`;
 
+  // Focus management — own effect so the save/restore runs exactly once per open (not on every onClose
+  // identity change). Capture the opener + focus the input on mount; restore on a cancel unmount.
   useEffect(() => {
+    openerRef.current = document.activeElement as HTMLElement | null;
     inputRef.current?.focus();
+    return () => {
+      if (!ranRef.current) openerRef.current?.focus?.();
+    };
+  }, []);
+
+  useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (!(e.target as HTMLElement)?.closest?.(".st-cmdk")) onClose();
     };
@@ -117,6 +131,7 @@ export function CommandPalette({
 
   const run = (c: Command | undefined) => {
     if (!c) return;
+    ranRef.current = true; // a command ran — don't restore focus to the opener (the command owns focus now)
     // Record only real registry commands (not the synthetic query-derived one) as recent.
     if (commands.some((x) => x.id === c.id)) pushRecent(c.id);
     c.run();

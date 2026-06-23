@@ -1284,6 +1284,7 @@ export function replaceTopics(
     for (const c of n.children) walk(c);
   };
   walk(next.root);
+  for (const f of next.floatingTopics ?? []) walk(f); // Find searches floating topics, so Replace must too
   if (count > 0) next.title = next.root.topic || next.title;
   return { doc: count > 0 ? next : doc, count };
 }

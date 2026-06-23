@@ -1213,6 +1213,17 @@ describe("flow ops — groupBranch + replaceTopics", () => {
     expect(findNode(doc, "a")?.topic).toBe("Z");
     expect(findNode(doc, "a")?.note).toBe("ZlphZ");
   });
+
+  it("replaceTopics also replaces inside floating topics (parity with Find)", () => {
+    const withFloat: MindMapDoc = {
+      ...base(),
+      floatingTopics: [{ id: "f", topic: "Apple", note: "an apple", children: [] }],
+    };
+    const { doc, count } = replaceTopics(withFloat, "apple", "Pear", { topics: true, notes: true });
+    expect(findAnyNode(doc, "f")?.topic).toBe("Pear"); // floating topic's topic replaced
+    expect(findAnyNode(doc, "f")?.note).toBe("an Pear"); // and its note
+    expect(count).toBe(2);
+  });
 });
 
 describe("flow ops — cross-links (relationships)", () => {

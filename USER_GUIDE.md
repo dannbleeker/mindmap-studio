@@ -437,9 +437,16 @@ backdrop you see on the canvas. The second **✕** removes the image.
   **Colour** swatch row (with **Default** to reset), and a **Delete** button — an alternative to the
   inline double-click gestures, which still work. A picked colour re-tints the whole object (outline,
   fill, and label) on the canvas and in every export; the backdrop colour lives in the Map panel.
-- **Floating topics** — detached topics imported from `.mmap` appear in a "Floating topics"
-  branch; edit them like any node (rename, add, remove, or drag in/out of the tree) and the
-  changes are saved.
+- **Floating topics** — detached topics that live outside the central tree. You get them several ways:
+  **double-click an empty spot** on the canvas, drop a **🗒 sticky note**, **Detach to floating topic**
+  from a branch's menu, drop a link/URL onto the canvas, or import a map that carries them (`.mmap`,
+  `.xmind`, `.smmx`, `.itmz`, …) — where they appear under a **"Floating topics"** branch. A floating
+  topic is a **first-class node**: right-click or use the keyboard to **add a child** (Tab) or **sibling**
+  (Enter), **indent / outdent** (Tab / Shift+Tab — a child can outdent into its own floating topic, a
+  floating topic can indent under the previous one), **reorder**, **group in a boundary**, **summarize**,
+  **paste a branch** under it, and **delete** it — and every inspector edit (note, colour, task fields,
+  hyperlink, markers, tags, style, image, callouts) applies just as it does to a central topic. Drag one
+  into the tree (or back out) to re-parent. All changes are saved.
 - **Sticky notes** — click **🗒 Note** in the toolbar to drop a free-floating **amber note** on the
   canvas. It's a floating topic underneath, so you rename it, drag it (in **🧲 Free layout**), and it
   exports and round-trips like any topic — handy for captions, reminders, and legends.

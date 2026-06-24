@@ -44,6 +44,7 @@ import { useCommandPaletteHotkey } from "./hooks/useCommandPaletteHotkey";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
 import { useNamedStyles } from "./hooks/useNamedStyles";
+import { useNoteEditor } from "./hooks/useNoteEditor";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
 import { usePanels } from "./hooks/usePanels";
 import { usePasteOutline } from "./hooks/usePasteOutline";
@@ -236,9 +237,6 @@ export function App() {
   // The selected overlay object (boundary/summary/callout) — swaps the right slot to the
   // OverlayInspector. Mutually exclusive with node + edge selection (canvas-driven).
   const [selectedOverlay, setSelectedOverlay] = useState<SelectedOverlay | null>(null);
-  // Bumped when a node's 📝 indicator is clicked → InfoPanel switches to its Notes tab.
-  const [noteNonce, setNoteNonce] = useState(0);
-  const [noteDraft, setNoteDraft] = useState("");
   // Live undo/redo availability, reported up by the canvas, so the Row-1 buttons disable correctly (#8).
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -405,8 +403,11 @@ export function App() {
   const [libDocs, setLibDocs] = useState<MindMapDoc[]>([]);
   const [libQuery, setLibQuery] = useState("");
   const pendingFocus = useRef<string | null>(null);
-  const noteCommit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedIdRef = useRef<string | null>(null);
+
+  // Note editor (debounced draft + commit, and the "switch to Notes tab" nonce) — its own hook.
+  const { noteNonce, noteDraft, setNoteDraft, onNoteChange, flushNote, bumpNoteNonce } =
+    useNoteEditor(mapRef);
 
   function handleSelect(sel: SelectedNode | null) {
     // Only reset the draft when the selected node actually changes — a note
@@ -415,17 +416,6 @@ export function App() {
     selectedIdRef.current = sel?.id ?? null;
     setSelected(sel);
     if (changed) setNoteDraft(sel?.note ?? "");
-  }
-
-  function onNoteChange(value: string) {
-    setNoteDraft(value);
-    if (noteCommit.current) clearTimeout(noteCommit.current);
-    noteCommit.current = setTimeout(() => mapRef.current?.setSelectedNote(value), 400);
-  }
-
-  function flushNote() {
-    if (noteCommit.current) clearTimeout(noteCommit.current);
-    mapRef.current?.setSelectedNote(noteDraft);
   }
 
   // Format Painter (copy a topic's style → paste across a selection) — owned by useFormatPainter.
@@ -1676,7 +1666,7 @@ export function App() {
                 onOpenNote={() => {
                   panels.setInfoMinimized(false);
                   panels.setInfoOpen(true);
-                  setNoteNonce((n) => n + 1);
+                  bumpNoteNonce();
                 }}
                 onMapLink={(id) => switchMap(id)}
                 onHistory={(u, r) => {

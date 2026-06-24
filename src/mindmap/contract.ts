@@ -95,6 +95,10 @@ export interface MindMapHandle {
   setViewport: (viewport: { x: number; y: number; zoom: number }) => void;
   /** Apply an image to the currently-selected node; false if nothing is selected. */
   setSelectedImage: (image: MapImage) => boolean;
+  /** Apply an image to a specific node by id (the drag-a-file-onto-a-topic path); false if not found. */
+  setNodeImage: (id: string, image: MapImage) => boolean;
+  /** Attach a file to a specific node by id (the drag-a-file-onto-a-topic path); false if not found. */
+  addNodeAttachment: (id: string, attachment: MapAttachment) => boolean;
   /** Set the note on the currently-selected node; false if nothing is selected. */
   setSelectedNote: (note: string) => boolean;
   /** Toggle a marker icon on the selected node; false if nothing is selected. */
@@ -338,6 +342,10 @@ export interface MindMapProps {
   onOpenNote?: () => void;
   /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
   onMapLink?: (mapId: string) => void;
+  /** Fires when desktop files are dropped onto a topic, with that topic's id + the dropped files. The
+   *  app reads them (an image → the topic's image; anything else → an attachment) via the id-based
+   *  setNodeImage / addNodeAttachment handle methods. */
+  onDropFilesOnNode?: (id: string, files: File[]) => void;
   /** Fires whenever the undo/redo stack depth changes, so the chrome can live-enable/disable the
    *  Row-1 undo + redo buttons (the depths aren't otherwise observable from outside the canvas). */
   onHistory?: (canUndo: boolean, canRedo: boolean) => void;

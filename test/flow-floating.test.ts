@@ -7,6 +7,7 @@ import {
   crosslinkBezier,
   curveFromHandle,
   floatingPoints,
+  nodeAtPoint,
 } from "../src/mindmap/flow/floating";
 
 describe("floatingPoints (border-to-border geometry)", () => {
@@ -168,5 +169,33 @@ describe("curveFromHandle (relationship reshape handle, #1)", () => {
     expect(curveFromHandle(0, 0, 200, 0, 100, 30)).toBeCloseTo(40, 5);
     expect(curveFromHandle(0, 0, 200, 0, 40, 30)).toBeCloseTo(40, 5); // different x, same y
     expect(curveFromHandle(0, 0, 200, 0, 100, 0)).toBeCloseTo(0, 5); // on the chord → no bow
+  });
+});
+
+describe("nodeAtPoint (drag-a-file-onto-a-topic hit-test, #4)", () => {
+  const nodes = [
+    { id: "a", position: { x: 0, y: 0 }, measured: { width: 100, height: 40 } },
+    { id: "b", position: { x: 200, y: 100 }, measured: { width: 80, height: 30 } },
+    // overlaps "a"; later in the array → painted on top → wins ties
+    { id: "c", position: { x: 50, y: 20 }, measured: { width: 100, height: 40 } },
+  ];
+
+  it("returns the node whose box contains the point", () => {
+    expect(nodeAtPoint(nodes, 10, 10)).toBe("a");
+    expect(nodeAtPoint(nodes, 210, 110)).toBe("b");
+  });
+
+  it("returns the topmost (last-painted) node when boxes overlap", () => {
+    expect(nodeAtPoint(nodes, 60, 30)).toBe("c"); // inside both a and c → c wins
+  });
+
+  it("returns null when the point misses every node", () => {
+    expect(nodeAtPoint(nodes, 500, 500)).toBeNull();
+    expect(nodeAtPoint([], 0, 0)).toBeNull();
+  });
+
+  it("treats a missing measured size as a zero-area box (no hit)", () => {
+    expect(nodeAtPoint([{ id: "x", position: { x: 0, y: 0 } }], 0, 0)).toBe("x"); // edge inclusive
+    expect(nodeAtPoint([{ id: "x", position: { x: 0, y: 0 } }], 1, 1)).toBeNull();
   });
 });

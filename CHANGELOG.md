@@ -321,6 +321,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Relationship arrows to/from floating topics.** Dragging a relationship (cross-link) to or from a
+  floating topic silently did nothing: `addLink` validated both endpoints against the central tree
+  only, so a floating-topic endpoint was rejected even though the canvas offers the gesture and the
+  edge renders fine. Endpoint validation is now floating-aware (`findAnyNode`), matching the rest of
+  the canvas. Deleting a node already prunes its links across floating topics, so no dangling edges.
+
+- **Version snapshots are repaired on load.** Restoring a version, and timeline playback, returned the
+  raw stored snapshot without the `normalizeDoc` salvage that `loadMap` applies. A snapshot predating a
+  normalize rule — e.g. a node missing its `children` array — could then crash the projector on
+  playback, or be persisted back unrepaired on restore. Both load paths now normalize, and the
+  save-time node count tolerates a missing `children` array so a malformed in-memory doc can't drop a
+  snapshot.
+
 - **Focus management for the full-screen overlays.** The **Present** overlay and the **⌘K command
   palette** are custom modals that grabbed focus on open but never returned it: dismissing them left
   keyboard focus stranded on `<body>`, so you had to click back into the canvas to regain control.

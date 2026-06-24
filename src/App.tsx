@@ -41,6 +41,7 @@ import { type FilterCriteria, filterResult, filterToDoc, focusSet, isFilterActiv
 import { clampIndex, togglePlay } from "./historyPlayback";
 import { useClipboardImagePaste } from "./hooks/useClipboardImagePaste";
 import { useCommandPaletteHotkey } from "./hooks/useCommandPaletteHotkey";
+import { useDiskFile } from "./hooks/useDiskFile";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
 import { useNamedStyles } from "./hooks/useNamedStyles";
@@ -52,17 +53,7 @@ import { useToast } from "./hooks/useToast";
 import { useVersionHistory } from "./hooks/useVersionHistory";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
-import {
-  downloadMapFile,
-  ensureWritePermission,
-  isNativeExt,
-  openMapFile,
-  pickSaveHandle,
-  readMapFromHandle,
-  suggestedFileName,
-  supportsFileSystemAccess,
-  writeMapToHandle,
-} from "./io/fileSystem";
+import { isNativeExt, readMapFromHandle } from "./io/fileSystem";
 import { fileToMapImage } from "./io/image";
 import { parseDoc } from "./io/json";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
@@ -101,7 +92,6 @@ import {
   loadMap,
   loadMapHandle,
   saveMap,
-  saveMapHandle,
   setLastOpened,
 } from "./store/mapStore";
 import { setTagColor, tagColor } from "./tagColors";
@@ -138,12 +128,6 @@ export function App() {
   const [liveDoc, setLiveDoc] = useState<MindMapDoc>(sampleDoc);
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Debounced write-through to the linked disk file (separate from the IndexedDB autosave above — disk
-  // writes are heavier and only happen when a map is bound to a `.mmst` with granted permission).
-  const fileSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Per-map disk-file binding (map id → FileSystemFileHandle), mirrored in IndexedDB so it survives a
-  // reload. Present only for maps opened from / saved to a file; absent maps live in the library only.
-  const handleCache = useRef<Map<string, FileSystemFileHandle>>(new Map());
   // The active map's linked file name (drives the title bar + File menu); null when it's library-only.
   const [fileName, setFileName] = useState<string | null>(null);
   // True when the linked file is behind the in-memory edits (the IndexedDB copy is always current; this
@@ -538,136 +522,18 @@ export function App() {
   }
 
   // --- disk files (open / save / save-as / autosave-to-file) -----------------
-  // The library (IndexedDB) is always the safety net; these add real `.mmst` files on disk. On a
-  // browser without the File System Access API (Firefox/Safari/mobile) Open falls back to the import
-  // <input> and Save to a plain download — feature-detected so the menu items always do *something*.
-
-  // Bind a map to a file handle: cache it, mirror to IndexedDB, and reflect it in the title bar.
-  const bindFileHandle = useCallback(async (id: string, handle: FileSystemFileHandle) => {
-    handleCache.current.set(id, handle);
-    await saveMapHandle(id, handle).catch(() => {
-      // handle persistence is best-effort (e.g. private mode) — the in-memory cache still works
-    });
-    if (id === liveDocRef.current.id) setFileName(handle.name);
-  }, []);
-
-  // Adopt a doc read from a file as the active map, keeping its embedded id so re-saving overwrites the
-  // same library entry (an id-less hand-built file gets a fresh one). Shared by Open + the launch queue.
-  const adoptOpenedFile = useCallback(
-    async (opened: MindMapDoc, handle: FileSystemFileHandle) => {
-      if (!opened.id) opened.id = crypto.randomUUID();
-      await bindFileHandle(opened.id, handle);
-      load(opened);
-      setFileName(handle.name);
-      setDirty(false);
-      setView("editor");
-      showHint(`Opened ${handle.name}`);
-    },
-    [bindFileHandle, load, showHint],
-  );
-
-  // Open a foreign file (a MindManager `.mmap`) as a one-way import: convert its bytes into a fresh
-  // library map via the shared import dispatcher and DON'T bind a handle — there's no save-back to
-  // `.mmap` (lossy by design). The map autosaves to IndexedDB like any other; the leading banner note
-  // + toast tell the user to Save as… a `.mmst` to keep it as a file.
-  const importForeignFile = useCallback(
-    async (handle: FileSystemFileHandle) => {
-      const bytes = new Uint8Array(await (await handle.getFile()).arrayBuffer());
-      const { parseMmap } = await import("./import/mmap"); // lazy: keeps the importer out of the entry
-      const { doc: next, warnings } = parseMmap(bytes);
-      next.id = crypto.randomUUID(); // an import is a new library map, not a re-openable native file
-      load(next, [
-        "Imported from MindManager — saved to your library. You can't save back to .mmap; use “Save as…” to keep it as a .mmst file.",
-        ...warnings,
-      ]);
-      setFileName(null); // library-only: not bound to a disk file
-      setDirty(false);
-      setView("editor");
-      showHint(`Imported ${handle.name} — use “Save as…” to keep it as a .mmst file.`);
-    },
-    [load, showHint],
-  );
-
-  const openFile = useCallback(async () => {
-    if (!supportsFileSystemAccess()) {
-      // No native picker — reuse the import <input>, which already accepts .mmst/.json/.mmap and more.
-      document.getElementById("mmap-input")?.click();
-      return;
-    }
-    try {
-      const res = await openMapFile();
-      if (!res) return;
-      if (res.kind === "import") await importForeignFile(res.handle);
-      else await adoptOpenedFile(res.doc, res.handle);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-  }, [adoptOpenedFile, importForeignFile]);
-
-  // "Save As" — pick a destination, write it, and remember the handle for plain Saves afterwards.
-  const saveFileAs = useCallback(async () => {
-    const d = liveDocRef.current;
-    if (!supportsFileSystemAccess()) {
-      downloadMapFile(d);
-      showHint(`Downloaded ${suggestedFileName(d)}`);
-      return;
-    }
-    try {
-      const handle = await pickSaveHandle(d);
-      if (!handle) return; // cancelled
-      await writeMapToHandle(handle, d);
-      await bindFileHandle(d.id, handle);
-      setDirty(false);
-      showHint(`Saved ${handle.name}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-  }, [bindFileHandle, showHint]);
-
-  // "Save" (Ctrl+S) — write back to the bound file with no dialog; first save (or no API) defers to
-  // Save As / download. Prompts once for write permission if the browser dropped it this session.
-  const saveFile = useCallback(async () => {
-    const d = liveDocRef.current;
-    if (!supportsFileSystemAccess()) {
-      downloadMapFile(d);
-      showHint(`Downloaded ${suggestedFileName(d)}`);
-      return;
-    }
-    const handle = handleCache.current.get(d.id);
-    if (!handle) {
-      await saveFileAs();
-      return;
-    }
-    try {
-      if (!(await ensureWritePermission(handle, true))) {
-        showHint("Couldn't save — permission to write the file was denied.");
-        return;
-      }
-      await writeMapToHandle(handle, d);
-      setDirty(false);
-      showHint(`Saved ${handle.name}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-  }, [saveFileAs, showHint]);
-
-  // Background write-through after an edit — silent (never prompts): only writes when the browser still
-  // holds write permission, so a denied/revoked grant simply leaves the IndexedDB copy as the record.
-  function scheduleFileSave() {
-    if (fileSaveTimer.current) clearTimeout(fileSaveTimer.current);
-    fileSaveTimer.current = setTimeout(async () => {
-      const d = liveDocRef.current;
-      const handle = handleCache.current.get(d.id);
-      if (!handle) return;
-      if (!(await ensureWritePermission(handle, false))) return; // don't prompt during autosave
-      try {
-        await writeMapToHandle(handle, d);
-        if (d.id === liveDocRef.current.id) setDirty(false);
-      } catch {
-        // best-effort; the IndexedDB autosave still holds the edit
-      }
-    }, 1500);
-  }
+  // The whole File System Access layer lives in useDiskFile (the library/IndexedDB copy is always the
+  // safety net; this adds real `.mmst` files on disk, with download/import fallbacks where the API is
+  // absent). App wires the deps and consumes the returned handlers + the handle cache.
+  const {
+    handleCache,
+    adoptOpenedFile,
+    importForeignFile,
+    openFile,
+    saveFile,
+    saveFileAs,
+    scheduleFileSave,
+  } = useDiskFile({ liveDocRef, load, setView, setFileName, setDirty, setError, showHint });
 
   // Refresh the history list whenever the panel opens.
   useEffect(() => {
@@ -691,7 +557,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [doc.id]);
+  }, [doc.id, handleCache]);
 
   // Reflect the linked file + unsaved-to-disk state in the tab/window title (a ● marks unsaved file
   // changes — the in-app library is always saved). Plain "MindMap Studio" when no file is bound.

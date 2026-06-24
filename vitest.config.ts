@@ -32,6 +32,7 @@ export default defineConfig({
       ["test/kanban.test.tsx", "jsdom"],
       ["test/brainstorm-timer.test.tsx", "jsdom"],
       ["test/start-sections.test.tsx", "jsdom"],
+      ["test/start-library-sections.test.tsx", "jsdom"],
       ["test/start-extra.test.tsx", "jsdom"],
       ["test/presentation.test.tsx", "jsdom"],
       ["test/flowmindmap.test.tsx", "jsdom"],

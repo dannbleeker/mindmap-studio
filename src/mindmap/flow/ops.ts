@@ -1029,9 +1029,11 @@ export function deleteCallout(doc: MindMapDoc, nodeId: string, calloutId: string
 
 // --- cross-links (relationship arrows) -------------------------------------
 
-/** Add a labelled cross-link between two distinct, existing nodes (no exact duplicate). */
+/** Add a labelled cross-link between two distinct, existing nodes (no exact duplicate). Either end
+ *  may be a floating topic — the canvas lets you drag a relationship to/from one, and the crosslink
+ *  edge renders for any endpoint, so endpoint validation must look beyond the central tree. */
 export function addLink(doc: MindMapDoc, from: string, to: string, label?: string): OpResult {
-  if (from === to || !findNode(doc, from) || !findNode(doc, to)) return { doc };
+  if (from === to || !findAnyNode(doc, from) || !findAnyNode(doc, to)) return { doc };
   if ((doc.links ?? []).some((l) => l.from === from && l.to === to)) return { doc };
   const next = structuredClone(doc);
   const link: CrossLink = { id: makeId(), from, to, ...(label ? { label } : {}) };

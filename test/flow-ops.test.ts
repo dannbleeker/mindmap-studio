@@ -1308,6 +1308,17 @@ describe("flow ops — cross-links (relationships)", () => {
     expect(addLink(d, "a", "ghost").doc).toBe(d);
   });
 
+  it("addLink accepts floating-topic endpoints (the canvas can connect them)", () => {
+    const d = addFloatingTopic(base(), "Detached").doc;
+    const fid = d.floatingTopics?.[0]?.id as string;
+    // tree node → floating topic
+    const r1 = addLink(d, "a", fid);
+    expect(r1.doc.links?.some((l) => l.from === "a" && l.to === fid)).toBe(true);
+    // floating topic → tree node
+    const r2 = addLink(d, fid, "b");
+    expect(r2.doc.links?.some((l) => l.from === fid && l.to === "b")).toBe(true);
+  });
+
   it("addLink rejects duplicate links (exact from→to already exists)", () => {
     const d = base(); // has link "a1" → "b"
     expect(addLink(d, "a1", "b").doc).toBe(d);

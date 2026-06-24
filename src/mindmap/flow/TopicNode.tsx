@@ -698,14 +698,31 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             }}
           >
             {priority ? (
-              <Chip
-                title={`${priorityLabel(priority)} priority`}
-                bg={priorityColor(priority)}
-                color="#fff"
-                fontWeight={600}
-              >
-                {priorityLabel(priority)}
-              </Chip>
+              editing ? (
+                <button
+                  type="button"
+                  className="nodrag nopan"
+                  title={`${priorityLabel(priority)} priority — click to cycle`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    editing.cyclePriority(id);
+                  }}
+                  style={{ border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
+                >
+                  <Chip bg={priorityColor(priority)} color="#fff" fontWeight={600}>
+                    {priorityLabel(priority)}
+                  </Chip>
+                </button>
+              ) : (
+                <Chip
+                  title={`${priorityLabel(priority)} priority`}
+                  bg={priorityColor(priority)}
+                  color="#fff"
+                  fontWeight={600}
+                >
+                  {priorityLabel(priority)}
+                </Chip>
+              )
             ) : null}
             {progress ? (
               <ProgressBadge

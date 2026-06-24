@@ -22,3 +22,12 @@ export function priorityLabel(p: number): string {
 export function priorityColor(p: number): string {
   return PRIORITY_COLOR[p] ?? "#6b7280";
 }
+
+/** The next priority when clicking the on-canvas chip: cycle through the picker's High/Med/Low
+ *  scheme then clear — undefined → 1 → 2 → 3 → undefined. Any imported 4–9 value clears (drops back
+ *  onto the 1–3 scale on the next click). Pure (drives the click-to-cycle priority chip). */
+export function cyclePriority(current: number | undefined): number | undefined {
+  if (current === undefined) return 1;
+  if (current >= 1 && current < 3) return current + 1;
+  return undefined;
+}

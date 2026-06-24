@@ -32,6 +32,8 @@ export interface EditingApi {
   cycleProgress: (id: string) => void;
   /** Quick task toggle (the hover checkbox): cycle not-a-task → to-do → done → not-a-task. */
   cycleTask: (id: string) => void;
+  /** Click the on-canvas priority chip to step priority: none → High → Med → Low → none. */
+  cyclePriority: (id: string) => void;
   /** Select the node and open the inspector on its Notes tab (clicking the node's 📝 indicator). */
   openNote: (id: string) => void;
   /** Native browser spell-check on the topic editors (a view setting; off by default). */

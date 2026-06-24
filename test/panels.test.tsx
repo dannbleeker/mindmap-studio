@@ -460,6 +460,22 @@ describe("StyleBar", () => {
       expect.objectContaining({ fontWeight: expect.any(String) }),
     );
   });
+
+  it("hides the Presets row when no named styles exist (#15)", () => {
+    render(<StyleBar onStyle={noop} />);
+    expect(screen.queryByText("Presets")).toBeNull();
+  });
+
+  it("surfaces saved named styles as quick-apply swatches and applies one on click (#15)", async () => {
+    const onStyle = vi.fn();
+    const preset = { background: "#fde68a", border: "2px solid #d97706" };
+    render(
+      <StyleBar onStyle={onStyle} namedStyles={[{ id: "p1", name: "Warning", style: preset }]} />,
+    );
+    expect(screen.getByText("Presets")).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "Apply preset Warning" }));
+    expect(onStyle).toHaveBeenCalledWith(preset);
+  });
 });
 
 describe("OutlinePanel (interaction)", () => {

@@ -160,7 +160,9 @@ export interface VersionSnapshot extends VersionMeta {
 }
 
 function docNodeCount(doc: MindMapDoc): number {
-  const walk = (n: MapNode): number => 1 + n.children.reduce((sum, c) => sum + walk(c), 0);
+  // Defensive on `children`: snapshots may pre-date a normalize rule, and this runs at save time
+  // before any load-boundary repair — a missing array must not throw and lose the snapshot.
+  const walk = (n: MapNode): number => 1 + (n.children ?? []).reduce((sum, c) => sum + walk(c), 0);
   return walk(doc.root) + (doc.floatingTopics ?? []).reduce((sum, f) => sum + walk(f), 0);
 }
 
@@ -190,12 +192,20 @@ export async function listVersions(mapId: string): Promise<VersionMeta[]> {
 export async function loadAllVersions(mapId: string): Promise<VersionSnapshot[]> {
   const recs = await (await db()).getAllFromIndex("versions", "by-map", mapId);
   return recs
-    .map((r) => ({ id: r.id, ts: r.ts, title: r.title, nodeCount: r.nodeCount, doc: r.doc }))
+    .map((r) => ({
+      id: r.id,
+      ts: r.ts,
+      title: r.title,
+      nodeCount: r.nodeCount,
+      doc: normalizeDoc(r.doc),
+    }))
     .sort((a, b) => a.ts - b.ts);
 }
 
 export async function loadVersion(id: string): Promise<MindMapDoc | null> {
-  return (await (await db()).get("versions", id))?.doc ?? null;
+  const doc = (await (await db()).get("versions", id))?.doc;
+  // Mirror loadMap: salvage a corrupt/old snapshot so restore + playback can't white-screen project().
+  return doc ? normalizeDoc(doc) : null;
 }
 
 /** The most recent snapshot's doc for a map (used to skip duplicate manual saves). */

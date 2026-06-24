@@ -7,6 +7,7 @@ import {
   deleteVersionsForMap,
   latestVersionDoc,
   listVersions,
+  loadAllVersions,
   loadVersion,
   saveVersion,
 } from "../src/store/mapStore";
@@ -42,6 +43,25 @@ describe("version store", () => {
     expect(list.length).toBe(MAX_VERSIONS);
     expect(list[0].ts).toBe(1000 + MAX_VERSIONS + 4); // newest kept
     expect(list.at(-1)?.ts).toBe(1005); // the 5 oldest were dropped
+  });
+
+  it("normalizes a malformed snapshot on load (restore/playback can't white-screen)", async () => {
+    // A snapshot predating a normalize rule: a child node missing its children array. saveVersion
+    // must not throw computing nodeCount, and the load boundary must repair it.
+    const malformed = {
+      schemaVersion: 1,
+      id: "v6",
+      title: "Legacy",
+      root: { id: "r", topic: "Legacy", children: [{ id: "c", topic: "child" }] },
+    } as unknown as MindMapDoc;
+    await saveVersion(malformed, 1000);
+    expect((await listVersions("v6"))[0].nodeCount).toBe(2); // counted despite missing children
+
+    const id = (await listVersions("v6"))[0].id;
+    const loaded = await loadVersion(id);
+    expect(loaded?.root.children[0].children).toEqual([]); // repaired to a projectable shape
+    const [snap] = await loadAllVersions("v6");
+    expect(snap.doc.root.children[0].children).toEqual([]); // playback path repaired too
   });
 
   it("deletes a map's history, and deleting the map cascades", async () => {

@@ -2,7 +2,12 @@
 // Pure functions with no dependencies — tests validate edge cases in box arithmetic.
 
 import { describe, expect, it } from "vitest";
-import { type Box, floatingPoints } from "../src/mindmap/flow/floating";
+import {
+  type Box,
+  crosslinkBezier,
+  curveFromHandle,
+  floatingPoints,
+} from "../src/mindmap/flow/floating";
 
 describe("floatingPoints (border-to-border geometry)", () => {
   it("connects two well-separated boxes", () => {
@@ -139,5 +144,29 @@ describe("floatingPoints (border-to-border geometry)", () => {
     expect(s2t.sy).toBe(t2s.ty);
     expect(s2t.tx).toBe(t2s.sx);
     expect(s2t.ty).toBe(t2s.sy);
+  });
+});
+
+describe("curveFromHandle (relationship reshape handle, #1)", () => {
+  // The handle sits at crosslinkBezier's midpoint, so dropping it where the curve already puts it
+  // must recover that same curve — curveFromHandle inverts the midpoint geometry.
+  it("inverts crosslinkBezier's midpoint for any chord + bow", () => {
+    const cases = [
+      { sx: 0, sy: 0, tx: 200, ty: 0, curve: 40 },
+      { sx: 0, sy: 0, tx: 200, ty: 0, curve: -60 },
+      { sx: 10, sy: 20, tx: 180, ty: 140, curve: 35 },
+      { sx: 100, sy: 0, tx: 100, ty: 200, curve: -25 }, // vertical chord
+    ];
+    for (const { sx, sy, tx, ty, curve } of cases) {
+      const { labelX, labelY } = crosslinkBezier(sx, sy, tx, ty, curve);
+      expect(curveFromHandle(sx, sy, tx, ty, labelX, labelY)).toBeCloseTo(curve, 5);
+    }
+  });
+
+  it("ignores movement along the chord (only the perpendicular component bends it)", () => {
+    // Horizontal chord: sliding the handle left/right along it changes nothing; only y matters.
+    expect(curveFromHandle(0, 0, 200, 0, 100, 30)).toBeCloseTo(40, 5);
+    expect(curveFromHandle(0, 0, 200, 0, 40, 30)).toBeCloseTo(40, 5); // different x, same y
+    expect(curveFromHandle(0, 0, 200, 0, 100, 0)).toBeCloseTo(0, 5); // on the chord → no bow
   });
 });

@@ -5,10 +5,17 @@ import {
   useEdges,
   useInternalNode,
   useNodes,
+  useReactFlow,
 } from "@xyflow/react";
-import { memo, useMemo } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { arrowHeadPath } from "./arrowhead";
-import { type Box, crosslinkBezier, floatingPoints, getFloatingPoints } from "./floating";
+import {
+  type Box,
+  crosslinkBezier,
+  curveFromHandle,
+  floatingPoints,
+  getFloatingPoints,
+} from "./floating";
 import { type HopSegment, hopPath } from "./lineJumps";
 import { useLinkEdit } from "./linkEdit";
 import { resolveLinkStyle } from "./style";
@@ -59,6 +66,11 @@ function collectSegments(
 
 function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgeProps<FlowEdge>) {
   const linkEdit = useLinkEdit();
+  const { screenToFlowPosition } = useReactFlow();
+  // While the midpoint handle is dragged, preview the new bow locally (re-bend the line live) and
+  // only commit to the doc on pointer-up — one undo step instead of one per pointermove.
+  const [previewCurve, setPreviewCurve] = useState<number | null>(null);
+  const dragging = useRef(false);
   const s = useInternalNode(source);
   const t = useInternalNode(target);
   // Subscribe to all nodes + edges so the hops re-compute live as ANY node moves or a relationship
@@ -86,7 +98,11 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
   // The bezier carries the wide invisible hit-area (and is the visible line when line-jumps is off).
   // Built from the SHARED helper the exporter uses, so the curve bows along the same (horizontal) axis
   // on screen and in exports — canvas == export.
-  const { path: bezier, labelX, labelY } = crosslinkBezier(sx, sy, tx, ty, data?.curve);
+  const {
+    path: bezier,
+    labelX,
+    labelY,
+  } = crosslinkBezier(sx, sy, tx, ty, previewCurve ?? data?.curve);
   const { color, width, dasharray, arrowAtTarget, arrowAtSource } = resolveLinkStyle(data ?? {});
   const dimOpacity = data?.dimmed ? 0.12 : 1;
 
@@ -125,6 +141,45 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
           fill={color}
           style={{ opacity: dimOpacity }}
         />
+      ) : null}
+      {selected && linkEdit?.editingId !== id ? (
+        // Draggable midpoint handle (#1): drag perpendicular to the chord to bow the relationship.
+        <EdgeLabelRenderer>
+          <div
+            className="nodrag nopan"
+            title="Drag to reshape the relationship"
+            aria-label="Reshape relationship"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              (e.target as Element).setPointerCapture?.(e.pointerId);
+              dragging.current = true;
+            }}
+            onPointerMove={(e) => {
+              if (!dragging.current) return;
+              const p = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+              setPreviewCurve(curveFromHandle(sx, sy, tx, ty, p.x, p.y));
+            }}
+            onPointerUp={(e) => {
+              if (!dragging.current) return;
+              dragging.current = false;
+              (e.target as Element).releasePointerCapture?.(e.pointerId);
+              if (previewCurve != null) linkEdit?.setCurve(id, previewCurve);
+              setPreviewCurve(null);
+            }}
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "var(--mm-node-bg, #ffffff)",
+              border: `2px solid ${color}`,
+              cursor: "grab",
+              pointerEvents: "all",
+              zIndex: 6,
+            }}
+          />
+        </EdgeLabelRenderer>
       ) : null}
       {linkEdit?.editingId === id ? (
         <EdgeLabelRenderer>

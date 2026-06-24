@@ -12,6 +12,8 @@ export interface LinkEditApi {
   commit: (id: string, label: string) => void;
   /** Abandon the inline edit without changing the label. */
   cancel: () => void;
+  /** Set a relationship's perpendicular bow (the draggable midpoint reshape handle). One undo step. */
+  setCurve: (id: string, curve: number) => void;
 }
 
 export const LinkEditContext = createContext<LinkEditApi | null>(null);

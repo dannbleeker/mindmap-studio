@@ -36,6 +36,8 @@ export interface ToolbarPanels {
   setBoardOpen: (fn: (v: boolean) => boolean) => void;
   statsOpen: boolean;
   setStatsOpen: (fn: (v: boolean) => boolean) => void;
+  agendaOpen: boolean;
+  setAgendaOpen: (fn: (v: boolean) => boolean) => void;
   noteEditorOpen: boolean;
   setNoteEditorOpen: (fn: (v: boolean) => boolean) => void;
   infoOpen: boolean;
@@ -568,6 +570,13 @@ export function Toolbar({
             checked={panels.statsOpen}
             trailing={mi("check")}
             onSelect={() => panels.setStatsOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("calendar")}
+            label="Agenda (due tasks)"
+            checked={panels.agendaOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setAgendaOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("note")}

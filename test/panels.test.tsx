@@ -6,6 +6,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import {
+  AgendaPanel,
   FilterPanel,
   HistoryPanel,
   InfoPanel,
@@ -723,6 +724,37 @@ describe("StatsPanel", () => {
     expect(screen.getByText(/Map statistics/)).toBeTruthy();
     expect(screen.getByText("Topics")).toBeTruthy();
     expect(screen.getByText("Distinct tags")).toBeTruthy();
+  });
+});
+
+describe("AgendaPanel (#9)", () => {
+  const agendaDoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "d",
+    title: "R",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "p", topic: "Late task", task: { due: "2026-06-20" }, children: [] },
+        { id: "t", topic: "Today task", task: { due: "2026-06-24" }, children: [] },
+      ],
+    },
+  };
+
+  it("buckets due tasks and jumps to one on click", async () => {
+    const onPick = vi.fn();
+    render(<AgendaPanel doc={agendaDoc} today="2026-06-24" onPick={onPick} />);
+    expect(screen.getByText("Overdue (1)")).toBeTruthy();
+    expect(screen.getByText("Today (1)")).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: /Late task/ }));
+    expect(onPick).toHaveBeenCalledWith("p");
+  });
+
+  it("shows an empty state when nothing is due", () => {
+    const bare: MindMapDoc = { ...agendaDoc, root: { id: "r", topic: "R", children: [] } };
+    render(<AgendaPanel doc={bare} today="2026-06-24" onPick={noop} />);
+    expect(screen.getByText(/No overdue or upcoming tasks/)).toBeTruthy();
   });
 });
 

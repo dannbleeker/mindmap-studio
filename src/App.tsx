@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Kanban } from "./Kanban";
 import {
+  AgendaPanel,
   FilterPanel,
   HistoryPanel,
   InfoPanel,
@@ -1297,6 +1298,13 @@ export function App() {
               />
             )}
             {panels.statsOpen && <StatsPanel doc={liveDoc} />}
+            {panels.agendaOpen && (
+              <AgendaPanel
+                doc={liveDoc}
+                today={todayISO()}
+                onPick={(id) => mapRef.current?.focusNode(id)}
+              />
+            )}
             {panels.noteEditorOpen && (
               <NoteEditorPanel
                 selected={selected}

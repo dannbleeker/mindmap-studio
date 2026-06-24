@@ -37,6 +37,7 @@ export type EditorIconName =
   | "board"
   | "history"
   | "grid"
+  | "calendar"
   | "copy"
   | "paste"
   | "undo"
@@ -294,6 +295,13 @@ export function EditorIcon({
           <rect x="13" y="4" width="7" height="7" rx="1.4" />
           <rect x="4" y="13" width="7" height="7" rx="1.4" />
           <rect x="13" y="13" width="7" height="7" rx="1.4" />
+        </svg>
+      );
+    case "calendar":
+      return (
+        <svg {...p} aria-hidden="true">
+          <rect x="3.5" y="5" width="17" height="16" rx="2" />
+          <path d="M3.5 9.5h17M8 3v4M16 3v4" />
         </svg>
       );
     case "copy":

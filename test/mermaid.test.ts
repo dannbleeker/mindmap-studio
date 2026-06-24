@@ -37,6 +37,26 @@ describe("Mermaid mindmap round-trip", () => {
     expect(topics(back.root)).toEqual(topics(doc.root));
   });
 
+  it("round-trips topics containing double-quotes and brackets (entity-escaped, not backslash)", () => {
+    // The exporter quotes node text and encodes embedded `"` as &quot; (the form Mermaid renders as
+    // a literal quote); the importer decodes it. Brackets survive because the node text is quoted.
+    // This pins the deliberate choice: backslash escaping would NOT round-trip through Mermaid.
+    const tricky: MindMapDoc = {
+      schemaVersion: 1,
+      id: "q",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [{ id: "n", topic: 'Say "Hi" [done]', children: [] }],
+      },
+    };
+    const out = toMermaid(tricky);
+    expect(out).toContain("&quot;"); // entity-escaped, not a raw or backslashed quote
+    expect(out).not.toContain('\\"');
+    expect(topics(fromMermaid(out).root)).toEqual(topics(tricky.root)); // exact round-trip
+  });
+
   it("parses a hand-written mindmap with mixed shapes and indentation", () => {
     const text = `mindmap
   root((Central))

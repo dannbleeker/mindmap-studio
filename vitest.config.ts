@@ -69,15 +69,14 @@ export default defineConfig({
       reporter: ["text-summary"],
       // No-regression floor, set just under the live numbers so routine variance doesn't flake but a
       // real drop fails the gate. Enforced when the gate runs `vitest run --coverage`. Raise as
-      // coverage climbs. NB: the app-integration test loads the whole tree, so these now reflect the
-      // COMPLETE denominator (lines/stmts ~88.4, funcs ~74.9, branches ~85.9). The functions figure
-      // looks lower than the old 81 only because the denominator is now complete — App's handlers were
-      // previously absent from the report, not because coverage regressed.
+      // coverage climbs. NB: the app-integration test loads the whole tree, so these reflect the
+      // COMPLETE denominator. Live ≈ lines/stmts 90.7, funcs 76.6, branches 86.6 — the functions
+      // figure trails because the in-browser-verified .tsx canvas/UI is intentionally not unit-tested.
       thresholds: {
-        lines: 88,
-        statements: 88,
-        functions: 74,
-        branches: 85,
+        lines: 90,
+        statements: 90,
+        functions: 76,
+        branches: 86,
       },
     },
   },

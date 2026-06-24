@@ -73,16 +73,15 @@ import {
   type SelectionFields,
   type SelectionMarkerTags,
 } from "./mindmap";
-import { findAnyNode, nodePath } from "./mindmap/flow/ops";
+import { findAnyNode } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
-import { noteCounts } from "./noteFormat";
 import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "./outline";
 import { checkForUpdate, initPwaUpdateToast } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
 import { useSavedViews } from "./savedViews";
 import { type LibraryHit, findDocMatches, searchLibrary } from "./search";
-import { countWords } from "./stats";
+import { selectionCrumbs, selectionInfo } from "./selectionInfo";
 import { stickerImage } from "./stickers";
 import {
   type MapSummary,
@@ -265,43 +264,17 @@ export function App() {
     selectedNode,
     showHint,
   });
-  // Inspector header breadcrumb (ancestor path) + quick-facts line (outline number, depth, child
-  // count, note size). Memoised so the whole-tree outline-number walk only reruns on doc/selection.
-  const inspectorInfo = useMemo(() => {
-    if (!selected || !selectedNode) return { breadcrumb: "", facts: "", times: "" };
-    const path = nodePath(liveDoc, selected.id);
-    const breadcrumb = (path?.ancestors ?? []).map((a) => a.topic || "(untitled)").join(" › ");
-    const outlineNo = outlineNumbers(liveDoc.root, liveDoc.meta?.numberStyle).get(selected.id);
-    const counts = noteCounts(selectedNode.note ?? "");
-    const kids = selectedNode.children.length;
-    // Reading load of this topic (its title + note) — words ÷ 200 wpm, surfaced only when non-trivial.
-    const topicWords = countWords(selectedNode.topic) + counts.words;
-    const facts = [
-      outlineNo ? `#${outlineNo}` : null,
-      `depth ${path?.depth ?? 0}`,
-      `${kids} ${kids === 1 ? "child" : "children"}`,
-      counts.chars ? `note ${counts.words}w · ${counts.chars}c` : null,
-      topicWords >= 50 ? `~${Math.ceil(topicWords / 200)} min read` : null,
-    ]
-      .filter(Boolean)
-      .join(" · ");
-    // Created / modified (when the node carries them) — a second, fainter facts line via timeAgo.
-    const times = [
-      selectedNode.createdAt ? `created ${timeAgo(selectedNode.createdAt)}` : null,
-      selectedNode.modifiedAt ? `modified ${timeAgo(selectedNode.modifiedAt)}` : null,
-    ]
-      .filter(Boolean)
-      .join(" · ");
-    return { breadcrumb, facts, times };
-  }, [selected, selectedNode, liveDoc]);
-  // The canvas breadcrumb trail: root → ancestors → selected, as clickable crumbs. Empty (hidden)
-  // unless something below the root is selected.
-  const crumbs = useMemo<Crumb[]>(() => {
-    if (!selected || !selectedNode) return [];
-    const path = nodePath(liveDoc, selected.id);
-    if (!path) return [];
-    return [...path.ancestors, selectedNode].map((n) => ({ id: n.id, topic: n.topic }));
-  }, [selected, selectedNode, liveDoc]);
+  // Inspector header breadcrumb + quick-facts/times lines, and the canvas breadcrumb trail — both pure
+  // derivations live in selectionInfo.ts; App just memoises them (the outline-number walk reruns only
+  // on doc/selection change).
+  const inspectorInfo = useMemo(
+    () => selectionInfo(liveDoc, selectedNode, selected?.id ?? null),
+    [selected, selectedNode, liveDoc],
+  );
+  const crumbs = useMemo<Crumb[]>(
+    () => selectionCrumbs(liveDoc, selectedNode, selected?.id ?? null),
+    [selected, selectedNode, liveDoc],
+  );
   // Topics that point AT the selected node (incoming #node= links + relationship edges) — the
   // inspector's "Linked from" jumps. Memoised on the live doc + selection so it doesn't re-walk the
   // tree on every render; rename of a source stays correct because liveDoc is a dependency.

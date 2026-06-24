@@ -92,6 +92,7 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
       "Double-click to edit", // #5 first-hover microcopy
       "3 things to try", // #13 first-run card
       "mm-node-add", // #1 hover ＋ affordance
+      "mm-node-bar", // #3 on-topic hover action bar
       "mm-coachmark", // #1
       "mm-firstrun", // #13
       "dropTarget", // #11 flag

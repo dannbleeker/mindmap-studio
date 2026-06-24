@@ -793,6 +793,35 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       {/* On-node ＋ add affordances (#1): child on the right edge, sibling below. Shown on hover or
           selection; ≥24px desktop / ≥44px touch (see .mm-node-add). nodrag nopan so dragging from
           them never moves the node. Canvas-only — not authored into exports. */}
+      {/* On-topic hover action bar (#3): quick access to actions otherwise only in the inspector —
+          add/open a note and add/cycle priority. Task & collapse already have dedicated hover
+          affordances (the left checkbox / the bottom-right toggle), so the bar focuses on these two. */}
+      {(hovered || selected) && !isEditing ? (
+        <div className="mm-node-bar nodrag nopan">
+          <button
+            type="button"
+            title={note?.trim() ? "Open note" : "Add note"}
+            aria-label={note?.trim() ? "Open note" : "Add note"}
+            onClick={(e) => {
+              e.stopPropagation();
+              editing?.openNote(id);
+            }}
+          >
+            📝
+          </button>
+          <button
+            type="button"
+            title={priority ? "Cycle priority" : "Add priority"}
+            aria-label={priority ? "Cycle priority" : "Add priority"}
+            onClick={(e) => {
+              e.stopPropagation();
+              editing?.cyclePriority(id);
+            }}
+          >
+            ⚑
+          </button>
+        </div>
+      ) : null}
       {(hovered || selected) && !isEditing ? (
         <>
           <button

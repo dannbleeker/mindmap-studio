@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Seven new starter templates.** The New-map gallery gains analysis + knowledge/sharing skeletons to
+  balance the existing team/meeting set: **PESTLE** (companion to SWOT), **Fishbone / cause & effect**
+  (the 6M categories — companion to 5 Whys, pairs with the Fishbone layout), **OKRs**, **Essay outline**,
+  **Presentation outline**, **Lean Canvas**, and **Persona**. Each is a data-driven entry in
+  `src/templates.ts`, so it auto-appears in the Templates gallery with a live preview.
+
 - **MindManager-inspired UI batch.** A round of canvas/editor affordances brought across from the
   MindManager UX survey:
   - **Click the priority chip to cycle it** (none → High → Med → Low → none) right on the node, like the

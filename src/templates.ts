@@ -141,6 +141,100 @@ export const templates: MapTemplate[] = [
         leaf("prevent", "Preventive actions"),
       ]),
   },
+  {
+    id: "pestle",
+    name: "PESTLE",
+    build: () =>
+      doc("PESTLE analysis", [
+        leaf("political", "Political"),
+        leaf("economic", "Economic"),
+        leaf("social", "Social"),
+        leaf("technological", "Technological"),
+        leaf("legal", "Legal"),
+        leaf("environmental", "Environmental"),
+      ]),
+  },
+  {
+    id: "fishbone",
+    name: "Fishbone (cause & effect)",
+    // The spine is the effect; the branches are the classic 6M cause categories. Switch to the
+    // Fishbone layout (Layout menu) to draw it as the herringbone diagram.
+    build: () =>
+      doc("Effect / problem", [
+        leaf("people", "People"),
+        leaf("process", "Process"),
+        leaf("equipment", "Equipment"),
+        leaf("materials", "Materials"),
+        leaf("environment", "Environment"),
+        leaf("management", "Management"),
+      ]),
+  },
+  {
+    id: "okrs",
+    name: "OKRs",
+    build: () =>
+      doc("Objective", [
+        leaf("kr1", "Key result 1"),
+        leaf("kr2", "Key result 2"),
+        leaf("kr3", "Key result 3"),
+        leaf("initiatives", "Initiatives"),
+      ]),
+  },
+  {
+    id: "essay",
+    name: "Essay outline",
+    build: () =>
+      doc("Essay", [
+        leaf("thesis", "Thesis"),
+        leaf("intro", "Introduction"),
+        leaf("p1", "Point 1"),
+        leaf("p2", "Point 2"),
+        leaf("p3", "Point 3"),
+        leaf("counter", "Counterpoint"),
+        leaf("conclusion", "Conclusion"),
+      ]),
+  },
+  {
+    id: "presentation",
+    name: "Presentation outline",
+    build: () =>
+      doc("Presentation", [
+        leaf("hook", "Hook"),
+        leaf("message", "Core message"),
+        leaf("pt1", "Point 1"),
+        leaf("pt2", "Point 2"),
+        leaf("pt3", "Point 3"),
+        leaf("cta", "Call to action"),
+      ]),
+  },
+  {
+    id: "lean-canvas",
+    name: "Lean Canvas",
+    build: () =>
+      doc("Lean Canvas", [
+        leaf("problem", "Problem"),
+        leaf("solution", "Solution"),
+        leaf("uvp", "Unique value proposition"),
+        leaf("customers", "Customer segments"),
+        leaf("channels", "Channels"),
+        leaf("revenue", "Revenue streams"),
+        leaf("costs", "Cost structure"),
+        leaf("metrics", "Key metrics"),
+        leaf("advantage", "Unfair advantage"),
+      ]),
+  },
+  {
+    id: "persona",
+    name: "Persona",
+    build: () =>
+      doc("Persona", [
+        leaf("goals", "Goals"),
+        leaf("pains", "Pains"),
+        leaf("behaviours", "Behaviours"),
+        leaf("context", "Context"),
+        leaf("quote", "Quote"),
+      ]),
+  },
 ];
 
 export function buildTemplate(id: string): MindMapDoc {

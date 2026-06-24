@@ -29,6 +29,35 @@ describe("buildTemplate", () => {
     expect(buildTemplate("project").root.children).toHaveLength(5);
   });
 
+  it("includes the analysis + knowledge/sharing templates", () => {
+    const ids = templates.map((t) => t.id);
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "pestle",
+        "fishbone",
+        "okrs",
+        "essay",
+        "presentation",
+        "lean-canvas",
+        "persona",
+      ]),
+    );
+    expect(buildTemplate("pestle").root.children.map((c) => c.topic)).toEqual([
+      "Political",
+      "Economic",
+      "Social",
+      "Technological",
+      "Legal",
+      "Environmental",
+    ]);
+    expect(buildTemplate("fishbone").root.children).toHaveLength(6); // the 6M cause categories
+    expect(buildTemplate("okrs").root.children.map((c) => c.topic)).toContain("Key result 1");
+    expect(buildTemplate("lean-canvas").root.children).toHaveLength(9); // the 9 canvas blocks
+    expect(buildTemplate("presentation").root.children.map((c) => c.topic)).toContain(
+      "Call to action",
+    );
+  });
+
   it("includes the structured-thinking templates", () => {
     const ids = templates.map((t) => t.id);
     expect(ids).toEqual(

@@ -145,7 +145,14 @@ function PropRow({ label, children }: { label: string; children: ReactNode }) {
 }
 
 // Per-topic styling bar: shape, fill, border, bold — applied to the selected node.
-export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => void }) {
+export function StyleBar({
+  onStyle,
+  namedStyles = [],
+}: {
+  onStyle: (patch: Partial<NodeStyle>) => void;
+  /** Saved presets surfaced as a quick-apply swatch gallery (#15); empty = no Presets row. */
+  namedStyles?: NamedStyle[];
+}) {
   const swatch = (color: string, onClick: () => void, title: string) => (
     <button
       key={title}
@@ -318,6 +325,29 @@ export function StyleBar({ onStyle }: { onStyle: (patch: Partial<NodeStyle>) => 
         <option value="300px">Wide</option>
         <option value="none">None</option>
       </select>
+      {namedStyles.length > 0 ? (
+        <>
+          {label("Presets")}
+          {namedStyles.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => onStyle(s.style)}
+              title={`Apply "${s.name}"`}
+              aria-label={`Apply preset ${s.name}`}
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: radius.xs,
+                border: s.style.border ?? `1px solid ${colors.controlBorder}`,
+                background: s.style.background ?? colors.white,
+                cursor: "pointer",
+                padding: 0,
+              }}
+            />
+          ))}
+        </>
+      ) : null}
       <button
         type="button"
         style={{ ...styleBtn, fontSize: 12 }}
@@ -1513,6 +1543,7 @@ export function InfoPanel({
   onBulkToggleTag,
   onPickSticker,
   onStyle,
+  namedStyles,
   onAddTag,
   onRemoveTag,
   allTags,
@@ -1570,6 +1601,8 @@ export function InfoPanel({
   onBulkToggleTag?: (tag: string) => void;
   onPickSticker: (sticker: Sticker) => void;
   onStyle: (patch: Partial<NodeStyle>) => void;
+  /** Saved presets for the StyleBar quick-apply gallery (#15). */
+  namedStyles?: NamedStyle[];
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
   /** Every tag already used in the map — drives the Add-a-tag autocomplete (a `<datalist>`). */
@@ -1782,7 +1815,7 @@ export function InfoPanel({
               )}
               {activeTab === "style" && (
                 <>
-                  <StyleBar onStyle={onStyle} />
+                  <StyleBar onStyle={onStyle} namedStyles={namedStyles} />
                   {multi ? (
                     // Bulk: tri-state markers (lit = on all, dashed = on some); stickers stay single-node.
                     onBulkToggleMarker ? (

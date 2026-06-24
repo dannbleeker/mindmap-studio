@@ -1547,6 +1547,7 @@ export function App() {
                   const ok = mapRef.current?.setSelectedStyle(patch);
                   if (!ok) showHint("Select a node first, then style it.");
                 }}
+                namedStyles={namedStyles}
                 onSetFillImage={async (file) => {
                   try {
                     const { url } = await fileToMapImage(file);

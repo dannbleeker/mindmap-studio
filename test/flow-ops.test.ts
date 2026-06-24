@@ -51,9 +51,12 @@ import {
   setBackground,
   setBackgroundImage,
   setBoundaryColor,
+  setBoundaryDash,
   setBoundaryLabel,
+  setBoundaryShape,
   setBranchColor,
   setCalloutColor,
+  setConnectorStyle,
   setDue,
   setExpandedToLevel,
   setFontFamily,
@@ -61,6 +64,7 @@ import {
   setFreeform,
   setHyperlink,
   setImage,
+  setLegend,
   setLineDash,
   setLineJumps,
   setLinkArrow,
@@ -355,6 +359,22 @@ describe("flow ops — content", () => {
     expect(
       alignNodes(doc, ["a", "b"], "right", sizes).doc.root.children.map((c) => c.pos?.x),
     ).toEqual([30, 50]);
+    // hcenter: centre on cx = (minX 0 + maxR 70) / 2 = 35 → x = 35 - w/2
+    expect(
+      alignNodes(doc, ["a", "b"], "hcenter", sizes).doc.root.children.map((c) => c.pos?.x),
+    ).toEqual([15, 25]);
+    // top: align top edges → y = minY (0); x untouched
+    expect(
+      alignNodes(doc, ["a", "b"], "top", sizes).doc.root.children.map((c) => c.pos?.y),
+    ).toEqual([0, 0]);
+    // bottom: align bottom edges → y = maxBottom - h (maxBottom = max(0+20, 100+20) = 120)
+    expect(
+      alignNodes(doc, ["a", "b"], "bottom", sizes).doc.root.children.map((c) => c.pos?.y),
+    ).toEqual([100, 100]);
+    // vmiddle: centre on cy = (minY 0 + maxB 120) / 2 = 60 → y = 60 - h/2
+    expect(
+      alignNodes(doc, ["a", "b"], "vmiddle", sizes).doc.root.children.map((c) => c.pos?.y),
+    ).toEqual([50, 50]);
     // fewer than 2 positioned nodes → no-op
     expect(alignNodes(doc, ["a"], "left", sizes).doc).toEqual(doc);
   });
@@ -372,6 +392,20 @@ describe("flow ops — content", () => {
     // centres 0,?,100 → even step 50 → middle node centre 50 (width 0 → x 50)
     expect(distributeNodes(doc, ["a", "b", "c"], "h", sizes).doc.root.children[1].pos?.x).toBe(50);
     expect(distributeNodes(doc, ["a", "b"], "h", sizes).doc).toEqual(doc); // <3 → no-op
+  });
+
+  it("distributeNodes spaces nodes along the vertical axis too", () => {
+    const node = (id: string, y: number) => ({ id, topic: id, pos: { x: 0, y }, children: [] });
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "R",
+      root: { id: "r", topic: "R", children: [node("a", 0), node("b", 10), node("c", 100)] },
+      meta: { freeform: true },
+    };
+    const sizes = { a: { w: 0, h: 0 }, b: { w: 0, h: 0 }, c: { w: 0, h: 0 } };
+    // centres 0,?,100 → even step 50 → middle node centre 50 (height 0 → y 50)
+    expect(distributeNodes(doc, ["a", "b", "c"], "v", sizes).doc.root.children[1].pos?.y).toBe(50);
   });
 
   it("detachBranch pops a subtree out of the tree into floatingTopics (with a pos)", () => {
@@ -736,6 +770,24 @@ describe("flow ops — per-overlay colours", () => {
     expect(setBoundaryColor(colored, "bd", "").doc.boundaries?.[0]?.color).toBeUndefined();
     const d = withOverlays();
     expect(setBoundaryColor(d, "ghost", "#000").doc).toBe(d); // no-op for unknown id
+  });
+
+  it("setBoundaryShape sets / clears a boundary's outline shape; roundRect clears, no-op for unknown id", () => {
+    expect(setBoundaryShape(withOverlays(), "bd", "rect").doc.boundaries?.[0]?.shape).toBe("rect");
+    const shaped = setBoundaryShape(withOverlays(), "bd", "rect").doc;
+    expect(setBoundaryShape(shaped, "bd", "roundRect").doc.boundaries?.[0]?.shape).toBeUndefined();
+    const d = withOverlays();
+    expect(setBoundaryShape(d, "ghost", "rect").doc).toBe(d); // no-op for unknown id
+  });
+
+  it("setBoundaryDash sets / clears a boundary's line style; solid clears, no-op for unknown id", () => {
+    expect(setBoundaryDash(withOverlays(), "bd", "dashed").doc.boundaries?.[0]?.dash).toBe(
+      "dashed",
+    );
+    const dashed = setBoundaryDash(withOverlays(), "bd", "dashed").doc;
+    expect(setBoundaryDash(dashed, "bd", "solid").doc.boundaries?.[0]?.dash).toBeUndefined();
+    const d = withOverlays();
+    expect(setBoundaryDash(d, "ghost", "dashed").doc).toBe(d); // no-op for unknown id
   });
 
   it("setSummaryColor sets / clears a summary's colour by id", () => {
@@ -1119,6 +1171,18 @@ describe("flow ops — content fill (hyperlink / image / rich text / meta toggle
     expect(setNumberStyle(base(), "outline").doc.meta?.numberStyle).toBe("outline");
     expect(
       setNumberStyle(setNumberStyle(base(), "outline").doc, "decimal").doc.meta?.numberStyle,
+    ).toBeUndefined();
+  });
+
+  it("setLegend toggles the per-map flag (false clears it)", () => {
+    expect(setLegend(base(), true).doc.meta?.legend).toBe(true);
+    expect(setLegend(setLegend(base(), true).doc, false).doc.meta?.legend).toBeUndefined();
+  });
+
+  it("setConnectorStyle stores the style; organic clears the override", () => {
+    expect(setConnectorStyle(base(), "elbow").doc.meta?.connectorStyle).toBe("elbow");
+    expect(
+      setConnectorStyle(setConnectorStyle(base(), "elbow").doc, "organic").doc.meta?.connectorStyle,
     ).toBeUndefined();
   });
 

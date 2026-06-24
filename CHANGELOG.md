@@ -7,6 +7,31 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **MindManager-inspired UI batch.** A round of canvas/editor affordances brought across from the
+  MindManager UX survey:
+  - **Click the priority chip to cycle it** (none → High → Med → Low → none) right on the node, like the
+    progress pie and task checkbox — no trip to the inspector. New pure `cyclePriority`.
+  - **On-topic hover action bar** — hovering/selecting a topic shows a small toolbar with one-click
+    *add/open note* and *add/cycle priority* (the actions otherwise only in the inspector).
+  - **Style-preset gallery** — saved named styles appear as a **Presets** swatch row on the StyleBar;
+    click one to apply it to the selection.
+  - **Agenda panel** (View → *Agenda*) — a read-only list of every dated, unfinished task bucketed into
+    Overdue / Today / This week, click-to-focus. New pure `agendaBuckets` selector.
+  - **Images & simple tables in notes** — the note markdown subset now renders `![alt](url)` images
+    (http(s)/data:image only) and GitHub-style pipe tables, with 🖼/▦ editor buttons; both round-trip to
+    plain markdown.
+  - **Reshape a relationship by dragging its midpoint** — a selected cross-link shows a draggable dot
+    that bows the arc (its `curve`), with a live preview and one undo step. New pure `curveFromHandle`.
+  - **Drag a desktop file onto a topic** — the first image becomes the topic's picture, anything else
+    attaches. New pure `nodeAtPoint` hit-test + id-based `setNodeImage` / `addNodeAttachment`.
+  - **Group-drag a multi-selection** in free-canvas mode now moves and *keeps* the whole selection (one
+    undo step), instead of only the cursor node. New pure `setNodePositions` batch op.
+  - **Animated expand/collapse** — collapsing/expanding a branch eases the surviving nodes to their new
+    positions (~240 ms, `requestAnimationFrame`), honouring the OS *reduce-motion* setting. Pure
+    `easeInOutCubic` / `lerp`.
+  - *(Already shipped, verified this round)* the **minimap** is pannable/zoomable with per-branch node
+    colours, and **live spell-check** squiggles toggle on both the topic and note editors.
+
 - **Floating topics are first-class for editing.** A floating topic and the nodes inside it now accept
   the full edit set — **Add child / Add sibling / Indent / Outdent / Move / Delete / Group in boundary /
   Summarize / Paste branch**, plus every inspector edit (rename, note, branch colour, line style,

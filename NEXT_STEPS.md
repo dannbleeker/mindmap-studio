@@ -25,10 +25,13 @@ push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 _None actionable._ The MindManager `.mmap` importer is now feature-complete for its scope — Phases A–C
 shipped (task info, full notes, tags, per-topic colour/font/shape, rich-text runs, embedded images +
 attachments, relationship/boundary styling, callouts, map background), each into an existing model
-field and unit-tested. What remains is intentionally lossy (see *Deferred* below). One validation gap
-stands: the **embedded-image / attachment paths want a real multi-feature `.mmap` sample** run through
-the env-gated test (`MMAP_FILE`) to confirm the `mmarch://bin/` resolution + `ImageSize` mapping
-against a genuine export — the synthetic fixtures pass, but no image-bearing real file is committed.
+field and unit-tested. What remains is intentionally lossy (see *Deferred* below). The
+**embedded-image / attachment code paths are now covered deterministically** — the `mmarch://bin/`
+resolver's scheme/case/basename tolerance, `ImageSize` mm→px conversion + 280px capping, the
+vector→raster `AlternateImageData` fallback, `IconImage`, attachment Folder/missing-bin skips, and a
+combined realistic multi-feature archive are all exercised by synthetic fixtures (`test/mmap.test.ts`).
+Running a *genuine* export through the env-gated `MMAP_FILE` test remains an optional extra-confidence
+check (the owner did so 2026-06-19), not a blocker.
 
 Both real-file importer validations remain done — **`.mmap`** and **`.smmx`** — each owner-validated
 **2026-06-19** and guarded by an env-gated integration test (`MMAP_FILE` / `SMMX_FILE`).

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   NATIVE_EXT,
+  downloadMapFile,
   ensureWritePermission,
   isNativeExt,
   openMapFile,
@@ -185,5 +186,47 @@ describe("openMapFile / pickSaveHandle", () => {
       throw new DOMException("cancelled", "AbortError");
     });
     expect(await pickSaveHandle(docOf("x"))).toBeNull();
+  });
+
+  it("openMapFile rethrows a non-abort picker error (a real failure isn't swallowed)", async () => {
+    window.showOpenFilePicker = vi.fn(async () => {
+      throw new DOMException("disk on fire", "NotAllowedError");
+    });
+    await expect(openMapFile()).rejects.toThrow("disk on fire");
+  });
+
+  it("openMapFile returns null when the picker yields no handle", async () => {
+    window.showOpenFilePicker = vi.fn(async () => []); // nothing selected
+    expect(await openMapFile()).toBeNull();
+  });
+
+  it("pickSaveHandle rethrows a non-abort picker error", async () => {
+    window.showSaveFilePicker = vi.fn(async () => {
+      throw new DOMException("denied", "NotAllowedError");
+    });
+    await expect(pickSaveHandle(docOf("x"))).rejects.toThrow("denied");
+  });
+});
+
+describe("downloadMapFile (no-picker fallback)", () => {
+  it("serializes the doc to a Blob and triggers an anchor download", () => {
+    // jsdom's URL has neither method, so assign fresh mocks (spyOn can't wrap a missing prop).
+    const createUrl = vi.fn(() => "blob:fake");
+    const revokeUrl = vi.fn();
+    URL.createObjectURL = createUrl as unknown as typeof URL.createObjectURL;
+    URL.revokeObjectURL = revokeUrl as unknown as typeof URL.revokeObjectURL;
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockReturnValue();
+    try {
+      downloadMapFile(docOf("Saved Local"));
+      expect(createUrl).toHaveBeenCalledWith(expect.any(Blob));
+      expect(click).toHaveBeenCalledOnce();
+      expect(revokeUrl).toHaveBeenCalledWith("blob:fake"); // object URL is released
+    } finally {
+      click.mockRestore();
+      // biome-ignore lint/performance/noDelete: remove the test-only global so other files stay clean
+      delete (URL as { createObjectURL?: unknown }).createObjectURL;
+      // biome-ignore lint/performance/noDelete: remove the test-only global so other files stay clean
+      delete (URL as { revokeObjectURL?: unknown }).revokeObjectURL;
+    }
   });
 });

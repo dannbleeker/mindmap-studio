@@ -10,6 +10,7 @@ import {
   computeAxisByParent,
   crosslinkBezier,
   elbowPath,
+  sideEndpoints,
   taperedRibbonPath,
 } from "../src/mindmap/flow/floating";
 import { boundaryPath, dashArray } from "../src/mindmap/flow/geometry";
@@ -171,5 +172,32 @@ describe("branch geometry", () => {
     expect(d.trimEnd().endsWith("60 180")).toBe(true); // ends at the child's top CENTRE
     expect(d).toContain("Q"); // routes via a rounded mid-bus, not one diagonal
     expect(elbowPath(parent, child, "bottom")).toBe(d); // deterministic
+  });
+
+  it("elbowPath: a horizontal-bus connector for a side attach (rounded, parent-right → child-left)", () => {
+    const parent = box(0, 0, 100, 40); // right edge at x=50
+    const child = box(260, 120, 100, 40); // to the right + below → left edge at x=210
+    const d = elbowPath(parent, child, "right");
+    expect(d.startsWith("M 50 0")).toBe(true); // leaves the parent's right CENTRE
+    expect(d.trimEnd().endsWith("210 120")).toBe(true); // ends at the child's left CENTRE
+    expect(d).toContain("Q"); // rounded vertical mid-bus
+  });
+
+  it("elbowPath: degenerates to square corners when the offset is tiny (r < 0.5)", () => {
+    const parent = box(0, 0, 100, 40); // right edge x=50
+    const child = box(50.5, 0.2, 0, 0); // barely offset → corner radius collapses
+    const d = elbowPath(parent, child, "right");
+    expect(d).not.toContain("Q"); // no rounded quad — just L segments
+    expect(d.startsWith("M 50 0")).toBe(true);
+  });
+
+  it("sideEndpoints: near-edge centres on the parent's attach side", () => {
+    const parent = box(0, 0, 100, 40);
+    const child = box(260, 0, 100, 40);
+    expect(sideEndpoints(parent, child, "right")).toMatchObject({ sx: 50, sy: 0, tx: 210, ty: 0 });
+    expect(sideEndpoints(parent, child, "left")).toMatchObject({ sx: -50, tx: 310 });
+    const below = box(0, 200, 100, 40);
+    expect(sideEndpoints(parent, below, "bottom")).toMatchObject({ sy: 20, ty: 180 });
+    expect(sideEndpoints(parent, below, "top")).toMatchObject({ sy: -20, ty: 220 });
   });
 });

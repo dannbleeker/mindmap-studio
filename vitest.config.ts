@@ -74,11 +74,14 @@ export default defineConfig({
       // No-regression floor, set just under the live numbers so routine variance doesn't flake but a
       // real drop fails the gate. Enforced when the gate runs `vitest run --coverage`. Raise as
       // coverage climbs. NB: the app-integration test loads the whole tree, so these reflect the
-      // COMPLETE denominator. Live ≈ lines/stmts 90.7, funcs 76.6, branches 86.6 — the functions
-      // figure trails because the in-browser-verified .tsx canvas/UI is intentionally not unit-tested.
+      // COMPLETE denominator. Live ≈ lines/stmts 91.2, funcs 77.2, branches 86.6 (after the App.tsx
+      // decomposition lifted file/autosave/import/selection logic into independently-tested modules).
+      // lines/stmts climbed enough to ratchet; functions/branches sit ~0.3–1pp above their floor and are
+      // left as-is to avoid a flaky-tight buffer (the .tsx canvas/UI is verified in-browser, not unit-
+      // tested, so the functions figure trails by design).
       thresholds: {
-        lines: 90,
-        statements: 90,
+        lines: 91,
+        statements: 91,
         functions: 76,
         branches: 86,
       },

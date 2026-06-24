@@ -29,12 +29,38 @@ function inline(s: string): string {
       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
       .replace(/~~([^~]+)~~/g, "<del>$1</del>")
       .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+      // ![alt](url) images — only http(s) or data:image URLs, so no javascript:/other-scheme
+      // injection. Runs BEFORE the link transform so the leading "!" isn't mistaken for link text.
+      .replace(
+        /!\[([^\]]*)\]\((https?:\/\/[^)\s]+|data:image\/[^)\s]+)\)/g,
+        '<img src="$2" alt="$1" />',
+      )
       // [text](http(s)://url) — only http(s) links, so no javascript: injection
       .replace(
         /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
         '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
       )
   );
+}
+
+/** A `| a | b |` table row (after escaping). */
+function isTableRow(line: string): boolean {
+  return /^\|(.+)\|$/.test(line.trim());
+}
+
+/** The `| --- | :-: |` separator row under a table header. */
+function isTableSeparator(line: string): boolean {
+  const t = line.trim();
+  return /^\|[\s:|-]+\|$/.test(t) && t.includes("-");
+}
+
+/** Split a `| a | b |` row into trimmed, inline-rendered cells. */
+function tableCells(line: string): string[] {
+  return line
+    .trim()
+    .replace(/^\||\|$/g, "")
+    .split("|")
+    .map((c) => inline(c.trim()));
 }
 
 export function renderNote(md: string): string {
@@ -54,8 +80,27 @@ export function renderNote(md: string): string {
       listType = type;
     }
   };
-  for (const raw of lines) {
-    const line = raw.trimEnd();
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trimEnd();
+    // A GitHub-style pipe table: a header row immediately followed by a `---` separator, then any
+    // number of body rows. Consumed as a block here (it spans lines, unlike the inline transforms).
+    if (isTableRow(line) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+      closeList();
+      const headCells = tableCells(line);
+      out.push("<table><thead><tr>");
+      for (const c of headCells) out.push(`<th>${c}</th>`);
+      out.push("</tr></thead><tbody>");
+      i += 2; // skip the header + separator rows
+      while (i < lines.length && isTableRow(lines[i].trimEnd())) {
+        out.push("<tr>");
+        for (const c of tableCells(lines[i].trimEnd())) out.push(`<td>${c}</td>`);
+        out.push("</tr>");
+        i++;
+      }
+      i--; // the outer loop will ++ past the last consumed row
+      out.push("</tbody></table>");
+      continue;
+    }
     const heading = line.match(/^(#{1,3})\s+(.*)$/);
     const bullet = line.match(/^[-*]\s+(.*)$/);
     const numbered = line.match(/^\d+\.\s+(.*)$/);
@@ -102,10 +147,37 @@ function serializeList(listEl: Element, ordered: boolean): string {
   return s;
 }
 
+// Serialise a <table> back to a GitHub-style pipe table (header row + `---` separator + body rows).
+// Tolerant of the markup execCommand / paste produce: it reads every <tr> and its td/th cells.
+function serializeTable(table: Element): string {
+  const rows = Array.from(table.querySelectorAll("tr"));
+  if (rows.length === 0) return "";
+  const cellsOf = (tr: Element) =>
+    Array.from(tr.children)
+      .filter((c) => ["td", "th"].includes(c.tagName.toLowerCase()))
+      // collapse any inner newlines + escape pipes so a cell can't break the row structure
+      .map((c) =>
+        serializeChildren(c)
+          .trim()
+          .replace(/\s*\n\s*/g, " ")
+          .replace(/\|/g, "\\|"),
+      );
+  const header = cellsOf(rows[0]);
+  const md = [
+    `| ${header.join(" | ")} |`,
+    `| ${header.map(() => "---").join(" | ")} |`,
+    ...rows.slice(1).map((tr) => `| ${cellsOf(tr).join(" | ")} |`),
+  ];
+  return `${md.join("\n")}\n\n`;
+}
+
 function serializeNode(node: Node): string {
   if (node.nodeType === 3) return node.textContent ?? ""; // text
   if (node.nodeType !== 1) return "";
   const el = node as Element;
+  if (el.tagName.toLowerCase() === "img")
+    return `![${el.getAttribute("alt") ?? ""}](${el.getAttribute("src") ?? ""})`;
+  if (el.tagName.toLowerCase() === "table") return serializeTable(el);
   const inner = serializeChildren(el);
   switch (el.tagName.toLowerCase()) {
     case "strong":

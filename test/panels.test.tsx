@@ -650,6 +650,44 @@ describe("NotesPanel (paste hardening, F2)", () => {
     expect(editor.querySelector("img")).toBeNull();
     for (const call of onChange.mock.calls) expect(String(call[0])).not.toContain("onerror");
   });
+
+  it("inserts a markdown table via the Table button (#11)", () => {
+    const onChange = vi.fn();
+    render(
+      <NotesPanel
+        selected={{ id: "a", topic: "A", note: "" }}
+        value=""
+        onChange={onChange}
+        onBlur={() => {}}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Table/ }));
+    expect(onChange).toHaveBeenCalledWith(expect.stringContaining("| Column A | Column B |"));
+    expect(onChange).toHaveBeenCalledWith(expect.stringContaining("| --- | --- |"));
+    // the editor re-rendered the table immediately
+    expect(screen.getByLabelText("Node note").querySelector("table")).not.toBeNull();
+  });
+
+  it("inserts an image by URL via the Image button, rejecting non-image schemes (#11)", () => {
+    const onChange = vi.fn();
+    const prompt = vi.spyOn(window, "prompt").mockReturnValue("https://x.test/c.png");
+    render(
+      <NotesPanel
+        selected={{ id: "a", topic: "A", note: "" }}
+        value=""
+        onChange={onChange}
+        onBlur={() => {}}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Image/ }));
+    expect(onChange).toHaveBeenCalledWith("![](https://x.test/c.png)");
+    // a javascript: URL is rejected — no further onChange
+    onChange.mockClear();
+    prompt.mockReturnValue("javascript:alert(1)");
+    fireEvent.click(screen.getByRole("button", { name: /Image/ }));
+    expect(onChange).not.toHaveBeenCalled();
+    prompt.mockRestore();
+  });
 });
 
 describe("WalkBar", () => {

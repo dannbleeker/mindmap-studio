@@ -40,6 +40,32 @@ describe("renderNote", () => {
     );
   });
 
+  it("renders images, only for http(s) / data:image URLs (#11)", () => {
+    expect(renderNote("![cat](https://x.test/c.png)")).toContain(
+      '<img src="https://x.test/c.png" alt="cat" />',
+    );
+    expect(renderNote("![](data:image/png;base64,AAAA)")).toContain(
+      '<img src="data:image/png;base64,AAAA" alt="" />',
+    );
+    // a non-image / dangerous scheme is left as text, never an <img>
+    expect(renderNote("![x](javascript:alert(1))")).not.toContain("<img");
+    expect(renderNote("![x](ftp://h/f.png)")).not.toContain("<img");
+  });
+
+  it("renders a pipe table as a <table> with a header row (#11)", () => {
+    // Segments are newline-joined like the rest of renderNote's output; the browser ignores the
+    // whitespace, so assert on the structural pieces rather than one concatenated string.
+    const flat = renderNote("| A | B |\n| --- | --- |\n| 1 | 2 |\n| 3 | 4 |").replace(/\n/g, "");
+    expect(flat).toContain("<table><thead><tr><th>A</th><th>B</th></tr></thead><tbody>");
+    expect(flat).toContain("<tr><td>1</td><td>2</td></tr>");
+    expect(flat).toContain("<tr><td>3</td><td>4</td></tr>");
+    expect(flat).toContain("</tbody></table>");
+  });
+
+  it("treats a pipe row with no separator as a normal paragraph (#11)", () => {
+    expect(renderNote("| not | a table |")).toBe("<p>| not | a table |</p>");
+  });
+
   it("escapes HTML so notes can't inject markup", () => {
     expect(renderNote("<script>alert(1)</script>")).toBe(
       "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>",
@@ -76,9 +102,27 @@ describe("htmlToNote", () => {
       "1. one\n2. two",
       "[site](https://x.test)",
       "para one\n\npara two",
+      "![cat](https://x.test/c.png)",
     ]) {
       expect(roundTrip(md)).toBe(md);
     }
+  });
+
+  it("round-trips a pipe table (md → html → md) (#11)", () => {
+    const md = "| A | B |\n| --- | --- |\n| 1 | 2 |";
+    expect(roundTrip(md)).toBe(md);
+  });
+
+  it("serialises a pasted/typed <table> back to pipe markdown (#11)", () => {
+    const html =
+      "<table><thead><tr><th>A</th><th>B</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table>";
+    expect(htmlToNote(html)).toBe("| A | B |\n| --- | --- |\n| 1 | 2 |");
+  });
+
+  it("serialises an <img> back to markdown (#11)", () => {
+    expect(htmlToNote('<img src="https://x.test/c.png" alt="cat" />')).toBe(
+      "![cat](https://x.test/c.png)",
+    );
   });
 
   it("normalises the tag soup execCommand emits (b/i/s/strike/div)", () => {

@@ -2492,6 +2492,23 @@ export function NotesPanel({
     document.execCommand(command);
     serialize();
   };
+  // Append a markdown block (image / table) to the note and re-render. Done at the markdown layer
+  // rather than via execCommand so it works reliably (no native table command) and round-trips through
+  // renderNote/htmlToNote — a freshly inserted block renders immediately as an image/table.
+  const appendBlock = (snippet: string) => {
+    const cur = ref.current ? htmlToNote(ref.current.innerHTML) : value;
+    const sep = cur ? (cur.endsWith("\n") ? "\n" : "\n\n") : "";
+    const next = `${cur}${sep}${snippet}`;
+    onChange(next);
+    if (ref.current) ref.current.innerHTML = renderNote(next);
+  };
+  const insertImage = () => {
+    const url = window.prompt("Image URL (http(s):// or data:image/…)")?.trim();
+    if (!url || !/^(https?:\/\/|data:image\/)/i.test(url)) return;
+    appendBlock(`![](${url})`);
+  };
+  const insertTable = () =>
+    appendBlock("| Column A | Column B |\n| --- | --- |\n| Cell 1 | Cell 2 |");
   const fmtBtns = [
     { cmd: "bold", label: <b>B</b>, title: "Bold (Ctrl+B)" },
     { cmd: "italic", label: <i>I</i>, title: "Italic (Ctrl+I)" },
@@ -2549,6 +2566,32 @@ export function NotesPanel({
                 {b.label}
               </Button>
             ))}
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={insertImage}
+              title="Insert image (by URL)"
+              style={{
+                padding: "2px 8px",
+                fontSize: fontSize.sm,
+                background: colors.white,
+                color: colors.text,
+              }}
+            >
+              🖼 Image
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={insertTable}
+              title="Insert table"
+              style={{
+                padding: "2px 8px",
+                fontSize: fontSize.sm,
+                background: colors.white,
+                color: colors.text,
+              }}
+            >
+              ▦ Table
+            </Button>
           </div>
           <div
             ref={ref}

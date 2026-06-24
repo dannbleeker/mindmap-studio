@@ -874,3 +874,156 @@ describe.skipIf(!realFile)("toMmap — real .mmap re-emit (MMAP_FILE)", () => {
     );
   });
 });
+
+// Real-export robustness: branches the happy-path image/attachment fixtures above don't exercise but a
+// genuine multi-feature .mmap will hit — the case/basename-tolerant bin resolver, ImageSize capping,
+// the vector→raster AlternateImageData fallback, IconImage, and attachment Folder/missing-bin skips,
+// plus a combined realistic archive. Stands in (deterministically, in CI) for the not-committed real
+// sample the backlog wanted: it confirms the mmarch://bin resolution + ImageSize mapping end-to-end.
+describe("parseMmap — real-export robustness (bin resolution + ImageSize)", () => {
+  // A genuine 1×1 transparent PNG, so the resolved data URL is a real, renderable image (not stub bytes).
+  const PNG = new Uint8Array([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+    0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
+    0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
+    0x42, 0x60, 0x82,
+  ]);
+  const b64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
+  const pngDataUrl = `data:image/png;base64,${b64(PNG)}`;
+  const imageTopic = (uri: string, size = "") =>
+    `${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Pic" />
+    <ap:OneImage><ap:Image>
+      <ap:ImageData ImageType="urn:mindjet:PngImage"><ap:Uri>${uri}</ap:Uri></ap:ImageData>
+      ${size}
+    </ap:Image></ap:OneImage>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`;
+
+  it("resolves a bin URI tolerant of scheme case, leading slashes, and path case", () => {
+    const { doc } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(imageTopic("MMARCH:///bin/IMG1.BIN")),
+        "bin/img1.bin": PNG, // archive entry differs in case from the reference
+      }),
+    );
+    expect(doc.root.image?.url).toBe(pngDataUrl);
+  });
+
+  it("resolves a bin URI by basename when the archive stores it under a different folder", () => {
+    const { doc } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(imageTopic("mmarch://bin/photo.bin")),
+        "attachments/photo.bin": PNG, // different folder, same basename
+      }),
+    );
+    expect(doc.root.image?.url).toBe(pngDataUrl);
+  });
+
+  it("caps a large ImageSize to the 280px display max, preserving aspect ratio", () => {
+    const { doc } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(
+          imageTopic("mmarch://bin/big.bin", '<ap:ImageSize Width="200" Height="100" />'),
+        ),
+        "bin/big.bin": PNG,
+      }),
+    );
+    // 200mm @96dpi ≈ 756px → capped to 280; height scales 100→140 to keep the 2:1 ratio.
+    expect(doc.root.image?.width).toBe(280);
+    expect(doc.root.image?.height).toBe(140);
+  });
+
+  it("falls back to a raster AlternateImageData when the primary is a vector (Metafile)", () => {
+    const { doc, warnings } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Vec+raster" />
+    <ap:OneImage><ap:Image>
+      <ap:ImageData ImageType="urn:mindjet:MetafileImage"><ap:Uri>mmarch://bin/v.bin</ap:Uri></ap:ImageData>
+      <ap:AlternateImageData ImageType="urn:mindjet:PngImage"><ap:Uri>mmarch://bin/alt.bin</ap:Uri></ap:AlternateImageData>
+    </ap:Image></ap:OneImage>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+        "bin/v.bin": new Uint8Array([1, 2]),
+        "bin/alt.bin": PNG,
+      }),
+    );
+    expect(doc.root.image?.url).toBe(pngDataUrl); // used the raster fallback, not the vector primary
+    expect(warnings.some((w) => /embedded image was skipped/i.test(w))).toBe(false);
+  });
+
+  it("imports an IconImage as a PNG data URL", () => {
+    const { doc } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Icon" />
+    <ap:OneImage><ap:Image>
+      <ap:ImageData ImageType="urn:mindjet:IconImage"><ap:Uri>mmarch://bin/icon.bin</ap:Uri></ap:ImageData>
+    </ap:Image></ap:OneImage>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+        "bin/icon.bin": PNG,
+      }),
+    );
+    expect(doc.root.image?.url).toBe(pngDataUrl);
+  });
+
+  it("skips a Folder attachment and one whose bytes are missing, keeping the real file", () => {
+    const { doc } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Files" />
+    <ap:AttachmentGroup>
+      <ap:AttachmentData FileName="folder" Type="urn:mindjet:Folder"><ap:Uri>mmarch://bin/folder.bin</ap:Uri></ap:AttachmentData>
+      <ap:AttachmentData FileName="ghost.pdf" Type="urn:mindjet:File"><ap:Uri>mmarch://bin/missing.bin</ap:Uri></ap:AttachmentData>
+      <ap:AttachmentData FileName="real.txt" Type="urn:mindjet:File"><ap:Uri>mmarch://bin/real.bin</ap:Uri></ap:AttachmentData>
+    </ap:AttachmentGroup>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+        "bin/folder.bin": new Uint8Array([0]),
+        "bin/real.bin": new Uint8Array([72, 105]), // "Hi"
+      }),
+    );
+    expect(doc.root.attachments).toEqual([
+      { name: "real.txt", dataUrl: `data:text/plain;base64,${btoa("Hi")}`, size: 2 },
+    ]);
+  });
+
+  it("imports a realistic multi-feature archive (tree + image + attachment + note + tags) in one pass", () => {
+    const { doc, warnings } = parseMmap(
+      zipSync({
+        "Document.xml": strToU8(`${MAP_OPEN}
+  <ap:OneTopic><ap:Topic OId="1"><ap:Text PlainText="Launch" />
+    <ap:SubTopics>
+      <ap:Topic OId="2"><ap:Text PlainText="Brand" />
+        <ap:OneImage><ap:Image>
+          <ap:ImageData ImageType="urn:mindjet:PngImage"><ap:Uri>mmarch://bin/logo.bin</ap:Uri></ap:ImageData>
+          <ap:ImageSize Width="25.4" Height="25.4" />
+        </ap:Image></ap:OneImage>
+      </ap:Topic>
+      <ap:Topic OId="3"><ap:Text PlainText="Docs" />
+        <ap:NotesGroup><ap:NotesXhtmlData PreviewPlainText="see brief" /></ap:NotesGroup>
+        <ap:AttachmentGroup>
+          <ap:AttachmentData FileName="brief.pdf" Type="urn:mindjet:File"><ap:Uri>mmarch://bin/brief.bin</ap:Uri></ap:AttachmentData>
+        </ap:AttachmentGroup>
+        <ap:TextLabels><ap:TextLabel TextLabelName="q3" /></ap:TextLabels>
+      </ap:Topic>
+    </ap:SubTopics>
+  </ap:Topic></ap:OneTopic>
+</ap:Map>`),
+        "bin/logo.bin": PNG,
+        "bin/brief.bin": new Uint8Array([37, 80, 68, 70]), // "%PDF"
+      }),
+    );
+    expect(doc.root.topic).toBe("Launch");
+    const [brand, docs] = doc.root.children;
+    expect(brand.image?.url).toBe(pngDataUrl);
+    expect(brand.image?.width).toBe(96); // 25.4mm @96dpi
+    expect(docs.attachments?.[0]).toMatchObject({ name: "brief.pdf", size: 4 });
+    expect(docs.note).toBe("see brief");
+    expect(docs.tags).toEqual(["q3"]);
+    expect(warnings).toEqual([]); // a clean, fully-imported multi-feature map logs nothing lost
+  });
+});

@@ -56,7 +56,7 @@ import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
 import { isNativeExt, readMapFromHandle } from "./io/fileSystem";
 import { fileToMapImage } from "./io/image";
-import { parseDoc } from "./io/json";
+import { parseImport } from "./io/importDispatch";
 import { serializeLibrary, tryParseLibrary } from "./io/library";
 import { toMarkdown } from "./io/markdown";
 import { mapToTsv } from "./io/tableExport";
@@ -590,70 +590,6 @@ export function App() {
       })();
     });
   }, [adoptOpenedFile, importForeignFile]);
-
-  async function parseImport(
-    file: File,
-    importMmap: () => Promise<typeof import("./import/mmap")>,
-  ): Promise<{ doc: MindMapDoc; warnings: string[] }> {
-    const name = file.name.toLowerCase();
-    if (name.endsWith(".md") || name.endsWith(".markdown")) {
-      // Markmap files are Markdown (optionally with a `---` frontmatter block); fromMarkmap strips
-      // any frontmatter then delegates to the Markdown parser, so plain .md still imports fine.
-      const { fromMarkmap } = await import("./io/markmap");
-      return { doc: fromMarkmap(await file.text()), warnings: [] };
-    }
-    if (name.endsWith(".mmd") || name.endsWith(".mermaid")) {
-      const { fromMermaid } = await import("./io/mermaid");
-      return { doc: fromMermaid(await file.text()), warnings: [] };
-    }
-    if (name.endsWith(".json") || name.endsWith(".mmst")) {
-      // `.mmst` is MindMap Studio's native file — the same lossless schema-v1 JSON.
-      return { doc: parseDoc(await file.text()), warnings: [] };
-    }
-    if (name.endsWith(".opml")) {
-      const { fromOpml } = await import("./io/opml");
-      return { doc: fromOpml(await file.text()), warnings: [] };
-    }
-    if (name.endsWith(".mm")) {
-      const { fromFreemind } = await import("./io/freemind");
-      return { doc: fromFreemind(await file.text()), warnings: [] };
-    }
-    if (name.endsWith(".xmind")) {
-      const { fromXmind } = await import("./io/xmind");
-      return { doc: fromXmind(new Uint8Array(await file.arrayBuffer())), warnings: [] };
-    }
-    if (name.endsWith(".smmx")) {
-      const { fromSmmx } = await import("./io/smmx");
-      return { doc: fromSmmx(new Uint8Array(await file.arrayBuffer())), warnings: [] };
-    }
-    if (name.endsWith(".docx")) {
-      const { fromDocx } = await import("./io/docx");
-      return { doc: fromDocx(new Uint8Array(await file.arrayBuffer())), warnings: [] };
-    }
-    if (name.endsWith(".xlsx")) {
-      const { fromXlsx } = await import("./io/xlsx");
-      return { doc: fromXlsx(new Uint8Array(await file.arrayBuffer())), warnings: [] };
-    }
-    if (name.endsWith(".itmz")) {
-      const { fromIthoughts } = await import("./io/ithoughts");
-      return { doc: fromIthoughts(new Uint8Array(await file.arrayBuffer())), warnings: [] };
-    }
-    if (name.endsWith(".mind")) {
-      const { fromMind } = await import("./io/mindmeister");
-      return { doc: fromMind(new Uint8Array(await file.arrayBuffer())), warnings: [] };
-    }
-    if (name.endsWith(".mup")) {
-      const { fromMindMup } = await import("./io/mindmup");
-      return { doc: fromMindMup(await file.text()), warnings: [] };
-    }
-    if (name.endsWith(".textpack") || name.endsWith(".textbundle")) {
-      const { fromTextBundle } = await import("./io/textbundle");
-      return { doc: fromTextBundle(new Uint8Array(await file.arrayBuffer())), warnings: [] };
-    }
-    const { parseMmap } = await importMmap();
-    const result = parseMmap(new Uint8Array(await file.arrayBuffer()));
-    return { doc: result.doc, warnings: result.warnings };
-  }
 
   function downloadBlob(blob: Blob, filename: string) {
     const url = URL.createObjectURL(blob);

@@ -470,6 +470,24 @@ describe("FlowMindMap canvas", () => {
     expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
   });
 
+  it("reveals the on-topic hover action bar (#3) wiring note + priority quick-actions", () => {
+    const onOpenNote = vi.fn();
+    const { container, onChange } = mount(baseDoc(), { onOpenNote });
+    // Nothing hovered → no action bar.
+    expect(screen.queryByRole("button", { name: "Add note" })).toBeNull();
+    // Hovering a note-less, priority-less node reveals the add-note + add-priority quick-actions.
+    const inner = nodeEl(container, "b").firstElementChild as HTMLElement;
+    run(() => fireEvent.mouseOver(inner));
+    const noteBtn = screen.getByRole("button", { name: "Add note" });
+    const prioBtn = screen.getByRole("button", { name: "Add priority" });
+    // Add-priority sets a priority on the topic (cyclePriority undefined → High).
+    run(() => fireEvent.click(prioBtn));
+    expect(onChange).toHaveBeenCalled();
+    // Add-note asks the app to open the inspector's Notes tab.
+    run(() => fireEvent.click(noteBtn));
+    expect(onOpenNote).toHaveBeenCalled();
+  });
+
   it("double-clicks the empty canvas to create a floating topic and edit it (#6)", () => {
     const { container, onChange } = mount();
     const pane = container.querySelector(".react-flow__pane") as HTMLElement;

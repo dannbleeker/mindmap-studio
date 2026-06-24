@@ -44,6 +44,7 @@ import { useCommandPaletteHotkey } from "./hooks/useCommandPaletteHotkey";
 import { useDiskFile } from "./hooks/useDiskFile";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
+import { useIdbAutosave } from "./hooks/useIdbAutosave";
 import { useNamedStyles } from "./hooks/useNamedStyles";
 import { useNoteEditor } from "./hooks/useNoteEditor";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
@@ -127,7 +128,6 @@ export function App() {
   // init prop for MindMap (changes on load), so edits update this without re-init.
   const [liveDoc, setLiveDoc] = useState<MindMapDoc>(sampleDoc);
   const liveDocRef = useRef<MindMapDoc>(sampleDoc);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The active map's linked file name (drives the title bar + File menu); null when it's library-only.
   const [fileName, setFileName] = useState<string | null>(null);
   // True when the linked file is behind the in-memory edits (the IndexedDB copy is always current; this
@@ -461,22 +461,14 @@ export function App() {
     maybeSnapshot,
   } = useVersionHistory({ liveDocRef, setLiveDoc, setDoc, refreshMaps, showHint });
 
-  const persist = useCallback(
-    // `snapshot` is true only on edit-driven saves — opening/switching a map shouldn't create a
-    // version, or pure reloads would spam the history.
-    async (d: MindMapDoc, snapshot = false) => {
-      try {
-        await saveMap(d);
-        await setLastOpened(d.id);
-        await refreshMaps();
-        // Edit-driven saves feed the version-history auto-snapshot (throttle lives inside the hook).
-        if (snapshot) maybeSnapshot(d);
-      } catch {
-        // autosave is best-effort
-      }
-    },
-    [refreshMaps, maybeSnapshot],
-  );
+  // IndexedDB autosave (debounced write-through + the tab-close flush / beforeunload guards) — its own
+  // hook. Wired after useVersionHistory (persist feeds maybeSnapshot) and before load (load calls it).
+  const { persist, scheduleSave } = useIdbAutosave({
+    liveDocRef,
+    dirtyRef,
+    refreshMaps,
+    maybeSnapshot,
+  });
 
   const load = useCallback(
     (next: MindMapDoc, nextWarnings: string[] = []) => {
@@ -512,14 +504,6 @@ export function App() {
 
   // "Paste text → map" dialog (parse a pasted outline → new map or under the selection) — own hook.
   const paste = usePasteOutline({ load, mapRef, showHint });
-
-  function scheduleSave() {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      saveTimer.current = null; // mark not-pending so the hidden-flush below skips an already-saved doc
-      persist(liveDocRef.current, true);
-    }, 500);
-  }
 
   // --- disk files (open / save / save-as / autosave-to-file) -----------------
   // The whole File System Access layer lives in useDiskFile (the library/IndexedDB copy is always the
@@ -566,33 +550,6 @@ export function App() {
       ? `${dirty ? "● " : ""}${fileName} — MindMap Studio`
       : "MindMap Studio";
   }, [fileName, dirty]);
-
-  // Warn before leaving with unsaved changes to a linked file. Only fires when a file is bound and
-  // behind (dirtyRef) — a library-only map autosaves to IndexedDB, so it never blocks the unload.
-  useEffect(() => {
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (dirtyRef.current) e.preventDefault();
-    };
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, []);
-
-  // A library-only map autosaves to IndexedDB on a 500ms debounce, so an edit made just before the tab
-  // is hidden/closed would be lost if that debounce hasn't fired yet. Flush a pending autosave the
-  // moment the page is hidden — visibilitychange is the reliable persistence signal (beforeunload can't
-  // run async work and is unreliable on mobile). The disk write-through (fileSaveTimer) is intentionally
-  // NOT flushed here: it needs a live permission grant and FS writes from a hidden page aren't reliable;
-  // the IndexedDB copy stays the record of truth.
-  useEffect(() => {
-    const onHidden = () => {
-      if (document.visibilityState !== "hidden" || !saveTimer.current) return;
-      clearTimeout(saveTimer.current);
-      saveTimer.current = null;
-      void persist(liveDocRef.current, true);
-    };
-    document.addEventListener("visibilitychange", onHidden);
-    return () => document.removeEventListener("visibilitychange", onHidden);
-  }, [persist]);
 
   // Ctrl/⌘+S save to file, +Shift save-as, Ctrl/⌘+O open — preventDefault so the browser's own
   // save/open dialogs don't hijack them. Bound once; the callbacks are stable (useCallback).

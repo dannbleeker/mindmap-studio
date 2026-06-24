@@ -48,6 +48,7 @@ import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { NodePopover } from "./flow/NodePopover";
 import { Summaries } from "./flow/Summaries";
 import { TopicNode } from "./flow/TopicNode";
+import { LAYOUT_ANIM_MS, easeInOutCubic, lerp, prefersReducedMotion } from "./flow/animateLayout";
 import { type BraceGroup, computeBraces } from "./flow/brace";
 import { buildFlowState } from "./flow/buildFlowState";
 import { EditingContext } from "./flow/editing";
@@ -399,9 +400,25 @@ function FlowInner({
   }, []);
   const themeRef = useLatestRef(theme);
 
+  // Layout-transition tween bookkeeping (#16): the in-flight rAF id + the loop's start timestamp.
+  const layoutRaf = useRef<number | null>(null);
+  const layoutStart = useRef<number | null>(null);
+  // Cancel a running tween if the canvas unmounts mid-animation.
+  useEffect(
+    () => () => {
+      if (layoutRaf.current != null) cancelAnimationFrame(layoutRaf.current);
+    },
+    [],
+  );
+
   // Re-project + re-layout from a doc (with measured sizes when available, else estimated).
   const sync = useCallback(
-    (newDoc: MindMapDoc, nextSelected?: string | null) => {
+    (newDoc: MindMapDoc, nextSelected?: string | null, animate = false) => {
+      // Cancel any in-flight layout tween — a fresh sync supersedes it (whether it animates or not).
+      if (layoutRaf.current != null) {
+        cancelAnimationFrame(layoutRaf.current);
+        layoutRaf.current = null;
+      }
       docRef.current = newDoc;
       // The view is re-rooted when drilled (pure transform); docRef stays the FULL doc so every edit,
       // undo, and onChange still operate on the whole map. Overlays read renderDoc, so it's the view.
@@ -430,8 +447,43 @@ function FlowInner({
         hideUnmatched: hideUnmatchedRef.current,
         highlightIds: highlightIdsRef.current,
       });
-      setNodes(nodes);
+      // Edges follow the live node positions, so set them once up front; the nodes either snap or tween.
       setEdges(edges);
+      const from = animate ? new Map(getNodes().map((n) => [n.id, n.position])) : null;
+      const moves =
+        !!from &&
+        !prefersReducedMotion() &&
+        nodes.some((n) => {
+          const f = from.get(n.id);
+          return f && (f.x !== n.position.x || f.y !== n.position.y);
+        });
+      if (!moves) {
+        setNodes(nodes);
+        return;
+      }
+      // Tween every node that exists in both the old + new layout from its old position to its new one;
+      // nodes that just appeared (expand) start at their target. One rAF loop, eased, ~240ms.
+      const tick = (now: number) => {
+        if (layoutStart.current == null) layoutStart.current = now;
+        const t = Math.min(1, (now - layoutStart.current) / LAYOUT_ANIM_MS);
+        const e = easeInOutCubic(t);
+        setNodes(
+          nodes.map((n) => {
+            const f = from?.get(n.id);
+            return f
+              ? { ...n, position: { x: lerp(f.x, n.position.x, e), y: lerp(f.y, n.position.y, e) } }
+              : n;
+          }),
+        );
+        if (t < 1) {
+          layoutRaf.current = requestAnimationFrame(tick);
+        } else {
+          layoutRaf.current = null;
+          layoutStart.current = null;
+        }
+      };
+      layoutStart.current = null;
+      layoutRaf.current = requestAnimationFrame(tick);
     },
     [getNodes, setNodes, setEdges],
   );
@@ -528,11 +580,11 @@ function FlowInner({
 
   // Apply a pure op: persist + re-render; optionally enter edit on the resulting node.
   const apply = useCallback(
-    (result: OpResult, edit = false) => {
+    (result: OpResult, edit = false, animate = false) => {
       if (result.doc !== docRef.current) {
         historyRef.current = record(historyRef.current, docRef.current); // snapshot the old doc
         reportHistory();
-        sync(result.doc, result.selectId);
+        sync(result.doc, result.selectId, animate);
         onChangeRef.current?.(result.doc);
       }
       if (result.selectId !== undefined) {
@@ -735,7 +787,7 @@ function FlowInner({
         if (changed(n, rich, plain)) d = setTopicRich(d, id, rich, plain).doc;
         apply(what === "child" ? addChild(d, id) : addSibling(d, id), true);
       },
-      toggleCollapse: (id: string) => apply(toggleCollapse(docRef.current, id)),
+      toggleCollapse: (id: string) => apply(toggleCollapse(docRef.current, id), false, true),
       // Follow a node's hyperlink: jump within the map (#node=), open another map (#map=), or
       // open an external URL in a new tab. Dangerous schemes are refused (the app-wide XSS guard).
       openLink: (url: string) => {
@@ -1240,7 +1292,7 @@ function FlowInner({
         if (res.count > 0) apply({ doc: res.doc });
         return res.count;
       },
-      setAllExpanded: (expanded) => apply(setAllExpanded(docRef.current, expanded)),
+      setAllExpanded: (expanded) => apply(setAllExpanded(docRef.current, expanded), false, true),
       setExpandedToLevel: (level) => apply(setExpandedToLevel(docRef.current, level)),
       setNodeSide: (id, side) => apply(setNodeSide(docRef.current, id, side)),
       balanceMap: () => apply(balanceMap(docRef.current)),

@@ -72,6 +72,7 @@ import {
   setLinkStyle,
   setNodeLayout,
   setNodePos,
+  setNodePositions,
   setNote,
   setNumberStyle,
   setPriority,
@@ -684,6 +685,36 @@ describe("flow ops — free-canvas (whiteboard) mode", () => {
   it("setNodePos is a no-op (same doc) for an unknown id", () => {
     const doc = base();
     expect(setNodePos(doc, "nope", 1, 2).doc).toBe(doc);
+  });
+
+  it("setNodePositions moves every listed node in one step (the group-drag path)", () => {
+    const doc = setNodePositions(base(), [
+      { id: "a", x: 10, y: 20 },
+      { id: "b", x: 30, y: 40 },
+      { id: "a1", x: 5, y: 5 },
+    ]).doc;
+    expect(findNode(doc, "a")?.pos).toEqual({ x: 10, y: 20 });
+    expect(findNode(doc, "b")?.pos).toEqual({ x: 30, y: 40 });
+    expect(findNode(doc, "a1")?.pos).toEqual({ x: 5, y: 5 });
+  });
+
+  it("setNodePositions skips locked nodes and is a no-op for an empty list", () => {
+    const start = base();
+    (findNode(start, "a") as { locked?: boolean }).locked = true;
+    const doc = setNodePositions(start, [
+      { id: "a", x: 10, y: 20 }, // locked → ignored
+      { id: "b", x: 30, y: 40 },
+    ]).doc;
+    expect(findNode(doc, "a")?.pos).toBeUndefined();
+    expect(findNode(doc, "b")?.pos).toEqual({ x: 30, y: 40 });
+    expect(setNodePositions(start, []).doc).toBe(start); // empty list → same ref
+  });
+
+  it("setNodePositions also reaches floating topics", () => {
+    const withFloat = addFloatingTopic(base(), "Free").doc;
+    const fid = withFloat.floatingTopics?.[0]?.id as string;
+    const doc = setNodePositions(withFloat, [{ id: fid, x: 7, y: 8 }]).doc;
+    expect(doc.floatingTopics?.[0]?.pos).toEqual({ x: 7, y: 8 });
   });
 
   it("setNodeLayout sets a per-branch layout override and clears it on undefined / empty", () => {

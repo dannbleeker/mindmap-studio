@@ -136,6 +136,7 @@ import {
   setLinkStyle,
   setNodeLayout,
   setNodePos,
+  setNodePositions,
   setNodeSide,
   setNote,
   setNumberStyle,
@@ -631,6 +632,13 @@ function FlowInner({
     (dragId: string, dragPos: { x: number; y: number }) => {
       if (docRef.current.meta?.freeform) {
         setDropTargetId(null);
+        // A group drag moves the whole selection together (React Flow does the visual move); skip the
+        // single-node alignment guides — they'd only track the cursor node, not the group.
+        const ids = selectedIdsRef.current;
+        if (ids.size > 1 && ids.has(dragId)) {
+          setGuides([]);
+          return;
+        }
         // Preview alignment guides while dragging; the node itself snaps into place on release (below).
         setGuides(snapFor(dragId, dragPos).guides);
         return;
@@ -647,6 +655,22 @@ function FlowInner({
       setDropTargetId(null);
       if (docRef.current.meta?.freeform) {
         setGuides([]);
+        // Group drag: the whole selection moved together, so persist EVERY selected node's new
+        // position (read live off the React Flow nodes, which onNodesChange kept in step) in one undo
+        // step — otherwise only the cursor node would stick and the rest would snap back to layout.
+        const ids = selectedIdsRef.current;
+        if (ids.size > 1 && ids.has(dragId)) {
+          const live = getNodes();
+          const positions = [...ids]
+            .map((id) => {
+              const n = live.find((m) => m.id === id);
+              if (!n || findAnyNode(docRef.current, id)?.locked) return null;
+              return { id, x: n.position.x, y: n.position.y };
+            })
+            .filter((p): p is { id: string; x: number; y: number } => p !== null);
+          if (positions.length > 0) apply(setNodePositions(docRef.current, positions));
+          return;
+        }
         // A locked node is draggable:false so this rarely fires, but guard the write anyway.
         if (findAnyNode(docRef.current, dragId)?.locked) return;
         const snap = snapFor(dragId, dropPos);
@@ -658,7 +682,7 @@ function FlowInner({
       if (r.doc !== docRef.current) apply(r);
       else sync(docRef.current); // snap back to the computed layout
     },
-    [apply, sync, findReparentTarget, snapFor],
+    [apply, sync, findReparentTarget, snapFor, getNodes],
   );
 
   // Centre + select a node by id (shared by the imperative handle and the in-map jump links).

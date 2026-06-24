@@ -1341,6 +1341,29 @@ export function setNodePos(doc: MindMapDoc, id: string, x: number, y: number): O
   });
 }
 
+/** Set several free-canvas node positions in one shot (one undo step) — the group-drag path: every
+ *  selected node moves together. Locked or missing nodes are skipped; an empty list is a no-op. Pure. */
+export function setNodePositions(
+  doc: MindMapDoc,
+  positions: { id: string; x: number; y: number }[],
+): OpResult {
+  if (positions.length === 0) return { doc };
+  const byId = new Map(positions.map((p) => [p.id, p]));
+  const next = structuredClone(doc);
+  const now = opsClock();
+  const visit = (n: MapNode) => {
+    const p = byId.get(n.id);
+    if (p && !n.locked) {
+      n.pos = { x: p.x, y: p.y };
+      touch(n, now);
+    }
+    for (const c of n.children) visit(c);
+  };
+  visit(next.root);
+  for (const f of next.floatingTopics ?? []) visit(f);
+  return { doc: next };
+}
+
 /** Edge/centre to align free-canvas nodes to. */
 export type AlignMode = "left" | "hcenter" | "right" | "top" | "vmiddle" | "bottom";
 /** Measured on-canvas size of a node (from the renderer), keyed by id — needed for centre/right

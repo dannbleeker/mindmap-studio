@@ -11,7 +11,7 @@
 import { describe, expect, it } from "vitest";
 import { sanitizeSvg } from "../src/io/svgSanitize";
 import { arrowHeadPath } from "../src/mindmap/flow/arrowhead";
-import { type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
+import { EXPORT_MARGIN, type NodeRect, buildFlowSvg } from "../src/mindmap/flow/exportSvg";
 import { crosslinkBezier, floatingPoints } from "../src/mindmap/flow/floating";
 import { shapePath } from "../src/mindmap/flow/shapes";
 import {
@@ -266,6 +266,70 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     ]);
     const out = buildFlowSvg(ddoc, drects, palette, cssVar);
     expect(out).toContain("📅"); // the calendar glyph the canvas DateChip shows must survive into the export
+  });
+
+  it("renders a completed task as a filled pie with a check tick, a partial one as a wedge", () => {
+    const mk = (p: number): MindMapDoc => ({
+      schemaVersion: 1,
+      id: "pr",
+      title: "Pr",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "t", topic: "T", task: { progress: p }, children: [] }],
+      },
+    });
+    const prects = new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 80, h: 40 }],
+      ["t", { x: 200, y: 0, w: 80, h: 40 }],
+    ]);
+    const done = buildFlowSvg(mk(1), prects, palette, cssVar);
+    expect(done).toContain('fill="#27852f"'); // the "complete" green fill
+    expect(done).toMatch(/<path d="M[^"]*" fill="none" stroke="#fff"/); // the check tick
+    const half = buildFlowSvg(mk(0.5), prects, palette, cssVar);
+    expect(half).toContain('fill="#3b8bd4"'); // the in-progress blue wedge
+    expect(half).not.toContain('stroke="#fff"'); // no tick on a partial pie
+  });
+
+  it("shows the note/link indicator even on a node whose title is blank", () => {
+    const ndoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "ind",
+      title: "I",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [{ id: "n", topic: "  ", note: "hidden", children: [] }],
+      },
+    };
+    const nrects = new Map<string, NodeRect>([
+      ["r", { x: 0, y: 0, w: 80, h: 40 }],
+      ["n", { x: 200, y: 0, w: 80, h: 40 }],
+    ]);
+    const out = buildFlowSvg(ndoc, nrects, palette, cssVar);
+    expect(out).toContain("📝"); // the note cue survives even with no title text to append to
+  });
+
+  it("draws a funnel backdrop as path bands (not just circles)", () => {
+    const fdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "fn",
+      title: "F",
+      root: { id: "r", topic: "R", children: [] },
+      backdrop: { kind: "funnel", rings: 3 },
+    };
+    const frects = new Map<string, NodeRect>([["r", { x: -20, y: -20, w: 40, h: 40 }]]);
+    const out = buildFlowSvg(fdoc, frects, palette, cssVar);
+    expect(out).toMatch(/<path d="M [^"]*Z" fill=/); // funnel band paths emitted
+  });
+
+  it("falls back to a default viewBox when there are no node rects", () => {
+    const empty = new Map<string, NodeRect>();
+    const out = buildFlowSvg(doc, empty, palette, cssVar);
+    // minX stays non-finite → the 0..100 fallback, padded by EXPORT_MARGIN on each side.
+    expect(out).toContain(
+      `viewBox="${-EXPORT_MARGIN} ${-EXPORT_MARGIN} ${100 + 2 * EXPORT_MARGIN} ${100 + 2 * EXPORT_MARGIN}"`,
+    );
   });
 
   it("draws a directional arrowhead on the cross-link (a filled triangle at the target)", () => {
@@ -1004,6 +1068,24 @@ describe("flow exportSvg — map legend", () => {
 
   it("omits the legend when meta.legend is unset", () => {
     expect(buildFlowSvg(doc, rects, palette, cssVar)).not.toContain(">Legend</text>");
+  });
+
+  it("draws an emoji marker in the legend as a text glyph (no vector tile)", () => {
+    const d: MindMapDoc = {
+      schemaVersion: 1,
+      id: "lg2",
+      title: "L",
+      meta: { legend: true },
+      root: {
+        id: "r",
+        topic: "R",
+        icons: ["👍"],
+        children: [{ id: "a", topic: "A", children: [] }],
+      },
+    };
+    const out = buildFlowSvg(d, rr("a", 120, 44), palette, cssVar);
+    expect(out).toContain(">Legend</text>");
+    expect(out).toMatch(/font-size="11">👍<\/text>/); // glyph fallback row, not an <image> tile
   });
 });
 

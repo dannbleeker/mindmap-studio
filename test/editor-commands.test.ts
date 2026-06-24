@@ -55,6 +55,9 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       "copyOutline",
       "copyTable",
       "handleFile",
+      "openFile",
+      "saveFile",
+      "saveFileAs",
     ].map((k) => [k, vi.fn()]),
   ) as unknown as ToolbarProps["io"];
   return {
@@ -215,6 +218,42 @@ describe("buildEditorCommands", () => {
     expect(jump?.enabled).toBe(true); // jump is always available
     jump?.run();
     expect(props.mapRef.current?.focusNode).toHaveBeenCalledWith("root");
+  });
+
+  it("every command's run() executes without throwing (selection + freeform present)", () => {
+    const props = mkProps({ id: "root", topic: "Map", note: "" });
+    // Enable the free-canvas arrange commands so their bodies run, not just the disabled shells.
+    props.canvas.freeform = true;
+    props.canvas.selectedCount = 3;
+    const cmds = buildEditorCommands(props);
+    for (const c of cmds) expect(() => c.run(), c.id).not.toThrow();
+    // The sweep actually drove handlers (sanity: not a no-op proxy that swallows everything).
+    expect(props.showHint).toHaveBeenCalled();
+  });
+
+  it("insert-map-part hints 'select a topic first' with no selection", () => {
+    const props = mkProps(null);
+    const part = buildEditorCommands(props).find((c) => c.id.startsWith("map-part:"));
+    part?.run();
+    expect(props.showHint).toHaveBeenCalledWith("Select a topic first.");
+  });
+
+  it("toggle-line-jumps flips the per-map flag through the handle", () => {
+    const props = mkProps();
+    byId(props).get("toggle-line-jumps")?.run();
+    expect(props.mapRef.current?.setLineJumps).toHaveBeenCalledWith(true); // doc flag is unset → on
+  });
+
+  it("offers a jump command for floating topics too (#12)", () => {
+    const props = mkProps();
+    props.map.liveDoc = {
+      ...doc,
+      floatingTopics: [{ id: "f1", topic: "Detached", children: [] }],
+    };
+    const jump = byId(props).get("jump:f1");
+    expect(jump?.kind).toBe("topic");
+    jump?.run();
+    expect(props.mapRef.current?.focusNode).toHaveBeenCalledWith("f1");
   });
 
   it("gates add-child / delete / marker / priority on a selection and routes them (#12)", () => {

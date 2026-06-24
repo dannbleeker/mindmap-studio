@@ -582,6 +582,28 @@
   margin: 4px 0;
   font-size: 1.05em;
 }
+/* Inline note images + simple tables (#11). Images never overflow the editor; tables get light
+   cell borders + a tinted header so they read as a grid. */
+.mm-note-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.mm-note-editor table {
+  border-collapse: collapse;
+  margin: 4px 0;
+  font-size: 0.95em;
+}
+.mm-note-editor th,
+.mm-note-editor td {
+  border: 1px solid var(--ed-border);
+  padding: 2px 6px;
+  text-align: left;
+}
+.mm-note-editor th {
+  background: var(--ed-hover, rgba(0, 0, 0, 0.05));
+  font-weight: 600;
+}
 
 /* On-node ＋ add affordances (#1). Sizing lives here so a coarse pointer (touch) gets a ≥44px
    target; the per-button colour comes in via --mm-add-color (the node's branch / ring colour). */

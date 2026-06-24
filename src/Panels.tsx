@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { ProgressPie } from "./ProgressPie";
+import { type AgendaItem, agendaBuckets, agendaIsEmpty } from "./agenda";
 import { InspectorResizer } from "./components/InspectorResizer";
 import {
   Button,
@@ -56,6 +57,7 @@ import { describeRule } from "./rules";
 import { mapStats } from "./stats";
 import { STICKERS, type Sticker, stickerDataUrl } from "./stickers";
 import type { VersionMeta } from "./store/mapStore";
+import { formatDateShort } from "./taskDate";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 
 // The per-topic fill/border swatch palettes live in the design tokens now (shared with the rest of
@@ -750,6 +752,69 @@ export function StatsPanel({ doc }: { doc: MindMapDoc }) {
         {row("Distinct markers", s.markers)}
         {row("Relationships", s.links)}
         {row("Boundaries", s.boundaries)}
+      </div>
+    </Panel>
+  );
+}
+
+// Read-only agenda: every dated, unfinished task bucketed into overdue / today / this week (#9).
+// Click a row to jump to that topic. Buckets come from the pure agendaBuckets() so they're unit-
+// tested independently; `today` is injected so the panel renders deterministically in tests.
+export function AgendaPanel({
+  doc,
+  today,
+  onPick,
+}: {
+  doc: MindMapDoc;
+  /** Injected ISO "YYYY-MM-DD" (the app passes todayISO()) so the buckets stay deterministic. */
+  today: string;
+  onPick: (id: string) => void;
+}) {
+  const buckets = agendaBuckets(doc, today);
+  const group = (label: string, items: AgendaItem[], accent?: string) => {
+    if (items.length === 0) return null;
+    return (
+      <div key={label}>
+        <PanelSection>
+          {label} ({items.length})
+        </PanelSection>
+        {items.map((it) => (
+          <button
+            key={it.id}
+            type="button"
+            onClick={() => onPick(it.id)}
+            title={`${it.topic || "(untitled)"} — due ${it.due}`}
+            style={{
+              ...listRow,
+              display: "flex",
+              gap: 8,
+              alignItems: "baseline",
+              padding: "2px 10px",
+            }}
+          >
+            <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
+              {it.topic || "(untitled)"}
+            </span>
+            <span style={{ flexShrink: 0, fontSize: fontSize.sm, color: accent ?? colors.faint }}>
+              {formatDateShort(it.due)}
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+  };
+  return (
+    <Panel>
+      <div style={panelTitle}>🗓 Agenda</div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {agendaIsEmpty(buckets) ? (
+          <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
+            No overdue or upcoming tasks.
+          </div>
+        ) : null}
+        {group("Overdue", buckets.overdue, "#b23b3a")}
+        {group("Today", buckets.today, colors.text)}
+        {group("This week", buckets.thisWeek)}
       </div>
     </Panel>
   );

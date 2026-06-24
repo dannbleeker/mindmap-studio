@@ -52,6 +52,7 @@ import { type BraceGroup, computeBraces } from "./flow/brace";
 import { buildFlowState } from "./flow/buildFlowState";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
+import { nodeAtPoint } from "./flow/floating";
 import {
   type History,
   createHistory,
@@ -275,6 +276,7 @@ function FlowInner({
   onSelectOverlay,
   onOpenNote,
   onMapLink,
+  onDropFilesOnNode,
   onHistory,
   onDelete,
   initialSession,
@@ -350,7 +352,8 @@ function FlowInner({
   const [guides, setGuides] = useState<GuideLine[]>([]);
   // The cross-link whose label is being inline-edited on the canvas (double-click), or null.
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
-  const { fitView, getNodes, setCenter, getViewport, setViewport } = useReactFlow();
+  const { fitView, getNodes, setCenter, getViewport, setViewport, screenToFlowPosition } =
+    useReactFlow();
   const initialized = useNodesInitialized();
 
   // Refs so the stable callbacks below always read the latest values.
@@ -384,6 +387,7 @@ function FlowInner({
   const onSelectRef = useLatestRef(onSelect);
   const onMapLinkRef = useLatestRef(onMapLink);
   const onOpenNoteRef = useLatestRef(onOpenNote);
+  const onDropFilesOnNodeRef = useLatestRef(onDropFilesOnNode);
   const onHistoryRef = useLatestRef(onHistory);
   const onDeleteRef = useLatestRef(onDelete);
   // On mount, report the (possibly restored) history depths so the chrome's undo/redo buttons match a
@@ -1180,6 +1184,18 @@ function FlowInner({
       setViewport: (vp) => setViewport(vp, { duration: 350 }),
       focusNode: focusNodeById,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
+      // Id-based variants for the drag-a-file-onto-a-topic path (the target is the dropped-on node,
+      // not necessarily the selected one). Return false if the node no longer exists.
+      setNodeImage: (id, image) => {
+        if (!findNode(docRef.current, id)) return false;
+        apply(setImage(docRef.current, id, image));
+        return true;
+      },
+      addNodeAttachment: (id, attachment) => {
+        if (!findNode(docRef.current, id)) return false;
+        apply(addAttachment(docRef.current, id, attachment));
+        return true;
+      },
       setSelectedNote: (note) => withSelected((id) => apply(setNote(docRef.current, id, note))),
       toggleSelectedIcon: (icon) =>
         withSelected((id) => apply(toggleIcon(docRef.current, id, icon))),
@@ -1382,6 +1398,7 @@ function FlowInner({
           // Drop a link (or text) from the browser onto the canvas → a new floating topic.
           onDragOver={(e) => {
             if (
+              e.dataTransfer.types.includes("Files") ||
               e.dataTransfer.types.includes("text/uri-list") ||
               e.dataTransfer.types.includes("text/plain")
             ) {
@@ -1390,6 +1407,17 @@ function FlowInner({
             }
           }}
           onDrop={(e) => {
+            // Desktop files dropped onto a topic → attach to that topic (image = its picture, anything
+            // else = an attachment). Resolve the drop target by hit-testing the flow-space point against
+            // the live node boxes; ignore file drops that miss every node.
+            const files = Array.from(e.dataTransfer.files ?? []);
+            if (files.length > 0) {
+              e.preventDefault();
+              const p = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+              const id = nodeAtPoint(getNodes(), p.x, p.y);
+              if (id) onDropFilesOnNodeRef.current?.(id, files);
+              return;
+            }
             const raw = (
               e.dataTransfer.getData("text/uri-list") ||
               e.dataTransfer.getData("text/plain") ||

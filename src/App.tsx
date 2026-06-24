@@ -1409,6 +1409,22 @@ export function App() {
                   bumpNoteNonce();
                 }}
                 onMapLink={(id) => switchMap(id)}
+                onDropFilesOnNode={async (id, files) => {
+                  // An image becomes the topic's picture (first image wins); everything else attaches.
+                  try {
+                    let usedImage = false;
+                    for (const file of files) {
+                      if (!usedImage && file.type.startsWith("image/")) {
+                        mapRef.current?.setNodeImage(id, await fileToMapImage(file));
+                        usedImage = true;
+                      } else {
+                        mapRef.current?.addNodeAttachment(id, await fileToAttachment(file));
+                      }
+                    }
+                  } catch (err) {
+                    showHint(err instanceof Error ? err.message : "Could not add that file.");
+                  }
+                }}
                 onHistory={(u, r) => {
                   setCanUndo(u);
                   setCanRedo(r);

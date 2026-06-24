@@ -237,6 +237,27 @@ export function crosslinkBezier(
   return { path, labelX, labelY };
 }
 
+/** A React-Flow node reduced to what hit-testing needs: its top-left position + measured size. */
+export interface RfNodeRect {
+  id: string;
+  position: { x: number; y: number };
+  measured?: { width?: number; height?: number };
+}
+
+/** The id of the topmost node whose box contains the flow-space point (x,y), or null. Later nodes in
+ *  the array paint on top, so the scan runs back-to-front. Pure — drives the drag-a-file-onto-a-topic
+ *  drop hit-test. */
+export function nodeAtPoint(nodes: RfNodeRect[], x: number, y: number): string | null {
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    const n = nodes[i];
+    const w = n.measured?.width ?? 0;
+    const h = n.measured?.height ?? 0;
+    if (x >= n.position.x && x <= n.position.x + w && y >= n.position.y && y <= n.position.y + h)
+      return n.id;
+  }
+  return null;
+}
+
 /** Invert crosslinkBezier's midpoint geometry: given where the user dragged the midpoint handle
  *  (px,py), return the signed `curve` (perpendicular bow) that puts the arc's midpoint there. The
  *  midpoint sits at chordMid + 0.75·curve·n (n = unit perpendicular), so curve = perp / 0.75. Only the

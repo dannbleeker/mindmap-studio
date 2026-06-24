@@ -488,6 +488,20 @@ describe("FlowMindMap canvas", () => {
     expect(onOpenNote).toHaveBeenCalled();
   });
 
+  it("sets a node's image / attachment by id — the drag-a-file-onto-a-topic handle path (#4)", () => {
+    const { h, onChange } = mount();
+    expect(h.setNodeImage("b", { url: "data:image/png;base64,AAAA", width: 10, height: 10 })).toBe(
+      true,
+    );
+    expect(
+      h.addNodeAttachment("b", { name: "spec.txt", dataUrl: "data:text/plain,hi", size: 2 }),
+    ).toBe(true);
+    // A missing node id is a no-op that reports false (the dropped-on node may have been deleted).
+    expect(h.setNodeImage("ghost", { url: "data:image/png;base64,AAAA" })).toBe(false);
+    expect(h.addNodeAttachment("ghost", { name: "x", dataUrl: "data:,", size: 0 })).toBe(false);
+    expect(onChange).toHaveBeenCalled();
+  });
+
   it("double-clicks the empty canvas to create a floating topic and edit it (#6)", () => {
     const { container, onChange } = mount();
     const pane = container.querySelector(".react-flow__pane") as HTMLElement;

@@ -14,7 +14,6 @@ import {
   HistoryPanel,
   InfoPanel,
   MarkerTagIndex,
-  type NamedStyle,
   NoteEditorPanel,
   OutlinePanel,
   PlaybackBar,
@@ -44,6 +43,7 @@ import { useClipboardImagePaste } from "./hooks/useClipboardImagePaste";
 import { useCommandPaletteHotkey } from "./hooks/useCommandPaletteHotkey";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
+import { useNamedStyles } from "./hooks/useNamedStyles";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
 import { usePanels } from "./hooks/usePanels";
 import { usePasteOutline } from "./hooks/usePasteOutline";
@@ -252,34 +252,6 @@ export function App() {
   // ensureOpen) and drives the tab strip; switching a tab reloads that map.
   const { openIds, ensureOpen, closeTab, reorder, restoreSession } = useOpenDocuments();
   const [outlineFilter, setOutlineFilter] = useState("");
-  // Named styles ("styles organizer"), persisted app-wide so a look is reusable across maps.
-  const [namedStyles, setNamedStyles] = useState<NamedStyle[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("mindmap-named-styles") ?? "[]");
-    } catch {
-      return [];
-    }
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem("mindmap-named-styles", JSON.stringify(namedStyles));
-    } catch {
-      // preference is best-effort
-    }
-  }, [namedStyles]);
-  const saveNamedStyle = (name: string) => {
-    const style = selectedNode?.style;
-    if (!style || Object.keys(style).length === 0) {
-      showHint("Select a styled topic first (style it, then save it as a named style).");
-      return;
-    }
-    setNamedStyles((prev) => [
-      ...prev.filter((s) => s.name !== name),
-      { id: crypto.randomUUID(), name, style },
-    ]);
-  };
-  const deleteNamedStyle = (id: string) =>
-    setNamedStyles((prev) => prev.filter((s) => s.id !== id));
   // Memoised so the canvas only re-dims when the map or the criteria actually change. The deps stay
   // plain primitives/arrays (the individual filter fields), so a fresh `filter.criteria` object each
   // render doesn't needlessly recompute — only an actual field change does.
@@ -305,6 +277,12 @@ export function App() {
     };
     return find(liveDoc.root) ?? liveDoc.floatingTopics?.map(find).find(Boolean) ?? null;
   }, [selected, liveDoc]);
+  // Named styles ("styles organizer") — app-wide saved looks, persisted; captures the selected node's
+  // style. Lifted into its own hook (called here, where `selectedNode` is in scope).
+  const { namedStyles, saveNamedStyle, deleteNamedStyle } = useNamedStyles({
+    selectedNode,
+    showHint,
+  });
   // Inspector header breadcrumb (ancestor path) + quick-facts line (outline number, depth, child
   // count, note size). Memoised so the whole-tree outline-number walk only reruns on doc/selection.
   const inspectorInfo = useMemo(() => {

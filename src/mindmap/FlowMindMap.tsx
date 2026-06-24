@@ -752,6 +752,8 @@ function FlowInner({
         setEditingLinkId(null);
       },
       cancel: () => setEditingLinkId(null),
+      // The on-canvas midpoint reshape handle (#1): set this relationship's perpendicular bow.
+      setCurve: (id: string, curve: number) => apply(setLinkStyle(docRef.current, id, { curve })),
     }),
     [editingLinkId, apply],
   );

@@ -237,6 +237,27 @@ export function crosslinkBezier(
   return { path, labelX, labelY };
 }
 
+/** Invert crosslinkBezier's midpoint geometry: given where the user dragged the midpoint handle
+ *  (px,py), return the signed `curve` (perpendicular bow) that puts the arc's midpoint there. The
+ *  midpoint sits at chordMid + 0.75·curve·n (n = unit perpendicular), so curve = perp / 0.75. Only the
+ *  perpendicular component of the drag matters; movement along the chord is ignored. Pure. */
+export function curveFromHandle(
+  sx: number,
+  sy: number,
+  tx: number,
+  ty: number,
+  px: number,
+  py: number,
+): number {
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const perp = (px - (sx + tx) / 2) * nx + (py - (sy + ty) / 2) * ny;
+  return perp / 0.75;
+}
+
 /** Right-angle "org-chart" connector: a uniform-width path from the parent's near-edge CENTRE to the
  *  child's near-edge centre via a shared mid bus (a vertical bus for top/bottom, horizontal for
  *  left/right) with small rounded corners. Org-down/org-up layouts use this instead of the organic

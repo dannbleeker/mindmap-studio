@@ -296,6 +296,22 @@ export function StyleBar({
       >
         <b>B</b>
       </button>
+      <button
+        type="button"
+        style={styleBtn}
+        title="Raised (drop shadow)"
+        onClick={() => onStyle({ shadow: true })}
+      >
+        ◰
+      </button>
+      <button
+        type="button"
+        style={styleBtn}
+        title="Flat (no shadow)"
+        onClick={() => onStyle({ shadow: undefined })}
+      >
+        ◳
+      </button>
       {label("Font")}
       <select
         value=""
@@ -367,6 +383,7 @@ export function StyleBar({
             textDecoration: "",
             fillImage: "",
             maxWidth: "",
+            shadow: undefined,
           })
         }
       >

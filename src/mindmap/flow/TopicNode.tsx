@@ -20,7 +20,13 @@ import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
 import { matchBorderColor } from "./geometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
-import { levelFontSize, readableTextOn, resolveLevelBox, resolveTopicFill } from "./style";
+import {
+  TOPIC_SHADOW_CSS,
+  levelFontSize,
+  readableTextOn,
+  resolveLevelBox,
+  resolveTopicFill,
+} from "./style";
 import type { TopicNode as TopicNodeT } from "./types";
 
 // Custom topic node: a rounded box honouring the model's NodeStyle, with marker emoji, the
@@ -406,9 +412,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 : underlineLeaf
                   ? "none"
                   : "0 6px 18px rgba(40,30,16,0.20)"
-              : // At rest the cards are flat (no shadow) — matches the export, which has no shadow.
-                // Hover + selection + drop still lift (interaction affordances, screen-only).
-                "none",
+              : // At rest the cards are flat — unless the topic opts into a raised drop shadow (#4),
+                // which IS a persisted style and so also renders in the export (canvas == export).
+                style?.shadow
+                ? TOPIC_SHADOW_CSS
+                : "none",
         // Hover lift + a pointer cursor signal "you can click/edit me" (#5); selection keeps the ring.
         transform: hovered && !selected && !isEditing ? "translateY(-1px)" : undefined,
         cursor: isEditing ? "text" : "pointer",

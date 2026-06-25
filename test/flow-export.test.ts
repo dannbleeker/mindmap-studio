@@ -69,6 +69,30 @@ const cssVar: Record<string, string> = {
   "--main-bgcolor": "#faf9f5",
 };
 
+describe("raised topic drop shadow (#4)", () => {
+  it("emits the shadow filter def + a filter ref only for a topic with style.shadow", () => {
+    // Baseline map has no shadowed topic → no filter in the output.
+    expect(buildFlowSvg(doc, rects, palette, cssVar)).not.toContain("mm-topic-shadow");
+    const shadowed: MindMapDoc = {
+      ...doc,
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [{ id: "a", topic: "Raised", style: { shadow: true }, children: [] }],
+      },
+      links: [],
+      boundaries: [],
+    };
+    const r = new Map<string, NodeRect>([
+      ["r", { x: 400, y: 300, w: 120, h: 50 }],
+      ["a", { x: 620, y: 200, w: 140, h: 60 }],
+    ]);
+    const out = buildFlowSvg(shadowed, r, palette, cssVar);
+    expect(out).toContain('<filter id="mm-topic-shadow"');
+    expect(out).toContain('filter="url(#mm-topic-shadow)"');
+  });
+});
+
 describe("flow exportSvg (model + rects → native-text SVG)", () => {
   const svg = buildFlowSvg(doc, rects, palette, cssVar);
 

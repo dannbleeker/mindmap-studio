@@ -177,6 +177,7 @@ export function MapPanel({
                 <option value="timeline">Timeline</option>
                 <option value="fishbone">Fishbone</option>
                 <option value="grid">Grid / matrix</option>
+                <option value="swimlane">Swimlane</option>
                 <option value="brace">Brace map</option>
               </optgroup>
             </select>

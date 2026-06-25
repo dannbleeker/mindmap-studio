@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Swimlane layout (structure batch C).** A new **Swimlane** layout (Canvas → Layout) arranges the
+  root's top branches as one row of vertical lanes — each level-1 topic is a lane header with its
+  subtree flowing beneath — for comparison / kanban-style maps. Reuses the grid/matrix machinery (a
+  single row) so it flows through the shared layout + export unchanged (canvas == export).
+
 - **Drag to reorder siblings on the canvas (structure batch C).** Dragging a topic now shows an
   **insertion line** at a target's top/bottom edge — drop there to place it *before/after* as a sibling
   (a reorder or cross-parent move), while dropping on the middle still nests it as a child. Reuses the

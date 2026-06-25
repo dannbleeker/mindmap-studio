@@ -250,6 +250,11 @@ function computeLayoutPlain(
     case "grid":
       layoutGrid(ctx);
       break;
+    case "swimlane":
+      // Each top branch becomes a labelled vertical lane (its level-1 topic is the lane header),
+      // all lanes in a single row — a comparison / kanban-style arrangement.
+      layoutGrid(ctx, { singleRow: true });
+      break;
     case "brace":
       // A brace map is a left-to-right tidy tree; the "{" fork connectors replace the ribbons.
       layoutHorizontal(ctx, 1, root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []));
@@ -403,7 +408,7 @@ function layoutVertical(ctx: Ctx, sign: 1 | -1): void {
 // Each first-level branch is laid out as its own small downward tidy tree (a "cell"); the cells
 // are tiled into a grid (4 branches → 2×2), with the root as a title centred above. Recognisable
 // for SWOT, Eisenhower, and other matrix frames built as a 4-branch map.
-function layoutGrid(ctx: Ctx): void {
+function layoutGrid(ctx: Ctx, opts?: { singleRow?: boolean }): void {
   const { root, branchChildren } = ctx;
   const kids = root.data.collapsed ? [] : (branchChildren.get(root.id) ?? []);
   if (kids.length === 0) {
@@ -428,7 +433,8 @@ function layoutGrid(ctx: Ctx): void {
   });
   const cellW = 2 * Math.max(...cells.map((c) => c.halfW));
   const cellH = Math.max(...cells.map((c) => c.depth)) * rowGap + cellMaxH;
-  const cols = Math.ceil(Math.sqrt(cells.length));
+  // Swimlane = one row of lanes (each top branch its own column); grid/matrix = a √N square tiling.
+  const cols = opts?.singleRow ? cells.length : Math.ceil(Math.sqrt(cells.length));
 
   cells.forEach((cell, i) => {
     const colCenterX = (i % cols) * (cellW + GRID_GAP) + cellW / 2;

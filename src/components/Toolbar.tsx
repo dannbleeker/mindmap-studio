@@ -1,6 +1,7 @@
 import type { ChangeEvent, FormEvent, ReactNode, RefObject } from "react";
 import { BrainstormTimer } from "../BrainstormTimer";
 import { Menu, MenuCheckboxItem, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
+import { designPreviewModel } from "../designPreview";
 import { DESIGNS } from "../designs";
 import { buildExample, examples } from "../examples";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
@@ -11,6 +12,31 @@ import type { BackdropKind, MindMapDoc } from "../model/types";
 import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, templates } from "../templates";
 import { EditorIcon, type EditorIconName } from "./EditorIcons";
+
+// A tiny themed thumbnail for a design in the gallery (#5): the design's background, a root dot, and
+// three palette branches drawn with its connector style — so designs are told apart at a glance
+// instead of by an identical palette icon. Model is the pure designPreviewModel.
+function DesignPreview({ design }: { design: (typeof DESIGNS)[number] }) {
+  const m = designPreviewModel(design);
+  return (
+    <svg
+      width={m.w}
+      height={m.h}
+      viewBox={`0 0 ${m.w} ${m.h}`}
+      aria-hidden="true"
+      style={{ flexShrink: 0, borderRadius: 3 }}
+    >
+      <rect width={m.w} height={m.h} rx={3} fill={m.bg} stroke="rgba(0,0,0,0.15)" />
+      {m.branches.map((b) => (
+        <g key={b.ty}>
+          <path d={b.d} fill="none" stroke={b.color} strokeWidth={1.5} />
+          <circle cx={b.tx} cy={b.ty} r={2.5} fill={b.color} />
+        </g>
+      ))}
+      <circle cx={m.root.cx} cy={m.root.cy} r={m.root.r} fill={m.rootBg} />
+    </svg>
+  );
+}
 
 // The redesigned editor top bar — a two-row chrome in the warm-cream + emerald language (see
 // design/editor.css, .mm-topbar*). Row 1 is file/identity (Start, map switcher, New, Find, Export,
@@ -918,7 +944,7 @@ export function Toolbar({
                 {DESIGNS.map((d) => (
                   <MenuItem
                     key={d.id}
-                    icon={mi("palette")}
+                    icon={<DesignPreview design={d} />}
                     label={d.name}
                     title={d.note}
                     onSelect={() => {

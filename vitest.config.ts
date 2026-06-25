@@ -50,6 +50,7 @@ export default defineConfig({
       ["test/use-toast.test.tsx", "jsdom"],
       ["test/use-format-painter.test.tsx", "jsdom"],
       ["test/use-command-palette-hotkey.test.tsx", "jsdom"],
+      ["test/use-focus-hotkey.test.tsx", "jsdom"],
       ["test/use-clipboard-image-paste.test.tsx", "jsdom"],
       ["test/use-guided-walk.test.tsx", "jsdom"],
       ["test/use-paste-outline.test.tsx", "jsdom"],

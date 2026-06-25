@@ -43,6 +43,7 @@ import { clampIndex, togglePlay } from "./historyPlayback";
 import { useClipboardImagePaste } from "./hooks/useClipboardImagePaste";
 import { useCommandPaletteHotkey } from "./hooks/useCommandPaletteHotkey";
 import { useDiskFile } from "./hooks/useDiskFile";
+import { useFocusHotkey } from "./hooks/useFocusHotkey";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
 import { useIdbAutosave } from "./hooks/useIdbAutosave";
@@ -358,6 +359,13 @@ export function App() {
   const [searchAllOpen, setSearchAllOpen] = useState(false);
   // In-editor ⌘K command palette (the Start screen has its own); the hook owns the ⌘K hotkey.
   const [cmdkOpen, setCmdkOpen] = useCommandPaletteHotkey(view === "editor");
+  // Focus mode (#9): Ctrl/⌘+. drills into the selected topic / Esc exits (drill carries its own crumb).
+  useFocusHotkey({
+    enabled: view === "editor",
+    drillId,
+    selectedId: selected?.id ?? null,
+    setDrillId,
+  });
   const [libDocs, setLibDocs] = useState<MindMapDoc[]>([]);
   const [libQuery, setLibQuery] = useState("");
   const pendingFocus = useRef<string | null>(null);

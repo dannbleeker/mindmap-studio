@@ -35,6 +35,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
     title: "Navigation",
     items: [
       { keys: "Ctrl/⌘ + K", action: "Open the command palette (do anything)" },
+      { keys: "Ctrl/⌘ + .", action: "Focus on the selected topic (Esc to exit)" },
       { keys: "/", action: "Jump to the Find box" },
       { keys: "Esc", action: "Cancel / clear the current selection" },
     ],

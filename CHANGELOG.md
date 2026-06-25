@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Focus-mode hotkey (structure batch C).** **Ctrl/⌘ + .** drills the canvas into the selected topic
+  (re-rooting the view, with the existing "Drilled into…" breadcrumb to step back out); pressing it
+  again — or **Esc** — exits. Ignored while typing. Added to the shortcuts cheat sheet.
+
 - **Raised topic style (theming batch B).** A topic can opt into a soft **drop shadow** for a raised,
   MindManager-style look — toggled from the StyleBar (◰ raised / ◳ flat). It's a persisted `NodeStyle`
   field, so it renders identically on the canvas (CSS) and in the SVG/PNG/PDF export (a shared SVG

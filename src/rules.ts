@@ -53,6 +53,25 @@ export function conditionalStyle(
   return merged;
 }
 
+/** The non-style *actions* a node's matching rules apply (view-only, like `conditionalStyle`): markers
+ *  are **unioned** across every match (deduped, first-seen order), and `branchColor` is **last-match
+ *  wins**. Returns empty `icons` + undefined `branchColor` when nothing applies. Pure + unit-tested. */
+export function conditionalActions(
+  node: MapNode,
+  rules: ConditionalRule[],
+  progress?: number,
+  today: string = todayISO(),
+): { icons: string[]; branchColor?: string } {
+  const icons: string[] = [];
+  let branchColor: string | undefined;
+  for (const rule of rules) {
+    if (!matchesRule(node, rule, progress, today)) continue;
+    for (const ic of rule.icons ?? []) if (!icons.includes(ic)) icons.push(ic);
+    if (rule.branchColor) branchColor = rule.branchColor;
+  }
+  return { icons, branchColor };
+}
+
 /** A short human label for a rule's condition (for the rules list). */
 export function describeRule(rule: ConditionalRule): string {
   switch (rule.kind) {
@@ -69,4 +88,12 @@ export function describeRule(rule: ConditionalRule): string {
     default:
       return `${rule.kind} ${rule.value ?? ""}`.trim();
   }
+}
+
+/** A short "→ actions" suffix for the rules list (markers + branch colour applied), or "" if none. */
+export function describeRuleActions(rule: ConditionalRule): string {
+  const parts: string[] = [];
+  if (rule.icons?.length) parts.push(rule.icons.join(" "));
+  if (rule.branchColor) parts.push("colour");
+  return parts.length ? ` → ${parts.join(" ")}` : "";
 }

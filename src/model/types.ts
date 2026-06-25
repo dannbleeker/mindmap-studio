@@ -200,7 +200,12 @@ export interface ConditionalRule {
   kind: "tag" | "marker" | "completed" | "overdue" | "priority" | "textContains" | "hasAttachment";
   /** The tag/marker/text to match, or the priority threshold (unused for completed/overdue/hasAttachment). */
   value?: string;
+  /** View-only style layered onto a matching node (under its own explicit style). */
   style: NodeStyle;
+  /** Action: markers auto-applied to a matching node (view-only, unioned with the node's own). */
+  icons?: string[];
+  /** Action: branch colour applied to a matching node + its subtree (a manual `branchColor` wins). */
+  branchColor?: string;
 }
 
 /** A dedicated diagram backdrop drawn behind freely-positioned topics (a geometric frame). The

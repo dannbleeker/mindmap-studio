@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **SmartRules actions — rule-applied marker + branch colour (#13).** A conditional-formatting rule can
+  now also **auto-apply a marker** and/or a **branch colour** to matching topics (e.g. auto-flag every
+  overdue topic 🚩 and tint its branch red), not just a fill/border. Like the existing style overlay
+  it's computed **render-time** and never written to the model — markers are unioned onto the node's
+  own and a manual `branchColor` still wins. Because the actions merge into the projected node data,
+  the canvas and the SVG/PNG/PDF export render them identically. Authored from the Styles panel's rule
+  form. (Rule-applied *tags* are intentionally excluded — a virtual tag wouldn't appear in the tag
+  index / Power Filter, so it'd mislead.)
+
 - **Categorised, searchable icon & sticker library (#12).** The marker picker's catalog grew (+16
   glyphs — people, flags, status, trend) and the **sticker** picker gained a search box plus
   category-grouped browsing (Status / Symbols / Actions / Objects), mirroring the marker search. Five

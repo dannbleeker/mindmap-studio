@@ -24,16 +24,20 @@ export interface ResolvedLinkStyle {
 
 /** Resolve a cross-link's optional style/arrow fields to concrete render values. Absent fields fall
  *  back to today's look (accent colour, 1.5px, dashed, a single arrowhead at the target). */
-export function resolveLinkStyle(s: {
-  color?: string;
-  width?: number;
-  dash?: "dashed" | "solid" | "dotted";
-  arrow?: "to" | "from" | "both" | "none";
-}): ResolvedLinkStyle {
+export function resolveLinkStyle(
+  s: {
+    color?: string;
+    width?: number;
+    dash?: "dashed" | "solid" | "dotted";
+    arrow?: "to" | "from" | "both" | "none";
+  },
+  /** Map-wide accent (meta.accentColor): the default when this link has no explicit colour. */
+  fallback?: string,
+): ResolvedLinkStyle {
   const dash = s.dash ?? "dashed";
   const arrow = s.arrow ?? "to";
   return {
-    color: s.color || CROSSLINK_COLOR,
+    color: s.color || fallback || CROSSLINK_COLOR,
     width: s.width || CROSSLINK_WIDTH,
     dasharray: dash === "solid" ? "" : dash === "dotted" ? CROSSLINK_DOT : CROSSLINK_DASH,
     arrowAtTarget: arrow === "to" || arrow === "both",
@@ -230,17 +234,20 @@ export interface ResolvedBoundaryStyle {
   labelBorder: string;
   labelColor: string;
 }
-/** Boundary stroke + fill tint (+ gradient stops) + label-chip colours from an optional override. */
-export function resolveBoundaryStyle(color?: string): ResolvedBoundaryStyle {
-  const base = color || BOUNDARY_STROKE;
+/** Boundary stroke + fill tint (+ gradient stops) + label-chip colours from an optional override, or
+ *  the map-wide accent `fallback` (meta.accentColor) when the boundary has no own colour. With neither,
+ *  the historical purple constants are returned verbatim (unstyled maps are pixel-unchanged). */
+export function resolveBoundaryStyle(color?: string, fallback?: string): ResolvedBoundaryStyle {
+  const accent = color || fallback;
+  const base = accent || BOUNDARY_STROKE;
   return {
-    stroke: color || BOUNDARY_STROKE,
-    fill: color ? withAlpha(color, 0.1) : BOUNDARY_FILL,
+    stroke: base,
+    fill: accent ? withAlpha(accent, 0.1) : BOUNDARY_FILL,
     fillTop: withAlpha(base, 0.05),
     fillBottom: withAlpha(base, 0.16),
-    labelBg: color ? mix(color, "#ffffff", 0.85) : BOUNDARY_LABEL_BG,
-    labelBorder: color ? mix(color, "#ffffff", 0.55) : BOUNDARY_LABEL_BORDER,
-    labelColor: color ? mix(color, "#000000", 0.55) : BOUNDARY_LABEL_COLOR,
+    labelBg: accent ? mix(accent, "#ffffff", 0.85) : BOUNDARY_LABEL_BG,
+    labelBorder: accent ? mix(accent, "#ffffff", 0.55) : BOUNDARY_LABEL_BORDER,
+    labelColor: accent ? mix(accent, "#000000", 0.55) : BOUNDARY_LABEL_COLOR,
   };
 }
 

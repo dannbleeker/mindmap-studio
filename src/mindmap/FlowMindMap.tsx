@@ -108,6 +108,7 @@ import {
   selectionFields,
   selectionMarkers,
   selectionTags,
+  setAccentColor,
   setAllExpanded,
   setBackdrop,
   setBackdropColor,
@@ -1359,6 +1360,7 @@ function FlowInner({
       moveOutlineNode: (dragId, targetId, where) =>
         apply(moveInTree(docRef.current, dragId, targetId, where)),
       setBackground: (color) => apply(setBackground(docRef.current, color)),
+      setAccentColor: (color) => apply(setAccentColor(docRef.current, color)),
       setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),
       setLineJumps: (on) => apply(setLineJumps(docRef.current, on)),
       setConnectorStyle: (style) => apply(setConnectorStyle(docRef.current, style)),
@@ -1624,6 +1626,7 @@ function FlowInner({
               boundaries={boundaries}
               selectedId={selectedOverlay?.kind === "boundary" ? selectedOverlay.id : null}
               onSelect={handleSelectBoundary}
+              accent={renderDoc.meta?.accentColor}
             />
             <Summaries
               summaries={summaries}

@@ -69,6 +69,19 @@ const cssVar: Record<string, string> = {
   "--main-bgcolor": "#faf9f5",
 };
 
+describe("map-wide accent recolours relationships + boundaries (#6)", () => {
+  it("uses meta.accentColor for an unstyled cross-link + boundary, not the purple default", () => {
+    const accented: MindMapDoc = { ...doc, meta: { accentColor: "#2e86ab" } };
+    const out = buildFlowSvg(accented, rects, palette, cssVar);
+    expect(out).toContain("#2e86ab"); // the accent reaches the SVG
+    expect(out).not.toContain(CROSSLINK_COLOR); // the relationship no longer uses the purple default
+  });
+
+  it("leaves the historical default when no accent is set", () => {
+    expect(buildFlowSvg(doc, rects, palette, cssVar)).toContain(CROSSLINK_COLOR);
+  });
+});
+
 describe("raised topic drop shadow (#4)", () => {
   it("emits the shadow filter def + a filter ref only for a topic with style.shadow", () => {
     // Baseline map has no shadowed topic → no filter in the output.

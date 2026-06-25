@@ -818,6 +818,13 @@ export function setBackground(doc: MindMapDoc, color: string): OpResult {
   return { doc: next };
 }
 
+/** Set the map-wide accent colour (default stroke for relationships + boundaries); "" clears it. */
+export function setAccentColor(doc: MindMapDoc, color: string): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, accentColor: color || undefined };
+  return { doc: next };
+}
+
 /** Set the per-map canvas background image (a data: URL); "" clears it. The image draws behind
  *  everything, on top of any background colour. */
 export function setBackgroundImage(doc: MindMapDoc, url: string): OpResult {

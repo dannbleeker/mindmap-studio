@@ -108,6 +108,10 @@ export function buildFlowState(args: BuildFlowStateArgs): {
     if (litIds) {
       data = { ...(data as EdgeData), dimmed: !(litIds.has(e.source) && litIds.has(e.target)) };
     }
+    // Stamp the map-wide accent onto relationships so CrosslinkEdge can use it as the default stroke.
+    if (e.data?.crosslink && doc.meta?.accentColor) {
+      data = { ...(data as EdgeData), accent: doc.meta.accentColor };
+    }
     // Hide an edge when the brace map hides ribbons OR (in hide-filter mode) either endpoint is unlit.
     const hidden =
       (brace && !e.data?.crosslink) ||

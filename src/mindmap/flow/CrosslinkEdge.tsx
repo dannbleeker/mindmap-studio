@@ -103,7 +103,10 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
     labelX,
     labelY,
   } = crosslinkBezier(sx, sy, tx, ty, previewCurve ?? data?.curve);
-  const { color, width, dasharray, arrowAtTarget, arrowAtSource } = resolveLinkStyle(data ?? {});
+  const { color, width, dasharray, arrowAtTarget, arrowAtSource } = resolveLinkStyle(
+    data ?? {},
+    data?.accent,
+  );
   const dimOpacity = data?.dimmed ? 0.12 : 1;
 
   const visiblePath = hopPathStr ?? bezier;

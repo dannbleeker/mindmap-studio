@@ -27,11 +27,12 @@ export function isDangerousUrl(url: string): boolean {
 
 /**
  * True for URL schemes safe to emit in an exported document: http(s), mailto,
- * in-page anchors (`#…`, including the app's `#map=` links), and inline image
- * data URLs. A strict allowlist used by the SVG export sanitiser, where any URL
- * not provably safe is dropped from the output.
+ * tel, in-page anchors (`#…`, including the app's `#map=` links), and inline
+ * image data URLs. A strict allowlist used by the SVG export sanitiser, where
+ * any URL not provably safe is dropped from the output. (`file:` is deliberately
+ * excluded — browsers block file:// navigation from a web context.)
  */
 export function isExportSafeUrl(url: string): boolean {
   const s = schemeOf(url);
-  return /^(?:https?:|mailto:|#)/.test(s) || /^data:image\//.test(s);
+  return /^(?:https?:|mailto:|tel:|#)/.test(s) || /^data:image\//.test(s);
 }

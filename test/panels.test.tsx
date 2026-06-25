@@ -651,6 +651,24 @@ describe("NotesPanel (paste hardening, F2)", () => {
     for (const call of onChange.mock.calls) expect(String(call[0])).not.toContain("onerror");
   });
 
+  it("inserts a checklist via the Checklist button (#10)", () => {
+    const onChange = vi.fn();
+    render(
+      <NotesPanel
+        selected={{ id: "a", topic: "A", note: "" }}
+        value=""
+        onChange={onChange}
+        onBlur={() => {}}
+      />,
+    );
+    // The ☑ List button appends task-list markdown and re-renders it with checkboxes.
+    fireEvent.click(screen.getByTitle("Checklist"));
+    expect(onChange).toHaveBeenCalledWith(expect.stringContaining("- [ ] To-do"));
+    expect(
+      screen.getByLabelText("Node note").querySelector('input[type="checkbox"]'),
+    ).not.toBeNull();
+  });
+
   it("inserts a markdown table via the Table button (#11)", () => {
     const onChange = vi.fn();
     render(

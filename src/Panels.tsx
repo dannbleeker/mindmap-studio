@@ -2285,7 +2285,7 @@ export function InfoPanel({
                           const v = e.target.value.trim();
                           if (v !== webUrl) onSetHyperlink(v);
                         }}
-                        placeholder="Web link (https://…)"
+                        placeholder="Link (https://, mailto:, tel:…)"
                         aria-label="Web link"
                         style={{ width: "auto", margin: "0 10px 4px" }}
                       />
@@ -2509,6 +2509,32 @@ export function NotesPanel({
   };
   const insertTable = () =>
     appendBlock("| Column A | Column B |\n| --- | --- |\n| Cell 1 | Cell 2 |");
+  // Block-level formatting (headings, code block) via the native formatBlock command — its <h1>/<pre>
+  // output round-trips through htmlToNote, so the note stays plain markdown.
+  const execBlock = (tag: string) => {
+    ref.current?.focus();
+    document.execCommand("formatBlock", false, tag);
+    serialize();
+  };
+  // Highlight: wrap the current selection in <mark> (no execCommand for it). Serialises to ==text==.
+  const highlight = () => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+    const mark = document.createElement("mark");
+    try {
+      sel.getRangeAt(0).surroundContents(mark);
+    } catch {
+      return; // selection crossed element boundaries — leave it untouched
+    }
+    serialize();
+  };
+  const insertChecklist = () => appendBlock("- [ ] To-do\n- [ ] To-do");
+  const tbBtn = {
+    padding: "2px 8px",
+    fontSize: fontSize.sm,
+    background: colors.white,
+    color: colors.text,
+  } as const;
   const fmtBtns = [
     { cmd: "bold", label: <b>B</b>, title: "Bold (Ctrl+B)" },
     { cmd: "italic", label: <i>I</i>, title: "Italic (Ctrl+I)" },
@@ -2568,14 +2594,57 @@ export function NotesPanel({
             ))}
             <Button
               onMouseDown={(e) => e.preventDefault()}
+              onClick={() => execBlock("<h1>")}
+              title="Heading 1"
+              style={tbBtn}
+            >
+              H1
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => execBlock("<h2>")}
+              title="Heading 2"
+              style={tbBtn}
+            >
+              H2
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => execBlock("<h3>")}
+              title="Heading 3"
+              style={tbBtn}
+            >
+              H3
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={highlight}
+              title="Highlight selection"
+              style={tbBtn}
+            >
+              <mark>H</mark>
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => execBlock("<pre>")}
+              title="Code block"
+              style={tbBtn}
+            >
+              {"</>"}
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={insertChecklist}
+              title="Checklist"
+              style={tbBtn}
+            >
+              ☑ List
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
               onClick={insertImage}
               title="Insert image (by URL)"
-              style={{
-                padding: "2px 8px",
-                fontSize: fontSize.sm,
-                background: colors.white,
-                color: colors.text,
-              }}
+              style={tbBtn}
             >
               🖼 Image
             </Button>
@@ -2603,7 +2672,7 @@ export function NotesPanel({
             tabIndex={0}
             aria-multiline="true"
             aria-label="Node note"
-            data-placeholder="Add a note… bold, italic, lists & links supported"
+            data-placeholder="Add a note… headings, highlight, code, lists, links, images & tables"
             onInput={serialize}
             onPaste={onPaste}
             onBlur={onBlur}

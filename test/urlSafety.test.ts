@@ -23,10 +23,11 @@ describe("isDangerousUrl", () => {
 });
 
 describe("isExportSafeUrl", () => {
-  it("allows the export allowlist (http(s), mailto, #, data:image)", () => {
+  it("allows the export allowlist (http(s), mailto, tel, #, data:image)", () => {
     expect(isExportSafeUrl("https://example.com")).toBe(true);
     expect(isExportSafeUrl("http://example.com")).toBe(true);
     expect(isExportSafeUrl("mailto:a@b.com")).toBe(true);
+    expect(isExportSafeUrl("tel:+15551234567")).toBe(true); // #11 hyperlink parity
     expect(isExportSafeUrl("#map=abc123")).toBe(true);
     expect(isExportSafeUrl("data:image/png;base64,AAAA")).toBe(true);
   });
@@ -36,6 +37,7 @@ describe("isExportSafeUrl", () => {
     expect(isExportSafeUrl("data:text/html,x")).toBe(false);
     expect(isExportSafeUrl("vbscript:x")).toBe(false);
     expect(isExportSafeUrl("ftp://host/file")).toBe(false);
+    expect(isExportSafeUrl("file:///etc/passwd")).toBe(false); // #11: file: deliberately excluded
     expect(isExportSafeUrl("/relative/page")).toBe(false);
   });
 });

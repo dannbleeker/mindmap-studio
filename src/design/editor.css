@@ -604,6 +604,26 @@
   background: var(--ed-hover, rgba(0, 0, 0, 0.05));
   font-weight: 600;
 }
+/* Highlight, fenced code block, and checklist items (#10). */
+.mm-note-editor mark {
+  background: #fff3a3;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.mm-note-editor pre {
+  margin: 4px 0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--ed-hover, rgba(0, 0, 0, 0.05));
+  font-family: monospace;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+.mm-note-editor li input[type="checkbox"] {
+  margin-right: 4px;
+}
 
 /* On-node ＋ add affordances (#1). Sizing lives here so a coarse pointer (touch) gets a ≥44px
    target; the per-button colour comes in via --mm-add-color (the node's branch / ring colour). */

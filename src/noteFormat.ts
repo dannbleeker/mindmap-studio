@@ -28,6 +28,7 @@ function inline(s: string): string {
       .replace(/`([^`]+)`/g, "<code>$1</code>")
       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
       .replace(/~~([^~]+)~~/g, "<del>$1</del>")
+      .replace(/==([^=]+)==/g, "<mark>$1</mark>")
       .replace(/\*([^*]+)\*/g, "<em>$1</em>")
       // ![alt](url) images — only http(s) or data:image URLs, so no javascript:/other-scheme
       // injection. Runs BEFORE the link transform so the leading "!" isn't mistaken for link text.
@@ -82,6 +83,19 @@ export function renderNote(md: string): string {
   };
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trimEnd();
+    // A ```fenced``` code block: everything until the closing fence is emitted verbatim (already
+    // escaped), with no inline transforms. An unterminated fence runs to the end of the note.
+    if (line.trim().startsWith("```")) {
+      closeList();
+      const code: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith("```")) {
+        code.push(lines[i]);
+        i++;
+      }
+      out.push(`<pre><code>${code.join("\n")}</code></pre>`); // outer ++ skips the closing fence
+      continue;
+    }
     // A GitHub-style pipe table: a header row immediately followed by a `---` separator, then any
     // number of body rows. Consumed as a block here (it spans lines, unlike the inline transforms).
     if (isTableRow(line) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
@@ -102,12 +116,21 @@ export function renderNote(md: string): string {
       continue;
     }
     const heading = line.match(/^(#{1,3})\s+(.*)$/);
+    // A task / checklist item ("- [ ] todo" / "- [x] done") — checked before the plain bullet so the
+    // checkbox marker isn't swallowed into the item text.
+    const task = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
     const bullet = line.match(/^[-*]\s+(.*)$/);
     const numbered = line.match(/^\d+\.\s+(.*)$/);
     if (heading) {
       closeList();
       const level = heading[1].length;
       out.push(`<h${level}>${inline(heading[2])}</h${level}>`);
+    } else if (task) {
+      openList("ul");
+      const checked = task[1].toLowerCase() === "x";
+      out.push(
+        `<li><input type="checkbox" disabled${checked ? " checked" : ""}> ${inline(task[2])}</li>`,
+      );
     } else if (bullet) {
       openList("ul");
       out.push(`<li>${inline(bullet[1])}</li>`);
@@ -140,7 +163,18 @@ function serializeList(listEl: Element, ordered: boolean): string {
   let i = 0;
   for (const li of listEl.childNodes) {
     if (li.nodeType === 1 && (li as Element).tagName.toLowerCase() === "li") {
-      const marker = ordered ? `${++i}. ` : "- ";
+      // A checklist item carries a checkbox — emit "- [ ]" / "- [x]" and drop the input from the text
+      // (remove it from this throwaway DOM copy so serializeChildren doesn't render it).
+      const checkbox = !ordered
+        ? ((li as Element).querySelector('input[type="checkbox"]') as HTMLInputElement | null)
+        : null;
+      let marker: string;
+      if (checkbox) {
+        marker = checkbox.checked ? "- [x] " : "- [ ] ";
+        checkbox.remove();
+      } else {
+        marker = ordered ? `${++i}. ` : "- ";
+      }
       s += `${marker}${serializeChildren(li).trim()}\n`;
     }
   }
@@ -178,6 +212,11 @@ function serializeNode(node: Node): string {
   if (el.tagName.toLowerCase() === "img")
     return `![${el.getAttribute("alt") ?? ""}](${el.getAttribute("src") ?? ""})`;
   if (el.tagName.toLowerCase() === "table") return serializeTable(el);
+  // A code block: take the raw text (don't recurse — the inner <code> would become inline `code`).
+  if (el.tagName.toLowerCase() === "pre") {
+    const text = (el.textContent ?? "").replace(/\n+$/, "");
+    return text.trim() ? `\`\`\`\n${text}\n\`\`\`\n\n` : "";
+  }
   const inner = serializeChildren(el);
   switch (el.tagName.toLowerCase()) {
     case "strong":
@@ -190,6 +229,8 @@ function serializeNode(node: Node): string {
     case "s":
     case "strike":
       return inner.trim() ? `~~${inner}~~` : inner;
+    case "mark":
+      return inner.trim() ? `==${inner}==` : inner;
     case "code":
       return inner.trim() ? `\`${inner}\`` : inner;
     case "a":

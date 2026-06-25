@@ -87,6 +87,9 @@ export type EdgeData = {
   color?: string;
   width?: number;
   dash?: "dashed" | "solid" | "dotted";
+  /** Map-wide accent (meta.accentColor) stamped on crosslink edges so the renderer uses it as the
+   *  default stroke when the link has no explicit colour. Crosslink edges only. */
+  accent?: string;
   /** Relationship arc bow: signed perpendicular offset of the midpoint (crosslink edges only). */
   curve?: number;
   /** Dimmed by the read-only Power Filter (an endpoint isn't lit); view-only opacity. */

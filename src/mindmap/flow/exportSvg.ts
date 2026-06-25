@@ -202,7 +202,7 @@ function emitBoundaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[]
     const y = by - BOUNDARY_PAD;
     const w = bX - bx + 2 * BOUNDARY_PAD;
     const h = bY - by + 2 * BOUNDARY_PAD;
-    const bs = resolveBoundaryStyle(b.color);
+    const bs = resolveBoundaryStyle(b.color, doc.meta?.accentColor);
     const gid = `bgrad-${b.id}`;
     const da = dashArray(b.dash);
     const dashAttr = da ? ` stroke-dasharray="${da}"` : "";
@@ -410,7 +410,7 @@ export function buildFlowSvg(
         dasharray,
         arrowAtTarget,
         arrowAtSource,
-      } = resolveLinkStyle(e.data);
+      } = resolveLinkStyle(e.data, doc.meta?.accentColor);
       // Hopped chord when line-jumps is on; otherwise the gentle S-bezier from the SAME helper the
       // canvas edge uses, so the relationship bows identically on screen and here (canvas == export).
       const self = lineJumps ? hopSegments.find((seg) => seg.id === e.id) : undefined;

@@ -12,6 +12,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   field, so it renders identically on the canvas (CSS) and in the SVG/PNG/PDF export (a shared SVG
   filter), preserving canvas == export.
 
+- **Per-theme relationship & boundary colours (theming batch B).** Applying a **Design** now also sets
+  a map-wide **accent** (new `meta.accentColor`) used as the default stroke for relationships and
+  boundaries, so a design recolours the whole map coherently instead of leaving them a fixed purple.
+  Per-object colours still win, and a map with no accent is pixel-unchanged (canvas == export). New
+  fallback in `resolveLinkStyle` / `resolveBoundaryStyle` + a `setAccentColor` op.
+
 - **Design gallery thumbnails (theming batch B).** Each design in the Canvas → Design menu now shows a
   tiny rendered preview — the theme's background + a root dot + three palette branches drawn with the
   design's connector style — so the looks are distinguishable at a glance instead of by an identical

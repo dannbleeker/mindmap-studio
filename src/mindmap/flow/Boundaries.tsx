@@ -55,10 +55,13 @@ function Boundaries({
   boundaries,
   selectedId,
   onSelect,
+  accent,
 }: {
   boundaries: readonly Boundary[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  /** Map-wide accent (meta.accentColor): the default colour for boundaries with no own colour. */
+  accent?: string;
 }) {
   const nodes = useNodes();
   // Resolve each boundary's bbox once per node/boundary change instead of on every parent re-render
@@ -95,11 +98,11 @@ function Boundaries({
         height: maxY - minY + 2 * BOUNDARY_PAD,
         shape: b.shape,
         dash: b.dash,
-        style: resolveBoundaryStyle(b.color),
+        style: resolveBoundaryStyle(b.color, accent),
       });
     }
     return out;
-  }, [nodes, boundaries]);
+  }, [nodes, boundaries, accent]);
 
   if (boxes.length === 0) return null;
 

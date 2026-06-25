@@ -12,6 +12,9 @@ export interface Design {
   themeId: string;
   /** The branch connector style applied map-wide. */
   connectorStyle: ConnectorStyle;
+  /** Map-wide accent for relationships + boundaries, so a design recolours them to match its theme.
+   *  "" leaves them at the historical purple default. */
+  accentColor: string;
   /** One-line description for the gallery. */
   note: string;
 }
@@ -22,6 +25,7 @@ export const DESIGNS: readonly Design[] = [
     name: "Classic",
     themeId: "light",
     connectorStyle: "organic",
+    accentColor: "",
     note: "Warm light theme, organic tapered branches",
   },
   {
@@ -29,6 +33,7 @@ export const DESIGNS: readonly Design[] = [
     name: "Blueprint",
     themeId: "ocean",
     connectorStyle: "elbow",
+    accentColor: "#2e86ab",
     note: "Cool ocean theme, right-angle connectors",
   },
   {
@@ -36,6 +41,7 @@ export const DESIGNS: readonly Design[] = [
     name: "Midnight",
     themeId: "dark",
     connectorStyle: "curved",
+    accentColor: "#7c83ff",
     note: "Dark theme, smooth curved branches",
   },
   {
@@ -43,6 +49,7 @@ export const DESIGNS: readonly Design[] = [
     name: "Sunrise",
     themeId: "sunset",
     connectorStyle: "organic",
+    accentColor: "#e36414",
     note: "Warm sunset palette, organic branches",
   },
   {
@@ -50,6 +57,7 @@ export const DESIGNS: readonly Design[] = [
     name: "Diagram",
     themeId: "light",
     connectorStyle: "straight",
+    accentColor: "#6b7280",
     note: "Light theme, straight-line connectors",
   },
 ];

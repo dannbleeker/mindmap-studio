@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { EDGE_PRESETS } from "../src/components/edgePresets";
-import { addLink, deleteLink, setLinkLabel, setLinkStyle } from "../src/mindmap/flow/ops";
+import {
+  addLink,
+  deleteLink,
+  setAccentColor,
+  setLinkLabel,
+  setLinkStyle,
+} from "../src/mindmap/flow/ops";
+import {
+  BOUNDARY_FILL,
+  BOUNDARY_STROKE,
+  CROSSLINK_COLOR,
+  resolveBoundaryStyle,
+  resolveLinkStyle,
+} from "../src/mindmap/flow/style";
 import type { MindMapDoc } from "../src/model/types";
 
 const base = (): MindMapDoc => ({
@@ -15,6 +28,31 @@ const base = (): MindMapDoc => ({
       { id: "b", topic: "B", children: [] },
     ],
   },
+});
+
+describe("map-wide accent fallback (#6)", () => {
+  it("setAccentColor sets / clears meta.accentColor", () => {
+    const on = setAccentColor(base(), "#2e86ab").doc;
+    expect(on.meta?.accentColor).toBe("#2e86ab");
+    expect(setAccentColor(on, "").doc.meta?.accentColor).toBeUndefined();
+  });
+
+  it("resolveLinkStyle: explicit colour > accent fallback > the purple default", () => {
+    expect(resolveLinkStyle({}).color).toBe(CROSSLINK_COLOR);
+    expect(resolveLinkStyle({}, "#2e86ab").color).toBe("#2e86ab");
+    expect(resolveLinkStyle({ color: "#111111" }, "#2e86ab").color).toBe("#111111");
+  });
+
+  it("resolveBoundaryStyle: accent fallback tints the box; unstyled stays the historical default", () => {
+    const def = resolveBoundaryStyle();
+    expect(def.stroke).toBe(BOUNDARY_STROKE);
+    expect(def.fill).toBe(BOUNDARY_FILL);
+    const accented = resolveBoundaryStyle(undefined, "#2e86ab");
+    expect(accented.stroke).toBe("#2e86ab");
+    expect(accented.fill).not.toBe(BOUNDARY_FILL); // tinted from the accent
+    // An explicit per-boundary colour still wins over the accent.
+    expect(resolveBoundaryStyle("#ff0000", "#2e86ab").stroke).toBe("#ff0000");
+  });
 });
 
 describe("cross-link ops", () => {

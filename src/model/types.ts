@@ -254,6 +254,10 @@ export interface MindMapDoc {
      *  "curved", "elbow" (right-angle), or "straight". Absent = "organic". Lossless in .json, ignored
      *  by flat exporters; carried into the image/PDF/HTML export. */
     connectorStyle?: "organic" | "curved" | "elbow" | "straight";
+    /** Map-wide accent colour: the default stroke for relationships + boundaries when they carry no
+     *  per-object colour (a Design sets it so applying a theme recolours them coherently). Absent =
+     *  the historical purple accent. Lossless in .json. */
+    accentColor?: string;
     /** Outline-numbering scheme used when numbering is shown: "decimal" (1, 1.1, 1.1.1 — the default)
      *  or "outline" (the legal outline I, A, 1, a, i by level). Absent = "decimal". Lossless in .json. */
     numberStyle?: NumberStyle;

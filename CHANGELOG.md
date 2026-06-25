@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Drag to reorder siblings on the canvas (structure batch C).** Dragging a topic now shows an
+  **insertion line** at a target's top/bottom edge — drop there to place it *before/after* as a sibling
+  (a reorder or cross-parent move), while dropping on the middle still nests it as a child. Reuses the
+  outline panel's drop-band rule (`outlineDropWhere`/new `dropWhereInBox`) and the `moveInTree` op.
+
 - **Maps index panel (structure batch C).** A dockable **Maps** panel (View → "Maps (all maps)") lists
   every saved map with a filter box; click a row to switch to it, with the current map marked. The top
   tab strip only shows *open* maps, so this gives an in-editor jump list across the whole library.

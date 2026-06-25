@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Categorised, searchable icon & sticker library (#12).** The marker picker's catalog grew (+16
+  glyphs — people, flags, status, trend) and the **sticker** picker gained a search box plus
+  category-grouped browsing (Status / Symbols / Actions / Objects), mirroring the marker search. Five
+  new stickers (25 total) and Person / Calendar / Hot now in the default marker palette (with
+  flat-vector bodies, so canvas == export holds). Pure `searchStickers` / `stickerCategories` helpers.
+
 - **Swimlane layout (structure batch C).** A new **Swimlane** layout (Canvas → Layout) arranges the
   root's top branches as one row of vertical lanes — each level-1 topic is a lane header with its
   subtree flowing beneath — for comparison / kanban-style maps. Reuses the grid/matrix machinery (a

@@ -186,6 +186,51 @@ describe("flow project — org-chart elbow stamping + task fields", () => {
     expect(edges.find((e) => e.id === "e:a:a1")?.data?.branchColor).toBe("#ff0000");
   });
 
+  it("applies SmartRules actions (marker + branch colour) into the projected node data (#13)", () => {
+    const rdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "rr",
+      title: "RR",
+      // overdue rule auto-flags 🚩 and recolours the branch; manual branchColor must still win.
+      rules: [
+        {
+          id: "rule1",
+          kind: "tag",
+          value: "risk",
+          style: {},
+          icons: ["🚩"],
+          branchColor: "#e23b3b",
+        },
+      ],
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "auto", topic: "Auto", tags: ["risk"], icons: ["⭐"], children: [] },
+          {
+            id: "manual",
+            topic: "Manual",
+            tags: ["risk"],
+            branchColor: "#0000ff",
+            children: [],
+          },
+          { id: "plain", topic: "Plain", children: [] },
+        ],
+      },
+    };
+    const { nodes } = project(rdoc);
+    const at = (id: string) => nodes.find((n) => n.id === id);
+    // matching node: rule marker unioned after the node's own; rule branch colour applied.
+    expect(at("auto")?.data.icons).toEqual(["⭐", "🚩"]);
+    expect(at("auto")?.data.branchColor).toBe("#e23b3b");
+    // a manual branchColor outranks the rule's; the marker is still applied.
+    expect(at("manual")?.data.icons).toEqual(["🚩"]);
+    expect(at("manual")?.data.branchColor).toBe("#0000ff");
+    // a non-matching node is untouched (keeps its auto-palette colour, no rule marker).
+    expect(at("plain")?.data.icons).toBeUndefined();
+    expect(at("plain")?.data.branchColor).not.toBe("#e23b3b");
+  });
+
   it("projects the task schedule fields the inline task-info line draws", () => {
     const tdoc: MindMapDoc = {
       schemaVersion: 1,

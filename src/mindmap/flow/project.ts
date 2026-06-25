@@ -1,7 +1,7 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
 import { outlineNumbers } from "../../outline";
 import { type ProgressInfo, progressMap } from "../../progress";
-import { conditionalStyle } from "../../rules";
+import { conditionalActions, conditionalStyle } from "../../rules";
 import type { LayoutKind } from "../contract";
 import { CROSSLINK_COLOR, fontScaleFactor } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
@@ -104,11 +104,20 @@ export function project(
     // branch renders as a right-angle elbow. A node's own `layout` override governs its children.
     edgeLayout: LayoutKind = kind,
   ): void => {
+    // Conditional-formatting *actions* (view-only, like condStyle): rule-applied markers + branch
+    // colour. Merged into the projected `icons` / `branchColor` here, so TopicNode AND the SVG export
+    // (both read this projected data) render them identically — canvas == export, nothing baked into
+    // the model.
+    const actions = conditionalActions(node, rules, progress.get(node.id)?.progress);
     // A node's own `branchColor` override (if set) recolours it AND its subtree (inherited via the
-    // `color` passed down to children); otherwise it keeps the inherited auto-palette colour.
-    // `|| color` (not `??`): an imported/hand-edited "" branchColor must fall back to the palette
-    // colour, not pass through as an empty stroke (setBranchColor already normalises "" → undefined).
-    const nodeColor = node.branchColor || color;
+    // `color` passed down to children); a rule-applied branch colour is next; otherwise it keeps the
+    // inherited auto-palette colour. `||` (not `??`): an imported/hand-edited "" branchColor must fall
+    // back, not pass through as an empty stroke (setBranchColor already normalises "" → undefined).
+    const nodeColor = node.branchColor || actions.branchColor || color;
+    // Rule markers are unioned onto the node's own (deduped, node's first), so manual + auto coexist.
+    const icons = actions.icons.length
+      ? [...(node.icons ?? []), ...actions.icons.filter((ic) => !node.icons?.includes(ic))]
+      : node.icons;
     nodes.push({
       id: node.id,
       type: "topic",
@@ -120,7 +129,7 @@ export function project(
         note: node.note,
         hyperlink: node.hyperlink,
         image: node.image,
-        icons: node.icons,
+        icons,
         tags: node.tags,
         style: node.style,
         // Conditional formatting is a separate view-only overlay (merged under `style` at render),

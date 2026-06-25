@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { ConditionalRule, MapNode } from "../src/model/types";
-import { conditionalStyle, describeRule, matchesRule } from "../src/rules";
+import {
+  conditionalActions,
+  conditionalStyle,
+  describeRule,
+  describeRuleActions,
+  matchesRule,
+} from "../src/rules";
 
 const node = (over: Partial<MapNode> = {}): MapNode => ({
   id: "n",
@@ -107,6 +113,55 @@ describe("conditionalStyle", () => {
 
   it("returns undefined when nothing matches", () => {
     expect(conditionalStyle(node(), [rule({})], 0)).toBeUndefined();
+  });
+});
+
+describe("conditionalActions", () => {
+  it("unions markers across matches (deduped) and takes the last branchColor", () => {
+    const rules: ConditionalRule[] = [
+      rule({ id: "a", kind: "tag", value: "risk", icons: ["🚩", "❗"], branchColor: "#e23b3b" }),
+      rule({
+        id: "b",
+        kind: "overdue",
+        value: undefined,
+        icons: ["❗", "⏰"],
+        branchColor: "#f4b400",
+      }),
+    ];
+    // only the tag rule matches (progress 0.5, no due date)
+    expect(conditionalActions(node({ tags: ["risk"] }), rules, 0.5)).toEqual({
+      icons: ["🚩", "❗"],
+      branchColor: "#e23b3b",
+    });
+    // both match: markers union (deduped), last branchColor wins
+    const overdue = node({ tags: ["risk"], task: { due: "2026-01-01", progress: 0.5 } });
+    expect(conditionalActions(overdue, rules, 0.5, "2026-06-21")).toEqual({
+      icons: ["🚩", "❗", "⏰"],
+      branchColor: "#f4b400",
+    });
+  });
+
+  it("returns empty icons + undefined branchColor when nothing matches or no actions are set", () => {
+    expect(conditionalActions(node(), [rule({})], 0)).toEqual({
+      icons: [],
+      branchColor: undefined,
+    });
+    // a matching rule with only a style (no action fields) yields no actions
+    expect(conditionalActions(node({ tags: ["risk"] }), [rule({})], 0)).toEqual({
+      icons: [],
+      branchColor: undefined,
+    });
+  });
+});
+
+describe("describeRuleActions", () => {
+  it("suffixes applied markers + a colour note, or '' when none", () => {
+    expect(describeRuleActions(rule({ icons: ["🚩"], branchColor: "#e23b3b" }))).toBe(
+      " → 🚩 colour",
+    );
+    expect(describeRuleActions(rule({ icons: ["🚩", "❗"] }))).toBe(" → 🚩 ❗");
+    expect(describeRuleActions(rule({ branchColor: "#e23b3b" }))).toBe(" → colour");
+    expect(describeRuleActions(rule({}))).toBe("");
   });
 });
 

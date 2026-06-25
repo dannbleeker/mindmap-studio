@@ -53,7 +53,7 @@ import {
 } from "./outline";
 import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
-import { describeRule } from "./rules";
+import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
 import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from "./stickers";
 import type { VersionMeta } from "./store/mapStore";
@@ -1437,12 +1437,16 @@ export function StylesPanel({
   const [value, setValue] = useState("");
   const [fill, setFill] = useState("");
   const [border, setBorder] = useState("");
+  // Actions (in addition to a style): a marker to auto-apply + a branch colour for the subtree.
+  const [actionIcon, setActionIcon] = useState("");
+  const [actionColor, setActionColor] = useState("");
   // tag / marker / priority / textContains carry a value; completed / overdue / hasAttachment don't.
   const needsValue =
     kind === "tag" || kind === "marker" || kind === "priority" || kind === "textContains";
   const add = () => {
     if (needsValue && !value.trim()) return;
-    if (!fill && !border) return;
+    // A rule needs at least one effect — a style swatch OR an action (marker / branch colour).
+    if (!fill && !border && !actionIcon && !actionColor) return;
     const style: NodeStyle = {};
     if (fill) style.background = fill;
     if (border) style.border = `2px solid ${border}`;
@@ -1451,10 +1455,14 @@ export function StylesPanel({
       kind,
       value: needsValue ? value.trim() : undefined,
       style,
+      icons: actionIcon ? [actionIcon] : undefined,
+      branchColor: actionColor || undefined,
     });
     setValue("");
     setFill("");
     setBorder("");
+    setActionIcon("");
+    setActionColor("");
   };
   const swatchRow = (
     swatches: readonly string[],
@@ -1499,8 +1507,8 @@ export function StylesPanel({
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <PanelSection>Conditional formatting</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-          Auto-style topics by tag, marker, completion, due date, priority, text, or attachment.
-          Manual styling still wins.
+          Auto-style topics by tag, marker, completion, due date, priority, text, or attachment —
+          and optionally auto-apply a marker or branch colour. Manual styling still wins.
         </div>
         {rules.map((r) => (
           <div
@@ -1510,6 +1518,7 @@ export function StylesPanel({
             <span style={previewSwatch(r.style)} />
             <span style={{ flex: 1, fontSize: fontSize.sm, color: colors.text }}>
               {describeRule(r)}
+              {describeRuleActions(r)}
             </span>
             <Button
               onClick={() => onDeleteRule(r.id)}
@@ -1585,6 +1594,23 @@ export function StylesPanel({
         ) : null}
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}
+        <div style={{ display: "flex", gap: 4, padding: "2px 10px 4px", alignItems: "center" }}>
+          <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>Marker</span>
+          <Select
+            value={actionIcon}
+            onChange={(e) => setActionIcon(e.target.value)}
+            aria-label="Rule action marker"
+            style={{ width: "auto", flex: 1 }}
+          >
+            <option value="">No marker</option>
+            {markers.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </Select>
+        </div>
+        {swatchRow(BORDER_SWATCHES, actionColor, setActionColor, "Branch")}
         <Button onClick={add} style={{ margin: "4px 10px", fontSize: fontSize.sm }}>
           + Add rule
         </Button>

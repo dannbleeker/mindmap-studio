@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Theme-driven branch growth weight (theming batch B).** A map-wide **branch "growth"** control
+  (Canvas toolbar → Growth: Fine / Regular / Bold) scales every branch line's thickness — the
+  MindManager per-theme line-weight dimension, on top of the existing connector *style*. Each **Design**
+  preset now bundles a growth weight (Blueprint/Diagram fine, Midnight/Sunrise bold), so applying a
+  design picks a coherent weight too. It's a map-wide `meta.branchGrowth` (absent = the historical
+  "regular" widths — no change for existing maps), threaded through the shared `branchWidths` /
+  `branchRender` so the canvas and the SVG/PNG/PDF export render identical line weights. Lossless in
+  `.json`.
+
 - **Custom slide deck builder (#3).** The presentation/deck was auto-generated (overview + one slide
   per top branch). A new **Slide deck** panel (View → "Slide deck (custom)") lets you pick which
   topics become slides, **reorder** them, add a **speaker note** per slide, and "Restore default" to

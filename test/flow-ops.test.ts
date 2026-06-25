@@ -55,6 +55,7 @@ import {
   setBoundaryLabel,
   setBoundaryShape,
   setBranchColor,
+  setBranchGrowth,
   setCalloutColor,
   setConnectorStyle,
   setDue,
@@ -1214,6 +1215,14 @@ describe("flow ops — content fill (hyperlink / image / rich text / meta toggle
     expect(setConnectorStyle(base(), "elbow").doc.meta?.connectorStyle).toBe("elbow");
     expect(
       setConnectorStyle(setConnectorStyle(base(), "elbow").doc, "organic").doc.meta?.connectorStyle,
+    ).toBeUndefined();
+  });
+
+  it("setBranchGrowth stores the weight; regular clears the override", () => {
+    expect(setBranchGrowth(base(), "bold").doc.meta?.branchGrowth).toBe("bold");
+    expect(setBranchGrowth(base(), "fine").doc.meta?.branchGrowth).toBe("fine");
+    expect(
+      setBranchGrowth(setBranchGrowth(base(), "bold").doc, "regular").doc.meta?.branchGrowth,
     ).toBeUndefined();
   });
 

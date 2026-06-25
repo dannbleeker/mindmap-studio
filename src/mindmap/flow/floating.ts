@@ -1,4 +1,5 @@
 import type { InternalNode } from "@xyflow/react";
+import type { BranchGrowth } from "../../model/types";
 import type { LayoutKind } from "../contract";
 
 // Floating-edge geometry: connect a node's border to another's, on the ray between their
@@ -116,10 +117,20 @@ export function attachSideFor(parent: Box, child: Box, axis: "h" | "v"): AttachS
   return child.cy >= parent.cy ? "bottom" : "top";
 }
 
+/** Map-wide branch line-weight multiplier ("growth"): "regular" (or absent) keeps the historical
+ *  widths, "fine" thins, "bold" thickens. One source of truth for the canvas + SVG export. */
+export function branchGrowthFactor(growth?: BranchGrowth): number {
+  return growth === "fine" ? 0.6 : growth === "bold" ? 1.6 : 1;
+}
+
 /** Chunky-trunk → fine-tip half-widths by the child's depth (MindManager weight: mains thick, subs
- *  progressively thinner). */
-export function branchWidths(depth: number): { trunk: number; tip: number } {
-  return { trunk: Math.max(7.5 - depth * 1.2, 3), tip: Math.max(2.4 - depth * 0.3, 0.9) };
+ *  progressively thinner), scaled by the map's branch-growth weight. */
+export function branchWidths(depth: number, growth?: BranchGrowth): { trunk: number; tip: number } {
+  const f = branchGrowthFactor(growth);
+  return {
+    trunk: Math.max(7.5 - depth * 1.2, 3) * f,
+    tip: Math.max(2.4 - depth * 0.3, 0.9) * f,
+  };
 }
 
 /** The single origin on the parent's `side` + the child's near-end entry, both tucked INTO the boxes
@@ -513,6 +524,7 @@ export function branchRender(
     elbow?: boolean;
     connectorStyle?: ConnectorStyle;
     dash?: "solid" | "dashed" | "dotted";
+    branchGrowth?: BranchGrowth;
   },
   bow = 0,
 ): BranchRender {
@@ -522,7 +534,7 @@ export function branchRender(
   const effective = cs === "organic" ? (data.elbow ? "elbow" : "taper") : cs;
   if (effective === "taper" && !dashArr) {
     const ep = branchEndpoints(parent, child, attachSide);
-    const { trunk, tip } = branchWidths(data.depth ?? 1);
+    const { trunk, tip } = branchWidths(data.depth ?? 1, data.branchGrowth);
     return {
       d: taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, attachSide, trunk, tip, bow),
       fill: color,
@@ -542,7 +554,8 @@ export function branchRender(
       : effective === "straight"
         ? straightPath(parent, child, attachSide)
         : curvedPath(parent, child, attachSide); // "curved", or a dashed taper
-  const width = Math.max(1.6, 3.4 - (data.depth ?? 1) * 0.5);
+  const width =
+    Math.max(1.6, 3.4 - (data.depth ?? 1) * 0.5) * branchGrowthFactor(data.branchGrowth);
   return { d, fill: null, stroke: color, width, dash: dashArr };
 }
 

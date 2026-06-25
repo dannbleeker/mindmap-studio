@@ -1018,6 +1018,7 @@ export function App() {
         if (!design) return;
         setThemeId(design.themeId); // canvas theme (React state)
         mapRef.current?.setConnectorStyle(design.connectorStyle); // map-wide connector (undoable)
+        mapRef.current?.setBranchGrowth(design.branchGrowth); // map-wide branch weight (undoable)
         mapRef.current?.setAccentColor(design.accentColor); // relationship + boundary accent (undoable)
         showHint(`Applied the ${design.name} design.`);
       },

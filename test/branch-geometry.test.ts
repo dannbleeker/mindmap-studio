@@ -4,6 +4,7 @@ import {
   attachSideFor,
   axisForLayoutKind,
   branchEndpoints,
+  branchGrowthFactor,
   branchRender,
   branchWidths,
   childrenAxis,
@@ -126,6 +127,38 @@ describe("branch geometry", () => {
   it("branchWidths tapers thinner with depth (chunky main branches → fine sub-branches)", () => {
     expect(branchWidths(1).trunk).toBeGreaterThan(branchWidths(3).trunk);
     expect(branchWidths(1).trunk).toBeGreaterThan(branchWidths(1).tip);
+  });
+
+  it("branchGrowth scales branch widths (fine < regular < bold), regular == the historical default", () => {
+    expect(branchGrowthFactor("regular")).toBe(1);
+    expect(branchGrowthFactor(undefined)).toBe(1); // absent = regular
+    expect(branchGrowthFactor("fine")).toBeLessThan(1);
+    expect(branchGrowthFactor("bold")).toBeGreaterThan(1);
+    // regular keeps today's numbers exactly (no behaviour change for existing maps)
+    expect(branchWidths(1, "regular")).toEqual(branchWidths(1));
+    // fine thins, bold thickens — both trunk + tip
+    expect(branchWidths(1, "fine").trunk).toBeLessThan(branchWidths(1).trunk);
+    expect(branchWidths(1, "bold").trunk).toBeGreaterThan(branchWidths(1).trunk);
+    expect(branchWidths(1, "bold").tip).toBeGreaterThan(branchWidths(1, "fine").tip);
+  });
+
+  it("branchRender applies branchGrowth to the tapered ribbon AND the uniform stroke (canvas == export)", () => {
+    const p = box(0, 0, 100, 40);
+    const c = box(200, 0, 100, 40);
+    // Tapered ribbon: a bolder growth produces a visibly larger filled path string.
+    const fine = branchRender(p, c, "right", { depth: 1, branchGrowth: "fine" });
+    const bold = branchRender(p, c, "right", { depth: 1, branchGrowth: "bold" });
+    expect(fine.d).not.toBe(bold.d);
+    // Uniform stroke (elbow): the stroke width scales with growth.
+    const elbowFine = branchRender(p, c, "right", {
+      connectorStyle: "elbow",
+      branchGrowth: "fine",
+    });
+    const elbowBold = branchRender(p, c, "right", {
+      connectorStyle: "elbow",
+      branchGrowth: "bold",
+    });
+    expect(elbowBold.width).toBeGreaterThan(elbowFine.width);
   });
 
   it("crosslinkBezier: a deterministic perpendicular-bow cubic shared canvas == export", () => {

@@ -837,6 +837,64 @@ export function AgendaPanel({
   );
 }
 
+// In-editor maps index (#18): a dockable, filterable list of every saved map to switch between
+// without leaving the canvas (the top tab strip only shows OPEN maps). Click a row to open it.
+export function MapsPanel({
+  maps,
+  currentId,
+  onOpen,
+}: {
+  maps: readonly { id: string; title: string }[];
+  currentId: string;
+  onOpen: (id: string) => void;
+}) {
+  const [q, setQ] = useState("");
+  const needle = q.trim().toLowerCase();
+  const shown = needle ? maps.filter((m) => (m.title || "").toLowerCase().includes(needle)) : maps;
+  return (
+    <Panel>
+      <div style={panelTitle}>🗂 Maps</div>
+      <div style={{ padding: "0 10px 6px" }}>
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Filter maps…"
+          aria-label="Filter maps"
+          style={{ width: "auto" }}
+        />
+      </div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {shown.length === 0 ? (
+          <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
+            No maps match.
+          </div>
+        ) : (
+          shown.map((m) => {
+            const current = m.id === currentId;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => onOpen(m.id)}
+                aria-current={current ? "true" : undefined}
+                title={m.title || "(untitled)"}
+                style={{
+                  ...listRow,
+                  padding: "3px 10px",
+                  fontWeight: current ? fontWeight.semibold : fontWeight.normal,
+                  background: current ? "var(--ed-hover, rgba(0,0,0,0.05))" : undefined,
+                }}
+              >
+                {m.title || "(untitled)"}
+              </button>
+            );
+          })
+        )}
+      </div>
+    </Panel>
+  );
+}
+
 // Read-only Power Filter: a free-text box plus toggle chips for every marker/tag in the map.
 // Matching topics (and the paths to them) stay lit on the canvas; everything else dims. Nothing
 // is deleted — closing the panel (or Clear) restores the full map.

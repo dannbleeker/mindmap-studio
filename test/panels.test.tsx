@@ -10,6 +10,7 @@ import {
   FilterPanel,
   HistoryPanel,
   InfoPanel,
+  MapsPanel,
   MarkerTagIndex,
   type NamedStyle,
   NoteEditorPanel,
@@ -789,6 +790,32 @@ describe("StatsPanel", () => {
     expect(screen.getByText(/Map statistics/)).toBeTruthy();
     expect(screen.getByText("Topics")).toBeTruthy();
     expect(screen.getByText("Distinct tags")).toBeTruthy();
+  });
+});
+
+describe("MapsPanel (#18)", () => {
+  const maps = [
+    { id: "m1", title: "Launch plan" },
+    { id: "m2", title: "Sprint retro" },
+    { id: "m3", title: "Roadmap" },
+  ];
+
+  it("lists every map, marks the current one, and opens one on click", async () => {
+    const onOpen = vi.fn();
+    render(<MapsPanel maps={maps} currentId="m2" onOpen={onOpen} />);
+    expect(screen.getByRole("button", { name: "Launch plan" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Sprint retro" }).getAttribute("aria-current")).toBe(
+      "true",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Roadmap" }));
+    expect(onOpen).toHaveBeenCalledWith("m3");
+  });
+
+  it("filters the list by the query", async () => {
+    render(<MapsPanel maps={maps} currentId="m1" onOpen={noop} />);
+    await userEvent.type(screen.getByLabelText("Filter maps"), "road");
+    expect(screen.getByRole("button", { name: "Roadmap" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Launch plan" })).toBeNull();
   });
 });
 

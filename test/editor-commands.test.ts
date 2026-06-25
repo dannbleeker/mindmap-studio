@@ -87,6 +87,8 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       setStatsOpen: vi.fn(),
       agendaOpen: false,
       setAgendaOpen: vi.fn(),
+      mapsOpen: false,
+      setMapsOpen: vi.fn(),
       noteEditorOpen: false,
       setNoteEditorOpen: vi.fn(),
       infoOpen: false,

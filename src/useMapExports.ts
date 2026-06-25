@@ -3,6 +3,7 @@ import { buildPrintDoc, wrapSvgHtml } from "./io/html";
 import { serializeDoc } from "./io/json";
 import { toMarkdown } from "./io/markdown";
 import { toMermaid } from "./io/mermaid";
+import { buildNotesAppendix } from "./io/notesAppendix";
 import { sanitizeSvg } from "./io/svgSanitize";
 import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
@@ -179,7 +180,7 @@ export function useMapExports(
     async exportPdf() {
       const clean = await cleanSvg();
       if (!clean) return;
-      const html = buildPrintDoc(clean, baseName());
+      const html = buildPrintDoc(clean, baseName(), buildNotesAppendix(getDoc()));
       const iframe = document.createElement("iframe");
       iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
       iframe.srcdoc = html;

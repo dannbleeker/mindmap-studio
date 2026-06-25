@@ -7,6 +7,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Notes & links polish (MindManager parity batch A).**
+  - **Richer note editor** — the note toolbar gains **H1/H2/H3 headings**, **highlight** (`==text==` →
+    `<mark>`), a **code block** (` ``` ` fenced), and **checklists** (`- [ ] / - [x]`), on top of the
+    existing bold/italic/strike/lists/links/images/tables. All round-trip through the markdown subset.
+  - **Hyperlink parity** — `tel:` links are now allowed (alongside the existing `http(s)`, `mailto:`,
+    `#node=`/`#map=`); the link field advertises the supported schemes. (`file:` stays excluded —
+    browsers block `file://` from a web context.)
+  - **Notes in PDF export** — the print/PDF export now appends a **Notes** section (every topic's note,
+    by outline number) after the map page; previously PDF was the map image only. New pure
+    `buildNotesAppendix`.
+
 - **Seven new starter templates.** The New-map gallery gains analysis + knowledge/sharing skeletons to
   balance the existing team/meeting set: **PESTLE** (companion to SWOT), **Fishbone / cause & effect**
   (the 6M categories — companion to 5 Whys, pairs with the Fishbone layout), **OKRs**, **Essay outline**,

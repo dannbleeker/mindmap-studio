@@ -33,8 +33,10 @@ export function wrapSvgHtml(svg: string, title: string): string {
 // for the browser's "Save as PDF". Pure + deterministic; the app loads this into
 // a hidden iframe and calls print(). Maps are wide, so the page defaults to
 // landscape. No auto-print script here — the caller triggers print on load.
-/** Build a print-to-PDF document from an ALREADY-SANITISED SVG (see module note). */
-export function buildPrintDoc(svg: string, title: string): string {
+// `appendixHtml`, when supplied, is the notes appendix from io/notesAppendix.ts — already-safe HTML
+// (renderNote is escape-first). It prints on its own portrait page(s) after the map.
+/** Build a print-to-PDF document from an ALREADY-SANITISED SVG (see module note) + optional notes. */
+export function buildPrintDoc(svg: string, title: string, appendixHtml = ""): string {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -45,10 +47,18 @@ export function buildPrintDoc(svg: string, title: string): string {
   html, body { margin: 0; padding: 0; background: #fff; }
   main { display: flex; justify-content: center; }
   svg { max-width: 100%; height: auto; }
+  .mm-notes-appendix { break-before: page; page-break-before: always; padding: 12mm; font-family: ui-sans-serif, system-ui, sans-serif; color: #23211c; }
+  .mm-notes-appendix h2 { font-size: 18px; margin: 0 0 12px; }
+  .mm-notes-appendix article { break-inside: avoid; page-break-inside: avoid; margin: 0 0 12px; }
+  .mm-notes-appendix h3 { font-size: 13px; margin: 0 0 4px; }
+  .mm-notes-appendix img { max-width: 100%; height: auto; }
+  .mm-notes-appendix table { border-collapse: collapse; }
+  .mm-notes-appendix th, .mm-notes-appendix td { border: 1px solid #ccc; padding: 2px 6px; }
 </style>
 </head>
 <body>
 <main>${svg}</main>
+${appendixHtml}
 </body>
 </html>
 `;

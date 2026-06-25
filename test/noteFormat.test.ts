@@ -66,6 +66,21 @@ describe("renderNote", () => {
     expect(renderNote("| not | a table |")).toBe("<p>| not | a table |</p>");
   });
 
+  it("renders ==highlight== as <mark> (#10)", () => {
+    expect(renderNote("a ==big== deal")).toBe("<p>a <mark>big</mark> deal</p>");
+  });
+
+  it("renders a ```fenced``` code block verbatim, no inline transforms (#10)", () => {
+    const html = renderNote("```\nconst x = **not bold**;\n<b>raw</b>\n```");
+    expect(html).toBe("<pre><code>const x = **not bold**;\n&lt;b&gt;raw&lt;/b&gt;</code></pre>");
+  });
+
+  it("renders - [ ] / - [x] as checklist items with checkboxes (#10)", () => {
+    const html = renderNote("- [ ] todo\n- [x] done");
+    expect(html).toContain('<li><input type="checkbox" disabled> todo</li>');
+    expect(html).toContain('<li><input type="checkbox" disabled checked> done</li>');
+  });
+
   it("escapes HTML so notes can't inject markup", () => {
     expect(renderNote("<script>alert(1)</script>")).toBe(
       "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>",
@@ -123,6 +138,22 @@ describe("htmlToNote", () => {
     expect(htmlToNote('<img src="https://x.test/c.png" alt="cat" />')).toBe(
       "![cat](https://x.test/c.png)",
     );
+  });
+
+  it("round-trips highlight + checklist (md → html → md) (#10)", () => {
+    expect(roundTrip("a ==big== deal")).toBe("a ==big== deal");
+    expect(roundTrip("- [ ] todo\n- [x] done")).toBe("- [ ] todo\n- [x] done");
+  });
+
+  it("serialises <mark> and a <pre> code block back to markdown (#10)", () => {
+    expect(htmlToNote("<p>a <mark>hot</mark> take</p>")).toBe("a ==hot== take");
+    expect(htmlToNote("<pre>const x = 1;</pre>")).toBe("```\nconst x = 1;\n```");
+  });
+
+  it("serialises a checklist <li> with an <input> checkbox back to task markdown (#10)", () => {
+    const html =
+      '<ul><li><input type="checkbox"> open</li><li><input type="checkbox" checked> shut</li></ul>';
+    expect(htmlToNote(html)).toBe("- [ ] open\n- [x] shut");
   });
 
   it("normalises the tag soup execCommand emits (b/i/s/strike/div)", () => {

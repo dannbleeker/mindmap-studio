@@ -58,6 +58,8 @@ export interface NodeStyle {
   /** Max topic width as a CSS px string (e.g. "180px"): a long label wraps to this width instead of
    *  stretching. Honoured by the layout estimate, the canvas, and the SVG export. */
   maxWidth?: string;
+  /** Raised look: a soft drop shadow under the topic card (canvas CSS + SVG export filter). */
+  shadow?: boolean;
 }
 
 export interface MapImage {

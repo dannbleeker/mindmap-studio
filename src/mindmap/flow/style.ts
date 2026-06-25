@@ -63,6 +63,12 @@ export function resolveLevelBox(p: {
   };
 }
 
+// Optional raised-topic drop shadow (#4) — the same look on the live canvas (CSS box-shadow) and in
+// the SVG export (a shared <filter> referenced by shadowed node fills), so canvas == export holds.
+export const TOPIC_SHADOW_CSS = "0 2px 6px rgba(40,30,16,0.30)";
+export const TOPIC_SHADOW_SVG_DEF =
+  '<defs><filter id="mm-topic-shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#281e10" flood-opacity="0.3"/></filter></defs>';
+
 // Boundary enclosure box.
 export const BOUNDARY_PAD = 16;
 export const BOUNDARY_STROKE = "#8b87e0";

@@ -462,6 +462,15 @@ describe("StyleBar", () => {
     );
   });
 
+  it("sets and clears the raised drop-shadow style (#4)", async () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} />);
+    await userEvent.click(screen.getByTitle("Raised (drop shadow)"));
+    expect(onStyle).toHaveBeenCalledWith({ shadow: true });
+    await userEvent.click(screen.getByTitle("Flat (no shadow)"));
+    expect(onStyle).toHaveBeenCalledWith({ shadow: undefined });
+  });
+
   it("hides the Presets row when no named styles exist (#15)", () => {
     render(<StyleBar onStyle={noop} />);
     expect(screen.queryByText("Presets")).toBeNull();

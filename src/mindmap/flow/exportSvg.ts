@@ -30,6 +30,7 @@ import {
   SUMMARY_BRACKET_W,
   SUMMARY_GAP,
   SUMMARY_PAD,
+  TOPIC_SHADOW_SVG_DEF,
   boundaryLabel,
   levelFontSize,
   readableTextOn,
@@ -539,9 +540,11 @@ export function buildFlowSvg(
       ? ` stroke="${esc(border.color)}" stroke-width="${border.width}"`
       : "";
     const ins = isGeometric(shape) ? shapeInset(shape) : { left: 0, right: 0, top: 0, bottom: 0 };
+    // Raised topic (#4): reference the shared drop-shadow filter on the card fill (canvas == export).
+    const shadowAttr = st?.shadow ? ' filter="url(#mm-topic-shadow)"' : "";
     if (isGeometric(shape)) {
       parts.push(
-        `<path d="${shapePath(shape, r.x, r.y, r.w, r.h)}" fill="${esc(fill)}"${strokeAttr}/>`,
+        `<path d="${shapePath(shape, r.x, r.y, r.w, r.h)}" fill="${esc(fill)}"${strokeAttr}${shadowAttr}/>`,
       );
       const ov = shapeOverlayPath(shape, r.x, r.y, r.w, r.h);
       if (ov) parts.push(`<path d="${ov}" fill="none"${strokeAttr}/>`);
@@ -557,14 +560,14 @@ export function buildFlowSvg(
       const rect = `x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" rx="${radius}"`;
       parts.push(
         `<defs><clipPath id="${clip}"><rect ${rect}/></clipPath></defs>`,
-        `<rect ${rect} fill="${esc(nodeBg)}"/>`,
+        `<rect ${rect} fill="${esc(nodeBg)}"${shadowAttr}/>`,
         `<image x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" href="${esc(imageFill)}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clip})"/>`,
         `<rect ${rect} fill="rgba(0,0,0,0.32)" clip-path="url(#${clip})"/>`,
         `<rect ${rect} fill="none"${strokeAttr || ` stroke="${esc(d.branchColor)}" stroke-width="1.5"`}/>`,
       );
     } else {
       parts.push(
-        `<rect x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" rx="${radius}" fill="${esc(fill)}"${strokeAttr}/>`,
+        `<rect x="${r2(r.x)}" y="${r2(r.y)}" width="${r2(r.w)}" height="${r2(r.h)}" rx="${radius}" fill="${esc(fill)}"${strokeAttr}${shadowAttr}/>`,
       );
     }
 
@@ -725,7 +728,13 @@ export function buildFlowSvg(
   // on-canvas LegendPanel shows (shared buildLegend), so the legend reads the same on screen + export.
   const legend = doc.meta?.legend ? emitLegend(doc, vbX, vbY) : "";
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vbX)} ${r2(vbY)} ${r2(vbW)} ${r2(vbH)}" width="${r2(vbW)}" height="${r2(vbH)}"><rect x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" fill="${esc(pageBg)}"/>${bgImage}${parts.join("")}${legend}</svg>`;
+  // Inject the drop-shadow filter def once, only when a topic actually uses it (#4) — keeps the export
+  // byte-stable + minimal for maps with no raised topics.
+  const shadowDef = parts.some((p) => p.includes("url(#mm-topic-shadow)"))
+    ? TOPIC_SHADOW_SVG_DEF
+    : "";
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vbX)} ${r2(vbY)} ${r2(vbW)} ${r2(vbH)}" width="${r2(vbW)}" height="${r2(vbH)}"><rect x="${r2(vbX)}" y="${r2(vbY)}" width="${r2(vbW)}" height="${r2(vbH)}" fill="${esc(pageBg)}"/>${shadowDef}${bgImage}${parts.join("")}${legend}</svg>`;
 }
 
 /** SVG for the map legend box anchored at the viewBox's top-left — one row per marker / tag / rule

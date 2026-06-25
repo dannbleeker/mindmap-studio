@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Raised topic style (theming batch B).** A topic can opt into a soft **drop shadow** for a raised,
+  MindManager-style look — toggled from the StyleBar (◰ raised / ◳ flat). It's a persisted `NodeStyle`
+  field, so it renders identically on the canvas (CSS) and in the SVG/PNG/PDF export (a shared SVG
+  filter), preserving canvas == export.
+
 - **Notes & links polish (MindManager parity batch A).**
   - **Richer note editor** — the note toolbar gains **H1/H2/H3 headings**, **highlight** (`==text==` →
     `<mark>`), a **code block** (` ``` ` fenced), and **checklists** (`- [ ] / - [x]`), on top of the

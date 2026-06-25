@@ -1296,9 +1296,9 @@ export function mergeStyle(doc: MindMapDoc, id: string, patch: Partial<NodeStyle
   const next = structuredClone(doc);
   const node = findAnyNode(next, id);
   if (!node) return { doc };
-  const merged: Record<string, string> = { ...(node.style ?? {}) };
+  const merged: Record<string, string | boolean> = { ...(node.style ?? {}) };
   for (const [k, v] of Object.entries(patch)) {
-    if (v === "" || v == null) delete merged[k];
+    if (v === "" || v == null || v === false) delete merged[k];
     else merged[k] = v;
   }
   node.style = Object.keys(merged).length > 0 ? (merged as NodeStyle) : undefined;

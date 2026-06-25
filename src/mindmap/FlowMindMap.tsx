@@ -25,7 +25,6 @@ import { MARKER_PALETTE, markerImage } from "../icons";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
-import { dropWhereInBox } from "../outline";
 import { PRIORITY_LABEL, PRIORITY_LEVELS, cyclePriority } from "../priority";
 import { cycleTaskProgress, nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
@@ -52,6 +51,7 @@ import { TopicNode } from "./flow/TopicNode";
 import { LAYOUT_ANIM_MS, easeInOutCubic, lerp, prefersReducedMotion } from "./flow/animateLayout";
 import { type BraceGroup, computeBraces } from "./flow/brace";
 import { buildFlowState } from "./flow/buildFlowState";
+import { resolveDropTarget } from "./flow/dropTarget";
 import { EditingContext } from "./flow/editing";
 import { type NodeRect, buildFlowSvg } from "./flow/exportSvg";
 import { nodeAtPoint } from "./flow/floating";
@@ -641,35 +641,14 @@ function FlowInner({
   // a *child* (the same band rule the outline panel uses, via outlineDropWhere). The root has no parent,
   // so before/after collapses to child there. Single source of truth for the live indicator + the drop.
   const findDropTarget = useCallback(
-    (
-      dragId: string,
-      dropPos: { x: number; y: number },
-    ): { id: string; where: ReturnType<typeof dropWhereInBox> } | null => {
-      const all = getNodes();
-      const dragged = all.find((n) => n.id === dragId);
-      const cx = dropPos.x + (dragged?.measured?.width ?? 0) / 2;
-      const cy = dropPos.y + (dragged?.measured?.height ?? 0) / 2;
-      const exclude = subtreeIds(findAnyNode(docRef.current, dragId));
-      const hit = all.find((n) => {
-        if (exclude.has(n.id)) return false;
-        const w = n.measured?.width ?? 0;
-        const h = n.measured?.height ?? 0;
-        return (
-          cx >= n.position.x &&
-          cx <= n.position.x + w &&
-          cy >= n.position.y &&
-          cy <= n.position.y + h
-        );
-      });
-      if (!hit) return null;
-      const where = dropWhereInBox(
-        cy,
-        hit.position.y,
-        hit.measured?.height ?? 0,
-        hit.id === docRef.current.root.id,
-      );
-      return { id: hit.id, where };
-    },
+    (dragId: string, dropPos: { x: number; y: number }) =>
+      resolveDropTarget(
+        getNodes(),
+        dragId,
+        subtreeIds(findAnyNode(docRef.current, dragId)),
+        dropPos,
+        docRef.current.root.id,
+      ),
     [getNodes],
   );
 

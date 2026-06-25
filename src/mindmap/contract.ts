@@ -303,6 +303,7 @@ export type LayoutKind =
   | "timeline"
   | "fishbone"
   | "grid"
+  | "swimlane"
   | "brace"
   // Free-canvas mode is a per-map state (doc.meta.freeform), not a layout the user picks; it's a
   // LayoutKind so computeLayout has a single positioning entry point.

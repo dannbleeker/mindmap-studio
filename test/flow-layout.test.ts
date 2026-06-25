@@ -234,6 +234,37 @@ describe("flow layout (alternate kinds)", () => {
     // a branch's child stays within its cell (below the branch)
     expect(pos.get("s1")?.y ?? 0).toBeGreaterThan(pos.get("s")?.y ?? 0);
   });
+
+  it("swimlane lays the root's branches out as one row of lanes (#7)", () => {
+    const lanes: MindMapDoc = {
+      schemaVersion: 1,
+      id: "sl",
+      title: "Lanes",
+      root: {
+        id: "r",
+        topic: "Lanes",
+        children: [
+          { id: "a", topic: "A", children: [{ id: "a1", topic: "A1", children: [] }] },
+          { id: "b", topic: "B", children: [] },
+          { id: "c", topic: "C", children: [] },
+          { id: "d", topic: "D", children: [] },
+        ],
+      },
+    };
+    const p = project(lanes);
+    const pos = computeLayout(p.nodes, p.edges, size, "swimlane");
+    expect(allFinite(pos)).toBe(true);
+    const lane = ["a", "b", "c", "d"];
+    const xs = lane.map((id) => pos.get(id)?.x ?? 0);
+    const ys = lane.map((id) => pos.get(id)?.y ?? 0);
+    // four lanes → four distinct columns, all level-1 headers on a single row (one y).
+    expect(new Set(xs).size).toBe(4);
+    expect(new Set(ys.map((y) => Math.round(y))).size).toBe(1);
+    // columns are ordered left→right and each lane's child sits under its header.
+    expect(xs[0]).toBeLessThan(xs[1]);
+    expect(xs[1]).toBeLessThan(xs[2]);
+    expect(pos.get("a1")?.y ?? 0).toBeGreaterThan(pos.get("a")?.y ?? 0);
+  });
 });
 
 describe("flow layout (per-subtree columns + height-proportional gaps + fishbone diagonal)", () => {

@@ -14,6 +14,7 @@ import {
   FilterPanel,
   HistoryPanel,
   InfoPanel,
+  MapsPanel,
   MarkerTagIndex,
   NoteEditorPanel,
   OutlinePanel,
@@ -1313,6 +1314,9 @@ export function App() {
                 today={todayISO()}
                 onPick={(id) => mapRef.current?.focusNode(id)}
               />
+            )}
+            {panels.mapsOpen && (
+              <MapsPanel maps={maps} currentId={doc.id} onOpen={(id) => void switchMap(id)} />
             )}
             {panels.noteEditorOpen && (
               <NoteEditorPanel

@@ -7,6 +7,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Maps index panel (structure batch C).** A dockable **Maps** panel (View → "Maps (all maps)") lists
+  every saved map with a filter box; click a row to switch to it, with the current map marked. The top
+  tab strip only shows *open* maps, so this gives an in-editor jump list across the whole library.
+
 - **Focus-mode hotkey (structure batch C).** **Ctrl/⌘ + .** drills the canvas into the selected topic
   (re-rooting the view, with the existing "Drilled into…" breadcrumb to step back out); pressing it
   again — or **Esc** — exits. Ignored while typing. Added to the shortcuts cheat sheet.

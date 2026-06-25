@@ -64,6 +64,8 @@ export interface ToolbarPanels {
   setStatsOpen: (fn: (v: boolean) => boolean) => void;
   agendaOpen: boolean;
   setAgendaOpen: (fn: (v: boolean) => boolean) => void;
+  mapsOpen: boolean;
+  setMapsOpen: (fn: (v: boolean) => boolean) => void;
   noteEditorOpen: boolean;
   setNoteEditorOpen: (fn: (v: boolean) => boolean) => void;
   infoOpen: boolean;
@@ -603,6 +605,13 @@ export function Toolbar({
             checked={panels.agendaOpen}
             trailing={mi("check")}
             onSelect={() => panels.setAgendaOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("layers")}
+            label="Maps (all maps)"
+            checked={panels.mapsOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setMapsOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("note")}

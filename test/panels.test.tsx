@@ -16,13 +16,14 @@ import {
   NoteEditorPanel,
   NotesPanel,
   OutlinePanel,
+  SlideDeckEditorPanel,
   StatsPanel,
   StyleBar,
   StylesPanel,
   WalkBar,
 } from "../src/Panels";
 import type { SelectedNode, SelectionFields } from "../src/mindmap";
-import type { MapNode, MindMapDoc } from "../src/model/types";
+import type { MapNode, MindMapDoc, SlideRef } from "../src/model/types";
 import type { Backlink } from "../src/outline";
 
 // A small but representative tree: a root with two children, one carrying a marker, a tag, a note,
@@ -170,6 +171,79 @@ describe("StylesPanel", () => {
       />,
     );
     expect(screen.getByText("Highlight")).toBeTruthy();
+  });
+});
+
+describe("SlideDeckEditorPanel", () => {
+  const deck = [
+    { ref: { nodeId: "overview" } as SlideRef, heading: "Plan" },
+    { ref: { nodeId: "a" } as SlideRef, heading: "Alpha" },
+  ];
+  const topics = [
+    { id: "r", topic: "Plan", depth: 0 },
+    { id: "a", topic: "Alpha", depth: 1 },
+    { id: "b", topic: "Beta", depth: 1 },
+  ];
+
+  it("lists the deck rows (overview flagged) and a Restore control only when custom", () => {
+    const { rerender } = render(
+      <SlideDeckEditorPanel
+        deck={deck}
+        topics={topics}
+        isCustom={false}
+        onChange={noop}
+        onRestoreDefault={noop}
+      />,
+    );
+    expect(screen.getByText(/1\. Plan/)).toBeTruthy();
+    expect(screen.getByText(/\(overview\)/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Restore default/ })).toBeNull();
+    rerender(
+      <SlideDeckEditorPanel
+        deck={deck}
+        topics={topics}
+        isCustom={true}
+        onChange={noop}
+        onRestoreDefault={noop}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /Restore default/ })).toBeTruthy();
+  });
+
+  it("commits reorder / remove / note edits and adds a slide from the picker", () => {
+    const onChange = vi.fn();
+    render(
+      <SlideDeckEditorPanel
+        deck={deck}
+        topics={topics}
+        isCustom={true}
+        onChange={onChange}
+        onRestoreDefault={noop}
+      />,
+    );
+    // Move Alpha (index 1) up → overview swaps down.
+    fireEvent.click(screen.getByRole("button", { name: /Move Alpha up/ }));
+    expect(onChange).toHaveBeenLastCalledWith([{ nodeId: "a" }, { nodeId: "overview" }]);
+    // Remove Alpha.
+    fireEvent.click(screen.getByRole("button", { name: /Remove Alpha/ }));
+    expect(onChange).toHaveBeenLastCalledWith([{ nodeId: "overview" }]);
+    // Type a speaker note on the overview slide.
+    fireEvent.change(screen.getByLabelText(/Speaker note for Plan/), {
+      target: { value: "Hello" },
+    });
+    // Controlled component: each action operates on the original deck (no rerender between clicks).
+    expect(onChange).toHaveBeenLastCalledWith([
+      { nodeId: "overview", note: "Hello" },
+      { nodeId: "a" },
+    ]);
+    // Add Beta from the picker.
+    fireEvent.change(screen.getByLabelText("Add a slide"), { target: { value: "b" } });
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add/ }));
+    expect(onChange).toHaveBeenLastCalledWith([
+      { nodeId: "overview" },
+      { nodeId: "a" },
+      { nodeId: "b" },
+    ]);
   });
 });
 

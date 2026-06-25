@@ -9,6 +9,7 @@ import type {
   MindMapDoc,
   NodeStyle,
   NumberStyle,
+  SlideRef,
 } from "../model/types";
 import type { MindMapTheme } from "./theme";
 
@@ -197,6 +198,8 @@ export interface MindMapHandle {
   setLegend: (on: boolean) => void;
   /** Replace the map's conditional-formatting rules (empty array clears them). */
   setRules: (rules: ConditionalRule[]) => void;
+  /** Replace the custom presentation deck (`meta.slides`); empty array clears it back to the auto deck. */
+  setSlides: (slides: SlideRef[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */
   setSelectedTags: (tags: string[]) => boolean;
   /** Rename a tag map-wide (central tree + floating topics); renaming to an existing tag MERGES them.

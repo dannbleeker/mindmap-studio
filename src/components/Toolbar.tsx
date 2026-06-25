@@ -66,6 +66,8 @@ export interface ToolbarPanels {
   setAgendaOpen: (fn: (v: boolean) => boolean) => void;
   mapsOpen: boolean;
   setMapsOpen: (fn: (v: boolean) => boolean) => void;
+  deckEditorOpen: boolean;
+  setDeckEditorOpen: (fn: (v: boolean) => boolean) => void;
   noteEditorOpen: boolean;
   setNoteEditorOpen: (fn: (v: boolean) => boolean) => void;
   infoOpen: boolean;
@@ -612,6 +614,13 @@ export function Toolbar({
             checked={panels.mapsOpen}
             trailing={mi("check")}
             onSelect={() => panels.setMapsOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("present")}
+            label="Slide deck (custom)"
+            checked={panels.deckEditorOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setDeckEditorOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("note")}

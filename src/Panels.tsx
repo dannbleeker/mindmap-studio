@@ -40,6 +40,7 @@ import type {
   NodeShape,
   NodeStyle,
   NumberStyle,
+  SlideRef,
 } from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
 import {
@@ -51,6 +52,8 @@ import {
   outlineNumbers,
   outlineRows,
 } from "./outline";
+import { addSlide, removeSlide, reorderSlides, setSlideNote } from "./present/deckEdit";
+import { OVERVIEW_SLIDE_ID } from "./present/slides";
 import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import { describeRule, describeRuleActions } from "./rules";
@@ -891,6 +894,120 @@ export function MapsPanel({
           })
         )}
       </div>
+    </Panel>
+  );
+}
+
+// Custom slide-deck editor (#3): reorder / add / remove the presentation slides and give each a
+// speaker note, overriding the auto walk-through. The deck is seeded from the resolved slides (so it
+// starts as today's auto deck), and every edit commits the full explicit deck via onChange — turning
+// the map "custom". "Restore default" clears it back to the auto deck. Pure list ops live in deckEdit.
+export function SlideDeckEditorPanel({
+  deck,
+  topics,
+  isCustom,
+  onChange,
+  onRestoreDefault,
+}: {
+  /** The current deck rows (each ref + a resolved display heading). */
+  deck: { ref: SlideRef; heading: string }[];
+  /** Every topic in the map, for the "add slide" picker. */
+  topics: { id: string; topic: string; depth: number }[];
+  /** Whether a custom deck is in effect (enables "Restore default"). */
+  isCustom: boolean;
+  /** Commit the edited deck (the full explicit slide list). */
+  onChange: (slides: SlideRef[]) => void;
+  /** Clear the custom deck back to the auto walk-through. */
+  onRestoreDefault: () => void;
+}) {
+  const [addId, setAddId] = useState("");
+  const refs = deck.map((d) => d.ref);
+  return (
+    <Panel>
+      <div style={panelTitle}>🎞 Slide deck</div>
+      <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
+        Choose which topics become slides, reorder them, and add speaker notes. Empty = the
+        automatic deck (overview + one slide per top branch).
+      </div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {deck.map((row, i) => (
+          <div
+            key={`${row.ref.nodeId}:${i}`}
+            style={{ padding: "4px 10px", borderTop: `1px solid ${colors.border}` }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ flex: 1, fontSize: fontSize.sm, color: colors.text }}>
+                {i + 1}. {row.heading}
+                {row.ref.nodeId === OVERVIEW_SLIDE_ID ? " (overview)" : ""}
+              </span>
+              <Button
+                onClick={() => onChange(reorderSlides(refs, i, i - 1))}
+                disabled={i === 0}
+                title="Move up"
+                aria-label={`Move ${row.heading} up`}
+                style={{ padding: "0 6px", fontSize: fontSize.sm }}
+              >
+                ↑
+              </Button>
+              <Button
+                onClick={() => onChange(reorderSlides(refs, i, i + 1))}
+                disabled={i === deck.length - 1}
+                title="Move down"
+                aria-label={`Move ${row.heading} down`}
+                style={{ padding: "0 6px", fontSize: fontSize.sm }}
+              >
+                ↓
+              </Button>
+              <Button
+                onClick={() => onChange(removeSlide(refs, i))}
+                title="Remove slide"
+                aria-label={`Remove ${row.heading}`}
+                style={{ padding: "0 6px", fontSize: fontSize.sm }}
+              >
+                ✕
+              </Button>
+            </div>
+            <textarea
+              value={row.ref.note ?? ""}
+              onChange={(e) => onChange(setSlideNote(refs, i, e.target.value))}
+              placeholder="Speaker note…"
+              aria-label={`Speaker note for ${row.heading}`}
+              rows={2}
+              style={{ ...inputStyle, width: "100%", marginTop: 3, resize: "vertical" }}
+            />
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 4, padding: "6px 10px", alignItems: "center" }}>
+        <Select
+          value={addId}
+          onChange={(e) => setAddId(e.target.value)}
+          aria-label="Add a slide"
+          style={{ width: "auto", flex: 1 }}
+        >
+          <option value="">Add a slide…</option>
+          {topics.map((t) => (
+            <option key={t.id} value={t.id}>
+              {`${"  ".repeat(t.depth)}${t.topic}`}
+            </option>
+          ))}
+        </Select>
+        <Button
+          onClick={() => {
+            if (!addId) return;
+            onChange(addSlide(refs, addId));
+            setAddId("");
+          }}
+          style={{ fontSize: fontSize.sm }}
+        >
+          + Add
+        </Button>
+      </div>
+      {isCustom ? (
+        <Button onClick={onRestoreDefault} style={{ margin: "0 10px 8px", fontSize: fontSize.sm }}>
+          Restore default deck
+        </Button>
+      ) : null}
     </Panel>
   );
 }

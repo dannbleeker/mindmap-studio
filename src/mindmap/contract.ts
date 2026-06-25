@@ -1,6 +1,7 @@
 import type { Ref } from "react";
 import type {
   BackdropKind,
+  BranchGrowth,
   ConditionalRule,
   FontScale,
   MapAttachment,
@@ -188,6 +189,8 @@ export interface MindMapHandle {
   setLineJumps: (on: boolean) => void;
   /** Set the map's branch connector style (organic / curved / elbow / straight). */
   setConnectorStyle: (style: "organic" | "curved" | "elbow" | "straight") => void;
+  /** Set the map's branch growth weight (fine / regular / bold); regular clears the override. */
+  setBranchGrowth: (growth: BranchGrowth) => void;
   /** Set the outline-numbering scheme (decimal / outline); decimal clears the override. */
   setNumberStyle: (style: NumberStyle) => void;
   /** Set the map-wide base font family ("" clears it back to the canvas default). */

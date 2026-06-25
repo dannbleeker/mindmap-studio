@@ -8,7 +8,7 @@ import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import { canvasThemes } from "../mindmap/theme";
 import type { CanvasTheme } from "../mindmap/theme";
-import type { BackdropKind, MindMapDoc } from "../model/types";
+import type { BackdropKind, BranchGrowth, MindMapDoc } from "../model/types";
 import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, templates } from "../templates";
 import { EditorIcon, type EditorIconName } from "./EditorIcons";
@@ -1147,6 +1147,18 @@ export function Toolbar({
           <option value="curved">Curved</option>
           <option value="elbow">Elbow</option>
           <option value="straight">Straight</option>
+        </select>
+        <span className="mm-eyebrow">Growth</span>
+        <select
+          className="mm-select"
+          value={liveDoc.meta?.branchGrowth ?? "regular"}
+          onChange={(e) => m()?.setBranchGrowth(e.target.value as BranchGrowth)}
+          aria-label="Branch growth weight"
+          title="Branch line weight (thickness)"
+        >
+          <option value="fine">Fine</option>
+          <option value="regular">Regular</option>
+          <option value="bold">Bold</option>
         </select>
         <span className="mm-vdiv" />
         <span className="mm-eyebrow">Type</span>

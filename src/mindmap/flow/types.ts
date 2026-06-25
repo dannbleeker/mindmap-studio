@@ -1,5 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
-import type { MapImage, NodeStyle } from "../../model/types";
+import type { BranchGrowth, MapImage, NodeStyle } from "../../model/types";
 import type { ProgressInfo } from "../../progress";
 import type { AttachSide, ConnectorStyle } from "./floating";
 
@@ -107,6 +107,9 @@ export type EdgeData = {
   /** The map's connector style (organic / curved / elbow / straight), stamped on every branch edge so
    *  the canvas + exporter render the chosen shape. Absent = "organic". Branch edges only. */
   connectorStyle?: ConnectorStyle;
+  /** The map's branch growth weight (fine / regular / bold), stamped on every branch edge so the
+   *  canvas + exporter scale line widths identically. Absent = "regular". Branch edges only. */
+  branchGrowth?: BranchGrowth;
 };
 
 export type TopicNode = Node<TopicData, "topic">;

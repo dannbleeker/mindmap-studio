@@ -231,6 +231,25 @@ describe("flow project — org-chart elbow stamping + task fields", () => {
     expect(at("plain")?.data.branchColor).not.toBe("#e23b3b");
   });
 
+  it("stamps the map branch-growth weight on every branch edge (#B1)", () => {
+    const gdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "g",
+      title: "G",
+      meta: { branchGrowth: "bold" },
+      root: { id: "r", topic: "R", children: [{ id: "a", topic: "A", children: [] }] },
+    };
+    expect(project(gdoc).edges.find((e) => e.id === "e:r:a")?.data?.branchGrowth).toBe("bold");
+    // absent meta → undefined (the historical default), not stamped as a value
+    const plain: MindMapDoc = {
+      schemaVersion: 1,
+      id: "p",
+      title: "P",
+      root: { id: "r", topic: "R", children: [{ id: "a", topic: "A", children: [] }] },
+    };
+    expect(project(plain).edges.find((e) => e.id === "e:r:a")?.data?.branchGrowth).toBeUndefined();
+  });
+
   it("projects the task schedule fields the inline task-info line draws", () => {
     const tdoc: MindMapDoc = {
       schemaVersion: 1,

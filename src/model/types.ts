@@ -259,6 +259,11 @@ export interface MindMapDoc {
      *  "curved", "elbow" (right-angle), or "straight". Absent = "organic". Lossless in .json, ignored
      *  by flat exporters; carried into the image/PDF/HTML export. */
     connectorStyle?: "organic" | "curved" | "elbow" | "straight";
+    /** Branch "growth" weight for the whole map: how thick the branch lines render — "fine", "regular"
+     *  (absent = the historical default), or "bold". A Design sets it so applying a theme also picks a
+     *  coherent line weight. Lossless in .json, ignored by flat exporters; carried into the image/PDF/
+     *  HTML export (canvas == export). */
+    branchGrowth?: BranchGrowth;
     /** Map-wide accent colour: the default stroke for relationships + boundaries when they carry no
      *  per-object colour (a Design sets it so applying a theme recolours them coherently). Absent =
      *  the historical purple accent. Lossless in .json. */
@@ -300,3 +305,7 @@ export type NumberStyle = "decimal" | "outline";
 
 /** Map-wide font-size scale (see meta.fontScale). */
 export type FontScale = "compact" | "comfortable" | "large";
+
+/** Branch line-weight ("growth") for the whole map (see meta.branchGrowth). "regular" = the historical
+ *  default widths; "fine" thins every branch, "bold" thickens them. */
+export type BranchGrowth = "fine" | "regular" | "bold";

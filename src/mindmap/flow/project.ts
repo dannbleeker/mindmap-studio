@@ -76,6 +76,7 @@ export function project(
 ): ProjectResult {
   const pal = palette.length > 0 ? palette : FALLBACK_PALETTE;
   const connectorStyle = doc.meta?.connectorStyle;
+  const branchGrowth = doc.meta?.branchGrowth;
   // Map-wide typography: one scale factor + base family for every node, so the canvas, the layout
   // estimate, and the exporter (all read from TopicData) size + render type identically.
   const fontScale = fontScaleFactor(doc.meta?.fontScale);
@@ -173,6 +174,7 @@ export function project(
           crosslink: false,
           elbow: isOrg(edgeLayout),
           connectorStyle,
+          branchGrowth,
           dash: node.lineDash,
         },
       });

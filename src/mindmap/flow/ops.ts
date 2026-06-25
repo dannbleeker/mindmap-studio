@@ -3,6 +3,7 @@ import { isDangerousUrl } from "../../io/urlSafety";
 import type {
   BackdropKind,
   Boundary,
+  BranchGrowth,
   Callout,
   ConditionalRule,
   CrossLink,
@@ -870,6 +871,13 @@ export function setConnectorStyle(
 ): OpResult {
   const next = structuredClone(doc);
   next.meta = { ...next.meta, connectorStyle: style === "organic" ? undefined : style };
+  return { doc: next };
+}
+
+/** Set the map-wide branch growth weight ("regular" clears it back to the historical default widths). */
+export function setBranchGrowth(doc: MindMapDoc, growth: BranchGrowth): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, branchGrowth: growth === "regular" ? undefined : growth };
   return { doc: next };
 }
 

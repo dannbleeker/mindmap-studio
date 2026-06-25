@@ -41,6 +41,20 @@ export function outlineDropWhere(ratio: number): "before" | "child" | "after" {
   return "child";
 }
 
+/** Canvas drag-reorder (#8): where a dragged topic dropped at `centerY` lands within a target box —
+ *  top band before, bottom band after, middle as a child (via outlineDropWhere). The root has no
+ *  parent, so before/after collapse to child there. Pure. */
+export function dropWhereInBox(
+  centerY: number,
+  boxTop: number,
+  boxHeight: number,
+  isRoot: boolean,
+): "before" | "child" | "after" {
+  const ratio = boxHeight > 0 ? (centerY - boxTop) / boxHeight : 0.5;
+  const where = outlineDropWhere(ratio);
+  return where !== "child" && isRoot ? "child" : where;
+}
+
 export interface IndexHit {
   id: string;
   topic: string;

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 import {
   backlinksFor,
+  dropWhereInBox,
   markerTagIndex,
   outlineDropWhere,
   outlineNumbers,
@@ -98,6 +99,25 @@ describe("outlineDropWhere", () => {
     expect(outlineDropWhere(0.5)).toBe("child"); // the broad middle nests as a child
     expect(outlineDropWhere(0.9)).toBe("after");
     expect(outlineDropWhere(1)).toBe("after");
+  });
+});
+
+describe("dropWhereInBox (canvas drag-reorder, #8)", () => {
+  it("maps a drop point in a box to before / child / after", () => {
+    // box top=100, height=40 → before <110, child 110..130, after >130.
+    expect(dropWhereInBox(104, 100, 40, false)).toBe("before");
+    expect(dropWhereInBox(120, 100, 40, false)).toBe("child");
+    expect(dropWhereInBox(136, 100, 40, false)).toBe("after");
+  });
+
+  it("collapses before/after to child on the root (it has no parent to be a sibling of)", () => {
+    expect(dropWhereInBox(104, 100, 40, true)).toBe("child");
+    expect(dropWhereInBox(136, 100, 40, true)).toBe("child");
+    expect(dropWhereInBox(120, 100, 40, true)).toBe("child");
+  });
+
+  it("treats a zero-height box as a child drop", () => {
+    expect(dropWhereInBox(100, 100, 0, false)).toBe("child");
   });
 });
 

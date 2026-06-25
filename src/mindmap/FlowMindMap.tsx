@@ -25,6 +25,7 @@ import { MARKER_PALETTE, markerImage } from "../icons";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
+import { dropWhereInBox } from "../outline";
 import { PRIORITY_LABEL, PRIORITY_LEVELS, cyclePriority } from "../priority";
 import { cycleTaskProgress, nextProgressLevel } from "../progress";
 import { getBranch, setBranch } from "../store/branchClipboard";
@@ -351,6 +352,8 @@ function FlowInner({
   const [coachDismissed, setCoachDismissed] = useState(false);
   // During a drag-to-reparent, the node the dragged topic would drop under (highlighted live). (#11)
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+  // During a drag-to-reorder, the sibling edge an insertion line marks (drop before/after). (#8)
+  const [insertEdge, setInsertEdge] = useState<{ id: string; after: boolean } | null>(null);
   // Free-canvas alignment guide lines shown while dragging (cleared on drag stop).
   const [guides, setGuides] = useState<GuideLine[]>([]);
   // The cross-link whose label is being inline-edited on the canvas (double-click), or null.
@@ -632,11 +635,16 @@ function FlowInner({
     }
   }, [restore, reportHistory]);
 
-  // Which node a dragged topic would re-parent under: the first whose box contains the dragged node's
-  // centre, excluding the dragged node and its own subtree (you can't parent a node into itself). The
-  // single source of truth for both the live drop indicator (#11) and the actual drop.
-  const findReparentTarget = useCallback(
-    (dragId: string, dropPos: { x: number; y: number }): string | null => {
+  // Where a dragged topic would land: the node whose box contains the dragged node's centre (excluding
+  // the dragged node + its own subtree), plus WHERE within it — the top quarter inserts the dragged
+  // node as a sibling *before* the target, the bottom quarter *after* it, the broad middle nests it as
+  // a *child* (the same band rule the outline panel uses, via outlineDropWhere). The root has no parent,
+  // so before/after collapses to child there. Single source of truth for the live indicator + the drop.
+  const findDropTarget = useCallback(
+    (
+      dragId: string,
+      dropPos: { x: number; y: number },
+    ): { id: string; where: ReturnType<typeof dropWhereInBox> } | null => {
       const all = getNodes();
       const dragged = all.find((n) => n.id === dragId);
       const cx = dropPos.x + (dragged?.measured?.width ?? 0) / 2;
@@ -653,7 +661,14 @@ function FlowInner({
           cy <= n.position.y + h
         );
       });
-      return hit?.id ?? null;
+      if (!hit) return null;
+      const where = dropWhereInBox(
+        cy,
+        hit.position.y,
+        hit.measured?.height ?? 0,
+        hit.id === docRef.current.root.id,
+      );
+      return { id: hit.id, where };
     },
     [getNodes],
   );
@@ -696,9 +711,20 @@ function FlowInner({
         setGuides(snapFor(dragId, dragPos).guides);
         return;
       }
-      setDropTargetId(findReparentTarget(dragId, dragPos));
+      // Tree mode: highlight a child drop-target ring, or show an insertion line for a sibling reorder.
+      const t = findDropTarget(dragId, dragPos);
+      if (!t) {
+        setDropTargetId(null);
+        setInsertEdge(null);
+      } else if (t.where === "child") {
+        setDropTargetId(t.id);
+        setInsertEdge(null);
+      } else {
+        setDropTargetId(null);
+        setInsertEdge({ id: t.id, after: t.where === "after" });
+      }
     },
-    [findReparentTarget, snapFor],
+    [findDropTarget, snapFor],
   );
 
   // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back. In free-canvas
@@ -706,6 +732,7 @@ function FlowInner({
   const handleDragStop = useCallback(
     (dragId: string, dropPos: { x: number; y: number }) => {
       setDropTargetId(null);
+      setInsertEdge(null);
       if (docRef.current.meta?.freeform) {
         setGuides([]);
         // Group drag: the whole selection moved together, so persist EVERY selected node's new
@@ -730,12 +757,13 @@ function FlowInner({
         apply(setNodePos(docRef.current, dragId, snap.x, snap.y));
         return;
       }
-      const targetId = findReparentTarget(dragId, dropPos);
-      const r = targetId ? reparent(docRef.current, dragId, targetId) : { doc: docRef.current };
+      // Tree mode: nest as a child (centre) or reorder as a sibling before/after the target (edges).
+      const t = findDropTarget(dragId, dropPos);
+      const r = t ? moveInTree(docRef.current, dragId, t.id, t.where) : { doc: docRef.current };
       if (r.doc !== docRef.current) apply(r);
       else sync(docRef.current); // snap back to the computed layout
     },
-    [apply, sync, findReparentTarget, snapFor, getNodes],
+    [apply, sync, findDropTarget, snapFor, getNodes],
   );
 
   // Centre + select a node by id (shared by the imperative handle and the in-map jump links).
@@ -1651,6 +1679,34 @@ function FlowInner({
             />
             <CoachMark show={showCoach} rootId={renderDoc.root.id} />
             <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
+            {/* Sibling-reorder insertion line (#8): a bar at the target node's top/bottom edge. */}
+            {insertEdge
+              ? (() => {
+                  const n = nodes.find((m) => m.id === insertEdge.id);
+                  if (!n) return null;
+                  const w = n.measured?.width ?? 0;
+                  const h = n.measured?.height ?? 0;
+                  const y = insertEdge.after ? n.position.y + h : n.position.y;
+                  return (
+                    <ViewportPortal>
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: n.position.x - 4,
+                          top: y - 1.5,
+                          width: w + 8,
+                          height: 3,
+                          background: "#1b8a5e",
+                          borderRadius: 2,
+                          boxShadow: "0 0 0 1px rgba(255,255,255,0.7)",
+                          pointerEvents: "none",
+                          zIndex: 5,
+                        }}
+                      />
+                    </ViewportPortal>
+                  );
+                })()
+              : null}
             {renderDoc.meta?.legend ? <LegendPanel doc={renderDoc} /> : null}
             {guides.length > 0 ? (
               <ViewportPortal>

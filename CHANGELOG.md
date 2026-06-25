@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Custom slide deck builder (#3).** The presentation/deck was auto-generated (overview + one slide
+  per top branch). A new **Slide deck** panel (View → "Slide deck (custom)") lets you pick which
+  topics become slides, **reorder** them, add a **speaker note** per slide, and "Restore default" to
+  clear it. The custom deck (`meta.slides`, additive + lossless) is honoured by all three consumers —
+  the on-screen presentation, the presenter sidebar (note overrides the topic's own), and the HTML
+  deck export — falling back to the auto deck when unset or when every referenced topic has been
+  deleted. Pure `resolveSlides` / `deckRows` / `deckEdit` cores.
+
 - **SmartRules actions — rule-applied marker + branch colour (#13).** A conditional-formatting rule can
   now also **auto-apply a marker** and/or a **branch colour** to matching topics (e.g. auto-flag every
   overdue topic 🚩 and tint its branch red), not just a fill/border. Like the existing style overlay

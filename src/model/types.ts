@@ -278,7 +278,21 @@ export interface MindMapDoc {
      *  overrides it. Absent = "comfortable". Threaded through the layout estimate, the canvas, and the
      *  export so all three agree. Lossless in .json. */
     fontScale?: FontScale;
+    /** Custom presentation deck: an explicit, ordered list of slides (overriding the auto walk-through
+     *  of overview + one slide per top branch). Each entry points at a topic by `nodeId` (the sentinel
+     *  `"overview"` = the root overview slide) with an optional per-slide speaker `note` that overrides
+     *  the topic's own note in the presenter view. Absent/empty ⇒ the auto deck. Entries whose `nodeId`
+     *  no longer resolves are skipped. Additive + lossless in .json. */
+    slides?: SlideRef[];
   };
+}
+
+/** One entry in a custom presentation deck (see meta.slides). */
+export interface SlideRef {
+  /** The topic to present, by id; the sentinel `"overview"` selects the root overview slide. */
+  nodeId: string;
+  /** Optional speaker note shown for this slide, overriding the topic's own `note`. */
+  note?: string;
 }
 
 /** Outline-numbering scheme (see meta.numberStyle). */

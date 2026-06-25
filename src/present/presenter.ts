@@ -30,7 +30,8 @@ export function presenterContext(slides: Slide[], index: number): PresenterConte
   const current = slides[safe];
   const nextSlide = slides[safe + 1];
   return {
-    notes: current?.node.note,
+    // A custom deck's per-slide note overrides the topic's own note.
+    notes: current?.note ?? current?.node.note,
     nextHeading: nextSlide?.heading,
     agenda: slides.map((s, i) => ({ heading: s.heading, index: i, current: i === safe })),
   };

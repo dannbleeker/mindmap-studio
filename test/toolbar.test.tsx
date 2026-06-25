@@ -66,6 +66,8 @@ function setup(
     setAgendaOpen: vi.fn(),
     mapsOpen: false,
     setMapsOpen: vi.fn(),
+    deckEditorOpen: false,
+    setDeckEditorOpen: vi.fn(),
     noteEditorOpen: false,
     setNoteEditorOpen: vi.fn(),
     infoOpen: false,

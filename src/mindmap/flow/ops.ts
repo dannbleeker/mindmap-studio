@@ -13,6 +13,7 @@ import type {
   MindMapDoc,
   NodeStyle,
   NumberStyle,
+  SlideRef,
   TaskInfo,
 } from "../../model/types";
 import type { SelectionFields } from "../contract";
@@ -808,6 +809,14 @@ export function setPriority(doc: MindMapDoc, id: string, priority: number | unde
 export function setRules(doc: MindMapDoc, rules: ConditionalRule[]): OpResult {
   const next = structuredClone(doc);
   next.rules = rules.length > 0 ? rules : undefined;
+  return { doc: next };
+}
+
+/** Replace the custom presentation deck (`meta.slides`); an empty array clears it back to the auto
+ *  walk-through. */
+export function setSlides(doc: MindMapDoc, slides: SlideRef[]): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, slides: slides.length > 0 ? slides : undefined };
   return { doc: next };
 }
 

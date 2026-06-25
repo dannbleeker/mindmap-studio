@@ -19,6 +19,7 @@ import {
   NoteEditorPanel,
   OutlinePanel,
   PlaybackBar,
+  SlideDeckEditorPanel,
   StatsPanel,
   StylesPanel,
   WalkBar,
@@ -80,6 +81,7 @@ import { findAnyNode } from "./mindmap/flow/ops";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
 import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "./outline";
+import { deckRows, hasCustomDeck } from "./present/slides";
 import { checkForUpdate, initPwaUpdateToast } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
 import { useSavedViews } from "./savedViews";
@@ -1317,6 +1319,15 @@ export function App() {
             )}
             {panels.mapsOpen && (
               <MapsPanel maps={maps} currentId={doc.id} onOpen={(id) => void switchMap(id)} />
+            )}
+            {panels.deckEditorOpen && (
+              <SlideDeckEditorPanel
+                deck={deckRows(liveDoc)}
+                topics={outlineRows(liveDoc.root)}
+                isCustom={hasCustomDeck(liveDoc)}
+                onChange={(slides) => mapRef.current?.setSlides(slides)}
+                onRestoreDefault={() => mapRef.current?.setSlides([])}
+              />
             )}
             {panels.noteEditorOpen && (
               <NoteEditorPanel

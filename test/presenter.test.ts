@@ -32,6 +32,14 @@ describe("presenterContext", () => {
     expect(presenterContext(slides, 2).notes).toBeUndefined(); // Beta has no note
   });
 
+  it("prefers a custom deck's per-slide note over the node's own (#3)", () => {
+    // A Slide with an override note (as resolveSlides produces for a custom deck).
+    const withOverride = [{ ...slides[1], note: "Override" }];
+    expect(presenterContext(withOverride, 0).notes).toBe("Override");
+    // …and falls back to the node note when the slide carries none.
+    expect(presenterContext([slides[1]], 0).notes).toBe("Alpha speaker notes");
+  });
+
   it("peeks at the next slide's heading on the first/overview slide", () => {
     expect(presenterContext(slides, 0).nextHeading).toBe("Alpha");
   });

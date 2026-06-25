@@ -6,7 +6,7 @@
 // static), so there is no scripting surface from map content.
 
 import type { MapNode, MindMapDoc } from "../model/types";
-import { presentationSlides } from "../present/slides";
+import { resolveSlides } from "../present/slides";
 // Quote-safe (attr-level): deck text lands in element content here, but escaping quotes too keeps it
 // safe if it is ever moved into an attribute, and costs nothing.
 import { escapeHtmlAttr as escapeHtml } from "./htmlEscape";
@@ -76,7 +76,7 @@ const DECK_SCRIPT = `
 `;
 
 export function buildDeckHtml(doc: MindMapDoc): string {
-  const slides = presentationSlides(doc);
+  const slides = resolveSlides(doc);
   const sections = slides
     .map((slide) => {
       const body = slide.isOverview

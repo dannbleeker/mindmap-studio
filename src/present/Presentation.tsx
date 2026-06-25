@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
 import { presenterContext } from "./presenter";
-import { presentationSlides } from "./slides";
+import { type Slide, resolveSlides } from "./slides";
 
 function Bullets({ node }: { node: MapNode }) {
   if (node.children.length === 0) return null;
@@ -59,7 +59,7 @@ function PresenterSidebar({
   index,
   onJump,
 }: {
-  slides: ReturnType<typeof presentationSlides>;
+  slides: Slide[];
   index: number;
   onJump: (i: number) => void;
 }) {
@@ -159,7 +159,7 @@ function PresenterSidebar({
 }
 
 export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => void }) {
-  const slides = presentationSlides(doc);
+  const slides = resolveSlides(doc);
   const [index, setIndex] = useState(0);
   const [presenter, setPresenter] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);

@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   STICKERS,
+  STICKER_CATEGORIES,
   STICKER_DISPLAY_PX,
   type Sticker,
+  searchStickers,
+  stickerCategories,
   stickerDataUrl,
   stickerImage,
 } from "../src/stickers";
@@ -10,7 +13,14 @@ import {
 describe("STICKERS catalogue", () => {
   it("is a non-empty curated set", () => {
     expect(STICKERS.length).toBeGreaterThanOrEqual(16);
-    expect(STICKERS.length).toBeLessThanOrEqual(24);
+    expect(STICKERS.length).toBeLessThanOrEqual(40);
+  });
+
+  it("gives every sticker a known category + at least one keyword (#12)", () => {
+    for (const s of STICKERS) {
+      expect(STICKER_CATEGORIES).toContain(s.category);
+      expect(s.keywords.length).toBeGreaterThan(0);
+    }
   });
 
   it("gives every sticker a unique id", () => {
@@ -53,6 +63,8 @@ describe("stickerDataUrl", () => {
     const sticker: Sticker = {
       id: "tmp",
       label: "Tmp",
+      category: "Symbols",
+      keywords: [],
       svg: '<svg viewBox="0 0 24 24" fill="#abc"><path d="M0 0h1"/></svg>',
     };
     const url = stickerDataUrl(sticker);
@@ -62,6 +74,36 @@ describe("stickerDataUrl", () => {
     expect(payload).toContain("%23"); // the "#abc" colour is percent-encoded
     // …and it still decodes back losslessly.
     expect(decodeURIComponent(payload)).toBe(sticker.svg);
+  });
+});
+
+describe("searchStickers (#12)", () => {
+  it("returns the whole set for an empty query", () => {
+    expect(searchStickers("").length).toBe(STICKERS.length);
+    expect(searchStickers("   ").length).toBe(STICKERS.length);
+  });
+
+  it("matches on label, keywords and id (case-insensitive)", () => {
+    for (const s of STICKERS) {
+      const byLabel = searchStickers(s.label.toUpperCase());
+      expect(byLabel.some((h) => h.id === s.id)).toBe(true);
+    }
+  });
+
+  it("requires every token to match (AND semantics) and returns [] when nothing matches", () => {
+    expect(searchStickers("zzzznotasticker")).toEqual([]);
+  });
+});
+
+describe("stickerCategories (#12)", () => {
+  it("partitions the catalogue into non-empty known categories with no lost stickers", () => {
+    const groups = stickerCategories();
+    for (const g of groups) {
+      expect(STICKER_CATEGORIES).toContain(g.category);
+      expect(g.stickers.length).toBeGreaterThan(0);
+    }
+    const total = groups.reduce((n, g) => n + g.stickers.length, 0);
+    expect(total).toBe(STICKERS.length);
   });
 });
 

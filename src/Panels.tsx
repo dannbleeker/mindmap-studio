@@ -55,7 +55,7 @@ import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import { describeRule } from "./rules";
 import { mapStats } from "./stats";
-import { STICKERS, type Sticker, stickerDataUrl } from "./stickers";
+import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from "./stickers";
 import type { VersionMeta } from "./store/mapStore";
 import { formatDateShort } from "./taskDate";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
@@ -1969,7 +1969,7 @@ export function InfoPanel({
                   ) : (
                     // Markers now lead the Details tab (#7); Style keeps the per-item sticker grid.
                     <>
-                      <StickerBar stickers={STICKERS} onPick={onPickSticker} />
+                      <StickerBar onPick={onPickSticker} />
                       {onSetFillImage ? (
                         <div
                           style={{
@@ -2785,54 +2785,76 @@ export function NotesPanel({
 // A grid of built-in inline-SVG stickers; clicking one sets it as the selected node's image (it
 // then flows through the existing node-image render + export pipeline). Lives in the Info panel
 // next to the Markers bar — markers are tiny emoji glyphs, stickers are a larger picture on the node.
-export function StickerBar({
-  stickers,
-  onPick,
-}: {
-  stickers: readonly Sticker[];
-  onPick: (sticker: Sticker) => void;
-}) {
+export function StickerBar({ onPick }: { onPick: (sticker: Sticker) => void }) {
+  const [query, setQuery] = useState("");
+  const stickerBtn = (s: Sticker) => (
+    <button
+      key={s.id}
+      type="button"
+      onClick={() => onPick(s)}
+      title={`Add the ${s.label} sticker to this node`}
+      aria-label={`Add ${s.label} sticker`}
+      style={{
+        width: 30,
+        height: 30,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        border: "1px solid var(--ed-border)",
+        background: "var(--ed-card)",
+        borderRadius: radius.md,
+        cursor: "pointer",
+        padding: 3,
+      }}
+    >
+      <img src={stickerDataUrl(s)} alt="" width={22} height={22} style={{ display: "block" }} />
+    </button>
+  );
+  const grid = (items: Sticker[]) => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px 6px" }}>
+      {items.map(stickerBtn)}
+    </div>
+  );
+  const q = query.trim();
+  const results = q ? searchStickers(q) : [];
   return (
     <>
       <PanelSection>Stickers</PanelSection>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 4,
-          padding: "0 10px 6px",
-        }}
-      >
-        {stickers.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => onPick(s)}
-            title={`Add the ${s.label} sticker to this node`}
-            aria-label={`Add ${s.label} sticker`}
-            style={{
-              width: 30,
-              height: 30,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "1px solid var(--ed-border)",
-              background: "var(--ed-card)",
-              borderRadius: radius.md,
-              cursor: "pointer",
-              padding: 3,
-            }}
-          >
-            <img
-              src={stickerDataUrl(s)}
-              alt=""
-              width={22}
-              height={22}
-              style={{ display: "block" }}
-            />
-          </button>
-        ))}
+      <div style={{ padding: "0 10px 4px" }}>
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Find a sticker…"
+          aria-label="Search stickers"
+          style={{ width: "auto" }}
+        />
       </div>
+      {q ? (
+        results.length > 0 ? (
+          grid(results)
+        ) : (
+          <div style={{ padding: "0 10px 6px", fontSize: fontSize.sm, color: colors.faint }}>
+            No stickers match.
+          </div>
+        )
+      ) : (
+        // No query → browse by category, each under a small heading.
+        stickerCategories().map((g) => (
+          <div key={g.category}>
+            <div
+              style={{
+                padding: "0 10px 2px",
+                fontSize: fontSize.sm,
+                color: colors.muted,
+                fontWeight: fontWeight.semibold,
+              }}
+            >
+              {g.category}
+            </div>
+            {grid(g.stickers)}
+          </div>
+        ))
+      )}
     </>
   );
 }

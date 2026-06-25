@@ -12,6 +12,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   field, so it renders identically on the canvas (CSS) and in the SVG/PNG/PDF export (a shared SVG
   filter), preserving canvas == export.
 
+- **Design gallery thumbnails (theming batch B).** Each design in the Canvas → Design menu now shows a
+  tiny rendered preview — the theme's background + a root dot + three palette branches drawn with the
+  design's connector style — so the looks are distinguishable at a glance instead of by an identical
+  palette icon. Pure `designPreviewModel`.
+
 - **Notes & links polish (MindManager parity batch A).**
   - **Richer note editor** — the note toolbar gains **H1/H2/H3 headings**, **highlight** (`==text==` →
     `<mark>`), a **code block** (` ``` ` fenced), and **checklists** (`- [ ] / - [x]`), on top of the

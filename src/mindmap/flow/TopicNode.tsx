@@ -1,4 +1,4 @@
-import { Handle, type NodeProps, Position } from "@xyflow/react";
+import { Handle, type NodeProps, Position, useStore } from "@xyflow/react";
 import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
@@ -19,6 +19,7 @@ import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
 import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
 import { matchBorderColor } from "./geometry";
+import { showNodeAffordances } from "./nodeChrome";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import {
   TOPIC_SHADOW_CSS,
@@ -250,6 +251,19 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const editRef = useRef<HTMLDivElement>(null);
   // Hover state drives the lift/shadow (#5) and reveals the ＋ add affordances (#1).
   const [hovered, setHovered] = useState(false);
+  // Is more than one node selected? A branch/marquee select would otherwise pop a per-node action bar
+  // + ＋ buttons on EVERY selected node, burying the map — so suppress them in bulk. Reactive: the
+  // selector returns a stable boolean, so a node only re-renders when the count crosses 1 ↔ many.
+  const multiSelected = useStore((s) => {
+    let n = 0;
+    for (const node of s.nodeLookup.values()) {
+      if (node.selected) {
+        n += 1;
+        if (n > 1) return true;
+      }
+    }
+    return false;
+  });
   // Hover-peek: show the note's text in a small card when the 📝 indicator is hovered (read it
   // without opening the inspector). Canvas-only.
   const [peekNote, setPeekNote] = useState(false);
@@ -804,7 +818,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       {/* On-topic hover action bar (#3): quick access to actions otherwise only in the inspector —
           add/open a note and add/cycle priority. Task & collapse already have dedicated hover
           affordances (the left checkbox / the bottom-right toggle), so the bar focuses on these two. */}
-      {(hovered || selected) && !isEditing ? (
+      {showNodeAffordances(hovered, selected, multiSelected, isEditing) ? (
         <div className="mm-node-bar nodrag nopan">
           <button
             type="button"
@@ -830,7 +844,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           </button>
         </div>
       ) : null}
-      {(hovered || selected) && !isEditing ? (
+      {showNodeAffordances(hovered, selected, multiSelected, isEditing) ? (
         <>
           <button
             type="button"

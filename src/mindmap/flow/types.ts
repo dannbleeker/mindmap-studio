@@ -110,6 +110,9 @@ export type EdgeData = {
   /** The map's branch growth weight (fine / regular / bold), stamped on every branch edge so the
    *  canvas + exporter scale line widths identically. Absent = "regular". Branch edges only. */
   branchGrowth?: BranchGrowth;
+  /** How many children share this edge's parent origin (the fan size), so the trunk can thin for dense
+   *  fans and not blob. Branch edges only. */
+  fanCount?: number;
 };
 
 export type TopicNode = Node<TopicData, "topic">;

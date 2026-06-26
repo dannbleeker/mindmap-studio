@@ -11,6 +11,7 @@ import {
   computeAxisByParent,
   crosslinkBezier,
   elbowPath,
+  fanTrunkFactor,
   sideEndpoints,
   taperedRibbonPath,
 } from "../src/mindmap/flow/floating";
@@ -140,6 +141,18 @@ describe("branch geometry", () => {
     expect(branchWidths(1, "fine").trunk).toBeLessThan(branchWidths(1).trunk);
     expect(branchWidths(1, "bold").trunk).toBeGreaterThan(branchWidths(1).trunk);
     expect(branchWidths(1, "bold").tip).toBeGreaterThan(branchWidths(1, "fine").tip);
+  });
+
+  it("thins the trunk for dense fans so the shared origin doesn't blob (≤3 children unchanged)", () => {
+    expect(fanTrunkFactor(undefined)).toBe(1);
+    expect(fanTrunkFactor(3)).toBe(1); // ordinary fan — no change
+    expect(fanTrunkFactor(5)).toBeLessThan(1); // dense fan — thinner trunk
+    expect(fanTrunkFactor(9)).toBe(0.7); // clamped floor
+    // trunk shrinks with fan size; tip (at the child) is untouched
+    expect(branchWidths(1, "regular", 6).trunk).toBeLessThan(branchWidths(1, "regular", 2).trunk);
+    expect(branchWidths(1, "regular", 6).tip).toBe(branchWidths(1, "regular", 2).tip);
+    // a sparse fan (≤3) renders exactly as before this fix — no regression for ordinary maps
+    expect(branchWidths(2, "regular", 3)).toEqual(branchWidths(2, "regular"));
   });
 
   it("branchRender applies branchGrowth to the tapered ribbon AND the uniform stroke (canvas == export)", () => {

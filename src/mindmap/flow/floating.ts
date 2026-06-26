@@ -118,17 +118,33 @@ export function attachSideFor(parent: Box, child: Box, axis: "h" | "v"): AttachS
 }
 
 /** Map-wide branch line-weight multiplier ("growth"): "regular" (or absent) keeps the historical
- *  widths, "fine" thins, "bold" thickens. One source of truth for the canvas + SVG export. */
+ *  widths, "fine" thins, "bold" thickens. One source of truth for the canvas + SVG export. Tamed from
+ *  the original 0.6/1.6 so bold stays distinct without the trunk ballooning into a blob. */
 export function branchGrowthFactor(growth?: BranchGrowth): number {
-  return growth === "fine" ? 0.6 : growth === "bold" ? 1.6 : 1;
+  return growth === "fine" ? 0.72 : growth === "bold" ? 1.3 : 1;
+}
+
+/** Trunk-only shrink when many children fan from ONE shared origin: their wide bases overlap into a
+ *  merged "blob" at the parent, worse the more siblings there are. Thin the trunk past 3 siblings
+ *  (down to 0.7×) so the fan stays legible; tips (at each child) are untouched. ≤3 children → 1× (no
+ *  change for ordinary maps). Pure. */
+export function fanTrunkFactor(fanCount?: number): number {
+  const n = fanCount ?? 0;
+  if (n <= 3) return 1;
+  return Math.max(0.7, 1 - (n - 3) * 0.08);
 }
 
 /** Chunky-trunk → fine-tip half-widths by the child's depth (MindManager weight: mains thick, subs
- *  progressively thinner), scaled by the map's branch-growth weight. */
-export function branchWidths(depth: number, growth?: BranchGrowth): { trunk: number; tip: number } {
+ *  progressively thinner), scaled by the map's branch-growth weight. `fanCount` (the parent's child
+ *  count) thins the trunk for dense fans so the shared origin doesn't blob. */
+export function branchWidths(
+  depth: number,
+  growth?: BranchGrowth,
+  fanCount?: number,
+): { trunk: number; tip: number } {
   const f = branchGrowthFactor(growth);
   return {
-    trunk: Math.max(7.5 - depth * 1.2, 3) * f,
+    trunk: Math.max(7.5 - depth * 1.2, 3) * f * fanTrunkFactor(fanCount),
     tip: Math.max(2.4 - depth * 0.3, 0.9) * f,
   };
 }
@@ -525,6 +541,7 @@ export function branchRender(
     connectorStyle?: ConnectorStyle;
     dash?: "solid" | "dashed" | "dotted";
     branchGrowth?: BranchGrowth;
+    fanCount?: number;
   },
   bow = 0,
 ): BranchRender {
@@ -534,7 +551,7 @@ export function branchRender(
   const effective = cs === "organic" ? (data.elbow ? "elbow" : "taper") : cs;
   if (effective === "taper" && !dashArr) {
     const ep = branchEndpoints(parent, child, attachSide);
-    const { trunk, tip } = branchWidths(data.depth ?? 1, data.branchGrowth);
+    const { trunk, tip } = branchWidths(data.depth ?? 1, data.branchGrowth, data.fanCount);
     return {
       d: taperedRibbonPath(ep.sx, ep.sy, ep.tx, ep.ty, attachSide, trunk, tip, bow),
       fill: color,

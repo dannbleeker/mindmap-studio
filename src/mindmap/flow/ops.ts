@@ -1282,14 +1282,23 @@ export function replaceTopics(
   doc: MindMapDoc,
   query: string,
   replacement: string,
-  scope: { topics?: boolean; notes?: boolean } = {},
+  scope: { topics?: boolean; notes?: boolean; regex?: boolean; matchCase?: boolean } = {},
 ): { doc: MindMapDoc; count: number } {
   if (!query) return { doc, count: 0 };
   // Default to topics (back-compat); callers opt into notes.
   const inTopics = scope.topics ?? true;
   const inNotes = scope.notes ?? false;
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const re = () => new RegExp(escaped, "gi");
+  // `regex` treats the query as a pattern (else it's a literal — special chars escaped); `matchCase`
+  // drops the case-insensitive flag. A malformed pattern → count -1 so the UI can say "invalid regex"
+  // instead of silently doing nothing.
+  const pattern = scope.regex ? query : query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const flags = `g${scope.matchCase ? "" : "i"}`;
+  try {
+    new RegExp(pattern, flags);
+  } catch {
+    return { doc, count: -1 };
+  }
+  const re = () => new RegExp(pattern, flags);
   const next = structuredClone(doc);
   let count = 0;
   const walk = (n: MapNode) => {

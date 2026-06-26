@@ -112,10 +112,12 @@ export interface MindMapHandle {
   bulkToggleSelectedTag: (tag: string) => boolean;
   /** Replace the query across matching topics and/or note bodies (per `scope`, default topics only);
    *  returns the count of fields changed. */
+  /** Replace `query` with `replacement` across topics/notes (per scope). `regex` treats the query as a
+   *  pattern, `matchCase` is case-sensitive. Returns the replacement count, or -1 for an invalid regex. */
   replaceTopics: (
     query: string,
     replacement: string,
-    scope?: { topics?: boolean; notes?: boolean },
+    scope?: { topics?: boolean; notes?: boolean; regex?: boolean; matchCase?: boolean },
   ) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
   setAllExpanded: (expanded: boolean) => void;

@@ -26,6 +26,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Regex + case-sensitive Replace (A1).** The find/replace bar gained a **Match case** ("Aa") and a
+  **Regex** (".*") toggle. With Regex on, the Find box is a pattern (capture groups, `\d+`, etc.);
+  Match case drops the case-insensitive default. A malformed pattern reports "invalid regex" instead of
+  silently doing nothing. Replace still spans topics / notes / both per the scope dropdown.
+
 - **Ctrl/⌘+T opens the selected topic's note** (in the **installed PWA** only — a normal browser tab
   reserves Ctrl+T for a new tab), and hover callouts now name their keyboard shortcut —
   the ＋ buttons read "Add child (Tab)" / "Add sibling (Enter)", the note quick-action reads "Add/Open

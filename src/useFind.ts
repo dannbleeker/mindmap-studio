@@ -12,6 +12,8 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
   const [query, setQuery] = useState("");
   const [replaceWith, setReplaceWith] = useState("");
   const [replaceScope, setReplaceScope] = useState<ReplaceScope>("topics");
+  const [useRegex, setUseRegex] = useState(false);
+  const [matchCase, setMatchCase] = useState(false);
   const [matchInfo, setMatchInfo] = useState("");
   const cursor = useRef({ q: "", i: -1 });
 
@@ -34,9 +36,12 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
     const scope = {
       topics: replaceScope !== "notes",
       notes: replaceScope !== "topics",
+      regex: useRegex,
+      matchCase,
     };
     const n = mapRef.current?.replaceTopics(query, replaceWith, scope) ?? 0;
-    setMatchInfo(n > 0 ? `replaced ${n}` : "no matches");
+    // -1 signals a malformed regex pattern (only possible when `regex` is on).
+    setMatchInfo(n < 0 ? "invalid regex" : n > 0 ? `replaced ${n}` : "no matches");
   }
 
   return {
@@ -46,6 +51,10 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
     setReplaceWith,
     replaceScope,
     setReplaceScope,
+    useRegex,
+    setUseRegex,
+    matchCase,
+    setMatchCase,
     matchInfo,
     runSearch,
     runReplace,

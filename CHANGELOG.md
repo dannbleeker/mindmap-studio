@@ -26,6 +26,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Insert a template as structure under a topic (A4).** The Insert menu gained a **Template** section: pick SWOT, Brainstorm, Lean Canvas, etc. and its branches graft under the selected topic (fresh ids), alongside the existing Map-part inserter. Pure `templateSubtree` / `insertableTemplates` helpers reuse `addSubtreeToSelected`.
+
 - **Ctrl/⌘+T opens the selected topic's note**, and hover callouts now name their keyboard shortcut —
   the ＋ buttons read "Add child (Tab)" / "Add sibling (Enter)", the note quick-action reads "Add/Open
   note (Ctrl/⌘+T)", and the edit hint reads "Double-click or F2 to edit". Added to the shortcuts cheat

@@ -250,6 +250,27 @@ describe("flow project — org-chart elbow stamping + task fields", () => {
     expect(project(plain).edges.find((e) => e.id === "e:r:a")?.data?.branchGrowth).toBeUndefined();
   });
 
+  it("stamps the fan size (parent's child count) on each branch edge so dense fans de-blob", () => {
+    const fdoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "f",
+      title: "F",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", children: [] },
+          { id: "b", topic: "B", children: [] },
+          { id: "c", topic: "C", children: [] },
+        ],
+      },
+    };
+    const { edges } = project(fdoc);
+    // root has 3 children → every root→child edge carries fanCount 3.
+    expect(edges.find((e) => e.id === "e:r:a")?.data?.fanCount).toBe(3);
+    expect(edges.find((e) => e.id === "e:r:c")?.data?.fanCount).toBe(3);
+  });
+
   it("projects the task schedule fields the inline task-info line draws", () => {
     const tdoc: MindMapDoc = {
       schemaVersion: 1,

@@ -21,6 +21,7 @@ const st = (over: Partial<KeyState> = {}): KeyState => ({
   editing: false,
   selectedId: "n1",
   linking: false,
+  pwa: true,
   ...over,
 });
 
@@ -97,6 +98,15 @@ describe("keyIntent", () => {
       [{ key: "a" }, { kind: "typeEdit", id: "n1", seed: "a" }],
     ];
     for (const [e, want] of cases) expect(keyIntent(ev(e), st())).toEqual(want);
+  });
+
+  it("Ctrl/⌘+T opens the note ONLY in the installed PWA (a browser tab reserves it)", () => {
+    expect(keyIntent(ev({ key: "t", ctrlKey: true }), st({ pwa: true }))).toEqual({
+      kind: "openNote",
+      id: "n1",
+    });
+    // Not a PWA → don't claim Ctrl+T; let the browser handle it (returns null here).
+    expect(keyIntent(ev({ key: "t", ctrlKey: true }), st({ pwa: false }))).toBeNull();
   });
 
   it("maps reorder + promote/demote shortcuts (Ctrl/⌘+Shift+↑/↓, Alt+Shift+←/→)", () => {

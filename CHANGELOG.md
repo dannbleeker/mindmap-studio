@@ -12,6 +12,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   background — the canvas bled through and rows overlapped. The cmdk colours now chain
   `--st-* → --ed-* → a literal`, so the panel is opaque in both places.
 
+- **Selecting a branch buried the map under per-node toolbars.** The on-node action bar (📝/⚑) and the
+  ＋ add buttons were shown on every *selected* node, so a branch/marquee select popped them on every
+  node at once — unusable. They're now suppressed whenever 2+ nodes are selected (the shared selection
+  toolbar covers bulk actions); they still appear on hover and on a single selection.
+
 ### Added
 
 - **Theme-driven branch growth weight (theming batch B).** A map-wide **branch "growth"** control

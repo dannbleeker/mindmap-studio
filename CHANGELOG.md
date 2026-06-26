@@ -5,13 +5,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Branch connectors blobbed into thick clumps.** The new "bold" growth weight was too heavy (1.6×)
+  and the Midnight/Sunrise designs silently switched it on, so branches — especially where several
+  children fan from one parent — merged into dark blobs. Tamed the weights (fine 0.72× / bold 1.3×),
+  reverted the Designs to the default "regular" weight (growth stays a manual choice), and added a
+  fan-aware trunk taper that thins the shared origin for dense fans (past 3 children) so it stays
+  legible. Maps with ≤3 children per node and the default weight render exactly as before.
+
 ### Added
 
 - **Theme-driven branch growth weight (theming batch B).** A map-wide **branch "growth"** control
   (Canvas toolbar → Growth: Fine / Regular / Bold) scales every branch line's thickness — the
-  MindManager per-theme line-weight dimension, on top of the existing connector *style*. Each **Design**
-  preset now bundles a growth weight (Blueprint/Diagram fine, Midnight/Sunrise bold), so applying a
-  design picks a coherent weight too. It's a map-wide `meta.branchGrowth` (absent = the historical
+  MindManager per-theme line-weight dimension, on top of the existing connector *style*. It's a
+  map-wide `meta.branchGrowth` (absent = the historical
   "regular" widths — no change for existing maps), threaded through the shared `branchWidths` /
   `branchRender` so the canvas and the SVG/PNG/PDF export render identical line weights. Lossless in
   `.json`.

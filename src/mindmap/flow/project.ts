@@ -104,6 +104,9 @@ export function project(
     // The layout governing the edge INTO this node (= the layout that placed it). Org layouts → the
     // branch renders as a right-angle elbow. A node's own `layout` override governs its children.
     edgeLayout: LayoutKind = kind,
+    // How many children the parent has (the fan size of the edge INTO this node) — thins the trunk for
+    // dense fans so the shared origin doesn't blob.
+    parentFan = 0,
   ): void => {
     // Conditional-formatting *actions* (view-only, like condStyle): rule-applied markers + branch
     // colour. Merged into the projected `icons` / `branchColor` here, so TopicNode AND the SVG export
@@ -175,6 +178,7 @@ export function project(
           elbow: isOrg(edgeLayout),
           connectorStyle,
           branchGrowth,
+          fanCount: parentFan,
           dash: node.lineDash,
         },
       });
@@ -184,17 +188,20 @@ export function project(
     if (node.collapsed || !recurse) return;
     // This node's children are governed by its own layout override, else the layout that placed it.
     const childLayout = (node.layout as LayoutKind | undefined) ?? edgeLayout;
+    // The fan size carried on each child's edge = how many children share this node's origin.
+    const fan = node.children.length;
     for (const child of node.children) {
-      emit(child, node.id, depth + 1, side, nodeColor, floating, false, true, childLayout);
+      emit(child, node.id, depth + 1, side, nodeColor, floating, false, true, childLayout, fan);
     }
   };
 
   const root = doc.root;
+  const rootFan = root.children.length;
   emit(root, undefined, 0, "right", ROOT_COLOR, false, true, false);
   const sides = assignSides(root.children);
   if (!root.collapsed) {
     root.children.forEach((child, i) => {
-      emit(child, root.id, 1, sides[i], pal[i % pal.length], false, false);
+      emit(child, root.id, 1, sides[i], pal[i % pal.length], false, false, true, kind, rootFan);
     });
   }
 

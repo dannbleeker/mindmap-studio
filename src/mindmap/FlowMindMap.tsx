@@ -27,6 +27,7 @@ import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
 import { PRIORITY_LABEL, PRIORITY_LEVELS, cyclePriority } from "../priority";
 import { cycleTaskProgress, nextProgressLevel } from "../progress";
+import { isStandalonePwa } from "../pwa/standalone";
 import { getBranch, setBranch } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
 import { useIsMobile } from "../useIsMobile";
@@ -1091,6 +1092,7 @@ function FlowInner({
           editing: !!editingRef.current,
           selectedId: selectedRef.current,
           linking: !!linkingFromRef.current,
+          pwa: isStandalonePwa(),
         },
       );
       if (!intent) return;

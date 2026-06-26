@@ -274,6 +274,27 @@
   border-color: var(--ed-accent);
   box-shadow: 0 0 0 3px var(--ed-accent-ring);
 }
+/* Find-bar toggles (Match case "Aa", Regex ".*") — square monospace chips that light up when on. */
+.mm-toggle-btn {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 7px;
+  border-radius: 8px;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  color: var(--ed-muted);
+  font-family: var(--ed-font-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.mm-toggle-btn:hover {
+  border-color: var(--ed-accent);
+}
+.mm-toggle-btn.is-on {
+  background: var(--ed-accent-tint);
+  border-color: var(--ed-accent);
+  color: var(--ed-accent);
+}
 
 /* ── Dropdown / popover menu ──────────────────────────────────────────────── */
 .mm-menu-wrap {

@@ -15,6 +15,7 @@ import { sanitizeRich } from "../../io/richText";
 import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
+import { isStandalonePwa } from "../../pwa/standalone";
 import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
 import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
@@ -74,6 +75,10 @@ const chipStyle: CSSProperties = {
 
 // Text colours offered by the inline rich-text mini-toolbar (red / green / blue / amber / ink).
 const RICH_COLORS = ["#e23b3b", "#1b8a5e", "#3f6fb0", "#b5852a", "#111827"];
+
+// The note quick-action's Ctrl/⌘+T shortcut only works in the installed PWA (a browser tab reserves
+// Ctrl+T), so only advertise it there. Evaluated once at load — display-mode is fixed per session.
+const NOTE_SHORTCUT = isStandalonePwa() ? " (Ctrl/⌘+T)" : "";
 
 /** The floating bold/italic/underline + colour bar shown above a topic while it's being edited
  *  (MindManager's inline format bar). Buttons preventDefault on mousedown so clicking them keeps the
@@ -822,8 +827,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         <div className="mm-node-bar nodrag nopan">
           <button
             type="button"
-            title={note?.trim() ? "Open note (Ctrl/⌘+T)" : "Add note (Ctrl/⌘+T)"}
-            aria-label={note?.trim() ? "Open note (Ctrl/⌘+T)" : "Add note (Ctrl/⌘+T)"}
+            title={`${note?.trim() ? "Open note" : "Add note"}${NOTE_SHORTCUT}`}
+            aria-label={`${note?.trim() ? "Open note" : "Add note"}${NOTE_SHORTCUT}`}
             onClick={(e) => {
               e.stopPropagation();
               editing?.openNote(id);

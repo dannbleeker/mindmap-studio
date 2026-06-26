@@ -1130,6 +1130,9 @@ function FlowInner({
         case "delete":
           deleteNodeWithUndo(intent.id);
           break;
+        case "openNote":
+          editingApi.openNote(intent.id);
+          break;
         case "rename":
           startEdit(intent.id);
           break;
@@ -1145,7 +1148,7 @@ function FlowInner({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [apply, undoAction, redoAction, deleteNodeWithUndo, startEdit, focusNodeById]);
+  }, [apply, undoAction, redoAction, deleteNodeWithUndo, startEdit, focusNodeById, editingApi]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 

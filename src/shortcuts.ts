@@ -25,6 +25,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: "Shift + Tab", action: "Outdent (promote one level)" },
       { keys: "F2", action: "Rename the selected topic" },
       { keys: "Type a letter", action: "Start editing the selected topic" },
+      { keys: "Ctrl/⌘ + T", action: "Open the selected topic's note" },
       { keys: "Delete", action: "Delete the topic + its branch (undoable)" },
       { keys: "Ctrl/⌘ + B / I / U", action: "Bold / italic / underline (while editing)" },
       { keys: "Ctrl/⌘ + Z", action: "Undo" },

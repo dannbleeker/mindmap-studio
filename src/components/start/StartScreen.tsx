@@ -35,10 +35,12 @@ export function StartScreen({
   theme,
   onOpen,
   onImportFiles,
+  onCheckForUpdates,
 }: {
   theme: CanvasTheme;
   onOpen: (doc: MindMapDoc, layout?: string) => void;
   onImportFiles: (files: File[]) => void;
+  onCheckForUpdates?: () => void;
 }) {
   const [section, setSection] = useState<StartSection>("start");
   const [cmdk, setCmdk] = useState(false);
@@ -63,8 +65,9 @@ export function StartScreen({
       go: setSection,
       libraryRev: rev,
       onLibraryChange: () => setRev((r) => r + 1),
+      onCheckForUpdates,
     }),
-    [onOpen, onImportFiles, rev],
+    [onOpen, onImportFiles, rev, onCheckForUpdates],
   );
 
   return (
@@ -86,7 +89,7 @@ export function StartScreen({
           {section === "layouts" ? <Layouts ctx={ctx} /> : null}
           {section === "import" ? <ImportView ctx={ctx} /> : null}
           {section === "learn" ? <Learn /> : null}
-          {section === "about" ? <About /> : null}
+          {section === "about" ? <About onCheckForUpdates={onCheckForUpdates} /> : null}
         </div>
       </div>
       {cmdk ? <CommandPalette ctx={ctx} onClose={() => setCmdk(false)} /> : null}

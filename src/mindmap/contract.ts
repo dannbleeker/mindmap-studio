@@ -112,10 +112,12 @@ export interface MindMapHandle {
   bulkToggleSelectedTag: (tag: string) => boolean;
   /** Replace the query across matching topics and/or note bodies (per `scope`, default topics only);
    *  returns the count of fields changed. */
+  /** Replace `query` with `replacement` across topics/notes (per scope). `regex` treats the query as a
+   *  pattern, `matchCase` is case-sensitive. Returns the replacement count, or -1 for an invalid regex. */
   replaceTopics: (
     query: string,
     replacement: string,
-    scope?: { topics?: boolean; notes?: boolean },
+    scope?: { topics?: boolean; notes?: boolean; regex?: boolean; matchCase?: boolean },
   ) => number;
   /** Collapse (false) or expand (true) every branch below the root. */
   setAllExpanded: (expanded: boolean) => void;
@@ -178,6 +180,10 @@ export interface MindMapHandle {
   /** Restructure the central tree from an outline drag: place `dragId` before/after `targetId`, or as
    *  its child. No-op on a self/cycle/root drag. */
   moveOutlineNode: (dragId: string, targetId: string, where: "before" | "after" | "child") => void;
+  /** Add an empty child / sibling to `id` and return the new node's id (or null if it couldn't) — for
+   *  the Outline panel's rapid keyboard entry, which re-opens its inline editor on the returned id. */
+  addOutlineChild: (id: string) => string | null;
+  addOutlineSibling: (id: string) => string | null;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
   /** Set the map-wide accent colour — the default for relationships + boundaries ("" clears it). */

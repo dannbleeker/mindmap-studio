@@ -61,6 +61,42 @@ describe("OutlinePanel", () => {
     expect(screen.getByRole("button", { name: /Build/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Research/ })).toBeNull();
   });
+
+  it("rapid keyboard entry: Enter adds a sibling, Tab a child, Shift+Tab outdents (A3)", async () => {
+    const onRename = vi.fn();
+    // Returning ids that DON'T exist in the tree would unmount the editor; map them back to a real row
+    // ("a") so the editor stays mounted and we can chain the next key.
+    const onAddSibling = vi.fn(() => "a");
+    const onAddChild = vi.fn(() => "a");
+    const onIndent = vi.fn();
+    render(
+      <OutlinePanel
+        root={sampleRoot()}
+        filter=""
+        onFilterChange={noop}
+        onPick={noop}
+        onRename={onRename}
+        onIndent={onIndent}
+        onMove={noop}
+        onAddChild={onAddChild}
+        onAddSibling={onAddSibling}
+      />,
+    );
+    // Double-click "Research" → inline editor opens.
+    await userEvent.dblClick(screen.getByRole("button", { name: /Research/ }));
+    const input = screen.getByLabelText("Rename topic");
+    // Enter commits the rename + adds a sibling, hopping the editor to the new node.
+    fireEvent.change(input, { target: { value: "Research X" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onRename).toHaveBeenCalledWith("a", "Research X");
+    expect(onAddSibling).toHaveBeenCalledWith("a");
+    // Editor stayed open (mapped back to "a") — Tab adds a child.
+    fireEvent.keyDown(screen.getByLabelText("Rename topic"), { key: "Tab" });
+    expect(onAddChild).toHaveBeenCalledWith("a");
+    // Shift+Tab outdents the current node.
+    fireEvent.keyDown(screen.getByLabelText("Rename topic"), { key: "Tab", shiftKey: true });
+    expect(onIndent).toHaveBeenCalledWith("a", "out");
+  });
 });
 
 describe("MarkerTagIndex", () => {

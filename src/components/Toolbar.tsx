@@ -136,6 +136,10 @@ export interface ToolbarFind {
   setReplaceWith: (value: string) => void;
   replaceScope: "topics" | "notes" | "both";
   setReplaceScope: (value: "topics" | "notes" | "both") => void;
+  useRegex: boolean;
+  setUseRegex: (value: boolean) => void;
+  matchCase: boolean;
+  setMatchCase: (value: boolean) => void;
   matchInfo: string;
   runSearch: (event: FormEvent) => void;
   runReplace: () => void;
@@ -430,6 +434,26 @@ export function Toolbar({
             <option value="notes">Notes</option>
             <option value="both">Both</option>
           </select>
+          <button
+            type="button"
+            className={`mm-toggle-btn${find.matchCase ? " is-on" : ""}`}
+            aria-pressed={find.matchCase}
+            title="Match case"
+            aria-label="Match case"
+            onClick={() => find.setMatchCase(!find.matchCase)}
+          >
+            Aa
+          </button>
+          <button
+            type="button"
+            className={`mm-toggle-btn${find.useRegex ? " is-on" : ""}`}
+            aria-pressed={find.useRegex}
+            title="Use regular expression"
+            aria-label="Use regular expression"
+            onClick={() => find.setUseRegex(!find.useRegex)}
+          >
+            .*
+          </button>
           <TBtn
             label="Replace the find text in every match (topics and/or notes per scope)"
             text="Replace all"

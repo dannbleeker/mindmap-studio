@@ -1328,6 +1328,30 @@ describe("flow ops — groupBranch + replaceTopics", () => {
     expect(findAnyNode(doc, "f")?.note).toBe("an Pear"); // and its note
     expect(count).toBe(2);
   });
+
+  it("replaceTopics matchCase only replaces exact-case occurrences (#A1)", () => {
+    const d = structuredClone(base());
+    const a = findNode(d, "a");
+    if (a) a.topic = "Aa aA";
+    // case-insensitive (default): every a/A in the node becomes X
+    expect(findNode(replaceTopics(d, "a", "X").doc, "a")?.topic).toBe("XX XX");
+    // matchCase: only the lowercase "a" occurrences are replaced
+    expect(findNode(replaceTopics(d, "a", "X", { matchCase: true }).doc, "a")?.topic).toBe("AX XA");
+  });
+
+  it("replaceTopics regex treats the query as a pattern; invalid pattern → count -1 (#A1)", () => {
+    const d = structuredClone(base());
+    const a = findNode(d, "a");
+    if (a) a.topic = "a1b2c3";
+    // \d+ replaced with "-" → "a-b-c-" (regex on)
+    expect(findNode(replaceTopics(d, "\\d+", "-", { regex: true }).doc, "a")?.topic).toBe("a-b-c-");
+    // without regex, "\d+" is literal → no match
+    expect(replaceTopics(d, "\\d+", "-").count).toBe(0);
+    // a malformed pattern is reported as -1 (the UI shows "invalid regex"), doc untouched
+    const bad = replaceTopics(d, "(", "x", { regex: true });
+    expect(bad.count).toBe(-1);
+    expect(bad.doc).toBe(d);
+  });
 });
 
 describe("flow ops — cross-links (relationships)", () => {

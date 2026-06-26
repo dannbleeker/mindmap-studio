@@ -13,6 +13,7 @@ export type KeyIntent =
   | { kind: "moveUp"; id: string }
   | { kind: "moveDown"; id: string }
   | { kind: "delete"; id: string }
+  | { kind: "openNote"; id: string }
   | { kind: "rename"; id: string }
   | { kind: "typeEdit"; id: string; seed: string }
   | { kind: "selectDir"; id: string; dir: "up" | "down" | "left" | "right" }
@@ -73,6 +74,9 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
   if (e.key === "Tab" && !e.shiftKey) return { kind: "addChild", id };
   if (e.key === "Tab" && e.shiftKey) return { kind: "outdent", id };
   if (e.key === "Delete") return { kind: "delete", id };
+  // Ctrl/⌘+T → open the selected topic's note (some browsers reserve Ctrl+T for a new tab; where it
+  // reaches the page we preventDefault it).
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "t") return { kind: "openNote", id };
   if (e.key === "F2") return { kind: "rename", id };
   // Type-to-edit (MindManager-style): a single printable char starts editing with that char as the seed.
   if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey)

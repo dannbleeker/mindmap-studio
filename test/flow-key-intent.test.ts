@@ -86,6 +86,14 @@ describe("keyIntent", () => {
       ],
       [{ key: "Delete" }, { kind: "delete", id: "n1" }],
       [{ key: "F2" }, { kind: "rename", id: "n1" }],
+      [
+        { key: "t", ctrlKey: true },
+        { kind: "openNote", id: "n1" },
+      ],
+      [
+        { key: "T", metaKey: true },
+        { kind: "openNote", id: "n1" },
+      ],
       [{ key: "a" }, { kind: "typeEdit", id: "n1", seed: "a" }],
     ];
     for (const [e, want] of cases) expect(keyIntent(ev(e), st())).toEqual(want);

@@ -444,9 +444,9 @@ describe("FlowMindMap canvas", () => {
     sel("a");
     pop("Rename"); // editingId = a
     sel("b");
-    pop("Add child");
+    pop("Add child (Tab)");
     sel("a");
-    pop("Add sibling");
+    pop("Add sibling (Enter)");
     sel("b");
     pop("Delete");
     // Pane click clears the selection.
@@ -458,12 +458,12 @@ describe("FlowMindMap canvas", () => {
   it("reveals the on-node ＋ add affordances on hover (#1) and wires them to add child/sibling", () => {
     const { container, onChange } = mount();
     // Nothing hovered or selected → no ＋.
-    expect(screen.queryByRole("button", { name: "Add child" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Add child/ })).toBeNull();
     // Hovering a node reveals the ＋ child / ＋ sibling affordances (re-homed off the popover).
     const inner = nodeEl(container, "b").firstElementChild as HTMLElement;
     run(() => fireEvent.mouseOver(inner));
-    const addChildBtn = screen.getByRole("button", { name: "Add child" });
-    expect(screen.getByRole("button", { name: "Add sibling" })).toBeTruthy();
+    const addChildBtn = screen.getByRole("button", { name: /Add child/ });
+    expect(screen.getByRole("button", { name: /Add sibling/ })).toBeTruthy();
     // Clicking ＋ adds a child and drops straight into editing it.
     run(() => fireEvent.click(addChildBtn));
     expect(onChange).toHaveBeenCalled();
@@ -474,11 +474,11 @@ describe("FlowMindMap canvas", () => {
     const onOpenNote = vi.fn();
     const { container, onChange } = mount(baseDoc(), { onOpenNote });
     // Nothing hovered → no action bar.
-    expect(screen.queryByRole("button", { name: "Add note" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Add note/ })).toBeNull();
     // Hovering a note-less, priority-less node reveals the add-note + add-priority quick-actions.
     const inner = nodeEl(container, "b").firstElementChild as HTMLElement;
     run(() => fireEvent.mouseOver(inner));
-    const noteBtn = screen.getByRole("button", { name: "Add note" });
+    const noteBtn = screen.getByRole("button", { name: /Add note/ });
     const prioBtn = screen.getByRole("button", { name: "Add priority" });
     // Add-priority sets a priority on the topic (cyclePriority undefined → High).
     run(() => fireEvent.click(prioBtn));

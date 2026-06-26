@@ -808,8 +808,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         <div className="mm-node-bar nodrag nopan">
           <button
             type="button"
-            title={note?.trim() ? "Open note" : "Add note"}
-            aria-label={note?.trim() ? "Open note" : "Add note"}
+            title={note?.trim() ? "Open note (Ctrl/⌘+T)" : "Add note (Ctrl/⌘+T)"}
+            aria-label={note?.trim() ? "Open note (Ctrl/⌘+T)" : "Add note (Ctrl/⌘+T)"}
             onClick={(e) => {
               e.stopPropagation();
               editing?.openNote(id);
@@ -835,8 +835,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           <button
             type="button"
             className="mm-node-add nodrag nopan"
-            title="Add child"
-            aria-label="Add child"
+            title="Add child (Tab)"
+            aria-label="Add child (Tab)"
             onClick={(e) => {
               e.stopPropagation();
               editing?.addChild(id);
@@ -856,8 +856,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             <button
               type="button"
               className="mm-node-add nodrag nopan"
-              title="Add sibling"
-              aria-label="Add sibling"
+              title="Add sibling (Enter)"
+              aria-label="Add sibling (Enter)"
               onClick={(e) => {
                 e.stopPropagation();
                 editing?.addSibling(id);
@@ -877,7 +877,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         </>
       ) : null}
       {hovered && !isEditing && !editHintSeen ? (
-        <span className="mm-node-hint nodrag nopan">Double-click to edit</span>
+        <span className="mm-node-hint nodrag nopan">Double-click or F2 to edit</span>
       ) : null}
     </div>
   );

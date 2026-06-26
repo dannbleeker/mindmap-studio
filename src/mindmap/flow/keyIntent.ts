@@ -26,6 +26,9 @@ export interface KeyState {
   selectedId: string | null;
   /** A relationship link is being drawn (Escape cancels it). */
   linking: boolean;
+  /** Running as an installed PWA (standalone). Gates browser-reserved shortcuts like Ctrl/⌘+T, which
+   *  only reach the page in standalone mode (a normal tab hands them to the browser). */
+  pwa: boolean;
 }
 
 /** The minimal event shape keyIntent reads (a real KeyboardEvent satisfies it; tests pass a literal). */
@@ -74,9 +77,10 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
   if (e.key === "Tab" && !e.shiftKey) return { kind: "addChild", id };
   if (e.key === "Tab" && e.shiftKey) return { kind: "outdent", id };
   if (e.key === "Delete") return { kind: "delete", id };
-  // Ctrl/⌘+T → open the selected topic's note (some browsers reserve Ctrl+T for a new tab; where it
-  // reaches the page we preventDefault it).
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "t") return { kind: "openNote", id };
+  // Ctrl/⌘+T → open the selected topic's note. Only in the installed PWA: a normal browser tab
+  // reserves Ctrl+T for "new tab" (the page can't intercept it), so we don't claim it there.
+  if (state.pwa && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "t")
+    return { kind: "openNote", id };
   if (e.key === "F2") return { kind: "rename", id };
   // Type-to-edit (MindManager-style): a single printable char starts editing with that char as the seed.
   if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey)

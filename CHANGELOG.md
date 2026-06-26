@@ -31,10 +31,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   Match case drops the case-insensitive default. A malformed pattern reports "invalid regex" instead of
   silently doing nothing. Replace still spans topics / notes / both per the scope dropdown.
 
-- **Ctrl/⌘+T opens the selected topic's note**, and hover callouts now name their keyboard shortcut —
+- **Ctrl/⌘+T opens the selected topic's note** (in the **installed PWA** only — a normal browser tab
+  reserves Ctrl+T for a new tab), and hover callouts now name their keyboard shortcut —
   the ＋ buttons read "Add child (Tab)" / "Add sibling (Enter)", the note quick-action reads "Add/Open
   note (Ctrl/⌘+T)", and the edit hint reads "Double-click or F2 to edit". Added to the shortcuts cheat
-  sheet. (Note: some browsers reserve Ctrl+T for a new tab; it always works in the installed PWA.)
+  sheet.
 
 - **Theme-driven branch growth weight (theming batch B).** A map-wide **branch "growth"** control
   (Canvas toolbar → Growth: Fine / Regular / Bold) scales every branch line's thickness — the

@@ -26,6 +26,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Rapid keyboard entry in the Outline panel (A3).** While editing a row inline, **Enter** adds a
+  sibling, **Tab** a child, and **Shift+Tab** outdents — each hops the inline editor straight onto the
+  new topic, so you can build a whole branch from the keyboard without leaving the panel (mirrors the
+  canvas's Enter/Tab/Shift+Tab). The panel was already double-click-rename + drag-reorder + ◂▸ indent.
+
 - **Ctrl/⌘+T opens the selected topic's note**, and hover callouts now name their keyboard shortcut —
   the ＋ buttons read "Add child (Tab)" / "Add sibling (Enter)", the note quick-action reads "Add/Open
   note (Ctrl/⌘+T)", and the edit hint reads "Double-click or F2 to edit". Added to the shortcuts cheat

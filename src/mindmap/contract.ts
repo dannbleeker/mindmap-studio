@@ -178,6 +178,10 @@ export interface MindMapHandle {
   /** Restructure the central tree from an outline drag: place `dragId` before/after `targetId`, or as
    *  its child. No-op on a self/cycle/root drag. */
   moveOutlineNode: (dragId: string, targetId: string, where: "before" | "after" | "child") => void;
+  /** Add an empty child / sibling to `id` and return the new node's id (or null if it couldn't) — for
+   *  the Outline panel's rapid keyboard entry, which re-opens its inline editor on the returned id. */
+  addOutlineChild: (id: string) => string | null;
+  addOutlineSibling: (id: string) => string | null;
   /** Set the per-map canvas background colour ("" clears it back to the theme default). */
   setBackground: (color: string) => void;
   /** Set the map-wide accent colour — the default for relationships + boundaries ("" clears it). */

@@ -22,8 +22,9 @@ export interface EditingApi {
   addChild: (id: string) => void;
   /** Add a sibling after a node and edit it (the on-node hover ＋ sibling affordance). */
   addSibling: (id: string) => void;
-  /** Leave edit mode without saving. */
-  cancelEdit: () => void;
+  /** Leave edit mode (Escape). `html` is the live editor buffer: an existing node reverts to its
+   *  committed text, but a brand-new node keeps what you typed (or is discarded if still empty). */
+  cancelEdit: (html?: string) => void;
   /** Collapse/expand a node from its toggle. */
   toggleCollapse: (id: string) => void;
   /** Follow a node's hyperlink: jump to a topic (#node=), open a map (#map=), or open a URL. */

@@ -33,6 +33,7 @@ import { todayISO } from "../taskDate";
 import { useIsMobile } from "../useIsMobile";
 import {
   type CanvasSession,
+  type DocSnapshot,
   type MindMapHandle,
   type MindMapProps,
   type SelectedOverlay,
@@ -86,6 +87,7 @@ import {
   deleteCallout,
   deleteLink,
   deleteNode,
+  deleteNodes,
   deleteSummary,
   deleteTag,
   detachBranch,
@@ -286,6 +288,7 @@ function FlowInner({
   onDropFilesOnNode,
   onHistory,
   onDelete,
+  onHint,
   initialSession,
   ref,
 }: MindMapProps) {
@@ -372,8 +375,8 @@ function FlowInner({
   // the live prop later would flip ReactFlow's fitView false→true and re-fit away the restored
   // viewport. FlowInner remounts on a real tab/version change (its key), so this stays correct.
   const mountSession = useRef(initialSession);
-  const historyRef = useRef<History<MindMapDoc>>(
-    mountSession.current?.history ?? createHistory<MindMapDoc>(),
+  const historyRef = useRef<History<DocSnapshot>>(
+    mountSession.current?.history ?? createHistory<DocSnapshot>(),
   );
   // Mirror refs: each tracks the latest prop/state so the stable callbacks below read live values
   // without re-creating. (docRef/historyRef/mountSession are NOT mirrors — they hold their own state.)
@@ -391,6 +394,9 @@ function FlowInner({
   const selectedOverlayRef = useLatestRef(selectedOverlay);
   const onSelectOverlayRef = useLatestRef(onSelectOverlay);
   const editingRef = useLatestRef(editingId);
+  // The id of the node just created via an add-and-edit (Tab/Enter/＋), so leaving it empty (Escape or
+  // click-away) can discard it instead of stranding a blank node — MindManager-style. Cleared on commit.
+  const justAddedRef = useRef<string | null>(null);
   const linkingFromRef = useLatestRef(linkingFrom);
   const onChangeRef = useLatestRef(onChange);
   const onSelectRef = useLatestRef(onSelect);
@@ -399,6 +405,7 @@ function FlowInner({
   const onDropFilesOnNodeRef = useLatestRef(onDropFilesOnNode);
   const onHistoryRef = useLatestRef(onHistory);
   const onDeleteRef = useLatestRef(onDelete);
+  const onHintRef = useLatestRef(onHint);
   // On mount, report the (possibly restored) history depths so the chrome's undo/redo buttons match a
   // restored tab session. A fresh canvas reports nothing-to-undo, which is also correct.
   useEffect(() => {
@@ -589,7 +596,11 @@ function FlowInner({
   const apply = useCallback(
     (result: OpResult, edit = false, animate = false) => {
       if (result.doc !== docRef.current) {
-        historyRef.current = record(historyRef.current, docRef.current); // snapshot the old doc
+        // Snapshot the old doc + the anchor that was selected with it, so undo restores the selection.
+        historyRef.current = record(historyRef.current, {
+          doc: docRef.current,
+          anchor: selectedRef.current,
+        });
         reportHistory();
         sync(result.doc, result.selectId, animate);
         onChangeRef.current?.(result.doc);
@@ -600,6 +611,7 @@ function FlowInner({
         if (edit) {
           setEditSeed(null); // a new node seeds with its (empty) topic, not a leftover typed char
           setEditingId(result.selectId);
+          justAddedRef.current = result.selectId; // discardable if left empty (Escape / click-away)
         }
       }
     },
@@ -613,16 +625,24 @@ function FlowInner({
     setEditingId(id);
   }, []);
 
-  // Undo/redo restore a snapshot without recording it.
+  // Undo/redo restore a snapshot (doc + its selection anchor) without recording it. Passing the anchor
+  // as sync's nextSelected re-selects it — and re-fires it to the inspector — so undo restores what was
+  // selected, not just the structure (MindManager-style). The anchor may be absent in the restored doc
+  // (it's just not highlighted then), so this is safe.
   const restore = useCallback(
-    (d: MindMapDoc) => {
-      sync(d);
-      onChangeRef.current?.(d);
+    (snap: DocSnapshot) => {
+      sync(snap.doc, snap.anchor);
+      // selectOnly drives the React selection STATE (not just the imperative ref sync writes) — without
+      // it the state→ref mirror (useLatestRef) reverts the anchor on the next render, so the highlight,
+      // the StatusBar count, and the next keyboard op would all stay on the pre-undo node.
+      selectOnly(snap.anchor);
+      fireSelect(snap.anchor);
+      onChangeRef.current?.(snap.doc);
     },
-    [sync],
+    [sync, selectOnly, fireSelect],
   );
   const undoAction = useCallback(() => {
-    const r = undoHistory(historyRef.current, docRef.current);
+    const r = undoHistory(historyRef.current, { doc: docRef.current, anchor: selectedRef.current });
     if (r) {
       historyRef.current = r.history;
       reportHistory();
@@ -630,13 +650,39 @@ function FlowInner({
     }
   }, [restore, reportHistory]);
   const redoAction = useCallback(() => {
-    const r = redoHistory(historyRef.current, docRef.current);
+    const r = redoHistory(historyRef.current, { doc: docRef.current, anchor: selectedRef.current });
     if (r) {
       historyRef.current = r.history;
       reportHistory();
       restore(r.value);
     }
   }, [restore, reportHistory]);
+
+  // Discard a just-created node that was left empty (no text, no children) — e.g. Tab/Enter spawned it
+  // and the user pressed Escape or clicked away without typing. Removes ONLY that node from the current
+  // doc (so any text committed onto a sibling in the same gesture — e.g. Enter, which commits the prior
+  // node then adds this one — is preserved), then pops the add's snapshot so create+discard nets to
+  // nothing in undo, and re-selects what was selected before the add — the way MindManager drops an
+  // abandoned new topic. Returns false (caller leaves it be) if it isn't empty.
+  const discardJustAdded = useCallback(
+    (id: string): boolean => {
+      const node = findAnyNode(docRef.current, id);
+      if (!node || node.topic.trim() || node.children.length > 0) return false;
+      const r = deleteNode(docRef.current, id);
+      if (r.doc === docRef.current) return false; // couldn't remove (shouldn't happen for a non-root)
+      const past = historyRef.current.past;
+      const anchor = past.length > 0 ? past[past.length - 1].anchor : (r.selectId ?? null);
+      if (past.length > 0)
+        historyRef.current = { past: past.slice(0, -1), future: historyRef.current.future };
+      reportHistory();
+      sync(r.doc, anchor);
+      selectOnly(anchor);
+      fireSelect(anchor);
+      onChangeRef.current?.(r.doc);
+      return true;
+    },
+    [sync, selectOnly, fireSelect, reportHistory],
+  );
 
   // Where a dragged topic would land: the node whose box contains the dragged node's centre (excluding
   // the dragged node + its own subtree), plus WHERE within it — the top quarter inserts the dragged
@@ -780,15 +826,33 @@ function FlowInner({
       // These never commit the node's own text (no inline-edit in flight), unlike commitAndAdd.
       addChild: (id: string) => apply(addChild(docRef.current, id), true),
       addSibling: (id: string) => apply(addSibling(docRef.current, id), true),
-      cancelEdit: () => {
+      // Escape passes the live editor buffer (`html`) so we can tell a typed-but-uncommitted new topic
+      // from an empty one: an existing node just reverts (no commit), a brand-new node keeps what you
+      // typed (commit) or — if still empty — is discarded rather than left as a blank box.
+      cancelEdit: (html?: string) => {
+        const id = editingRef.current;
         setEditingId(null);
         setEditSeed(null);
+        const wasJustAdded = !!id && id === justAddedRef.current;
+        justAddedRef.current = null;
+        if (!id || !wasJustAdded) return; // existing node → plain cancel (its committed text stands)
+        const { rich, plain } = parse(html ?? "");
+        if (!plain.trim()) {
+          discardJustAdded(id);
+          return;
+        }
+        const n = findNode(docRef.current, id);
+        if (changed(n, rich, plain)) apply(setTopicRich(docRef.current, id, rich, plain));
       },
       commitEdit: (id: string, html: string) => {
         setEditingId(null);
         setEditSeed(null);
-        const n = id ? findNode(docRef.current, id) : null;
         const { rich, plain } = parse(html);
+        // Click-away (blur) that leaves a just-created node empty discards it (same as Escape).
+        const wasJustAdded = id === justAddedRef.current;
+        justAddedRef.current = null;
+        if (wasJustAdded && !plain.trim() && discardJustAdded(id)) return;
+        const n = id ? findNode(docRef.current, id) : null;
         if (changed(n, rich, plain)) apply(setTopicRich(docRef.current, id, rich, plain));
       },
       commitAndAdd: (id: string, html: string, what: "sibling" | "child") => {
@@ -832,7 +896,17 @@ function FlowInner({
       // Native browser spell-check on the topic editors (view setting; off by default).
       spellcheck,
     };
-  }, [editingId, editSeed, startEdit, apply, focusNodeById, selectOnly, fireSelect, spellcheck]);
+  }, [
+    editingId,
+    editSeed,
+    startEdit,
+    apply,
+    focusNodeById,
+    selectOnly,
+    fireSelect,
+    spellcheck,
+    discardJustAdded,
+  ]);
 
   // Inline relationship-label editing (double-click a cross-link). Mirrors the topic editing context.
   const linkEditApi = useMemo(
@@ -1068,12 +1142,41 @@ function FlowInner({
     (id: string) => {
       const node = findAnyNode(docRef.current, id);
       const r = deleteNode(docRef.current, id);
-      if (r.doc === docRef.current) return; // no-op: root or not found
+      if (r.doc === docRef.current) {
+        // No-op: the central topic can't be deleted. Tell the user why nothing happened (a missing
+        // node — already gone — is silent; only the root case reaches here with a live node).
+        if (node && id === docRef.current.root.id)
+          onHintRef.current?.("The central topic can't be deleted.");
+        return;
+      }
       apply(r);
       onDeleteRef.current?.(node?.topic?.trim() || "topic", node ? countDescendants(node) : 0);
     },
     [apply],
   );
+
+  // Delete the WHOLE selection (every selected node's branch) as one undoable edit — the Delete key
+  // and the inspector's Delete both route here. A single selection keeps the original per-topic
+  // "… deleted — Undo" wording; a multi-select reports "N topics". Returns false if nothing's selected.
+  const deleteSelectionWithUndo = useCallback((): boolean => {
+    const ids = [...selectedIdsRef.current];
+    const list = ids.length > 0 ? ids : selectedRef.current ? [selectedRef.current] : [];
+    if (list.length === 0) return false;
+    if (list.length === 1) {
+      deleteNodeWithUndo(list[0]);
+      return true;
+    }
+    const r = deleteNodes(docRef.current, list);
+    if (r.doc === docRef.current) {
+      // Every selected id was the root / already gone (e.g. only the central topic was selected).
+      if (list.includes(docRef.current.root.id))
+        onHintRef.current?.("The central topic can't be deleted.");
+      return true;
+    }
+    apply(r);
+    onDeleteRef.current?.(`${r.removed} topic${r.removed === 1 ? "" : "s"}`, 0);
+    return true;
+  }, [apply, deleteNodeWithUndo]);
 
   // Keyboard tree-building (when a node is selected and we're not inline-editing or in a field). The
   // pure key→intent mapping lives in flow/keyIntent.ts; here we only wire the listener + dispatch.
@@ -1130,7 +1233,7 @@ function FlowInner({
           apply(moveSibling(docRef.current, intent.id, "down"));
           break;
         case "delete":
-          deleteNodeWithUndo(intent.id);
+          deleteSelectionWithUndo();
           break;
         case "openNote":
           editingApi.openNote(intent.id);
@@ -1150,7 +1253,15 @@ function FlowInner({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [apply, undoAction, redoAction, deleteNodeWithUndo, startEdit, focusNodeById, editingApi]);
+  }, [
+    apply,
+    undoAction,
+    redoAction,
+    deleteSelectionWithUndo,
+    startEdit,
+    focusNodeById,
+    editingApi,
+  ]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 
@@ -1422,7 +1533,7 @@ function FlowInner({
         apply({ doc: res.doc });
       },
       addChildToSelected: () => withSelected((id) => apply(addChild(docRef.current, id), true)),
-      deleteSelected: () => withSelected((id) => deleteNodeWithUndo(id)),
+      deleteSelected: () => deleteSelectionWithUndo(),
       undo: undoAction,
       redo: redoAction,
       // Relationship (cross-link) edits — applied to the selected edge (false if none selected).
@@ -1482,7 +1593,7 @@ function FlowInner({
       clearOverlaySelection,
       fireSelectOverlay,
       focusNodeById,
-      deleteNodeWithUndo,
+      deleteSelectionWithUndo,
       undoAction,
       redoAction,
     ],

@@ -19,6 +19,7 @@ import {
   deleteBoundary,
   deleteLink,
   deleteNode,
+  deleteNodes,
   deleteSummary,
   deleteTag,
   detachBranch,
@@ -180,6 +181,40 @@ describe("flow ops — structural", () => {
 
   it("deleteNode refuses to delete the root", () => {
     expect(deleteNode(base(), "r").doc.root.id).toBe("r");
+  });
+
+  it("deleteNodes removes every selected subtree as one edit and counts the top-level topics", () => {
+    const r = deleteNodes(base(), ["a", "b"]);
+    expect(findNode(r.doc, "a")).toBeNull();
+    expect(findNode(r.doc, "b")).toBeNull();
+    expect(kids(r.doc, "r")).toEqual([]);
+    expect(r.removed).toBe(2);
+    expect(r.doc.links).toEqual([]); // a1→b pruned with its endpoints
+    expect(r.doc.boundaries).toBeUndefined(); // a1,a2 gone → boundary dropped
+  });
+
+  it("deleteNodes absorbs a descendant of another selected node (counts once)", () => {
+    const r = deleteNodes(base(), ["a", "a1"]); // a1 is inside a
+    expect(findNode(r.doc, "a")).toBeNull();
+    expect(r.removed).toBe(1);
+    // order-independent: child-before-parent collapses the same way
+    expect(deleteNodes(base(), ["a1", "a"]).removed).toBe(1);
+  });
+
+  it("deleteNodes skips the root and selects a surviving node", () => {
+    const r = deleteNodes(base(), ["r", "a"]);
+    expect(r.doc.root.id).toBe("r"); // root never deleted
+    expect(findNode(r.doc, "a")).toBeNull();
+    expect(r.removed).toBe(1);
+    expect(findAnyNode(r.doc, r.selectId ?? "")).not.toBeNull(); // selection survives
+  });
+
+  it("deleteNodes is a no-op when only the root (or nothing) is selected", () => {
+    const d = base();
+    const r = deleteNodes(d, ["r"]);
+    expect(r.doc).toBe(d); // unchanged: same reference, nothing removed
+    expect(r.removed).toBe(0);
+    expect(deleteNodes(base(), []).removed).toBe(0);
   });
 
   it("reparent moves a subtree and guards against cycles", () => {

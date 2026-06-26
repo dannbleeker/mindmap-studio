@@ -224,6 +224,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     isRoot,
     depth,
     branchColor,
+    tipLeft,
     collapsed,
     hasChildren,
     hiddenCount,
@@ -619,7 +620,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                   editing?.commitAndAdd(id, html, "child");
                 } else if (e.key === "Escape") {
                   e.preventDefault();
-                  editing?.cancelEdit();
+                  editing?.cancelEdit(html);
                 }
               }}
               onBlur={() => editing?.commitEdit(id, editRef.current?.innerHTML ?? "")}
@@ -799,7 +800,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           }}
           style={{
             position: "absolute",
-            right: -9,
+            // Leaf-facing edge: left for a left-growing branch (two-sided left half / all-left), else
+            // right — so the toggle sits at the branch tip like MindManager, not toward the root.
+            ...(tipLeft ? { left: -9 } : { right: -9 }),
             bottom: -9,
             width: 18,
             height: 18,

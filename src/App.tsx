@@ -1474,6 +1474,7 @@ export function App() {
                     action: { label: "Undo", run: () => mapRef.current?.undo() },
                   });
                 }}
+                onHint={showHint}
               />
               {/* First-run tips (#13) — overlays the canvas for a brand-new user; gone after the
                   first edit or an explicit dismiss. */}

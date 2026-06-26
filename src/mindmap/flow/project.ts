@@ -122,6 +122,11 @@ export function project(
     const icons = actions.icons.length
       ? [...(node.icons ?? []), ...actions.icons.filter((ic) => !node.icons?.includes(ic))]
       : node.icons;
+    // This node's children are governed by its own layout override, else the layout that placed it.
+    // A subtree that grows LEFT (the two-sided map's left half, or an all-left layout) wants its
+    // collapse toggle on the left (leaf-facing) edge — MindManager-style.
+    const childLayout = (node.layout as LayoutKind | undefined) ?? edgeLayout;
+    const tipLeft = childLayout === "left" || (childLayout === "side" && side === "left");
     nodes.push({
       id: node.id,
       type: "topic",
@@ -145,6 +150,7 @@ export function project(
         depth,
         branchColor: nodeColor,
         side,
+        tipLeft: tipLeft || undefined,
         collapsed: Boolean(node.collapsed),
         hasChildren: node.children.length > 0,
         hiddenCount: node.collapsed ? node.children.length : undefined,
@@ -186,8 +192,7 @@ export function project(
     // Collapsed → keep the node (with hasChildren) but omit its descendants. The root is
     // emitted with recurse=false so its children are emitted once, per-branch (colour/side).
     if (node.collapsed || !recurse) return;
-    // This node's children are governed by its own layout override, else the layout that placed it.
-    const childLayout = (node.layout as LayoutKind | undefined) ?? edgeLayout;
+    // `childLayout` (computed above for the toggle side) also governs this node's children's edges.
     // The fan size carried on each child's edge = how many children share this node's origin.
     const fan = node.children.length;
     for (const child of node.children) {

@@ -5,6 +5,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **⌘K command palette was unreadable in the editor.** The palette's styles pulled colours from
+  `--st-*` tokens defined only on the Start screen (`.start`), so when opened in the editor it had no
+  background — the canvas bled through and rows overlapped. The cmdk colours now chain
+  `--st-* → --ed-* → a literal`, so the panel is opaque in both places.
+
 ### Added
 
 - **Theme-driven branch growth weight (theming batch B).** A map-wide **branch "growth"** control

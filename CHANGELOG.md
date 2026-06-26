@@ -26,6 +26,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Rapid keyboard entry in the Outline panel (A3).** While editing a row inline, **Enter** adds a
+  sibling, **Tab** a child, and **Shift+Tab** outdents — each hops the inline editor straight onto the
+  new topic, so you can build a whole branch from the keyboard without leaving the panel (mirrors the
+  canvas's Enter/Tab/Shift+Tab). The panel was already double-click-rename + drag-reorder + ◂▸ indent.
+
 - **Regex + case-sensitive Replace (A1).** The find/replace bar gained a **Match case** ("Aa") and a
   **Regex** (".*") toggle. With Regex on, the Find box is a pattern (capture groups, `\d+`, etc.);
   Match case drops the case-insensitive default. A malformed pattern reports "invalid regex" instead of

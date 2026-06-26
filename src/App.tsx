@@ -1303,6 +1303,8 @@ export function App() {
                 onMove={(dragId, targetId, where) =>
                   mapRef.current?.moveOutlineNode(dragId, targetId, where)
                 }
+                onAddChild={(id) => mapRef.current?.addOutlineChild(id) ?? null}
+                onAddSibling={(id) => mapRef.current?.addOutlineSibling(id) ?? null}
               />
             )}
             {panels.indexOpen && (

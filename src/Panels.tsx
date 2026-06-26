@@ -409,6 +409,8 @@ export function OutlinePanel({
   onRename,
   onIndent,
   onMove,
+  onAddChild,
+  onAddSibling,
 }: {
   root: MapNode;
   filter: string;
@@ -423,6 +425,10 @@ export function OutlinePanel({
   onIndent?: (id: string, dir: "in" | "out") => void;
   /** Drag-reorder: drop `dragId` before/after `targetId`, or nest it as a child. */
   onMove?: (dragId: string, targetId: string, where: "before" | "child" | "after") => void;
+  /** Rapid keyboard entry: add a child / sibling and return the new node's id (so the inline editor
+   *  hops to it). Tab = child, Enter = sibling while editing a row. */
+  onAddChild?: (id: string) => string | null;
+  onAddSibling?: (id: string) => string | null;
 }) {
   const editable = !!(onRename && onIndent && onMove);
   const q = filter.trim().toLowerCase();
@@ -444,6 +450,22 @@ export function OutlinePanel({
     if (editId && onRename) onRename(editId, draft.trim());
     setEditId(null);
   };
+  // Rapid keyboard entry while editing a row: commit the rename, then add a sibling/child (Enter/Tab)
+  // and hop the inline editor to the new node — or outdent the current one (Shift+Tab). Keeps your
+  // hands on the keyboard, mirroring the canvas's Enter/Tab/Shift+Tab.
+  const commitThen = (action: "sibling" | "child" | "outdent") => {
+    const id = editId;
+    if (!id) return;
+    if (onRename) onRename(id, draft.trim());
+    if (action === "outdent") {
+      onIndent?.(id, "out"); // the node keeps its id — stay in its editor
+      return;
+    }
+    const newId = action === "child" ? onAddChild?.(id) : onAddSibling?.(id);
+    if (newId) startEdit(newId, "");
+    else setEditId(null);
+  };
+  const rapid = !!(onAddChild && onAddSibling);
 
   return (
     <Panel>
@@ -507,8 +529,14 @@ export function OutlinePanel({
                   onChange={(e) => setDraft(e.target.value)}
                   onBlur={commitEdit}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") commitEdit();
-                    else if (e.key === "Escape") setEditId(null);
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (rapid) commitThen("sibling");
+                      else commitEdit();
+                    } else if (e.key === "Tab" && rapid) {
+                      e.preventDefault();
+                      commitThen(e.shiftKey ? "outdent" : "child");
+                    } else if (e.key === "Escape") setEditId(null);
                   }}
                   aria-label="Rename topic"
                   style={{ ...inputStyle, flex: 1, margin: "1px 6px", padding: "2px 6px" }}

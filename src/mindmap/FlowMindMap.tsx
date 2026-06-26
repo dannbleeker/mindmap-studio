@@ -1373,6 +1373,16 @@ function FlowInner({
         apply(dir === "in" ? indent(docRef.current, id) : outdent(docRef.current, id)),
       moveOutlineNode: (dragId, targetId, where) =>
         apply(moveInTree(docRef.current, dragId, targetId, where)),
+      addOutlineChild: (id) => {
+        const res = addChild(docRef.current, id);
+        if (res.selectId) apply(res);
+        return res.selectId ?? null;
+      },
+      addOutlineSibling: (id) => {
+        const res = addSibling(docRef.current, id);
+        if (res.selectId) apply(res);
+        return res.selectId ?? null;
+      },
       setBackground: (color) => apply(setBackground(docRef.current, color)),
       setAccentColor: (color) => apply(setAccentColor(docRef.current, color)),
       setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),

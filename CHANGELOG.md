@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **⌘K command palette was unreadable in the editor.** The palette's styles pulled colours from
+  `--st-*` tokens defined only on the Start screen (`.start`), so when opened in the editor it had no
+  background — the canvas bled through and rows overlapped. The cmdk colours now chain
+  `--st-* → --ed-* → a literal`, so the panel is opaque in both places.
+
+- **Selecting a branch buried the map under per-node toolbars.** The on-node action bar (📝/⚑) and the
+  ＋ add buttons were shown on every *selected* node, so a branch/marquee select popped them on every
+  node at once — unusable. They're now suppressed whenever 2+ nodes are selected (the shared selection
+  toolbar covers bulk actions); they still appear on hover and on a single selection.
+
 - **Branch connectors blobbed into thick clumps.** The new "bold" growth weight was too heavy (1.6×)
   and the Midnight/Sunrise designs silently switched it on, so branches — especially where several
   children fan from one parent — merged into dark blobs. Tamed the weights (fine 0.72× / bold 1.3×),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildTemplate, templates } from "../src/templates";
+import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../src/templates";
 
 // templates.ts was on the dashboard's least-covered list — pure logic, worth pinning.
 
@@ -98,5 +98,19 @@ describe("buildTemplate", () => {
 
   it("mints a fresh id per build (no shared reference)", () => {
     expect(buildTemplate("blank").id).not.toBe(buildTemplate("blank").id);
+  });
+});
+
+describe("insert-structure helpers (A4)", () => {
+  it("templateSubtree returns a template's top branches (the root is dropped)", () => {
+    expect(templateSubtree("swot").map((n) => n.topic)).toEqual(
+      buildTemplate("swot").root.children.map((n) => n.topic),
+    );
+    expect(templateSubtree("swot")).toHaveLength(4);
+  });
+
+  it("insertableTemplates excludes the empty Blank template", () => {
+    expect(insertableTemplates.some((t) => t.id === "blank")).toBe(false);
+    expect(insertableTemplates.length).toBe(templates.length - 1);
   });
 });

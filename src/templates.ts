@@ -240,3 +240,12 @@ export const templates: MapTemplate[] = [
 export function buildTemplate(id: string): MindMapDoc {
   return (templates.find((t) => t.id === id) ?? templates[0]).build();
 }
+
+/** A template's top branches as a graftable subtree — for "Insert ▸ Template" (insert the structure
+ *  under the selected topic). Fresh ids are assigned by addSubtree when grafted; the root is dropped. */
+export function templateSubtree(id: string): MapNode[] {
+  return buildTemplate(id).root.children;
+}
+
+/** Templates worth inserting as a structure (everything except the empty "Blank"). */
+export const insertableTemplates: MapTemplate[] = templates.filter((t) => t.id !== "blank");

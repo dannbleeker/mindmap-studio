@@ -10,7 +10,7 @@ import { canvasThemes } from "../mindmap/theme";
 import type { CanvasTheme } from "../mindmap/theme";
 import type { BackdropKind, BranchGrowth, MindMapDoc } from "../model/types";
 import type { MapSummary } from "../store/mapStore";
-import { buildTemplate, templates } from "../templates";
+import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../templates";
 import { EditorIcon, type EditorIconName } from "./EditorIcons";
 
 // A tiny themed thumbnail for a design in the gallery (#5): the design's background, a root dot, and
@@ -933,6 +933,21 @@ export function Toolbar({
                       const part = buildMapPart(p.id);
                       const ok = part ? m()?.addSubtreeToSelected(part) : false;
                       showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");
+                    }}
+                  />
+                ))}
+                <MenuSeparator />
+                <MenuLabel>Template (insert structure under selected)</MenuLabel>
+                {insertableTemplates.map((t) => (
+                  <MenuItem
+                    key={t.id}
+                    icon={mi("plus")}
+                    label={t.name}
+                    disabled={!canvas.selected}
+                    title={canvas.selected ? undefined : "Select a topic first to insert under it"}
+                    onSelect={() => {
+                      const ok = m()?.addSubtreeToSelected(templateSubtree(t.id)) ?? false;
+                      showHint(ok ? `Inserted the ${t.name} structure.` : "Select a topic first.");
                     }}
                   />
                 ))}

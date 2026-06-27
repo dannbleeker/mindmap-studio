@@ -269,6 +269,79 @@ describe("FlowMindMap canvas", () => {
     expect(onDelete).toHaveBeenCalledWith("Beta", 0);
   });
 
+  it("deleting the central root is refused with a hint, not a silent no-op", () => {
+    const onHint = vi.fn();
+    const { h, onChange, onDelete } = mount(baseDoc(), { onHint });
+    run(() => h.focusNode("root"));
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(document, { key: "Delete" }));
+    expect(onChange).not.toHaveBeenCalled(); // root not deleted
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(onHint).toHaveBeenCalledWith(expect.stringMatching(/central topic/i));
+  });
+
+  it("undo restores the selection STATE (not just the callback) so the next keystroke targets it", () => {
+    const { h, onChange, onSelect } = mount();
+    run(() => h.focusNode("b")); // Beta (a leaf) selected
+    run(() => fireEvent.keyDown(document, { key: "Delete" })); // delete b; anchor moves to a sibling
+    expect(
+      (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find((n) => n.id === "b"),
+    ).toBeUndefined();
+    onSelect.mockClear();
+    run(() => fireEvent.keyDown(document, { key: "z", ctrlKey: true })); // undo → b back + reselected
+    expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ id: "b" }));
+    // The React selection state — not just onSelect — must point at b: a Tab now adds a child to b.
+    run(() => fireEvent.keyDown(document, { key: "Tab" }));
+    const b = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "b",
+    );
+    expect(b?.children).toHaveLength(1); // landed under the restored node, not a stale anchor
+  });
+
+  it("Escape on a brand-new empty topic discards it instead of leaving a blank node", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("a")); // "a" has one child (a1)
+    run(() => fireEvent.keyDown(document, { key: "Tab" })); // add an empty child + enter edit
+    const editable = container.querySelector('[contenteditable="true"]');
+    expect(editable).toBeTruthy();
+    const aKids = () =>
+      (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find((n) => n.id === "a")
+        ?.children.length;
+    expect(aKids()).toBe(2); // a1 + the new empty node
+    run(() => fireEvent.keyDown(editable as Element, { key: "Escape" })); // leave it empty
+    expect(aKids()).toBe(1); // the blank node is discarded
+  });
+
+  it("Escape on a new topic you typed into keeps it (only an empty one is discarded)", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("a"));
+    run(() => fireEvent.keyDown(document, { key: "Tab" })); // empty child + edit
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    editable.innerHTML = "Typed"; // the live editor buffer (not yet committed to the doc)
+    run(() => fireEvent.keyDown(editable, { key: "Escape" })); // Escape keeps what you typed
+    const a = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "a",
+    );
+    expect(a?.children).toHaveLength(2); // a1 + the kept node
+    expect(a?.children.some((c) => c.topic === "Typed")).toBe(true);
+  });
+
+  it("Enter then Escape keeps the committed text and drops only the empty new sibling (no data loss)", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("a")); // a has [a1]
+    run(() => fireEvent.keyDown(document, { key: "Tab" })); // empty child C1 + edit
+    let editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    editable.innerHTML = "First"; // type into C1
+    run(() => fireEvent.keyDown(editable, { key: "Enter" })); // commit C1="First", add empty sibling C2
+    editable = container.querySelector('[contenteditable="true"]') as HTMLElement; // now C2's editor
+    run(() => fireEvent.keyDown(editable, { key: "Escape" })); // discard the empty C2
+    const a = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "a",
+    );
+    expect(a?.children.some((c) => c.topic === "First")).toBe(true); // C1's text survived the discard
+    expect(a?.children).toHaveLength(2); // a1 + C1 only (C2 dropped, not stranded empty)
+  });
+
   it("drops a URL onto the canvas as a floating topic", () => {
     const { container, onChange } = mount();
     const surface = container.querySelector("div");
@@ -774,7 +847,7 @@ describe("FlowMindMap canvas", () => {
     const { h } = mount(baseDoc(), {
       initialSession: {
         viewport: { x: 10, y: 20, zoom: 1.5 },
-        history: { past: [prior], future: [] },
+        history: { past: [{ doc: prior, anchor: null }], future: [] },
       },
       onHistory,
     });
@@ -783,7 +856,7 @@ describe("FlowMindMap canvas", () => {
     // getSession round-trips the seeded history + returns a viewport object.
     const session = h.getSession();
     expect(session.history.past).toHaveLength(1);
-    expect(session.history.past[0].id).toBe("prior");
+    expect(session.history.past[0].doc.id).toBe("prior");
     expect(typeof session.viewport.zoom).toBe("number");
   });
 

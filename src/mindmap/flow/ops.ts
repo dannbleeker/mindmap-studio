@@ -421,6 +421,36 @@ export function deleteNode(doc: MindMapDoc, id: string): OpResult {
   return { doc: next, selectId };
 }
 
+/** Delete every node in `ids` (and their subtrees) as ONE edit. A node that's a descendant of another
+ *  selected node is absorbed — only the maximal selected subtrees are removed — so deleting a parent
+ *  together with one of its children counts (and re-selects) once. The root is never deleted. Returns
+ *  the new doc, a surviving node to select, and how many top-level topics were removed. */
+export function deleteNodes(doc: MindMapDoc, ids: string[]): OpResult & { removed: number } {
+  // Drop the central root up front: it can't be deleted, so it must not absorb its (every) descendant
+  // out of the set — selecting root + a child should still delete the child.
+  const present = ids
+    .map((id) => ({ id, node: findAnyNode(doc, id) }))
+    .filter((x): x is { id: string; node: MapNode } => x.node !== null && x.id !== doc.root.id);
+  // Keep only ids whose subtree isn't already covered by another selected id.
+  const maximal = present.filter(
+    (x) => !present.some((y) => y.id !== x.id && isDescendant(y.node, x.id)),
+  );
+  let next = doc;
+  let removed = 0;
+  let selectId: string | undefined;
+  for (const { id } of maximal) {
+    const r = deleteNode(next, id);
+    if (r.doc !== next) {
+      next = r.doc;
+      removed += 1;
+      selectId = r.selectId;
+    }
+  }
+  // A neighbour we picked may itself have been removed by a later id — fall back to the root.
+  if (selectId && !findAnyNode(next, selectId)) selectId = next.root.id;
+  return { doc: next, selectId, removed };
+}
+
 /** Locate a node ANYWHERE it can be reparented from — the central tree, a top-level floating topic,
  *  or a node nested inside a floating topic's subtree — and return a `remove()` that detaches it from
  *  whichever container holds it. Null for the root (no parent to detach from) or an unknown id. */

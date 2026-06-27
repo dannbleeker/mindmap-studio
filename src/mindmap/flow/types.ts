@@ -33,6 +33,10 @@ export type TopicData = {
   branchColor: string;
   /** Which half of the two-sided radial layout this node sits on. */
   side: "left" | "right";
+  /** This node's subtree grows leftward (the two-sided map's left half, or an all-left layout), so its
+   *  collapse toggle sits on the LEFT (leaf-facing) edge — MindManager-style. Absent = grows right (the
+   *  default; toggle on the right). Canvas-only — the export doesn't draw the interactive toggle. */
+  tipLeft?: boolean;
   collapsed: boolean;
   hasChildren: boolean;
   /** When collapsed, the number of direct subtopics folded away — shown in the +N expand affordance. */

@@ -7,6 +7,24 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Delete now removes the whole multi-selection, not just one node.** Marquee- or Shift/Ctrl/Cmd-select
+  several topics and press Delete (or the inspector's Delete) — every selected branch goes in one
+  undoable step, re-selecting a surviving neighbour. Previously only the anchor (last-touched) node was
+  deleted; the rest stayed. Overlapping selections (a parent + its child) collapse to one deletion; the
+  central root is still never deleted.
+- **Undo/redo restores the selection, not just the structure.** Each history snapshot now carries the
+  anchor that was selected with it, so undoing a delete brings the branch back *and* re-selects it (and
+  the inspector follows) — MindManager-style — instead of leaving the selection stranded on a neighbour.
+- **Esc / click-away on a brand-new empty topic discards it.** Pressing Tab/Enter to spawn a topic and
+  then leaving it without typing no longer strands a blank node on the canvas; the abandoned topic is
+  dropped cleanly (and doesn't linger in undo). A topic you actually typed into is kept.
+- **The collapse toggle sits on the branch tip, not toward the root.** On the two-sided map's left half
+  (and all-left layouts) the −/＋ expand control now hangs off a node's left (leaf-facing) edge instead of
+  always the right, matching MindManager. Right-side and downward layouts are unchanged.
+- **Modals close on a backdrop click.** Clicking outside the About / Shortcuts / search / paste dialogs
+  now dismisses them, the convention every modal follows (Escape and the ✕ still work too).
+- **Deleting the central topic explains itself.** Trying to delete the root now shows a brief "The
+  central topic can't be deleted." hint instead of silently doing nothing.
 - **Updates (and every toast) now work on the Start screen.** The toast surface lived only in the
   editor view, so while a user sat on the Start screen — the most common landing screen — the PWA's
   automatic "A new version is available — Refresh now" prompt was produced but never rendered, and there

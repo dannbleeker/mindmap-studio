@@ -55,7 +55,25 @@ export function Dialog({ open, onClose, onOpen, title, ariaLabel, style, childre
   }, [open]);
 
   return (
-    <dialog ref={ref} aria-label={ariaLabel} onClose={onClose} style={{ ...DIALOG_BASE, ...style }}>
+    // The onClick closes on a backdrop (click-outside) — the convention every modal follows. A native
+    // <dialog> reports a backdrop click with the dialog itself as the target; a click on the content
+    // bubbles up with a child target (ignored), and a click on the dialog's own padding lands inside its
+    // box (kept open via the rect check). The keyboard equivalent (Escape) is handled natively + wired
+    // to onClose, so the mouse-only backdrop click is safe.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape (the keyboard dismiss) is handled natively.
+    <dialog
+      ref={ref}
+      aria-label={ariaLabel}
+      onClose={onClose}
+      onClick={(e) => {
+        if (e.target !== e.currentTarget) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        const outside =
+          e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+        if (outside) onClose();
+      }}
+      style={{ ...DIALOG_BASE, ...style }}
+    >
       {title != null && (
         <div
           style={{

@@ -323,13 +323,20 @@ export type LayoutKind =
 
 /** Props the canvas accepts. Kept engine-neutral so the renderer stays swappable behind
  *  the `index.tsx` chooser. */
+/** One undo/redo entry: the doc snapshot + the selection anchor that was active when it was current,
+ *  so undo restores the selection (not just the structure) — MindManager-style. */
+export interface DocSnapshot {
+  doc: MindMapDoc;
+  anchor: string | null;
+}
+
 /** A saved canvas session — the viewport + the undo/redo snapshot stacks — used to make document-tab
  *  switches lossless (captured via `MindMapHandle.getSession`, restored via `MindMapProps.initialSession`).
- *  The history shape is structurally the flow engine's `History<MindMapDoc>`, kept inline so the
+ *  The history shape is structurally the flow engine's `History<DocSnapshot>`, kept inline so the
  *  engine-neutral contract doesn't import from the flow layer. */
 export interface CanvasSession {
   viewport: { x: number; y: number; zoom: number };
-  history: { past: MindMapDoc[]; future: MindMapDoc[] };
+  history: { past: DocSnapshot[]; future: DocSnapshot[] };
 }
 
 export interface MindMapProps {
@@ -368,6 +375,9 @@ export interface MindMapProps {
    *  number of sub-topics that went with it, so the app can show a "… deleted — Undo" toast. The
    *  delete is already done + reversible via undo(); this never blocks. */
   onDelete?: (topic: string, descendants: number) => void;
+  /** A transient one-line hint from the canvas (e.g. "The central topic can't be deleted") — the app
+   *  surfaces it as a toast. For feedback on a refused/no-op action, where `onDelete` wouldn't fire. */
+  onHint?: (message: string) => void;
   /** Canvas style/theme (light, dark, or a palette); image exports inherit it. */
   theme?: MindMapTheme;
   /** Layout: a direction, or an alternate layout (org-chart, radial, timeline, fishbone). */

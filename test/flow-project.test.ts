@@ -338,3 +338,25 @@ describe("flow project — org-chart elbow stamping + task fields", () => {
     expect(free?.draggable).toBeUndefined(); // undefined → inherits the global nodesDraggable
   });
 });
+
+describe("flow project — collapse-toggle side (tipLeft)", () => {
+  // `c` is pinned side:"left"; in the two-sided map its subtree grows left, so its toggle is left.
+  it("flags left-growing nodes in the two-sided layout", () => {
+    const left = project(doc).nodes.find((n) => n.id === "c");
+    expect(left?.data.side).toBe("left");
+    expect(left?.data.tipLeft).toBe(true);
+  });
+
+  it("never flags tipLeft in an all-right layout (side is just a balance artifact there)", () => {
+    const nodes = project(doc, undefined, false, "right").nodes;
+    expect(nodes.every((n) => !n.data.tipLeft)).toBe(true);
+  });
+
+  it("flags every tree node tipLeft in an all-left layout (floating subtrees still grow right)", () => {
+    const all = project(doc, undefined, false, "left").nodes;
+    const tree = all.filter((n) => !n.data.isRoot && !n.data.floating);
+    expect(tree.length).toBeGreaterThan(0);
+    expect(tree.every((n) => n.data.tipLeft)).toBe(true);
+    expect(all.find((n) => n.id === "f")?.data.tipLeft).toBeFalsy(); // floating → right tip
+  });
+});

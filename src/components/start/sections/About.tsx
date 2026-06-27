@@ -10,7 +10,7 @@ const LINKS: { href: string; label: string }[] = [
   { href: "https://github.com/dannbleeker/mindmap-studio", label: "Source" },
 ];
 
-export function About() {
+export function About({ onCheckForUpdates }: { onCheckForUpdates?: () => void }) {
   return (
     <div className="st-content">
       <section>
@@ -52,6 +52,20 @@ export function About() {
               </a>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 className="st-section-title" style={{ fontSize: 13, color: "var(--st-muted)" }}>
+          Updates
+        </h3>
+        <p className="st-section-sub">
+          Installed as a PWA, MindMap Studio updates itself; check here to pull a new version now.
+        </p>
+        <div className="st-card" style={{ padding: 16, marginTop: 10 }}>
+          <button type="button" className="st-btn" onClick={() => onCheckForUpdates?.()}>
+            Check for updates
+          </button>
         </div>
       </section>
 

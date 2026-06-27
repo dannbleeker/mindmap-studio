@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Updates (and every toast) now work on the Start screen.** The toast surface lived only in the
+  editor view, so while a user sat on the Start screen — the most common landing screen — the PWA's
+  automatic "A new version is available — Refresh now" prompt was produced but never rendered, and there
+  was no manual update control there at all. The single toast surface was extracted into a `ToastBar`
+  that now renders in both views (a fixed top-centre overlay on Start), and the Start screen's **About**
+  gained a **Check for updates** button mirroring the editor's, so a pending update is both visible and
+  actionable without first opening a map.
+
 - **⌘K command palette was unreadable in the editor.** The palette's styles pulled colours from
   `--st-*` tokens defined only on the Start screen (`.start`), so when opened in the editor it had no
   background — the canvas bled through and rows overlapped. The cmdk colours now chain

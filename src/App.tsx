@@ -35,6 +35,7 @@ import { InspectorRail } from "./components/InspectorRail";
 import { MapPanel } from "./components/MapPanel";
 import { OverlayInspector } from "./components/OverlayInspector";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
+import { ToastBar } from "./components/ToastBar";
 import { Toolbar, type ToolbarProps } from "./components/Toolbar";
 import { buildEditorCommands } from "./components/editorCommands";
 import "./design/editor.css";
@@ -401,6 +402,24 @@ export function App() {
   // through showToast (no-op in dev — the service worker is disabled there).
   useEffect(() => {
     initPwaUpdateToast(showToast);
+  }, [showToast]);
+
+  // Manual "Check for updates", shared by the editor's About dialog and the Start screen's About.
+  // Maps the check result to a toast (the surface — ToastBar — is now mounted in both views, so the
+  // result, and any re-surfaced "Refresh now" prompt, shows wherever the user triggered it).
+  const checkForUpdates = useCallback(async () => {
+    const result = await checkForUpdate();
+    if (result === "up-to-date") {
+      showToast("success", "You're on the latest version.");
+    } else if (result === "newly-found") {
+      showToast(
+        "info",
+        "New version found — the refresh prompt will appear once it finishes downloading.",
+      );
+    } else if (result === "unsupported") {
+      showToast("info", "Update checks aren't available here (no service worker running).");
+    }
+    // 'already-pending' — checkForUpdate already re-surfaced the "Refresh now" prompt.
   }, [showToast]);
 
   // Copy the map as a Markdown outline straight to the clipboard — no file download —
@@ -1124,9 +1143,19 @@ export function App() {
 
   if (view === "start") {
     return (
-      <Suspense fallback={null}>
-        <StartScreen theme={theme} onOpen={openFromStart} onImportFiles={importFromStart} />
-      </Suspense>
+      <>
+        <Suspense fallback={null}>
+          <StartScreen
+            theme={theme}
+            onOpen={openFromStart}
+            onImportFiles={importFromStart}
+            onCheckForUpdates={checkForUpdates}
+          />
+        </Suspense>
+        {/* The toast surface must render on Start too, or the PWA "Refresh now" prompt (and any
+            other toast) is silently swallowed here — Start is the most common landing screen. */}
+        <ToastBar toast={toast} onDismiss={dismissToast} variant="floating" />
+      </>
     );
   }
 
@@ -1192,35 +1221,7 @@ export function App() {
           </output>
         )}
 
-        {toast && (
-          <output
-            aria-live="polite"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              padding: "8px 16px",
-              background: toast.kind === "success" ? "#eafaf0" : "#eef2fc",
-              color: "#26215c",
-              fontSize: 13,
-              borderBottom: "1px solid #cecbf6",
-            }}
-          >
-            <span>{toast.message}</span>
-            {toast.action && (
-              <button
-                type="button"
-                onClick={() => {
-                  toast.action?.run();
-                  dismissToast();
-                }}
-                style={{ ...controlStyle, padding: "4px 12px" }}
-              >
-                {toast.action.label}
-              </button>
-            )}
-          </output>
-        )}
+        <ToastBar toast={toast} onDismiss={dismissToast} variant="inline" />
 
         {focus && (
           <div
@@ -1874,24 +1875,10 @@ export function App() {
         <div style={{ marginTop: 16, borderTop: "1px solid #e4e4e7", paddingTop: 14 }}>
           <button
             type="button"
-            onClick={async () => {
+            onClick={() => {
               // Close so the result toast (top of the app) isn't hidden behind the modal.
               setAboutOpen(false);
-              const result = await checkForUpdate();
-              if (result === "up-to-date") {
-                showToast("success", "You're on the latest version.");
-              } else if (result === "newly-found") {
-                showToast(
-                  "info",
-                  "New version found — the refresh prompt will appear once it finishes downloading.",
-                );
-              } else if (result === "unsupported") {
-                showToast(
-                  "info",
-                  "Update checks aren't available here (no service worker running).",
-                );
-              }
-              // 'already-pending' — checkForUpdate already re-surfaced the "Refresh now" prompt.
+              void checkForUpdates();
             }}
             style={controlStyle}
           >

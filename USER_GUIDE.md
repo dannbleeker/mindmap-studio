@@ -94,7 +94,7 @@ Keyboard-first, just like MindManager:
 - **Enter** — add a sibling topic
 - **Tab** — add a child topic
 - **Ctrl + Enter** — add a child of the selected topic
-- **Delete** — remove the selected topic and its branch immediately; an **Undo** toast appears (and Ctrl/⌘+Z works) — no confirmation prompt
+- **Delete** — remove the selected topic and its branch immediately (with several topics multi-selected, it removes them all in one step); an **Undo** toast appears (and Ctrl/⌘+Z works) — no confirmation prompt
 - **Just start typing** on a selected topic — it opens for editing with your first keystroke replacing the old text (type straight on)
 - **Double-click** a node, or press **F2** with it selected — edit its text inline (starting from the existing text, all selected)
 - **Ctrl + B / I / U** — while editing a topic: bold / italic / underline the selection
@@ -706,7 +706,7 @@ updates**.
 | Tab | Add child |
 | Ctrl + Enter | Add child (selected topic) |
 | Shift + Tab | Outdent (promote one level) |
-| Delete | Remove the topic + its branch (instant — undo from the toast) |
+| Delete | Remove the topic + its branch — or the whole multi-selection (instant — undo from the toast) |
 | Type a letter (topic selected) | Edit in place, replacing the text |
 | F2 / double-click | Edit in place, keeping the text |
 | Ctrl + B / I / U (while editing) | Bold / italic / underline the selection |

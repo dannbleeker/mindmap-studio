@@ -538,8 +538,7 @@ describe("FlowMindMap canvas", () => {
       run(() => fireEvent.contextMenu(screen.getByRole("button", { name: "Scope" })));
       return openMenu() as HTMLElement;
     };
-    const lastBoundary = () =>
-      (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).boundaries?.[0];
+    const lastBoundary = () => (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).boundaries?.[0];
 
     let menu = reopen();
     expect(within(menu).getByText("Recolour")).toBeTruthy();

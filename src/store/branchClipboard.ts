@@ -16,6 +16,15 @@ export function setBranch(node: MapNode): void {
   }
 }
 
+/** Empty the branch clipboard (the Settings "clear branch clipboard" action). */
+export function clearBranch(): void {
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    // best-effort
+  }
+}
+
 /** Read the copied subtree, or null if the clipboard is empty / unreadable / malformed. */
 export function getBranch(): MapNode | null {
   try {

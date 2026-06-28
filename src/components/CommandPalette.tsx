@@ -52,6 +52,15 @@ function pushRecent(id: string) {
   }
 }
 
+/** Forget the most-recently-used command list (the Settings "clear command history" action). */
+export function clearRecents() {
+  try {
+    localStorage.removeItem(RECENT_KEY);
+  } catch {
+    // best-effort
+  }
+}
+
 export function CommandPalette({
   commands,
   onClose,

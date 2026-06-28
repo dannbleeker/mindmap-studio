@@ -13,6 +13,7 @@ function setup(over: Partial<Parameters<typeof IconRail>[0]> = {}) {
     onImage: vi.fn(),
     onPaste: vi.fn(),
     onShortcuts: vi.fn(),
+    onSettings: vi.fn(),
     ...over,
   };
   render(<IconRail {...props} />);
@@ -34,6 +35,12 @@ describe("IconRail", () => {
     expect(p.onFind).toHaveBeenCalledTimes(1);
     expect(p.onPaste).toHaveBeenCalledTimes(1);
     expect(p.onShortcuts).toHaveBeenCalledTimes(1);
+  });
+
+  it("fires onSettings from the settings button", async () => {
+    const p = setup();
+    await userEvent.click(screen.getByRole("button", { name: /settings/i }));
+    expect(p.onSettings).toHaveBeenCalledTimes(1);
   });
 
   it("exposes an image file picker wired to onImage", async () => {

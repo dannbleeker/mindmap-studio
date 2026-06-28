@@ -229,6 +229,31 @@ describe("App (integration)", () => {
     await waitFor(() => expect(screen.queryByText(/OPML/i)).toBeNull());
   });
 
+  it("opens Settings from the rail and drives its actions", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+    await flush();
+    await openEditor(user, container);
+    await user.click(screen.getByRole("button", { name: /^settings$/i }));
+    await flush();
+    expect(screen.getByText("Local data")).toBeTruthy();
+    // Re-show getting-started clears the one-way first-run flag + closes the dialog.
+    await user.click(screen.getByRole("button", { name: /getting-started tips/i }));
+    await flush();
+    // Reopen and clear the command history (drives the App handler + its hint toast).
+    await user.click(screen.getByRole("button", { name: /^settings$/i }));
+    await flush();
+    await user.click(screen.getByRole("button", { name: /clear command history/i }));
+    await flush();
+    // "Clear all local data" confirms first — declining is a safe no-op (the editor stays put).
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    await user.click(screen.getByRole("button", { name: /clear all local data/i }));
+    await flush();
+    expect(confirmSpy).toHaveBeenCalled();
+    confirmSpy.mockRestore();
+    expect(container.querySelector(".mm-editor")).toBeTruthy();
+  });
+
   it("selects a topic and drives inspector edits (tag, progress, priority)", async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);

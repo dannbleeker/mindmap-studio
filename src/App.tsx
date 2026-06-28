@@ -26,7 +26,7 @@ import {
   WalkBar,
 } from "./Panels";
 import { Breadcrumb, type Crumb } from "./components/Breadcrumb";
-import { CommandPalette } from "./components/CommandPalette";
+import { CommandPalette, clearRecents } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
 import { DocumentTabs } from "./components/DocumentTabs";
 import { EdgeInspector } from "./components/EdgeInspector";
@@ -36,6 +36,7 @@ import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
 import { MapPanel } from "./components/MapPanel";
 import { OverlayInspector } from "./components/OverlayInspector";
+import { SettingsDialog } from "./components/SettingsDialog";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { ToastBar } from "./components/ToastBar";
 import { Toolbar, type ToolbarProps } from "./components/Toolbar";
@@ -91,8 +92,11 @@ import { useSavedViews } from "./savedViews";
 import { type LibraryHit, findDocMatches, searchLibrary } from "./search";
 import { selectionCrumbs, selectionInfo } from "./selectionInfo";
 import { stickerImage } from "./stickers";
+import { clearBranch } from "./store/branchClipboard";
+import { clearAllLocalPreferences } from "./store/localPrefs";
 import {
   type MapSummary,
+  clearAllData,
   deleteMap,
   findMapReferences,
   getAllMaps,
@@ -394,6 +398,35 @@ export function App() {
     } catch {
       // best-effort
     }
+  }, []);
+  // Settings / Preferences dialog (IconRail ⚙ + ⌘K). Re-showing getting-started clears the one-way
+  // first-run flag so the "3 things to try" card returns.
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const reShowFirstRun = useCallback(() => {
+    setFirstRunSeen(false);
+    try {
+      localStorage.removeItem("mindmap-first-run-seen");
+    } catch {
+      // best-effort
+    }
+    setSettingsOpen(false);
+  }, []);
+  const clearAllLocalData = useCallback(() => {
+    if (
+      !window.confirm(
+        "Delete ALL local data — every map, its version history, and your preferences in this browser? This cannot be undone.",
+      )
+    )
+      return;
+    void (async () => {
+      try {
+        await clearAllData();
+      } catch {
+        // proceed to clear prefs + reload regardless
+      }
+      clearAllLocalPreferences();
+      location.reload();
+    })();
   }, []);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
   // Find & Replace overlay (#…): opened with Ctrl/⌘+F, the "/" key, or the toolbar's Find button.
@@ -1103,6 +1136,7 @@ export function App() {
       openSearchAll: () => setSearchAllOpen(true),
       openPaste: () => paste.setOpen(true),
       openFind: () => setFindOpen(true),
+      openSettings: () => setSettingsOpen(true),
     },
     panels,
     map: {
@@ -1286,6 +1320,7 @@ export function App() {
         onImage={handleImage}
         onPaste={() => paste.setOpen(true)}
         onShortcuts={() => setShortcutsOpen(true)}
+        onSettings={() => setSettingsOpen(true)}
       />
       <div className="mm-editor-main">
         <Toolbar {...toolbarProps} />
@@ -2052,6 +2087,23 @@ export function App() {
 
       {/* Keyboard shortcuts cheat-sheet (#2) — opened from the icon-rail (?) and ⌘K. */}
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+      <SettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        theme={theme}
+        setThemeId={setThemeId}
+        onReShowGettingStarted={reShowFirstRun}
+        onClearRecents={() => {
+          clearRecents();
+          showHint("Command history cleared.");
+        }}
+        onClearBranchClipboard={() => {
+          clearBranch();
+          showHint("Branch clipboard cleared.");
+        }}
+        onClearAllData={clearAllLocalData}
+      />
 
       {/* Paste text → map — controlled <Dialog>; focus the textarea on open. (No drop shadow here —
           the original Paste dialog had none, so cancel the shared base shadow.) */}

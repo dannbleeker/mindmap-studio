@@ -204,6 +204,8 @@ export interface ToolbarProps {
     openPaste: () => void;
     /** Open the Find & Replace overlay (also bound to Ctrl/⌘+F and the "/" key). */
     openFind: () => void;
+    /** Open the Settings / Preferences dialog (IconRail ⚙ + ⌘K). */
+    openSettings: () => void;
   };
   panels: ToolbarPanels;
   map: ToolbarMap;

@@ -47,6 +47,7 @@ function setup(
     openSearchAll: vi.fn(),
     openPaste: vi.fn(),
     openFind: vi.fn(),
+    openSettings: vi.fn(),
   };
   const panels = {
     outlineOpen: false,

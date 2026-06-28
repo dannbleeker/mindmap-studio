@@ -2,6 +2,7 @@ import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
 import type { MindMapDoc } from "../src/model/types";
 import {
+  clearAllData,
   deleteMap,
   findMapReferences,
   getAllMaps,
@@ -218,5 +219,15 @@ describe("mapStore — concurrency", () => {
     ]);
     const ids = (await getAllMaps()).map((d) => d.id);
     expect(ids).toEqual(expect.arrayContaining(["p1", "p2", "p3"]));
+  });
+});
+
+// MUST stay last — it deletes the shared database this file's other tests populate.
+describe("mapStore — clearAllData", () => {
+  it("wipes the whole library", async () => {
+    await saveMap(docOf("wipe-me", "Wipe"));
+    expect((await getAllMaps()).length).toBeGreaterThan(0);
+    await clearAllData();
+    expect(await getAllMaps()).toEqual([]);
   });
 });

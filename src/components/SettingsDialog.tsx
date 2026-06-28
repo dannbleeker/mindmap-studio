@@ -1,0 +1,133 @@
+import { useEffect, useState } from "react";
+import { Button } from "../design/primitives";
+import type { CanvasTheme } from "../mindmap/theme";
+import { canvasThemes } from "../mindmap/theme";
+import { Dialog } from "./Dialog";
+
+// Settings / Preferences — the one place to see and reset the bits of app state that otherwise live
+// invisibly in ~a dozen localStorage keys + the IndexedDB library. Local-first means everything lives
+// in this one origin's storage, so a "what's stored / clear it" surface is part of being trustworthy.
+// Presentational: every action is a prop App wires to the real handler (theme, first-run flag, recents,
+// branch clipboard, full wipe). The storage estimate is read here (best-effort) since it's read-only.
+
+export interface SettingsDialogProps {
+  open: boolean;
+  onClose: () => void;
+  theme: CanvasTheme;
+  setThemeId: (id: string) => void;
+  /** Re-show the first-run "3 things to try" card. */
+  onReShowGettingStarted: () => void;
+  /** Clear the ⌘K most-recently-used list. */
+  onClearRecents: () => void;
+  /** Clear the cross-map branch clipboard. */
+  onClearBranchClipboard: () => void;
+  /** Wipe the whole local library + preferences (App confirms + reloads). */
+  onClearAllData: () => void;
+}
+
+const fmtBytes = (n: number): string => {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+      <div className="mm-map-section-title">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+export function SettingsDialog({
+  open,
+  onClose,
+  theme,
+  setThemeId,
+  onReShowGettingStarted,
+  onClearRecents,
+  onClearBranchClipboard,
+  onClearAllData,
+}: SettingsDialogProps) {
+  const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null);
+
+  // Read the local storage estimate when the dialog opens (best-effort — not in every browser/jsdom).
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    void navigator.storage
+      ?.estimate?.()
+      .then((e) => {
+        if (live && typeof e.usage === "number" && typeof e.quota === "number")
+          setStorage({ usage: e.usage, quota: e.quota });
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [open]);
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Settings"
+      style={{
+        width: "min(440px, 92vw)",
+        padding: 20,
+        color: "var(--ed-ink)",
+        background: "var(--ed-card)",
+        boxShadow: "var(--ed-shadow-pop)",
+      }}
+    >
+      <Section title="Appearance">
+        <label className="mm-map-field">
+          <span>Canvas theme</span>
+          <select
+            className="mm-map-control"
+            value={theme.id}
+            onChange={(e) => setThemeId(e.target.value)}
+            aria-label="Canvas theme"
+          >
+            {canvasThemes.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </Section>
+
+      <Section title="Getting started">
+        <Button onClick={onReShowGettingStarted} style={{ alignSelf: "flex-start" }}>
+          Show the getting-started tips again
+        </Button>
+      </Section>
+
+      <Section title="Local data">
+        <p style={{ margin: 0, fontSize: 12.5, color: "var(--ed-muted)", lineHeight: 1.5 }}>
+          Everything — your maps, version history and preferences — is stored only in this browser.
+          {storage
+            ? ` About ${fmtBytes(storage.usage)} used of ${fmtBytes(storage.quota)} available.`
+            : ""}
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <Button onClick={onClearRecents}>Clear command history</Button>
+          <Button onClick={onClearBranchClipboard}>Clear branch clipboard</Button>
+        </div>
+        <Button
+          onClick={onClearAllData}
+          style={{
+            alignSelf: "flex-start",
+            marginTop: 4,
+            color: "var(--ed-danger)",
+            borderColor: "var(--ed-danger)",
+          }}
+        >
+          Clear all local data…
+        </Button>
+      </Section>
+    </Dialog>
+  );
+}

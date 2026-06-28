@@ -1,4 +1,4 @@
-import { type DBSchema, type IDBPDatabase, openDB } from "idb";
+import { type DBSchema, type IDBPDatabase, deleteDB, openDB } from "idb";
 import { normalizeDoc } from "../model/normalize";
 import type { MapNode, MindMapDoc } from "../model/types";
 
@@ -118,6 +118,21 @@ export async function findMapReferences(targetId: string): Promise<MapSummary[]>
     .filter((d) => refsTarget(d.root) || (d.floatingTopics ?? []).some(refsTarget))
     .map((d) => ({ id: d.id, title: d.title }))
     .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+/** Wipe the entire local library (maps, versions, handles, meta) by deleting the IndexedDB database —
+ *  the "clear all local data" action in Settings. Closes the cached connection first so the delete
+ *  isn't blocked. The caller is expected to clear localStorage prefs + reload afterwards. */
+export async function clearAllData(): Promise<void> {
+  if (dbPromise) {
+    try {
+      (await dbPromise).close();
+    } catch {
+      // already closing / closed
+    }
+    dbPromise = null;
+  }
+  await deleteDB(DB_NAME);
 }
 
 export async function setLastOpened(id: string): Promise<void> {

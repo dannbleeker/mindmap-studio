@@ -35,6 +35,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **A Settings screen.** A new ⚙ Settings dialog (left rail + `⌘K` → "Settings & preferences")
+  consolidates the bits of app state that previously lived only in scattered `localStorage` keys: pick
+  the **canvas theme**, **re-show the getting-started tips**, **clear the command history** or the
+  **branch clipboard**, see how much **local storage** the library uses, and **clear all local data**
+  (with a confirm). For a local-first app where everything lives in one browser, this is the "what's
+  stored / reset it" surface that was missing.
 - **The map accent colour is now a one-click control.** The accent (the default tint for relationship
   lines and boundary boxes) could previously only be changed as a side effect of applying a whole Design
   preset — which also rewrote your theme, connectors and branch weight, and only offered the preset's

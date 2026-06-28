@@ -31,8 +31,8 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   Agenda "Later" bucket, Find Next/Prev + announced count, saved-view delete-undo + overwrite ack,
   `Ctrl/⌘+F` typing guard, cheat-sheet completeness, command-palette paging, toast/banner tokenisation.
 - [x] **Phase 1** — accent-colour picker (MapPanel); inline note link button. (shipped — see CHANGELOG)
-- [ ] **Phase 2** — real save-state + storage health; version-history finiteness; Settings surface;
-  cross-map link-integrity warning on delete.
+- [x] **Phase 2** — real save-state + storage health; version-history finiteness; Settings surface;
+  cross-map link-integrity warning on delete. (shipped — see CHANGELOG)
 - [ ] **Phase 3** — inspector mobile bottom-sheet; Start 390px overflow; sheet scrim/handle/close;
   touch-aware first-run; mobile add-topic; desktop Row-2 overflow menu.
 - [ ] **Phase 4** (prep commit first) — right-click keeps multi-selection + bulk menu; keyboard

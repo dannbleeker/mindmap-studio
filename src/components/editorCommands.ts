@@ -86,6 +86,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("copy-table", "Copy as table (TSV)", "map", () => io.copyTable());
   add("backup", "Back up whole library", "map", () => io.exportLibrary());
   add("shortcuts", "Keyboard shortcuts", "map", () => nav.openShortcuts());
+  add("settings", "Settings & preferences", "map", () => nav.openSettings());
   add("about", "About MindMap Studio", "map", () => nav.openAbout());
 
   // Edit history

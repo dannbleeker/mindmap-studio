@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **The inspector is usable on a phone.** It stayed a fixed 300px column (~80% of a ~390px screen),
+  so editing a topic left almost no canvas. On phones the inspector now docks as a dismissible
+  **bottom sheet** (like the side panels) — ~62vh with a grab handle, leaving the map visible above —
+  and a **tap-out scrim** dismisses any open sheet so you can't get stuck with the canvas obscured.
+- **First-run tips adapt to touch.** On a phone/tablet the "3 things to try" card showed
+  Tab / double-click / `⌘K` — none of which exist on touch. It now shows real gestures (tap a topic,
+  tap the ＋ to add a child, drag to pan / pinch to zoom). Desktop is unchanged.
 - **"Saved locally" can no longer lie.** The badge was a static label, unbound to the actual autosave —
   and a failed write (browser out of storage, private mode) was silently swallowed. It now reflects real
   state: **Saving…** while a write is pending, **Saved locally** once it lands, and a red **Couldn't

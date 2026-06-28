@@ -35,6 +35,7 @@ import { FirstRunCard } from "./components/FirstRunCard";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
 import { MapPanel } from "./components/MapPanel";
+import { MobileSheetScrim } from "./components/MobileSheetScrim";
 import { OverlayInspector } from "./components/OverlayInspector";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
@@ -82,6 +83,7 @@ import {
   type SelectionMarkerTags,
 } from "./mindmap";
 import { findAnyNode } from "./mindmap/flow/ops";
+import { anyMobileSheetOpen, closeMobileSheets } from "./mobileSheets";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
 import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "./outline";
@@ -1292,6 +1294,11 @@ export function App() {
     saveState,
   };
 
+  // On a phone the side panels + inspector dock as bottom sheets (mobile.css). A tap-out scrim
+  // dismisses whichever is open, so a user can't get stuck with the canvas obscured. (Logic lives in
+  // mobileSheets.ts so it's unit-testable without a forced-mobile integration render.)
+  const mobileSheetOpen = isMobile && anyMobileSheetOpen(panels);
+
   if (view === "start") {
     return (
       <>
@@ -1481,6 +1488,7 @@ export function App() {
         )}
 
         <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+          {mobileSheetOpen && <MobileSheetScrim onClose={() => closeMobileSheets(panels)} />}
           <div className="mm-panel-host">
             {panels.outlineOpen && (
               <OutlinePanel

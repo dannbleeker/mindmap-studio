@@ -33,8 +33,12 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
 - [x] **Phase 1** — accent-colour picker (MapPanel); inline note link button. (shipped — see CHANGELOG)
 - [x] **Phase 2** — real save-state + storage health; version-history finiteness; Settings surface;
   cross-map link-integrity warning on delete. (shipped — see CHANGELOG)
-- [ ] **Phase 3** — inspector mobile bottom-sheet; Start 390px overflow; sheet scrim/handle/close;
-  touch-aware first-run; mobile add-topic; desktop Row-2 overflow menu.
+- [~] **Phase 3** — mobile/responsive. **Shipped:** inspector mobile bottom-sheet + grab handle +
+  62vh + tap-out scrim; touch-aware first-run card. **Verified false-alarm:** the "Start 390px
+  overflow" was a headless `--window-size` screenshot artifact — proper device emulation shows it
+  reflows fine, so no fix needed. **Deferred:** desktop Row-2 overflow menu (T1) → folded into Phase 6
+  (T3 moves the low-value toggles out of Row-2, which removes the crowding at the root); a dedicated
+  mobile add-topic input (O3) → the touch first-run card now guides the on-node ＋ path.
 - [ ] **Phase 4** (prep commit first) — right-click keeps multi-selection + bulk menu; keyboard
   restructure over the selection; tree-mode group drag; overlay delete + context menu.
 - [ ] **Phase 5** (prep commit first) — left rail → tabbed dock; placement cues + de-dupe note editor;

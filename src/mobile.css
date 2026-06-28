@@ -11,18 +11,36 @@
 }
 
 @media (max-width: 640px) {
-  .mm-panel-host {
+  /* Both side rails — the left panel host AND the right inspector — become the same dismissible
+     bottom sheet on a phone. The inspector previously stayed a fixed 300px column (≈80% of a 390px
+     screen), so editing a topic left almost no canvas; now it docks to the bottom like the panels.
+     ~62vh leaves a usable strip of canvas visible above the sheet. */
+  .mm-panel-host,
+  .mm-inspector {
     display: block;
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 80vh;
+    width: 100% !important;
+    height: 62vh;
     z-index: 40;
     background: #fff;
+    border-left: none;
     border-top: 1px solid #e2e0d8;
     box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.2);
     overflow: auto;
+    /* Room for the grab handle drawn at the top of the sheet (::before below). */
+    padding-top: 14px;
+  }
+  /* The inspector is a flex column; restore that under the fixed-sheet positioning. */
+  .mm-inspector {
+    display: flex;
+    flex-direction: column;
+  }
+  /* The inspector sits above the left-panel sheet when both happen to be open. */
+  .mm-inspector {
+    z-index: 41;
   }
   /* No panel open → the host has no children → don't let an empty sheet block the canvas. */
   .mm-panel-host:empty {
@@ -32,5 +50,42 @@
   .mm-panel-host > * {
     width: 100% !important;
     border-right: none !important;
+  }
+  /* A grab handle so the sheet reads as a draggable/dismissible surface (visual affordance). */
+  .mm-panel-host::before,
+  .mm-inspector::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.18);
+    z-index: 2;
+    pointer-events: none;
+  }
+  /* The minimized inspector strip (a 40px right column) makes no sense as a phone sheet — hide it;
+     re-selecting a topic re-opens the full inspector sheet. */
+  .mm-inspector-rail {
+    display: none;
+  }
+  /* A tap-out scrim behind whichever sheet is open, so tapping the visible canvas dismisses it. */
+  .mm-sheet-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+    background: rgba(0, 0, 0, 0.18);
+    border: none;
+  }
+}
+/* The scrim is mobile-only chrome — never shown on desktop. */
+.mm-sheet-scrim {
+  display: none;
+}
+@media (max-width: 640px) {
+  .mm-sheet-scrim {
+    display: block;
   }
 }

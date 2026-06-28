@@ -3,6 +3,9 @@
 // Theme-reactive via the .mm-firstrun* classes (offline-safe — no network, no web fonts).
 
 export function FirstRunCard({ onDismiss }: { onDismiss: () => void }) {
+  // A phone/tablet has no Tab key, no reliable double-click, and no Ctrl/⌘+K — telling a touch user
+  // to do those three things is useless. Detect a coarse pointer and show gestures that actually work.
+  const touch = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
   return (
     <aside className="mm-firstrun" aria-label="Getting started">
       <button
@@ -15,15 +18,29 @@ export function FirstRunCard({ onDismiss }: { onDismiss: () => void }) {
       </button>
       <strong className="mm-firstrun-title">3 things to try</strong>
       <ol className="mm-firstrun-list">
-        <li>
-          <strong>Double-click</strong> a topic to rename it
-        </li>
-        <li>
-          Press <kbd>Tab</kbd> to add a child
-        </li>
-        <li>
-          Press <kbd>Ctrl/⌘ + K</kbd> for anything
-        </li>
+        {touch ? (
+          <>
+            <li>
+              <strong>Tap</strong> a topic to select it
+            </li>
+            <li>
+              Tap the <strong>＋</strong> on a topic to add a child
+            </li>
+            <li>Drag the background to pan · pinch to zoom</li>
+          </>
+        ) : (
+          <>
+            <li>
+              <strong>Double-click</strong> a topic to rename it
+            </li>
+            <li>
+              Press <kbd>Tab</kbd> to add a child
+            </li>
+            <li>
+              Press <kbd>Ctrl/⌘ + K</kbd> for anything
+            </li>
+          </>
+        )}
       </ol>
     </aside>
   );

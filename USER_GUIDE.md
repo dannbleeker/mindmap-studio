@@ -400,6 +400,14 @@ map re-flows into the new shape without losing any edits:
 The **Theme** dropdown restyles the whole canvas — **Light**, **Dark**, **Ocean**, **Sunset** —
 live, without losing edits. Image exports inherit the theme, so a dark map exports dark.
 
+### App appearance (dark mode)
+
+Separately from the canvas theme, **Settings → Appearance → App theme** controls the *chrome* — the
+toolbar, side panels, inspector and dialogs. Choose **System** (the default — it follows your
+operating system's light/dark setting and updates live when you change it), **Light**, or **Dark**.
+The app theme is independent of the canvas theme, with one tie: a **Dark** canvas always darkens the
+chrome too, so you never end up with a bright toolbar around a dark map.
+
 ### Canvas background
 
 The **Canvas** colour control sets the background for **this map only**, overriding the theme's

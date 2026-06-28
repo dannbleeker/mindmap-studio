@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import type { CanvasTheme } from "../../mindmap/theme";
 import type { MindMapDoc } from "../../model/types";
 import { CommandPalette } from "./CommandPalette";
 import { StartHeader } from "./StartHeader";
@@ -32,12 +31,13 @@ const TITLES: Record<StartSection, string> = {
 };
 
 export function StartScreen({
-  theme,
+  dark,
   onOpen,
   onImportFiles,
   onCheckForUpdates,
 }: {
-  theme: CanvasTheme;
+  /** Resolved app appearance (Phase 8) — drives the Start chrome independently of the canvas theme. */
+  dark: boolean;
   onOpen: (doc: MindMapDoc, layout?: string) => void;
   onImportFiles: (files: File[]) => void;
   onCheckForUpdates?: () => void;
@@ -82,7 +82,7 @@ export function StartScreen({
   );
 
   return (
-    <div className="start" style={startThemeVars(theme)}>
+    <div className="start" data-theme={dark ? "dark" : "light"} style={startThemeVars(dark)}>
       <StartSidebar
         active={section}
         mapCount={mapCount}

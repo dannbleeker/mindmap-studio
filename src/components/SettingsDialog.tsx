@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../design/primitives";
 import type { CanvasTheme } from "../mindmap/theme";
 import { canvasThemes } from "../mindmap/theme";
+import type { Appearance } from "../useAppearance";
 import { Dialog } from "./Dialog";
 
 // Settings / Preferences — the one place to see and reset the bits of app state that otherwise live
@@ -13,6 +14,9 @@ import { Dialog } from "./Dialog";
 export interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
+  /** App chrome appearance — System / Light / Dark (independent of the canvas theme). */
+  appearance: Appearance;
+  setAppearance: (a: Appearance) => void;
   theme: CanvasTheme;
   setThemeId: (id: string) => void;
   /** Re-show the first-run "3 things to try" card. */
@@ -43,6 +47,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function SettingsDialog({
   open,
   onClose,
+  appearance,
+  setAppearance,
   theme,
   setThemeId,
   onReShowGettingStarted,
@@ -83,6 +89,19 @@ export function SettingsDialog({
     >
       <Section title="Appearance">
         <label className="mm-map-field">
+          <span>App theme</span>
+          <select
+            className="mm-map-control"
+            value={appearance}
+            onChange={(e) => setAppearance(e.target.value as Appearance)}
+            aria-label="App theme"
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <label className="mm-map-field">
           <span>Canvas theme</span>
           <select
             className="mm-map-control"
@@ -97,6 +116,10 @@ export function SettingsDialog({
             ))}
           </select>
         </label>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
+          App theme colours the chrome (toolbar, panels, dialogs); canvas theme colours the topics.
+          A dark canvas always darkens the chrome too.
+        </p>
       </Section>
 
       <Section title="Getting started">

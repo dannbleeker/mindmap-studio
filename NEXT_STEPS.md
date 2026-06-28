@@ -68,7 +68,14 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   (C4). **Deferred:** C6 (NodePopover → "More…" that opens the rich context menu at the node) — it
   restructures the selection popover + context-menu wiring and needs test rewrites for higher regression
   risk; the right-click menu already provides the full power, so this is a discoverability follow-up.
-- [ ] **Phase 8** — app-wide dark mode (chrome tokenisation + `data-theme` + `prefers-color-scheme`).
+- [x] **Phase 8** — app-wide dark mode (shipped — see CHANGELOG): a `useAppearance` hook (System /
+  Light / Dark, persisted, honouring `prefers-color-scheme` live) resolves a single `chromeDark`
+  that drives `--ed-*`/`--st-*` via decoupled `editorThemeVars(dark)`/`startThemeVars(dark)` (no longer
+  piggy-backing on the canvas theme) + a `data-theme` + `color-scheme` on `<html>`; the static panel
+  `colors.*` palette now resolves to `var(--ed-*)` so all panels/primitives/dialogs (incl. the native
+  `<dialog>` surface) go dark in one move; App-theme control added to Settings. Sync rule: a dark canvas
+  still darkens the chrome under System, so the old dark-canvas/light-chrome clash is gone. Verified by
+  headless render in dark across Start + editor + Settings dialog.
 - [ ] **Phase 9** — Kanban drag-to-retag; presentation true fullscreen; roll-up badge; inspector swatch
   unification; undo coalescing for cycle controls.
 

@@ -37,6 +37,11 @@ export interface DialogProps {
 const DIALOG_BASE: CSSProperties = {
   border: "none",
   borderRadius: radius.xl,
+  // Themed surface by default so every dialog follows the app appearance (Phase 8) — without this a
+  // native <dialog> falls back to the UA white background, which is unreadable in dark mode. Callers
+  // can still override. Fallbacks keep it correct if ever rendered outside the .mm-editor token scope.
+  background: "var(--ed-card, #fff)",
+  color: "var(--ed-ink, #23211c)",
 };
 
 export function Dialog({ open, onClose, onOpen, title, ariaLabel, style, children }: DialogProps) {

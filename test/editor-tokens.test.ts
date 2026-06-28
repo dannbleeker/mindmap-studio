@@ -1,6 +1,6 @@
-// editorThemeVars — the theme-reactive `--ed-*` custom properties the redesigned editor chrome
-// consumes. Pure function of the active canvas theme; tests pin the emerald accent (fixed across
-// themes), the light surfaces, and the dark-branch overrides so Light/Dark/Ocean/Sunset stay legible.
+// editorThemeVars — the `--ed-*` custom properties the redesigned editor chrome consumes. Phase 8:
+// a pure function of the resolved app appearance (light/dark boolean), independent of the canvas
+// theme; tests pin the emerald accent (fixed), the light surfaces, and the dark-branch overrides.
 
 import { describe, expect, it } from "vitest";
 import {
@@ -10,13 +10,12 @@ import {
   EDITOR_FONT_SANS,
   editorThemeVars,
 } from "../src/design/tokens";
-import { themeById } from "../src/mindmap/theme";
 
 type Vars = Record<string, string>;
 
 describe("editorThemeVars", () => {
-  it("derives light-theme surfaces + ink from the canvas theme", () => {
-    const v = editorThemeVars(themeById("light")) as Vars;
+  it("emits the light-appearance surfaces + ink", () => {
+    const v = editorThemeVars(false) as Vars;
     expect(v["--ed-page"]).toBe("#faf9f5");
     expect(v["--ed-card"]).toBe("#ffffff");
     expect(v["--ed-ink"]).toBe("#23211c");
@@ -24,26 +23,27 @@ describe("editorThemeVars", () => {
     expect(v["--ed-border"]).toBe("#e7e4dc");
   });
 
-  it("uses dark overrides for a dark theme (chrome-only tokens branch on theme type)", () => {
-    const v = editorThemeVars(themeById("dark")) as Vars;
+  it("uses dark overrides for the dark appearance", () => {
+    const v = editorThemeVars(true) as Vars;
+    expect(v["--ed-page"]).toBe("#1d1c22");
+    expect(v["--ed-card"]).toBe("#2a2930");
+    expect(v["--ed-ink"]).toBe("#e8e6df");
     expect(v["--ed-sidebar"]).toBe("#16151d");
     expect(v["--ed-ink2"]).toBe("#bdb8ad");
     expect(v["--ed-border"]).toBe("rgba(255,255,255,0.11)");
-    // surfaces still track the dark canvas theme's own cssVars
-    expect(v["--ed-page"]).toBe(themeById("dark").theme.cssVar["--main-bgcolor"]);
   });
 
-  it("keeps the emerald accent fixed across every theme", () => {
-    for (const id of ["light", "dark", "ocean", "sunset"]) {
-      const v = editorThemeVars(themeById(id)) as Vars;
-      expect(v["--ed-accent"], id).toBe(EDITOR_ACCENT);
-      expect(v["--ed-accent-hover"], id).toBe(EDITOR_ACCENT_HOVER);
+  it("keeps the emerald accent fixed in both appearances", () => {
+    for (const dark of [false, true]) {
+      const v = editorThemeVars(dark) as Vars;
+      expect(v["--ed-accent"], String(dark)).toBe(EDITOR_ACCENT);
+      expect(v["--ed-accent-hover"], String(dark)).toBe(EDITOR_ACCENT_HOVER);
     }
     expect(EDITOR_ACCENT).toBe("#1b8a5e");
   });
 
   it("threads the font stacks through (no web fonts — offline-first)", () => {
-    const v = editorThemeVars(themeById("light")) as Vars;
+    const v = editorThemeVars(false) as Vars;
     expect(v["--ed-font-sans"]).toBe(EDITOR_FONT_SANS);
     expect(v["--ed-font-mono"]).toBe(EDITOR_FONT_MONO);
     expect(EDITOR_FONT_MONO).toContain("JetBrains Mono");
@@ -51,7 +51,7 @@ describe("editorThemeVars", () => {
   });
 
   it("emits the full --ed-* contract (shadows, rings, danger)", () => {
-    const v = editorThemeVars(themeById("light")) as Vars;
+    const v = editorThemeVars(false) as Vars;
     for (const key of [
       "--ed-muted",
       "--ed-faint",

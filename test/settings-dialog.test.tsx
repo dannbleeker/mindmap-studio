@@ -24,6 +24,8 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
   const props = {
     open: true,
     onClose: vi.fn(),
+    appearance: "system" as const,
+    setAppearance: vi.fn(),
     theme: themeById("light"),
     setThemeId: vi.fn(),
     onReShowGettingStarted: vi.fn(),
@@ -44,6 +46,12 @@ describe("SettingsDialog", () => {
     expect(screen.getByText("Local data")).toBeTruthy();
     await userEvent.selectOptions(screen.getByLabelText("Canvas theme"), "dark");
     expect(p.setThemeId).toHaveBeenCalledWith("dark");
+  });
+
+  it("drives the app-appearance select (System / Light / Dark)", async () => {
+    const p = setup();
+    await userEvent.selectOptions(screen.getByLabelText("App theme"), "dark");
+    expect(p.setAppearance).toHaveBeenCalledWith("dark");
   });
 
   it("shows the local-storage usage line when an estimate is available", async () => {

@@ -1,21 +1,18 @@
 import type { CSSProperties } from "react";
-import type { CanvasTheme } from "../../mindmap/theme";
 
-// Start-screen design tokens. The emerald brand accent is fixed across themes; surfaces + text come
-// from the current canvas theme's cssVar, and chrome-only tokens (sidebar, borders, muted text)
-// branch on the theme's light/dark type — so Light / Dark / Ocean / Sunset all stay legible. The
-// tokens are emitted as `--st-*` CSS custom properties on the .start root; start.css consumes them.
+// Start-screen design tokens. The emerald brand accent is fixed across themes; chrome surfaces + text
+// branch on the app's `dark` appearance (Phase 8 — independent of the canvas theme) so the Start
+// screen honours System / Light / Dark. Emitted as `--st-*` CSS custom properties on the .start root;
+// start.css consumes them.
 
 export const ACCENT = "#1b8a5e";
 export const ACCENT_HOVER = "#15714d";
 
-/** Build the `--st-*` custom properties for the .start root from the active canvas theme. */
-export function startThemeVars(theme: CanvasTheme): CSSProperties {
-  const v = theme.theme.cssVar;
-  const dark = theme.theme.type === "dark";
-  const page = v["--main-bgcolor"] ?? (dark ? "#1d1c22" : "#faf9f5");
-  const card = v["--bgcolor"] ?? (dark ? "#2a2930" : "#ffffff");
-  const ink = v["--main-color"] ?? (dark ? "#e8e6df" : "#23211c");
+/** Build the `--st-*` custom properties for the .start root from the resolved app appearance. */
+export function startThemeVars(dark: boolean): CSSProperties {
+  const page = dark ? "#1d1c22" : "#faf9f5";
+  const card = dark ? "#2a2930" : "#ffffff";
+  const ink = dark ? "#e8e6df" : "#23211c";
   return {
     "--st-page": page,
     "--st-card": card,

@@ -1416,10 +1416,10 @@ export function PlaybackBar({
         alignItems: "center",
         gap: 8,
         padding: "8px 12px",
-        background: "rgba(255,255,255,0.95)",
+        background: "var(--ed-card, rgba(255,255,255,0.95))",
         border: `1px solid ${colors.playbackBorder}`,
         borderRadius: radius.xl,
-        boxShadow: "0 6px 24px rgba(31,27,77,0.18)",
+        boxShadow: "var(--ed-shadow-pop, 0 6px 24px rgba(31,27,77,0.18))",
         maxWidth: "min(560px, calc(100% - 24px))",
       }}
     >

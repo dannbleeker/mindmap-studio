@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **App-wide dark mode (Phase 8).** A real dark theme for the whole app chrome — toolbar, side panels,
+  inspector, dialogs, toasts and the Start screen — not just the canvas. A new **App theme: System /
+  Light / Dark** control in Settings drives it, **defaulting to System** (it follows your OS
+  `prefers-color-scheme` and updates live when you flip your desktop theme). It's **independent of the
+  canvas theme** (which still colours the topics), with one tie: a dark canvas always darkens the chrome
+  too, so you never get a bright toolbar around a dark map. Under the hood the chrome's colour palette
+  now resolves to the theme-reactive `--ed-*`/`--st-*` tokens, so every panel and dialog re-themes from
+  one source.
+
 - **Onboarding & learnability pass (Phase 7).** Help new users get oriented and find the editor's power:
   - **Install MindMap Studio as an app.** When your browser offers it, an "Install" button appears in
     the Start sidebar footer + the About pages; on iOS Safari you get an "Add to Home Screen via Share"

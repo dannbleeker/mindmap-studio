@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { blankDoc, outlineDoc, topicDoc } from "../src/components/start/docBuilders";
 import { branchLabels, countNodes, docNodeCount } from "../src/components/start/nodeStats";
 import { ACCENT, startThemeVars } from "../src/components/start/tokens";
-import { themeById } from "../src/mindmap/theme";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 
 const leaf = (id: string, topic: string): MapNode => ({ id, topic, children: [] });
@@ -103,28 +102,24 @@ describe("startThemeVars", () => {
     "--st-shadow",
   ];
 
-  it("emits every --st-* token for each canvas theme", () => {
-    for (const id of ["light", "dark", "ocean", "sunset"]) {
-      const vars = startThemeVars(themeById(id)) as Record<string, string>;
-      for (const k of KEYS) expect(vars[k], `${id} ${k}`).toBeTruthy();
+  it("emits every --st-* token for each appearance", () => {
+    for (const dark of [false, true]) {
+      const vars = startThemeVars(dark) as Record<string, string>;
+      for (const k of KEYS) expect(vars[k], `${dark} ${k}`).toBeTruthy();
     }
   });
 
-  it("keeps the emerald accent fixed across themes", () => {
-    for (const id of ["light", "dark", "ocean", "sunset"]) {
-      expect((startThemeVars(themeById(id)) as Record<string, string>)["--st-accent"]).toBe(ACCENT);
+  it("keeps the emerald accent fixed across appearances", () => {
+    for (const dark of [false, true]) {
+      expect((startThemeVars(dark) as Record<string, string>)["--st-accent"]).toBe(ACCENT);
     }
   });
 
-  it("derives chrome from the theme type (dark differs from light)", () => {
-    const light = startThemeVars(themeById("light")) as Record<string, string>;
-    const dark = startThemeVars(themeById("dark")) as Record<string, string>;
+  it("branches chrome on the appearance (dark differs from light)", () => {
+    const light = startThemeVars(false) as Record<string, string>;
+    const dark = startThemeVars(true) as Record<string, string>;
     expect(dark["--st-sidebar"]).not.toBe(light["--st-sidebar"]);
-  });
-
-  it("reads surfaces from the active theme's cssVar", () => {
-    const t = themeById("ocean");
-    const vars = startThemeVars(t) as Record<string, string>;
-    expect(vars["--st-page"]).toBe(t.theme.cssVar["--main-bgcolor"]);
+    expect(light["--st-page"]).toBe("#faf9f5");
+    expect(dark["--st-page"]).toBe("#1d1c22");
   });
 });

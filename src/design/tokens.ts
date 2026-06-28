@@ -17,7 +17,6 @@
 // The emerald brand accent is fixed across themes to match the start screen.
 
 import type { CSSProperties } from "react";
-import type { CanvasTheme } from "../mindmap/theme";
 
 /** Emerald brand accent — fixed across all canvas themes (matches the start screen). */
 export const EDITOR_ACCENT = "#1b8a5e";
@@ -29,16 +28,14 @@ export const EDITOR_ACCENT_HOVER = "#15714d";
 export const EDITOR_FONT_SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
 export const EDITOR_FONT_MONO = '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 
-/** Build the `--ed-*` custom properties for the `.mm-editor` root from the active canvas theme.
- *  Surfaces + ink track the theme's cssVars (so dark themes stay legible); chrome-only tokens branch
- *  on the theme's light/dark type; the emerald accent is constant. Consumed by editor.css + the
- *  redesigned chrome components. */
-export function editorThemeVars(theme: CanvasTheme): CSSProperties {
-  const v = theme.theme.cssVar;
-  const dark = theme.theme.type === "dark";
-  const page = v["--main-bgcolor"] ?? (dark ? "#1d1c22" : "#faf9f5");
-  const card = v["--bgcolor"] ?? (dark ? "#2a2930" : "#ffffff");
-  const ink = v["--main-color"] ?? (dark ? "#e8e6df" : "#23211c");
+/** Build the `--ed-*` custom properties for the `.mm-editor` root from the app's chrome appearance
+ *  (Phase 8): `dark` is resolved app-wide (system / light / dark) independently of the canvas theme,
+ *  so the chrome can be dark over a light canvas and vice-versa. Chrome surfaces are neutral light/dark
+ *  values; the emerald accent is constant. Consumed by editor.css + the redesigned chrome components. */
+export function editorThemeVars(dark: boolean): CSSProperties {
+  const page = dark ? "#1d1c22" : "#faf9f5";
+  const card = dark ? "#2a2930" : "#ffffff";
+  const ink = dark ? "#e8e6df" : "#23211c";
   return {
     "--ed-page": page,
     "--ed-card": card,
@@ -78,68 +75,69 @@ export function editorThemeVars(theme: CanvasTheme): CSSProperties {
 }
 
 /** Semantic colours for the side panels (Outline / Filter / Styles / History / Index / Info).
- *  Retuned to the warm-cream + emerald language of the redesign so the panels harmonise with the new
- *  chrome. These are static light values (the panels were never dark-adaptive); the theme-reactive
- *  chrome uses the `--ed-*` tokens above. Grouped by role; the swatch arrays are the styling pickers. */
+ *  Phase 8: these now resolve to the theme-reactive `--ed-*` tokens above (every consumer renders
+ *  inside `.mm-editor`, where those tokens are in scope), so the panels + shared primitives go dark
+ *  with the app appearance — with the original light hex kept as the `var()` fallback so nothing
+ *  changes in light mode or if a token is ever out of scope. The swatch arrays + a couple of
+ *  genuinely-fixed values stay literal. */
 export const colors = {
   /** Primary ink — topic/panel text, control labels. */
-  text: "#23211c",
+  text: "var(--ed-ink, #23211c)",
   /** Muted label text (section sub-labels, inline field labels). */
-  muted: "#5c574e",
-  /** Fainter secondary text (counts, hints, empty-state copy). Darkened from #938d81 (3.3:1) to meet
-   *  WCAG AA 4.5:1 on the white panel surface. */
-  faint: "#706a5f",
+  muted: "var(--ed-ink2, #5c574e)",
+  /** Fainter secondary text (counts, hints, empty-state copy). */
+  faint: "var(--ed-muted, #706a5f)",
   /** Placeholder / disabled-ish copy in the notes editor empty states. */
-  placeholder: "#b6b0a4",
+  placeholder: "var(--ed-faint, #b6b0a4)",
 
   /** Divider / border between panel regions and below the marker/style bars. */
-  border: "#e7e4dc",
+  border: "var(--ed-border, #e7e4dc)",
   /** Control border (buttons, inputs, chips, swatch frames). */
-  controlBorder: "#e7e4dc",
+  controlBorder: "var(--ed-border, #e7e4dc)",
 
   /** Panel aside background. */
-  surface: "#ffffff",
+  surface: "var(--ed-card, #ffffff)",
   /** Marker/Style bar background (a faint warm strip inside the Info panel). */
-  surfaceBar: "#f4f2ec",
-  /** Plain white surface (inputs, swatch buttons, the "off" chip). */
-  white: "#fff",
+  surfaceBar: "var(--ed-sidebar, #f4f2ec)",
+  /** Plain surface (inputs, swatch buttons, the "off" chip) — the adaptive card surface. */
+  white: "var(--ed-card, #fff)",
 
   /** Control fill (the toolbar button look). */
-  controlBg: "#f4f2ec",
+  controlBg: "var(--ed-sidebar, #f4f2ec)",
   /** Accent — active chip background + border, the lit toggle state (emerald). */
-  accent: "#1b8a5e",
+  accent: "var(--ed-accent, #1b8a5e)",
   /** Accent used as the history-timeline range slider tint. */
-  accentSlider: "#1b8a5e",
+  accentSlider: "var(--ed-accent, #1b8a5e)",
   /** Active marker chip background (a soft emerald tint, distinct from the solid accent fill). */
-  accentTint: "#e3f1ea",
+  accentTint: "var(--ed-accent-tint, #e3f1ea)",
 
   /** Context-menu chrome (FlowMindMap right-click menu + linking banner). */
   menu: {
-    border: "#cfcfe0",
-    separator: "#eceafb",
-    /** Themed fallbacks for the menu surface when no theme cssVar is present. */
-    fallbackBg: "#fff",
-    fallbackColor: "#222",
-    /** Linking-banner fallbacks (mirror the root node theme vars). */
+    border: "var(--ed-border, #cfcfe0)",
+    separator: "var(--ed-divider, #eceafb)",
+    /** Themed fallbacks for the menu surface when no node theme cssVar is present. */
+    fallbackBg: "var(--ed-card, #fff)",
+    fallbackColor: "var(--ed-ink, #222)",
+    /** Linking-banner fallbacks (mirror the root node theme vars) — kept literal (a fixed dark banner). */
     linkBg: "#26215c",
     linkColor: "#fff",
   },
 
-  /** Floating playback bar border (a cool lilac-grey). */
-  playbackBorder: "#d9d7ea",
+  /** Floating playback bar border. */
+  playbackBorder: "var(--ed-border, #d9d7ea)",
 
   /** Import/notification strips along the top of the editor. */
   toast: {
-    successBg: "#eafaf0",
-    infoBg: "#eef2fc",
+    successBg: "var(--ed-toast-success-bg, #eafaf0)",
+    infoBg: "var(--ed-toast-info-bg, #eef2fc)",
     /** Success/info share the control border below the strip. */
-    infoBorder: "#cecbf6",
-    errorBg: "#fcebeb",
-    errorText: "#791f1f",
-    errorBorder: "#f7c1c1",
-    warnBg: "#faeeda",
-    warnText: "#633806",
-    warnBorder: "#fac775",
+    infoBorder: "var(--ed-toast-border, #cecbf6)",
+    errorBg: "var(--ed-toast-error-bg, #fcebeb)",
+    errorText: "var(--ed-toast-error-ink, #791f1f)",
+    errorBorder: "var(--ed-toast-error-border, #f7c1c1)",
+    warnBg: "var(--ed-toast-warn-bg, #faeeda)",
+    warnText: "var(--ed-toast-warn-ink, #633806)",
+    warnBorder: "var(--ed-toast-warn-border, #fac775)",
   },
 
   /** Per-topic fill swatches (StyleBar + StylesPanel conditional-formatting picker). */

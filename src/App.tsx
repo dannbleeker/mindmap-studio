@@ -115,6 +115,7 @@ import { setTagColor, tagColor } from "./tagColors";
 import { todayISO } from "./taskDate";
 import { buildTemplate } from "./templates";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
+import { resolveChromeDark, useAppearance } from "./useAppearance";
 import { useFind } from "./useFind";
 import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
@@ -198,6 +199,17 @@ export function App() {
   // Transient toast: a message + an optional action button (e.g. "Refresh now") — owned by useToast.
   const { toast, showToast, showHint, dismiss: dismissToast } = useToast();
   const { theme, setThemeId } = useTheme();
+  // App-wide chrome appearance (Phase 8) — independent of the canvas theme. Resolves to a single
+  // light/dark for all chrome surfaces; a dark canvas theme also darkens the chrome under "system".
+  const { appearance, setAppearance, prefersDark } = useAppearance();
+  const chromeDark = resolveChromeDark(appearance, prefersDark, theme.theme.type === "dark");
+  // Mirror the resolved appearance onto <html> so native UI (scrollbars, form controls) + any
+  // selector-based CSS can react, and the body backdrop behind the app matches.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.theme = chromeDark ? "dark" : "light";
+    root.style.colorScheme = chromeDark ? "dark" : "light";
+  }, [chromeDark]);
   const [layout, setLayout] = useState<LayoutKind>(() => {
     const valid = [
       "side",
@@ -1345,7 +1357,7 @@ export function App() {
       <>
         <Suspense fallback={null}>
           <StartScreen
-            theme={theme}
+            dark={chromeDark}
             onOpen={openFromStart}
             onImportFiles={importFromStart}
             onCheckForUpdates={checkForUpdates}
@@ -1359,7 +1371,11 @@ export function App() {
   }
 
   return (
-    <div className="mm-editor" style={editorThemeVars(theme)}>
+    <div
+      className="mm-editor"
+      data-theme={chromeDark ? "dark" : "light"}
+      style={editorThemeVars(chromeDark)}
+    >
       <IconRail
         onHome={goHome}
         onImage={handleImage}
@@ -1468,10 +1484,10 @@ export function App() {
               justifyContent: "center",
               gap: 10,
               padding: "4px 12px",
-              background: "#efe9ff",
-              borderBottom: "1px solid #cecbf6",
+              background: "var(--ed-toast-info-bg, #efe9ff)",
+              borderBottom: "1px solid var(--ed-toast-border, #cecbf6)",
               fontSize: 13,
-              color: "#26215c",
+              color: "var(--ed-toast-ink, #26215c)",
             }}
           >
             <span>
@@ -1495,10 +1511,10 @@ export function App() {
               justifyContent: "center",
               gap: 10,
               padding: "4px 12px",
-              background: "#e9f6ef",
-              borderBottom: "1px solid #bfe6d2",
+              background: "var(--ed-toast-success-bg, #e9f6ef)",
+              borderBottom: "1px solid var(--ed-toast-border, #bfe6d2)",
               fontSize: 13,
-              color: "#14573a",
+              color: "var(--ed-toast-ink, #14573a)",
             }}
           >
             <span>
@@ -2052,7 +2068,7 @@ export function App() {
           padding: "18px 20px",
           maxWidth: 520,
           width: "calc(100% - 32px)",
-          color: "#1f2933",
+          color: "var(--ed-ink)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -2078,7 +2094,9 @@ export function App() {
             const hits = searchLibrary(libDocs, libQuery);
             if (hits.length === 0) {
               return (
-                <p style={{ color: "#73726c", fontSize: 13, margin: "12px 2px 0" }}>No matches.</p>
+                <p style={{ color: "var(--ed-muted)", fontSize: 13, margin: "12px 2px 0" }}>
+                  No matches.
+                </p>
               );
             }
             return (
@@ -2109,12 +2127,12 @@ export function App() {
                       }}
                     >
                       <span>{h.topic}</span>{" "}
-                      <span style={{ color: "#9aa5b1", fontSize: 12 }}>— {h.mapTitle}</span>
+                      <span style={{ color: "var(--ed-faint)", fontSize: 12 }}>— {h.mapTitle}</span>
                     </button>
                   </li>
                 ))}
                 {hits.length > 50 && (
-                  <li style={{ color: "#9aa5b1", fontSize: 12, padding: "6px 8px" }}>
+                  <li style={{ color: "var(--ed-faint)", fontSize: 12, padding: "6px 8px" }}>
                     +{hits.length - 50} more — refine your search
                   </li>
                 )}
@@ -2133,7 +2151,7 @@ export function App() {
           padding: "22px 24px",
           maxWidth: 440,
           width: "calc(100% - 32px)",
-          color: "#1f2933",
+          color: "var(--ed-ink)",
           lineHeight: 1.5,
         }}
       >
@@ -2155,7 +2173,7 @@ export function App() {
             ✕
           </button>
         </div>
-        <p style={{ margin: "8px 0 14px", color: "#52606d", fontSize: 13 }}>
+        <p style={{ margin: "8px 0 14px", color: "var(--ed-muted)", fontSize: 13 }}>
           Local-first mind mapping — a MindManager replacement. Your maps stay in your browser.
         </p>
         <p style={{ margin: "0 0 14px", fontSize: 13 }}>© 2026 Dann Bleeker Pedersen</p>
@@ -2191,7 +2209,7 @@ export function App() {
         <div
           style={{
             marginTop: 16,
-            borderTop: "1px solid #e4e4e7",
+            borderTop: "1px solid var(--ed-border)",
             paddingTop: 14,
             display: "flex",
             alignItems: "center",
@@ -2221,6 +2239,8 @@ export function App() {
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        appearance={appearance}
+        setAppearance={setAppearance}
         theme={theme}
         setThemeId={setThemeId}
         onReShowGettingStarted={reShowFirstRun}
@@ -2250,8 +2270,8 @@ export function App() {
         style={{ padding: 0, width: "min(560px, 92vw)" }}
       >
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-          <strong style={{ color: "#26215c" }}>Paste text → topics</strong>
-          <p style={{ margin: 0, fontSize: 13, color: "#73726c" }}>
+          <strong style={{ color: "var(--ed-ink)" }}>Paste text → topics</strong>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--ed-muted)" }}>
             Paste an outline, a bullet list, or Markdown — indentation (or <code>#</code> headings)
             sets the hierarchy. A spreadsheet selection (Excel / Sheets) becomes one topic per row,
             with extra columns as the note and a <code>Tags</code> column as tags.
@@ -2264,12 +2284,13 @@ export function App() {
             rows={10}
             style={{
               resize: "vertical",
-              border: "1px solid #cecbf6",
+              border: "1px solid var(--ed-border)",
               borderRadius: 8,
               padding: 8,
               fontSize: 13,
               fontFamily: "ui-monospace, monospace",
-              color: "#26215c",
+              color: "var(--ed-ink)",
+              background: "var(--ed-card)",
             }}
           />
           <div
@@ -2280,12 +2301,12 @@ export function App() {
               gap: 8,
             }}
           >
-            <span style={{ fontSize: 12, color: "#8a8780" }}>{paste.count} topics</span>
+            <span style={{ fontSize: 12, color: "var(--ed-muted)" }}>{paste.count} topics</span>
             <span style={{ display: "flex", gap: 6 }}>
               <button
                 type="button"
                 onClick={() => paste.setOpen(false)}
-                style={{ ...controlStyle, background: "#fff" }}
+                style={{ ...controlStyle, background: "var(--ed-card)" }}
               >
                 Cancel
               </button>

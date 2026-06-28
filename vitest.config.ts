@@ -30,6 +30,7 @@ export default defineConfig({
       ["test/icon-rail.test.tsx", "jsdom"],
       ["test/toolbar.test.tsx", "jsdom"],
       ["test/install-prompt.test.tsx", "jsdom"],
+      ["test/use-appearance.test.tsx", "jsdom"],
       ["test/find-replace-overlay.test.tsx", "jsdom"],
       ["test/kanban.test.tsx", "jsdom"],
       ["test/brainstorm-timer.test.tsx", "jsdom"],

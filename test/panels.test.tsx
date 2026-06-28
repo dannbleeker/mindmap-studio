@@ -329,6 +329,7 @@ describe("InfoPanel", () => {
       onMarker?: (m: string) => void;
       onTag?: (t: string) => void;
     },
+    over: Partial<React.ComponentProps<typeof InfoPanel>> = {},
   ) =>
     render(
       <InfoPanel
@@ -367,6 +368,7 @@ describe("InfoPanel", () => {
         backlinks={backlinks}
         onFollowBacklink={onFollowBacklink}
         onMinimize={noop}
+        {...over}
       />,
     );
 
@@ -412,6 +414,31 @@ describe("InfoPanel", () => {
     expect(screen.getByText("Dates")).toBeTruthy();
     expect(screen.getByText("Priority")).toBeTruthy();
     expect(screen.getByText("Links")).toBeTruthy();
+  });
+
+  it("inserts a markdown link from the note toolbar when nothing is selected (🔗 Link)", async () => {
+    const onNoteChange = vi.fn();
+    const prompt = vi.spyOn(window, "prompt").mockReturnValue("https://example.com");
+    renderInfo(selected, node, undefined, undefined, undefined, [], noop, undefined, undefined, {
+      onNoteChange,
+    });
+    await userEvent.click(screen.getByRole("button", { name: "🔗 Link" }));
+    // With no text selected the URL is appended as its own markdown link (round-trips via htmlToNote).
+    expect(onNoteChange).toHaveBeenCalledWith(
+      expect.stringContaining("[https://example.com](https://example.com)"),
+    );
+    prompt.mockRestore();
+  });
+
+  it("ignores a non-http(s) link URL (🔗 Link)", async () => {
+    const onNoteChange = vi.fn();
+    const prompt = vi.spyOn(window, "prompt").mockReturnValue("javascript:alert(1)");
+    renderInfo(selected, node, undefined, undefined, undefined, [], noop, undefined, undefined, {
+      onNoteChange,
+    });
+    await userEvent.click(screen.getByRole("button", { name: "🔗 Link" }));
+    expect(onNoteChange).not.toHaveBeenCalled();
+    prompt.mockRestore();
   });
 
   it("hides the Details note/markers/tags once the Style tab is active (#7)", async () => {

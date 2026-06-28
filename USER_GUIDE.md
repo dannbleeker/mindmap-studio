@@ -138,15 +138,19 @@ the multi-selection. *(Because the canvas now box-selects on a
 left-drag, pan with the middle or right mouse button; scroll still zooms.)*
 
 **Map properties.** With nothing selected, the panel shows the **Map** — rename the map inline and
-set its **theme**, **layout**, **background colour / image**, and **line-jumps** there (the same
-settings as the toolbar's Canvas menu), above a quick **overview** (topics, branches, task progress).
+set its **theme**, **layout**, **background colour / image**, **accent colour**, and **line-jumps**
+there (the same settings as the toolbar's Canvas menu), above a quick **overview** (topics, branches,
+task progress). The **accent** is the default tint for relationship lines and boundary boxes — pick any
+colour (or **Reset** to the theme default) without touching the rest of the style.
 When the map has a **diagram backdrop** (onion / funnel / Venn), a **Backdrop** section lets you
 add / remove a ring or stage, set its **colour**, and remove the backdrop. Clicking a **relationship**
 arrow instead shows a connector editor (see [Relationships](#relationships-boundaries--callouts)).
 
 - **Note** — write in the **WYSIWYG** editor: a formatting toolbar (**bold**, *italic*,
-  ~~strikethrough~~, bulleted list, numbered list) and inline formatting as you type — no raw markup
-  to read. The note box fills the inspector's height. Notes autosave, travel with the map (and the
+  ~~strikethrough~~, bulleted list, numbered list, headings, highlight, code, checklist, **🔗 link**,
+  image, table) and inline formatting as you type — no raw markup to read. The **🔗 Link** button wraps
+  the selected text in a link (or, with nothing selected, drops in the URL). The note box fills the
+  inspector's height. Notes autosave, travel with the map (and the
   lossless `.json` export). Behind the scenes the note is stored as **Markdown** (`#` headings,
   `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, `- lists`, `1. numbered`, `[links](https://…)`),
   so it stays portable across every export. Nodes with a note show a 📝 — in the

@@ -2,7 +2,7 @@
 // branches / task progress over the live doc) AND the new Map settings: title rename, theme + layout
 // selects, background colour, line-jumps toggle. Each control fires the prop App wires to the real
 // handler. jsdom so the editable title + change events work.
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { MapPanel } from "../src/components/MapPanel";
@@ -43,6 +43,8 @@ function setup(d: MindMapDoc = planDoc, over: Partial<React.ComponentProps<typeo
     changeLayout: vi.fn(),
     background: d.meta?.background,
     onSetBackground: vi.fn(),
+    accentColor: d.meta?.accentColor,
+    onSetAccentColor: vi.fn(),
     onSetBackgroundImage: vi.fn(),
     handleBackgroundImage: noop,
     lineJumps: !!d.meta?.lineJumps,
@@ -109,6 +111,25 @@ describe("MapPanel", () => {
     expect(onSetBackground).toHaveBeenCalledWith("");
   });
 
+  it("reflects + drives the map accent colour (Reset only once an accent is set)", async () => {
+    const { onSetAccentColor } = setup(
+      doc("M", { id: "root", topic: "M", children: [] }, { accentColor: "#e36414" }),
+    );
+    const picker = screen.getByLabelText("Accent colour") as HTMLInputElement;
+    expect(picker.value).toBe("#e36414");
+    fireEvent.change(picker, { target: { value: "#123456" } });
+    expect(onSetAccentColor).toHaveBeenCalledWith("#123456");
+    // Background is unset here, so the only Reset button is the accent one → clears the accent.
+    await userEvent.click(screen.getByRole("button", { name: "Reset" }));
+    expect(onSetAccentColor).toHaveBeenCalledWith("");
+  });
+
+  it("shows the emerald default in the accent picker when no accent is set", () => {
+    setup(doc("M", { id: "root", topic: "M", children: [] }));
+    expect((screen.getByLabelText("Accent colour") as HTMLInputElement).value).toBe("#1b8a5e");
+    expect(screen.queryByRole("button", { name: "Reset" })).toBeNull(); // nothing to reset
+  });
+
   it("disables the layout select in free-canvas mode", () => {
     setup(doc("F", { id: "root", topic: "F", children: [] }, { freeform: true }), {
       freeform: true,
@@ -160,6 +181,7 @@ describe("MapPanel", () => {
         changeLayout={noop}
         background={undefined}
         onSetBackground={noop}
+        onSetAccentColor={noop}
         onSetBackgroundImage={noop}
         handleBackgroundImage={noop}
         lineJumps={false}
@@ -183,6 +205,7 @@ describe("MapPanel", () => {
         changeLayout={noop}
         background={undefined}
         onSetBackground={noop}
+        onSetAccentColor={noop}
         onSetBackgroundImage={noop}
         handleBackgroundImage={noop}
         lineJumps={false}

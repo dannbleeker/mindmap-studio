@@ -1818,6 +1818,8 @@ export function App() {
                 freeform={liveDoc.meta?.freeform}
                 background={liveDoc.meta?.background}
                 onSetBackground={(c) => mapRef.current?.setBackground(c)}
+                accentColor={liveDoc.meta?.accentColor}
+                onSetAccentColor={(c) => mapRef.current?.setAccentColor(c)}
                 onSetBackgroundImage={(u) => mapRef.current?.setBackgroundImage(u)}
                 handleBackgroundImage={handleBackgroundImage}
                 lineJumps={!!liveDoc.meta?.lineJumps}

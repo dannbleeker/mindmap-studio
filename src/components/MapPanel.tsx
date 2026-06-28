@@ -43,6 +43,8 @@ export function MapPanel({
   freeform,
   background,
   onSetBackground,
+  accentColor,
+  onSetAccentColor,
   onSetBackgroundImage,
   handleBackgroundImage,
   lineJumps,
@@ -63,6 +65,9 @@ export function MapPanel({
   freeform?: boolean;
   background?: string;
   onSetBackground: (color: string) => void;
+  /** The map-wide accent colour (default tint for relationships + boundaries), or "" for the theme default. */
+  accentColor?: string;
+  onSetAccentColor: (color: string) => void;
   onSetBackgroundImage: (url: string) => void;
   handleBackgroundImage: (e: ChangeEvent<HTMLInputElement>) => void;
   lineJumps: boolean;
@@ -199,6 +204,32 @@ export function MapPanel({
                   className="mm-map-control"
                   onClick={() => onSetBackground("")}
                   title="Reset background colour"
+                  style={{ cursor: "pointer" }}
+                >
+                  Reset
+                </button>
+              ) : null}
+            </div>
+          </div>
+          {/* Accent — the default tint for relationship lines + boundary boxes. Previously only
+              settable as a side effect of a whole Design preset; now a standalone control. */}
+          <div className="mm-map-field">
+            <span>Accent</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <input
+                type="color"
+                className="mm-map-control"
+                value={accentColor || "#1b8a5e"}
+                onChange={(e) => onSetAccentColor(e.target.value)}
+                aria-label="Accent colour"
+                style={{ padding: 1, width: 34, height: 24 }}
+              />
+              {accentColor ? (
+                <button
+                  type="button"
+                  className="mm-map-control"
+                  onClick={() => onSetAccentColor("")}
+                  title="Reset accent colour"
                   style={{ cursor: "pointer" }}
                 >
                   Reset

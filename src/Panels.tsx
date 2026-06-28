@@ -2754,6 +2754,28 @@ export function NotesPanel({
     if (!url || !/^(https?:\/\/|data:image\/)/i.test(url)) return;
     appendBlock(`![](${url})`);
   };
+  // Insert an inline link. With text selected, wrap it (createLink → <a>, which htmlToNote serialises
+  // to [text](url)); with nothing selected, append the URL as its own markdown link. The selection is
+  // captured + restored because window.prompt can drop it. The renderer already round-trips links —
+  // this just gives the capability a button (matching image/table) instead of hand-typed markdown.
+  const insertLink = () => {
+    const sel = window.getSelection();
+    const range =
+      sel && sel.rangeCount > 0 && !sel.isCollapsed ? sel.getRangeAt(0).cloneRange() : null;
+    const hasText = !!range && range.toString().trim().length > 0;
+    const url = window.prompt("Link URL (https://… or mailto:…)")?.trim();
+    if (!url || !/^(https?:\/\/|mailto:|#)/i.test(url)) return;
+    ref.current?.focus();
+    if (hasText && range) {
+      const s = window.getSelection();
+      s?.removeAllRanges();
+      s?.addRange(range); // restore the selection the prompt may have cleared
+      document.execCommand("createLink", false, url);
+      serialize();
+    } else {
+      appendBlock(`[${url}](${url})`);
+    }
+  };
   const insertTable = () =>
     appendBlock("| Column A | Column B |\n| --- | --- |\n| Cell 1 | Cell 2 |");
   // Block-level formatting (headings, code block) via the native formatBlock command — its <h1>/<pre>
@@ -2890,6 +2912,14 @@ export function NotesPanel({
               style={tbBtn}
             >
               ☑ List
+            </Button>
+            <Button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={insertLink}
+              title="Insert link (wraps the selected text)"
+              style={tbBtn}
+            >
+              🔗 Link
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}

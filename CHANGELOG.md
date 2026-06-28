@@ -24,6 +24,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **The map accent colour is now a one-click control.** The accent (the default tint for relationship
+  lines and boundary boxes) could previously only be changed as a side effect of applying a whole Design
+  preset — which also rewrote your theme, connectors and branch weight, and only offered the preset's
+  fixed colour. The **Map** inspector (no node selected) now has an **Accent** colour picker with Reset,
+  so you can set any accent without disturbing the rest of the style.
+- **Notes have a Link button.** The note editor rendered markdown links and even advertised "links" in
+  its placeholder, but the only way to add one was to hand-type `[text](url)`. There's now a **🔗 Link**
+  button (next to Image / Table): with text selected it wraps the selection; with nothing selected it
+  appends the URL as a link. `http(s)` / `mailto:` / in-page `#` targets only.
 - **Find & Replace gained Next / Prev controls and an announced match count.** Cycling matches was
   Enter-only and undiscoverable, and the "3/12" / "no matches" / "invalid regex" counter was invisible
   to screen readers. There are now **▴ / ▾** buttons (and **Shift+Enter** steps backwards), and the

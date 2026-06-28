@@ -240,6 +240,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     image,
     note,
     hyperlink,
+    rollup,
     isRoot,
     depth,
     branchColor,
@@ -708,6 +709,15 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               style={{ marginLeft: 4, opacity: 0.55, fontSize: "0.85em" }}
             >
               🔒
+            </span>
+          ) : null}
+          {rollup ? (
+            <span
+              title="Roll-up: this topic mirrors another map — Refresh roll-ups to pull the latest"
+              aria-label="Roll-up source"
+              style={{ marginLeft: 4, opacity: 0.6, fontSize: "0.85em" }}
+            >
+              ⤵
             </span>
           ) : null}
         </span>

@@ -14,6 +14,13 @@ const KIND_LABEL: Record<SelectedOverlay["kind"], string> = {
   callout: "Callout",
 };
 
+/** A one-line context describing what the overlay covers — mirrors the node inspector's breadcrumb so
+ *  every inspector reads the same way (P5). caption is already "N topics" for boundary/summary. */
+function overlayContext(kind: SelectedOverlay["kind"], caption: string): string {
+  if (kind === "callout") return caption ? `Callout on ${caption}` : "Callout";
+  return `${KIND_LABEL[kind]} around ${caption || "0 topics"}`;
+}
+
 const controlStyle: CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
@@ -83,6 +90,10 @@ export function OverlayInspector({
             title={caption}
           >
             {caption || KIND_LABEL[overlay.kind]}
+          </div>
+          {/* Faint context line under the title, matching the node + edge inspectors (P5). */}
+          <div className="mm-inspector-path" title={overlayContext(overlay.kind, caption)}>
+            {overlayContext(overlay.kind, caption)}
           </div>
         </div>
         {onMinimize && (

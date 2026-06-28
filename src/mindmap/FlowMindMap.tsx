@@ -381,6 +381,11 @@ function FlowInner({
   const historyRef = useRef<History<DocSnapshot>>(
     mountSession.current?.history ?? createHistory<DocSnapshot>(),
   );
+  // Undo coalescing (S4): rapid repeated edits to the SAME node+field (priority / progress / task chip
+  // spree) within COALESCE_MS collapse into ONE undo step — `apply` skips pushing a new snapshot while
+  // the key matches inside the window, so undoing once jumps back to the pre-spree state. Any other
+  // edit (no key / different key) resets it, preserving normal undo granularity.
+  const coalesceRef = useRef<{ key: string; at: number } | null>(null);
   // Mirror refs: each tracks the latest prop/state so the stable callbacks below read live values
   // without re-creating. (docRef/historyRef/mountSession are NOT mirrors — they hold their own state.)
   const paletteRef = useLatestRef(palette);
@@ -597,14 +602,26 @@ function FlowInner({
 
   // Apply a pure op: persist + re-render; optionally enter edit on the resulting node.
   const apply = useCallback(
-    (result: OpResult, edit = false, animate = false) => {
+    (result: OpResult, edit = false, animate = false, coalesceKey?: string) => {
       if (result.doc !== docRef.current) {
-        // Snapshot the old doc + the anchor that was selected with it, so undo restores the selection.
-        historyRef.current = record(historyRef.current, {
-          doc: docRef.current,
-          anchor: selectedRef.current,
-        });
-        reportHistory();
+        // Coalesce repeated same-key edits within a short window into one undo step (S4): on a matching
+        // key inside COALESCE_MS, skip pushing a snapshot (the pre-spree doc is already on top of `past`).
+        const now = Date.now();
+        const prevCoalesce = coalesceRef.current;
+        const coalesce =
+          coalesceKey !== undefined &&
+          prevCoalesce?.key === coalesceKey &&
+          now - prevCoalesce.at < 600;
+        if (!coalesce) {
+          // Snapshot the old doc + the anchor selected with it, so undo restores the selection.
+          historyRef.current = record(historyRef.current, {
+            doc: docRef.current,
+            anchor: selectedRef.current,
+          });
+          reportHistory();
+        }
+        // Track the key for the next click; a non-keyed apply clears it, breaking the coalesce chain.
+        coalesceRef.current = coalesceKey !== undefined ? { key: coalesceKey, at: now } : null;
         sync(result.doc, result.selectId, animate);
         onChangeRef.current?.(result.doc);
       }
@@ -645,6 +662,7 @@ function FlowInner({
     [sync, selectOnly, fireSelect],
   );
   const undoAction = useCallback(() => {
+    coalesceRef.current = null; // an undo breaks any open coalesce chain (S4)
     const r = undoHistory(historyRef.current, { doc: docRef.current, anchor: selectedRef.current });
     if (r) {
       historyRef.current = r.history;
@@ -653,6 +671,7 @@ function FlowInner({
     }
   }, [restore, reportHistory]);
   const redoAction = useCallback(() => {
+    coalesceRef.current = null; // a redo breaks any open coalesce chain (S4)
     const r = redoHistory(historyRef.current, { doc: docRef.current, anchor: selectedRef.current });
     if (r) {
       historyRef.current = r.history;
@@ -669,6 +688,7 @@ function FlowInner({
   // abandoned new topic. Returns false (caller leaves it be) if it isn't empty.
   const discardJustAdded = useCallback(
     (id: string): boolean => {
+      coalesceRef.current = null; // popping the add's snapshot must not be coalesced into (S4)
       const node = findAnyNode(docRef.current, id);
       if (!node || node.topic.trim() || node.children.length > 0) return false;
       const r = deleteNode(docRef.current, id);
@@ -884,19 +904,38 @@ function FlowInner({
         else if (link.kind === "map") onMapLinkRef.current?.(link.id);
         else if (!isDangerousUrl(link.url)) window.open(link.url, "_blank", "noopener,noreferrer");
       },
-      // Click the on-canvas pie to step a leaf task's completion (0→25→50→75→100→0).
+      // Click the on-canvas pie to step a leaf task's completion (0→25→50→75→100→0). A rapid spree on
+      // the same node coalesces into one undo (S4) via the progress:id key.
       cycleProgress: (id: string) => {
         const n = findNode(docRef.current, id);
-        if (n) apply(setProgress(docRef.current, id, nextProgressLevel(n.task?.progress ?? 0)));
+        if (n)
+          apply(
+            setProgress(docRef.current, id, nextProgressLevel(n.task?.progress ?? 0)),
+            false,
+            false,
+            `progress:${id}`,
+          );
       },
       cycleTask: (id: string) => {
         const n = findNode(docRef.current, id);
-        if (n) apply(setProgress(docRef.current, id, cycleTaskProgress(n.task?.progress)));
+        if (n)
+          apply(
+            setProgress(docRef.current, id, cycleTaskProgress(n.task?.progress)),
+            false,
+            false,
+            `progress:${id}`,
+          );
       },
       // Click the on-canvas priority chip to step priority: none → High → Med → Low → none.
       cyclePriority: (id: string) => {
         const n = findNode(docRef.current, id);
-        if (n) apply(setPriority(docRef.current, id, cyclePriority(n.task?.priority)));
+        if (n)
+          apply(
+            setPriority(docRef.current, id, cyclePriority(n.task?.priority)),
+            false,
+            false,
+            `priority:${id}`,
+          );
       },
       // Click the node's 📝 indicator → select it and ask the app to open the Notes tab.
       openNote: (id: string) => {
@@ -1551,6 +1590,11 @@ function FlowInner({
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSlides: (slides) => apply(setSlides(docRef.current, slides)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
+      setNodeTags: (id, tags) => {
+        if (!findAnyNode(docRef.current, id)) return false;
+        apply(setTags(docRef.current, id, tags));
+        return true;
+      },
       renameTag: (from, to) => apply(renameTag(docRef.current, from, to)),
       deleteTag: (tag) => apply(deleteTag(docRef.current, tag)),
       setSelectedProgress: (progress) =>

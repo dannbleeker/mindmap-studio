@@ -144,6 +144,10 @@ export const colors = {
   fillSwatches: ["#fde2e2", "#e2ecfd", "#e2fbe8", "#fdf3e2", "#efe2fd", "#ececec"],
   /** Per-topic border swatches (paired 1:1 with the fills above). */
   borderSwatches: ["#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"],
+  /** Stroke/accent swatches for line-coloured objects (relationships + boundary/overlay inspectors).
+   *  Index 0 is the shared default (CROSSLINK_COLOR / BOUNDARY_STROKE); an empty pick resets to it.
+   *  One source of truth so the edge + overlay inspectors stay in sync (P5). */
+  strokeSwatches: ["#8b87e0", "#e0697f", "#3f9e6e", "#d98a2b", "#3b82c4", "#111827"],
 } as const;
 
 /** Spacing scale (px) — the paddings/gaps the chrome actually uses. Names are t-shirt sizes; the

@@ -18,6 +18,8 @@ export type TopicData = {
   image?: MapImage;
   icons?: string[];
   tags?: string[];
+  /** Roll-up source map id — when set, this node mirrors another map (shows a ⤵ badge). */
+  rollup?: string;
   style?: NodeStyle;
   /** Conditional-formatting style (view-only); merged *under* `style` at render. */
   condStyle?: NodeStyle;

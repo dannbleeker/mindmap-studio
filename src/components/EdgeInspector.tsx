@@ -83,6 +83,12 @@ export function EdgeInspector({
             {fromTopic || "(untitled)"} <span style={{ color: "var(--ed-faint)" }}>→</span>{" "}
             {toTopic || "(untitled)"}
           </div>
+          {/* Faint context line under the title, mirroring the node inspector's breadcrumb (P5). */}
+          {edge.label ? (
+            <div className="mm-inspector-path" title={`Relationship: ${edge.label}`}>
+              Relationship: {edge.label}
+            </div>
+          ) : null}
         </div>
         {onMinimize && (
           <button

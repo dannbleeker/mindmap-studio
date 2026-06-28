@@ -76,8 +76,18 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   `<dialog>` surface) go dark in one move; App-theme control added to Settings. Sync rule: a dark canvas
   still darkens the chrome under System, so the old dark-canvas/light-chrome clash is gone. Verified by
   headless render in dark across Start + editor + Settings dialog.
-- [ ] **Phase 9** — Kanban drag-to-retag; presentation true fullscreen; roll-up badge; inspector swatch
-  unification; undo coalescing for cycle controls.
+- [x] **Phase 9** — feature-specific polish (shipped — see CHANGELOG): Kanban drag-to-retag (I6 — a pure
+  `retagForMove` + a by-id `setNodeTags` handle, one undoable edit; board also tokenised for dark mode);
+  presentation true fullscreen + key-hint footer + Home→first-slide (I10); roll-up ⤵ badge on bound nodes
+  (I11 — projected via TopicData; the context-menu binder is **deferred**, the Insert menu already binds
+  and a node-menu picker needs the maps list plumbed into FlowMindMap); inspector swatch unification +
+  Edge/Overlay context lines from one `strokeSwatches` source (P5); undo coalescing for the
+  priority/progress/task cycle chips — a same-node+field spree within ~0.6s collapses to one undo step,
+  with the chain reset on undo/redo/discard (S4). Note: history keeps a 100-snapshot cap (history.ts CAP)
+  — large maps trade older undo depth for memory; not changed here.
+
+**The UX remediation plan (Phases 0–9) is complete.** Phases 3, 5, 6, 7 each shipped their high-value core
+with a few sub-items deferred + documented above (none blocking).
 
 ## Open items
 

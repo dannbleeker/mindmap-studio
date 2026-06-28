@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { UNTAGGED, boardColumns } from "../src/board";
+import { UNTAGGED, boardColumns, retagForMove } from "../src/board";
 import type { MindMapDoc } from "../src/model/types";
 
 const doc: MindMapDoc = {
@@ -82,5 +82,20 @@ describe("boardColumns", () => {
     };
     const col = boardColumns(dup).find((c) => c.tag === "dup");
     expect(col?.cards.map((x) => x.id)).toEqual(["r"]); // once, not ["r","r"]
+  });
+});
+
+describe("retagForMove (drag-to-retag)", () => {
+  it("drops the source tag and adds the target tag, preserving other tags", () => {
+    expect(retagForMove(["now", "next"], "now", "later").sort()).toEqual(["later", "next"]);
+  });
+  it("dropping into Untagged only removes the source tag", () => {
+    expect(retagForMove(["now"], "now", UNTAGGED)).toEqual([]);
+  });
+  it("dragging from Untagged only adds the target tag", () => {
+    expect(retagForMove([], UNTAGGED, "now")).toEqual(["now"]);
+  });
+  it("doesn't duplicate a tag the card already carries", () => {
+    expect(retagForMove(["a", "b"], "a", "b")).toEqual(["b"]);
   });
 });

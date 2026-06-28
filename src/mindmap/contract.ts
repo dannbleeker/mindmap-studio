@@ -211,6 +211,9 @@ export interface MindMapHandle {
   setSlides: (slides: SlideRef[]) => void;
   /** Replace the tags on the selected node (empty array clears); false if nothing is selected. */
   setSelectedTags: (tags: string[]) => boolean;
+  /** Replace the tags on a SPECIFIC node by id (the Kanban drag-to-retag path) — targets that node
+   *  directly, not the selection; false if the id isn't found. One undoable edit. */
+  setNodeTags: (id: string, tags: string[]) => boolean;
   /** Rename a tag map-wide (central tree + floating topics); renaming to an existing tag MERGES them.
    *  The tag manager's rename/merge. No-op on a blank target or when nothing carries the tag. */
   renameTag: (from: string, to: string) => void;

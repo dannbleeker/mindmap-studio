@@ -42,6 +42,11 @@ describe("EdgeInspector", () => {
     expect(screen.getByTitle("Alpha → Beta")).toBeTruthy();
   });
 
+  it("shows the relationship label as a faint context line (P5)", () => {
+    setup({ label: "blocks" });
+    expect(screen.getByText("Relationship: blocks")).toBeTruthy();
+  });
+
   it("commits the label on Enter", async () => {
     const { onSetLabel } = setup();
     const input = screen.getByLabelText("Relationship label");

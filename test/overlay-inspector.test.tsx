@@ -32,6 +32,8 @@ describe("OverlayInspector", () => {
     expect(screen.getByLabelText("Overlay info")).toBeTruthy();
     expect(screen.getByText("Boundary")).toBeTruthy();
     expect(screen.getByText("2 topics")).toBeTruthy();
+    // Faint context line under the title, matching the node + edge inspectors (P5).
+    expect(screen.getByText("Boundary around 2 topics")).toBeTruthy();
   });
 
   it("commits a boundary/summary label on Enter (trimmed)", async () => {

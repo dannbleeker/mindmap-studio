@@ -1,10 +1,10 @@
 import type { MapNode, MindMapDoc } from "./model/types";
 import { progressMap, toPercent } from "./progress";
 
-// Group a map's topics into Kanban columns by tag — a read-only "board" view of the same data
-// (a visualisation, not task management: we don't move cards or write back). A topic appears in a
-// column for each of its tags; topics with no tags fall into an "Untagged" column shown last.
+// Group a map's topics into Kanban columns by tag — a "board" view of the same data. A topic appears
+// in a column for each of its tags; topics with no tags fall into an "Untagged" column shown last.
 // Cards carry their rolled-up completion + due date so the board reads like a status wall. Pure.
+// Cards can be dragged between columns to re-tag the topic (retagForMove); the board itself is pure.
 
 export interface BoardCard {
   id: string;
@@ -22,6 +22,18 @@ export interface BoardColumn {
 }
 
 export const UNTAGGED = "";
+
+/** DataTransfer MIME identifying a Kanban card dragged between columns (drag-to-retag). */
+export const CARD_DND_TYPE = "application/x-mm-card";
+
+/** A card's new tag set when dragged from `fromTag` to `toTag`: drop the source-column tag, add the
+ *  target-column tag (deduped). Dropping into Untagged only removes; dragging from Untagged only adds;
+ *  a card's other tags are preserved. Pure — the canvas applies it via the `setNodeTags` handle. */
+export function retagForMove(tags: string[], fromTag: string, toTag: string): string[] {
+  const next = tags.filter((t) => t !== fromTag || fromTag === UNTAGGED);
+  if (toTag !== UNTAGGED && !next.includes(toTag)) next.push(toTag);
+  return next;
+}
 
 export function boardColumns(doc: MindMapDoc): BoardColumn[] {
   const prog = new Map(progressMap(doc.root));

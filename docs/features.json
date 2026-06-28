@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 332,
+  "reviewedThroughChangelogBullets": 333,
   "areas": [
     "editing",
     "notes",
@@ -738,7 +738,7 @@
     },
     {
       "id": "kanban-board",
-      "name": "Board view (Kanban) — topics grouped into columns by tag (read-only)",
+      "name": "Board view (Kanban) — topics grouped into columns by tag, drag a card to re-tag",
       "area": "navigation",
       "since": "2026-06-14",
       "manual": true,
@@ -1035,7 +1035,7 @@
     },
     {
       "id": "presentation-mode",
-      "name": "Walk-Through presentation mode",
+      "name": "Walk-Through presentation mode (true fullscreen, key-hint footer, Home → first slide)",
       "area": "presentation",
       "since": "2026-06-11",
       "manual": true,

@@ -7,6 +7,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Feature-specific polish (Phase 9).** Five targeted refinements:
+  - **The Kanban board is now interactive.** Drag a card to another column to re-tag that topic — it
+    drops the source-column tag and adds the target one in a single undoable edit (the board was a
+    read-only view before). It also re-themes for dark mode.
+  - **Present mode goes true fullscreen.** Entering the presentation now takes over the whole screen
+    (OS fullscreen, graceful fallback if blocked); a key-hint footer (`← → / Space · P · Esc`) is shown
+    and **Home** jumps back to the first slide.
+  - **Roll-up topics are now visible at a glance.** A node that mirrors another map shows a small **⤵**
+    badge on the canvas (with a "refresh to update" tooltip).
+  - **Consistent inspectors.** The relationship and overlay (boundary/summary/callout) inspectors now
+    show a one-line context under their title (`Relationship: …` / `Boundary around N topics`), matching
+    the topic inspector's breadcrumb, and all the colour swatches come from one shared palette.
+  - **Calmer undo for chip-spamming.** Rapidly clicking the same topic's priority / progress / task chip
+    now collapses into a **single undo step** (within ~0.6s) instead of one undo per click.
+
 - **App-wide dark mode (Phase 8).** A real dark theme for the whole app chrome — toolbar, side panels,
   inspector, dialogs, toasts and the Start screen — not just the canvas. A new **App theme: System /
   Light / Dark** control in Settings drives it, **defaulting to System** (it follows your OS

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MindMap } from "../src/mindmap";
 import { FlowMindMap } from "../src/mindmap/FlowMindMap";
 import type { MindMapHandle } from "../src/mindmap/contract";
+import { findAnyNode } from "../src/mindmap/flow/ops";
 import type { MindMapDoc } from "../src/model/types";
 
 // FlowMindMap — the React Flow canvas. Most of its body is the imperative MindMapHandle (the app's
@@ -668,6 +669,47 @@ describe("FlowMindMap canvas", () => {
     expect(onOpenNote).toHaveBeenCalled();
     run(() => fireEvent.click(screen.getAllByTitle(/Collapse|Expand/)[0]));
     expect(onChange).toHaveBeenCalled();
+  });
+
+  it("shows a roll-up badge on a node bound to a source map (I11)", () => {
+    const rollupDoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "rd",
+      title: "T",
+      root: {
+        id: "root",
+        topic: "R",
+        children: [{ id: "a", topic: "Mirrors", rollup: "src-map-id", children: [] }],
+      },
+    };
+    mount(rollupDoc);
+    expect(screen.getByLabelText("Roll-up source")).toBeTruthy();
+  });
+
+  it("coalesces a rapid task-pie spree into a single undo (S4)", () => {
+    const taskDoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "td",
+      title: "T",
+      root: {
+        id: "root",
+        topic: "R",
+        children: [{ id: "a", topic: "Task", task: { progress: 0.25 }, children: [] }],
+      },
+    };
+    const { onChange } = mount(taskDoc);
+    onChange.mockClear();
+    const pie = () => screen.getByTitle(/click to change/);
+    // Three quick clicks (0.25 → 0.5 → 0.75 → 1.0) within the coalesce window.
+    run(() => fireEvent.click(pie()));
+    run(() => fireEvent.click(pie()));
+    run(() => fireEvent.click(pie()));
+    const after = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(findAnyNode(after, "a")?.task?.progress).toBe(1);
+    // A single undo reverts the WHOLE spree back to the pre-spree 0.25 (not just one step).
+    run(() => fireEvent.keyDown(document, { key: "z", ctrlKey: true }));
+    const undone = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(findAnyNode(undone, "a")?.task?.progress).toBe(0.25);
   });
 
   it("toggles the minimap, follows in-map / map links, and edits a relationship edge", () => {

@@ -70,6 +70,11 @@ describe("Presentation overlay", () => {
     fireEvent.keyDown(document, { key: "ArrowLeft" });
     expect(heading()).toBe("First branch");
 
+    // Home jumps back to the first slide (the overview) (I10).
+    fireEvent.keyDown(document, { key: "ArrowRight" });
+    fireEvent.keyDown(document, { key: "Home" });
+    expect(heading()).toBe("My Talk");
+
     // 'p' toggles the presenter sidebar.
     expect(screen.queryByRole("complementary", { name: "Presenter view" })).toBeNull();
     fireEvent.keyDown(document, { key: "p" });

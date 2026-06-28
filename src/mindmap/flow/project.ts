@@ -140,6 +140,7 @@ export function project(
         image: node.image,
         icons,
         tags: node.tags,
+        rollup: node.rollup,
         style: node.style,
         // Conditional formatting is a separate view-only overlay (merged under `style` at render),
         // so the model + fromFlow stay lossless — nothing bakes into node.style.

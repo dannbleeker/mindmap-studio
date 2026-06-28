@@ -173,6 +173,18 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
     return () => prevFocus?.focus?.();
   }, []);
 
+  // True OS fullscreen for the presentation (graceful when unavailable/denied). Present is entered via
+  // a click, so the requestFullscreen gesture requirement is met; we still swallow the promise rejection
+  // (e.g. an iframe without allow="fullscreen", or a policy/user denial) and just stay windowed. Kept
+  // separate from the focus effect so a fullscreen failure can never affect focus restore.
+  useEffect(() => {
+    overlayRef.current?.requestFullscreen?.().catch(() => {});
+    return () => {
+      // Only exit if we're still the fullscreen element (avoids InvalidStateError when nothing is).
+      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    };
+  }, []);
+
   const next = useCallback(
     () => setIndex((i) => Math.min(i + 1, slides.length - 1)),
     [slides.length],
@@ -192,6 +204,9 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
       } else if (e.key === "p" || e.key === "P") {
         e.preventDefault();
         togglePresenter();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setIndex(0);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -270,6 +285,9 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           Next ›
         </button>
         <span style={{ flex: 1 }} />
+        <span style={{ fontSize: 12, color: "#7e78b8", letterSpacing: "0.02em" }}>
+          ← → / Space · P · Esc
+        </span>
         <button
           type="button"
           onClick={togglePresenter}

@@ -403,5 +403,8 @@ export interface MindMapProps {
    *  `getSession()` (used by the document-tab switcher so returning to a tab keeps its pan/zoom +
    *  history). Absent → fresh canvas (fit-to-view, empty history). */
   initialSession?: CanvasSession;
+  /** The library's other maps `{ id, title }` — lets the node right-click menu bind a roll-up source
+   *  (mirror another map). Empty/absent → the roll-up binder is hidden. */
+  libraryMaps?: { id: string; title: string }[];
   ref?: Ref<MindMapHandle>;
 }

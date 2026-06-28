@@ -41,29 +41,27 @@ function PopBtn({
   );
 }
 
-/** Inline contextual popover — quick structural actions above the selected node (Rename / Collapse /
- *  Delete). Node-tracked via React Flow's NodeToolbar so it stays put through pan/zoom; hidden while the
- *  node is being inline-edited, and Delete is suppressed on the root. Canvas-only (never exported). The
- *  handlers are the same internal ops the keyboard + right-click menu use. */
+/** Inline contextual popover — quick actions above the selected node: Collapse / expand (when the node
+ *  has children) and "More…", which opens the full right-click menu at the node so Rename / Delete / Add
+ *  callout / roll-up etc. are all one click away without right-clicking (C6 — friendlier on trackpad +
+ *  touch). Node-tracked via React Flow's NodeToolbar so it stays put through pan/zoom; hidden while the
+ *  node is being inline-edited. Canvas-only (never exported). */
 export function NodePopover({
   selectedId,
   editingId,
   doc,
-  onRename,
   onToggleCollapse,
-  onDelete,
+  onMore,
 }: {
   selectedId: string | null;
   editingId: string | null;
   doc: MindMapDoc;
-  onRename: (id: string) => void;
   onToggleCollapse: (id: string) => void;
-  onDelete: (id: string) => void;
+  onMore: (id: string) => void;
 }) {
   if (!selectedId || editingId === selectedId) return null;
   const sid = selectedId;
   const sel = findAnyNode(doc, sid);
-  const isRoot = sid === doc.root.id;
   const hasKids = (sel?.children?.length ?? 0) > 0;
   return (
     <NodeToolbar nodeId={sid} isVisible position={Position.Top} offset={10}>
@@ -80,15 +78,12 @@ export function NodePopover({
           boxShadow: "0 10px 30px rgba(40,30,16,0.18)",
         }}
       >
-        {/* Add child / sibling are re-homed onto the node as the hover ＋ affordances (#1); this
-            popover keeps the rest of the quick actions. */}
-        <PopBtn icon="text" label="Rename" onClick={() => onRename(sid)} />
+        {/* Add child / sibling are re-homed onto the node as the hover ＋ affordances (#1); Rename +
+            Delete moved into the "More…" menu (C6) — this popover keeps Collapse + the menu opener. */}
         {hasKids ? (
           <PopBtn icon="minus" label="Collapse / expand" onClick={() => onToggleCollapse(sid)} />
         ) : null}
-        {!isRoot ? (
-          <PopBtn icon="trash" label="Delete" danger onClick={() => onDelete(sid)} />
-        ) : null}
+        <PopBtn icon="dots" label="More actions" onClick={() => onMore(sid)} />
       </div>
     </NodeToolbar>
   );

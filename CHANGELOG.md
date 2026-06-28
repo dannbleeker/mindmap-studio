@@ -7,6 +7,20 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Deferred-item polish.** Five follow-ups from the UX-remediation pass:
+  - **Right-click menu on overlays.** Boundaries, summaries and callouts now have their own right-click
+    menu — recolour (and, for boundaries, shape + outline style), plus Delete — matching the topic and
+    relationship menus. Deleting an overlay was keyboard-only before.
+  - **"More…" on the selected topic.** The on-node quick-action popover keeps Collapse and adds a
+    **More…** button that opens the full right-click menu at the topic, so Rename / Delete / Add callout /
+    roll-up and the rest are reachable without right-clicking (friendlier on trackpad + touch).
+  - **Bind a roll-up source from the canvas.** The topic right-click menu can now bind — or unbind — a
+    roll-up source map directly, alongside the existing Insert-menu binder.
+  - **Notes get their own tab.** The topic inspector's note editor moved out of the crowded Details tab
+    into a dedicated, roomy **Notes** tab; clicking a topic's 📝 indicator jumps straight to it.
+  - **Clearer dockable note.** The dockable Note-editor panel now flags that it shows the same note as
+    the inspector's Notes tab, just docked for more room.
+
 - **Feature-specific polish (Phase 9).** Five targeted refinements:
   - **The Kanban board is now interactive.** Drag a card to another column to re-tag that topic — it
     drops the source-column tag and adds the target one in a single undoable edit (the board was a

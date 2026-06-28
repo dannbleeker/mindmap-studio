@@ -41,15 +41,17 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   mobile add-topic input (O3) → the touch first-run card now guides the on-node ＋ path.
 - [x] **Phase 4** — multi-selection parity (shipped — see CHANGELOG): bulk right-click menu, keyboard
   indent/outdent over the selection, tree-mode group drag, overlay Delete key. Logic lives in tested
-  pure helpers (BulkNodeMenu, moveSelectionInTree, applyAcrossIds, deleteSelectedOverlay). Deferred: a
-  dedicated right-click menu *on overlays* (Rename/Recolour/Delete) — only the Delete key was wired.
+  pure helpers (BulkNodeMenu, moveSelectionInTree, applyAcrossIds, deleteSelectedOverlay). The
+  follow-up dedicated right-click menu *on overlays* (recolour + boundary shape/outline + Delete) shipped
+  2026-06-28 — see CHANGELOG; rename stays in the OverlayInspector.
   Note: the lines/stmts coverage floor was nudged 91→90.9 because the ~6 lines wiring the bulk menu to
   a React-Flow multi-selection can't be exercised in jsdom (RF needs real held-key state).
-- [~] **Phase 5** — panel/workspace. **Shipped:** left rail → **tabbed dock** (PanelDock; the 10 side
+- [x] **Phase 5** — panel/workspace. **Shipped:** left rail → **tabbed dock** (PanelDock; the 10 side
   panels share one ~280px tabbed column instead of N crushing 250px columns — verified in-browser +
-  unit-tested); bulk-edit banner clarity. **Deferred:** InfoPanel Details restructure (P3 — collapsible
-  sections + note below task fields) and the note-editor de-dupe / placement cues (P6) — lower-value
-  polish, the dock already fixed the core canvas-crush. Note: lines/stmts coverage floor nudged
+  unit-tested); bulk-edit banner clarity. The deferred inspector follow-ups shipped 2026-06-28 (see
+  CHANGELOG): the note editor moved to its own roomy **Notes** tab (P3 — chosen over collapsible sections)
+  and the dockable note panel now flags it shows the same note as the Notes tab (P6). Note: lines/stmts
+  coverage floor nudged
   90.9→90.8 (the per-panel dock-entry App wiring only runs when each panel is opened via the flaky-to-
   drive Panels menu; the dock logic itself is unit-tested in PanelDock).
 - [x] **Phase 6** — toolbar IA cleanup (shipped — see CHANGELOG): distinct maps-grid glyph for
@@ -60,14 +62,14 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   switcher relabelled as an "Open a map…" library picker, distinct from the open-doc tabs (T7). Note:
   the Canvas-menu "open Map panel" link opens the inspector — if a node is selected it shows that
   node's settings (no deselect API on the handle), so map-wide styling appears once nothing is selected.
-- [~] **Phase 7** — onboarding & learnability (shipped — see CHANGELOG): in-app PWA install button + iOS
+- [x] **Phase 7** — onboarding & learnability (shipped — see CHANGELOG): in-app PWA install button + iOS
   A2HS hint (O2); "Learn the app" tip cards (O5); re-openable getting-started from Settings/⌘K/rail (O8);
   actionable "＋ New map" empty states (O4); one-line template/example descriptions + curated featured set
   (O6); "New here?" deep-link/new-user banner (O9); gesture coaching — relate-grip coach, Shift-drag in
   the coachmark + Shortcuts, selected-grip opacity (C7); non-overlapping hover affordances + touch sizing
-  (C4). **Deferred:** C6 (NodePopover → "More…" that opens the rich context menu at the node) — it
-  restructures the selection popover + context-menu wiring and needs test rewrites for higher regression
-  risk; the right-click menu already provides the full power, so this is a discoverability follow-up.
+  (C4). C6 (the selection popover now keeps Collapse and adds a **More…** button that opens the rich
+  context menu at the node — the menu opens at the node's on-screen rect since `flowToScreenPosition`
+  isn't wired here) shipped 2026-06-28 — see CHANGELOG.
 - [x] **Phase 8** — app-wide dark mode (shipped — see CHANGELOG): a `useAppearance` hook (System /
   Light / Dark, persisted, honouring `prefers-color-scheme` live) resolves a single `chromeDark`
   that drives `--ed-*`/`--st-*` via decoupled `editorThemeVars(dark)`/`startThemeVars(dark)` (no longer
@@ -79,15 +81,17 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
 - [x] **Phase 9** — feature-specific polish (shipped — see CHANGELOG): Kanban drag-to-retag (I6 — a pure
   `retagForMove` + a by-id `setNodeTags` handle, one undoable edit; board also tokenised for dark mode);
   presentation true fullscreen + key-hint footer + Home→first-slide (I10); roll-up ⤵ badge on bound nodes
-  (I11 — projected via TopicData; the context-menu binder is **deferred**, the Insert menu already binds
-  and a node-menu picker needs the maps list plumbed into FlowMindMap); inspector swatch unification +
+  (I11 — projected via TopicData; the context-menu binder shipped 2026-06-28 via a `libraryMaps` prop
+  threaded into FlowMindMap, alongside the Insert-menu binder — see CHANGELOG); inspector swatch unification +
   Edge/Overlay context lines from one `strokeSwatches` source (P5); undo coalescing for the
   priority/progress/task cycle chips — a same-node+field spree within ~0.6s collapses to one undo step,
   with the chain reset on undo/redo/discard (S4). Note: history keeps a 100-snapshot cap (history.ts CAP)
   — large maps trade older undo depth for memory; not changed here.
 
-**The UX remediation plan (Phases 0–9) is complete.** Phases 3, 5, 6, 7 each shipped their high-value core
-with a few sub-items deferred + documented above (none blocking).
+**The UX remediation plan (Phases 0–9) is complete**, and the unblocked deferred follow-ups (overlay
+right-click menu, NodePopover→More, roll-up binder, Notes tab, dockable-note relabel) shipped 2026-06-28.
+Phase 3's remaining notes (T1 superseded by Phase 6's T3; O3 covered by the touch first-run card) need no
+further work; everything else still open is in *Deferred / blocked* below.
 
 ## Open items
 

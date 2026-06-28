@@ -44,11 +44,14 @@ function Summaries({
   onRename,
   selectedId,
   onSelect,
+  onContextMenu,
 }: {
   summaries: readonly Summary[];
   onRename: (id: string) => void;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  /** Right-click a summary → open its context menu (recolour / delete). */
+  onContextMenu?: (e: React.MouseEvent, id: string) => void;
 }) {
   const nodes = useNodes();
   // Resolve each bracket's geometry once per node/summary change rather than on every parent
@@ -124,6 +127,7 @@ function Summaries({
               className="nodrag nopan"
               title="Click to select · double-click to rename this summary"
               onClick={() => onSelect?.(id)}
+              onContextMenu={(e) => onContextMenu?.(e, id)}
               onDoubleClick={() => onRename(id)}
               style={{
                 ...labelChipBase,

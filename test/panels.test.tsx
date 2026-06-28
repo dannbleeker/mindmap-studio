@@ -382,8 +382,8 @@ describe("InfoPanel", () => {
     expect(screen.getByRole("button", { name: /Minimize/ })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Details" })).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Style" })).toBeTruthy();
-    // Notes folded into Details (#7) — no separate Notes tab.
-    expect(screen.queryByRole("tab", { name: "Notes" })).toBeNull();
+    // The note editor has its own Notes tab for a single selection (P3).
+    expect(screen.getByRole("tab", { name: "Notes" })).toBeTruthy();
   });
 
   it("renders the created/modified times line when provided, and omits it when empty", () => {
@@ -403,17 +403,26 @@ describe("InfoPanel", () => {
     expect(screen.queryByText(/created .* ago/)).toBeNull();
   });
 
-  it("opens on Details, leading with the note editor + markers, then tags / dates / priority / links (#7)", () => {
+  it("opens on Details leading with markers; the note moved to its own Notes tab (P3)", () => {
     renderInfo(selected, node);
     expect(screen.getByRole("tab", { name: "Details" }).getAttribute("aria-selected")).toBe("true");
-    // Note + markers now lead Details — one click from the default inspector view.
-    const editor = screen.getByRole("textbox", { name: "Node note" });
-    expect(editor.textContent).toContain("interview users");
+    // Markers lead Details; the note editor is NOT here (it's on the Notes tab).
+    expect(screen.queryByRole("textbox", { name: "Node note" })).toBeNull();
     expect(screen.getByText("Markers")).toBeTruthy();
     expect(screen.getByText("Tags")).toBeTruthy();
     expect(screen.getByText("Dates")).toBeTruthy();
     expect(screen.getByText("Priority")).toBeTruthy();
     expect(screen.getByText("Links")).toBeTruthy();
+  });
+
+  it("shows the note editor on its own roomy Notes tab (P3)", async () => {
+    renderInfo(selected, node);
+    await userEvent.click(screen.getByRole("tab", { name: "Notes" }));
+    const editor = screen.getByRole("textbox", { name: "Node note" });
+    expect(editor.textContent).toContain("interview users");
+    // Details-only sections aren't duplicated on the Notes tab.
+    expect(screen.queryByText("Markers")).toBeNull();
+    expect(screen.queryByText("Tags")).toBeNull();
   });
 
   it("inserts a markdown link from the note toolbar when nothing is selected (🔗 Link)", async () => {
@@ -422,6 +431,7 @@ describe("InfoPanel", () => {
     renderInfo(selected, node, undefined, undefined, undefined, [], noop, undefined, undefined, {
       onNoteChange,
     });
+    await userEvent.click(screen.getByRole("tab", { name: "Notes" })); // the note toolbar lives here (P3)
     await userEvent.click(screen.getByRole("button", { name: "🔗 Link" }));
     // With no text selected the URL is appended as its own markdown link (round-trips via htmlToNote).
     expect(onNoteChange).toHaveBeenCalledWith(
@@ -436,15 +446,16 @@ describe("InfoPanel", () => {
     renderInfo(selected, node, undefined, undefined, undefined, [], noop, undefined, undefined, {
       onNoteChange,
     });
+    await userEvent.click(screen.getByRole("tab", { name: "Notes" })); // the note toolbar lives here (P3)
     await userEvent.click(screen.getByRole("button", { name: "🔗 Link" }));
     expect(onNoteChange).not.toHaveBeenCalled();
     prompt.mockRestore();
   });
 
-  it("hides the Details note/markers/tags once the Style tab is active (#7)", async () => {
+  it("hides the Details markers/tags/priority once the Style tab is active (#7)", async () => {
     renderInfo(selected, node);
     await userEvent.click(screen.getByRole("tab", { name: "Style" }));
-    expect(screen.queryByRole("textbox", { name: "Node note" })).toBeNull();
+    expect(screen.queryByText("Markers")).toBeNull();
     expect(screen.queryByText("Priority")).toBeNull();
   });
 
@@ -552,9 +563,9 @@ describe("InfoPanel", () => {
     expect(screen.queryByText("Linked from")).toBeNull();
   });
 
-  it("surfaces the note on Details when openNoteNonce is set (the node 📝 click target) (#7)", () => {
+  it("jumps to the Notes tab when openNoteNonce is set (the node 📝 click target) (P3)", () => {
     renderInfo(selected, node, 1, 1);
-    expect(screen.getByRole("tab", { name: "Details" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("tab", { name: "Notes" }).getAttribute("aria-selected")).toBe("true");
     expect(screen.getByRole("textbox", { name: "Node note" })).toBeTruthy();
   });
 });

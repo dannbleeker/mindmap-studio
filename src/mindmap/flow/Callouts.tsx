@@ -86,12 +86,15 @@ function Callouts({
   onDelete,
   selectedId,
   onSelect,
+  onContextMenu,
 }: {
   items: CalloutAnchor[];
   onCommit: (nodeId: string, calloutId: string, text: string) => void;
   onDelete: (nodeId: string, calloutId: string) => void;
   selectedId?: string | null;
   onSelect?: (nodeId: string, calloutId: string) => void;
+  /** Right-click a callout → open its context menu (recolour / delete). */
+  onContextMenu?: (e: React.MouseEvent, nodeId: string, calloutId: string) => void;
 }) {
   const nodes = useNodes();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -162,6 +165,7 @@ function Callouts({
                   : BUBBLE_BASE.boxShadow,
               }}
               onClick={() => onSelect?.(nodeId, callout.id)}
+              onContextMenu={(e) => onContextMenu?.(e, nodeId, callout.id)}
             >
               {editing ? (
                 <CalloutEditor

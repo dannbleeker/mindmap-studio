@@ -103,7 +103,8 @@ Keyboard-first, just like MindManager:
 - **Alt + Shift + ← / →** — promote (outdent) / demote (indent) the topic
 - **Ctrl/⌘ + V** (with a topic selected, not typing) — paste a clipboard image onto the topic
 - **Ctrl + Z / Ctrl + Shift + Z** (or Ctrl + Y) — **undo / redo** (kept in sync with what's saved)
-- Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down)
+- Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down) —
+  or, on the selected node, use the **More…** button on its quick-action popover to open the same menu
 
 Edits you make on the canvas — adding, renaming, moving, restyling — are captured into the map's
 underlying model, so the outline, every export, and the autosave always reflect your latest changes.
@@ -149,8 +150,9 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
 - **Note** — write in the **WYSIWYG** editor: a formatting toolbar (**bold**, *italic*,
   ~~strikethrough~~, bulleted list, numbered list, headings, highlight, code, checklist, **🔗 link**,
   image, table) and inline formatting as you type — no raw markup to read. The **🔗 Link** button wraps
-  the selected text in a link (or, with nothing selected, drops in the URL). The note box fills the
-  inspector's height. Notes autosave, travel with the map (and the
+  the selected text in a link (or, with nothing selected, drops in the URL). The note editor lives on
+  its own roomy **Notes** tab in the inspector (and a dockable Note-editor panel shows the *same* note,
+  docked for more room). Notes autosave, travel with the map (and the
   lossless `.json` export). Behind the scenes the note is stored as **Markdown** (`#` headings,
   `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, `- lists`, `1. numbered`, `[links](https://…)`),
   so it stays portable across every export. Nodes with a note show a 📝 — in the
@@ -453,6 +455,8 @@ backdrop you see on the canvas. The second **✕** removes the image.
   **Colour** swatch row (with **Default** to reset), and a **Delete** button — an alternative to the
   inline double-click gestures, which still work. A picked colour re-tints the whole object (outline,
   fill, and label) on the canvas and in every export; the backdrop colour lives in the Map panel.
+  **Right-click any overlay** for a quick menu — recolour (and, for a boundary, its **shape** + **outline
+  style**) or **Delete** — without opening the inspector.
 - **Floating topics** — detached topics that live outside the central tree. You get them several ways:
   **double-click an empty spot** on the canvas, drop a **🗒 sticky note**, **Detach to floating topic**
   from a branch's menu, drop a link/URL onto the canvas, or import a map that carries them (`.mmap`,
@@ -491,8 +495,9 @@ re-numbered internally, so you can paste the same branch as many times as you li
 ### Rolling up other maps
 
 A roll-up keeps a node mirroring another map. Select a node, pick a source map from the **⤵ Roll-up**
-menu in the toolbar, then click **🔄 Roll-ups** — the node's children become a fresh copy of that
-map's branches. Click **🔄 Roll-ups** again any time to pull the latest. One map can aggregate
+menu in the toolbar — or **right-click the node → Roll-up** to bind (or unbind) a source there — then
+click **🔄 Roll-ups** — the node's children become a fresh copy of that map's branches. Click
+**🔄 Roll-ups** again any time to pull the latest. A bound node shows a small **⤵** badge on the canvas. One map can aggregate
 several others — give each child node a different source — which is the *live* cousin of copy/paste
 above (a paste is a one-off snapshot; a roll-up re-pulls on demand). A roll-up node is a mirror: its
 children are replaced on each refresh, so edit the **source** map, not the pulled copy. Pick

@@ -293,6 +293,7 @@ function FlowInner({
   onDelete,
   onHint,
   initialSession,
+  libraryMaps = [],
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
@@ -333,6 +334,13 @@ function FlowInner({
   // (caret at end); null for a normal edit (double-click / F2 / new node → seed topic, select all).
   const [editSeed, setEditSeed] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
+  // Right-click menu for overlays (boundary / summary / callout) — recolour / shape / delete. Kept
+  // separate from the node `menu` (which is keyed by node id) since it carries the selected overlay.
+  const [overlayMenu, setOverlayMenu] = useState<{
+    x: number;
+    y: number;
+    overlay: { kind: SelectedOverlay["kind"]; id: string; nodeId?: string };
+  } | null>(null);
   // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
   // The corner minimap can be collapsed (it covers dense maps); the choice persists.
@@ -1419,6 +1427,35 @@ function FlowInner({
     },
     [selectOnly, fireSelect, clearEdgeSelection, fireSelectOverlay],
   );
+  // Right-click an overlay → select it (so the mutators target it) + open its context menu.
+  const openOverlayMenu = useCallback(
+    (
+      e: React.MouseEvent,
+      overlay: { kind: SelectedOverlay["kind"]; id: string; nodeId?: string },
+    ) => {
+      e.preventDefault();
+      selectOverlay(overlay);
+      setOverlayMenu({ x: e.clientX, y: e.clientY, overlay });
+    },
+    [selectOverlay],
+  );
+  // Open the full node right-click menu at a node by id — the popover's "More…" opener (C6). The node's
+  // on-screen rect comes from the DOM (useReactFlow() here doesn't expose flowToScreenPosition); the
+  // ContextMenu primitive clamps to the viewport, so a node near an edge still opens on-screen.
+  const openNodeMenuAt = useCallback(
+    (id: string) => {
+      clearEdgeSelection();
+      clearOverlaySelection();
+      selectOnly(id);
+      fireSelect(id);
+      const rect = document
+        .querySelector(`.react-flow__node[data-id="${id}"]`)
+        ?.getBoundingClientRect();
+      if (!rect) return;
+      setMenu({ x: rect.left + rect.width / 2, y: rect.top, id });
+    },
+    [clearEdgeSelection, clearOverlaySelection, selectOnly, fireSelect],
+  );
   const handleSelectBoundary = useCallback(
     (id: string) => selectOverlay({ kind: "boundary", id }),
     [selectOverlay],
@@ -1853,6 +1890,7 @@ function FlowInner({
               boundaries={boundaries}
               selectedId={selectedOverlay?.kind === "boundary" ? selectedOverlay.id : null}
               onSelect={handleSelectBoundary}
+              onContextMenu={(e, id) => openOverlayMenu(e, { kind: "boundary", id })}
               accent={renderDoc.meta?.accentColor}
             />
             <Summaries
@@ -1860,6 +1898,7 @@ function FlowInner({
               onRename={handleRenameSummary}
               selectedId={selectedOverlay?.kind === "summary" ? selectedOverlay.id : null}
               onSelect={handleSelectSummaryOverlay}
+              onContextMenu={(e, id) => openOverlayMenu(e, { kind: "summary", id })}
             />
             <Callouts
               items={calloutItems}
@@ -1867,14 +1906,16 @@ function FlowInner({
               onDelete={handleDeleteCallout}
               selectedId={selectedOverlay?.kind === "callout" ? selectedOverlay.id : null}
               onSelect={handleSelectCallout}
+              onContextMenu={(e, nodeId, calloutId) =>
+                openOverlayMenu(e, { kind: "callout", id: calloutId, nodeId })
+              }
             />
             <NodePopover
               selectedId={selectedId}
               editingId={editingId}
               doc={renderDoc}
-              onRename={startEdit}
               onToggleCollapse={(id) => apply(toggleCollapse(docRef.current, id))}
-              onDelete={deleteNodeWithUndo}
+              onMore={openNodeMenuAt}
             />
             <CoachMark show={showCoach} rootId={renderDoc.root.id} />
             <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
@@ -2181,6 +2222,136 @@ function FlowInner({
                         );
                       })}
                     </div>
+                    {/* Roll-up (mirror another map) — bind this topic to a source map so its children
+                        mirror that map; shown only when the library has other maps (I11). */}
+                    {libraryMaps.length > 0 ? (
+                      <>
+                        <MenuLabel>Roll-up (mirror another map)</MenuLabel>
+                        <div style={{ padding: "2px 6px" }}>
+                          <select
+                            className="mm-select"
+                            style={{ width: "100%" }}
+                            value={findNode(docRef.current, id)?.rollup ?? ""}
+                            onChange={(e) => {
+                              apply(setRollup(docRef.current, id, e.target.value || undefined));
+                              setMenu(null);
+                            }}
+                            aria-label="Bind roll-up source"
+                          >
+                            {findNode(docRef.current, id)?.rollup ? (
+                              <option value="">— Unbind</option>
+                            ) : (
+                              <option value="">Bind source map…</option>
+                            )}
+                            {libraryMaps
+                              .filter((mm) => mm.id !== docRef.current.id)
+                              .map((mm) => (
+                                <option key={mm.id} value={mm.id}>
+                                  {mm.title || "(untitled)"}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                      </>
+                    ) : null}
+                  </>
+                );
+              })()}
+            </ContextMenu>
+          ) : null}
+          {/* Right-click menu for a boundary / summary / callout overlay (recolour · shape · delete).
+              The overlay was selected on open, so the selection-based ops target it. */}
+          {overlayMenu ? (
+            <ContextMenu
+              x={overlayMenu.x}
+              y={overlayMenu.y}
+              onClose={() => setOverlayMenu(null)}
+              menuAriaLabel="Overlay actions"
+              sheet={isMobile}
+            >
+              {(() => {
+                const ov = overlayMenu.overlay;
+                const recolour = (c: string) => {
+                  withSelectedOverlay((s) => OVERLAY_OPS[s.kind].color(docRef.current, s, c));
+                  fireSelectOverlay(ov);
+                  setOverlayMenu(null);
+                };
+                const SHAPES = [
+                  ["roundRect", "Rounded"],
+                  ["rect", "Square"],
+                  ["ellipse", "Ellipse"],
+                  ["cloud", "Cloud"],
+                  ["polygon", "Polygon"],
+                ] as const;
+                return (
+                  <>
+                    <MenuLabel>Recolour</MenuLabel>
+                    <div className="mm-menu-row">
+                      {colors.strokeSwatches.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          className="mm-menu-chip"
+                          aria-label={`Colour ${c}`}
+                          style={{ background: c }}
+                          onClick={() => recolour(c)}
+                        />
+                      ))}
+                      <button type="button" className="mm-menu-chip" onClick={() => recolour("")}>
+                        Default
+                      </button>
+                    </div>
+                    {ov.kind === "boundary" ? (
+                      <>
+                        <MenuLabel>Shape</MenuLabel>
+                        <div className="mm-menu-row">
+                          {SHAPES.map(([sh, lbl]) => (
+                            <button
+                              key={sh}
+                              type="button"
+                              className="mm-menu-chip"
+                              onClick={() => {
+                                withSelectedOverlay((s) =>
+                                  setBoundaryShape(docRef.current, s.id, sh),
+                                );
+                                fireSelectOverlay(ov);
+                                setOverlayMenu(null);
+                              }}
+                            >
+                              {lbl}
+                            </button>
+                          ))}
+                        </div>
+                        <MenuLabel>Outline</MenuLabel>
+                        <div className="mm-menu-row">
+                          {(["solid", "dashed", "dotted"] as const).map((d) => (
+                            <button
+                              key={d}
+                              type="button"
+                              className="mm-menu-chip"
+                              onClick={() => {
+                                withSelectedOverlay((s) =>
+                                  setBoundaryDash(docRef.current, s.id, d),
+                                );
+                                fireSelectOverlay(ov);
+                                setOverlayMenu(null);
+                              }}
+                            >
+                              {d}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+                    <MenuSeparator />
+                    <MenuItem
+                      label="Delete"
+                      danger
+                      onSelect={() => {
+                        deleteSelectedOverlay();
+                        setOverlayMenu(null);
+                      }}
+                    />
                   </>
                 );
               })()}

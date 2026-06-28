@@ -1832,15 +1832,16 @@ export function StylesPanel({
 // replacing the separate Notes / Markers / Style bars and the Link / Jump toolbar selects.
 // The Info panel groups a topic's editors into three tabs: Details (tags/markers/progress/dates/
 // priority/attachments/links), Style (shape & fill bar + stickers), and Notes (the markdown editor).
-type InfoTab = "details" | "style";
-// Details now leads with the note + markers (the most-reached-for edits), so the old separate Notes
-// tab is folded in; Style stays the secondary tab. (#7)
+type InfoTab = "details" | "notes" | "style";
+// Details holds markers/tags/task/links; the note editor gets its own roomy Notes tab (P3) so Details
+// isn't one long scroll. Style stays the trailing tab.
 const INFO_TABS: readonly TabItem[] = [
   {
     id: "details",
     label: "Details",
-    title: "Note, markers, tags, progress, dates, priority, attachments & links",
+    title: "Markers, tags, progress, dates, priority, attachments & links",
   },
+  { id: "notes", label: "Notes", title: "The selected topic's rich-text note" },
   { id: "style", label: "Style", title: "Shape, colour, font & stickers" },
 ];
 
@@ -1957,11 +1958,13 @@ export function InfoPanel({
   // In bulk mode, which task fields the selected topics disagree on — those render blank + "Mixed"
   // instead of (and without overwriting from) the anchor's value. Empty object for a single select.
   const mixed: Partial<SelectionFields["mixed"]> = multi ? (fields?.mixed ?? {}) : {};
-  const tabs = INFO_TABS;
-  const activeTab: InfoTab = tab;
-  // Clicking a node's 📝 indicator bumps openNoteNonce → jump to Details, where the note now lives.
+  // The note editor is single-topic, so the Notes tab is dropped in bulk mode (and a stale "notes"
+  // selection falls back to Details). (P3)
+  const tabs = multi ? INFO_TABS.filter((t) => t.id !== "notes") : INFO_TABS;
+  const activeTab: InfoTab = multi && tab === "notes" ? "details" : tab;
+  // Clicking a node's 📝 indicator bumps openNoteNonce → jump to the Notes tab where the note lives.
   useEffect(() => {
-    if (openNoteNonce) setTab("details");
+    if (openNoteNonce) setTab("notes");
   }, [openNoteNonce]);
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
@@ -2197,12 +2200,24 @@ export function InfoPanel({
                   )}
                 </>
               )}
+              {activeTab === "notes" && (
+                // Single-topic only (the tab is hidden in bulk) — the editor gets the whole tab with no
+                // 168px clamp, roomy by design (P3).
+                <div style={{ display: "flex", flexDirection: "column", minHeight: 320 }}>
+                  <NotesPanel
+                    selected={selected}
+                    value={noteDraft}
+                    onChange={onNoteChange}
+                    onBlur={onNoteBlur}
+                    spellCheck={spellCheck}
+                  />
+                </div>
+              )}
               {activeTab === "details" && (
                 <>
                   {!multi && (
                     <>
-                      {/* Note + markers lead Details — the most-reached-for edits, one click from
-                          the default inspector view (#7). */}
+                      {/* Markers lead Details; the note moved to its own Notes tab (P3). */}
                       {sectionLabel("Markers")}
                       <MarkerBar markers={markers} active={node.icons} onToggle={onToggleMarker} />
                       {(() => {
@@ -2252,16 +2267,6 @@ export function InfoPanel({
                           </div>
                         ) : null;
                       })()}
-                      {sectionLabel("Note")}
-                      <div style={{ display: "flex", flexDirection: "column", height: 168 }}>
-                        <NotesPanel
-                          selected={selected}
-                          value={noteDraft}
-                          onChange={onNoteChange}
-                          onBlur={onNoteBlur}
-                          spellCheck={spellCheck}
-                        />
-                      </div>
                       {sectionLabel("Tags")}
                       <div
                         style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}
@@ -2682,6 +2687,7 @@ export function NoteEditorPanel({
           onChange={onChange}
           onBlur={onBlur}
           onClose={onClose}
+          cue="The selected topic's note — the same note as the inspector's Notes tab, docked here for more room."
           spellCheck={spellCheck}
         />
       ) : (
@@ -2712,6 +2718,7 @@ export function NotesPanel({
   onChange,
   onBlur,
   onClose,
+  cue,
   spellCheck = false,
 }: {
   selected: SelectedNode | null;
@@ -2720,6 +2727,9 @@ export function NotesPanel({
   onBlur: () => void;
   /** Optional — when omitted (e.g. embedded in the Info panel) the Close button is hidden. */
   onClose?: () => void;
+  /** Optional faint sub-line under the header — used by the dockable panel to flag that it's the same
+   *  note as the inspector's Notes tab (P6). */
+  cue?: string;
   /** Native browser spell-check in the note editor (view setting; off by default). */
   spellCheck?: boolean;
 }) {
@@ -2858,6 +2868,9 @@ export function NotesPanel({
           </Button>
         )}
       </div>
+      {cue ? (
+        <div style={{ padding: "0 14px 4px", fontSize: 11.5, color: "var(--ed-faint)" }}>{cue}</div>
+      ) : null}
       {selected ? (
         <>
           <div

@@ -1742,6 +1742,7 @@ export function App() {
                 hideUnmatched={!playback && filter.hide && panels.filterOpen}
                 highlightIds={playback ? null : searchMatchIds}
                 drillId={playback ? null : drillId}
+                libraryMaps={maps.map((m) => ({ id: m.id, title: m.title }))}
                 onChange={(d) => {
                   if (playback) return; // read-only while reviewing history
                   liveDocRef.current = d;

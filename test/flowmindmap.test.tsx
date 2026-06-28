@@ -512,21 +512,52 @@ describe("FlowMindMap canvas", () => {
     const pop = (name: string) => run(() => fireEvent.click(screen.getByRole("button", { name })));
     sel("a");
     expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "a" }));
-    // Popover quick actions (NodeToolbar) — aria-labelled buttons. Add-child/sibling/Rename each
-    // enter edit (hiding the popover), so re-select before each to keep one visible.
-    pop("Collapse / expand"); // toggleCollapse — popover stays
+    // Popover quick actions (NodeToolbar): Collapse stays inline; Rename/Delete now live behind the
+    // "More…" opener, which raises the full right-click menu at the node (C6).
+    pop("Collapse / expand"); // toggleCollapse — popover stays, fires onChange
+    expect(onChange).toHaveBeenCalled();
     sel("a");
-    pop("Rename"); // editingId = a
-    sel("b");
-    pop("Add child (Tab)");
-    sel("a");
-    pop("Add sibling (Enter)");
-    sel("b");
-    pop("Delete");
-    // Pane click clears the selection.
+    pop("More actions"); // opens the node's full context menu
+    const menu = openMenu() as HTMLElement;
+    expect(within(menu).getByText("Rename")).toBeTruthy();
+    expect(within(menu).getByText("Delete")).toBeTruthy();
+    // Escape closes the menu; a pane click then clears the selection.
+    run(() => fireEvent.keyDown(document, { key: "Escape" }));
     const pane = container.querySelector(".react-flow__pane");
     if (pane) run(() => fireEvent.click(pane));
-    expect(onChange).toHaveBeenCalled();
+  });
+
+  it("right-clicks a boundary overlay → recolour / shape / delete menu (Phase 4)", () => {
+    const doc: MindMapDoc = {
+      ...baseDoc(),
+      boundaries: [{ id: "bnd-1", nodeIds: ["a"], label: "Scope" }],
+    };
+    const { onChange } = mount(doc);
+    // The boundary renders a label button (accessible name = its label).
+    run(() => fireEvent.contextMenu(screen.getByRole("button", { name: "Scope" })));
+    const menu = openMenu() as HTMLElement;
+    expect(within(menu).getByText("Recolour")).toBeTruthy();
+    expect(within(menu).getByText("Shape")).toBeTruthy(); // boundary-only group
+    // Delete removes the boundary from the doc.
+    run(() => fireEvent.click(within(menu).getByText("Delete")));
+    const last = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(last.boundaries ?? []).toHaveLength(0);
+  });
+
+  it("binds a roll-up source from the node context menu when libraryMaps is supplied (I11)", () => {
+    const { container, onChange } = mount(baseDoc(), {
+      libraryMaps: [
+        { id: "src-1", title: "Source One" },
+        { id: "src-2", title: "Source Two" },
+      ],
+    });
+    run(() => fireEvent.contextMenu(nodeEl(container, "a")));
+    const menu = openMenu() as HTMLElement;
+    const select = within(menu).getByRole("combobox", { name: "Bind roll-up source" });
+    run(() => fireEvent.change(select, { target: { value: "src-2" } }));
+    const last = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    const a = last.root.children.find((c) => c.id === "a");
+    expect(a?.rollup).toBe("src-2");
   });
 
   it("reveals the on-node ＋ add affordances on hover (#1) and wires them to add child/sibling", () => {

@@ -55,11 +55,14 @@ function Boundaries({
   boundaries,
   selectedId,
   onSelect,
+  onContextMenu,
   accent,
 }: {
   boundaries: readonly Boundary[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  /** Right-click a boundary → open its context menu (recolour / shape / delete). */
+  onContextMenu?: (e: React.MouseEvent, id: string) => void;
   /** Map-wide accent (meta.accentColor): the default colour for boundaries with no own colour. */
   accent?: string;
 }) {
@@ -159,6 +162,7 @@ function Boundaries({
                   type="button"
                   className="nodrag nopan"
                   onClick={() => onSelect(b.id)}
+                  onContextMenu={(e) => onContextMenu?.(e, b.id)}
                   title={`Select boundary "${b.label}"`}
                   style={{ ...tab, cursor: "pointer", pointerEvents: "auto", border: "none" }}
                 >
@@ -176,6 +180,7 @@ function Boundaries({
                     className="nodrag nopan"
                     aria-label={`Select boundary${b.label ? ` "${b.label}"` : ""}`}
                     onClick={() => onSelect(b.id)}
+                    onContextMenu={(e) => onContextMenu?.(e, b.id)}
                     style={{
                       position: "absolute",
                       ...style,

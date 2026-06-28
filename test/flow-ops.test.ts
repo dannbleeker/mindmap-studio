@@ -10,6 +10,7 @@ import {
   addStickyNote,
   addSubtree,
   alignNodes,
+  applyAcrossIds,
   applyRollups,
   assignBranchColors,
   bulkToggleIcon,
@@ -33,6 +34,7 @@ import {
   isolateBranch,
   mergeStyle,
   moveInTree,
+  moveSelectionInTree,
   moveSibling,
   nextSelectionId,
   nodePath,
@@ -248,6 +250,59 @@ describe("flow ops — structural", () => {
     expect(kids(moveInTree(base(), "a", "a1", "child").doc, "r")).toEqual(["a", "b"]);
     // dragging the root → unchanged
     expect(kids(moveInTree(base(), "r", "a", "child").doc, "r")).toEqual(["a", "b"]);
+  });
+
+  describe("moveSelectionInTree (group drag)", () => {
+    it("moves every selected sibling under the target as a child (one step)", () => {
+      const { doc, selectId } = moveSelectionInTree(base(), ["a1", "a2"], "a1", "b", "child");
+      expect(kids(doc, "b")).toEqual(["a1", "a2"]); // both reparented under b
+      expect(kids(doc, "a")).toEqual([]); // …out of a
+      expect(selectId).toBe("a1"); // the grabbed node stays selected
+    });
+
+    it("moves selected siblings before the target, preserving order", () => {
+      const doc = moveSelectionInTree(base(), ["a1", "a2"], "a1", "b", "before").doc;
+      expect(kids(doc, "r")).toEqual(["a", "a1", "a2", "b"]);
+      expect(kids(doc, "a")).toEqual([]);
+    });
+
+    it("doesn't double-move a node nested under another selected node", () => {
+      // Select a parent (a) AND its child (a1); a1 moves WITH a, not separately.
+      const doc = moveSelectionInTree(base(), ["a", "a1"], "a", "b", "child").doc;
+      expect(kids(doc, "b")).toEqual(["a"]); // a moved under b…
+      expect(kids(doc, "a")).toEqual(["a1", "a2"]); // …with a1 still inside it
+    });
+
+    it("never moves the root and honours the per-node cycle guard", () => {
+      // Select root + b: root is skipped, b moves under a.
+      expect(kids(moveSelectionInTree(base(), ["r", "b"], "b", "a", "child").doc, "a")).toEqual([
+        "a1",
+        "a2",
+        "b",
+      ]);
+      // Select a + b, drop on a1 (a descendant of a): a can't enter its own subtree (no-op), b can.
+      const doc = moveSelectionInTree(base(), ["a", "b"], "a", "a1", "child").doc;
+      expect(achildren(doc, "a1")).toEqual(["b"]); // b nested under a1
+      expect(kids(doc, "a")).toEqual(["a1", "a2"]); // a unchanged (cycle guard)
+    });
+
+    it("returns the doc unchanged when nothing is movable", () => {
+      const d = base();
+      expect(moveSelectionInTree(d, ["r"], "r", "a", "child").doc).toBe(d); // only the root selected
+    });
+  });
+
+  describe("applyAcrossIds", () => {
+    it("folds a per-node op over every id in one result", () => {
+      const d = applyAcrossIds(base(), ["a", "b"], (doc, id) => setPriority(doc, id, 1)).doc;
+      expect(findNode(d, "a")?.task?.priority).toBe(1);
+      expect(findNode(d, "b")?.task?.priority).toBe(1);
+    });
+
+    it("returns the doc unchanged when no op changes anything", () => {
+      const d = base();
+      expect(applyAcrossIds(d, [], (doc) => ({ doc })).doc).toBe(d); // empty id set → no-op
+    });
   });
 
   it("groupBranch wraps a node + its whole subtree in a new boundary (PREP-A pin)", () => {

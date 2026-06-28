@@ -538,6 +538,52 @@ export function moveInTree(
   return { doc: next, selectId: dragId };
 }
 
+/** Group drag in tree mode: move every selected branch to `targetId` (as a child, or before/after the
+ *  target) in ONE undo step. Rules that keep it safe:
+ *   • the root is never moved;
+ *   • a selected node nested under another selected node moves WITH its ancestor (excluded here), so we
+ *     don't double-move it;
+ *   • moveInTree's own cycle guard rejects moving a node into its own subtree (e.g. dropping onto a
+ *     selected member), so those simply no-op.
+ *  `dragId` (the grabbed node) is moved first so its drop intent leads and stays selected. Pure. */
+export function moveSelectionInTree(
+  doc: MindMapDoc,
+  ids: string[],
+  dragId: string,
+  targetId: string,
+  where: "before" | "after" | "child",
+): OpResult {
+  const tops = ids.filter(
+    (id) =>
+      id !== doc.root.id &&
+      // Excluded only if nested under another selected node that ITSELF moves — the root never moves,
+      // so being under a selected root doesn't pull a node out of the move set.
+      !ids.some((other) => {
+        if (other === id || other === doc.root.id) return false;
+        const on = findAnyNode(doc, other);
+        return on ? isDescendant(on, id) : false;
+      }),
+  );
+  // Grabbed node first; the rest keep their given order.
+  tops.sort((a, b) => (a === dragId ? -1 : b === dragId ? 1 : 0));
+  let next = doc;
+  for (const id of tops) next = moveInTree(next, id, targetId, where).doc;
+  return next === doc ? { doc } : { doc: next, selectId: dragId };
+}
+
+/** Fold a per-node op across `ids` into ONE OpResult (one undo step) — the value-setting bulk edits
+ *  (priority / branch colour) over a multi-selection, and keyboard indent/outdent over the selection.
+ *  Returns the input doc unchanged when nothing changed. Pure. */
+export function applyAcrossIds(
+  doc: MindMapDoc,
+  ids: Iterable<string>,
+  op: (d: MindMapDoc, id: string) => OpResult,
+): OpResult {
+  let next = doc;
+  for (const id of ids) next = op(next, id).doc;
+  return next === doc ? { doc } : { doc: next };
+}
+
 // --- content edits ---------------------------------------------------------
 
 /** Set a node's topic text (renaming the root also updates the doc title). */

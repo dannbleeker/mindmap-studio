@@ -841,6 +841,28 @@ describe("FlowMindMap canvas", () => {
     expect(onSelectOverlay).toHaveBeenLastCalledWith(null);
   });
 
+  it("deletes the selected overlay with the Delete key", () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "ovk",
+      title: "OK",
+      root: {
+        id: "root",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", children: [] },
+          { id: "b", topic: "B", children: [] },
+        ],
+      },
+      boundaries: [{ id: "bd1", nodeIds: ["a"], label: "Box" }],
+    };
+    const { onChange } = mount(doc);
+    const lastDoc = () => onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    run(() => fireEvent.click(screen.getByText("Box"))); // select the boundary
+    run(() => fireEvent.keyDown(document, { key: "Delete" })); // Delete-key listener removes it
+    expect(lastDoc()?.boundaries ?? []).toEqual([]);
+  });
+
   it("restores a tab session: seeds the undo history (reports it) and round-trips via getSession", () => {
     const prior = baseDoc("prior"); // a prior snapshot to seed the undo stack with
     const onHistory = vi.fn();

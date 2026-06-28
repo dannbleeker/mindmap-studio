@@ -5,7 +5,28 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Added
+
+- **Right-click a multi-selection for bulk actions.** Right-clicking used to collapse a multi-selection
+  to a single node, so batch work by mouse was impossible. When you right-click one of several selected
+  topics you now get a **bulk menu** — Delete N topics, Group in a boundary, and bulk Markers / Priority /
+  Branch colour — operating on the whole set in one undo step.
+- **Drag a multi-selection to re-parent all of it.** In the tree layout, dragging one of several selected
+  topics moved only the grabbed one (a silent surprise). It now moves **every selected branch** to the
+  drop target in one undo step (nodes nested under another selected node ride along; the root and cycles
+  are skipped).
+
+### Changed
+
+- **Indent / outdent now apply to the whole selection.** Previously only Delete was multi-aware —
+  `Alt+Shift+←/→` (and `Tab` / `Shift+Tab`) acted on just the anchor and silently abandoned the rest.
+  With several topics selected they now restructure the whole selection in one undo step.
+
 ### Fixed
+
+- **Delete removes a selected boundary, summary or callout.** Selecting an overlay then pressing Delete
+  was a silent no-op — the most expected gesture did nothing. The Delete (and Backspace) key now removes
+  the selected overlay.
 
 - **The inspector is usable on a phone.** It stayed a fixed 300px column (~80% of a ~390px screen),
   so editing a topic left almost no canvas. On phones the inspector now docks as a dismissible

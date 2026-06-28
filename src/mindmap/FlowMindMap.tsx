@@ -43,6 +43,7 @@ import { BackgroundImage } from "./flow/BackgroundImage";
 import { Boundaries } from "./flow/Boundaries";
 import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
+import { BulkNodeMenu } from "./flow/BulkNodeMenu";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CoachMark, DropLabel, LegendPanel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
@@ -78,6 +79,7 @@ import {
   addStickyNote,
   addSubtree,
   alignNodes,
+  applyAcrossIds,
   assignBranchColors,
   balanceMap,
   bulkToggleIcon,
@@ -101,6 +103,7 @@ import {
   isolateBranch,
   mergeStyle,
   moveInTree,
+  moveSelectionInTree,
   moveSibling,
   nextSelectionId,
   outdent,
@@ -787,7 +790,17 @@ function FlowInner({
       }
       // Tree mode: nest as a child (centre) or reorder as a sibling before/after the target (edges).
       const t = findDropTarget(dragId, dropPos);
-      const r = t ? moveInTree(docRef.current, dragId, t.id, t.where) : { doc: docRef.current };
+      if (!t) {
+        sync(docRef.current); // no valid target → snap back to the computed layout
+        return;
+      }
+      // Group drag: when the grabbed node is part of a multi-selection, move every selected branch to
+      // the target in one undo step (previously only the grabbed node moved — a silent surprise).
+      const sel = selectedIdsRef.current;
+      const r =
+        sel.size > 1 && sel.has(dragId)
+          ? moveSelectionInTree(docRef.current, [...sel], dragId, t.id, t.where)
+          : moveInTree(docRef.current, dragId, t.id, t.where);
       if (r.doc !== docRef.current) apply(r);
       else sync(docRef.current); // snap back to the computed layout
     },
@@ -1220,12 +1233,20 @@ function FlowInner({
         case "addSibling":
           apply(addSibling(docRef.current, intent.id), true);
           break;
-        case "outdent":
-          apply(outdent(docRef.current, intent.id));
+        // Indent / outdent apply to the WHOLE selection (one undo step) when several are selected —
+        // not just the anchor — so multi-select restructuring matches multi-select Delete.
+        case "outdent": {
+          const ids = selectedIdsRef.current;
+          if (ids.size > 1) apply(applyAcrossIds(docRef.current, ids, outdent));
+          else apply(outdent(docRef.current, intent.id));
           break;
-        case "indent":
-          apply(indent(docRef.current, intent.id));
+        }
+        case "indent": {
+          const ids = selectedIdsRef.current;
+          if (ids.size > 1) apply(applyAcrossIds(docRef.current, ids, indent));
+          else apply(indent(docRef.current, intent.id));
           break;
+        }
         case "moveUp":
           apply(moveSibling(docRef.current, intent.id, "up"));
           break;
@@ -1323,6 +1344,29 @@ function FlowInner({
     },
     [apply],
   );
+
+  // Delete the selected overlay (boundary / summary / callout). Shared by the imperative handle and the
+  // keyboard listener below — pressing Delete with an overlay selected used to be a silent no-op.
+  const deleteSelectedOverlay = useCallback((): boolean => {
+    const ok = withSelectedOverlay((sel) => OVERLAY_OPS[sel.kind].del(docRef.current, sel));
+    if (ok) clearOverlaySelection();
+    return ok;
+  }, [withSelectedOverlay, clearOverlaySelection]);
+
+  // Keyboard delete for overlays. keyIntent only fires for node selections (and node selection is
+  // cleared while an overlay is selected), so a boundary/summary/callout needs its own Delete listener.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
+      if (!selectedOverlayRef.current || editingRef.current) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault();
+      deleteSelectedOverlay();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [deleteSelectedOverlay]);
 
   // Select an overlay (clears node + edge first — mutually exclusive), then resolve + fire.
   const selectOverlay = useCallback(
@@ -1572,11 +1616,7 @@ function FlowInner({
         if (ok) fireSelectOverlay({ kind: sel.kind, id: sel.id, nodeId: sel.nodeId });
         return ok;
       },
-      deleteOverlay: () => {
-        const ok = withSelectedOverlay((sel) => OVERLAY_OPS[sel.kind].del(docRef.current, sel));
-        if (ok) clearOverlaySelection();
-        return ok;
-      },
+      deleteOverlay: () => deleteSelectedOverlay(),
       setBackdropColor: (color) => apply(setBackdropColor(docRef.current, color)),
     }),
     [
@@ -1590,7 +1630,7 @@ function FlowInner({
       withSelectedLink,
       withSelectedOverlay,
       measuredSizes,
-      clearOverlaySelection,
+      deleteSelectedOverlay,
       fireSelectOverlay,
       focusNodeById,
       deleteSelectionWithUndo,
@@ -1743,8 +1783,14 @@ function FlowInner({
               e.preventDefault();
               clearEdgeSelection();
               clearOverlaySelection();
-              selectOnly(node.id);
-              fireSelect(node.id);
+              // Keep an existing multi-selection when right-clicking one of its members — so the menu
+              // can offer bulk actions instead of collapsing to a single node (the natural mouse path
+              // for batch work). Otherwise select just this node.
+              const sel = selectedIdsRef.current;
+              if (!(sel.size > 1 && sel.has(node.id))) {
+                selectOnly(node.id);
+                fireSelect(node.id);
+              }
               setMenu({ x: e.clientX, y: e.clientY, id: node.id });
             }}
             onNodeDrag={(_, node) => handleDrag(node.id, node.position)}
@@ -1848,6 +1894,20 @@ function FlowInner({
             >
               {(() => {
                 const id = menu.id;
+                // Bulk menu: when the right-clicked node is part of a multi-selection, operate on the
+                // whole set (the natural mouse path for batch work — was previously impossible because
+                // right-click collapsed the selection). Reuses the existing bulk ops.
+                const selSet = selectedIdsRef.current;
+                if (selSet.size > 1 && selSet.has(id)) {
+                  return (
+                    <BulkNodeMenu
+                      ids={[...selSet]}
+                      getDoc={() => docRef.current}
+                      apply={apply}
+                      onDelete={() => deleteSelectionWithUndo()}
+                    />
+                  );
+                }
                 const items: [string, () => void, boolean?][] = [
                   ["Add child", () => apply(addChild(docRef.current, id), true)],
                   ["Add sibling", () => apply(addSibling(docRef.current, id), true)],

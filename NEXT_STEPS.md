@@ -39,8 +39,12 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   reflows fine, so no fix needed. **Deferred:** desktop Row-2 overflow menu (T1) → folded into Phase 6
   (T3 moves the low-value toggles out of Row-2, which removes the crowding at the root); a dedicated
   mobile add-topic input (O3) → the touch first-run card now guides the on-node ＋ path.
-- [ ] **Phase 4** (prep commit first) — right-click keeps multi-selection + bulk menu; keyboard
-  restructure over the selection; tree-mode group drag; overlay delete + context menu.
+- [x] **Phase 4** — multi-selection parity (shipped — see CHANGELOG): bulk right-click menu, keyboard
+  indent/outdent over the selection, tree-mode group drag, overlay Delete key. Logic lives in tested
+  pure helpers (BulkNodeMenu, moveSelectionInTree, applyAcrossIds, deleteSelectedOverlay). Deferred: a
+  dedicated right-click menu *on overlays* (Rename/Recolour/Delete) — only the Delete key was wired.
+  Note: the lines/stmts coverage floor was nudged 91→90.9 because the ~6 lines wiring the bulk menu to
+  a React-Flow multi-selection can't be exercised in jsdom (RF needs real held-key state).
 - [ ] **Phase 5** (prep commit first) — left rail → tabbed dock; placement cues + de-dupe note editor;
   InfoPanel Details restructure; bulk-edit clarity.
 - [ ] **Phase 6** — distinct cross-map search icon; icon-only toggles → labelled; View-menu regroup;

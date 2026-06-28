@@ -158,6 +158,19 @@ describe("useMapExports — SVG-backed formats", () => {
     await ex.exportSvg();
     expect(downloads).toHaveLength(0);
   });
+
+  // Beyond no-op'ing, the renderer-backed exports now hint the user instead of failing silently.
+  it.each(["exportSvg", "exportHtml", "exportPng", "exportPdf"] as const)(
+    "%s hints the user when there is no live map",
+    async (method) => {
+      const onHint = vi.fn();
+      const ex = useMapExports(handleRef(null), () => docOf("Demo Map"), undefined, onHint);
+      await ex[method]();
+      expect(downloads).toHaveLength(0);
+      expect(onHint).toHaveBeenCalledTimes(1);
+      expect(onHint.mock.calls[0][0]).toMatch(/canvas/i);
+    },
+  );
 });
 
 describe("useMapExports — PNG raster seam", () => {

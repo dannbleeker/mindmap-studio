@@ -204,6 +204,31 @@ describe("App (integration)", () => {
     expect(container.querySelector(".mm-editor")).toBeTruthy();
   });
 
+  it("imports a file, surfaces the lossy-import note, and dismisses the banner", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+    await flush();
+    await openEditor(user, container);
+    // The import <input> lives in the More menu — open it so the input is mounted, then fire the
+    // change directly (the real picker dialog can't open in jsdom).
+    await user.click(screen.getByRole("button", { name: /More/ }));
+    await flush();
+    const input = container.querySelector('input[accept*=".opml"]') as HTMLInputElement;
+    expect(input).toBeTruthy();
+    const opml =
+      '<?xml version="1.0"?><opml version="2.0"><head><title>Imported</title></head><body><outline text="A"/></body></opml>';
+    const file = new File([opml], "imp.opml", { type: "text/x-opml" });
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [file] } });
+      await flush();
+    });
+    // A non-native import surfaces a one-line lossy-conversion note in the warnings banner…
+    expect(await screen.findByText(/OPML/i)).toBeTruthy();
+    // …which the × dismisses.
+    await user.click(screen.getByRole("button", { name: /dismiss import notes/i }));
+    await waitFor(() => expect(screen.queryByText(/OPML/i)).toBeNull());
+  });
+
   it("selects a topic and drives inspector edits (tag, progress, priority)", async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);

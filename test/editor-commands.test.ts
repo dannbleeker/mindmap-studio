@@ -130,6 +130,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       canPasteFormat: false,
       shuffleBranchColors: vi.fn(),
       applyDesign: vi.fn(),
+      openMapPanel: vi.fn(),
       drillIn: vi.fn(),
       startWalk: vi.fn(),
       alignSelection: vi.fn(),

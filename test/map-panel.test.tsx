@@ -50,6 +50,10 @@ function setup(d: MindMapDoc = planDoc, over: Partial<React.ComponentProps<typeo
     lineJumps: !!d.meta?.lineJumps,
     onToggleLineJumps: vi.fn(),
     onRenameMap: vi.fn(),
+    onSetConnectorStyle: vi.fn(),
+    onSetBranchGrowth: vi.fn(),
+    onSetFontFamily: vi.fn(),
+    onSetFontScale: vi.fn(),
     ...over,
   };
   render(<MapPanel {...props} />);
@@ -187,6 +191,10 @@ describe("MapPanel", () => {
         lineJumps={false}
         onToggleLineJumps={noop}
         onRenameMap={noop}
+        onSetConnectorStyle={noop}
+        onSetBranchGrowth={noop}
+        onSetFontFamily={noop}
+        onSetFontScale={noop}
         onSetBackdropColor={onSetBackdropColor}
       />,
     );
@@ -211,6 +219,10 @@ describe("MapPanel", () => {
         lineJumps={false}
         onToggleLineJumps={noop}
         onRenameMap={noop}
+        onSetConnectorStyle={noop}
+        onSetBranchGrowth={noop}
+        onSetFontFamily={noop}
+        onSetFontScale={noop}
         onSetBackdropColor={onSetBackdropColor}
       />,
     );

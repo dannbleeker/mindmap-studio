@@ -35,6 +35,9 @@ function setup(
     isMobile?: boolean;
     canUndo?: boolean;
     canRedo?: boolean;
+    freeform?: boolean;
+    selectedCount?: number;
+    numbered?: boolean;
   } = {},
 ) {
   const handle = mockHandle();
@@ -76,7 +79,7 @@ function setup(
     setInfoOpen: vi.fn(),
     infoMinimized: false,
     setInfoMinimized: vi.fn(),
-    numbered: false,
+    numbered: over.numbered ?? false,
     setNumbered: vi.fn(),
     spellcheck: false,
     setSpellcheck: vi.fn(),
@@ -113,12 +116,13 @@ function setup(
     canPasteFormat: false,
     shuffleBranchColors: vi.fn(),
     applyDesign: vi.fn(),
+    openMapPanel: vi.fn(),
     drillIn: vi.fn(),
     startWalk: vi.fn(),
     alignSelection: vi.fn(),
     distributeSelection: vi.fn(),
-    selectedCount: 0,
-    freeform: false,
+    selectedCount: over.selectedCount ?? 0,
+    freeform: over.freeform ?? false,
   };
   const find = {
     query: "",
@@ -275,7 +279,7 @@ describe("Toolbar — More menu", () => {
 });
 
 describe("Toolbar — row 2 (view/edit/canvas)", () => {
-  it("View menu: fit / collapse / expand; numbering + line jumps stay top-level (#4)", async () => {
+  it("View menu: fit / collapse / expand + the labelled display toggles (#4)", async () => {
     const t = setup();
     // Fit / collapse / expand are folded into the View menu (one labelled dropdown, not 4 icons).
     await u.click(screen.getByRole("button", { name: /^view/i }));
@@ -287,11 +291,40 @@ describe("Toolbar — row 2 (view/edit/canvas)", () => {
     await u.click(screen.getByRole("button", { name: /^view/i }));
     await u.click(screen.getByRole("menuitem", { name: /expand all/i }));
     expect(t.handle.setAllExpanded).toHaveBeenCalledWith(true);
-    // The view-toggle switches stay top-level so their on/off state is visible at a glance.
-    await u.click(screen.getByRole("button", { name: /numbering/i }));
+    // The display toggles now live in the View menu as labelled checkboxes (moved off the cramped,
+    // non-mnemonic Row-2 icon strip). They keep the menu open (closeOnSelect=false).
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    await u.click(screen.getByRole("menuitemcheckbox", { name: /outline numbering/i }));
     expect(t.panels.setNumbered).toHaveBeenCalled();
-    await u.click(screen.getByRole("button", { name: /line jumps/i }));
+    await u.click(screen.getByRole("menuitemcheckbox", { name: /line jumps/i }));
     expect(t.handle.setLineJumps).toHaveBeenCalled();
+    await u.click(screen.getByRole("menuitemcheckbox", { name: /legend/i }));
+    expect(t.handle.setLegend).toHaveBeenCalled();
+    await u.click(screen.getByRole("menuitemcheckbox", { name: /spell-check/i }));
+    expect(t.panels.setSpellcheck).toHaveBeenCalled();
+  });
+
+  it("View menu: the numbering-style toggle appears once numbering is on (#4)", async () => {
+    const t = setup({ numbered: true });
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    await u.click(screen.getByRole("menuitem", { name: /numbering style/i }));
+    expect(t.handle.setNumberStyle).toHaveBeenCalled();
+  });
+
+  it("View menu: the Arrange group shows only in free-canvas mode (#4)", async () => {
+    // Not freeform → no Arrange group.
+    setup();
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    expect(screen.queryByRole("menuitem", { name: /align left/i })).toBeNull();
+    cleanup();
+    // Freeform + 2 selected → align/distribute appear and dispatch.
+    const b = setup({ freeform: true, selectedCount: 3 });
+    await u.click(screen.getByRole("button", { name: /^view/i }));
+    await u.click(screen.getByRole("menuitem", { name: /align left/i }));
+    expect(b.canvas.alignSelection).toHaveBeenCalledWith("left");
+    await u.click(screen.getByRole("button", { name: /^view/i })); // align closed the menu — reopen
+    await u.click(screen.getByRole("menuitem", { name: /distribute horizontally/i }));
+    expect(b.canvas.distributeSelection).toHaveBeenCalledWith("h");
   });
 
   it("Focus is disabled in the View menu without a selection (#4)", async () => {
@@ -352,11 +385,19 @@ describe("Toolbar — row 2 (view/edit/canvas)", () => {
     expect(t.handle.groupBranch).toHaveBeenCalledWith("n1");
   });
 
-  it("Canvas menu: theme select + background reset", async () => {
+  it("Canvas menu: design preset, free layout, and opens the Map panel for styling (T5)", async () => {
+    // Persistent styling (theme/background/connectors/fonts/backdrop) moved to the Map panel; the
+    // Canvas menu now keeps only one-shot Design presets + Free layout, and a link to the panel.
     const t = setup();
     await u.click(screen.getByRole("button", { name: /^canvas/i }));
-    await u.selectOptions(screen.getByLabelText("Canvas theme"), "dark");
-    expect(t.canvas.setThemeId).toHaveBeenCalledWith("dark");
+    await u.click(screen.getAllByRole("menuitem")[0]); // first Design preset
+    expect(t.canvas.applyDesign).toHaveBeenCalled();
+    await u.click(screen.getByRole("button", { name: /^canvas/i }));
+    await u.click(screen.getByRole("menuitemcheckbox", { name: /free layout/i }));
+    expect(t.handle.setFreeform).toHaveBeenCalled();
+    // The Free-layout checkbox keeps the menu open, so the styling link is reachable directly.
+    await u.click(screen.getByRole("menuitem", { name: /theme, colours, fonts/i }));
+    expect(t.canvas.openMapPanel).toHaveBeenCalled();
   });
 
   it("layout select + quick add", async () => {

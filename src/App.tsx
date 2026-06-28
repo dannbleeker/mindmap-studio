@@ -1176,6 +1176,12 @@ export function App() {
         mapRef.current?.setAccentColor(design.accentColor); // relationship + boundary accent (undoable)
         showHint(`Applied the ${design.name} design.`);
       },
+      // Open the right-hand inspector, where the Map panel (shown when no node is selected) now hosts
+      // theme / background / connectors / fonts / backdrop. Deselect a node to see those map settings.
+      openMapPanel: () => {
+        panels.setInfoMinimized(false);
+        panels.setInfoOpen(true);
+      },
       drillIn: () => {
         if (selected) setDrillId(selected.id);
       },
@@ -1322,7 +1328,6 @@ export function App() {
     .map(([, key]) => key);
   const openDockKey = openDockKeys.join(",");
   const prevOpenDock = useRef("");
-  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the joined open-set string.
   useEffect(() => {
     const keys = openDockKey ? openDockKey.split(",") : [];
     const prev = prevOpenDock.current ? prevOpenDock.current.split(",") : [];
@@ -1355,9 +1360,6 @@ export function App() {
     <div className="mm-editor" style={editorThemeVars(theme)}>
       <IconRail
         onHome={goHome}
-        onFind={() =>
-          document.querySelector<HTMLInputElement>('input[aria-label="Find node"]')?.focus()
-        }
         onImage={handleImage}
         onPaste={() => paste.setOpen(true)}
         onShortcuts={() => setShortcutsOpen(true)}
@@ -1994,6 +1996,11 @@ export function App() {
                 handleBackgroundImage={handleBackgroundImage}
                 lineJumps={!!liveDoc.meta?.lineJumps}
                 onToggleLineJumps={() => mapRef.current?.setLineJumps(!liveDoc.meta?.lineJumps)}
+                onSetConnectorStyle={(s) => mapRef.current?.setConnectorStyle(s)}
+                onSetBranchGrowth={(w) => mapRef.current?.setBranchGrowth(w)}
+                onSetFontFamily={(f) => mapRef.current?.setFontFamily(f)}
+                onSetFontScale={(s) => mapRef.current?.setFontScale(s)}
+                onSetBackdrop={(k) => mapRef.current?.setBackdrop(k)}
                 onRenameMap={(t) => mapRef.current?.renameMap(t)}
                 onBackdropRings={(d) => mapRef.current?.setBackdropRings(d)}
                 onSetBackdropColor={(c) => mapRef.current?.setBackdropColor(c)}

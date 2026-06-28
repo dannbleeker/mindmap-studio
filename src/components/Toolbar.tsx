@@ -7,9 +7,8 @@ import { buildExample, examples } from "../examples";
 import type { SaveState } from "../hooks/useIdbAutosave";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
-import { canvasThemes } from "../mindmap/theme";
 import type { CanvasTheme } from "../mindmap/theme";
-import type { BackdropKind, BranchGrowth, MindMapDoc } from "../model/types";
+import type { MindMapDoc } from "../model/types";
 import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../templates";
 import { EditorIcon, type EditorIconName } from "./EditorIcons";
@@ -117,6 +116,8 @@ export interface ToolbarCanvas {
   shuffleBranchColors: () => void;
   /** Apply a design preset (theme + connector style) from the gallery. */
   applyDesign: (id: string) => void;
+  /** Open the Map panel (the no-selection inspector) where persistent styling now lives. */
+  openMapPanel: () => void;
   /** Drill in: re-root the canvas view at the selected topic (focus-on-topic). */
   drillIn: () => void;
   /** Start the guided walk (step through every topic in outline order with a spotlight + notes). */
@@ -301,7 +302,7 @@ export function Toolbar({
   showHint,
   saveState,
 }: ToolbarProps) {
-  const { liveDoc, doc } = map;
+  const { liveDoc } = map;
   const m = () => mapRef.current;
 
   const EXPORTS: { group: string; items: [string, () => void][] }[] = [
@@ -366,14 +367,20 @@ export function Toolbar({
           onClick={history.redo}
         />
         {isMobile ? null : <span className="mm-crumb">Maps /</span>}
+        {/* A "browse all maps" picker — distinct from the open-document tabs below (which show only the
+            currently-open maps). Held at value="" so it reads as an action ("Open a map…") instead of
+            duplicating the active tab's title; choosing one switches to it (opening a tab). */}
         <select
-          className="mm-select"
-          value={doc.id}
-          onChange={(e) => map.switchMap(e.target.value)}
+          className="mm-select mm-open-map"
+          value=""
+          onChange={(e) => {
+            if (e.target.value) map.switchMap(e.target.value);
+          }}
           aria-label="Open map"
-          title="Switch map"
-          style={{ fontWeight: 700, maxWidth: isMobile ? 104 : 220 }}
+          title="Open a map from your library"
+          style={{ maxWidth: isMobile ? 116 : 200 }}
         >
+          <option value="">Open a map…</option>
           {map.mapOptions.map((mm) => (
             <option key={mm.id} value={mm.id}>
               {mm.title || "(untitled)"}
@@ -412,8 +419,8 @@ export function Toolbar({
               </optgroup>
             </select>
             <TBtn
-              icon="search"
-              label="Search across every map"
+              icon="grid"
+              label="Search across every map in your library"
               text="All maps"
               ghost
               onClick={nav.openSearchAll}
@@ -741,34 +748,81 @@ export function Toolbar({
             label="Auto-colour branches"
             onSelect={() => canvas.shuffleBranchColors()}
           />
-          <MenuLabel>Arrange (free layout)</MenuLabel>
-          {(
-            [
-              ["left", "Align left"],
-              ["hcenter", "Align centres (horizontal)"],
-              ["right", "Align right"],
-              ["top", "Align top"],
-              ["vmiddle", "Align middles (vertical)"],
-              ["bottom", "Align bottom"],
-            ] as const
-          ).map(([mode, label]) => (
-            <MenuItem
-              key={mode}
-              label={label}
-              disabled={!canvas.freeform || canvas.selectedCount < 2}
-              onSelect={() => canvas.alignSelection(mode)}
-            />
-          ))}
-          <MenuItem
-            label="Distribute horizontally"
-            disabled={!canvas.freeform || canvas.selectedCount < 3}
-            onSelect={() => canvas.distributeSelection("h")}
-          />
-          <MenuItem
-            label="Distribute vertically"
-            disabled={!canvas.freeform || canvas.selectedCount < 3}
-            onSelect={() => canvas.distributeSelection("v")}
-          />
+          {/* Arrange tools only apply in free-canvas mode — hide the whole group otherwise instead of
+              showing a block of greyed-out rows the user has to scroll past. */}
+          {canvas.freeform ? (
+            <>
+              <MenuLabel>Arrange (free layout)</MenuLabel>
+              {(
+                [
+                  ["left", "Align left"],
+                  ["hcenter", "Align centres (horizontal)"],
+                  ["right", "Align right"],
+                  ["top", "Align top"],
+                  ["vmiddle", "Align middles (vertical)"],
+                  ["bottom", "Align bottom"],
+                ] as const
+              ).map(([mode, label]) => (
+                <MenuItem
+                  key={mode}
+                  label={label}
+                  disabled={canvas.selectedCount < 2}
+                  onSelect={() => canvas.alignSelection(mode)}
+                />
+              ))}
+              <MenuItem
+                label="Distribute horizontally"
+                disabled={canvas.selectedCount < 3}
+                onSelect={() => canvas.distributeSelection("h")}
+              />
+              <MenuItem
+                label="Distribute vertically"
+                disabled={canvas.selectedCount < 3}
+                onSelect={() => canvas.distributeSelection("v")}
+              />
+            </>
+          ) : null}
+          {/* Display toggles — labelled here (moved out of the cramped, non-mnemonic Row-2 icon strip).
+              Desktop only: on a phone these live in the dedicated Options overflow menu instead. */}
+          {isMobile ? null : (
+            <>
+              <MenuLabel>Display</MenuLabel>
+              <MenuCheckboxItem
+                label="Outline numbering"
+                checked={panels.numbered}
+                onSelect={() => panels.setNumbered((v) => !v)}
+              />
+              {panels.numbered ? (
+                <MenuItem
+                  label={
+                    liveDoc.meta?.numberStyle === "outline"
+                      ? "Numbering style: outline (I, A, 1)"
+                      : "Numbering style: decimal (1, 1.1)"
+                  }
+                  onSelect={() =>
+                    m()?.setNumberStyle(
+                      liveDoc.meta?.numberStyle === "outline" ? "decimal" : "outline",
+                    )
+                  }
+                />
+              ) : null}
+              <MenuCheckboxItem
+                label="Line jumps"
+                checked={!!liveDoc.meta?.lineJumps}
+                onSelect={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
+              />
+              <MenuCheckboxItem
+                label="Legend"
+                checked={!!liveDoc.meta?.legend}
+                onSelect={() => m()?.setLegend(!liveDoc.meta?.legend)}
+              />
+              <MenuCheckboxItem
+                label="Spell-check"
+                checked={panels.spellcheck}
+                onSelect={() => panels.setSpellcheck((v) => !v)}
+              />
+            </>
+          )}
           <MenuLabel>Saved views</MenuLabel>
           <MenuItem icon={mi("star")} label="Save current view…" onSelect={() => views.onSave()} />
           {views.list.map((v) => (
@@ -795,54 +849,9 @@ export function Toolbar({
             </div>
           ))}
         </Menu>
-        {/* Overlay-toggle group — outline numbering / line-jumps (view-only switches). On phones
-            these move into the ⋯ overflow menu below to keep the bar compact. */}
-        {isMobile ? null : (
-          <>
-            <span className="mm-vdiv" />
-            <div className="mm-cluster">
-              <TBtn
-                icon="check"
-                label="Outline numbering (1, 1.2, 1.2.3…)"
-                active={panels.numbered}
-                onClick={() => panels.setNumbered((v) => !v)}
-              />
-              {panels.numbered ? (
-                <TBtn
-                  icon="layers"
-                  label={
-                    liveDoc.meta?.numberStyle === "outline"
-                      ? "Numbering: outline (I, A, 1, a) — switch to decimal"
-                      : "Numbering: decimal (1, 1.1) — switch to outline"
-                  }
-                  onClick={() =>
-                    m()?.setNumberStyle(
-                      liveDoc.meta?.numberStyle === "outline" ? "decimal" : "outline",
-                    )
-                  }
-                />
-              ) : null}
-              <TBtn
-                icon="link"
-                label="Line jumps where relationships cross"
-                active={!!liveDoc.meta?.lineJumps}
-                onClick={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
-              />
-              <TBtn
-                icon="layers"
-                label="Legend (markers / tags / rules in use)"
-                active={!!liveDoc.meta?.legend}
-                onClick={() => m()?.setLegend(!liveDoc.meta?.legend)}
-              />
-              <TBtn
-                icon="text"
-                label="Spell-check the topic + note editors"
-                active={panels.spellcheck}
-                onClick={() => panels.setSpellcheck((v) => !v)}
-              />
-            </div>
-          </>
-        )}
+        {/* The view-only display toggles (numbering / line-jumps / legend / spell-check) used to be a
+            row of non-mnemonic icon buttons here; they now live as labelled checkboxes in the View menu
+            (desktop) and the Options menu (mobile), keeping Row 2 from overflowing. */}
         <span className="mm-vdiv" />
         {/* Insert + Canvas menus — content/styling group. */}
         <div className="mm-cluster">
@@ -1007,7 +1016,7 @@ export function Toolbar({
           >
             {(close) => (
               <>
-                <MenuLabel>Design</MenuLabel>
+                <MenuLabel>Design presets</MenuLabel>
                 {DESIGNS.map((d) => (
                   <MenuItem
                     key={d.id}
@@ -1021,141 +1030,6 @@ export function Toolbar({
                   />
                 ))}
                 <MenuSeparator />
-                <MenuLabel>Theme</MenuLabel>
-                <div style={{ padding: "2px 6px" }}>
-                  <select
-                    className="mm-select"
-                    style={{ width: "100%" }}
-                    value={canvas.theme.id}
-                    onChange={(e) => canvas.setThemeId(e.target.value)}
-                    aria-label="Canvas theme"
-                  >
-                    {canvasThemes.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <MenuLabel>Background</MenuLabel>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 10px" }}>
-                  <input
-                    type="color"
-                    aria-label="Canvas background colour"
-                    value={liveDoc.meta?.background || "#ffffff"}
-                    onChange={(e) => m()?.setBackground(e.target.value)}
-                    style={{
-                      width: 28,
-                      height: 22,
-                      border: "none",
-                      background: "none",
-                      padding: 0,
-                      cursor: "pointer",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="mm-tbtn"
-                    style={{ height: 26 }}
-                    onClick={() => m()?.setBackground("")}
-                  >
-                    Reset
-                  </button>
-                  <label
-                    className="mm-tbtn"
-                    style={{ height: 26, cursor: "pointer" }}
-                    title="Background image"
-                  >
-                    <EditorIcon name="image" size={15} />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      aria-label="Canvas background image"
-                      onChange={(e) => {
-                        canvas.handleBackgroundImage(e);
-                        close();
-                      }}
-                      style={{ display: "none" }}
-                    />
-                  </label>
-                  {liveDoc.meta?.backgroundImage ? (
-                    <button
-                      type="button"
-                      className="mm-tbtn"
-                      style={{ height: 26 }}
-                      onClick={() => m()?.setBackgroundImage("")}
-                    >
-                      Clear img
-                    </button>
-                  ) : null}
-                </div>
-                <MenuSeparator />
-                <MenuLabel>Connectors</MenuLabel>
-                <div style={{ padding: "2px 6px" }}>
-                  <select
-                    className="mm-select"
-                    style={{ width: "100%" }}
-                    value={liveDoc.meta?.connectorStyle ?? "organic"}
-                    onChange={(e) =>
-                      m()?.setConnectorStyle(
-                        e.target.value as "organic" | "curved" | "elbow" | "straight",
-                      )
-                    }
-                    aria-label="Connector style"
-                    title="Branch connector style"
-                  >
-                    <option value="organic">Organic</option>
-                    <option value="curved">Curved</option>
-                    <option value="elbow">Elbow</option>
-                    <option value="straight">Straight</option>
-                  </select>
-                </div>
-                <MenuLabel>Branch growth</MenuLabel>
-                <div style={{ padding: "2px 6px" }}>
-                  <select
-                    className="mm-select"
-                    style={{ width: "100%" }}
-                    value={liveDoc.meta?.branchGrowth ?? "regular"}
-                    onChange={(e) => m()?.setBranchGrowth(e.target.value as BranchGrowth)}
-                    aria-label="Branch growth weight"
-                    title="Branch line weight (thickness)"
-                  >
-                    <option value="fine">Fine</option>
-                    <option value="regular">Regular</option>
-                    <option value="bold">Bold</option>
-                  </select>
-                </div>
-                <MenuLabel>Type</MenuLabel>
-                <div style={{ display: "flex", gap: 6, padding: "2px 6px" }}>
-                  <select
-                    className="mm-select"
-                    style={{ flex: 1 }}
-                    value={liveDoc.meta?.fontFamily ?? ""}
-                    onChange={(e) => m()?.setFontFamily(e.target.value)}
-                    aria-label="Base font family"
-                    title="Map-wide base font (a per-topic font still overrides it)"
-                  >
-                    <option value="">Default</option>
-                    <option value="Inter, system-ui, sans-serif">Sans</option>
-                    <option value="Georgia, 'Times New Roman', serif">Serif</option>
-                    <option value="'Courier New', ui-monospace, monospace">Mono</option>
-                  </select>
-                  <select
-                    className="mm-select"
-                    style={{ flex: 1 }}
-                    value={liveDoc.meta?.fontScale ?? "comfortable"}
-                    onChange={(e) =>
-                      m()?.setFontScale(e.target.value as "compact" | "comfortable" | "large")
-                    }
-                    aria-label="Font size scale"
-                    title="Map-wide text size (a per-topic size still overrides it)"
-                  >
-                    <option value="compact">Compact</option>
-                    <option value="comfortable">Comfortable</option>
-                    <option value="large">Large</option>
-                  </select>
-                </div>
-                <MenuSeparator />
                 <MenuCheckboxItem
                   icon={mi("hand")}
                   label="Free layout (whiteboard)"
@@ -1163,59 +1037,19 @@ export function Toolbar({
                   trailing={mi("check")}
                   onSelect={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
                 />
-                <MenuLabel>Diagram backdrop</MenuLabel>
-                <div style={{ padding: "2px 6px" }}>
-                  <select
-                    className="mm-select"
-                    style={{ width: "100%" }}
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value) m()?.setBackdrop(e.target.value as BackdropKind);
-                    }}
-                    aria-label="Add a diagram backdrop"
-                  >
-                    <option value="">Add backdrop…</option>
-                    <option value="onion">Onion (rings)</option>
-                    <option value="funnel">Funnel (stages)</option>
-                    <option value="venn2">Venn (2 circles)</option>
-                    <option value="venn3">Venn (3 circles)</option>
-                  </select>
-                </div>
-                {liveDoc.backdrop ? (
-                  <div style={{ display: "flex", gap: 6, padding: "4px 10px" }}>
-                    {liveDoc.backdrop.kind === "onion" || liveDoc.backdrop.kind === "funnel" ? (
-                      <>
-                        <button
-                          type="button"
-                          className="mm-tbtn"
-                          style={{ height: 26 }}
-                          onClick={() => m()?.setBackdropRings(-1)}
-                        >
-                          − ring
-                        </button>
-                        <button
-                          type="button"
-                          className="mm-tbtn"
-                          style={{ height: 26 }}
-                          onClick={() => m()?.setBackdropRings(1)}
-                        >
-                          + ring
-                        </button>
-                      </>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="mm-tbtn"
-                      style={{ height: 26 }}
-                      onClick={() => {
-                        m()?.clearBackdrop();
-                        close();
-                      }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : null}
+                <MenuSeparator />
+                {/* Persistent styling (theme · background · connectors · branch weight · fonts ·
+                    backdrop) now lives in the Map panel so the map's look has one home instead of
+                    being split between this menu and the panel (T5). This opens it. */}
+                <MenuItem
+                  icon={mi("palette")}
+                  label="Theme, colours, fonts & backdrop…"
+                  title="Open the Map panel to change theme, background, connectors, fonts and backdrop"
+                  onSelect={() => {
+                    canvas.openMapPanel();
+                    close();
+                  }}
+                />
               </>
             )}
           </Menu>

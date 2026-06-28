@@ -7,6 +7,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Toolbar information-architecture cleanup (Phase 6).** A pass to make the editor chrome read more
+  clearly and stop splitting one job across two places:
+  - **Cross-map search is now distinct from in-map Find.** The Row-1 "All maps" button took a maps-grid
+    glyph (was a second magnifier, identical to Find); the plain magnifier now means in-map Find only.
+    The redundant Find button in the left icon rail is gone — `Ctrl/⌘+F` and the Row-1 Find cover it.
+  - **The four view toggles are labelled words, not cryptic icons.** Outline numbering, line jumps,
+    legend and spell-check moved out of the ambiguous Row-2 icon strip into the **View menu** as
+    labelled checkboxes (desktop) / the Options menu (mobile).
+  - **The View menu's Arrange tools hide unless Free layout is on** — no more scrolling past a block of
+    greyed-out align/distribute rows that don't apply.
+  - **Map styling has one home.** Theme, background, connectors, branch weight, fonts and the diagram
+    backdrop now live in the **Map panel** (the right panel shown when no node is selected). The Canvas
+    menu keeps just the one-shot **Design presets** + **Free layout**, plus a link that opens the panel.
+  - **The Row-1 map switcher reads as an action.** It's now an explicit **"Open a map…"** picker for
+    browsing your whole library, visually distinct from the open-document tabs below it.
+
 - **The side panels now share one tabbed dock.** Outline, Markers & tags, Power Filter, Conditional
   styles, Version history, Map statistics, Agenda, Maps, Slide deck and the Note editor used to stack
   as separate 250px columns — open four at once on a 1280px screen and they crushed the map to a sliver.

@@ -8,7 +8,6 @@ import { EditorIcon } from "./EditorIcons";
 
 export interface IconRailProps {
   onHome: () => void;
-  onFind: () => void;
   onImage: (event: ChangeEvent<HTMLInputElement>) => void;
   onPaste: () => void;
   onShortcuts: () => void;
@@ -37,14 +36,7 @@ function RailBtn({
   );
 }
 
-export function IconRail({
-  onHome,
-  onFind,
-  onImage,
-  onPaste,
-  onShortcuts,
-  onSettings,
-}: IconRailProps) {
+export function IconRail({ onHome, onImage, onPaste, onShortcuts, onSettings }: IconRailProps) {
   return (
     <aside className="mm-rail">
       <button
@@ -58,7 +50,6 @@ export function IconRail({
         <BrandMark size={24} />
       </button>
       <span className="mm-rail-sep" />
-      <RailBtn icon="search" label="Find in map" onClick={onFind} />
       <label
         className="mm-rail-btn"
         title="Insert image on the selected node"

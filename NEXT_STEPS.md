@@ -52,8 +52,14 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   polish, the dock already fixed the core canvas-crush. Note: lines/stmts coverage floor nudged
   90.9→90.8 (the per-panel dock-entry App wiring only runs when each panel is opened via the flaky-to-
   drive Panels menu; the dock logic itself is unit-tested in PanelDock).
-- [ ] **Phase 6** — distinct cross-map search icon; icon-only toggles → labelled; View-menu regroup;
-  Canvas-menu/MapPanel de-dupe; map-switcher vs tabs.
+- [x] **Phase 6** — toolbar IA cleanup (shipped — see CHANGELOG): distinct maps-grid glyph for
+  cross-map search + dropped the rail Find dup (T2); the four view toggles are labelled View-menu
+  checkboxes, not icon buttons (T3); the View-menu Arrange group hides unless free-layout (T4);
+  persistent styling (theme/background/connectors/branch-weight/fonts/backdrop) consolidated into the
+  Map panel, Canvas menu kept to Design presets + Free layout + a link to the panel (T5); Row-1 map
+  switcher relabelled as an "Open a map…" library picker, distinct from the open-doc tabs (T7). Note:
+  the Canvas-menu "open Map panel" link opens the inspector — if a node is selected it shows that
+  node's settings (no deselect API on the handle), so map-wide styling appears once nothing is selected.
 - [ ] **Phase 7** — PWA install affordance; Learn-the-app cards; re-openable getting-started; actionable
   empty states; template descriptions; deep-link first-run; gesture onboarding; NodePopover → context menu.
 - [ ] **Phase 8** — app-wide dark mode (chrome tokenisation + `data-theme` + `prefers-color-scheme`).

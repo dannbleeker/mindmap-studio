@@ -1,8 +1,11 @@
 import type { ChangeEvent } from "react";
 import type { LayoutKind } from "../mindmap";
 import { type CanvasTheme, canvasThemes } from "../mindmap/theme";
-import type { MapNode, MindMapDoc } from "../model/types";
+import type { BackdropKind, BranchGrowth, MapNode, MindMapDoc } from "../model/types";
 import { InspectorResizer } from "./InspectorResizer";
+
+type ConnectorStyle = "organic" | "curved" | "elbow" | "straight";
+type FontScale = "compact" | "comfortable" | "large";
 
 // MapPanel — the right-panel no-selection state (was MapStats). An editable map title + a "Map"
 // settings section (theme, layout, background colour/image, line-jumps) above the read-only stats
@@ -49,6 +52,11 @@ export function MapPanel({
   handleBackgroundImage,
   lineJumps,
   onToggleLineJumps,
+  onSetConnectorStyle,
+  onSetBranchGrowth,
+  onSetFontFamily,
+  onSetFontScale,
+  onSetBackdrop,
   onRenameMap,
   onBackdropRings,
   onSetBackdropColor,
@@ -72,6 +80,13 @@ export function MapPanel({
   handleBackgroundImage: (e: ChangeEvent<HTMLInputElement>) => void;
   lineJumps: boolean;
   onToggleLineJumps: () => void;
+  /** Persistent map-wide styling (moved here from the Canvas menu so the map's look has one home). */
+  onSetConnectorStyle: (style: ConnectorStyle) => void;
+  onSetBranchGrowth: (weight: BranchGrowth) => void;
+  onSetFontFamily: (family: string) => void;
+  onSetFontScale: (scale: FontScale) => void;
+  /** Create a diagram backdrop (ring/colour controls below appear once one exists). */
+  onSetBackdrop?: (kind: BackdropKind) => void;
   onRenameMap: (title: string) => void;
   /** Add/remove a ring or stage on the current onion/funnel backdrop (no-op for venn). */
   onBackdropRings?: (delta: number) => void;
@@ -271,6 +286,84 @@ export function MapPanel({
               aria-label="Line jumps where relationships cross"
             />
           </label>
+          {/* Connector style / branch weight / type — moved here from the Canvas menu (T5) so the
+              map's persistent styling lives in one place. The Canvas menu now keeps only Design
+              presets + Free layout and points here. */}
+          <label className="mm-map-field">
+            <span>Connectors</span>
+            <select
+              className="mm-map-control"
+              value={doc.meta?.connectorStyle ?? "organic"}
+              onChange={(e) => onSetConnectorStyle(e.target.value as ConnectorStyle)}
+              aria-label="Connector style"
+            >
+              <option value="organic">Organic</option>
+              <option value="curved">Curved</option>
+              <option value="elbow">Elbow</option>
+              <option value="straight">Straight</option>
+            </select>
+          </label>
+          <label className="mm-map-field">
+            <span>Branch weight</span>
+            <select
+              className="mm-map-control"
+              value={doc.meta?.branchGrowth ?? "regular"}
+              onChange={(e) => onSetBranchGrowth(e.target.value as BranchGrowth)}
+              aria-label="Branch growth weight"
+            >
+              <option value="fine">Fine</option>
+              <option value="regular">Regular</option>
+              <option value="bold">Bold</option>
+            </select>
+          </label>
+          <label className="mm-map-field">
+            <span>Font</span>
+            <select
+              className="mm-map-control"
+              value={doc.meta?.fontFamily ?? ""}
+              onChange={(e) => onSetFontFamily(e.target.value)}
+              aria-label="Base font family"
+              title="Map-wide base font (a per-topic font still overrides it)"
+            >
+              <option value="">Default</option>
+              <option value="Inter, system-ui, sans-serif">Sans</option>
+              <option value="Georgia, 'Times New Roman', serif">Serif</option>
+              <option value="'Courier New', ui-monospace, monospace">Mono</option>
+            </select>
+          </label>
+          <label className="mm-map-field">
+            <span>Text size</span>
+            <select
+              className="mm-map-control"
+              value={doc.meta?.fontScale ?? "comfortable"}
+              onChange={(e) => onSetFontScale(e.target.value as FontScale)}
+              aria-label="Font size scale"
+              title="Map-wide text size (a per-topic size still overrides it)"
+            >
+              <option value="compact">Compact</option>
+              <option value="comfortable">Comfortable</option>
+              <option value="large">Large</option>
+            </select>
+          </label>
+          {!doc.backdrop && onSetBackdrop ? (
+            <label className="mm-map-field">
+              <span>Backdrop</span>
+              <select
+                className="mm-map-control"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) onSetBackdrop(e.target.value as BackdropKind);
+                }}
+                aria-label="Add a diagram backdrop"
+              >
+                <option value="">None</option>
+                <option value="onion">Onion (rings)</option>
+                <option value="funnel">Funnel (stages)</option>
+                <option value="venn2">Venn (2 circles)</option>
+                <option value="venn3">Venn (3 circles)</option>
+              </select>
+            </label>
+          ) : null}
         </div>
 
         {/* Diagram backdrop controls — shown only when the map has one (a singleton on the doc). */}

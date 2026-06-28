@@ -527,18 +527,38 @@ describe("FlowMindMap canvas", () => {
     if (pane) run(() => fireEvent.click(pane));
   });
 
-  it("right-clicks a boundary overlay → recolour / shape / delete menu (Phase 4)", () => {
+  it("right-clicks a boundary overlay → recolour / shape / outline / delete menu (Phase 4)", () => {
     const doc: MindMapDoc = {
       ...baseDoc(),
       boundaries: [{ id: "bnd-1", nodeIds: ["a"], label: "Scope" }],
     };
     const { onChange } = mount(doc);
-    // The boundary renders a label button (accessible name = its label).
-    run(() => fireEvent.contextMenu(screen.getByRole("button", { name: "Scope" })));
-    const menu = openMenu() as HTMLElement;
+    // Re-open the overlay menu from the boundary's label button (each action closes it).
+    const reopen = () => {
+      run(() => fireEvent.contextMenu(screen.getByRole("button", { name: "Scope" })));
+      return openMenu() as HTMLElement;
+    };
+    const lastBoundary = () =>
+      (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).boundaries?.[0];
+
+    let menu = reopen();
     expect(within(menu).getByText("Recolour")).toBeTruthy();
-    expect(within(menu).getByText("Shape")).toBeTruthy(); // boundary-only group
-    // Delete removes the boundary from the doc.
+    expect(within(menu).getByText("Shape")).toBeTruthy(); // boundary-only
+    expect(within(menu).getByText("Outline")).toBeTruthy(); // boundary-only
+
+    // Recolour applies a stroke swatch…
+    run(() => fireEvent.click(within(menu).getByRole("button", { name: "Colour #3f9e6e" })));
+    expect(lastBoundary()?.color).toBe("#3f9e6e");
+    // …Shape sets the outline shape…
+    menu = reopen();
+    run(() => fireEvent.click(within(menu).getByText("Square")));
+    expect(lastBoundary()?.shape).toBe("rect");
+    // …Outline sets the dash style…
+    menu = reopen();
+    run(() => fireEvent.click(within(menu).getByText("dashed")));
+    expect(lastBoundary()?.dash).toBe("dashed");
+    // …and Delete removes the boundary.
+    menu = reopen();
     run(() => fireEvent.click(within(menu).getByText("Delete")));
     const last = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
     expect(last.boundaries ?? []).toHaveLength(0);

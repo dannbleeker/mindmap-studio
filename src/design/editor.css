@@ -435,6 +435,16 @@
   .mm-inspector-resizer {
     display: none;
   }
+  /* Tighter spacing on phones so the slimmed rows fit. */
+  .mm-topbar-row {
+    gap: 4px;
+    padding: 0 8px;
+  }
+  /* Safety net: if the slimmed row-1 essentials still exceed a very narrow phone, scroll rather
+     than clip (row 2's overflow controls already live behind the Options menu). */
+  .mm-topbar-row1 {
+    overflow-x: auto;
+  }
 }
 .mm-inspector-head {
   flex-shrink: 0;
@@ -1005,6 +1015,20 @@
   background: var(--ed-page, #f4f2ec);
   font-family: var(--ed-font-mono, monospace);
   font-size: 11px;
+}
+/* Phones: shrink the first-run card so it doesn't dominate a narrow viewport. */
+@media (max-width: 640px) {
+  .mm-firstrun {
+    max-width: 200px;
+    padding: 10px 26px 10px 12px;
+    font-size: 12px;
+  }
+  .mm-firstrun-title {
+    font-size: 12.5px;
+  }
+  .mm-firstrun-list {
+    gap: 3px;
+  }
 }
 
 /* Find & Replace overlay — non-modal panel anchored to the top-right of the canvas (Ctrl/⌘+F or

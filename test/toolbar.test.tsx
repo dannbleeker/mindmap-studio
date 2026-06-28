@@ -410,13 +410,27 @@ describe("Toolbar — menu a11y parity net", () => {
     for (const c of checks) expect(c.getAttribute("aria-checked")).toBe("false");
   });
 
-  it("renders + works in mobile mode (rows scroll instead of wrapping)", async () => {
+  it("compacts the toolbar in mobile mode (primary menus inline, extras in the Options menu)", async () => {
     const t = setup({ isMobile: true });
-    // The grouped controls are all still present and wired in the single-row mobile layout.
-    expect(screen.getByRole("button", { name: /^view/i })).toBeTruthy(); // View menu (holds Fit etc.)
-    expect(screen.getByLabelText("Quick add topic")).toBeTruthy();
+    // Primary menus stay inline so they're always reachable on a phone.
+    expect(screen.getByRole("button", { name: /^view/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^insert/i })).toBeTruthy();
+    // The view toggles + Layout collapse behind a dedicated "Options" overflow menu…
+    expect(screen.getByRole("button", { name: /^options/i })).toBeTruthy();
+    // …and the lowest-value widgets (Quick-add input, Timer) are dropped on phone.
+    expect(screen.queryByLabelText("Quick add topic")).toBeNull();
+    // Export still dispatches.
     await u.click(screen.getByRole("button", { name: /^export/i }));
     await u.click(screen.getByRole("menuitem", { name: /\.json/i }));
     expect(t.io.exportJson).toHaveBeenCalled();
+  });
+
+  it("opens the mobile Options menu with the view toggles + Layout", async () => {
+    setup({ isMobile: true });
+    await u.click(screen.getByRole("button", { name: /^options/i }));
+    // Layout select + the view toggles live inside the sheet.
+    expect(screen.getByLabelText("Layout")).toBeTruthy();
+    const checks = screen.getAllByRole("menuitemcheckbox");
+    expect(checks.length).toBeGreaterThanOrEqual(4); // numbering, line jumps, legend, spell-check
   });
 });

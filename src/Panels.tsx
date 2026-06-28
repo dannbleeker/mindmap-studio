@@ -2820,7 +2820,11 @@ export function NotesPanel({
       </div>
       {selected ? (
         <>
-          <div role="toolbar" aria-label="Note formatting" style={{ display: "flex", gap: 4 }}>
+          <div
+            role="toolbar"
+            aria-label="Note formatting"
+            style={{ display: "flex", flexWrap: "wrap", gap: 4, rowGap: 4 }}
+          >
             {fmtBtns.map((b) => (
               <Button
                 key={b.cmd}

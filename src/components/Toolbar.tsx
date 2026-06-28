@@ -261,13 +261,14 @@ function TBtn({
   );
 }
 
-/** A toolbar dropdown trigger's inner content (icon + label + chevron); the accessible name is the
- *  label text, matching the old inline trigger so the menu a11y parity net stays green. */
-function menuTrigger(icon: EditorIconName, label: string): ReactNode {
+/** A toolbar dropdown trigger's inner content (icon + label + chevron). `compact` drops the visible
+ *  label (icon-only) for the narrow mobile bar — pair it with `triggerAriaLabel` so the accessible
+ *  name is preserved and the menu a11y parity net stays green. */
+function menuTrigger(icon: EditorIconName, label: string, compact = false): ReactNode {
   return (
     <>
       <EditorIcon name={icon} size={16} />
-      {label}
+      {compact ? null : label}
       <EditorIcon name="chevron" size={13} />
     </>
   );
@@ -354,14 +355,14 @@ export function Toolbar({
           disabled={!history.canRedo}
           onClick={history.redo}
         />
-        <span className="mm-crumb">Maps /</span>
+        {isMobile ? null : <span className="mm-crumb">Maps /</span>}
         <select
           className="mm-select"
           value={doc.id}
           onChange={(e) => map.switchMap(e.target.value)}
           aria-label="Open map"
           title="Switch map"
-          style={{ fontWeight: 700, maxWidth: 220 }}
+          style={{ fontWeight: 700, maxWidth: isMobile ? 104 : 220 }}
         >
           {map.mapOptions.map((mm) => (
             <option key={mm.id} value={mm.id}>
@@ -369,46 +370,53 @@ export function Toolbar({
             </option>
           ))}
         </select>
-        <select
-          className="mm-select"
-          value=""
-          onChange={(e) => {
-            const v = e.target.value;
-            if (v) map.load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
-          }}
-          aria-label="New map from a template or example"
-          title="New map (blank template or worked example)"
-        >
-          <option value="">+ New…</option>
-          <optgroup label="Templates">
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Examples">
-            {examples.map((e) => (
-              <option key={e.id} value={`ex:${e.id}`}>
-                {e.name}
-              </option>
-            ))}
-          </optgroup>
-        </select>
-        <TBtn
-          icon="search"
-          label="Search across every map"
-          text="All maps"
-          ghost
-          onClick={nav.openSearchAll}
-        />
-        <span className="mm-saved">
-          <span className="mm-saved-dot" /> Saved locally
-        </span>
+        {/* New-map picker, "All maps" search, and the "Saved locally" badge are desktop-only — on a
+            phone they're reached from the Start screen / command palette, and the space is needed for
+            Find / Export / More to stay visible. */}
+        {isMobile ? null : (
+          <>
+            <select
+              className="mm-select"
+              value=""
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v) map.load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
+              }}
+              aria-label="New map from a template or example"
+              title="New map (blank template or worked example)"
+            >
+              <option value="">+ New…</option>
+              <optgroup label="Templates">
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Examples">
+                {examples.map((e) => (
+                  <option key={e.id} value={`ex:${e.id}`}>
+                    {e.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+            <TBtn
+              icon="search"
+              label="Search across every map"
+              text="All maps"
+              ghost
+              onClick={nav.openSearchAll}
+            />
+            <span className="mm-saved">
+              <span className="mm-saved-dot" /> Saved locally
+            </span>
+          </>
+        )}
         <span className="mm-grow" />
         <TBtn
           icon="search"
-          text="Find"
+          text={isMobile ? undefined : "Find"}
           label="Find & replace (Ctrl/⌘+F)"
           ghost
           onClick={nav.openFind}
@@ -416,8 +424,9 @@ export function Toolbar({
         {/* Export + More menus — output / overflow group. */}
         <div className="mm-cluster">
           <Menu
-            trigger={menuTrigger("export", "Export")}
+            trigger={menuTrigger("export", "Export", isMobile)}
             triggerTitle="Export"
+            triggerAriaLabel={isMobile ? "Export" : undefined}
             align="right"
             sheet={isMobile}
           >
@@ -431,8 +440,9 @@ export function Toolbar({
             ))}
           </Menu>
           <Menu
-            trigger={menuTrigger("dots", "More")}
+            trigger={menuTrigger("dots", "More", isMobile)}
             triggerTitle="More"
+            triggerAriaLabel={isMobile ? "More" : undefined}
             align="right"
             sheet={isMobile}
           >
@@ -523,7 +533,12 @@ export function Toolbar({
 
       {/* ── Row 2 — view / edit / canvas ── */}
       <div className={`mm-topbar-row mm-topbar-row2${isMobile ? "" : " mm-wrap"}`}>
-        <Menu trigger={menuTrigger("layers", "Panels")} triggerTitle="Panels" sheet={isMobile}>
+        <Menu
+          trigger={menuTrigger("layers", "Panels", isMobile)}
+          triggerTitle="Panels"
+          triggerAriaLabel={isMobile ? "Panels" : undefined}
+          sheet={isMobile}
+        >
           <MenuLabel>Side panels</MenuLabel>
           <MenuCheckboxItem
             icon={mi("layers")}
@@ -618,7 +633,12 @@ export function Toolbar({
         <span className="mm-vdiv" />
         {/* View menu — fit / collapse / expand / focus folded into one labelled dropdown so the bar
             reads clearly instead of four ambiguous icons (#4). Mirrored 1:1 in ⌘K (kind "view"). */}
-        <Menu trigger={menuTrigger("fit", "View")} triggerTitle="View actions" sheet={isMobile}>
+        <Menu
+          trigger={menuTrigger("fit", "View", isMobile)}
+          triggerTitle="View actions"
+          triggerAriaLabel={isMobile ? "View" : undefined}
+          sheet={isMobile}
+        >
           <MenuItem icon={mi("fit")} label="Fit map to screen" onSelect={() => m()?.fit()} />
           <MenuItem
             icon={mi("balance")}
@@ -752,54 +772,62 @@ export function Toolbar({
             </div>
           ))}
         </Menu>
-        <span className="mm-vdiv" />
-        {/* Overlay-toggle group — outline numbering / line-jumps (view-only switches). */}
-        <div className="mm-cluster">
-          <TBtn
-            icon="check"
-            label="Outline numbering (1, 1.2, 1.2.3…)"
-            active={panels.numbered}
-            onClick={() => panels.setNumbered((v) => !v)}
-          />
-          {panels.numbered ? (
-            <TBtn
-              icon="layers"
-              label={
-                liveDoc.meta?.numberStyle === "outline"
-                  ? "Numbering: outline (I, A, 1, a) — switch to decimal"
-                  : "Numbering: decimal (1, 1.1) — switch to outline"
-              }
-              onClick={() =>
-                m()?.setNumberStyle(liveDoc.meta?.numberStyle === "outline" ? "decimal" : "outline")
-              }
-            />
-          ) : null}
-          <TBtn
-            icon="link"
-            label="Line jumps where relationships cross"
-            active={!!liveDoc.meta?.lineJumps}
-            onClick={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
-          />
-          <TBtn
-            icon="layers"
-            label="Legend (markers / tags / rules in use)"
-            active={!!liveDoc.meta?.legend}
-            onClick={() => m()?.setLegend(!liveDoc.meta?.legend)}
-          />
-          <TBtn
-            icon="text"
-            label="Spell-check the topic + note editors"
-            active={panels.spellcheck}
-            onClick={() => panels.setSpellcheck((v) => !v)}
-          />
-        </div>
+        {/* Overlay-toggle group — outline numbering / line-jumps (view-only switches). On phones
+            these move into the ⋯ overflow menu below to keep the bar compact. */}
+        {isMobile ? null : (
+          <>
+            <span className="mm-vdiv" />
+            <div className="mm-cluster">
+              <TBtn
+                icon="check"
+                label="Outline numbering (1, 1.2, 1.2.3…)"
+                active={panels.numbered}
+                onClick={() => panels.setNumbered((v) => !v)}
+              />
+              {panels.numbered ? (
+                <TBtn
+                  icon="layers"
+                  label={
+                    liveDoc.meta?.numberStyle === "outline"
+                      ? "Numbering: outline (I, A, 1, a) — switch to decimal"
+                      : "Numbering: decimal (1, 1.1) — switch to outline"
+                  }
+                  onClick={() =>
+                    m()?.setNumberStyle(
+                      liveDoc.meta?.numberStyle === "outline" ? "decimal" : "outline",
+                    )
+                  }
+                />
+              ) : null}
+              <TBtn
+                icon="link"
+                label="Line jumps where relationships cross"
+                active={!!liveDoc.meta?.lineJumps}
+                onClick={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
+              />
+              <TBtn
+                icon="layers"
+                label="Legend (markers / tags / rules in use)"
+                active={!!liveDoc.meta?.legend}
+                onClick={() => m()?.setLegend(!liveDoc.meta?.legend)}
+              />
+              <TBtn
+                icon="text"
+                label="Spell-check the topic + note editors"
+                active={panels.spellcheck}
+                onClick={() => panels.setSpellcheck((v) => !v)}
+              />
+            </div>
+          </>
+        )}
         <span className="mm-vdiv" />
         {/* Insert + Canvas menus — content/styling group. */}
         <div className="mm-cluster">
           <Menu
-            trigger={menuTrigger("plus", "Insert")}
+            trigger={menuTrigger("plus", "Insert", isMobile)}
             triggerClassName="mm-tbtn mm-tbtn-accent"
             triggerTitle="Insert"
+            triggerAriaLabel={isMobile ? "Insert" : undefined}
             sheet={isMobile}
           >
             {(close) => (
@@ -948,7 +976,12 @@ export function Toolbar({
               </>
             )}
           </Menu>
-          <Menu trigger={menuTrigger("palette", "Canvas")} triggerTitle="Canvas" sheet={isMobile}>
+          <Menu
+            trigger={menuTrigger("palette", "Canvas", isMobile)}
+            triggerTitle="Canvas"
+            triggerAriaLabel={isMobile ? "Canvas" : undefined}
+            sheet={isMobile}
+          >
             {(close) => (
               <>
                 <MenuLabel>Design</MenuLabel>
@@ -1164,52 +1197,146 @@ export function Toolbar({
             )}
           </Menu>
         </div>
+        {/* Phone overflow: the view toggles + Layout that sit inline on desktop live here so the
+            narrow bar keeps Panels / View / Insert / Canvas reachable. Quick-add + Timer are omitted
+            on phone (an input + a widget don't fit a menu, and both are low-value on a small screen). */}
+        {isMobile ? (
+          <Menu
+            trigger={menuTrigger("settings", "Options", true)}
+            triggerTitle="View options & layout"
+            triggerAriaLabel="Options"
+            sheet
+          >
+            <MenuLabel>View</MenuLabel>
+            <MenuCheckboxItem
+              icon={mi("check")}
+              label="Outline numbering"
+              checked={panels.numbered}
+              trailing={mi("check")}
+              onSelect={() => panels.setNumbered((v) => !v)}
+            />
+            {panels.numbered ? (
+              <MenuCheckboxItem
+                icon={mi("layers")}
+                label={
+                  liveDoc.meta?.numberStyle === "outline"
+                    ? "Numbering: outline (I, A, 1)"
+                    : "Numbering: decimal (1, 1.1)"
+                }
+                checked={liveDoc.meta?.numberStyle === "outline"}
+                trailing={mi("check")}
+                onSelect={() =>
+                  m()?.setNumberStyle(
+                    liveDoc.meta?.numberStyle === "outline" ? "decimal" : "outline",
+                  )
+                }
+              />
+            ) : null}
+            <MenuCheckboxItem
+              icon={mi("link")}
+              label="Line jumps"
+              checked={!!liveDoc.meta?.lineJumps}
+              trailing={mi("check")}
+              onSelect={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
+            />
+            <MenuCheckboxItem
+              icon={mi("layers")}
+              label="Legend"
+              checked={!!liveDoc.meta?.legend}
+              trailing={mi("check")}
+              onSelect={() => m()?.setLegend(!liveDoc.meta?.legend)}
+            />
+            <MenuCheckboxItem
+              icon={mi("text")}
+              label="Spell-check"
+              checked={panels.spellcheck}
+              trailing={mi("check")}
+              onSelect={() => panels.setSpellcheck((v) => !v)}
+            />
+            <MenuSeparator />
+            <MenuLabel>Layout</MenuLabel>
+            <div style={{ padding: "2px 6px" }}>
+              <select
+                className="mm-select"
+                style={{ width: "100%" }}
+                value={canvas.layout}
+                onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
+                aria-label="Layout"
+                disabled={!!liveDoc.meta?.freeform}
+              >
+                <optgroup label="Radial">
+                  <option value="side">Both sides</option>
+                  <option value="right">Right</option>
+                  <option value="left">Left</option>
+                  <option value="radial">Radial / hub</option>
+                </optgroup>
+                <optgroup label="Tree">
+                  <option value="org-down">Org chart ↓</option>
+                  <option value="org-up">Org chart ↑</option>
+                </optgroup>
+                <optgroup label="Diagram">
+                  <option value="timeline">Timeline</option>
+                  <option value="fishbone">Fishbone</option>
+                  <option value="grid">Grid / matrix</option>
+                  <option value="swimlane">Swimlane</option>
+                  <option value="brace">Brace map</option>
+                </optgroup>
+              </select>
+            </div>
+          </Menu>
+        ) : null}
         <span className="mm-grow" />
-        <span className="mm-eyebrow">Layout</span>
-        <select
-          className="mm-select"
-          value={canvas.layout}
-          onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
-          aria-label="Layout"
-          title={liveDoc.meta?.freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
-          disabled={!!liveDoc.meta?.freeform}
-        >
-          <optgroup label="Radial">
-            <option value="side">Both sides</option>
-            <option value="right">Right</option>
-            <option value="left">Left</option>
-            <option value="radial">Radial / hub</option>
-          </optgroup>
-          <optgroup label="Tree">
-            <option value="org-down">Org chart ↓</option>
-            <option value="org-up">Org chart ↑</option>
-          </optgroup>
-          <optgroup label="Diagram">
-            <option value="timeline">Timeline</option>
-            <option value="fishbone">Fishbone</option>
-            <option value="grid">Grid / matrix</option>
-            <option value="swimlane">Swimlane</option>
-            <option value="brace">Brace map</option>
-          </optgroup>
-        </select>
-        <span className="mm-vdiv" />
-        <input
-          className="mm-input"
-          placeholder="Quick add… ⏎"
-          aria-label="Quick add topic"
-          title="Type a topic and press Enter to add it under the selection (or the central topic)."
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const v = e.currentTarget.value.trim();
-              if (v) {
-                m()?.quickAdd(v);
-                e.currentTarget.value = "";
+        {isMobile ? null : (
+          <>
+            <span className="mm-eyebrow">Layout</span>
+            <select
+              className="mm-select"
+              value={canvas.layout}
+              onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
+              aria-label="Layout"
+              title={
+                liveDoc.meta?.freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"
               }
-            }
-          }}
-          style={{ width: 130 }}
-        />
-        <BrainstormTimer />
+              disabled={!!liveDoc.meta?.freeform}
+            >
+              <optgroup label="Radial">
+                <option value="side">Both sides</option>
+                <option value="right">Right</option>
+                <option value="left">Left</option>
+                <option value="radial">Radial / hub</option>
+              </optgroup>
+              <optgroup label="Tree">
+                <option value="org-down">Org chart ↓</option>
+                <option value="org-up">Org chart ↑</option>
+              </optgroup>
+              <optgroup label="Diagram">
+                <option value="timeline">Timeline</option>
+                <option value="fishbone">Fishbone</option>
+                <option value="grid">Grid / matrix</option>
+                <option value="swimlane">Swimlane</option>
+                <option value="brace">Brace map</option>
+              </optgroup>
+            </select>
+            <span className="mm-vdiv" />
+            <input
+              className="mm-input"
+              placeholder="Quick add… ⏎"
+              aria-label="Quick add topic"
+              title="Type a topic and press Enter to add it under the selection (or the central topic)."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const v = e.currentTarget.value.trim();
+                  if (v) {
+                    m()?.quickAdd(v);
+                    e.currentTarget.value = "";
+                  }
+                }
+              }}
+              style={{ width: 130 }}
+            />
+            <BrainstormTimer />
+          </>
+        )}
       </div>
     </header>
   );

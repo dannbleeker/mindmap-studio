@@ -7,6 +7,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **The editor toolbar now fits a phone.** On ≤640px the two rows overflowed — row 2 scrolled with
+  controls off-screen and no affordance, and row 1 clipped Find/Export/More entirely. Mobile now uses
+  icon-only menu triggers; the view toggles + Layout collapse behind a single **Options** menu (bottom
+  sheet), and the lowest-value widgets (the New-map picker, All-maps search, "Saved" badge, Quick-add
+  box, Brainstorm Timer) are dropped on phone (all reachable from the Start screen / command palette).
+  Panels / View / Insert / Canvas / Options and Find / Export / More all stay visible. Desktop is
+  unchanged.
+- **The inspector's note formatting toolbar wraps instead of clipping.** The 13 format buttons
+  (B / I / S / lists / H1–H3 / highlight / code / image / table) now reflow onto multiple lines within
+  the panel, so none are cut off at the default rail width.
+- **The command palette stops repeating its category badge.** The kind label (e.g. "map") now shows
+  only at the start of each same-kind run, instead of stacking down every row.
+
 - **Editor chrome decluttered — a calmer toolbar.** A UX pass moved occasional/power controls out of
   the always-on top bar so the primary actions read first:
   - **Find & Replace is now a `Ctrl/⌘+F` overlay** (also `/` or the new **🔍 Find** button) anchored
@@ -25,6 +38,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **The first-run tips card is sized for phones.** On a narrow viewport the "3 things to try" card no
+  longer dominates the screen — a mobile breakpoint trims its width, padding, and font.
 - **Example polish:** the "Product launch plan" example's boundary is now labelled **"Launch window"**
   so it no longer echoes the **"Go-live week"** branch node it wraps (the text appeared twice).
 

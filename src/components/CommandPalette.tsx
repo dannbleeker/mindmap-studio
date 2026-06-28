@@ -220,7 +220,11 @@ export function CommandPalette({
                   onClick={() => run(c)}
                 >
                   <span>{c.label}</span>
-                  <span className="st-cmdk-kind">{c.kind}</span>
+                  {/* Show the kind badge only at the start of each same-kind run, so a long cluster
+                      of one kind (e.g. "map") doesn't repeat the label down every row. */}
+                  {i === 0 || items[i - 1]?.kind !== c.kind ? (
+                    <span className="st-cmdk-kind">{c.kind}</span>
+                  ) : null}
                 </button>
               </Fragment>
             ))

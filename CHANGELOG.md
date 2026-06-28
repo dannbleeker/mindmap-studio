@@ -5,6 +5,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Changed
+
+- **The side panels now share one tabbed dock.** Outline, Markers & tags, Power Filter, Conditional
+  styles, Version history, Map statistics, Agenda, Maps, Slide deck and the Note editor used to stack
+  as separate 250px columns — open four at once on a 1280px screen and they crushed the map to a sliver.
+  They now live in a single ~280px **tabbed dock**: one panel shows at a time, a tab strip switches
+  between the open ones (each tab has a × to close it), and the canvas keeps its width no matter how
+  many you open.
+
+### Fixed
+
+- **Bulk edit explains why per-topic fields disappear.** Selecting several topics quietly removed the
+  note / links / attachments editors, which read as a bug. The "N topics selected" banner now adds a
+  line: "Per-topic fields (note, links, attachments) are hidden — select one topic to edit them."
+
 ### Added
 
 - **Right-click a multi-selection for bulk actions.** Right-clicking used to collapse a multi-selection

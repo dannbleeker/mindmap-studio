@@ -92,14 +92,16 @@ describe("App (integration)", () => {
     await waitFor(() => expect(screen.queryByPlaceholderText(/Search commands/)).toBeNull());
   });
 
-  it("toggles a side panel via the Panels menu", async () => {
+  it("toggles a side panel into the tabbed dock via the Panels menu", async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);
     await flush();
     await openEditor(user, container);
     await user.click(screen.getByRole("button", { name: /Panels/ }));
     await user.click(await screen.findByText("Outline", { exact: true }));
-    await waitFor(() => expect(container.querySelector(".mm-panel-host")).toBeTruthy());
+    // The panel docks into the one tabbed column (mm-dock) rather than a free-floating 250px sibling.
+    await waitFor(() => expect(container.querySelector(".mm-dock")).toBeTruthy());
+    expect(container.querySelector(".mm-dock-tab")).toBeTruthy();
   });
 
   it("runs find then replace-all from the overlay without crashing", async () => {

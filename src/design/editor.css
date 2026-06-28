@@ -94,6 +94,80 @@
   font-weight: 700;
 }
 
+/* ── Left dock (tabbed side panels) ───────────────────────────────────────────
+   The read-mostly side panels (Outline / Index / Stats / Agenda / Maps / Deck / Note / Filter /
+   Styles / History) share ONE tabbed column instead of stacking as N 250px columns that could crush
+   the canvas. One panel shows at a time; the tab strip switches between the open ones. */
+.mm-dock {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--ed-card);
+  border-right: 1px solid var(--ed-border);
+  overflow: hidden;
+}
+.mm-dock-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px 0;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--ed-divider);
+  scrollbar-width: thin;
+}
+.mm-dock-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 4px 5px 9px;
+  border: none;
+  border-radius: 7px 7px 0 0;
+  background: transparent;
+  color: var(--ed-muted);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mm-dock-tab:hover {
+  color: var(--ed-ink);
+}
+.mm-dock-tab[data-active] {
+  background: var(--ed-page);
+  color: var(--ed-ink);
+  font-weight: 600;
+}
+.mm-dock-tab-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 3px;
+  border-radius: 5px;
+}
+.mm-dock-tab-close:hover {
+  opacity: 1;
+  background: var(--ed-accent-tint);
+}
+.mm-dock-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* The hosted panel fills the dock (overrides its own fixed 250px column width). */
+.mm-dock-body > * {
+  width: 100% !important;
+  flex: 1;
+  min-height: 0;
+  border-right: none !important;
+}
+
 /* ── Top bar (two rows) ───────────────────────────────────────────────────── */
 .mm-topbar {
   flex-shrink: 0;

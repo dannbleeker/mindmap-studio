@@ -37,6 +37,7 @@ import { InspectorRail } from "./components/InspectorRail";
 import { MapPanel } from "./components/MapPanel";
 import { MobileSheetScrim } from "./components/MobileSheetScrim";
 import { OverlayInspector } from "./components/OverlayInspector";
+import { type DockEntry, PanelDock } from "./components/PanelDock";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { ToastBar } from "./components/ToastBar";
@@ -1299,6 +1300,39 @@ export function App() {
   // mobileSheets.ts so it's unit-testable without a forced-mobile integration render.)
   const mobileSheetOpen = isMobile && anyMobileSheetOpen(panels);
 
+  // Left dock: the side panels share ONE tabbed column (mm-dock) instead of stacking as N 250px
+  // columns that could crush the canvas. `activeDock` is the visible tab; opening a panel makes it
+  // active, and closing the active one falls back to another open panel.
+  const [activeDock, setActiveDock] = useState<string | null>(null);
+  const openDockKeys = (
+    [
+      [panels.outlineOpen, "outline"],
+      [panels.indexOpen, "index"],
+      [panels.statsOpen, "stats"],
+      [panels.agendaOpen, "agenda"],
+      [panels.mapsOpen, "maps"],
+      [panels.deckEditorOpen, "deck"],
+      [panels.noteEditorOpen, "note"],
+      [panels.filterOpen, "filter"],
+      [panels.stylesOpen, "styles"],
+      [panels.historyOpen, "history"],
+    ] as const
+  )
+    .filter(([open]) => open)
+    .map(([, key]) => key);
+  const openDockKey = openDockKeys.join(",");
+  const prevOpenDock = useRef("");
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the joined open-set string.
+  useEffect(() => {
+    const keys = openDockKey ? openDockKey.split(",") : [];
+    const prev = prevOpenDock.current ? prevOpenDock.current.split(",") : [];
+    const newly = keys.find((k) => !prev.includes(k)); // a just-opened panel becomes active
+    prevOpenDock.current = openDockKey;
+    setActiveDock(
+      (cur) => newly ?? (cur && keys.includes(cur) ? cur : (keys[keys.length - 1] ?? null)),
+    );
+  }, [openDockKey]);
+
   if (view === "start") {
     return (
       <>
@@ -1490,117 +1524,183 @@ export function App() {
         <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
           {mobileSheetOpen && <MobileSheetScrim onClose={() => closeMobileSheets(panels)} />}
           <div className="mm-panel-host">
-            {panels.outlineOpen && (
-              <OutlinePanel
-                root={liveDoc.root}
-                filter={outlineFilter}
-                numbered={panels.numbered}
-                numberStyle={liveDoc.meta?.numberStyle}
-                onFilterChange={setOutlineFilter}
-                onPick={(id) => mapRef.current?.focusNode(id)}
-                onRename={(id, topic) => mapRef.current?.renameNode(id, topic)}
-                onIndent={(id, dir) => mapRef.current?.indentNode(id, dir)}
-                onMove={(dragId, targetId, where) =>
-                  mapRef.current?.moveOutlineNode(dragId, targetId, where)
-                }
-                onAddChild={(id) => mapRef.current?.addOutlineChild(id) ?? null}
-                onAddSibling={(id) => mapRef.current?.addOutlineSibling(id) ?? null}
-              />
-            )}
-            {panels.indexOpen && (
-              <MarkerTagIndex
-                root={liveDoc.root}
-                floatingTopics={liveDoc.floatingTopics}
-                onPick={(id) => mapRef.current?.focusNode(id)}
-                onRenameTag={(from, to) => mapRef.current?.renameTag(from, to)}
-                onDeleteTag={(t) => mapRef.current?.deleteTag(t)}
-                tagColorOf={(t) => tagColor(liveDoc.rules, t)}
-                onSetTagColor={(t, color) =>
-                  mapRef.current?.setRules(setTagColor(liveDoc.rules, t, color))
-                }
-              />
-            )}
-            {panels.statsOpen && <StatsPanel doc={liveDoc} />}
-            {panels.agendaOpen && (
-              <AgendaPanel
-                doc={liveDoc}
-                today={todayISO()}
-                onPick={(id) => mapRef.current?.focusNode(id)}
-              />
-            )}
-            {panels.mapsOpen && (
-              <MapsPanel maps={maps} currentId={doc.id} onOpen={(id) => void switchMap(id)} />
-            )}
-            {panels.deckEditorOpen && (
-              <SlideDeckEditorPanel
-                deck={deckRows(liveDoc)}
-                topics={outlineRows(liveDoc.root)}
-                isCustom={hasCustomDeck(liveDoc)}
-                onChange={(slides) => mapRef.current?.setSlides(slides)}
-                onRestoreDefault={() => mapRef.current?.setSlides([])}
-              />
-            )}
-            {panels.noteEditorOpen && (
-              <NoteEditorPanel
-                selected={selected}
-                value={noteDraft}
-                onChange={onNoteChange}
-                onBlur={flushNote}
-                onClose={() => panels.setNoteEditorOpen(false)}
-                spellCheck={panels.spellcheck}
-              />
-            )}
-            {panels.filterOpen && (
-              <FilterPanel
-                root={liveDoc.root}
-                floatingTopics={liveDoc.floatingTopics}
-                text={filter.text}
-                markers={filter.markers}
-                tags={filter.tags}
-                due={filter.due}
-                priority={filter.priority}
-                matchCount={filterHits?.matches ?? 0}
-                savedFilters={savedFilters.list}
-                onText={filter.setText}
-                onToggleMarker={filter.toggleMarker}
-                onToggleTag={filter.toggleTag}
-                onDue={filter.setDue}
-                onPriority={filter.setPriority}
-                hide={filter.hide}
-                onHide={filter.setHide}
-                onExtract={extractFilterMatches}
-                onClear={filter.clear}
-                onSaveFilter={savedFilters.save}
-                onApplyFilter={savedFilters.apply}
-                onDeleteFilter={savedFilters.remove}
-              />
-            )}
-            {panels.stylesOpen && (
-              <StylesPanel
-                rules={liveDoc.rules ?? []}
-                markers={MARKER_PALETTE}
-                namedStyles={namedStyles}
-                onAddRule={(rule) => mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])}
-                onDeleteRule={(id) =>
-                  mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
-                }
-                onSaveStyle={saveNamedStyle}
-                onApplyStyle={(style) => {
-                  const ok = mapRef.current?.setSelectedStyle(style);
-                  if (!ok) showHint("Select a topic first, then apply a named style.");
-                }}
-                onDeleteStyle={deleteNamedStyle}
-              />
-            )}
-            {panels.historyOpen && (
-              <HistoryPanel
-                versions={versions}
-                onSaveNow={saveVersionNow}
-                onPlay={startPlayback}
-                onRestore={restoreVersion}
-                onClose={() => panels.setHistoryOpen(false)}
-              />
-            )}
+            {(() => {
+              const entries: DockEntry[] = [];
+              if (panels.outlineOpen)
+                entries.push({
+                  key: "outline",
+                  label: "Outline",
+                  onClose: () => panels.setOutlineOpen(false),
+                  node: (
+                    <OutlinePanel
+                      root={liveDoc.root}
+                      filter={outlineFilter}
+                      numbered={panels.numbered}
+                      numberStyle={liveDoc.meta?.numberStyle}
+                      onFilterChange={setOutlineFilter}
+                      onPick={(id) => mapRef.current?.focusNode(id)}
+                      onRename={(id, topic) => mapRef.current?.renameNode(id, topic)}
+                      onIndent={(id, dir) => mapRef.current?.indentNode(id, dir)}
+                      onMove={(dragId, targetId, where) =>
+                        mapRef.current?.moveOutlineNode(dragId, targetId, where)
+                      }
+                      onAddChild={(id) => mapRef.current?.addOutlineChild(id) ?? null}
+                      onAddSibling={(id) => mapRef.current?.addOutlineSibling(id) ?? null}
+                    />
+                  ),
+                });
+              if (panels.indexOpen)
+                entries.push({
+                  key: "index",
+                  label: "Markers & tags",
+                  onClose: () => panels.setIndexOpen(false),
+                  node: (
+                    <MarkerTagIndex
+                      root={liveDoc.root}
+                      floatingTopics={liveDoc.floatingTopics}
+                      onPick={(id) => mapRef.current?.focusNode(id)}
+                      onRenameTag={(from, to) => mapRef.current?.renameTag(from, to)}
+                      onDeleteTag={(t) => mapRef.current?.deleteTag(t)}
+                      tagColorOf={(t) => tagColor(liveDoc.rules, t)}
+                      onSetTagColor={(t, color) =>
+                        mapRef.current?.setRules(setTagColor(liveDoc.rules, t, color))
+                      }
+                    />
+                  ),
+                });
+              if (panels.statsOpen)
+                entries.push({
+                  key: "stats",
+                  label: "Stats",
+                  onClose: () => panels.setStatsOpen(false),
+                  node: <StatsPanel doc={liveDoc} />,
+                });
+              if (panels.agendaOpen)
+                entries.push({
+                  key: "agenda",
+                  label: "Agenda",
+                  onClose: () => panels.setAgendaOpen(false),
+                  node: (
+                    <AgendaPanel
+                      doc={liveDoc}
+                      today={todayISO()}
+                      onPick={(id) => mapRef.current?.focusNode(id)}
+                    />
+                  ),
+                });
+              if (panels.mapsOpen)
+                entries.push({
+                  key: "maps",
+                  label: "Maps",
+                  onClose: () => panels.setMapsOpen(false),
+                  node: (
+                    <MapsPanel maps={maps} currentId={doc.id} onOpen={(id) => void switchMap(id)} />
+                  ),
+                });
+              if (panels.deckEditorOpen)
+                entries.push({
+                  key: "deck",
+                  label: "Deck",
+                  onClose: () => panels.setDeckEditorOpen(false),
+                  node: (
+                    <SlideDeckEditorPanel
+                      deck={deckRows(liveDoc)}
+                      topics={outlineRows(liveDoc.root)}
+                      isCustom={hasCustomDeck(liveDoc)}
+                      onChange={(slides) => mapRef.current?.setSlides(slides)}
+                      onRestoreDefault={() => mapRef.current?.setSlides([])}
+                    />
+                  ),
+                });
+              if (panels.noteEditorOpen)
+                entries.push({
+                  key: "note",
+                  label: "Note",
+                  onClose: () => panels.setNoteEditorOpen(false),
+                  node: (
+                    <NoteEditorPanel
+                      selected={selected}
+                      value={noteDraft}
+                      onChange={onNoteChange}
+                      onBlur={flushNote}
+                      onClose={() => panels.setNoteEditorOpen(false)}
+                      spellCheck={panels.spellcheck}
+                    />
+                  ),
+                });
+              if (panels.filterOpen)
+                entries.push({
+                  key: "filter",
+                  label: "Filter",
+                  onClose: () => panels.toggleFilter(),
+                  node: (
+                    <FilterPanel
+                      root={liveDoc.root}
+                      floatingTopics={liveDoc.floatingTopics}
+                      text={filter.text}
+                      markers={filter.markers}
+                      tags={filter.tags}
+                      due={filter.due}
+                      priority={filter.priority}
+                      matchCount={filterHits?.matches ?? 0}
+                      savedFilters={savedFilters.list}
+                      onText={filter.setText}
+                      onToggleMarker={filter.toggleMarker}
+                      onToggleTag={filter.toggleTag}
+                      onDue={filter.setDue}
+                      onPriority={filter.setPriority}
+                      hide={filter.hide}
+                      onHide={filter.setHide}
+                      onExtract={extractFilterMatches}
+                      onClear={filter.clear}
+                      onSaveFilter={savedFilters.save}
+                      onApplyFilter={savedFilters.apply}
+                      onDeleteFilter={savedFilters.remove}
+                    />
+                  ),
+                });
+              if (panels.stylesOpen)
+                entries.push({
+                  key: "styles",
+                  label: "Styles",
+                  onClose: () => panels.setStylesOpen(false),
+                  node: (
+                    <StylesPanel
+                      rules={liveDoc.rules ?? []}
+                      markers={MARKER_PALETTE}
+                      namedStyles={namedStyles}
+                      onAddRule={(rule) =>
+                        mapRef.current?.setRules([...(liveDoc.rules ?? []), rule])
+                      }
+                      onDeleteRule={(id) =>
+                        mapRef.current?.setRules((liveDoc.rules ?? []).filter((r) => r.id !== id))
+                      }
+                      onSaveStyle={saveNamedStyle}
+                      onApplyStyle={(style) => {
+                        const ok = mapRef.current?.setSelectedStyle(style);
+                        if (!ok) showHint("Select a topic first, then apply a named style.");
+                      }}
+                      onDeleteStyle={deleteNamedStyle}
+                    />
+                  ),
+                });
+              if (panels.historyOpen)
+                entries.push({
+                  key: "history",
+                  label: "History",
+                  onClose: () => panels.setHistoryOpen(false),
+                  node: (
+                    <HistoryPanel
+                      versions={versions}
+                      onSaveNow={saveVersionNow}
+                      onPlay={startPlayback}
+                      onRestore={restoreVersion}
+                      onClose={() => panels.setHistoryOpen(false)}
+                    />
+                  ),
+                });
+              return <PanelDock entries={entries} active={activeDock} onActivate={setActiveDock} />;
+            })()}
           </div>
           <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div style={{ flex: 1, minHeight: 0, position: "relative" }}>

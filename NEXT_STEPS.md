@@ -45,8 +45,13 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   dedicated right-click menu *on overlays* (Rename/Recolour/Delete) — only the Delete key was wired.
   Note: the lines/stmts coverage floor was nudged 91→90.9 because the ~6 lines wiring the bulk menu to
   a React-Flow multi-selection can't be exercised in jsdom (RF needs real held-key state).
-- [ ] **Phase 5** (prep commit first) — left rail → tabbed dock; placement cues + de-dupe note editor;
-  InfoPanel Details restructure; bulk-edit clarity.
+- [~] **Phase 5** — panel/workspace. **Shipped:** left rail → **tabbed dock** (PanelDock; the 10 side
+  panels share one ~280px tabbed column instead of N crushing 250px columns — verified in-browser +
+  unit-tested); bulk-edit banner clarity. **Deferred:** InfoPanel Details restructure (P3 — collapsible
+  sections + note below task fields) and the note-editor de-dupe / placement cues (P6) — lower-value
+  polish, the dock already fixed the core canvas-crush. Note: lines/stmts coverage floor nudged
+  90.9→90.8 (the per-panel dock-entry App wiring only runs when each panel is opened via the flaky-to-
+  drive Panels menu; the dock logic itself is unit-tested in PanelDock).
 - [ ] **Phase 6** — distinct cross-map search icon; icon-only toggles → labelled; View-menu regroup;
   Canvas-menu/MapPanel de-dupe; map-switcher vs tabs.
 - [ ] **Phase 7** — PWA install affordance; Learn-the-app cards; re-openable getting-started; actionable

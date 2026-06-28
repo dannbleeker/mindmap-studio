@@ -2129,6 +2129,17 @@ export function InfoPanel({
                   }}
                 >
                   {selectedCount} topics selected — changes apply to all
+                  <div
+                    style={{
+                      fontWeight: fontWeight.normal,
+                      fontSize: fontSize.xs,
+                      marginTop: 3,
+                      color: "var(--ed-ink2)",
+                    }}
+                  >
+                    Per-topic fields (note, links, attachments) are hidden — select one topic to
+                    edit them.
+                  </div>
                 </div>
               )}
               {activeTab === "style" && (

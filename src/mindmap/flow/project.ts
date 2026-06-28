@@ -73,6 +73,7 @@ export function project(
   palette: string[] = FALLBACK_PALETTE,
   numbered = false,
   kind: LayoutKind = "side",
+  rollupTitles?: ReadonlyMap<string, string>,
 ): ProjectResult {
   const pal = palette.length > 0 ? palette : FALLBACK_PALETTE;
   const connectorStyle = doc.meta?.connectorStyle;
@@ -141,6 +142,9 @@ export function project(
         icons,
         tags: node.tags,
         rollup: node.rollup,
+        // The bound source map's title (resolved from the library) so the node's ⤵ badge can name it
+        // (I11); undefined when the source map isn't in the local library.
+        rollupTitle: node.rollup ? rollupTitles?.get(node.rollup) : undefined,
         style: node.style,
         // Conditional formatting is a separate view-only overlay (merged under `style` at render),
         // so the model + fromFlow stay lossless — nothing bakes into node.style.

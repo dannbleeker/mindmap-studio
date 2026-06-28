@@ -7,6 +7,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Relevance-sweep gap closure.** A verification pass over the remaining UX backlog found six residual
+  gaps against the as-built app; all are now closed:
+  - **Bulk markers live with the rest of Details.** Selecting several topics used to move the markers
+    control onto the Style tab while Tags stayed on Details; markers now lead the **Details** tab in
+    single- and multi-select alike, so the control set no longer reshuffles between modes.
+  - **Heavy inspector sections collapse.** Attachments, Links and "Linked from" are now collapsible and
+    start collapsed when empty, so a topic with no metadata doesn't pad the panel.
+  - **Roll-up badges name their source.** A mirrored topic's ⤵ badge tooltip now names the bound source
+    map (e.g. mirrors "Quarterly OKRs") instead of a generic string.
+  - **Open a note in the dock from the inspector.** The Notes tab gained an **⤢ Open in dock** button
+    that opens the roomy dockable note editor on the same note.
+  - **Presentation Home hint + internals.** The presentation footer now lists the Home-to-first-slide
+    key, and the undo-coalescing window is a named constant.
 - **Deferred-item polish.** Five follow-ups from the UX-remediation pass:
   - **Right-click menu on overlays.** Boundaries, summaries and callouts now have their own right-click
     menu — recolour (and, for boundaries, shape + outline style), plus Delete — matching the topic and

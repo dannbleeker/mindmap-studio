@@ -20,6 +20,9 @@ export type TopicData = {
   tags?: string[];
   /** Roll-up source map id — when set, this node mirrors another map (shows a ⤵ badge). */
   rollup?: string;
+  /** The bound source map's title, resolved from the library at projection time, so the badge can
+   *  name which map is mirrored (I11). Undefined when the source isn't in the local library. */
+  rollupTitle?: string;
   style?: NodeStyle;
   /** Conditional-formatting style (view-only); merged *under* `style` at render. */
   condStyle?: NodeStyle;

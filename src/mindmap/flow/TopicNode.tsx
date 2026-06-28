@@ -241,6 +241,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     note,
     hyperlink,
     rollup,
+    rollupTitle,
     isRoot,
     depth,
     branchColor,
@@ -713,7 +714,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           ) : null}
           {rollup ? (
             <span
-              title="Roll-up: this topic mirrors another map — Refresh roll-ups to pull the latest"
+              title={
+                rollupTitle
+                  ? `Roll-up: mirrors "${rollupTitle}" — Refresh roll-ups to pull the latest`
+                  : "Roll-up: this topic mirrors another map — Refresh roll-ups to pull the latest"
+              }
               aria-label="Roll-up source"
               style={{ marginLeft: 4, opacity: 0.6, fontSize: "0.85em" }}
             >

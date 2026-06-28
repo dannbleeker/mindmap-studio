@@ -149,6 +149,53 @@ function PropRow({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+// A Details-tab section whose body collapses behind a small-caps disclosure header (P3). Starts
+// collapsed when it holds nothing yet (count === 0) so empty Attachments / Links / Linked-from don't
+// pad the panel; expands to reveal — or add — content. Mirrors the PanelSection look as a button.
+// Callers key it by node id so the open/closed state resets per selected topic.
+function CollapsibleSection({
+  label,
+  count = 0,
+  children,
+}: {
+  label: string;
+  count?: number;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(count > 0);
+  return (
+    <>
+      <button
+        type="button"
+        className="mm-prim-section"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: space.xs,
+          width: "100%",
+          padding: `${space.lg}px ${space.xl}px ${space.xxs}px`,
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          textAlign: "left",
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.bold,
+          color: "var(--ed-faint)",
+        }}
+      >
+        <span aria-hidden="true" style={{ fontSize: "0.85em", opacity: 0.7 }}>
+          {open ? "▾" : "▸"}
+        </span>
+        {label}
+        {count > 0 ? <span style={{ opacity: 0.6 }}>({count})</span> : null}
+      </button>
+      {open ? children : null}
+    </>
+  );
+}
+
 // Per-topic styling bar: shape, fill, border, bold — applied to the selected node.
 export function StyleBar({
   onStyle,
@@ -1854,6 +1901,7 @@ export function InfoPanel({
   noteDraft,
   onNoteChange,
   onNoteBlur,
+  onExpandNote,
   markers,
   onToggleMarker,
   bulkMarkers,
@@ -1910,6 +1958,8 @@ export function InfoPanel({
   noteDraft: string;
   onNoteChange: (value: string) => void;
   onNoteBlur: () => void;
+  /** Open the dockable note editor — the Notes tab's "expand for more room" target (P6). */
+  onExpandNote?: () => void;
   markers: readonly string[];
   onToggleMarker: (marker: string) => void;
   /** Bulk mode: markers/tags on ALL vs SOME of the selection (tri-state chips). */
@@ -1951,9 +2001,9 @@ export function InfoPanel({
 }) {
   const [tagInput, setTagInput] = useState("");
   const [tab, setTab] = useState<InfoTab>("details");
-  // Bulk mode: >1 node selected. Only the value-setting editors that apply cleanly across a set are
-  // shown (shape/colour/font, progress, dates, priority); per-item editors (notes, markers, tags,
-  // stickers, attachments, links) are hidden — they stay single-node, edited by selecting one topic.
+  // Bulk mode: >1 node selected. The editors that apply cleanly across a set are shown — markers
+  // (tri-state) + tags lead the Details tab, plus shape/colour/font, progress, dates, priority. The
+  // genuinely per-item editors (notes, stickers, attachments, links) stay single-node.
   const multi = (selectedCount ?? 0) > 1;
   // In bulk mode, which task fields the selected topics disagree on — those render blank + "Mixed"
   // instead of (and without overwriting from) the anchor's value. Empty object for a single select.
@@ -2148,18 +2198,9 @@ export function InfoPanel({
               {activeTab === "style" && (
                 <>
                   <StyleBar onStyle={onStyle} namedStyles={namedStyles} />
-                  {multi ? (
-                    // Bulk: tri-state markers (lit = on all, dashed = on some); stickers stay single-node.
-                    onBulkToggleMarker ? (
-                      <MarkerBar
-                        markers={markers}
-                        active={bulkMarkers?.all}
-                        partial={bulkMarkers?.some}
-                        onToggle={onBulkToggleMarker}
-                      />
-                    ) : null
-                  ) : (
-                    // Markers now lead the Details tab (#7); Style keeps the per-item sticker grid.
+                  {!multi && (
+                    // Markers lead the Details tab in single + bulk; Style keeps the per-item sticker
+                    // grid + fill image (both single-node).
                     <>
                       <StickerBar onPick={onPickSticker} />
                       {onSetFillImage ? (
@@ -2204,6 +2245,26 @@ export function InfoPanel({
                 // Single-topic only (the tab is hidden in bulk) — the editor gets the whole tab with no
                 // 168px clamp, roomy by design (P3).
                 <div style={{ display: "flex", flexDirection: "column", minHeight: 320 }}>
+                  {onExpandNote ? (
+                    <button
+                      type="button"
+                      onClick={onExpandNote}
+                      title="Open this note in the dockable editor for more room"
+                      style={{
+                        alignSelf: "flex-end",
+                        margin: "2px 8px 4px",
+                        padding: "2px 8px",
+                        fontSize: fontSize.sm,
+                        background: "none",
+                        border: "1px solid var(--ed-border)",
+                        borderRadius: radius.md,
+                        color: "var(--ed-ink2)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ⤢ Open in dock
+                    </button>
+                  ) : null}
                   <NotesPanel
                     selected={selected}
                     value={noteDraft}
@@ -2215,6 +2276,19 @@ export function InfoPanel({
               )}
               {activeTab === "details" && (
                 <>
+                  {multi && onBulkToggleMarker ? (
+                    // Bulk: tri-state markers lead Details too (lit = on all, dashed = on some), so the
+                    // control set doesn't reshuffle between single and multi select.
+                    <>
+                      {sectionLabel("Markers")}
+                      <MarkerBar
+                        markers={markers}
+                        active={bulkMarkers?.all}
+                        partial={bulkMarkers?.some}
+                        onToggle={onBulkToggleMarker}
+                      />
+                    </>
+                  ) : null}
                   {!multi && (
                     <>
                       {/* Markers lead Details; the note moved to its own Notes tab (P3). */}
@@ -2475,137 +2549,152 @@ export function InfoPanel({
 
                   {!multi && (
                     <>
-                      {sectionLabel("Attachments")}
-                      <div
-                        style={{
-                          padding: "0 10px 6px",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 4,
-                        }}
+                      <CollapsibleSection
+                        key={`att:${node.id}`}
+                        label="Attachments"
+                        count={(node.attachments ?? []).length}
                       >
-                        {(node.attachments ?? []).map((a, i) => (
-                          <div
-                            key={`${a.name}:${i}`}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 6,
-                              fontSize: fontSize.sm,
-                            }}
-                          >
-                            <a
-                              href={a.dataUrl}
-                              download={a.name}
-                              title={`Download ${a.name}`}
+                        <div
+                          style={{
+                            padding: "0 10px 6px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 4,
+                          }}
+                        >
+                          {(node.attachments ?? []).map((a, i) => (
+                            <div
+                              key={`${a.name}:${i}`}
                               style={{
-                                color: "var(--ed-ink)",
-                                flex: 1,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                fontSize: fontSize.sm,
                               }}
                             >
-                              📎 {a.name}
-                            </a>
-                            <span style={{ color: "var(--ed-faint)" }}>{formatBytes(a.size)}</span>
-                            <Button
-                              onClick={() => onRemoveAttachment(i)}
-                              title="Remove attachment"
-                              style={{ padding: "1px 6px", fontSize: fontSize.sm }}
-                            >
-                              ✕
-                            </Button>
-                          </div>
-                        ))}
-                        <label
-                          style={{
-                            ...controlStyle,
-                            fontSize: fontSize.sm,
-                            cursor: "pointer",
-                            textAlign: "center",
-                            background: "var(--ed-card)",
-                            border: "1px solid var(--ed-border)",
-                            color: "var(--ed-ink2)",
-                          }}
-                        >
-                          + Attach file
-                          <input
-                            type="file"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0];
-                              if (f) onAddAttachment(f);
-                              e.target.value = "";
+                              <a
+                                href={a.dataUrl}
+                                download={a.name}
+                                title={`Download ${a.name}`}
+                                style={{
+                                  color: "var(--ed-ink)",
+                                  flex: 1,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                📎 {a.name}
+                              </a>
+                              <span style={{ color: "var(--ed-faint)" }}>
+                                {formatBytes(a.size)}
+                              </span>
+                              <Button
+                                onClick={() => onRemoveAttachment(i)}
+                                title="Remove attachment"
+                                style={{ padding: "1px 6px", fontSize: fontSize.sm }}
+                              >
+                                ✕
+                              </Button>
+                            </div>
+                          ))}
+                          <label
+                            style={{
+                              ...controlStyle,
+                              fontSize: fontSize.sm,
+                              cursor: "pointer",
+                              textAlign: "center",
+                              background: "var(--ed-card)",
+                              border: "1px solid var(--ed-border)",
+                              color: "var(--ed-ink2)",
                             }}
-                            style={{ display: "none" }}
-                          />
-                        </label>
-                      </div>
+                          >
+                            + Attach file
+                            <input
+                              type="file"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) onAddAttachment(f);
+                                e.target.value = "";
+                              }}
+                              style={{ display: "none" }}
+                            />
+                          </label>
+                        </div>
+                      </CollapsibleSection>
 
-                      {sectionLabel("Links")}
-                      <Input
-                        key={`${node.id}:url`}
-                        defaultValue={webUrl}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter")
-                            onSetHyperlink((e.target as HTMLInputElement).value.trim());
-                        }}
-                        onBlur={(e) => {
-                          const v = e.target.value.trim();
-                          if (v !== webUrl) onSetHyperlink(v);
-                        }}
-                        placeholder="Link (https://, mailto:, tel:…)"
-                        aria-label="Web link"
-                        style={{ width: "auto", margin: "0 10px 4px" }}
-                      />
-                      <Select
-                        value=""
-                        onChange={(e) => e.target.value && onLinkMap(e.target.value)}
-                        aria-label="Link to another map"
-                        style={{ width: "auto", margin: "0 10px 4px" }}
+                      <CollapsibleSection
+                        key={`links:${node.id}`}
+                        label="Links"
+                        count={link ? 1 : 0}
                       >
-                        <option value="">🔗 Link to a map…</option>
-                        {maps.map((m) => (
-                          <option key={m.id} value={m.id}>
-                            {m.title}
-                          </option>
-                        ))}
-                      </Select>
-                      <Select
-                        value=""
-                        onChange={(e) => e.target.value && onJump(e.target.value)}
-                        aria-label="Jump to another topic"
-                        style={{ width: "auto", margin: "0 10px 4px" }}
-                      >
-                        <option value="">↪ Jump to a topic…</option>
-                        {jumpTargets.map((row) => (
-                          <option key={row.id} value={row.id}>
-                            {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
-                          </option>
-                        ))}
-                      </Select>
-                      {link && (
-                        <Button
-                          onClick={() => onSetHyperlink("")}
-                          style={{
-                            padding: "2px 8px",
-                            fontSize: fontSize.sm,
-                            margin: "0 10px 6px",
+                        <Input
+                          key={`${node.id}:url`}
+                          defaultValue={webUrl}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter")
+                              onSetHyperlink((e.target as HTMLInputElement).value.trim());
                           }}
+                          onBlur={(e) => {
+                            const v = e.target.value.trim();
+                            if (v !== webUrl) onSetHyperlink(v);
+                          }}
+                          placeholder="Link (https://, mailto:, tel:…)"
+                          aria-label="Web link"
+                          style={{ width: "auto", margin: "0 10px 4px" }}
+                        />
+                        <Select
+                          value=""
+                          onChange={(e) => e.target.value && onLinkMap(e.target.value)}
+                          aria-label="Link to another map"
+                          style={{ width: "auto", margin: "0 10px 4px" }}
                         >
-                          ✕ Remove link (
-                          {link.startsWith("#map=")
-                            ? "map"
-                            : link.startsWith("#node=")
-                              ? "topic"
-                              : "web"}
-                          )
-                        </Button>
-                      )}
+                          <option value="">🔗 Link to a map…</option>
+                          {maps.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.title}
+                            </option>
+                          ))}
+                        </Select>
+                        <Select
+                          value=""
+                          onChange={(e) => e.target.value && onJump(e.target.value)}
+                          aria-label="Jump to another topic"
+                          style={{ width: "auto", margin: "0 10px 4px" }}
+                        >
+                          <option value="">↪ Jump to a topic…</option>
+                          {jumpTargets.map((row) => (
+                            <option key={row.id} value={row.id}>
+                              {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+                            </option>
+                          ))}
+                        </Select>
+                        {link && (
+                          <Button
+                            onClick={() => onSetHyperlink("")}
+                            style={{
+                              padding: "2px 8px",
+                              fontSize: fontSize.sm,
+                              margin: "0 10px 6px",
+                            }}
+                          >
+                            ✕ Remove link (
+                            {link.startsWith("#map=")
+                              ? "map"
+                              : link.startsWith("#node=")
+                                ? "topic"
+                                : "web"}
+                            )
+                          </Button>
+                        )}
+                      </CollapsibleSection>
 
                       {backlinks.length > 0 && (
-                        <>
-                          {sectionLabel("Linked from")}
+                        <CollapsibleSection
+                          key={`backlinks:${node.id}`}
+                          label="Linked from"
+                          count={backlinks.length}
+                        >
                           <div
                             style={{
                               padding: "0 10px 6px",
@@ -2646,7 +2735,7 @@ export function InfoPanel({
                               </button>
                             ))}
                           </div>
-                        </>
+                        </CollapsibleSection>
                       )}
                     </>
                   )}

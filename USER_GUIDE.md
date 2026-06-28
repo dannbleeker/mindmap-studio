@@ -113,9 +113,10 @@ underlying model, so the outline, every export, and the autosave always reflect 
 
 Select a node and open **ℹ Info** to see and edit everything about it in one side panel — its
 note, markers, tags, style, and links. (This replaces the old separate **Notes**, **Markers**, and
-**Style** toggles.) The panel is organised into three tabs: **Details** (tags, progress, dates,
-priority, attachments, links), **Style** (shape / fill / border / font, markers, stickers), and
-**Notes** (the Markdown editor) — move between the tabs with the **←/→** (and **Home/End**) keys once
+**Style** toggles.) The panel is organised into three tabs: **Details** (markers, tags, progress, dates,
+priority, and collapsible Attachments / Links / Linked-from sections that start collapsed when empty),
+**Style** (shape / fill / border / font, stickers), and **Notes** (the Markdown editor, with an
+**⤢ Open in dock** button that pops it into the roomy side-panel editor) — move between the tabs with the **←/→** (and **Home/End**) keys once
 one is focused. **Minimize** it with the **›** button to collapse it to a thin strip
 on the right edge (click the strip's ℹ to bring it back) — minimizing sticks, so selecting other
 nodes won't reopen it; re-expanding shows whatever node is selected then. **Drag the panel's left
@@ -128,7 +129,8 @@ never drawn on the canvas or in image / PDF exports.)
 selection, or **drag a box** across the empty canvas — and the inspector switches to bulk mode (an
 "N topics selected" banner). Changes to **shape, fill, border, font/bold, progress, dates and
 priority** apply to every selected topic at once (a single undo reverts them all). **Markers and
-tags** also work in bulk, with a *tri-state* view: a chip is **lit** when every selected topic has
+tags** also work in bulk — on the **Details** tab, the same place they sit for a single topic — with a
+*tri-state* view: a chip is **lit** when every selected topic has
 it and **dashed (a “+” chip)** when only some do — clicking adds it to the whole selection, or
 removes it from all if they all already have it. The remaining per-item editors (notes, stickers,
 attachments, links) stay single-topic — select one topic to edit those. If the selected topics

@@ -360,3 +360,38 @@ describe("flow project — collapse-toggle side (tipLeft)", () => {
     expect(all.find((n) => n.id === "f")?.data.tipLeft).toBeFalsy(); // floating → right tip
   });
 });
+
+describe("flow project — roll-up source title (I11)", () => {
+  const rollupDoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "d2",
+    title: "Plan",
+    root: {
+      id: "r",
+      topic: "Plan",
+      children: [
+        { id: "m", topic: "Mirror", rollup: "src", children: [] },
+        { id: "n", topic: "Plain", children: [] },
+      ],
+    },
+  };
+
+  it("resolves the bound source map's title onto the node data", () => {
+    const { nodes } = project(
+      rollupDoc,
+      undefined,
+      false,
+      "side",
+      new Map([["src", "Quarterly OKRs"]]),
+    );
+    expect(nodes.find((n) => n.id === "m")?.data.rollupTitle).toBe("Quarterly OKRs");
+    // A node with no roll-up binding carries no title.
+    expect(nodes.find((n) => n.id === "n")?.data.rollupTitle).toBeUndefined();
+  });
+
+  it("leaves rollupTitle undefined when the source map isn't in the library", () => {
+    const { nodes } = project(rollupDoc, undefined, false, "side", new Map());
+    expect(nodes.find((n) => n.id === "m")?.data.rollup).toBe("src"); // still bound…
+    expect(nodes.find((n) => n.id === "m")?.data.rollupTitle).toBeUndefined(); // …but no title resolved
+  });
+});

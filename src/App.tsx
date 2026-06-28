@@ -1921,6 +1921,7 @@ export function App() {
                 noteDraft={noteDraft}
                 onNoteChange={onNoteChange}
                 onNoteBlur={flushNote}
+                onExpandNote={() => panels.setNoteEditorOpen(() => true)}
                 markers={MARKER_PALETTE}
                 onToggleMarker={(mk) => {
                   const ok = mapRef.current?.toggleSelectedIcon(mk);

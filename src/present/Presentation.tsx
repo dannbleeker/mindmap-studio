@@ -286,7 +286,7 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
         </button>
         <span style={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "#7e78b8", letterSpacing: "0.02em" }}>
-          ← → / Space · P · Esc
+          ← → · Home · Space · P · Esc
         </span>
         <button
           type="button"

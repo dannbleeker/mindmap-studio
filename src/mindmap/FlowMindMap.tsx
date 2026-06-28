@@ -189,6 +189,10 @@ import { mindManagerTheme } from "./theme";
 const nodeTypes = { topic: TopicNode };
 const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
 
+// Undo coalescing window (S4): repeated same-key cycle edits (priority/progress/task) inside this many
+// ms collapse into one undo step, so a chip-spree reverts in a single Ctrl+Z.
+const COALESCE_MS = 600;
+
 // Per-overlay-kind op table: routes a label / colour / delete edit to the right boundary / summary /
 // callout op, so the three-way kind dispatch lives in ONE place instead of being re-spelled in each
 // overlay handle method (add a 4th overlay kind → one entry here, not three edits).
@@ -303,8 +307,15 @@ function FlowInner({
   // full doc (docRef), making drilling a pure view transform.
   const viewOf = useMemo(() => viewDoc(doc, drillId), [doc, drillId]);
   const projected = useMemo(
-    () => project(viewOf, palette, numbered, viewOf.meta?.freeform ? "freeform" : direction),
-    [viewOf, palette, numbered, direction],
+    () =>
+      project(
+        viewOf,
+        palette,
+        numbered,
+        viewOf.meta?.freeform ? "freeform" : direction,
+        new Map(libraryMaps.map((m) => [m.id, m.title])),
+      ),
+    [viewOf, palette, numbered, direction, libraryMaps],
   );
   const initialNodes = useMemo(() => {
     const pos = computeLayout(
@@ -619,7 +630,7 @@ function FlowInner({
         const coalesce =
           coalesceKey !== undefined &&
           prevCoalesce?.key === coalesceKey &&
-          now - prevCoalesce.at < 600;
+          now - prevCoalesce.at < COALESCE_MS;
         if (!coalesce) {
           // Snapshot the old doc + the anchor selected with it, so undo restores the selection.
           historyRef.current = record(historyRef.current, {

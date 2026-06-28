@@ -49,8 +49,10 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
 - [x] **Phase 5** — panel/workspace. **Shipped:** left rail → **tabbed dock** (PanelDock; the 10 side
   panels share one ~280px tabbed column instead of N crushing 250px columns — verified in-browser +
   unit-tested); bulk-edit banner clarity. The deferred inspector follow-ups shipped 2026-06-28 (see
-  CHANGELOG): the note editor moved to its own roomy **Notes** tab (P3 — chosen over collapsible sections)
-  and the dockable note panel now flags it shows the same note as the Notes tab (P6). Note: lines/stmts
+  CHANGELOG): the note editor moved to its own roomy **Notes** tab and the heavy Details sections
+  (Attachments/Links/Linked-from) are now collapsible, collapsed-by-default when empty (P3); the Notes
+  tab also gained an **⤢ Open in dock** button that opens the dockable note editor on the same note (P6).
+  Note: lines/stmts
   coverage floor nudged
   90.9→90.8 (the per-panel dock-entry App wiring only runs when each panel is opened via the flaky-to-
   drive Panels menu; the dock logic itself is unit-tested in PanelDock).
@@ -80,9 +82,10 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   headless render in dark across Start + editor + Settings dialog.
 - [x] **Phase 9** — feature-specific polish (shipped — see CHANGELOG): Kanban drag-to-retag (I6 — a pure
   `retagForMove` + a by-id `setNodeTags` handle, one undoable edit; board also tokenised for dark mode);
-  presentation true fullscreen + key-hint footer + Home→first-slide (I10); roll-up ⤵ badge on bound nodes
-  (I11 — projected via TopicData; the context-menu binder shipped 2026-06-28 via a `libraryMaps` prop
-  threaded into FlowMindMap, alongside the Insert-menu binder — see CHANGELOG); inspector swatch unification +
+  presentation true fullscreen + key-hint footer (now lists Home) + Home→first-slide (I10); roll-up ⤵
+  badge on bound nodes whose tooltip names the bound source map (I11 — projected via TopicData incl. the
+  resolved `rollupTitle`; the context-menu binder shipped 2026-06-28 via a `libraryMaps` prop threaded
+  into FlowMindMap, alongside the Insert-menu binder — see CHANGELOG); inspector swatch unification +
   Edge/Overlay context lines from one `strokeSwatches` source (P5); undo coalescing for the
   priority/progress/task cycle chips — a same-node+field spree within ~0.6s collapses to one undo step,
   with the chain reset on undo/redo/discard (S4). Note: history keeps a 100-snapshot cap (history.ts CAP)
@@ -90,8 +93,12 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
 
 **The UX remediation plan (Phases 0–9) is complete**, and the unblocked deferred follow-ups (overlay
 right-click menu, NodePopover→More, roll-up binder, Notes tab, dockable-note relabel) shipped 2026-06-28.
-Phase 3's remaining notes (T1 superseded by Phase 6's T3; O3 covered by the touch first-run card) need no
-further work; everything else still open is in *Deferred / blocked* below.
+A follow-up **relevance sweep** (2026-06-28) re-verified every backlog item against the as-built app and
+closed the six residual gaps it found — bulk markers back on Details, collapsible heavy sections (P3),
+the roll-up source-map tooltip (I11), the Notes-tab dock-expand button (P6), the presentation Home hint
+and the named coalesce constant (see CHANGELOG). Phase 3's remaining notes (T1 superseded by Phase 6's
+T3; O3 covered by the touch first-run card) need no further work; everything else still open is in
+*Deferred / blocked* below.
 
 ## Open items
 

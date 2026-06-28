@@ -490,7 +490,7 @@ describe("InfoPanel", () => {
     expect(screen.queryByText(/Stickers/)).toBeNull(); // per-item sticker grid hidden
   });
 
-  it("bulk mode shows tri-state markers + tags and toggles them across the selection", async () => {
+  it("bulk mode shows tri-state markers + tags on Details and toggles them across the selection", async () => {
     const onMarker = vi.fn();
     const onTag = vi.fn();
     renderInfo(selected, node, 3, undefined, undefined, [], noop, undefined, {
@@ -499,14 +499,45 @@ describe("InfoPanel", () => {
       onMarker,
       onTag,
     });
-    // Details tab (default): tri-state tags — "risk" on all (✕ removes), "wip" on some (+ adds).
+    // Details tab (default): markers lead, tags follow — both tri-state. "risk" on all (✕ removes),
+    // "wip" on some (+ adds).
+    expect(screen.getByText("Markers")).toBeTruthy();
     expect(screen.getByText("risk ✕")).toBeTruthy();
     await userEvent.click(screen.getByText("wip +"));
     expect(onTag).toHaveBeenCalledWith("wip");
-    // Style tab: tri-state markers — clicking the partial 🚩 adds it to all.
-    await userEvent.click(screen.getByRole("tab", { name: "Style" }));
+    // The partial 🚩 marker is on Details (not the Style tab); clicking it adds it to all.
     await userEvent.click(screen.getByRole("button", { name: "🚩" }));
     expect(onMarker).toHaveBeenCalledWith("🚩");
+  });
+
+  it("keeps bulk markers on Details, not Style, so the control set doesn't reshuffle (P4)", async () => {
+    renderInfo(selected, node, 3, undefined, undefined, [], noop, undefined, {
+      markers: { all: ["⭐"], some: [] },
+      onMarker: vi.fn(),
+    });
+    expect(screen.getByText("Markers")).toBeTruthy(); // on Details (default tab)
+    await userEvent.click(screen.getByRole("tab", { name: "Style" }));
+    expect(screen.queryByText("Markers")).toBeNull(); // not duplicated on Style
+  });
+
+  it("collapses an empty Details section (Attachments) and expands it on click (P3)", async () => {
+    renderInfo(selected, node); // node carries no attachments → the section starts collapsed
+    const header = screen.getByRole("button", { name: /Attachments/ });
+    expect(header.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByText("+ Attach file")).toBeNull(); // body hidden while collapsed
+    await userEvent.click(header);
+    expect(header.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByText("+ Attach file")).toBeTruthy(); // body revealed
+  });
+
+  it("offers an 'Open in dock' button on the Notes tab that calls onExpandNote (P6)", async () => {
+    const onExpandNote = vi.fn();
+    renderInfo(selected, node, undefined, undefined, undefined, [], noop, undefined, undefined, {
+      onExpandNote,
+    });
+    await userEvent.click(screen.getByRole("tab", { name: "Notes" }));
+    await userEvent.click(screen.getByRole("button", { name: /Open in dock/ }));
+    expect(onExpandNote).toHaveBeenCalledTimes(1);
   });
 
   it("bulk mode blanks a mixed field + shows a 'Mixed' hint instead of the anchor's value", () => {

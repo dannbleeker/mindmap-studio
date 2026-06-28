@@ -105,6 +105,21 @@ export async function getAllMaps(): Promise<MindMapDoc[]> {
   return (await db()).getAll("maps");
 }
 
+/** Maps (other than `targetId`) that reference it — via a roll-up binding (`node.rollup`) or an
+ *  in-app map-link hyperlink (`#map=<id>`). Used to warn before deleting a map that others point at,
+ *  so a delete doesn't silently break cross-map references. */
+export async function findMapReferences(targetId: string): Promise<MapSummary[]> {
+  const mapLink = `#map=${targetId}`;
+  const refsTarget = (n: MapNode): boolean =>
+    n.rollup === targetId || n.hyperlink === mapLink || (n.children ?? []).some(refsTarget);
+  const docs = await getAllMaps();
+  return docs
+    .filter((d) => d.id !== targetId)
+    .filter((d) => refsTarget(d.root) || (d.floatingTopics ?? []).some(refsTarget))
+    .map((d) => ({ id: d.id, title: d.title }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
 export async function setLastOpened(id: string): Promise<void> {
   await (await db()).put("meta", id, "lastOpened");
 }

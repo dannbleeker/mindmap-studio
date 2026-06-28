@@ -7,6 +7,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **"Saved locally" can no longer lie.** The badge was a static label, unbound to the actual autosave —
+  and a failed write (browser out of storage, private mode) was silently swallowed. It now reflects real
+  state: **Saving…** while a write is pending, **Saved locally** once it lands, and a red **Couldn't
+  save** if it fails. The app also asks the browser to keep the local library **persistent** (exempt
+  from eviction) on startup.
+- **Deleting a map warns when other maps link to it.** Maps that roll-up or `#map=`-link the one you're
+  deleting would have been left with broken references and no warning. Delete now confirms first when
+  other maps point at it (and names them); an unreferenced map still deletes instantly with Undo.
+- **The Version-history panel is honest about its limits.** A one-line note now says auto-snapshots are
+  throttled (~3 min) and only the last 30 are kept — so you don't expect to roll back to an arbitrary
+  point on a busy map (use **Save version now** to pin one).
 - **Image / SVG / HTML / PDF export no longer fails silently.** When there's no live canvas to render
   (e.g. the command runs while the Board is open), these exports used to do nothing at all — no file,
   no message. They now show a hint ("Open a map on the canvas first…") instead of a silent no-op. The

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { MindMapDoc } from "../src/model/types";
 import {
   deleteMap,
+  findMapReferences,
   getAllMaps,
   getLastOpened,
   latestVersionDoc,
@@ -124,6 +125,58 @@ describe("mapStore — getAllMaps / listMaps", () => {
     const titles = list.map((m) => m.title);
     const sorted = [...titles].sort((a, b) => a.localeCompare(b));
     expect(titles).toEqual(sorted);
+  });
+});
+
+describe("mapStore — findMapReferences", () => {
+  it("finds maps that roll-up or map-link to the target, excluding the target + unrelated maps", async () => {
+    await saveMap(docOf("ref-target", "Target"));
+    await saveMap({
+      schemaVersion: 1,
+      id: "ref-r1",
+      title: "R1 Rollup",
+      root: {
+        id: "r",
+        topic: "R1",
+        children: [{ id: "c", topic: "mirror", rollup: "ref-target", children: [] }],
+      },
+    });
+    await saveMap({
+      schemaVersion: 1,
+      id: "ref-r2",
+      title: "R2 Link",
+      root: {
+        id: "r",
+        topic: "R2",
+        children: [{ id: "c", topic: "see", hyperlink: "#map=ref-target", children: [] }],
+      },
+    });
+    await saveMap({
+      schemaVersion: 1,
+      id: "ref-r3",
+      title: "R3 Unrelated",
+      root: {
+        id: "r",
+        topic: "R3",
+        children: [{ id: "c", topic: "x", rollup: "someone-else", children: [] }],
+      },
+    });
+    const ids = (await findMapReferences("ref-target")).map((r) => r.id);
+    expect(ids).toContain("ref-r1");
+    expect(ids).toContain("ref-r2");
+    expect(ids).not.toContain("ref-r3");
+    expect(ids).not.toContain("ref-target"); // never lists the target itself
+  });
+
+  it("checks floating topics, not only the central tree", async () => {
+    await saveMap({
+      schemaVersion: 1,
+      id: "ref-float",
+      title: "Floats",
+      root: { id: "r", topic: "Floats", children: [] },
+      floatingTopics: [{ id: "f", topic: "loose", rollup: "ref-target", children: [] }],
+    });
+    expect((await findMapReferences("ref-target")).some((r) => r.id === "ref-float")).toBe(true);
   });
 });
 

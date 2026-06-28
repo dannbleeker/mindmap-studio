@@ -59,7 +59,7 @@ import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
 import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from "./stickers";
-import type { VersionMeta } from "./store/mapStore";
+import { MAX_VERSIONS, type VersionMeta } from "./store/mapStore";
 import { formatDateShort } from "./taskDate";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 
@@ -1330,6 +1330,12 @@ export function HistoryPanel({
       >
         ▶ Play timeline
       </Button>
+      {/* Be honest that auto-history is finite + throttled, so a user doesn't expect to roll back to
+          an arbitrary point on a busy map (snapshots coalesce to ~3 min; the last MAX_VERSIONS kept). */}
+      <div style={{ padding: "0 10px 8px", fontSize: fontSize.xs, color: colors.faint }}>
+        Auto-saves are throttled (~3 min); the last {MAX_VERSIONS} are kept. Use “Save version now”
+        to pin an important state.
+      </div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {versions.length === 0 ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>

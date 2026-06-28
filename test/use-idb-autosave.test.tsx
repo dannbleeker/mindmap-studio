@@ -43,6 +43,7 @@ describe("useIdbAutosave — persist", () => {
     expect(mocked.setLastOpened).toHaveBeenCalledWith("m9");
     expect(deps.refreshMaps).toHaveBeenCalledTimes(1);
     expect(deps.maybeSnapshot).not.toHaveBeenCalled(); // no snapshot unless asked
+    expect(result.current.saveState).toBe("saved"); // badge can show "Saved locally" truthfully
   });
 
   it("feeds the version snapshot only on an edit-driven save (snapshot=true)", async () => {
@@ -53,13 +54,14 @@ describe("useIdbAutosave — persist", () => {
     expect(deps.maybeSnapshot).toHaveBeenCalledTimes(1);
   });
 
-  it("is best-effort: a store error is swallowed (no throw)", async () => {
+  it("surfaces a store error as saveState='error' (no throw) so the badge can't lie", async () => {
     mocked.saveMap.mockRejectedValueOnce(new Error("quota"));
     const { result, deps } = setup();
     await act(async () => {
       await result.current.persist(doc(), true);
     });
     expect(deps.maybeSnapshot).not.toHaveBeenCalled(); // threw before the snapshot, but didn't propagate
+    expect(result.current.saveState).toBe("error");
   });
 });
 
@@ -77,6 +79,16 @@ describe("useIdbAutosave — scheduleSave + lifecycle", () => {
     });
     expect(mocked.saveMap).toHaveBeenCalledTimes(1);
     expect(mocked.setLastOpened).toHaveBeenCalledWith("live");
+  });
+
+  it("shows saveState='saving' as soon as an edit is pending, then 'saved' once it lands", async () => {
+    const { result } = setup(doc("live2"));
+    act(() => result.current.scheduleSave());
+    expect(result.current.saveState).toBe("saving"); // pending immediately, before the debounce fires
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    expect(result.current.saveState).toBe("saved");
   });
 
   it("flushes a pending save the moment the tab is hidden", async () => {

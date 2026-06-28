@@ -1,6 +1,11 @@
-import { type RefObject, useCallback, useEffect, useRef } from "react";
+import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import type { MindMapDoc } from "../model/types";
 import { saveMap, setLastOpened } from "../store/mapStore";
+
+/** The live autosave status, surfaced in the toolbar badge so "Saved locally" can't lie: `saving`
+ *  while a debounced/in-flight write is pending, `saved` once it lands, `error` if the write throws
+ *  (quota exceeded / private-mode / disk full) instead of silently swallowing it. */
+export type SaveState = "idle" | "saving" | "saved" | "error";
 
 // The IndexedDB autosave path: a debounced write-through of the live doc to the library (the always-on
 // safety net), plus the guards that keep an edit from being lost on tab close. Lifted out of App so the
@@ -23,19 +28,24 @@ interface Options {
 
 export function useIdbAutosave({ liveDocRef, dirtyRef, refreshMaps, maybeSnapshot }: Options) {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
 
   const persist = useCallback(
     // `snapshot` is true only on edit-driven saves — opening/switching a map shouldn't create a
     // version, or pure reloads would spam the history.
     async (d: MindMapDoc, snapshot = false) => {
+      setSaveState("saving");
       try {
         await saveMap(d);
         await setLastOpened(d.id);
         await refreshMaps();
         // Edit-driven saves feed the version-history auto-snapshot (throttle lives inside that hook).
         if (snapshot) maybeSnapshot(d);
+        setSaveState("saved");
       } catch {
-        // autosave is best-effort
+        // Don't swallow it silently — a quota/private-mode failure must reach the badge so the user
+        // doesn't trust "Saved locally" while nothing persisted.
+        setSaveState("error");
       }
     },
     [refreshMaps, maybeSnapshot],
@@ -43,6 +53,7 @@ export function useIdbAutosave({ liveDocRef, dirtyRef, refreshMaps, maybeSnapsho
 
   const scheduleSave = useCallback(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
+    setSaveState("saving"); // a pending edit → show "Saving…" right away, before the debounce fires
     saveTimer.current = setTimeout(() => {
       saveTimer.current = null; // mark not-pending so the hidden-flush below skips an already-saved doc
       persist(liveDocRef.current, true);
@@ -76,5 +87,5 @@ export function useIdbAutosave({ liveDocRef, dirtyRef, refreshMaps, maybeSnapsho
     return () => document.removeEventListener("visibilitychange", onHidden);
   }, [persist, liveDocRef]);
 
-  return { persist, scheduleSave };
+  return { persist, scheduleSave, saveState };
 }

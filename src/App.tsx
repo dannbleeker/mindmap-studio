@@ -94,6 +94,7 @@ import { stickerImage } from "./stickers";
 import {
   type MapSummary,
   deleteMap,
+  findMapReferences,
   getAllMaps,
   getTabSession,
   listMaps,
@@ -503,12 +504,19 @@ export function App() {
 
   // IndexedDB autosave (debounced write-through + the tab-close flush / beforeunload guards) — its own
   // hook. Wired after useVersionHistory (persist feeds maybeSnapshot) and before load (load calls it).
-  const { persist, scheduleSave } = useIdbAutosave({
+  const { persist, scheduleSave, saveState } = useIdbAutosave({
     liveDocRef,
     dirtyRef,
     refreshMaps,
     maybeSnapshot,
   });
+
+  // Ask the browser to make the local library persistent (exempt from eviction under storage
+  // pressure) — best-effort, once on boot. A local-first app's whole pitch is "your work is safe
+  // here", so it shouldn't leave the library evictable. No-op where unsupported / not granted.
+  useEffect(() => {
+    void navigator.storage?.persist?.().catch(() => {});
+  }, []);
 
   const load = useCallback(
     (next: MindMapDoc, nextWarnings: string[] = []) => {
@@ -845,6 +853,24 @@ export function App() {
   async function deleteCurrent() {
     // Delete immediately + offer Undo (re-saves the map), instead of a blocking confirm (#9).
     const deleted = structuredClone(liveDocRef.current);
+    // …but if other maps roll-up or link to this one, deleting silently breaks those references —
+    // so confirm in that (rarer, riskier) case. Best-effort: never block a delete on a failed scan.
+    try {
+      const refs = await findMapReferences(deleted.id);
+      if (refs.length > 0) {
+        const names = refs
+          .slice(0, 3)
+          .map((r) => `“${r.title || "Untitled"}”`)
+          .join(", ");
+        const more = refs.length > 3 ? `, and ${refs.length - 3} more` : "";
+        const ok = window.confirm(
+          `${refs.length} other map${refs.length === 1 ? "" : "s"} link to this one (${names}${more}). Those links will break. Delete anyway?`,
+        );
+        if (!ok) return;
+      }
+    } catch {
+      // reference scan is best-effort
+    }
     try {
       await deleteMap(deleted.id);
       sessionCache.current.delete(deleted.id); // its stashed canvas session goes with it
@@ -1229,6 +1255,7 @@ export function App() {
       },
     },
     showHint,
+    saveState,
   };
 
   if (view === "start") {

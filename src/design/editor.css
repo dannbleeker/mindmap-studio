@@ -166,6 +166,22 @@
   border-radius: 6px;
   background: var(--ed-accent);
 }
+/* Saving → amber pulse; error → red, so a failed write reads as a problem (not a calm "Saved"). */
+.mm-saved[data-state="saving"] .mm-saved-dot {
+  background: #d9a514;
+  animation: mm-saved-pulse 1s ease-in-out infinite;
+}
+.mm-saved[data-state="error"] {
+  color: var(--ed-danger);
+}
+.mm-saved[data-state="error"] .mm-saved-dot {
+  background: var(--ed-danger);
+}
+@keyframes mm-saved-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
 .mm-grow {
   flex: 1;
 }

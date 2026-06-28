@@ -4,6 +4,7 @@ import { Menu, MenuCheckboxItem, MenuItem, MenuLabel, MenuSeparator } from "../d
 import { designPreviewModel } from "../designPreview";
 import { DESIGNS } from "../designs";
 import { buildExample, examples } from "../examples";
+import type { SaveState } from "../hooks/useIdbAutosave";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import { canvasThemes } from "../mindmap/theme";
@@ -215,6 +216,9 @@ export interface ToolbarProps {
   history: { canUndo: boolean; canRedo: boolean; undo: () => void; redo: () => void };
   /** Transient hint toast (used by the group/summary/note/roll-up actions). */
   showHint: (message: string) => void;
+  /** Live autosave status → the "Saved locally" badge (so it can't claim "Saved" mid-write or after a
+   *  failed write). `undefined` keeps the legacy static "Saved locally" look. */
+  saveState?: SaveState;
 }
 
 // ── primitives ───────────────────────────────────────────────────────────────
@@ -293,6 +297,7 @@ export function Toolbar({
   views,
   history,
   showHint,
+  saveState,
 }: ToolbarProps) {
   const { liveDoc, doc } = map;
   const m = () => mapRef.current;
@@ -411,8 +416,21 @@ export function Toolbar({
               ghost
               onClick={nav.openSearchAll}
             />
-            <span className="mm-saved">
-              <span className="mm-saved-dot" /> Saved locally
+            <span
+              className="mm-saved"
+              data-state={saveState ?? "saved"}
+              title={
+                saveState === "error"
+                  ? "Couldn't save to this browser — it may be out of storage or in private mode."
+                  : "Your maps are stored locally in this browser."
+              }
+            >
+              <span className="mm-saved-dot" />{" "}
+              {saveState === "saving"
+                ? "Saving…"
+                : saveState === "error"
+                  ? "Couldn't save"
+                  : "Saved locally"}
             </span>
           </>
         )}

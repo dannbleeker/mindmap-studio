@@ -3,6 +3,7 @@ import { MapCard } from "../MapCard";
 import { handleMapAction } from "../mapActions";
 import type { StartContext } from "../types";
 import { useLibrary } from "../useLibrary";
+import { EmptyMaps } from "./EmptyMaps";
 
 // The full library — grid ↔ list toggle + sort (recently edited / name A–Z / most nodes). Cards
 // carry the hover kebab (Open/Rename/Duplicate/Export/Delete) via handleMapAction.
@@ -46,7 +47,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
       </div>
 
       {entries.length === 0 ? (
-        <div className="st-empty">No maps yet — create one from the Start screen.</div>
+        <EmptyMaps ctx={ctx} />
       ) : list ? (
         <div className="st-list">
           {sorted.map((e) => (

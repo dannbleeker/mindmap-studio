@@ -2,6 +2,7 @@ import { MapCard, type MapEntry } from "../MapCard";
 import { handleMapAction } from "../mapActions";
 import type { StartContext } from "../types";
 import { useLibrary } from "../useLibrary";
+import { EmptyMaps } from "./EmptyMaps";
 
 // Saved maps grouped by last-edited into Today / Yesterday / Earlier (and "Not yet saved" for any
 // map without a timestamp). Uses the same MapCard + actions as All maps.
@@ -37,7 +38,7 @@ export function Recent({ ctx }: { ctx: StartContext }) {
         <p className="st-section-sub">Your maps, newest first.</p>
       </section>
       {entries.length === 0 ? (
-        <div className="st-empty">No maps yet — create one from the Start screen.</div>
+        <EmptyMaps ctx={ctx} />
       ) : (
         GROUPS.filter((g) => byGroup.has(g)).map((g) => (
           <section key={g}>

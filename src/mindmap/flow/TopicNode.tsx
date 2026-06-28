@@ -55,6 +55,25 @@ function markEditHintSeen() {
   }
 }
 
+// One-time coach for the drag-to-relate grip (C7): shown on hover after the edit hint is retired,
+// until the user first grabs the grip. Same module-level best-effort-persisted pattern as the edit hint.
+let relateHintSeen = (() => {
+  try {
+    return localStorage.getItem("mindmap-relate-hint") === "seen";
+  } catch {
+    return false;
+  }
+})();
+function markRelateHintSeen() {
+  if (relateHintSeen) return;
+  relateHintSeen = true;
+  try {
+    localStorage.setItem("mindmap-relate-hint", "seen");
+  } catch {
+    // best-effort
+  }
+}
+
 const HANDLE: CSSProperties = {
   opacity: 0,
   width: 1,
@@ -484,10 +503,15 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           position={Position.Right}
           className="mm-relate-handle nodrag"
           title="Drag onto another topic to link them"
+          // Grabbing the grip retires its one-time coach hint (C7).
+          onMouseDown={markRelateHintSeen}
           style={{
             width: 11,
             height: 11,
             right: -6,
+            // Sit below the vertically-centred add-child ＋ so the two no longer overlap (C4).
+            top: "calc(50% + 16px)",
+            transform: "translateY(-50%)",
             border: "2px solid #fff",
             background: branchColor,
             boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
@@ -792,7 +816,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       {hasChildren ? (
         <button
           type="button"
-          className="nodrag nopan"
+          className="mm-collapse-toggle nodrag nopan"
           title={collapsed ? "Expand" : "Collapse"}
           onClick={(e) => {
             e.stopPropagation();
@@ -900,6 +924,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       ) : null}
       {hovered && !isEditing && !editHintSeen ? (
         <span className="mm-node-hint nodrag nopan">Double-click or F2 to edit</span>
+      ) : null}
+      {/* Drag-to-relate coach (C7) — shown after the edit hint is retired, until the grip is grabbed.
+          Non-root only (the root has no grip); hidden on touch via CSS (the grip is hidden there too). */}
+      {hovered && !isRoot && !isEditing && editHintSeen && !relateHintSeen ? (
+        <span className="mm-relate-hint nodrag nopan">Drag the dot onto another topic to link</span>
       ) : null}
     </div>
   );

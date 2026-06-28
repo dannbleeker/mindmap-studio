@@ -51,6 +51,7 @@ function setup(
     openPaste: vi.fn(),
     openFind: vi.fn(),
     openSettings: vi.fn(),
+    reShowGettingStarted: vi.fn(),
   };
   const panels = {
     outlineOpen: false,

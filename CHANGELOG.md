@@ -5,7 +5,31 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Added
+
+- **Onboarding & learnability pass (Phase 7).** Help new users get oriented and find the editor's power:
+  - **Install MindMap Studio as an app.** When your browser offers it, an "Install" button appears in
+    the Start sidebar footer + the About pages; on iOS Safari you get an "Add to Home Screen via Share"
+    hint instead. Dismissible, and hidden once it's installed.
+  - **"Learn the app" tips on the Start screen** — four cards covering ⌘K, right-click markers, the
+    drag-to-relate grip, and exporting to PowerPoint/PDF.
+  - **Actionable empty states.** "All maps" / "Recent" with no maps now offer a primary "＋ New map"
+    button instead of pointing you elsewhere.
+  - **Template & example cards now carry a one-line use-case**, and the Start home leads with a curated
+    set of starters rather than whatever happened to be first in the list.
+  - **Getting-started tips are re-openable** any time — from Settings, the ⌘K palette, and a new tips
+    button in the icon rail (not just once on first run).
+  - **A "New here?" banner** greets a brand-new or shared-link visitor on the home screen with a quick
+    orientation and a "Start your own" button.
+  - **Gesture coaching:** a one-time hint on the drag-to-relate grip, a "Shift-drag to select" line in
+    the empty-map coachmark, both gestures added to the Shortcuts sheet, and a selected topic's relate
+    grip now rests a little more visible.
+
 ### Changed
+
+- **Phase 7 affordance tidy-up.** The drag-to-relate grip now sits just below the add-child ＋ so the two
+  no longer overlap; on touch screens the grip is hidden (link via long-press → "Link to…") and the
+  collapse toggle is tap-sized.
 
 - **Toolbar information-architecture cleanup (Phase 6).** A pass to make the editor chrome read more
   clearly and stop splitting one job across two places:

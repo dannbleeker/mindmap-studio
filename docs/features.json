@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 329,
+  "reviewedThroughChangelogBullets": 331,
   "areas": [
     "editing",
     "notes",
@@ -54,9 +54,9 @@
     },
     {
       "id": "first-run-tips",
-      "name": "First-run \"3 things to try\" onboarding card",
+      "name": "First-run \"3 things to try\" card, re-openable from Settings, ⌘K & the help rail",
       "area": "navigation",
-      "since": "2026-06-18",
+      "since": "2026-06-28",
       "manual": true,
       "book": true,
       "bookExample": true
@@ -1053,9 +1053,9 @@
     },
     {
       "id": "pwa-install",
-      "name": "Installable to desktop / home screen",
+      "name": "Installable to desktop / home screen (in-app Install button + iOS Add-to-Home hint)",
       "area": "pwa",
-      "since": "2026-06-11",
+      "since": "2026-06-28",
       "manual": true,
       "book": true,
       "bookExample": true

@@ -207,6 +207,8 @@ export interface ToolbarProps {
     openFind: () => void;
     /** Open the Settings / Preferences dialog (IconRail ⚙ + ⌘K). */
     openSettings: () => void;
+    /** Re-show the first-run "3 things to try" card (clears the one-shot flag) — from ⌘K / Settings. */
+    reShowGettingStarted: () => void;
   };
   panels: ToolbarPanels;
   map: ToolbarMap;

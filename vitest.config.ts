@@ -29,6 +29,7 @@ export default defineConfig({
       ["test/dashboard.test.ts", "jsdom"],
       ["test/icon-rail.test.tsx", "jsdom"],
       ["test/toolbar.test.tsx", "jsdom"],
+      ["test/install-prompt.test.tsx", "jsdom"],
       ["test/find-replace-overlay.test.tsx", "jsdom"],
       ["test/kanban.test.tsx", "jsdom"],
       ["test/brainstorm-timer.test.tsx", "jsdom"],
@@ -66,6 +67,10 @@ export default defineConfig({
     // takes effect for the jsdom tests.
     setupFiles: ["test/setup.ts"],
     include: ["test/**/*.test.{ts,tsx}"],
+    // The whole-tree app-integration tests render <App/> and drive real menus; under the parallel
+    // coverage run they can brush past the stock 5s per-test budget on a loaded machine. Give every
+    // test generous headroom so the gate (and CI) don't flake on a slow render rather than a real bug.
+    testTimeout: 20000,
     coverage: {
       provider: "v8",
       // Cover all app source; the canvas/React UI is verified in-browser rather

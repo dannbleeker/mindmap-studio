@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { buildExample, examples } from "../../../examples";
+import { EXAMPLE_DESCRIPTIONS, buildExample, examples } from "../../../examples";
 import { TemplateCard } from "../TemplateCard";
 import { branchLabels } from "../nodeStats";
 import type { StartContext } from "../types";
@@ -10,11 +10,18 @@ import type { StartContext } from "../types";
 
 export function Examples({ ctx }: { ctx: StartContext }) {
   const [q, setQ] = useState("");
-  const built = examples.map((e) => ({ id: e.id, name: e.name, doc: e.build() }));
+  const built = examples.map((e) => ({
+    id: e.id,
+    name: e.name,
+    description: EXAMPLE_DESCRIPTIONS[e.id],
+    doc: e.build(),
+  }));
   const query = q.trim().toLowerCase();
   const shown = query
     ? built.filter((e) =>
-        `${e.name} ${branchLabels(e.doc).join(" ")}`.toLowerCase().includes(query),
+        `${e.name} ${e.description ?? ""} ${branchLabels(e.doc).join(" ")}`
+          .toLowerCase()
+          .includes(query),
       )
     : built;
 
@@ -41,6 +48,7 @@ export function Examples({ ctx }: { ctx: StartContext }) {
             <TemplateCard
               key={e.id}
               name={e.name}
+              description={e.description}
               doc={e.doc}
               seed={e.id}
               onOpen={() => ctx.onOpen(buildExample(e.id))}

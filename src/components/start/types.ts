@@ -32,4 +32,8 @@ export interface StartContext {
   /** Trigger a manual PWA update check (About → "Check for updates"). App maps the result to a
    *  toast; the Start screen now renders that toast surface, so the result is visible here. */
   onCheckForUpdates?: () => void;
+  /** True for a brand-new user (no real edits yet, ≤1 map) — e.g. someone who opened a shared
+   *  `?map=` deep link and lands on Home with an unfamiliar, imported-only library. Drives the
+   *  dismissible "New here?" onboarding banner on StartHome (O9). */
+  showNewHere?: boolean;
 }

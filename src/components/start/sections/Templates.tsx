@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { buildTemplate, templates } from "../../../templates";
+import { TEMPLATE_DESCRIPTIONS, buildTemplate, templates } from "../../../templates";
 import { TemplateCard } from "../TemplateCard";
 import { branchLabels } from "../nodeStats";
 import type { StartContext } from "../types";
@@ -11,11 +11,18 @@ export function Templates({ ctx }: { ctx: StartContext }) {
   const [q, setQ] = useState("");
   const built = templates
     .filter((t) => t.id !== "blank")
-    .map((t) => ({ id: t.id, name: t.name, doc: t.build() }));
+    .map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: TEMPLATE_DESCRIPTIONS[t.id],
+      doc: t.build(),
+    }));
   const query = q.trim().toLowerCase();
   const shown = query
     ? built.filter((t) =>
-        `${t.name} ${branchLabels(t.doc).join(" ")}`.toLowerCase().includes(query),
+        `${t.name} ${t.description ?? ""} ${branchLabels(t.doc).join(" ")}`
+          .toLowerCase()
+          .includes(query),
       )
     : built;
 
@@ -43,6 +50,7 @@ export function Templates({ ctx }: { ctx: StartContext }) {
             <TemplateCard
               key={t.id}
               name={t.name}
+              description={t.description}
               doc={t.doc}
               seed={t.id}
               onOpen={() => ctx.onOpen(buildTemplate(t.id))}

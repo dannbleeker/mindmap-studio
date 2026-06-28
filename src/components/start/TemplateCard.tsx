@@ -8,11 +8,14 @@ import { branchLabels, docNodeCount } from "./nodeStats";
 
 export function TemplateCard({
   name,
+  description,
   doc,
   seed,
   onOpen,
 }: {
   name: string;
+  /** One-line use-case shown under the node count (O6). */
+  description?: string;
   doc: MindMapDoc;
   seed: string;
   onOpen: () => void;
@@ -34,6 +37,7 @@ export function TemplateCard({
       <div className="st-tile-body">
         <div className="st-card-title">{name}</div>
         <div className="st-card-meta">{count} nodes</div>
+        {description ? <div className="st-card-desc">{description}</div> : null}
         <div className="st-pills">
           {shown.map((b) => (
             <span key={b} className="st-tag">

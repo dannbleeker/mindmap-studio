@@ -373,6 +373,13 @@
   align-items: center;
   gap: 6px;
 }
+/* One-line template/example use-case under the node count (O6). */
+.st-card-desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--st-ink2);
+  margin: 4px 0 0;
+}
 .st-pills {
   display: flex;
   flex-wrap: wrap;
@@ -571,6 +578,47 @@
   text-align: center;
   color: var(--st-muted);
   padding: 40px 20px;
+}
+/* The actionable empty-state "New map" button — auto-width + centred (the sidebar .st-new is full-width). */
+.st-empty-new {
+  width: auto;
+  margin: 0 auto;
+  padding: 0 18px;
+}
+/* "New here?" onboarding banner (O9) — a dismissible accent-tinted strip above the capture hero. */
+.st-newhere {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px solid var(--st-accent);
+  background: var(--st-accent-tint);
+  border-radius: 12px;
+  color: var(--st-ink);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.st-newhere-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.st-newhere-x {
+  border: none;
+  background: transparent;
+  color: var(--st-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+.st-newhere-x:hover {
+  background: var(--st-card);
+  color: var(--st-ink);
 }
 
 /* --- learn / about prose --- */

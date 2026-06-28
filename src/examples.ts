@@ -717,6 +717,30 @@ export const examples: MapExample[] = [
   { id: "atlas", name: "Cross-map atlas", build: atlas },
 ];
 
+/** One-line use-case shown on the Start-screen example cards (keyed by example id). */
+export const EXAMPLE_DESCRIPTIONS: Record<string, string> = {
+  launch: "A worked go-to-market plan with dependencies and status.",
+  meeting: "A filled meeting note with decisions and action markers.",
+  decision: "A logged decision with options weighed and chosen.",
+  okrs: "A quarter's objective broken into measured key results.",
+  retro: "A team retro turning reflections into action items.",
+  swot: "A completed SWOT with real strengths and threats.",
+  flowchart: "A process drawn with shapes and directional flow.",
+  concept: "Linked ideas in a non-hierarchical concept web.",
+  whiteboard: "A free-layout whiteboard of loosely-placed notes.",
+  onion: "Nested layers shown on an onion-ring backdrop.",
+  funnel: "Stages narrowing through a funnel backdrop.",
+  venn: "Overlapping sets on a three-circle Venn backdrop.",
+  runbook: "Step-by-step incident response, ready to follow.",
+  gtd: "GTD natural planning, from purpose to next actions.",
+  "gtd-areas": "GTD areas of focus across work and life.",
+  outline: "A talk or article outlined section by section.",
+  pkm: "A personal knowledge map linking notes and topics.",
+  study: "A revision map built for learning and recall.",
+  trip: "A trip plan with an embedded image.",
+  atlas: "A hub map that links out to several other maps.",
+};
+
 export function buildExample(id: string): MindMapDoc {
   return (examples.find((e) => e.id === id) ?? examples[0]).build();
 }

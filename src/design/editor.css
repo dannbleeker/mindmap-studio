@@ -858,6 +858,29 @@
   pointer-events: none;
   z-index: 3;
 }
+/* One-time drag-to-relate coach (C7) — same top-centre anchor as the edit hint (the two are sequential,
+   never shown together) but accent-tinted to read as a "try this" nudge rather than a plain tip. */
+.mm-relate-hint {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  font-size: 11px;
+  border-radius: 6px;
+  background: var(--ed-accent, #1b8a5e);
+  color: #fff;
+  box-shadow: var(--ed-shadow-pop, 0 8px 22px rgba(0, 0, 0, 0.18));
+  pointer-events: none;
+  z-index: 3;
+}
+@media (pointer: coarse) {
+  .mm-relate-hint {
+    display: none; /* the grip itself is hidden on touch */
+  }
+}
 
 /* Drag-to-reparent "Make child of X" label (#11) — rides above the highlighted drop target. */
 .mm-drop-label {
@@ -883,6 +906,25 @@
 }
 .react-flow__node .mm-relate-handle:hover {
   opacity: 1;
+}
+/* A selected node shows its relate grip a little more at rest, so the link affordance is discoverable
+   without hovering (C7). Sits between the hover (0.55) and grip-hover (1) levels. */
+.react-flow__node.selected .mm-relate-handle {
+  opacity: 0.75;
+}
+/* Touch: hover doesn't exist and the 44px ＋ dominates, so drop the relate grip from the canvas and
+   route linking to long-press → the context menu's "Link to…". Keep collapse, but make it tap-sized so
+   a collapsed branch stays expandable without the menu (C4). */
+@media (pointer: coarse) {
+  .react-flow__node .mm-relate-handle {
+    display: none;
+  }
+  .mm-collapse-toggle {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+    line-height: 26px;
+  }
 }
 
 /* Quick task toggle — a hover checkbox on a topic's left edge (mirrors the relate grip on the right).

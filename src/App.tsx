@@ -34,6 +34,7 @@ import { FindReplaceOverlay } from "./components/FindReplaceOverlay";
 import { FirstRunCard } from "./components/FirstRunCard";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
+import { InstallButton } from "./components/InstallButton";
 import { MapPanel } from "./components/MapPanel";
 import { MobileSheetScrim } from "./components/MobileSheetScrim";
 import { OverlayInspector } from "./components/OverlayInspector";
@@ -1140,6 +1141,7 @@ export function App() {
       openPaste: () => paste.setOpen(true),
       openFind: () => setFindOpen(true),
       openSettings: () => setSettingsOpen(true),
+      reShowGettingStarted: reShowFirstRun,
     },
     panels,
     map: {
@@ -1364,6 +1366,7 @@ export function App() {
         onPaste={() => paste.setOpen(true)}
         onShortcuts={() => setShortcutsOpen(true)}
         onSettings={() => setSettingsOpen(true)}
+        onGettingStarted={reShowFirstRun}
       />
       <div className="mm-editor-main">
         <Toolbar {...toolbarProps} />
@@ -2185,7 +2188,17 @@ export function App() {
             Source
           </a>
         </div>
-        <div style={{ marginTop: 16, borderTop: "1px solid #e4e4e7", paddingTop: 14 }}>
+        <div
+          style={{
+            marginTop: 16,
+            borderTop: "1px solid #e4e4e7",
+            paddingTop: 14,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
           <button
             type="button"
             onClick={() => {
@@ -2197,6 +2210,8 @@ export function App() {
           >
             Check for updates
           </button>
+          {/* Renders only when installation is offered (otherwise nothing). */}
+          <InstallButton className="mm-install-about" />
         </div>
       </Dialog>
 

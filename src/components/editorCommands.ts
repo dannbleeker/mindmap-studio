@@ -88,6 +88,16 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("shortcuts", "Keyboard shortcuts", "map", () => nav.openShortcuts());
   add("settings", "Settings & preferences", "map", () => nav.openSettings());
   add("about", "About MindMap Studio", "map", () => nav.openAbout());
+  add(
+    "getting-started",
+    "Show getting-started tips again",
+    "map",
+    () => nav.reShowGettingStarted(),
+    true,
+    {
+      keywords: "onboarding tutorial first run 3 things to try help tips",
+    },
+  );
 
   // Edit history
   add("undo", "Undo", "edit", () => history.undo(), history.canUndo);

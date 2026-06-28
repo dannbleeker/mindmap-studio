@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InstallButton } from "../InstallButton";
 import { ACCENT } from "./tokens";
 import type { StartSection } from "./types";
 
@@ -106,6 +107,7 @@ export function StartSidebar({
           </button>
         ))}
       </div>
+      <InstallButton className="st-install" />
       <div className="st-foot">
         <span aria-hidden="true">🔒</span>
         <span>

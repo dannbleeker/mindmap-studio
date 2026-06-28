@@ -12,6 +12,8 @@ export interface IconRailProps {
   onPaste: () => void;
   onShortcuts: () => void;
   onSettings: () => void;
+  /** Re-show the first-run "getting started" tips (also in Settings + ⌘K). */
+  onGettingStarted: () => void;
 }
 
 function RailBtn({
@@ -36,7 +38,14 @@ function RailBtn({
   );
 }
 
-export function IconRail({ onHome, onImage, onPaste, onShortcuts, onSettings }: IconRailProps) {
+export function IconRail({
+  onHome,
+  onImage,
+  onPaste,
+  onShortcuts,
+  onSettings,
+  onGettingStarted,
+}: IconRailProps) {
   return (
     <aside className="mm-rail">
       <button
@@ -60,6 +69,7 @@ export function IconRail({ onHome, onImage, onPaste, onShortcuts, onSettings }: 
       </label>
       <RailBtn icon="paste" label="Paste text → topics" onClick={onPaste} />
       <div className="mm-rail-spacer">
+        <RailBtn icon="star" label="Getting started tips" onClick={onGettingStarted} />
         <RailBtn icon="settings" label="Settings" onClick={onSettings} />
         <RailBtn icon="help" label="Keyboard shortcuts" onClick={onShortcuts} />
       </div>

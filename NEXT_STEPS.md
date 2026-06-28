@@ -60,8 +60,14 @@ A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely
   switcher relabelled as an "Open a map…" library picker, distinct from the open-doc tabs (T7). Note:
   the Canvas-menu "open Map panel" link opens the inspector — if a node is selected it shows that
   node's settings (no deselect API on the handle), so map-wide styling appears once nothing is selected.
-- [ ] **Phase 7** — PWA install affordance; Learn-the-app cards; re-openable getting-started; actionable
-  empty states; template descriptions; deep-link first-run; gesture onboarding; NodePopover → context menu.
+- [~] **Phase 7** — onboarding & learnability (shipped — see CHANGELOG): in-app PWA install button + iOS
+  A2HS hint (O2); "Learn the app" tip cards (O5); re-openable getting-started from Settings/⌘K/rail (O8);
+  actionable "＋ New map" empty states (O4); one-line template/example descriptions + curated featured set
+  (O6); "New here?" deep-link/new-user banner (O9); gesture coaching — relate-grip coach, Shift-drag in
+  the coachmark + Shortcuts, selected-grip opacity (C7); non-overlapping hover affordances + touch sizing
+  (C4). **Deferred:** C6 (NodePopover → "More…" that opens the rich context menu at the node) — it
+  restructures the selection popover + context-menu wiring and needs test rewrites for higher regression
+  risk; the right-click menu already provides the full power, so this is a discoverability follow-up.
 - [ ] **Phase 8** — app-wide dark mode (chrome tokenisation + `data-theme` + `prefers-color-scheme`).
 - [ ] **Phase 9** — Kanban drag-to-retag; presentation true fullscreen; roll-up badge; inspector swatch
   unification; undo coalescing for cycle controls.

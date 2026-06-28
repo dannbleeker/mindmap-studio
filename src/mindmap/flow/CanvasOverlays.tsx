@@ -19,6 +19,9 @@ export function CoachMark({ show, rootId }: { show: boolean; rootId: string }) {
         <span>
           Press <kbd>Tab</kbd> for a child · <kbd>Enter</kbd> for a sibling · double-click to rename
         </span>
+        <span>
+          <kbd>Shift</kbd>-drag the canvas to select several topics
+        </span>
       </div>
     </NodeToolbar>
   );

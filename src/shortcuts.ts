@@ -39,6 +39,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: "Arrow keys", action: "Move the selection through the tree" },
       { keys: "Ctrl/⌘ + Shift + ↑ / ↓", action: "Reorder the topic among its siblings" },
       { keys: "Alt + Shift + ← / →", action: "Outdent / indent the selected topic" },
+      { keys: "Shift + drag", action: "Rubber-band select several topics" },
     ],
   },
   {
@@ -66,6 +67,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: "Scroll / ⌘ + scroll", action: "Zoom in and out" },
       { keys: "Double-click a topic", action: "Rename it" },
       { keys: "Double-click the canvas", action: "Add a floating topic" },
+      { keys: "Drag a topic's grip", action: "Draw a relationship to another topic" },
     ],
   },
 ];

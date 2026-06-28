@@ -46,6 +46,16 @@ export function StartScreen({
   const [cmdk, setCmdk] = useState(false);
   const [rev, setRev] = useState(0);
   const mapCount = useLibrary(rev).length;
+  // A brand-new user hasn't completed a first edit, so the one-shot first-run flag is still unset.
+  // Combined with a near-empty library, that's the signal for the "New here?" onboarding banner (O9).
+  const firstRunSeen = (() => {
+    try {
+      return localStorage.getItem("mindmap-first-run-seen") === "1";
+    } catch {
+      return true; // can't read storage → assume seen, don't nag
+    }
+  })();
+  const showNewHere = mapCount <= 1 && !firstRunSeen;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -66,8 +76,9 @@ export function StartScreen({
       libraryRev: rev,
       onLibraryChange: () => setRev((r) => r + 1),
       onCheckForUpdates,
+      showNewHere,
     }),
-    [onOpen, onImportFiles, rev, onCheckForUpdates],
+    [onOpen, onImportFiles, rev, onCheckForUpdates, showNewHere],
   );
 
   return (

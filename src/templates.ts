@@ -237,6 +237,25 @@ export const templates: MapTemplate[] = [
   },
 ];
 
+/** One-line use-case shown on the Start-screen template cards (keyed by template id). */
+export const TEMPLATE_DESCRIPTIONS: Record<string, string> = {
+  brainstorm: "Open an idea from every angle — the five W's and How.",
+  swot: "Weigh strengths, weaknesses, opportunities and threats.",
+  project: "Frame a project: goals, scope, milestones, risks, team.",
+  "five-whys": "Drill from a symptom to its root cause, five whys deep.",
+  decision: "Compare options by pros, cons and criteria to decide.",
+  retrospective: "Reflect on what to start, stop and continue.",
+  meeting: "Capture agenda, decisions and action items together.",
+  "pre-mortem": "Imagine the project failed, then prevent it up front.",
+  pestle: "Scan the macro landscape, political to environmental.",
+  fishbone: "Trace an effect back to its causes across the six M's.",
+  okrs: "Set an objective with measurable key results.",
+  essay: "Outline an argument from thesis to conclusion.",
+  presentation: "Structure a talk from hook to call to action.",
+  "lean-canvas": "Sketch a whole business model on one page.",
+  persona: "Profile a user's goals, pains and behaviours.",
+};
+
 export function buildTemplate(id: string): MindMapDoc {
   return (templates.find((t) => t.id === id) ?? templates[0]).build();
 }

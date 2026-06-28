@@ -71,6 +71,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       openPaste: vi.fn(),
       openFind: vi.fn(),
       openSettings: vi.fn(),
+      reShowGettingStarted: vi.fn(),
     },
     panels: {
       outlineOpen: false,
@@ -224,6 +225,12 @@ describe("buildEditorCommands", () => {
     const props = mkProps();
     byId(props).get("shortcuts")?.run();
     expect(props.nav.openShortcuts).toHaveBeenCalled();
+  });
+
+  it("exposes a 'getting-started' command that re-shows the first-run tips (O8)", () => {
+    const props = mkProps();
+    byId(props).get("getting-started")?.run();
+    expect(props.nav.reShowGettingStarted).toHaveBeenCalled();
   });
 
   it("offers a jump-to-topic command per topic that selects + centres on run (#12)", () => {

@@ -1,3 +1,5 @@
+import { InstallButton } from "../../InstallButton";
+
 // Local-first / format-agnostic / open-source blurb, plus the book, user guide, and other resource
 // links — mirrors the editor's ⓘ About so the Start screen exposes the same downloads.
 
@@ -66,6 +68,8 @@ export function About({ onCheckForUpdates }: { onCheckForUpdates?: () => void })
           <button type="button" className="st-btn" onClick={() => onCheckForUpdates?.()}>
             Check for updates
           </button>
+          {/* Renders only when the browser offers installation (or iOS Safari); otherwise nothing. */}
+          <InstallButton className="st-install-about" />
         </div>
       </section>
 

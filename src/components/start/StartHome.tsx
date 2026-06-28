@@ -1,6 +1,7 @@
-import { buildExample, examples } from "../../examples";
-import { templates } from "../../templates";
-import { buildTemplate } from "../../templates";
+import { useState } from "react";
+import { EXAMPLE_DESCRIPTIONS, buildExample, examples } from "../../examples";
+import { TEMPLATE_DESCRIPTIONS, buildTemplate, templates } from "../../templates";
+import { AppTips } from "./AppTips";
 import { CaptureCard } from "./CaptureCard";
 import { MapCard } from "./MapCard";
 import { TemplateCard } from "./TemplateCard";
@@ -10,22 +11,60 @@ import type { StartContext } from "./types";
 import { useLibrary } from "./useLibrary";
 
 // The default "Start" section: capture hero + "pick up where you left off" (3 most-recent maps) +
-// "start from a template" (the first 4 non-blank templates). Recent hides itself when empty.
+// a curated set of starter templates / worked examples + "Learn the app" tips. Recent hides when empty.
+
+// Hand-picked featured sets (vs a positional slice) so the home surface always leads with the most
+// broadly useful starters, regardless of definition order. Falls back gracefully if an id is missing.
+const FEATURED_TEMPLATES = ["brainstorm", "swot", "project", "five-whys"];
+const FEATURED_EXAMPLES = ["launch", "okrs", "retro", "runbook"];
+
+function pick<
+  T extends { id: string; name: string; build: () => import("../../model/types").MindMapDoc },
+>(all: T[], ids: string[], descriptions: Record<string, string>) {
+  return ids
+    .map((id) => all.find((x) => x.id === id))
+    .filter((x): x is T => !!x)
+    .map((x) => ({ id: x.id, name: x.name, description: descriptions[x.id], doc: x.build() }));
+}
 
 export function StartHome({ ctx }: { ctx: StartContext }) {
   const recent = [...useLibrary(ctx.libraryRev)]
     .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
     .slice(0, 3);
-  const featured = templates
-    .filter((t) => t.id !== "blank")
-    .slice(0, 4)
-    .map((t) => ({ id: t.id, name: t.name, doc: t.build() }));
-  const featuredExamples = examples
-    .slice(0, 4)
-    .map((e) => ({ id: e.id, name: e.name, doc: e.build() }));
+  const featured = pick(templates, FEATURED_TEMPLATES, TEMPLATE_DESCRIPTIONS);
+  const featuredExamples = pick(examples, FEATURED_EXAMPLES, EXAMPLE_DESCRIPTIONS);
+  const [newHereDismissed, setNewHereDismissed] = useState(false);
+  const touch = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
 
   return (
     <div className="st-content">
+      {ctx.showNewHere && !newHereDismissed ? (
+        <div className="st-newhere" role="note">
+          <div>
+            <strong>New here?</strong>{" "}
+            {touch
+              ? "Capture a thought below, then tap ＋ on a topic to grow it — pinch to zoom."
+              : "Capture a thought below, then press Tab to add topics and ⌘K for anything."}
+          </div>
+          <div className="st-newhere-actions">
+            <button
+              type="button"
+              className="st-new st-empty-new"
+              onClick={() => ctx.onOpen(blankDoc())}
+            >
+              <span aria-hidden="true">＋</span> Start your own
+            </button>
+            <button
+              type="button"
+              className="st-newhere-x"
+              aria-label="Dismiss"
+              onClick={() => setNewHereDismissed(true)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      ) : null}
       <CaptureCard
         onTopic={(text) => ctx.onOpen(topicDoc(text))}
         onPaste={(text) => {
@@ -63,6 +102,7 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
             <TemplateCard
               key={t.id}
               name={t.name}
+              description={t.description}
               doc={t.doc}
               seed={t.id}
               onOpen={() => ctx.onOpen(buildTemplate(t.id))}
@@ -83,6 +123,7 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
             <TemplateCard
               key={e.id}
               name={e.name}
+              description={e.description}
               doc={e.doc}
               seed={e.id}
               onOpen={() => ctx.onOpen(buildExample(e.id))}
@@ -90,6 +131,8 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
           ))}
         </div>
       </section>
+
+      <AppTips />
     </div>
   );
 }

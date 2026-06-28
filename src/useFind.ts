@@ -17,20 +17,28 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
   const [matchInfo, setMatchInfo] = useState("");
   const cursor = useRef({ q: "", i: -1 });
 
-  function runSearch(event: FormEvent) {
-    event.preventDefault();
+  // Move to the next (dir=1) or previous (dir=-1) match, cycling and restarting when the query
+  // changes. Shared by Enter (next), the on-screen Next/Prev buttons, and Shift+Enter (prev).
+  function step(dir: 1 | -1) {
     const matches = findDocMatches(getDoc(), query);
     if (matches.length === 0) {
       setMatchInfo(query.trim() ? "no matches" : "");
       return;
     }
-    // Cycle through matches on repeated Enter; restart when the query changes.
     const c = cursor.current;
-    const i = c.q === query ? (c.i + 1) % matches.length : 0;
+    const len = matches.length;
+    const i = c.q === query ? (c.i + dir + len) % len : dir === 1 ? 0 : len - 1;
     cursor.current = { q: query, i };
     mapRef.current?.focusNode(matches[i]);
-    setMatchInfo(`${i + 1}/${matches.length}`);
+    setMatchInfo(`${i + 1}/${len}`);
   }
+
+  function runSearch(event: FormEvent) {
+    event.preventDefault();
+    step(1);
+  }
+  const findNext = () => step(1);
+  const findPrev = () => step(-1);
 
   function runReplace() {
     const scope = {
@@ -57,6 +65,8 @@ export function useFind(mapRef: RefObject<MindMapHandle | null>, getDoc: () => M
     setMatchCase,
     matchInfo,
     runSearch,
+    findNext,
+    findPrev,
     runReplace,
   };
 }

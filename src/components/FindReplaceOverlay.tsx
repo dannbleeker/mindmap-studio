@@ -47,7 +47,14 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
           className="mm-input"
           value={find.query}
           onChange={(e) => find.setQuery(e.target.value)}
-          placeholder="Find…"
+          onKeyDown={(e) => {
+            // Enter (form submit) goes to the next match; Shift+Enter to the previous one.
+            if (e.key === "Enter" && e.shiftKey) {
+              e.preventDefault();
+              find.findPrev();
+            }
+          }}
+          placeholder="Find… (↵ next · ⇧↵ prev)"
           aria-label="Find node"
         />
         <input
@@ -98,7 +105,30 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
             Replace all
           </button>
         </div>
-        {find.matchInfo ? <span className="mm-find-info">{find.matchInfo}</span> : null}
+        <div className="mm-find-row">
+          <button
+            type="button"
+            className="mm-tbtn mm-tbtn-ghost"
+            title="Previous match (Shift+Enter)"
+            aria-label="Previous match"
+            onClick={find.findPrev}
+          >
+            ▴
+          </button>
+          <button
+            type="button"
+            className="mm-tbtn mm-tbtn-ghost"
+            title="Next match (Enter)"
+            aria-label="Next match"
+            onClick={find.findNext}
+          >
+            ▾
+          </button>
+          {/* Always-present live region (<output> implies role=status + aria-live=polite) so
+              screen-reader users hear "3/12" / "no matches" / "invalid regex" as they cycle — the
+              count was previously a silent, button-less span. */}
+          <output className="mm-find-info">{find.matchInfo}</output>
+        </div>
       </form>
     </div>
   );

@@ -30,6 +30,23 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: "Ctrl/⌘ + B / I / U", action: "Bold / italic / underline (while editing)" },
       { keys: "Ctrl/⌘ + Z", action: "Undo" },
       { keys: "Ctrl/⌘ + Shift + Z", action: "Redo" },
+      { keys: "Ctrl/⌘ + Y", action: "Redo (alternative)" },
+    ],
+  },
+  {
+    title: "Selection & moving",
+    items: [
+      { keys: "Arrow keys", action: "Move the selection through the tree" },
+      { keys: "Ctrl/⌘ + Shift + ↑ / ↓", action: "Reorder the topic among its siblings" },
+      { keys: "Alt + Shift + ← / →", action: "Outdent / indent the selected topic" },
+    ],
+  },
+  {
+    title: "File",
+    items: [
+      { keys: "Ctrl/⌘ + S", action: "Save to the linked file" },
+      { keys: "Ctrl/⌘ + Shift + S", action: "Save to a file as…" },
+      { keys: "Ctrl/⌘ + O", action: "Open a file" },
     ],
   },
   {

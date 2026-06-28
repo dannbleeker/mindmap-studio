@@ -31,7 +31,11 @@ afterEach(() => {
 async function openEditor(user: ReturnType<typeof userEvent.setup>, container: HTMLElement) {
   // Boot lands on Start (no saved session); open a template card to enter the editor.
   if (container.querySelector(".mm-editor")) return; // already in the editor
-  await waitFor(() => expect(screen.getByText("Brainstorm", { exact: true })).toBeTruthy());
+  // The Start screen's first paint can exceed the 1s default under heavy parallel/coverage load;
+  // give it the same headroom as the editor-mount waits below to avoid an intermittent red.
+  await waitFor(() => expect(screen.getByText("Brainstorm", { exact: true })).toBeTruthy(), {
+    timeout: 4000,
+  });
   await user.click(screen.getByText("Brainstorm", { exact: true }));
   await waitFor(() => expect(container.querySelector(".mm-editor")).toBeTruthy(), {
     timeout: 4000,

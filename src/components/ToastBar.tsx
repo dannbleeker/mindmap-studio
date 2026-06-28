@@ -17,7 +17,7 @@ const BASE: CSSProperties = {
   alignItems: "center",
   gap: 12,
   padding: "8px 16px",
-  color: "#26215c",
+  color: "var(--ed-toast-ink, #26215c)",
   fontSize: 13,
 };
 
@@ -29,7 +29,7 @@ const FLOATING: CSSProperties = {
   zIndex: 40,
   maxWidth: "calc(100% - 24px)",
   borderRadius: 10,
-  border: "1px solid #cecbf6",
+  border: "1px solid var(--ed-toast-border, #cecbf6)",
   boxShadow: "0 6px 24px rgba(38, 33, 92, 0.18)",
 };
 
@@ -43,11 +43,14 @@ export function ToastBar({
   variant?: "inline" | "floating";
 }) {
   if (!toast) return null;
-  const background = toast.kind === "success" ? "#eafaf0" : "#eef2fc";
+  const background =
+    toast.kind === "success"
+      ? "var(--ed-toast-success-bg, #eafaf0)"
+      : "var(--ed-toast-info-bg, #eef2fc)";
   const style: CSSProperties =
     variant === "floating"
       ? { ...BASE, ...FLOATING, background }
-      : { ...BASE, background, borderBottom: "1px solid #cecbf6" };
+      : { ...BASE, background, borderBottom: "1px solid var(--ed-toast-border, #cecbf6)" };
   return (
     <output aria-live="polite" style={style}>
       <span>{toast.message}</span>

@@ -20,6 +20,8 @@ export interface AgendaBuckets {
   today: AgendaItem[];
   /** Due within the next 7 days (tomorrow … today+7), soonest first. */
   thisWeek: AgendaItem[];
+  /** Due after today+7 (scheduled further out), soonest first — so future-dated work isn't dropped. */
+  later: AgendaItem[];
 }
 
 /** Group the map's dated, unfinished tasks into overdue / today / this-week buckets. Pure. */
@@ -27,6 +29,7 @@ export function agendaBuckets(doc: MindMapDoc, today: string): AgendaBuckets {
   const overdue: AgendaItem[] = [];
   const dueToday: AgendaItem[] = [];
   const thisWeek: AgendaItem[] = [];
+  const later: AgendaItem[] = [];
   const weekEnd = addDaysISO(today, 7);
 
   const visit = (n: MapNode) => {
@@ -36,7 +39,8 @@ export function agendaBuckets(doc: MindMapDoc, today: string): AgendaBuckets {
       const item: AgendaItem = { id: n.id, topic: n.topic, due };
       if (isOverdue(due, progress, today)) overdue.push(item);
       else if (due === today) dueToday.push(item);
-      else if (due > today && due <= weekEnd) thisWeek.push(item);
+      else if (due <= weekEnd) thisWeek.push(item);
+      else later.push(item); // due > today+7 — kept, not dropped
     }
     for (const c of n.children) visit(c);
   };
@@ -48,10 +52,16 @@ export function agendaBuckets(doc: MindMapDoc, today: string): AgendaBuckets {
     overdue: overdue.sort(byDue),
     today: dueToday.sort(byDue),
     thisWeek: thisWeek.sort(byDue),
+    later: later.sort(byDue),
   };
 }
 
 /** True when no bucket carries anything — lets the panel show its empty state. */
 export function agendaIsEmpty(b: AgendaBuckets): boolean {
-  return b.overdue.length === 0 && b.today.length === 0 && b.thisWeek.length === 0;
+  return (
+    b.overdue.length === 0 &&
+    b.today.length === 0 &&
+    b.thisWeek.length === 0 &&
+    b.later.length === 0
+  );
 }

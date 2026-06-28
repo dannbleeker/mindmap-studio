@@ -38,11 +38,12 @@ const doc: MindMapDoc = {
 };
 
 describe("agendaBuckets", () => {
-  it("buckets dated, unfinished tasks into overdue / today / this week", () => {
+  it("buckets dated, unfinished tasks into overdue / today / this week / later", () => {
     const b = agendaBuckets(doc, TODAY);
     expect(b.overdue.map((i) => i.id)).toEqual(["older", "past", "float"]); // oldest-first
     expect(b.today.map((i) => i.id)).toEqual(["now"]);
     expect(b.thisWeek.map((i) => i.id)).toEqual(["soon", "edge"]); // tomorrow..+7, soonest-first
+    expect(b.later.map((i) => i.id)).toEqual(["later"]); // beyond +7, kept (not dropped)
   });
 
   it("excludes completed, undated, and non-task topics", () => {
@@ -52,7 +53,6 @@ describe("agendaBuckets", () => {
     expect(ids).not.toContain("done"); // progress = 1
     expect(ids).not.toContain("undated"); // no due date
     expect(ids).not.toContain("plain"); // no task
-    expect(ids).not.toContain("later"); // beyond the 7-day window
   });
 
   it("reports empty when nothing is due", () => {

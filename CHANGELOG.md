@@ -5,8 +5,47 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Image / SVG / HTML / PDF export no longer fails silently.** When there's no live canvas to render
+  (e.g. the command runs while the Board is open), these exports used to do nothing at all — no file,
+  no message. They now show a hint ("Open a map on the canvas first…") instead of a silent no-op. The
+  model-backed formats (JSON / Markdown / Word / Excel / PowerPoint) were never affected.
+- **Imports from other apps now say what didn't come across.** Only `.mmap` ever reported lossy
+  conversions; importing XMind / Word / Excel / FreeMind / OPML / SimpleMind / iThoughts / MindMeister /
+  MindMup / Mermaid / Markdown / TextBundle silently dropped styling, relationships or images and
+  reported a clean "success." Each now carries a one-line note so you don't trust a faithful round-trip.
+- **A corrupt file in a multi-file import no longer aborts the batch.** One bad file used to stop the
+  whole import — leaving the maps that already parsed orphaned in the library with only an "Import
+  failed" message. Each file is now imported independently; the banner reports "Imported X of Y maps
+  (Z failed)" and lists which files couldn't be read.
+- **`Ctrl/⌘+F` no longer hijacks typing.** Pressing it while editing a topic, a note, or any text field
+  used to yank focus to Find mid-edit; it now respects the editing context (matching the `/` shortcut).
+
+### Added
+
+- **Find & Replace gained Next / Prev controls and an announced match count.** Cycling matches was
+  Enter-only and undiscoverable, and the "3/12" / "no matches" / "invalid regex" counter was invisible
+  to screen readers. There are now **▴ / ▾** buttons (and **Shift+Enter** steps backwards), and the
+  counter is a live region that announces as you cycle.
+- **The Agenda gained a "Later" bucket.** Tasks due more than 7 days out were dropped entirely — the
+  panel even read "empty" when future-dated work existed. They now appear under **Later**, soonest-first.
+- **Import notes are dismissible and expandable.** The warning/error strips now have a **×** to dismiss,
+  and the notes banner expands from "(+N more)" to the full list.
+- **Saved views: delete is undoable and same-name saves are acknowledged.** Deleting a view now shows a
+  **Delete + Undo** toast (matching map deletion), and re-using a view name reports "Replaced view …"
+  instead of silently overwriting it.
+- **The keyboard cheat-sheet now documents the bindings it was missing** — arrow-key tree navigation,
+  `Ctrl/⌘+Shift+↑/↓` reorder, `Alt+Shift+←/→` indent/outdent, `Ctrl/⌘+Y` redo, and the file shortcuts
+  (`Ctrl/⌘+S` / `Shift+S` / `O`).
+- **The command palette supports Home / End / PageUp / PageDown** and keeps the highlighted row scrolled
+  into view in long lists.
+
 ### Changed
 
+- **Toasts and the import banners are theme-reactive.** They read from `--ed-toast-*` tokens (with the
+  old colours as fallbacks) instead of hardcoded hex, so feedback no longer renders as a pale light box
+  on a dark canvas — and it's wired up for the upcoming app-wide dark mode.
 - **The editor toolbar now fits a phone.** On ≤640px the two rows overflowed — row 2 scrolled with
   controls off-screen and no affordance, and row 1 clipped Find/Export/More entirely. Mobile now uses
   icon-only menu triggers; the view toggles + Layout collapse behind a single **Options** menu (bottom

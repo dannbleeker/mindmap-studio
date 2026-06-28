@@ -69,8 +69,15 @@ export function useMapExports(
   getDoc: () => MindMapDoc,
   /** When true, the Markdown export bakes in outline numbers (mirrors the on-screen numbering). */
   numbered?: () => boolean,
+  /** Surface a one-line hint (toast) — used when an image/PDF export has no live canvas to render. */
+  onHint?: (msg: string) => void,
 ): MapExports {
   const baseName = () => getDoc().title || "mindmap";
+  // The renderer-backed formats (png/svg/html/pdf) need a live canvas; when there isn't one (e.g. the
+  // command runs while the Board overlay is open, or before the canvas mounts) the SVG is null and the
+  // export used to no-op silently. Tell the user instead of doing nothing.
+  const noCanvas = () =>
+    onHint?.("Open a map on the canvas first to export an image, SVG, HTML or PDF.");
 
   // The rendered map as a clean, portable SVG string. The exporter (flow/exportSvg.ts) authors
   // native <text> from the model, so this only needs sanitizeSvg (strip XSS) for the file to
@@ -138,18 +145,27 @@ export function useMapExports(
     // png/svg/html/pdf all embed the rendered SVG via cleanSvg() (sanitize + native-text).
     async exportPng() {
       const clean = await cleanSvg();
-      if (!clean) return;
+      if (!clean) {
+        noCanvas();
+        return;
+      }
       const blob = await svgToPng(clean);
       if (blob) download(blob, `${baseName()}.png`);
     },
     async exportSvg() {
       const clean = await cleanSvg();
-      if (!clean) return;
+      if (!clean) {
+        noCanvas();
+        return;
+      }
       download(new Blob([clean], { type: "image/svg+xml" }), `${baseName()}.svg`);
     },
     async exportHtml() {
       const clean = await cleanSvg();
-      if (!clean) return;
+      if (!clean) {
+        noCanvas();
+        return;
+      }
       download(
         new Blob([wrapSvgHtml(clean, baseName())], { type: "text/html" }),
         `${baseName()}.html`,
@@ -179,7 +195,10 @@ export function useMapExports(
     // dialog ("Save as PDF"). Dep-free and fully local; an iframe dodges popup blockers.
     async exportPdf() {
       const clean = await cleanSvg();
-      if (!clean) return;
+      if (!clean) {
+        noCanvas();
+        return;
+      }
       const html = buildPrintDoc(clean, baseName(), buildNotesAppendix(getDoc()));
       const iframe = document.createElement("iframe");
       iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";

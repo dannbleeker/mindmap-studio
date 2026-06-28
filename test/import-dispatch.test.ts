@@ -25,7 +25,8 @@ describe("parseImport — extension routing", () => {
     );
     expect(doc.root.topic).toBe("Plan");
     expect(doc.root.children.map((c) => c.topic)).toEqual(["a", "b"]);
-    expect(warnings).toEqual([]);
+    expect(warnings).toHaveLength(1); // non-native formats carry a lossy-import note
+    expect(warnings[0]).toMatch(/Markdown/i);
   });
 
   it("routes Mermaid (.mmd) to the mermaid parser", async () => {
@@ -52,6 +53,20 @@ describe("parseImport — extension routing", () => {
       '<?xml version="1.0"?><opml version="2.0"><head><title>O</title></head><body><outline text="A"></outline></body></opml>';
     const { doc } = await parseImport(file("o.opml", opml), stubMmap(nativeDoc("x")));
     expect(doc.title).toBe("O"); // parsed by fromOpml (the stub fallback would yield "x")
+  });
+
+  it("attaches a lossy-import note for non-native formats but not for native .json/.mmst", async () => {
+    const opml =
+      '<?xml version="1.0"?><opml version="2.0"><head><title>O</title></head><body><outline text="A"></outline></body></opml>';
+    const lossy = await parseImport(file("o.opml", opml), stubMmap(nativeDoc("x")));
+    expect(lossy.warnings).toHaveLength(1);
+    expect(lossy.warnings[0]).toMatch(/OPML/i);
+    // Native lossless schema gets no note.
+    const native = await parseImport(
+      file("m.json", JSON.stringify(nativeDoc("N"))),
+      stubMmap(nativeDoc("x")),
+    );
+    expect(native.warnings).toEqual([]);
   });
 
   it("routes MindMup (.mup) to its parser", async () => {

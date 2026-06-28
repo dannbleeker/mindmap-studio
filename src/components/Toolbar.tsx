@@ -142,6 +142,9 @@ export interface ToolbarFind {
   setMatchCase: (value: boolean) => void;
   matchInfo: string;
   runSearch: (event: FormEvent) => void;
+  /** Advance to the next / previous match (the overlay's ▾ ▴ buttons; Enter / Shift+Enter). */
+  findNext: () => void;
+  findPrev: () => void;
   runReplace: () => void;
 }
 

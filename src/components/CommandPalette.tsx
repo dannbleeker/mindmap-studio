@@ -129,6 +129,15 @@ export function CommandPalette({
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset highlight to top when the result set changes.
   useEffect(() => setActive(0), [items.length]);
 
+  // Keep the highlighted row scrolled into view — arrow/Home/End/Page nav can move `active` off-screen
+  // in a long list (every export, layout, marker + a jump entry per topic), and aria-activedescendant
+  // alone doesn't scroll the listbox.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on each active change.
+  useEffect(() => {
+    // Optional-call the method too — jsdom (tests) doesn't implement Element.scrollIntoView.
+    document.getElementById(optionId(active))?.scrollIntoView?.({ block: "nearest" });
+  }, [active]);
+
   const run = (c: Command | undefined) => {
     if (!c) return;
     ranRef.current = true; // a command ran — don't restore focus to the opener (the command owns focus now)
@@ -181,6 +190,18 @@ export function CommandPalette({
             } else if (e.key === "ArrowUp") {
               e.preventDefault();
               setActive((a) => Math.max(a - 1, 0));
+            } else if (e.key === "Home") {
+              e.preventDefault();
+              setActive(0);
+            } else if (e.key === "End") {
+              e.preventDefault();
+              setActive(items.length - 1);
+            } else if (e.key === "PageDown") {
+              e.preventDefault();
+              setActive((a) => Math.min(a + 8, items.length - 1));
+            } else if (e.key === "PageUp") {
+              e.preventDefault();
+              setActive((a) => Math.max(a - 8, 0));
             } else if (e.key === "Enter") {
               e.preventDefault();
               run(items[active]);

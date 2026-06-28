@@ -20,9 +20,36 @@ title-tab + dashed) — all ship with UI controls and `.json` schema fields, and
 identically on canvas and in export (see `CHANGELOG.md`). Deployed to GitHub Pages on every
 push to `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
+## UX remediation (active — from the 2026-06-28 audit)
+
+A 17-agent UX + feature-gap audit produced 56 items (47 UX findings, 2 genuinely-unreachable features,
+7 structural gaps). Full plan + phasing approved this session
+(`~/.claude/plans/vivid-sleeping-pudding.md`); implementing in priority phases, each landed green.
+
+- [x] **Phase 0 — silent-failure & feedback fixes** (shipped — see CHANGELOG): export hints instead of
+  no-ops, lossy-import notes for all formats, resilient batch import, dismissible/expandable banners,
+  Agenda "Later" bucket, Find Next/Prev + announced count, saved-view delete-undo + overwrite ack,
+  `Ctrl/⌘+F` typing guard, cheat-sheet completeness, command-palette paging, toast/banner tokenisation.
+- [ ] **Phase 1** — accent-colour picker (MapPanel); inline note link button.
+- [ ] **Phase 2** — real save-state + storage health; version-history finiteness; Settings surface;
+  cross-map link-integrity warning on delete.
+- [ ] **Phase 3** — inspector mobile bottom-sheet; Start 390px overflow; sheet scrim/handle/close;
+  touch-aware first-run; mobile add-topic; desktop Row-2 overflow menu.
+- [ ] **Phase 4** (prep commit first) — right-click keeps multi-selection + bulk menu; keyboard
+  restructure over the selection; tree-mode group drag; overlay delete + context menu.
+- [ ] **Phase 5** (prep commit first) — left rail → tabbed dock; placement cues + de-dupe note editor;
+  InfoPanel Details restructure; bulk-edit clarity.
+- [ ] **Phase 6** — distinct cross-map search icon; icon-only toggles → labelled; View-menu regroup;
+  Canvas-menu/MapPanel de-dupe; map-switcher vs tabs.
+- [ ] **Phase 7** — PWA install affordance; Learn-the-app cards; re-openable getting-started; actionable
+  empty states; template descriptions; deep-link first-run; gesture onboarding; NodePopover → context menu.
+- [ ] **Phase 8** — app-wide dark mode (chrome tokenisation + `data-theme` + `prefers-color-scheme`).
+- [ ] **Phase 9** — Kanban drag-to-retag; presentation true fullscreen; roll-up badge; inspector swatch
+  unification; undo coalescing for cycle controls.
+
 ## Open items
 
-_None actionable._ The MindManager `.mmap` importer is now feature-complete for its scope — Phases A–C
+_No other actionable items._ The MindManager `.mmap` importer is now feature-complete for its scope — Phases A–C
 shipped (task info, full notes, tags, per-topic colour/font/shape, rich-text runs, embedded images +
 attachments, relationship/boundary styling, callouts, map background), each into an existing model
 field and unit-tested. What remains is intentionally lossy (see *Deferred* below). The

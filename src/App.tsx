@@ -1,4 +1,5 @@
 import {
+  type CSSProperties,
   type ChangeEvent,
   Suspense,
   lazy,
@@ -128,6 +129,30 @@ const MAX_SESSIONS = 5;
 // keeps the full depth; only the stashed copy is trimmed.
 const CACHED_UNDO_DEPTH = 40;
 
+// Shared chrome for the dismissible import banners (× close + "Show all" toggle). Inherit the banner's
+// own colour so they read as part of the alert/notes strip rather than separate controls.
+const bannerDismissStyle: CSSProperties = {
+  flexShrink: 0,
+  border: "none",
+  background: "transparent",
+  color: "inherit",
+  cursor: "pointer",
+  fontSize: 16,
+  lineHeight: 1,
+  padding: "0 2px",
+  opacity: 0.7,
+};
+const bannerLinkStyle: CSSProperties = {
+  flexShrink: 0,
+  border: "none",
+  background: "transparent",
+  color: "inherit",
+  cursor: "pointer",
+  fontSize: 12,
+  textDecoration: "underline",
+  padding: 0,
+};
+
 export function App() {
   const [doc, setDoc] = useState<MindMapDoc>(sampleDoc);
   // A reactive mirror of the live doc for panels (Outline) — `doc` is only the
@@ -157,6 +182,8 @@ export function App() {
   // (the desktop layout wraps into a wall of rows on a narrow screen, burying the canvas).
   const isMobile = useIsMobile();
   const [warnings, setWarnings] = useState<string[]>([]);
+  // The import-warnings banner collapses to the first note + "(+N more)"; this reveals the full list.
+  const [warningsExpanded, setWarningsExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
   // Transient toast: a message + an optional action button (e.g. "Refresh now") — owned by useToast.
@@ -199,6 +226,8 @@ export function App() {
     setMatchCase,
     matchInfo,
     runSearch,
+    findNext,
+    findPrev,
     runReplace,
   } = useFind(mapRef, () => liveDocRef.current);
   // Live Find-result set → a highlight ring on every matching topic (the canvas reads `highlightIds`).
@@ -562,6 +591,10 @@ export function App() {
       : "MindMap Studio";
   }, [fileName, dirty]);
 
+  // A fresh import collapses the warnings banner back to its summary line.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on each new warnings set.
+  useEffect(() => setWarningsExpanded(false), [warnings]);
+
   // Ctrl/⌘+S save to file, +Shift save-as, Ctrl/⌘+O open — preventDefault so the browser's own
   // save/open dialogs don't hijack them. Bound once; the callbacks are stable (useCallback).
   useEffect(() => {
@@ -576,6 +609,11 @@ export function App() {
         e.preventDefault();
         void openFile();
       } else if (k === "f" && !e.shiftKey) {
+        // Don't hijack Ctrl/⌘+F while the user is typing in a field/note/inline editor — match the
+        // "/" find shortcut's editing-context guard (Save/Open stay global on purpose).
+        const el = document.activeElement as HTMLElement | null;
+        if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable))
+          return;
         e.preventDefault();
         setFindOpen(true);
       }
@@ -661,22 +699,44 @@ export function App() {
       let lastDoc: MindMapDoc | null = null;
       let lastWarnings: string[] = [];
       const batchNotes: string[] = [];
+      let failed = 0;
+      let firstError = "";
+      // Per-file try/catch: one corrupt file in a batch must not abort the rest (the maps that
+      // already parsed are saved as we go) and must not be a silent drop — collect failures so they
+      // surface in the import banner alongside the lossy-import notes.
       for (const file of files) {
-        const { doc: next, warnings } = await parseImport(file, importMmap);
-        next.id = crypto.randomUUID(); // each import becomes its own library entry
-        if (batch) await saveMap(next); // persist every map in a batch
-        if (warnings.length > 0) {
-          const extra = warnings.length > 1 ? ` (+${warnings.length - 1} more)` : "";
-          batchNotes.push(`${next.title}: ${warnings[0]}${extra}`);
+        try {
+          const { doc: next, warnings } = await parseImport(file, importMmap);
+          next.id = crypto.randomUUID(); // each import becomes its own library entry
+          if (batch) await saveMap(next); // persist every map in a batch
+          if (warnings.length > 0) {
+            const extra = warnings.length > 1 ? ` (+${warnings.length - 1} more)` : "";
+            batchNotes.push(`${next.title}: ${warnings[0]}${extra}`);
+          }
+          lastDoc = next;
+          lastWarnings = warnings;
+        } catch (err) {
+          failed++;
+          const msg = err instanceof Error ? err.message : String(err);
+          if (!firstError) firstError = `${file.name}: ${msg}`;
+          batchNotes.push(`Couldn’t import ${file.name}: ${msg}`);
         }
-        lastDoc = next;
-        lastWarnings = warnings;
       }
-      if (!lastDoc) return;
-      // Render the last import; for a batch, lead with a one-line summary.
+      if (!lastDoc) {
+        // Nothing parsed — surface the first failure rather than returning silently.
+        setError(`Import failed — ${firstError || "no readable maps"}`);
+        return;
+      }
+      // Render the last good import; lead with a one-line summary that owns up to any failures.
+      const ok = files.length - failed;
       load(
         lastDoc,
-        batch ? [`Imported ${files.length} maps into the library.`, ...batchNotes] : lastWarnings,
+        batch
+          ? [
+              `Imported ${ok} of ${files.length} maps${failed ? ` (${failed} failed)` : ""}.`,
+              ...batchNotes,
+            ]
+          : lastWarnings,
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -860,6 +920,7 @@ export function App() {
     mapRef,
     () => liveDocRef.current,
     () => panels.numbered,
+    showHint,
   );
 
   // Restore the last-opened map on startup straight into the editor. With no prior map (first run /
@@ -1074,6 +1135,8 @@ export function App() {
       setMatchCase,
       matchInfo,
       runSearch,
+      findNext,
+      findPrev,
       runReplace,
     },
     io: {
@@ -1112,12 +1175,15 @@ export function App() {
         const vp = mapRef.current?.getViewport();
         if (!vp) return;
         const active = panels.filterOpen && isFilterActive(filter.criteria);
+        // Same-name save replaces the existing view (addView filters by name) — say so rather than
+        // silently clobbering a captured perspective.
+        const replaced = savedViews.list.some((x) => x.name === name);
         savedViews.add(name, {
           viewport: vp,
           drillId,
           criteria: active ? filter.criteria : null,
         });
-        showHint(`Saved view "${name}".`);
+        showHint(replaced ? `Replaced view "${name}".` : `Saved view "${name}".`);
       },
       onApply: (id: string) => {
         const v = savedViews.list.find((x) => x.id === id);
@@ -1131,7 +1197,24 @@ export function App() {
           panels.toggleFilter(); // closing also clears the filter
         }
       },
-      onDelete: (id: string) => savedViews.remove(id),
+      onDelete: (id: string) => {
+        // Delete + Undo toast — matches the considered map-delete pattern, so a misclick in the
+        // small views list doesn't permanently destroy a captured viewport/filter/drill state.
+        const v = savedViews.list.find((x) => x.id === id);
+        savedViews.remove(id);
+        if (v)
+          showToast("info", `Deleted view "${v.name}".`, {
+            action: {
+              label: "Undo",
+              run: () =>
+                savedViews.add(v.name, {
+                  viewport: v.viewport,
+                  drillId: v.drillId,
+                  criteria: v.criteria,
+                }),
+            },
+          });
+      },
     },
     history: {
       canUndo,
@@ -1201,14 +1284,25 @@ export function App() {
           <div
             role="alert"
             style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: 8,
               padding: "8px 16px",
-              background: "#fcebeb",
-              color: "#791f1f",
+              background: "var(--ed-toast-error-bg, #fcebeb)",
+              color: "var(--ed-toast-error-ink, #791f1f)",
               fontSize: 13,
-              borderBottom: "1px solid #f7c1c1",
+              borderBottom: "1px solid var(--ed-toast-error-border, #f7c1c1)",
             }}
           >
-            Import failed: {error}
+            <span style={{ flex: 1 }}>Import failed: {error}</span>
+            <button
+              type="button"
+              aria-label="Dismiss import error"
+              onClick={() => setError(null)}
+              style={bannerDismissStyle}
+            >
+              ×
+            </button>
           </div>
         )}
 
@@ -1217,14 +1311,42 @@ export function App() {
             style={{
               display: "block",
               padding: "8px 16px",
-              background: "#faeeda",
-              color: "#633806",
+              background: "var(--ed-toast-warn-bg, #faeeda)",
+              color: "var(--ed-toast-warn-ink, #633806)",
               fontSize: 13,
-              borderBottom: "1px solid #fac775",
+              borderBottom: "1px solid var(--ed-toast-warn-border, #fac775)",
             }}
           >
-            Imported with {warnings.length} note{warnings.length > 1 ? "s" : ""}: {warnings[0]}
-            {warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ""}
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ flex: 1 }}>
+                Imported with {warnings.length} note{warnings.length > 1 ? "s" : ""}: {warnings[0]}
+                {warnings.length > 1 && !warningsExpanded ? ` (+${warnings.length - 1} more)` : ""}
+              </span>
+              {warnings.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setWarningsExpanded((v) => !v)}
+                  style={bannerLinkStyle}
+                >
+                  {warningsExpanded ? "Hide" : "Show all"}
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label="Dismiss import notes"
+                onClick={() => setWarnings([])}
+                style={bannerDismissStyle}
+              >
+                ×
+              </button>
+            </div>
+            {warningsExpanded && warnings.length > 1 ? (
+              <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
+                {warnings.slice(1).map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            ) : null}
           </output>
         )}
 

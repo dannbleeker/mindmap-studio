@@ -149,6 +149,8 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       setMatchCase: vi.fn(),
       matchInfo: "",
       runSearch: vi.fn(),
+      findNext: vi.fn(),
+      findPrev: vi.fn(),
       runReplace: vi.fn(),
     },
     io,

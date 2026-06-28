@@ -57,6 +57,19 @@ export function editorThemeVars(theme: CanvasTheme): CSSProperties {
     "--ed-accent-tint": dark ? "rgba(27,138,94,0.18)" : "rgba(27,138,94,0.10)",
     "--ed-accent-ring": "rgba(27,138,94,0.30)",
     "--ed-danger": "#b23b3a",
+    // Toast + import-banner strips — theme-reactive so feedback isn't a pale light box on a dark
+    // canvas (the legacy hardcoded hex are kept as fallbacks where --ed-* isn't in scope, e.g. the
+    // Start-screen floating toast). Light values match the old static colors.toast palette.
+    "--ed-toast-ink": dark ? "#dfe7f2" : "#26215c",
+    "--ed-toast-border": dark ? "rgba(255,255,255,0.12)" : "#cecbf6",
+    "--ed-toast-success-bg": dark ? "rgba(27,138,94,0.18)" : "#eafaf0",
+    "--ed-toast-info-bg": dark ? "rgba(90,110,170,0.20)" : "#eef2fc",
+    "--ed-toast-error-bg": dark ? "rgba(178,59,58,0.22)" : "#fcebeb",
+    "--ed-toast-error-ink": dark ? "#f1b8b6" : "#791f1f",
+    "--ed-toast-error-border": dark ? "rgba(178,59,58,0.42)" : "#f7c1c1",
+    "--ed-toast-warn-bg": dark ? "rgba(154,120,30,0.24)" : "#faeeda",
+    "--ed-toast-warn-ink": dark ? "#e8cfa0" : "#633806",
+    "--ed-toast-warn-border": dark ? "rgba(214,170,80,0.46)" : "#fac775",
     "--ed-shadow": dark ? "0 6px 22px rgba(0,0,0,0.38)" : "0 6px 22px rgba(40,30,16,0.08)",
     "--ed-shadow-pop": dark ? "0 12px 32px rgba(0,0,0,0.5)" : "0 12px 32px rgba(40,30,16,0.18)",
     "--ed-font-sans": EDITOR_FONT_SANS,

@@ -863,6 +863,7 @@ export function AgendaPanel({
         {group("Overdue", buckets.overdue, "#b23b3a")}
         {group("Today", buckets.today, colors.text)}
         {group("This week", buckets.thisWeek)}
+        {group("Later", buckets.later)}
       </div>
     </Panel>
   );

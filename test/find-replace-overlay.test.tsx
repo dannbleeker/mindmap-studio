@@ -20,6 +20,8 @@ function makeFind(over: Partial<ToolbarFind> = {}): ToolbarFind {
     setMatchCase: vi.fn(),
     matchInfo: "",
     runSearch: vi.fn((e: { preventDefault: () => void }) => e.preventDefault()),
+    findNext: vi.fn(),
+    findPrev: vi.fn(),
     runReplace: vi.fn(),
     ...over,
   };
@@ -46,6 +48,21 @@ describe("FindReplaceOverlay", () => {
     expect(find.setMatchCase).toHaveBeenCalledWith(true);
     await u.click(screen.getByRole("button", { name: /regular expression/i }));
     expect(find.setUseRegex).toHaveBeenCalledWith(true);
+  });
+
+  it("cycles matches via the Next / Prev buttons and Shift+Enter", async () => {
+    const u = userEvent.setup();
+    const find = makeFind({ matchInfo: "2/5" });
+    render(<FindReplaceOverlay find={find} onClose={vi.fn()} />);
+    await u.click(screen.getByRole("button", { name: /next match/i }));
+    expect(find.findNext).toHaveBeenCalled();
+    await u.click(screen.getByRole("button", { name: /previous match/i }));
+    expect(find.findPrev).toHaveBeenCalled();
+    // Shift+Enter in the query box steps backwards (plain Enter submits the form → next).
+    fireEvent.keyDown(screen.getByLabelText("Find node"), { key: "Enter", shiftKey: true });
+    expect(find.findPrev).toHaveBeenCalledTimes(2);
+    // The match counter is a live region so AT announces "2/5".
+    expect(screen.getByRole("status").textContent).toBe("2/5");
   });
 
   it("closes on the × button and on Escape", async () => {

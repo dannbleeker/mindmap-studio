@@ -132,6 +132,8 @@ function setup(
     setMatchCase: vi.fn(),
     matchInfo: "",
     runSearch: vi.fn((e: { preventDefault: () => void }) => e.preventDefault()),
+    findNext: vi.fn(),
+    findPrev: vi.fn(),
     runReplace: vi.fn(),
   };
   const io = Object.fromEntries(

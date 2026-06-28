@@ -114,7 +114,6 @@ Both real-file importer validations remain done — **`.mmap`** and **`.smmx`** 
 - **AI assist** — **decided against (2026-06-15).** The biggest category-wide gap, but the only fit
   for a no-backend, local-first app is a keyless copy-prompt → paste-result bridge (or BYO-key),
   which isn't worth building. The manual path already exists: paste an outline / Markdown → map.
-- **`.mmap` writer** — high-risk, low-value (open formats already bridge every tool).
 - **Theme-only `.mmap` styling + summary brackets** — a topic with no explicit colour inherits the
   MindManager `StyleGroup` theme (we don't resolve it), and summary spans are positional/implicit in
   the schema; both are low-ROI, left lossy by design.

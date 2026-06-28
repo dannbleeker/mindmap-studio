@@ -26,6 +26,24 @@
       "bookExample": true
     },
     {
+      "id": "overlay-context-menu",
+      "name": "Right-click menu on overlays (recolour / shape / outline / delete)",
+      "area": "structure",
+      "since": "2026-06-28",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "node-popover-more",
+      "name": "Topic quick-action popover More button (opens the full context menu)",
+      "area": "editing",
+      "since": "2026-06-28",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
       "id": "canvas-gestures",
       "name": "Pan, scroll-zoom & double-click the canvas to add a topic",
       "area": "navigation",

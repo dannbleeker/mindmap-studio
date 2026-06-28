@@ -69,6 +69,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       openShortcuts: vi.fn(),
       openSearchAll: vi.fn(),
       openPaste: vi.fn(),
+      openFind: vi.fn(),
     },
     panels: {
       outlineOpen: false,

@@ -37,7 +37,8 @@ export const SHORTCUTS: ShortcutGroup[] = [
     items: [
       { keys: "Ctrl/⌘ + K", action: "Open the command palette (do anything)" },
       { keys: "Ctrl/⌘ + .", action: "Focus on the selected topic (Esc to exit)" },
-      { keys: "/", action: "Jump to the Find box" },
+      { keys: "Ctrl/⌘ + F", action: "Open Find & Replace (or press /)" },
+      { keys: "/", action: "Open Find & Replace" },
       { keys: "Esc", action: "Cancel / clear the current selection" },
     ],
   },

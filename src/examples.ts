@@ -74,7 +74,7 @@ const launch = (): MindMapDoc =>
       { note: "Cross-functional launch. Markers: ✅ done · ⏳ in progress · 🚩 risk · 🎯 goal." },
     ),
     {
-      boundaries: [{ id: "b1", nodeIds: ["week", "w1", "w2", "w3"], label: "Go-live week" }],
+      boundaries: [{ id: "b1", nodeIds: ["week", "w1", "w2", "w3"], label: "Launch window" }],
       links: [
         { id: "r1", from: "p2", to: "u2", label: "readiness" },
         { id: "r2", from: "a2", to: "k2", label: "GTM" },

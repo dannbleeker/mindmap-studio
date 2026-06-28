@@ -198,6 +198,8 @@ export interface ToolbarProps {
     openShortcuts: () => void;
     openSearchAll: () => void;
     openPaste: () => void;
+    /** Open the Find & Replace overlay (also bound to Ctrl/⌘+F and the "/" key). */
+    openFind: () => void;
   };
   panels: ToolbarPanels;
   map: ToolbarMap;
@@ -283,7 +285,6 @@ export function Toolbar({
   panels,
   map,
   canvas,
-  find,
   io,
   views,
   history,
@@ -405,65 +406,13 @@ export function Toolbar({
           <span className="mm-saved-dot" /> Saved locally
         </span>
         <span className="mm-grow" />
-        <form onSubmit={find.runSearch} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <input
-            className="mm-input"
-            value={find.query}
-            onChange={(e) => find.setQuery(e.target.value)}
-            placeholder="Find…"
-            aria-label="Find node"
-            style={{ width: 96 }}
-          />
-          <input
-            className="mm-input"
-            value={find.replaceWith}
-            onChange={(e) => find.setReplaceWith(e.target.value)}
-            placeholder="Replace…"
-            aria-label="Replace with"
-            style={{ width: 96 }}
-          />
-          <select
-            className="mm-input"
-            value={find.replaceScope}
-            onChange={(e) => find.setReplaceScope(e.target.value as "topics" | "notes" | "both")}
-            aria-label="Replace scope"
-            title="Where to replace: topics, notes, or both"
-            style={{ width: 78 }}
-          >
-            <option value="topics">Topics</option>
-            <option value="notes">Notes</option>
-            <option value="both">Both</option>
-          </select>
-          <button
-            type="button"
-            className={`mm-toggle-btn${find.matchCase ? " is-on" : ""}`}
-            aria-pressed={find.matchCase}
-            title="Match case"
-            aria-label="Match case"
-            onClick={() => find.setMatchCase(!find.matchCase)}
-          >
-            Aa
-          </button>
-          <button
-            type="button"
-            className={`mm-toggle-btn${find.useRegex ? " is-on" : ""}`}
-            aria-pressed={find.useRegex}
-            title="Use regular expression"
-            aria-label="Use regular expression"
-            onClick={() => find.setUseRegex(!find.useRegex)}
-          >
-            .*
-          </button>
-          <TBtn
-            label="Replace the find text in every match (topics and/or notes per scope)"
-            text="Replace all"
-            ghost
-            onClick={find.runReplace}
-          />
-          {find.matchInfo && (
-            <span style={{ fontSize: 11, color: "var(--ed-muted)" }}>{find.matchInfo}</span>
-          )}
-        </form>
+        <TBtn
+          icon="search"
+          text="Find"
+          label="Find & replace (Ctrl/⌘+F)"
+          ghost
+          onClick={nav.openFind}
+        />
         {/* Export + More menus — output / overflow group. */}
         <div className="mm-cluster">
           <Menu
@@ -847,7 +796,12 @@ export function Toolbar({
         <span className="mm-vdiv" />
         {/* Insert + Canvas menus — content/styling group. */}
         <div className="mm-cluster">
-          <Menu trigger={menuTrigger("plus", "Insert")} triggerTitle="Insert" sheet={isMobile}>
+          <Menu
+            trigger={menuTrigger("plus", "Insert")}
+            triggerClassName="mm-tbtn mm-tbtn-accent"
+            triggerTitle="Insert"
+            sheet={isMobile}
+          >
             {(close) => (
               <>
                 <MenuItem
@@ -1080,6 +1034,72 @@ export function Toolbar({
                   ) : null}
                 </div>
                 <MenuSeparator />
+                <MenuLabel>Connectors</MenuLabel>
+                <div style={{ padding: "2px 6px" }}>
+                  <select
+                    className="mm-select"
+                    style={{ width: "100%" }}
+                    value={liveDoc.meta?.connectorStyle ?? "organic"}
+                    onChange={(e) =>
+                      m()?.setConnectorStyle(
+                        e.target.value as "organic" | "curved" | "elbow" | "straight",
+                      )
+                    }
+                    aria-label="Connector style"
+                    title="Branch connector style"
+                  >
+                    <option value="organic">Organic</option>
+                    <option value="curved">Curved</option>
+                    <option value="elbow">Elbow</option>
+                    <option value="straight">Straight</option>
+                  </select>
+                </div>
+                <MenuLabel>Branch growth</MenuLabel>
+                <div style={{ padding: "2px 6px" }}>
+                  <select
+                    className="mm-select"
+                    style={{ width: "100%" }}
+                    value={liveDoc.meta?.branchGrowth ?? "regular"}
+                    onChange={(e) => m()?.setBranchGrowth(e.target.value as BranchGrowth)}
+                    aria-label="Branch growth weight"
+                    title="Branch line weight (thickness)"
+                  >
+                    <option value="fine">Fine</option>
+                    <option value="regular">Regular</option>
+                    <option value="bold">Bold</option>
+                  </select>
+                </div>
+                <MenuLabel>Type</MenuLabel>
+                <div style={{ display: "flex", gap: 6, padding: "2px 6px" }}>
+                  <select
+                    className="mm-select"
+                    style={{ flex: 1 }}
+                    value={liveDoc.meta?.fontFamily ?? ""}
+                    onChange={(e) => m()?.setFontFamily(e.target.value)}
+                    aria-label="Base font family"
+                    title="Map-wide base font (a per-topic font still overrides it)"
+                  >
+                    <option value="">Default</option>
+                    <option value="Inter, system-ui, sans-serif">Sans</option>
+                    <option value="Georgia, 'Times New Roman', serif">Serif</option>
+                    <option value="'Courier New', ui-monospace, monospace">Mono</option>
+                  </select>
+                  <select
+                    className="mm-select"
+                    style={{ flex: 1 }}
+                    value={liveDoc.meta?.fontScale ?? "comfortable"}
+                    onChange={(e) =>
+                      m()?.setFontScale(e.target.value as "compact" | "comfortable" | "large")
+                    }
+                    aria-label="Font size scale"
+                    title="Map-wide text size (a per-topic size still overrides it)"
+                  >
+                    <option value="compact">Compact</option>
+                    <option value="comfortable">Comfortable</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+                <MenuSeparator />
                 <MenuCheckboxItem
                   icon={mi("hand")}
                   label="Free layout (whiteboard)"
@@ -1171,58 +1191,6 @@ export function Toolbar({
             <option value="swimlane">Swimlane</option>
             <option value="brace">Brace map</option>
           </optgroup>
-        </select>
-        <span className="mm-eyebrow">Connectors</span>
-        <select
-          className="mm-select"
-          value={liveDoc.meta?.connectorStyle ?? "organic"}
-          onChange={(e) =>
-            m()?.setConnectorStyle(e.target.value as "organic" | "curved" | "elbow" | "straight")
-          }
-          aria-label="Connector style"
-          title="Branch connector style"
-        >
-          <option value="organic">Organic</option>
-          <option value="curved">Curved</option>
-          <option value="elbow">Elbow</option>
-          <option value="straight">Straight</option>
-        </select>
-        <span className="mm-eyebrow">Growth</span>
-        <select
-          className="mm-select"
-          value={liveDoc.meta?.branchGrowth ?? "regular"}
-          onChange={(e) => m()?.setBranchGrowth(e.target.value as BranchGrowth)}
-          aria-label="Branch growth weight"
-          title="Branch line weight (thickness)"
-        >
-          <option value="fine">Fine</option>
-          <option value="regular">Regular</option>
-          <option value="bold">Bold</option>
-        </select>
-        <span className="mm-vdiv" />
-        <span className="mm-eyebrow">Type</span>
-        <select
-          className="mm-select"
-          value={liveDoc.meta?.fontFamily ?? ""}
-          onChange={(e) => m()?.setFontFamily(e.target.value)}
-          aria-label="Base font family"
-          title="Map-wide base font (a per-topic font still overrides it)"
-        >
-          <option value="">Default</option>
-          <option value="Inter, system-ui, sans-serif">Sans</option>
-          <option value="Georgia, 'Times New Roman', serif">Serif</option>
-          <option value="'Courier New', ui-monospace, monospace">Mono</option>
-        </select>
-        <select
-          className="mm-select"
-          value={liveDoc.meta?.fontScale ?? "comfortable"}
-          onChange={(e) => m()?.setFontScale(e.target.value as "compact" | "comfortable" | "large")}
-          aria-label="Font size scale"
-          title="Map-wide text size (a per-topic size still overrides it)"
-        >
-          <option value="compact">Compact</option>
-          <option value="comfortable">Comfortable</option>
-          <option value="large">Large</option>
         </select>
         <span className="mm-vdiv" />
         <input

@@ -69,10 +69,9 @@ Left to right:
 | **1. Numbering** | Toggle [outline numbering](#auto-numbering) (1, 1.2, …) on every topic |
 | **⌒ Line jumps** | Toggle [line-jumps](#relationships-boundaries--callouts) — a hop where two relationship arrows cross |
 | **◎ Focus** | [Focus the selected branch](#focus-a-branch) — dim everything else (Esc exits) |
-| **Canvas** | [Per-map background colour + image](#canvas-background) (overrides the theme) |
+| **Canvas** | [Per-map look](#canvas-background): background colour + image, theme, **connector style**, **branch growth**, and **type** (base font + size) |
 | **ℹ Info** | Toggle the [topic info panel](#topic-info-panel) — note, markers, tags, style, links for the selected node |
-| **Find / Replace** | [Search and replace](#find--replace) topics & notes (`/` jumps here) |
-| **Theme** | [Canvas theme](#themes): Light / Dark / Ocean / Sunset |
+| **🔍 Find** | Open [Find & Replace](#find--replace) — a top-right overlay to search and replace topics & notes (`Ctrl/⌘+F` or `/`) |
 | **Layout** | [Layout direction](#layout): Both sides / Right / Left |
 | **⬆ Export…** | Save the map in any format — see [Exporting](#exporting) |
 | **⬇ Backup** | [Back up](#backup--restore) the whole library to one file |
@@ -286,11 +285,16 @@ whole map, and exiting brings back the rest with all its links and boundaries.
 
 ### Find & Replace
 
+Press **`Ctrl/⌘+F`** (or **`/`** when you're not typing, or the toolbar's **🔍 Find** button) to
+open the **Find & Replace** overlay in the top-right corner. It's non-modal — the map stays fully
+visible and editable behind it, and **Esc** closes it.
+
 Type in **Find** and every matching topic is **ringed on the canvas** as you type, so you can see all
 hits at once; press **Enter** repeatedly to jump between them (an `n/total` counter shows where you
 are). Clearing the box removes the rings. Type in the **Replace** box and click
-**Replace all** to rewrite the search text across every matching topic. Press **`/`** anywhere
-(when you're not typing) to jump straight to Find.
+**Replace all** to rewrite the search text across every matching topic. **Aa** matches case and
+**`.*`** treats the query as a regular expression; the scope selector limits replace to topics,
+notes, or both.
 
 Find is **typo-tolerant**: if nothing matches exactly, it automatically retries with a fuzzy pass,
 so a slip like `Launhc` still finds **Launch**. Exact matches always take priority, and very short

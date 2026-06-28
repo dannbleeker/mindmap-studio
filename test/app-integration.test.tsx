@@ -98,11 +98,13 @@ describe("App (integration)", () => {
     await waitFor(() => expect(container.querySelector(".mm-panel-host")).toBeTruthy());
   });
 
-  it("runs find then replace-all from the header without crashing", async () => {
+  it("runs find then replace-all from the overlay without crashing", async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);
     await flush();
     await openEditor(user, container);
+    // Find & Replace now opens as an overlay (the toolbar "Find" button / Ctrl+F / "/").
+    await user.click(screen.getByRole("button", { name: "Find" }));
     const find = screen.getByLabelText("Find node") as HTMLInputElement;
     await user.click(find);
     await user.type(find, "idea{Enter}");

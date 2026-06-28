@@ -29,6 +29,7 @@ import { CommandPalette } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
 import { DocumentTabs } from "./components/DocumentTabs";
 import { EdgeInspector } from "./components/EdgeInspector";
+import { FindReplaceOverlay } from "./components/FindReplaceOverlay";
 import { FirstRunCard } from "./components/FirstRunCard";
 import { IconRail } from "./components/IconRail";
 import { InspectorRail } from "./components/InspectorRail";
@@ -365,6 +366,8 @@ export function App() {
     }
   }, []);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
+  // Find & Replace overlay (#…): opened with Ctrl/⌘+F, the "/" key, or the toolbar's Find button.
+  const [findOpen, setFindOpen] = useState(false);
   // In-editor ⌘K command palette (the Start screen has its own); the hook owns the ⌘K hotkey.
   const [cmdkOpen, setCmdkOpen] = useCommandPaletteHotkey(view === "editor");
   // Focus mode (#9): Ctrl/⌘+. drills into the selected topic / Esc exits (drill carries its own crumb).
@@ -572,6 +575,9 @@ export function App() {
       } else if (k === "o" && !e.shiftKey) {
         e.preventDefault();
         void openFile();
+      } else if (k === "f" && !e.shiftKey) {
+        e.preventDefault();
+        setFindOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -936,7 +942,7 @@ export function App() {
     }
   }, [doc.id, view]);
 
-  // Press "/" to jump to the Find box (ignored while typing in a field/node).
+  // Press "/" to open the Find & Replace overlay (ignored while typing in a field/node).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -945,7 +951,7 @@ export function App() {
         el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
       if (editing) return;
       e.preventDefault();
-      document.querySelector<HTMLInputElement>('input[aria-label="Find node"]')?.focus();
+      setFindOpen(true);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -1009,6 +1015,7 @@ export function App() {
       openShortcuts: () => setShortcutsOpen(true),
       openSearchAll: () => setSearchAllOpen(true),
       openPaste: () => paste.setOpen(true),
+      openFind: () => setFindOpen(true),
     },
     panels,
     map: {
@@ -1479,6 +1486,10 @@ export function App() {
               {/* First-run tips (#13) — overlays the canvas for a brand-new user; gone after the
                   first edit or an explicit dismiss. */}
               {!firstRunSeen ? <FirstRunCard onDismiss={dismissFirstRun} /> : null}
+              {/* Find & Replace overlay — top-right of the canvas, non-modal (Ctrl/⌘+F or "/"). */}
+              {findOpen ? (
+                <FindReplaceOverlay find={toolbarProps.find} onClose={() => setFindOpen(false)} />
+              ) : null}
               {/* Kanban board overlays the canvas (the map stays mounted underneath). */}
               {panels.boardOpen && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>

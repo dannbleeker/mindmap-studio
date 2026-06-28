@@ -5,7 +5,28 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Editor chrome decluttered — a calmer toolbar.** A UX pass moved occasional/power controls out of
+  the always-on top bar so the primary actions read first:
+  - **Find & Replace is now a `Ctrl/⌘+F` overlay** (also `/` or the new **🔍 Find** button) anchored
+    top-right of the canvas, replacing the inline Find/Replace/Aa/`.*`/Replace-all strip that used to
+    camp the top bar. It's non-modal — the map stays visible and editable behind it; **Esc** closes it.
+  - **Connector style, branch growth, and type (base font + size) moved into the Canvas menu**,
+    alongside Design/Theme/Background. **Layout** stays in the toolbar (it's changed often).
+  - **Insert** now carries a subtle accent tint so the core "add content" action stands out from the
+    output/overflow controls.
+- **First-run "3 things to try" card no longer covers the map.** It's anchored to the top of the
+  canvas (dead space below the toolbar) instead of bottom-left over a branch, which also de-clutters
+  the bottom edge (minimap + zoom pill).
+- **Start screen's narrow-width navigation is a proper drawer.** Below 640px the section nav collapses
+  behind a **hamburger** button and slides in over a backdrop (close on select, backdrop click, or
+  Esc) — replacing the cut-off horizontal scroller.
+
 ### Fixed
+
+- **Example polish:** the "Product launch plan" example's boundary is now labelled **"Launch window"**
+  so it no longer echoes the **"Go-live week"** branch node it wraps (the text appeared twice).
 
 - **Delete now removes the whole multi-selection, not just one node.** Marquee- or Shift/Ctrl/Cmd-select
   several topics and press Delete (or the inspector's Delete) — every selected branch goes in one

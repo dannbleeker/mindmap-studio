@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ACCENT } from "./tokens";
 import type { StartSection } from "./types";
 
@@ -44,6 +45,18 @@ export function StartSidebar({
   onNavigate: (s: StartSection) => void;
   onNewMap: () => void;
 }) {
+  // Narrow widths collapse the section nav into a slide-in drawer behind a hamburger; this state is
+  // inert on desktop (the drawer styles only apply ≤640px, where the toggle is shown).
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawerOpen]);
+
   return (
     <nav className="st-sidebar" aria-label="Start sections">
       <div className="st-brand">
@@ -53,14 +66,35 @@ export function StartSidebar({
       <button type="button" className="st-new" onClick={onNewMap}>
         <span aria-hidden="true">＋</span> New map
       </button>
-      <div className="st-nav">
+      <button
+        type="button"
+        className="st-hamburger"
+        aria-label="Sections menu"
+        aria-expanded={drawerOpen}
+        aria-controls="st-nav-drawer"
+        onClick={() => setDrawerOpen((v) => !v)}
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+      {drawerOpen ? (
+        <button
+          type="button"
+          className="st-nav-backdrop"
+          aria-label="Close sections menu"
+          onClick={() => setDrawerOpen(false)}
+        />
+      ) : null}
+      <div id="st-nav-drawer" className={`st-nav${drawerOpen ? " is-open" : ""}`}>
         {NAV.map((n) => (
           <button
             key={n.id}
             type="button"
             className="st-nav-item"
             aria-current={active === n.id}
-            onClick={() => onNavigate(n.id)}
+            onClick={() => {
+              onNavigate(n.id);
+              setDrawerOpen(false);
+            }}
           >
             <span className="st-nav-icon" aria-hidden="true">
               {n.icon}

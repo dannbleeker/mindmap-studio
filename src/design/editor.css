@@ -225,6 +225,17 @@
   background: var(--ed-accent-hover);
   color: #fff;
 }
+/* Accent trigger — a subtle emerald-tinted button for the core "Insert" action so it reads as the
+   primary creative control without shouting like the solid primary button. Fills on hover. */
+.mm-tbtn-accent {
+  border: 1px solid var(--ed-accent);
+  background: var(--ed-accent-tint);
+  color: var(--ed-accent);
+}
+.mm-tbtn-accent:hover {
+  background: var(--ed-accent);
+  color: #fff;
+}
 
 .mm-vdiv {
   width: 1px;
@@ -934,11 +945,14 @@
   }
 }
 
-/* First-run "3 things to try" card (#13) — a dismissible overlay, bottom-left of the canvas. */
+/* First-run "3 things to try" card (#13) — a dismissible overlay, anchored to the top of the
+   canvas (dead space below the toolbar) so it never covers the auto-centred map or crowds the
+   bottom edge (minimap + zoom pill). */
 .mm-firstrun {
   position: absolute;
-  left: 16px;
-  bottom: 16px;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 9;
   max-width: 250px;
   padding: 12px 32px 12px 14px;
@@ -991,6 +1005,71 @@
   background: var(--ed-page, #f4f2ec);
   font-family: var(--ed-font-mono, monospace);
   font-size: 11px;
+}
+
+/* Find & Replace overlay — non-modal panel anchored to the top-right of the canvas (Ctrl/⌘+F or
+   "/"). Replaces the old inline toolbar form so the top bar stays light. */
+.mm-find-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 11;
+  width: 260px;
+  padding: 10px 12px 12px;
+  border-radius: 10px;
+  background: var(--ed-card, #fff);
+  border: 1px solid var(--ed-border, #e7e4dc);
+  color: var(--ed-ink, #23211c);
+  box-shadow: var(--ed-shadow-pop, 0 12px 30px rgba(0, 0, 0, 0.2));
+}
+.mm-find-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.mm-find-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+.mm-find-close {
+  border: none;
+  background: transparent;
+  color: var(--ed-muted, #6b675e);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 0 6px;
+}
+.mm-find-close:hover {
+  background: var(--ed-accent-tint, #e3f1ea);
+  color: var(--ed-ink, #23211c);
+}
+.mm-find-close:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+}
+.mm-find-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mm-find-body .mm-input {
+  width: 100%;
+}
+.mm-find-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mm-find-row .mm-input {
+  width: auto;
+  flex: 1;
+}
+.mm-find-info {
+  font-size: 11px;
+  color: var(--ed-muted, #6b675e);
 }
 
 @media (prefers-reduced-motion: reduce) {

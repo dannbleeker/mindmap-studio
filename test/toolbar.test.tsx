@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type RefObject, createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -46,6 +46,7 @@ function setup(
     openShortcuts: vi.fn(),
     openSearchAll: vi.fn(),
     openPaste: vi.fn(),
+    openFind: vi.fn(),
   };
   const panels = {
     outlineOpen: false,
@@ -225,15 +226,11 @@ describe("Toolbar — row 1 (file/identity)", () => {
     expect(t.map.load).toHaveBeenCalledTimes(1);
   });
 
-  it("runs find + replace", async () => {
+  it("opens Find & Replace from the toolbar button", async () => {
     const t = setup();
-    const input = screen.getByLabelText("Find node");
-    await u.type(input, "x");
-    // The find row is a <form> with no submit button (implicit submit), so submit it directly.
-    fireEvent.submit(input.closest("form") as HTMLFormElement);
-    expect(t.find.runSearch).toHaveBeenCalled();
-    await u.click(screen.getByRole("button", { name: /replace all/i }));
-    expect(t.find.runReplace).toHaveBeenCalled();
+    // Find & Replace now lives in an overlay (Ctrl/⌘+F or "/"); the toolbar just opens it.
+    await u.click(screen.getByRole("button", { name: "Find" }));
+    expect(t.nav.openFind).toHaveBeenCalled();
   });
 });
 

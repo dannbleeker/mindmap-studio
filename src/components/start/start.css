@@ -60,6 +60,13 @@
 .st-new:hover {
   background: var(--st-accent-hover);
 }
+/* Hamburger + drawer backdrop are mobile-only chrome (≤640px); hidden on the desktop rail. */
+.st-hamburger {
+  display: none;
+}
+.st-nav-backdrop {
+  display: none;
+}
 .st-nav {
   display: flex;
   flex-direction: column;
@@ -674,24 +681,71 @@
   }
   .st-sidebar {
     width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
     border-right: none;
     border-bottom: 1px solid var(--st-border);
     padding: 10px 12px;
     gap: 8px;
     overflow-y: visible;
   }
+  .st-brand {
+    margin-right: auto; /* push the New-map button + hamburger to the right */
+  }
+  .st-new {
+    width: auto;
+    min-height: 34px;
+    padding: 0 14px;
+  }
+  /* Hamburger toggle — shown only on the narrow top bar. */
+  .st-hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    min-height: 34px;
+    border: 1px solid var(--st-border);
+    border-radius: 9px;
+    background: var(--st-card);
+    color: var(--st-ink);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  /* The section nav becomes a slide-in drawer off the left edge. */
   .st-nav {
-    flex-direction: row;
-    overflow-x: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    width: 264px;
+    max-width: 82vw;
+    flex-direction: column;
     gap: 4px;
+    padding: 16px 12px;
+    background: var(--st-sidebar);
+    border-right: 1px solid var(--st-border);
+    box-shadow: var(--ed-shadow-pop, 0 12px 30px rgba(0, 0, 0, 0.2));
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.18s ease;
   }
-  .st-nav-item {
-    flex-shrink: 0;
-    white-space: nowrap;
+  .st-nav.is-open {
+    transform: translateX(0);
   }
-  .st-nav-count,
+  .st-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 49;
+    border: none;
+    background: rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+  }
   .st-foot {
-    display: none; /* count badge + privacy footer are noise on a narrow nav strip */
+    display: none; /* privacy footer is noise on a narrow top bar */
   }
   .st-header {
     padding: 10px 16px;

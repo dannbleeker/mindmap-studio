@@ -582,6 +582,12 @@
   .mm-inspector-resizer {
     display: none;
   }
+  /* Reclaim the 56px rail on phones — every rail action (Home, Paste, Insert image, Getting-started,
+     Settings, Shortcuts) is also reachable from the toolbar Row-1 / the More + Insert menus / ⌘K, so
+     hiding it gives the canvas back ~14% of a 390px screen instead of a column of redundant buttons. */
+  .mm-rail {
+    display: none;
+  }
   /* Tighter spacing on phones so the slimmed rows fit. */
   .mm-topbar-row {
     gap: 4px;
@@ -591,6 +597,20 @@
      than clip (row 2's overflow controls already live behind the Options menu). */
   .mm-topbar-row1 {
     overflow-x: auto;
+  }
+}
+
+/* Tablet tier (coarse pointer, between the phone bottom-sheet breakpoint and the desktop comfort zone):
+   iPad portrait got the full desktop chrome — 56 (rail) + 280 (dock) + 300 (inspector) ≈ 636px, leaving
+   almost no canvas with both open. Narrow the dock + cap the inspector so the working area stays usable.
+   max-width caps the inspector's inline (resizable) width without !important; min-width:641 keeps this
+   clear of the ≤640 phone-sheet rules. */
+@media (pointer: coarse) and (min-width: 641px) and (max-width: 1024px) {
+  .mm-dock {
+    width: 220px;
+  }
+  .mm-inspector {
+    max-width: 240px;
   }
 }
 .mm-inspector-head {

@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Mobile & tablet layout (UI review — Phase 6).** On phones the 56px icon rail is hidden — every one
+  of its actions (Home, Paste, Insert image, Getting-started, Settings, Shortcuts) is also reachable from
+  the toolbar Row-1 / the More + Insert menus / ⌘K, so the canvas gets back ~14% of a 390px screen. New
+  tablet tier (coarse pointer, 641–1024px) narrows the side dock and caps the inspector so iPad portrait
+  keeps a usable working area instead of the full desktop chrome (which left almost no canvas).
 - **Mobile viewport & touch hardening (UI review — Phase 5).** `viewport-fit=cover` now lets the PWA
   use the full screen on notched iPhones AND switches on the `env(safe-area-inset-*)` values the CSS
   already referenced (they were inert before), so the bottom sheets pad clear of the home indicator.

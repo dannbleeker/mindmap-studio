@@ -98,7 +98,13 @@ describe("App (integration)", () => {
     await flush();
     await openEditor(user, container);
     await user.click(screen.getByRole("button", { name: /Panels/ }));
-    await user.click(await screen.findByText("Outline", { exact: true }));
+    const ol = await screen.findByText("Outline", { exact: true });
+    // The 12 toggles are grouped under three section labels (Phase 11c).
+    const menu = ol.closest(".mm-menu");
+    expect(menu?.textContent).toContain("Structure");
+    expect(menu?.textContent).toContain("Analysis");
+    expect(menu?.textContent).toContain("Workflow");
+    await user.click(ol);
     // The panel docks into the one tabbed column (mm-dock) rather than a free-floating 250px sibling.
     await waitFor(() => expect(container.querySelector(".mm-dock")).toBeTruthy());
     expect(container.querySelector(".mm-dock-tab")).toBeTruthy();

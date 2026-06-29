@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Panels menu grouped (UI review — Phase 11c).** The twelve side-panel toggles were one flat list under
+  a single "Side panels" label. They're now sorted into three labelled groups — **Structure** / **Analysis**
+  / **Workflow** — and the duplicate leading icons (layers ×2, grid ×2, note ×2) are de-collided to distinct
+  glyphs, so the menu scans as three short lists instead of a wall of twelve.
+
 - **Start nav vector icons (UI review — Phase 11b).** The nine left-rail section glyphs were a mix of
   Unicode symbols and one full-colour emoji (🕘) that rendered inconsistently across platforms. They're
   now uniform 18px line icons drawn with `currentColor`, so the active row still tints emerald and every

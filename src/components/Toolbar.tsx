@@ -599,16 +599,46 @@ export function Toolbar({
           triggerAriaLabel={isMobile ? "Panels" : undefined}
           sheet={isMobile}
         >
-          <MenuLabel>Side panels</MenuLabel>
+          {/* Grouped into Structure / Analysis / Workflow so 12 flat toggles read as three short lists,
+              and the duplicate leading icons (layers ×2, grid ×2, note ×2) are de-collided to distinct
+              glyphs within the menu. */}
+          <MenuLabel>Structure</MenuLabel>
           <MenuCheckboxItem
-            icon={mi("layers")}
+            icon={mi("text")}
             label="Outline"
             checked={panels.outlineOpen}
             trailing={mi("check")}
             onSelect={() => panels.setOutlineOpen((v) => !v)}
           />
           <MenuCheckboxItem
-            icon={mi("grid")}
+            icon={mi("layers")}
+            label="Maps (all maps)"
+            checked={panels.mapsOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setMapsOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("settings")}
+            label="Topic info / inspector"
+            checked={panels.infoOpen || panels.infoMinimized}
+            trailing={mi("check")}
+            onSelect={() => {
+              // One clean toggle: if shown (panel OR minimized strip) close both; else open.
+              const shown = panels.infoOpen || panels.infoMinimized;
+              panels.setInfoMinimized(() => false);
+              panels.setInfoOpen(() => !shown);
+            }}
+          />
+          <MenuCheckboxItem
+            icon={mi("note")}
+            label="Note editor (dockable)"
+            checked={panels.noteEditorOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setNoteEditorOpen((v) => !v)}
+          />
+          <MenuLabel>Analysis</MenuLabel>
+          <MenuCheckboxItem
+            icon={mi("star")}
             label="Markers & tags index"
             checked={panels.indexOpen}
             trailing={mi("check")}
@@ -629,25 +659,19 @@ export function Toolbar({
             onSelect={() => panels.setStylesOpen((v) => !v)}
           />
           <MenuCheckboxItem
-            icon={mi("history")}
-            label="Version history"
-            checked={panels.historyOpen}
-            trailing={mi("check")}
-            onSelect={() => panels.setHistoryOpen((v) => !v)}
-          />
-          <MenuCheckboxItem
-            icon={mi("board")}
-            label="Board (Kanban)"
-            checked={panels.boardOpen}
-            trailing={mi("check")}
-            onSelect={() => panels.setBoardOpen((v) => !v)}
-          />
-          <MenuCheckboxItem
             icon={mi("grid")}
             label="Map statistics"
             checked={panels.statsOpen}
             trailing={mi("check")}
             onSelect={() => panels.setStatsOpen((v) => !v)}
+          />
+          <MenuLabel>Workflow</MenuLabel>
+          <MenuCheckboxItem
+            icon={mi("history")}
+            label="Version history"
+            checked={panels.historyOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setHistoryOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("calendar")}
@@ -657,11 +681,11 @@ export function Toolbar({
             onSelect={() => panels.setAgendaOpen((v) => !v)}
           />
           <MenuCheckboxItem
-            icon={mi("layers")}
-            label="Maps (all maps)"
-            checked={panels.mapsOpen}
+            icon={mi("board")}
+            label="Board (Kanban)"
+            checked={panels.boardOpen}
             trailing={mi("check")}
-            onSelect={() => panels.setMapsOpen((v) => !v)}
+            onSelect={() => panels.setBoardOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("present")}
@@ -669,25 +693,6 @@ export function Toolbar({
             checked={panels.deckEditorOpen}
             trailing={mi("check")}
             onSelect={() => panels.setDeckEditorOpen((v) => !v)}
-          />
-          <MenuCheckboxItem
-            icon={mi("note")}
-            label="Note editor (dockable)"
-            checked={panels.noteEditorOpen}
-            trailing={mi("check")}
-            onSelect={() => panels.setNoteEditorOpen((v) => !v)}
-          />
-          <MenuCheckboxItem
-            icon={mi("note")}
-            label="Topic info / inspector"
-            checked={panels.infoOpen || panels.infoMinimized}
-            trailing={mi("check")}
-            onSelect={() => {
-              // One clean toggle: if shown (panel OR minimized strip) close both; else open.
-              const shown = panels.infoOpen || panels.infoMinimized;
-              panels.setInfoMinimized(() => false);
-              panels.setInfoOpen(() => !shown);
-            }}
           />
         </Menu>
         <span className="mm-vdiv" />

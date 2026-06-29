@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Node affordance polish (UI review — Phase 10a).** The drag-to-relate grip is bigger (16px, was 11) and
+  clearer at rest on a selected node, so "drag to link" is a reliable target instead of a fiddly dot. And
+  hovering a collapsed branch's **+N** toggle now peeks the first hidden child titles in a small card — so
+  you can decide whether to expand without triggering a full re-layout (mirrors the note hover-peek;
+  canvas-only, projected via a new `childTitles`).
+
 - **Empty-pane menu + interactive zoom (UI review — Phase 9b).** Right-clicking the bare canvas now opens a
   menu — **Add topic here**, **Paste branch here** (when a branch is copied), **Fit to view**, **Reset zoom
   (100%)** — the one surface that previously did nothing on right-click. "Paste branch here" finally lets a

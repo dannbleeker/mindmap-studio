@@ -34,6 +34,9 @@ describe("flow project (model → React Flow)", () => {
     expect(node("b")?.data.collapsed).toBe(true);
     expect(node("b")?.data.hasChildren).toBe(true);
     expect(node("b1")).toBeUndefined();
+    // …but it carries the first hidden child titles for the collapsed-branch hover-peek.
+    expect(node("b")?.data.childTitles).toEqual(["B1"]);
+    expect(node("a")?.data.childTitles).toBeUndefined(); // not collapsed → no peek titles
   });
 
   it("projects one node per visible MapNode", () => {

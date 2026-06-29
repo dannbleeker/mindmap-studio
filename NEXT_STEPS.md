@@ -136,8 +136,10 @@ affordances, visual micro-polish, sheet drag-to-resize) remain open from the 202
 - [x] **Phase 9 — canvas interactions** (shipped — see CHANGELOG): keyboard copy/duplicate/paste of a
   branch (`Ctrl/⌘+C` / `Ctrl/⌘+D` / `Ctrl/⌘+Shift+V`); empty-pane right-click menu (add topic /
   paste-branch-as-floating / fit / reset-zoom); clickable status-bar zoom % (reset / fit selection).
-- [ ] **Phase 10 — canvas affordances:** on-canvas wrap-width drag handle; hover a collapsed `+N`
-  badge to peek hidden children; enlarge the relate-grip hit area + de-crowd the lower-right corner.
+- [~] **Phase 10 — canvas affordances.** **10a shipped (see CHANGELOG):** enlarged + more-visible
+  relate-grip; hover a collapsed `+N` badge to peek the first hidden child titles. **Open:** 10b —
+  on-canvas wrap-width drag handle. (Lower-right de-crowd on min-height nodes deferred — the weak half;
+  the grip enlarge/visibility was the verified win.)
 - [ ] **Phase 11 — visual micro-polish:** Start nav vector icons; token the hardcoded `#26215c`
   thumbnail node (dark-mode invisible); `:active` press state; active-rail accent bar; tokenise Start
   radii + card radius; Start thumbnail surface separation; group the 12-toggle Panels menu; Export

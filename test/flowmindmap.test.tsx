@@ -243,6 +243,36 @@ describe("FlowMindMap canvas", () => {
     expect(a?.children.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("hovers a collapsed +N toggle to peek the first hidden child titles (Phase 10)", () => {
+    const collapsedDoc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "peek",
+      title: "T",
+      root: {
+        id: "root",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            collapsed: true,
+            children: [
+              { id: "a1", topic: "First child", children: [] },
+              { id: "a2", topic: "Second child", children: [] },
+            ],
+          },
+        ],
+      },
+    };
+    const { container } = mount(collapsedDoc);
+    const toggle = within(nodeEl(container, "a") as HTMLElement).getByTitle("Expand");
+    run(() => fireEvent.mouseEnter(toggle));
+    expect(screen.getByText("First child")).toBeTruthy();
+    expect(screen.getByText("Second child")).toBeTruthy();
+    run(() => fireEvent.mouseLeave(toggle));
+    expect(screen.queryByText("First child")).toBeNull(); // peek dismissed on leave
+  });
+
   it("right-clicks the empty pane → a canvas menu (add topic / fit / reset zoom)", () => {
     localStorage.removeItem("mindmap-branch-clipboard");
     const { container, onChange } = mount();

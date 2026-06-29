@@ -249,6 +249,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     collapsed,
     hasChildren,
     hiddenCount,
+    childTitles,
     progress,
     due,
     start,
@@ -294,6 +295,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   // Hover-peek: show the note's text in a small card when the 📝 indicator is hovered (read it
   // without opening the inspector). Canvas-only.
   const [peekNote, setPeekNote] = useState(false);
+  // Hover-peek on the collapsed +N toggle: list the first few hidden child titles so you can decide
+  // whether to expand without re-laying out the map. Canvas-only.
+  const [peekCollapsed, setPeekCollapsed] = useState(false);
   // True while a marker is being dragged over this node (drag-and-drop marker application) — drives a
   // drop-highlight ring.
   const [markerDragOver, setMarkerDragOver] = useState(false);
@@ -508,9 +512,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           // Grabbing the grip retires its one-time coach hint (C7).
           onMouseDown={markRelateHintSeen}
           style={{
-            width: 11,
-            height: 11,
-            right: -6,
+            // 16px (was 11) so "drag to link" is a reliable target, not a fiddly dot.
+            width: 16,
+            height: 16,
+            right: -8,
             // Sit below the vertically-centred add-child ＋ so the two no longer overlap (C4).
             top: "calc(50% + 16px)",
             transform: "translateY(-50%)",
@@ -837,6 +842,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             e.stopPropagation();
             editing?.toggleCollapse(id);
           }}
+          onMouseEnter={() => setPeekCollapsed(true)}
+          onMouseLeave={() => setPeekCollapsed(false)}
           style={{
             position: "absolute",
             // Leaf-facing edge: left for a left-growing branch (two-sided left half / all-left), else
@@ -858,6 +865,41 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         >
           {collapsed ? (hiddenCount ?? "+") : "−"}
         </button>
+      ) : null}
+      {/* Hover-peek the hidden children of a collapsed branch — decide whether to expand without a
+          re-layout. Mirrors the note hover-peek; canvas-only (not authored into exports). */}
+      {peekCollapsed && collapsed && childTitles?.length ? (
+        <output
+          className="nodrag nopan"
+          style={{
+            position: "absolute",
+            top: "100%",
+            ...(tipLeft ? { left: 0 } : { right: 0 }),
+            marginTop: 6,
+            maxWidth: 240,
+            padding: "6px 10px",
+            borderRadius: 8,
+            background: "#fffef7",
+            border: "1px solid #e7dca8",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+            fontSize: 12,
+            lineHeight: 1.5,
+            color: "#3a3320",
+            zIndex: 7,
+          }}
+        >
+          {childTitles.map((t, i) => (
+            <div
+              key={`${i}:${t}`}
+              style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+            >
+              {t.trim() || "(untitled)"}
+            </div>
+          ))}
+          {(hiddenCount ?? 0) > childTitles.length ? (
+            <div style={{ opacity: 0.6 }}>…({(hiddenCount ?? 0) - childTitles.length} more)</div>
+          ) : null}
+        </output>
       ) : null}
       {/* On-node ＋ add affordances (#1): child on the right edge, sibling below. Shown on hover or
           selection; ≥24px desktop / ≥44px touch (see .mm-node-add). nodrag nopan so dragging from

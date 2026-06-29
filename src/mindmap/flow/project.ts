@@ -159,6 +159,7 @@ export function project(
         collapsed: Boolean(node.collapsed),
         hasChildren: node.children.length > 0,
         hiddenCount: node.collapsed ? node.children.length : undefined,
+        childTitles: node.collapsed ? node.children.slice(0, 6).map((c) => c.topic) : undefined,
         progress: progress.get(node.id),
         due: node.task?.due,
         start: node.task?.start,

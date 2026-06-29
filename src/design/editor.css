@@ -999,15 +999,15 @@
   transition: opacity 0.12s ease;
 }
 .react-flow__node:hover .mm-relate-handle {
-  opacity: 0.55;
+  opacity: 0.7;
 }
 .react-flow__node .mm-relate-handle:hover {
   opacity: 1;
 }
-/* A selected node shows its relate grip a little more at rest, so the link affordance is discoverable
-   without hovering (C7). Sits between the hover (0.55) and grip-hover (1) levels. */
+/* A selected node shows its relate grip clearly at rest, so the link affordance is discoverable
+   without hovering (C7). Sits between the hover (0.7) and grip-hover (1) levels. */
 .react-flow__node.selected .mm-relate-handle {
-  opacity: 0.75;
+  opacity: 0.9;
 }
 /* Touch: hover doesn't exist and the 44px ＋ dominates, so drop the relate grip from the canvas and
    route linking to long-press → the context menu's "Link to…". Keep collapse, but make it tap-sized so

@@ -46,6 +46,8 @@ export type TopicData = {
   hasChildren: boolean;
   /** When collapsed, the number of direct subtopics folded away — shown in the +N expand affordance. */
   hiddenCount?: number;
+  /** When collapsed, the first few hidden child topics — for the hover-peek on the +N toggle (canvas-only). */
+  childTitles?: string[];
   /** Rolled-up task progress (0..1 + done/total), or undefined when the node isn't a task. */
   progress?: ProgressInfo;
   /** Task due date ("YYYY-MM-DD"), shown as a chip (red when overdue). */

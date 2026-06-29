@@ -83,7 +83,7 @@ export default defineConfig({
       // No-regression floor, set just under the live numbers so routine variance doesn't flake but a
       // real drop fails the gate. Enforced when the gate runs `vitest run --coverage`. Raise as
       // coverage climbs. NB: the app-integration test loads the whole tree, so these reflect the
-      // COMPLETE denominator. Live ≈ lines/stmts 91.2, funcs 77.2, branches 86.6 (after the App.tsx
+      // COMPLETE denominator. Live ≈ lines/stmts 91.3, funcs 76.6, branches 86.7 (after the App.tsx
       // decomposition lifted file/autosave/import/selection logic into independently-tested modules).
       // lines/stmts sit just under their prior floor after two UX passes that added App/canvas UI whose
       // LOGIC is fully unit-tested in extracted components/helpers, but whose thin App wiring is gated
@@ -95,10 +95,10 @@ export default defineConfig({
       // code that builds an entry per panel only runs when each of the 10 panels is opened through the
       // Panels menu (flaky to drive across tests). functions/branches stay above their floor.
       thresholds: {
-        lines: 90.8,
-        statements: 90.8,
-        functions: 75.9,
-        branches: 86,
+        lines: 91,
+        statements: 91,
+        functions: 76.3,
+        branches: 86.4,
       },
     },
   },

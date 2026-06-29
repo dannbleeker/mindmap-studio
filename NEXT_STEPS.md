@@ -115,9 +115,9 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
 - [x] **Phase 4 — shortcut discoverability** (shipped — see CHANGELOG): rendered the (previously unused)
   `shortcut` slot in the toolbar menus + ⌘K from a drift-guarded `SHORTCUT_BINDINGS` map (pinned to the
   cheat-sheet by a test); added Settings + Keyboard-shortcuts entries to the "More" menu.
-- [ ] **Phase 5 — mobile viewport & sheet hardening:** `viewport-fit=cover` (then the existing
-  safe-area padding engages); bottom-sheet safe-area padding; `vh`→`dvh`; touch-size the React Flow
-  zoom controls; global touch reset (tap-highlight / overscroll / user-select).
+- [x] **Phase 5 — mobile viewport & sheet hardening** (shipped — see CHANGELOG): `viewport-fit=cover`
+  (engages the existing safe-area padding); bottom-sheet safe-area padding; `vh`→`dvh` (vh fallback);
+  touch-sized React Flow zoom controls; global touch reset (tap-highlight / overscroll / user-select).
 - [ ] **Phase 6 — mobile/tablet layout:** collapse/hide the 56px icon rail on phones; add a
   `(pointer:coarse)` tablet tier so iPad portrait isn't desktop-with-no-canvas.
 - [ ] **Phase 7 — Start library scanning & curation:** real branch-shaped thumbnails (widen

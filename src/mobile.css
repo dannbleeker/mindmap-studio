@@ -23,15 +23,21 @@
     right: 0;
     bottom: 0;
     width: 100% !important;
+    /* vh first as a fallback for older engines; dvh tracks the live visible viewport so the sheet
+       keeps a stable share of the screen as the iOS Safari URL bar shows/hides (plain vh resolves to
+       the LARGE viewport, so the sheet would eat more than 62% while the bar is visible). */
     height: 62vh;
+    height: 62dvh;
     z-index: 40;
     background: #fff;
     border-left: none;
     border-top: 1px solid #e2e0d8;
     box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.2);
     overflow: auto;
-    /* Room for the grab handle drawn at the top of the sheet (::before below). */
+    /* Room for the grab handle at the top; the bottom pad clears the iOS home indicator (the inset
+       is 0 unless index.html opts in via viewport-fit=cover, which it now does). */
     padding-top: 14px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
   /* The inspector is a flex column; restore that under the fixed-sheet positioning. */
   .mm-inspector {
@@ -88,4 +94,22 @@
   .mm-sheet-scrim {
     display: block;
   }
+}
+
+/* Touch hygiene — applies everywhere, no-ops on a mouse. Kills the grey iOS tap-flash on controls,
+   keeps over-scroll inside the canvas / sheets (no browser pull-to-refresh / rubber-band mid-gesture),
+   and stops a long-press from popping the text-selection callout on chrome labels. */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+.mm-editor,
+.mm-panel-host,
+.mm-inspector,
+.mm-menu-sheet {
+  overscroll-behavior: contain;
+}
+.mm-rail-btn,
+.mm-tbtn,
+.mm-dock-tab {
+  user-select: none;
 }

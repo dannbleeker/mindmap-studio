@@ -416,6 +416,7 @@
   box-shadow: var(--ed-shadow-pop);
   padding: 6px;
   max-height: 70vh;
+  max-height: 70dvh; /* track the live viewport on mobile (URL-bar show/hide); vh above is the fallback */
   overflow-y: auto;
 }
 /* Phone layout: a menu opens as a full-width bottom sheet instead of an anchored popover. */
@@ -428,6 +429,7 @@
   width: 100%;
   min-width: 0;
   max-height: 65vh;
+  max-height: 65dvh; /* live-viewport height on mobile; vh above is the older-engine fallback */
   border-radius: 14px 14px 0 0;
   box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.22);
   padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
@@ -1374,4 +1376,20 @@
 }
 .mm-doctab-new:hover {
   background: var(--ed-accent-tint);
+}
+
+/* React Flow's built-in zoom / fit controls default to ~26px — below the touch minimum the app
+   already adopted for its own affordances (40–44px). On a touch device wheel-zoom is unavailable and
+   pinch is imprecise, so these are the primary canvas controls; size them up to match. */
+@media (pointer: coarse) {
+  .react-flow__controls button {
+    width: 40px;
+    height: 40px;
+  }
+  .react-flow__controls button svg {
+    width: 18px;
+    height: 18px;
+    max-width: 18px;
+    max-height: 18px;
+  }
 }

@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Mobile viewport & touch hardening (UI review — Phase 5).** `viewport-fit=cover` now lets the PWA
+  use the full screen on notched iPhones AND switches on the `env(safe-area-inset-*)` values the CSS
+  already referenced (they were inert before), so the bottom sheets pad clear of the home indicator.
+  Sheet heights moved from `vh` to `dvh` (with a `vh` fallback) so they keep a stable share of the
+  screen as the iOS Safari URL bar shows/hides. The React Flow zoom/fit controls are sized up to the
+  app's 40px touch target on coarse-pointer devices. Plus global touch hygiene — no grey tap-flash,
+  contained over-scroll (no stray pull-to-refresh), and no long-press text-selection on chrome labels.
 - **Shortcut discoverability (UI review — Phase 4).** Key bindings now show at the point of use instead
   of only in the cheat-sheet: the ⌘K command palette renders an inline binding chip on every command
   that has one (Undo, Redo, Open/Save/Save-as), and the toolbar "More" menu shows the same chips on its

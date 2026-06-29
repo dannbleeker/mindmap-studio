@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover lets the PWA draw into the notch/home-bar area AND makes every
+         env(safe-area-inset-*) resolve to a real value (it's 0 without this) so the sheets can pad
+         for it on iOS standalone. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#26215c" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="icon" type="image/png" sizes="180x180" href="/apple-touch-icon.png" />

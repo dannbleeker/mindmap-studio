@@ -134,11 +134,11 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
 **UI-review remediation (2026-06-29 review) — Phases 1–12 all shipped** (see CHANGELOG). Open tails only:
 - **Phase 12 touch feel** wants a real-device pass — the snap/dismiss + keyboard logic is unit-tested, but
   the coarse-pointer drag feel (momentum, dismiss threshold) can't be exercised headlessly.
-- **Deferred, low value (each noted with rationale):** 10b on-canvas wrap-width drag handle (the node's
-  right edge is already contested by ＋/relate-grip/collapse, so a resize bar there collides — and the
-  Narrow/Medium/Wide/None presets already control wrap width); Export "last format" recency row (⌘K already
-  fuzzy-searches every format); full Start radius-scale tokenisation (sub-perceptual — the card radius was
-  the visible win); the min-height-node lower-right de-crowd.
+- **Deferred, low value:** 10b on-canvas wrap-width drag handle (the node's right edge is already contested
+  by ＋/relate-grip/collapse, so a resize bar there collides — and the Narrow/Medium/Wide/None presets
+  already control wrap width). Revisit only if the presets prove too coarse.
+  (Export "last format" recency row, full Start radius-scale tokenisation, and the min-height-node
+  lower-right de-crowd were the other deferred items — all shipped on request; see CHANGELOG.)
 
 ## Open items
 

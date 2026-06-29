@@ -252,6 +252,19 @@ describe("Toolbar — Export menu", () => {
     await u.click(screen.getByRole("menuitem", { name: /\.pptx/i }));
     expect(t.io.exportPptx).toHaveBeenCalled();
   });
+
+  it("pins the last-used format atop the menu and re-runs it", async () => {
+    localStorage.removeItem("mindmap-last-export");
+    const t = setup();
+    // First export records the format…
+    await u.click(screen.getByRole("button", { name: /^export/i }));
+    await u.click(screen.getByRole("menuitem", { name: /\.pptx/i }));
+    expect(t.io.exportPptx).toHaveBeenCalledTimes(1);
+    // …so reopening shows a pinned "Last: …pptx" row that re-runs it (read fresh on open).
+    await u.click(screen.getByRole("button", { name: /^export/i }));
+    await u.click(await screen.findByRole("menuitem", { name: /^Last:.*pptx/i }));
+    expect(t.io.exportPptx).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("Toolbar — More menu", () => {

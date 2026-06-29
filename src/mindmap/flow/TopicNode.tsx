@@ -21,6 +21,7 @@ import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
 import { matchBorderColor } from "./geometry";
 import { showNodeAffordances } from "./nodeChrome";
+import { relateGripTopCss } from "./relateGripGeometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
 import {
   TOPIC_SHADOW_CSS,
@@ -516,8 +517,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             width: 16,
             height: 16,
             right: -8,
-            // Sit below the vertically-centred add-child ＋ so the two no longer overlap (C4).
-            top: "calc(50% + 16px)",
+            // Sit below the vertically-centred add-child ＋ (C4) — but when a collapse toggle shares the
+            // right edge (a right-growing node with children), clamp the grip to ride just above it so
+            // the two never overlap on a short node (relateGripGeometry).
+            top: relateGripTopCss(hasChildren && !tipLeft),
             transform: "translateY(-50%)",
             border: "2px solid #fff",
             background: branchColor,

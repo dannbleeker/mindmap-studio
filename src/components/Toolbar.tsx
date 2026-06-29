@@ -14,6 +14,26 @@ import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../templates";
 import { EditorIcon, type EditorIconName } from "./EditorIcons";
 
+// Remember the last-chosen export format (by its menu label, the stable id) so the Export menu can pin a
+// one-click "Last used" row at the top — the common case is re-exporting the same format. Best-effort
+// localStorage, mirroring the ⌘K recents.
+const LAST_EXPORT_KEY = "mindmap-last-export";
+function loadLastExport(): string | null {
+  try {
+    const v = localStorage.getItem(LAST_EXPORT_KEY);
+    return typeof v === "string" && v ? v : null;
+  } catch {
+    return null;
+  }
+}
+function saveLastExport(label: string) {
+  try {
+    localStorage.setItem(LAST_EXPORT_KEY, label);
+  } catch {
+    // best-effort — the recency row just won't persist
+  }
+}
+
 // A tiny themed thumbnail for a design in the gallery (#5): the design's background, a root dot, and
 // three palette branches drawn with its connector style — so designs are told apart at a glance
 // instead of by an identical palette icon. Model is the pure designPreviewModel.
@@ -471,14 +491,41 @@ export function Toolbar({
             align="right"
             sheet={isMobile}
           >
-            {EXPORTS.map((g) => (
-              <div key={g.group}>
-                <MenuLabel>{g.group}</MenuLabel>
-                {g.items.map(([lbl, fn]) => (
-                  <MenuItem key={lbl} label={lbl} onSelect={fn} />
-                ))}
-              </div>
-            ))}
+            {/* Function-children so the "Last used" row is read fresh each time the menu opens (the
+                Menu re-renders on open), not snapshotted into the parent's render. */}
+            {() => {
+              const last = loadLastExport();
+              const lastItem = last
+                ? EXPORTS.flatMap((g) => g.items).find(([lbl]) => lbl === last)
+                : undefined;
+              const run = (lbl: string, fn: () => void) => () => {
+                saveLastExport(lbl);
+                fn();
+              };
+              return (
+                <>
+                  {/* One-click re-export of the last format used (the common case). */}
+                  {lastItem ? (
+                    <div>
+                      <MenuLabel>Recent</MenuLabel>
+                      <MenuItem
+                        label={`Last: ${lastItem[0]}`}
+                        onSelect={run(lastItem[0], lastItem[1])}
+                      />
+                      <MenuSeparator />
+                    </div>
+                  ) : null}
+                  {EXPORTS.map((g) => (
+                    <div key={g.group}>
+                      <MenuLabel>{g.group}</MenuLabel>
+                      {g.items.map(([lbl, fn]) => (
+                        <MenuItem key={lbl} label={lbl} onSelect={run(lbl, fn)} />
+                      ))}
+                    </div>
+                  ))}
+                </>
+              );
+            }}
           </Menu>
           <Menu
             trigger={menuTrigger("dots", "More", isMobile)}

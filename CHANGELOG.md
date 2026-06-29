@@ -7,6 +7,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Export menu remembers the last format (UI review follow-up).** The Export menu now pins a one-click
+  **Last: <format>** row at the top, persisted in localStorage and read fresh each time the menu opens —
+  re-exporting the same format (the common case) is one click instead of hunting the grouped list.
+
+- **Topic-node corner de-crowded (UI review follow-up).** On a short, right-growing node with children,
+  the drag-to-relate grip could overlap the always-visible collapse toggle. The grip now clamps to ride
+  just above the toggle (CSS `min()`, no JS height measurement) while keeping its full below-centre offset
+  on taller nodes — extracted as a pure `relateGripGeometry` module with a permanent clearance test
+  (verified against a real layout engine).
+
+- **Start radius scale tokenised (UI review follow-up).** The Start screen's two dozen scattered
+  `border-radius` literals (5/6/8/9/10/12/14px) now resolve to a four-rung `--st-radius-*` scale on `.start`
+  that mirrors the editor's `design/tokens.ts`; the off-scale 9/10/14 values snap to the nearest rung
+  (sub-perceptual) so corners read as one consistent system. Pill shapes (search bar, recent chips) stay
+  literal `999px`. One source of truth for Start corner radii.
+
 - **Mobile sheet drag-to-resize (UI review — Phase 12).** The bottom sheet's grab handle was decorative
   (`pointer-events:none`) and the sheet was locked at 62dvh. It's now a real, focusable handle: drag to
   resize the sheet — snapping between 62dvh and ~90dvh — drag down past a threshold to dismiss, or focus it

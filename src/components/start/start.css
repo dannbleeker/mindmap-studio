@@ -7,6 +7,13 @@
   background: var(--st-page);
   color: var(--st-ink);
   font: 14px / 1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Corner-radius scale (theme-independent) — mirrors design/tokens.ts so Start corners line up with the
+     editor. Every non-pill border-radius below resolves to one of these four rungs (the old scattered
+     9/10/14px literals snap to the nearest). Pills (.st-search-bar, .st-recent-item) stay literal 999px. */
+  --st-radius-sm: 5px;
+  --st-radius-md: 6px;
+  --st-radius-lg: 8px;
+  --st-radius-xl: 12px;
 }
 .start *,
 .start *::before,
@@ -49,7 +56,7 @@
   width: 100%;
   min-height: 38px;
   border: none;
-  border-radius: 9px;
+  border-radius: var(--st-radius-lg);
   background: var(--st-accent);
   color: #fff;
   font: inherit;
@@ -79,7 +86,7 @@
   min-height: 36px;
   padding: 0 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--st-radius-lg);
   background: transparent;
   color: var(--st-ink2);
   font: inherit;
@@ -123,7 +130,7 @@
   display: flex;
   gap: 8px;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-xl);
   background: var(--st-card);
   border: 1px solid var(--st-border);
   font-size: 11.5px;
@@ -161,7 +168,7 @@
   min-height: 34px;
   padding: 0 12px;
   border: 1px solid var(--st-border);
-  border-radius: 9px;
+  border-radius: var(--st-radius-lg);
   background: var(--st-card);
   color: var(--st-muted);
   font: inherit;
@@ -176,7 +183,7 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 11px;
   padding: 1px 5px;
-  border-radius: 5px;
+  border-radius: var(--st-radius-sm);
   border: 1px solid var(--st-border);
   background: var(--st-page);
   color: var(--st-ink2);
@@ -237,7 +244,7 @@
   background: var(--st-card);
   border: 1px solid var(--st-border);
   /* 12px to match the editor's card radius (was 14) so the two surfaces read as one product. */
-  border-radius: 12px;
+  border-radius: var(--st-radius-xl);
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 .st-card-hover:hover {
@@ -258,7 +265,7 @@
   min-height: 38px;
   padding: 0 14px;
   border: 1px solid var(--st-border);
-  border-radius: 9px;
+  border-radius: var(--st-radius-lg);
   background: var(--st-card);
   color: var(--st-ink);
   font: inherit;
@@ -284,7 +291,7 @@
   min-height: 38px;
   padding: 9px 12px;
   border: 1px solid var(--st-border);
-  border-radius: 10px;
+  border-radius: var(--st-radius-xl);
   background: var(--st-page);
   color: var(--st-ink);
   font: inherit;
@@ -402,7 +409,7 @@
   cursor: pointer;
   width: 24px;
   height: 24px;
-  border-radius: 6px;
+  border-radius: var(--st-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -430,7 +437,7 @@
   padding: 4px;
   background: var(--st-card);
   border: 1px solid var(--st-border);
-  border-radius: 9px;
+  border-radius: var(--st-radius-lg);
   box-shadow: var(--st-shadow);
   display: flex;
   flex-direction: column;
@@ -442,7 +449,7 @@
   color: var(--st-ink);
   font: inherit;
   padding: 6px 9px;
-  border-radius: 6px;
+  border-radius: var(--st-radius-md);
   cursor: pointer;
 }
 .st-kebab-menu button:hover {
@@ -469,7 +476,7 @@
   padding: 3px;
   background: var(--st-page);
   border: 1px solid var(--st-border);
-  border-radius: 10px;
+  border-radius: var(--st-radius-xl);
   margin-bottom: 14px;
 }
 .st-tab {
@@ -480,7 +487,7 @@
   font-weight: 600;
   font-size: 13px;
   padding: 6px 14px;
-  border-radius: 8px;
+  border-radius: var(--st-radius-lg);
   cursor: pointer;
 }
 .st-tab[aria-selected="true"] {
@@ -512,7 +519,7 @@
   font-size: 11px;
   padding: 1px 5px;
   border: 1px solid var(--st-border);
-  border-radius: 5px;
+  border-radius: var(--st-radius-sm);
   background: var(--st-page);
 }
 .st-layout-row {
@@ -525,7 +532,7 @@
   width: 78px;
   height: 56px;
   border: 1px solid var(--st-border);
-  border-radius: 9px;
+  border-radius: var(--st-radius-lg);
   background: var(--st-page);
   color: #26215c;
   cursor: pointer;
@@ -547,7 +554,7 @@
   display: flex;
   flex-direction: column;
   border: 1px solid var(--st-border);
-  border-radius: 12px;
+  border-radius: var(--st-radius-xl);
   overflow: hidden;
 }
 .st-list-row {
@@ -573,7 +580,7 @@
   min-height: 34px;
   padding: 0 10px;
   border: 1px solid var(--st-border);
-  border-radius: 9px;
+  border-radius: var(--st-radius-lg);
   background: var(--st-card);
   color: var(--st-ink);
   font: inherit;
@@ -601,7 +608,7 @@
   padding: 12px 14px;
   border: 1px solid var(--st-accent);
   background: var(--st-accent-tint);
-  border-radius: 12px;
+  border-radius: var(--st-radius-xl);
   color: var(--st-ink);
   font-size: 13.5px;
   line-height: 1.5;
@@ -619,7 +626,7 @@
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--st-radius-md);
   padding: 2px 8px;
 }
 .st-newhere-x:hover {
@@ -669,7 +676,7 @@
      opaque background — otherwise in the editor the canvas bleeds through and rows overlap. */
   background: var(--st-card, var(--ed-card, #fff));
   border: 1px solid var(--st-border, var(--ed-border, #d9d4c8));
-  border-radius: 14px;
+  border-radius: var(--st-radius-xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
@@ -700,7 +707,7 @@
   color: var(--st-ink, var(--ed-ink, #23211c));
   font: inherit;
   padding: 9px 11px;
-  border-radius: 8px;
+  border-radius: var(--st-radius-lg);
   cursor: pointer;
 }
 .st-cmdk-item[data-active="true"] {
@@ -719,7 +726,7 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 10.5px;
   padding: 1px 5px;
-  border-radius: 5px;
+  border-radius: var(--st-radius-sm);
   border: 1px solid var(--st-border, var(--ed-border, #d9d4c8));
   background: var(--st-page, var(--ed-page, #f7f4ec));
   color: var(--st-ink2, var(--ed-ink2, #54513f));
@@ -805,7 +812,7 @@
     width: 38px;
     min-height: 34px;
     border: 1px solid var(--st-border);
-    border-radius: 9px;
+    border-radius: var(--st-radius-lg);
     background: var(--st-card);
     color: var(--st-ink);
     font-size: 18px;

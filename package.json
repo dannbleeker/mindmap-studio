@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@11.0.9",
   "description": "Local-first mind mapping PWA — a MindManager replacement.",
   "license": "Apache-2.0",
   "scripts": {

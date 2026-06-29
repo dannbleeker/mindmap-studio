@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-29T17:43:27.990Z",
-  "commit": "cccf80f",
+  "generatedAt": "2026-06-29T17:50:50.402Z",
+  "commit": "edca0a6",
   "headline": {
     "linesTsJs": 61884,
     "tests": 1714,
     "lineCoveragePct": 91.2,
-    "commits": 942,
+    "commits": 944,
     "ageDays": 17,
     "trackedFiles": 429,
     "featureManualPct": 72.1,
@@ -31,7 +31,7 @@
     {
       "category": "Styles (CSS)",
       "files": 3,
-      "lines": 2394
+      "lines": 2428
     },
     {
       "category": "Docs (Markdown)",
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 1714,
     "e2e": 0,
-    "durationMs": 73943,
+    "durationMs": 77466,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 23132
+        "ms": 21636
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 18741
+        "ms": 18626
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8546
+        "ms": 7806
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7759
+        "ms": 6974
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3891
+        "ms": 4046
       }
     ]
   },
@@ -190,7 +190,7 @@
   "bundle": {
     "jsGzipKb": 304.1,
     "cssGzipKb": 9.6,
-    "totalGzipKb": 313.7,
+    "totalGzipKb": 313.8,
     "entryGzipKb": 144.2,
     "budgetKb": 150,
     "withinBudget": true
@@ -806,16 +806,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 17,
-    "commits": 942,
-    "commits7d": 171,
+    "commits": 944,
+    "commits7d": 173,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 469
+        "count": 470
       },
       {
         "name": "github-actions[bot]",
-        "count": 438
+        "count": 439
       },
       {
         "name": "Claude",
@@ -823,9 +823,9 @@
       }
     ],
     "churn30d": {
-      "added": 116938,
-      "removed": 36446
+      "added": 117032,
+      "removed": 36494
     },
-    "changelogEntries": 348
+    "changelogEntries": 349
   }
 }

@@ -2355,6 +2355,9 @@ export function App() {
           commands={buildEditorCommands(toolbarProps)}
           onClose={() => setCmdkOpen(false)}
           placeholder="Search commands…"
+          // When a topic is selected these kinds are enabled, so ⌘K (empty query) leads with the
+          // node-scoped actions under a "For the selected topic" header.
+          contextKinds={["node", "marker", "priority"]}
         />
       )}
     </div>

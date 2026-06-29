@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Context-ranked ⌘K (UI review — Phase 11d).** Open the command palette with a topic selected and the
+  node-scoped actions (delete, markers, priority, …) now lead the list under a **For the selected topic**
+  header — ahead of Recent and All commands — so what you can do to the selection is one keystroke away
+  instead of buried. Completes Phase 11. (The palette's section model is now a general list, not just
+  recent-vs-rest.)
+
 - **Panels menu grouped (UI review — Phase 11c).** The twelve side-panel toggles were one flat list under
   a single "Side panels" label. They're now sorted into three labelled groups — **Structure** / **Analysis**
   / **Workflow** — and the duplicate leading icons (layers ×2, grid ×2, note ×2) are de-collided to distinct

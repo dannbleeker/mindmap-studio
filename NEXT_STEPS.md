@@ -142,12 +142,12 @@ affordances, visual micro-polish, sheet drag-to-resize) remain open from the 202
   (add-child ＋, relate-grip, collapse toggle), so a full-height resize bar there is collision-prone;
   the value is incremental (Narrow/Medium/Wide/None presets already control wrap width). Revisit only if
   the presets prove too coarse. (Min-height lower-right de-crowd also deferred — the weak half.)
-- [~] **Phase 11 — visual micro-polish.** **11a shipped (see CHANGELOG):** indigo `#26215c` → brand
+- [x] **Phase 11 — visual micro-polish.** **11a shipped (see CHANGELOG):** indigo `#26215c` → brand
   tokens (Start thumbnail + `theme-color`); `:active` press nudge (editor + Start); Start card radius
-  12px; active left-rail 3px accent edge. **11b shipped:** Start nav vector (SVG) icons. **11c shipped:**
-  Panels menu grouped into Structure/Analysis/Workflow + de-collided icons. **Open:** 11d — context-rank
-  ⌘K when a node is selected. (Export "last format" recency row deferred — minor; ⌘K already fuzzy-searches
-  every export format.)
+  12px; active left-rail 3px accent edge. **11b:** Start nav vector (SVG) icons. **11c:** Panels menu
+  grouped into Structure/Analysis/Workflow + de-collided icons. **11d:** context-ranked ⌘K ("For the
+  selected topic" leads when a node is selected). (Export "last format" recency row deferred — minor; ⌘K
+  already fuzzy-searches every export format.)
   (Full Start-radius-scale tokenisation deferred — sub-perceptual; the card radius was the visible win.)
 - [ ] **Phase 12 — sheet drag-to-resize (L):** replace the fake (pointer-events:none) grab handle
   with a real pointer-drag (snap detents + drag-down-to-dismiss). Isolated last (only large item).

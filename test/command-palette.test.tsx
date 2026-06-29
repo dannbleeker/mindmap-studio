@@ -139,6 +139,26 @@ describe("CommandPalette (generic)", () => {
     expect(screen.getByText("Recent")).toBeTruthy();
   });
 
+  it("leads the empty-query list with selection-scoped commands under a context header (Phase 11d)", () => {
+    localStorage.removeItem("mindmap-cmdk-recent");
+    const run = vi.fn();
+    render(
+      <CommandPalette
+        commands={[
+          { id: "v-fit", label: "Fit to view", kind: "view", run: () => {} },
+          { id: "node-del", label: "Delete selected topic", kind: "node", run },
+          { id: "mk-flag", label: "Marker: flag", kind: "marker", run: () => {} },
+        ]}
+        onClose={vi.fn()}
+        contextKinds={["node", "marker", "priority"]}
+      />,
+    );
+    expect(screen.getByText("For the selected topic")).toBeTruthy();
+    // The node-scoped command leads; the generic "view" command falls under "All commands".
+    expect(screen.getAllByRole("option")[0].textContent).toContain("Delete selected topic");
+    expect(screen.getByText("All commands")).toBeTruthy();
+  });
+
   it("restores focus to the opener on Escape, but not after running a command", () => {
     // Opener stands in for whatever had focus when ⌘K opened (a toolbar button, the canvas, …).
     const opener = document.createElement("button");

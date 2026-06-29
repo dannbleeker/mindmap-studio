@@ -68,12 +68,20 @@ export function CommandPalette({
   onClose,
   placeholder = "Search commands…",
   makeQueryCommand,
+  contextKinds,
+  contextLabel,
 }: {
   commands: Command[];
   onClose: () => void;
   placeholder?: string;
   /** Optional command derived from the live query, prepended to the list (e.g. "New map: <q>"). */
   makeQueryCommand?: (query: string) => Command | null;
+  /** Command kinds that are scoped to the current selection (e.g. "node" / "marker" / "priority"). When
+   *  any such command is enabled (= something is selected), the empty-query list leads with them under a
+   *  "For the selected topic" header. Omit for generic palettes (e.g. the Start screen). */
+  contextKinds?: string[];
+  /** Header shown above the context-kind commands (default "For the selected topic"). */
+  contextLabel?: string;
 }) {
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
@@ -115,27 +123,46 @@ export function CommandPalette({
   // reshuffle under the cursor mid-session).
   const recentIds = useMemo(() => loadRecent(), []);
 
-  const { items, recentCount } = useMemo<{ items: Command[]; recentCount: number }>(() => {
+  const { items, sections } = useMemo<{
+    items: Command[];
+    sections: { at: number; label: string }[];
+  }>(() => {
     const query = q.trim().toLowerCase();
     const enabled = commands.filter((c) => c.enabled !== false);
     if (!query) {
-      // Empty query: lead with the recently-used (still present) commands, then the rest.
+      // Empty query: lead with selection-scoped commands (when something's selected → those kinds are
+      // enabled), then the recently-used, then everything else — each under its own section header.
+      const context = contextKinds?.length
+        ? enabled.filter((c) => contextKinds.includes(c.kind))
+        : [];
+      const contextSet = new Set(context.map((c) => c.id));
       const recent = recentIds
         .map((id) => enabled.find((c) => c.id === id))
-        .filter((c): c is Command => !!c);
+        .filter((c): c is Command => !!c && !contextSet.has(c.id));
       const recentSet = new Set(recent.map((c) => c.id));
-      return {
-        items: [...recent, ...enabled.filter((c) => !recentSet.has(c.id))],
-        recentCount: recent.length,
-      };
+      const rest = enabled.filter((c) => !contextSet.has(c.id) && !recentSet.has(c.id));
+      const sections: { at: number; label: string }[] = [];
+      if (context.length) sections.push({ at: 0, label: contextLabel ?? "For the selected topic" });
+      if (recent.length) sections.push({ at: context.length, label: "Recent" });
+      // "All commands" only earns a header when something sits above it.
+      if (rest.length && (context.length || recent.length))
+        sections.push({ at: context.length + recent.length, label: "All commands" });
+      return { items: [...context, ...recent, ...rest], sections };
     }
     const matched = enabled.filter((c) =>
       matches(`${c.label} ${c.keywords ?? ""}`.toLowerCase(), query),
     );
     const qc = makeQueryCommand?.(q.trim());
     if (qc) matched.unshift(qc);
-    return { items: matched, recentCount: 0 };
-  }, [q, commands, makeQueryCommand, recentIds]);
+    return { items: matched, sections: [] };
+  }, [q, commands, makeQueryCommand, recentIds, contextKinds, contextLabel]);
+
+  // Section headers keyed by the item index they precede (Recent / All commands / context group).
+  const sectionAt = useMemo(() => {
+    const m = new Map<number, string>();
+    for (const s of sections) m.set(s.at, s.label);
+    return m;
+  }, [sections]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset highlight to top when the result set changes.
   useEffect(() => setActive(0), [items.length]);
@@ -236,14 +263,9 @@ export function CommandPalette({
           ) : (
             items.map((c, i) => (
               <Fragment key={c.id}>
-                {recentCount > 0 && i === 0 ? (
+                {sectionAt.has(i) ? (
                   <div style={sectionStyle} role="presentation">
-                    Recent
-                  </div>
-                ) : null}
-                {recentCount > 0 && i === recentCount ? (
-                  <div style={sectionStyle} role="presentation">
-                    All commands
+                    {sectionAt.get(i)}
                   </div>
                 ) : null}
                 <button

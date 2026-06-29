@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { downloadBlob } from "./io/download";
 import { buildPrintDoc, wrapSvgHtml } from "./io/html";
 import { serializeDoc } from "./io/json";
 import { toMarkdown } from "./io/markdown";
@@ -8,15 +9,6 @@ import { sanitizeSvg } from "./io/svgSanitize";
 import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
 import { outlineNumbers } from "./outline";
-
-function download(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 // Rasterise an SVG string to a PNG via an offscreen canvas. Safe because the exporter emits
 // native <text> (no foreignObject) — a foreignObject SVG would taint the canvas, which is
@@ -90,7 +82,7 @@ export function useMapExports(
 
   return {
     exportJson() {
-      download(
+      downloadBlob(
         new Blob([serializeDoc(getDoc())], { type: "application/json" }),
         `${baseName()}.json`,
       );
@@ -98,21 +90,24 @@ export function useMapExports(
     exportMarkdown() {
       const d = getDoc();
       const nums = numbered?.() ? outlineNumbers(d.root, d.meta?.numberStyle) : undefined;
-      download(new Blob([toMarkdown(d, nums)], { type: "text/markdown" }), `${baseName()}.md`);
+      downloadBlob(new Blob([toMarkdown(d, nums)], { type: "text/markdown" }), `${baseName()}.md`);
     },
     // Mermaid `mindmap` text (mermaid.ts is dependency-free, so static-imported).
     exportMermaid() {
-      download(new Blob([toMermaid(getDoc())], { type: "text/vnd.mermaid" }), `${baseName()}.mmd`);
+      downloadBlob(
+        new Blob([toMermaid(getDoc())], { type: "text/vnd.mermaid" }),
+        `${baseName()}.mmd`,
+      );
     },
     async exportOpml() {
       // Lazy: opml.ts pulls in fast-xml-parser, kept out of the entry bundle.
       const { toOpml } = await import("./io/opml");
-      download(new Blob([toOpml(getDoc())], { type: "text/x-opml" }), `${baseName()}.opml`);
+      downloadBlob(new Blob([toOpml(getDoc())], { type: "text/x-opml" }), `${baseName()}.opml`);
     },
     // FreeMind / Freeplane .mm — lazy (freemind.ts pulls fast-xml-parser for its importer).
     async exportFreemind() {
       const { toFreemind } = await import("./io/freemind");
-      download(
+      downloadBlob(
         new Blob([toFreemind(getDoc())], { type: "application/x-freemind" }),
         `${baseName()}.mm`,
       );
@@ -121,7 +116,7 @@ export function useMapExports(
     async exportXmind() {
       const { toXmind } = await import("./io/xmind");
       const bytes = toXmind(getDoc()) as BlobPart;
-      download(
+      downloadBlob(
         new Blob([bytes], { type: "application/vnd.xmind.workbook" }),
         `${baseName()}.xmind`,
       );
@@ -130,14 +125,14 @@ export function useMapExports(
     async exportSmmx() {
       const { toSmmx } = await import("./io/smmx");
       const bytes = toSmmx(getDoc()) as BlobPart;
-      download(new Blob([bytes], { type: "application/octet-stream" }), `${baseName()}.smmx`);
+      downloadBlob(new Blob([bytes], { type: "application/octet-stream" }), `${baseName()}.smmx`);
     },
     // MindManager .mmap — a ZIP (Document.xml); lazy (mmap.ts pulls fflate). Inverse of the
     // .mmap importer; round-trips topics/notes/links/icons + the two-sided side.
     async exportMmap() {
       const { toMmap } = await import("./io/mmap");
       const bytes = toMmap(getDoc()) as BlobPart;
-      download(
+      downloadBlob(
         new Blob([bytes], { type: "application/vnd.mindjet.mindmanager" }),
         `${baseName()}.mmap`,
       );
@@ -150,7 +145,7 @@ export function useMapExports(
         return;
       }
       const blob = await svgToPng(clean);
-      if (blob) download(blob, `${baseName()}.png`);
+      if (blob) downloadBlob(blob, `${baseName()}.png`);
     },
     async exportSvg() {
       const clean = await cleanSvg();
@@ -158,7 +153,7 @@ export function useMapExports(
         noCanvas();
         return;
       }
-      download(new Blob([clean], { type: "image/svg+xml" }), `${baseName()}.svg`);
+      downloadBlob(new Blob([clean], { type: "image/svg+xml" }), `${baseName()}.svg`);
     },
     async exportHtml() {
       const clean = await cleanSvg();
@@ -166,7 +161,7 @@ export function useMapExports(
         noCanvas();
         return;
       }
-      download(
+      downloadBlob(
         new Blob([wrapSvgHtml(clean, baseName())], { type: "text/html" }),
         `${baseName()}.html`,
       );
@@ -177,7 +172,7 @@ export function useMapExports(
     // lazy-loaded so the template + runtime stay out of the entry chunk.
     async exportInteractiveHtml() {
       const { buildInteractiveHtml } = await import("./io/interactiveHtml");
-      download(
+      downloadBlob(
         new Blob([buildInteractiveHtml(getDoc())], { type: "text/html" }),
         `${baseName()}-interactive.html`,
       );
@@ -186,7 +181,7 @@ export function useMapExports(
     // Model-backed (no SVG), lazy-loaded to keep the deck template out of the entry chunk.
     async exportDeck() {
       const { buildDeckHtml } = await import("./io/deck");
-      download(
+      downloadBlob(
         new Blob([buildDeckHtml(getDoc())], { type: "text/html" }),
         `${baseName()}-slides.html`,
       );
@@ -218,7 +213,7 @@ export function useMapExports(
       // plain ArrayBuffer-backed view, so it's a valid BlobPart — the cast just
       // satisfies the stricter lib.dom generic.
       const bytes = buildDocx(getDoc()) as BlobPart;
-      download(
+      downloadBlob(
         new Blob([bytes], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         }),
@@ -230,7 +225,7 @@ export function useMapExports(
     async exportPptx() {
       const { buildPptx } = await import("./io/pptx");
       const bytes = buildPptx(getDoc()) as BlobPart;
-      download(
+      downloadBlob(
         new Blob([bytes], {
           type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         }),
@@ -242,7 +237,7 @@ export function useMapExports(
     async exportXlsx() {
       const { buildXlsx } = await import("./io/xlsx");
       const bytes = buildXlsx(getDoc()) as BlobPart;
-      download(
+      downloadBlob(
         new Blob([bytes], {
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         }),

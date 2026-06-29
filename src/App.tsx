@@ -67,6 +67,7 @@ import { useToast } from "./hooks/useToast";
 import { useVersionHistory } from "./hooks/useVersionHistory";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
+import { downloadBlob } from "./io/download";
 import { isNativeExt, readMapFromHandle } from "./io/fileSystem";
 import { fileToMapImage } from "./io/image";
 import { parseImport } from "./io/importDispatch";
@@ -710,15 +711,6 @@ export function App() {
       })();
     });
   }, [adoptOpenedFile, importForeignFile]);
-
-  function downloadBlob(blob: Blob, filename: string) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   async function exportLibrary() {
     try {

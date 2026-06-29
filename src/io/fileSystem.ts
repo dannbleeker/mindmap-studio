@@ -10,6 +10,7 @@
 // schema-v1 JSON that `serializeDoc` produces, so a `.mmst` is also a valid `.json` import.
 
 import type { MindMapDoc } from "../model/types";
+import { downloadBlob } from "./download";
 import { parseDoc, serializeDoc } from "./json";
 
 /** Native file extension (a custom extension is what lets Windows associate the PWA with it). */
@@ -143,12 +144,7 @@ export async function writeMapToHandle(
 /** Fallback download (browsers without the save picker): emit the doc as a `.mmst` download. */
 export function downloadMapFile(doc: MindMapDoc): void {
   const blob = new Blob([serializeDoc(doc)], { type: NATIVE_MIME });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = suggestedFileName(doc);
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, suggestedFileName(doc));
 }
 
 /** A user-cancelled picker rejects with an AbortError — treated as "no selection", not an error. */

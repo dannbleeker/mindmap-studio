@@ -1,3 +1,4 @@
+import { downloadBlob } from "../../io/download";
 import type { MindMapDoc } from "../../model/types";
 import { loadMap, saveMap } from "../../store/mapStore";
 import type { MapEntry } from "./MapCard";
@@ -13,12 +14,7 @@ function download(doc: MindMapDoc): void {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "") || "map";
   const blob = new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${name}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, `${name}.json`);
 }
 
 export async function handleMapAction(

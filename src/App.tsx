@@ -123,6 +123,15 @@ import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
 import { useTheme } from "./useTheme";
 
+// DEV-only verification hooks the headless render harness reads off `window` (set in a DEV effect below).
+// Declared here so the effect can assign them without an `as unknown as` cast on `window`.
+declare global {
+  interface Window {
+    __getLiveDoc?: () => MindMapDoc;
+    __exportSvg?: () => Promise<string> | null;
+  }
+}
+
 // Lazy-loaded so they never sit in the entry bundle (the size-budget gates the entry chunk only),
 // matching the canvas's own code-split idiom (src/mindmap/index.tsx). The Start screen is shown only
 // on a fresh boot with no open document — an async decision, so deferring its chunk is invisible to the
@@ -1100,12 +1109,8 @@ export function App() {
   // the app — the Phase F go/no-go check).
   useEffect(() => {
     if (import.meta.env.DEV) {
-      const w = window as unknown as {
-        __getLiveDoc?: () => MindMapDoc;
-        __exportSvg?: () => Promise<string> | null;
-      };
-      w.__getLiveDoc = () => liveDocRef.current;
-      w.__exportSvg = () => mapRef.current?.exportSvg()?.text() ?? null;
+      window.__getLiveDoc = () => liveDocRef.current;
+      window.__exportSvg = () => mapRef.current?.exportSvg()?.text() ?? null;
     }
   }, []);
 

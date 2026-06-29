@@ -144,6 +144,18 @@ export function findAnyNode(doc: MindMapDoc, id: string): MapNode | null {
   return null;
 }
 
+/** The parent node of `id` (the node whose children include it), or null when `id` is the central
+ *  root, a floating top-level node, or not found — used to duplicate a branch as a sibling. */
+export function findParent(doc: MindMapDoc, id: string): MapNode | null {
+  const inTree = locate(doc.root, id);
+  if (inTree) return inTree.parent;
+  for (const f of doc.floatingTopics ?? []) {
+    const found = locate(f, id);
+    if (found) return found.parent;
+  }
+  return null;
+}
+
 /** Logical tree direction for arrow-key selection movement. */
 export type SelectDir = "up" | "down" | "left" | "right";
 

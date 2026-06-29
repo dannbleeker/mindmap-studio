@@ -96,6 +96,7 @@ import {
   distributeNodes,
   findAnyNode,
   findNode,
+  findParent,
   groupBranch,
   groupNodes,
   groupSummary,
@@ -241,6 +242,8 @@ const MENU_SHORTCUT: Record<string, string> = {
   "Add sibling": "Enter",
   Rename: "F2",
   Delete: "Del",
+  "Copy branch": "Ctrl/⌘+C",
+  "Paste branch here": "Ctrl/⌘+Shift+V",
 };
 
 /** Count all descendants of a node (the size of the branch beneath it) — drives the delete toast. */
@@ -1334,6 +1337,36 @@ function FlowInner({
         case "selectDir": {
           const next = nextSelectionId(docRef.current, intent.id, intent.dir);
           if (next) focusNodeById(next);
+          break;
+        }
+        case "copyBranch": {
+          const n = findAnyNode(docRef.current, intent.id);
+          if (n) {
+            setBranch(structuredClone(n));
+            onHintRef.current?.("Branch copied — paste with Ctrl/⌘+Shift+V.");
+          }
+          break;
+        }
+        case "duplicateBranch": {
+          const n = findAnyNode(docRef.current, intent.id);
+          if (!n || intent.id === docRef.current.root.id) {
+            onHintRef.current?.("Select a topic to duplicate (not the central one).");
+            break;
+          }
+          // Paste a clone under the same parent → a sibling (or floating if the node has no parent).
+          const parent = findParent(docRef.current, intent.id);
+          apply(pasteBranch(docRef.current, parent?.id ?? null, structuredClone(n)));
+          onHintRef.current?.("Branch duplicated.");
+          break;
+        }
+        case "pasteBranch": {
+          const clip = getBranch();
+          if (clip) {
+            apply(pasteBranch(docRef.current, intent.id, clip));
+            onHintRef.current?.("Branch pasted under the selection.");
+          } else {
+            onHintRef.current?.("Nothing to paste — copy a branch first (Ctrl/⌘+C).");
+          }
           break;
         }
       }

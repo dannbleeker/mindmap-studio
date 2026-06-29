@@ -222,6 +222,27 @@ describe("FlowMindMap canvas", () => {
     run(() => fireEvent.keyDown(document, { key: "y", ctrlKey: true }));
   });
 
+  it("keyboard branch clipboard: copy, duplicate-as-sibling, and paste under the selection", () => {
+    localStorage.removeItem("mindmap-branch-clipboard");
+    const { h, onChange } = mount(); // root > [a (> a1), b]
+    run(() => h.focusNode("a"));
+    // Ctrl+C copies the "a" branch to the clipboard.
+    run(() => fireEvent.keyDown(document, { key: "c", ctrlKey: true }));
+    expect(localStorage.getItem("mindmap-branch-clipboard")).toContain("Alpha");
+    // Ctrl+D duplicates "a" as a sibling → root grows from 2 children to 3.
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(document, { key: "d", ctrlKey: true }));
+    expect((onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children).toHaveLength(3);
+    // Ctrl+Shift+V pastes the copied branch UNDER the selection → "a" gains a child (a1 + paste).
+    run(() => h.focusNode("a"));
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(document, { key: "v", ctrlKey: true, shiftKey: true }));
+    const a = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "a",
+    );
+    expect(a?.children.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("Ctrl+Enter adds a child of the selected node (plain Enter still adds a sibling)", () => {
     const { h, onChange } = mount();
     run(() => h.focusNode("a")); // "a" starts with one child (a1)

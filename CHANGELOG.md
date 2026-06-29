@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Keyboard branch copy / duplicate / paste (UI review — Phase 9a).** The canvas gains the muscle-memory
+  editing keys: **Ctrl/⌘+C** copies the selected branch, **Ctrl/⌘+D** duplicates it as a sibling, and
+  **Ctrl/⌘+Shift+V** pastes a copied branch under the selection (plain Ctrl/⌘+V stays the image paste, so
+  there's no collision). The branch was already copyable from the right-click menu; now it's keyboard-driven
+  too. The new keys appear in the cheat-sheet and on the Copy/Paste context-menu rows.
+
 - **Custom relationship / boundary colours (UI review — Phase 8c).** The Edge and Overlay inspectors'
   colour rows gain a native colour picker beside the preset swatches, so a relationship or boundary can
   take an exact brand/accent hue (e.g. matching the map accent) instead of being limited to the ~8

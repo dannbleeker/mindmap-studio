@@ -27,6 +27,7 @@ import {
   distributeNodes,
   findAnyNode,
   findNode,
+  findParent,
   groupBranch,
   groupNodes,
   groupSummary,
@@ -141,6 +142,21 @@ describe("flow ops — structural", () => {
   it("addSibling on the root adds a child instead", () => {
     const { doc, selectId } = addSibling(base(), "r");
     expect(kids(doc, "r")).toContain(selectId);
+  });
+
+  it("findParent returns the parent node (null for root / floating-top / missing)", () => {
+    expect(findParent(base(), "a1")?.id).toBe("a");
+    expect(findParent(base(), "a")?.id).toBe("r");
+    expect(findParent(base(), "r")).toBeNull(); // the central root has no parent
+    expect(findParent(base(), "missing")).toBeNull();
+    const withFloat = {
+      ...base(),
+      floatingTopics: [
+        { id: "f", topic: "F", children: [{ id: "f1", topic: "F1", children: [] }] },
+      ],
+    };
+    expect(findParent(withFloat, "f1")?.id).toBe("f");
+    expect(findParent(withFloat, "f")).toBeNull(); // a floating top-level node has no parent
   });
 
   it("addChild appends and expands the parent", () => {

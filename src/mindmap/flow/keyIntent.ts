@@ -17,6 +17,9 @@ export type KeyIntent =
   | { kind: "rename"; id: string }
   | { kind: "typeEdit"; id: string; seed: string }
   | { kind: "selectDir"; id: string; dir: "up" | "down" | "left" | "right" }
+  | { kind: "copyBranch"; id: string }
+  | { kind: "duplicateBranch"; id: string }
+  | { kind: "pasteBranch"; id: string }
   | null;
 
 export interface KeyState {
@@ -65,6 +68,14 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
     return { kind: "moveDown", id };
   if (e.altKey && e.shiftKey && e.key === "ArrowLeft") return { kind: "outdent", id };
   if (e.altKey && e.shiftKey && e.key === "ArrowRight") return { kind: "indent", id };
+  // Branch clipboard: copy (Ctrl/⌘+C), duplicate-as-sibling (Ctrl/⌘+D), paste under the selection
+  // (Ctrl/⌘+Shift+V). NOT Ctrl/⌘+V — that's the window-level image paste (useClipboardImagePaste).
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "c")
+    return { kind: "copyBranch", id };
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "d")
+    return { kind: "duplicateBranch", id };
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "v")
+    return { kind: "pasteBranch", id };
   // Bare arrows move the selection through the tree (left=parent, right=child, up/down=siblings).
   if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
     if (e.key === "ArrowUp") return { kind: "selectDir", id, dir: "up" };

@@ -39,6 +39,30 @@ describe("keyIntent", () => {
     });
   });
 
+  it("maps the branch-clipboard combos (copy / duplicate / paste) only with a selection", () => {
+    expect(keyIntent(ev({ key: "c", ctrlKey: true }), st())).toEqual({
+      kind: "copyBranch",
+      id: "n1",
+    });
+    expect(keyIntent(ev({ key: "C", metaKey: true }), st())).toEqual({
+      kind: "copyBranch",
+      id: "n1",
+    });
+    expect(keyIntent(ev({ key: "d", ctrlKey: true }), st())).toEqual({
+      kind: "duplicateBranch",
+      id: "n1",
+    });
+    expect(keyIntent(ev({ key: "v", ctrlKey: true, shiftKey: true }), st())).toEqual({
+      kind: "pasteBranch",
+      id: "n1",
+    });
+    // Plain Ctrl/⌘+V is left for the window-level image-paste hook (not handled here).
+    expect(keyIntent(ev({ key: "v", ctrlKey: true }), st())).toBeNull();
+    // None fire without a selection.
+    expect(keyIntent(ev({ key: "c", ctrlKey: true }), st({ selectedId: null }))).toBeNull();
+    expect(keyIntent(ev({ key: "d", ctrlKey: true }), st({ selectedId: null }))).toBeNull();
+  });
+
   it("ignores keys while inline-editing or when a form field / link is focused", () => {
     expect(keyIntent(ev({ key: "Enter" }), st({ editing: true }))).toBeNull();
     for (const tagName of ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]) {

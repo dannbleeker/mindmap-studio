@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Start nav vector icons (UI review — Phase 11b).** The nine left-rail section glyphs were a mix of
+  Unicode symbols and one full-colour emoji (🕘) that rendered inconsistently across platforms. They're
+  now uniform 18px line icons drawn with `currentColor`, so the active row still tints emerald and every
+  platform sees the same crisp set.
+
 - **Visual polish — colours, press feedback, active-rail edge (UI review — Phase 11a).** The Start-screen
   thumbnail node and the mobile browser/PWA `theme-color` move off a legacy indigo (`#26215c`) onto the
   brand tokens — the thumbnail's central node was near-invisible on the dark page. Buttons (editor + Start)

@@ -58,6 +58,15 @@ describe("StartSidebar", () => {
     render(<StartSidebar active="all" mapCount={7} onNavigate={vi.fn()} onNewMap={vi.fn()} />);
     expect(screen.getByText("7")).toBeTruthy();
   });
+
+  it("renders vector (SVG) nav icons, not Unicode/emoji glyphs (Phase 11b)", () => {
+    const { container } = render(
+      <StartSidebar active="start" mapCount={0} onNavigate={vi.fn()} onNewMap={vi.fn()} />,
+    );
+    // One inline SVG per nav row (9); the .st-nav-icon selector excludes the brand glyph.
+    expect(container.querySelectorAll(".st-nav-item .st-nav-icon svg").length).toBe(9);
+    expect(container.textContent).not.toContain("🕘"); // the old clock emoji is gone
+  });
 });
 
 describe("CommandPalette", () => {

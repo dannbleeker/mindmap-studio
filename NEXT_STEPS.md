@@ -144,8 +144,8 @@ affordances, visual micro-polish, sheet drag-to-resize) remain open from the 202
   the presets prove too coarse. (Min-height lower-right de-crowd also deferred — the weak half.)
 - [~] **Phase 11 — visual micro-polish.** **11a shipped (see CHANGELOG):** indigo `#26215c` → brand
   tokens (Start thumbnail + `theme-color`); `:active` press nudge (editor + Start); Start card radius
-  12px; active left-rail 3px accent edge. **Open:** 11b/c — Start nav vector icons; group the 12-toggle
-  Panels menu; Export "last format" recency row; context-rank ⌘K when a node is selected.
+  12px; active left-rail 3px accent edge. **11b shipped:** Start nav vector (SVG) icons. **Open:** 11c —
+  group the 12-toggle Panels menu; Export "last format" recency row; context-rank ⌘K when a node is selected.
   (Full Start-radius-scale tokenisation deferred — sub-perceptual; the card radius was the visible win.)
 - [ ] **Phase 12 — sheet drag-to-resize (L):** replace the fake (pointer-events:none) grab handle
   with a real pointer-drag (snap detents + drag-down-to-dismiss). Isolated last (only large item).

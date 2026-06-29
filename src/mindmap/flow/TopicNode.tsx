@@ -417,8 +417,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           borderBottom: !style?.border && underlineLeaf ? `2px solid ${branchColor}` : undefined,
           borderRadius: style?.borderRadius ?? (underlineLeaf ? 0 : "11px"),
           padding: underlineLeaf ? "3px 8px 4px" : "6px 12px",
-          // Per-topic wrap width: a long label wraps to this width instead of stretching.
-          maxWidth: style?.maxWidth,
+          // Per-topic wrap width enables mid-word breaking when a width is set; the width cap itself is
+          // applied on the outer box below (a flat `maxWidth` here was clobbered by the 320 hard cap).
           overflowWrap: style?.maxWidth ? "anywhere" : undefined,
           fontSize: style?.fontSize ?? scaledFont,
           fontWeight: style?.fontWeight ?? (filledMain ? 600 : undefined),
@@ -441,7 +441,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         ...box,
         position: "relative",
         boxSizing: "border-box",
-        maxWidth: 320,
+        // Per-topic wrap width when set (Narrow/Medium/Wide), else the 320 hard cap. Previously a flat
+        // `maxWidth: 320` here silently overrode the per-topic width — so the canvas rendered wide while
+        // layout.ts + the SVG export already wrapped to the set width (a canvas==export break, now fixed).
+        maxWidth: style?.maxWidth || 320,
         lineHeight: 1.35,
         // Selected: a branded ring (node's branch colour, emerald for the root) + soft glow — the
         // redesign's selection treatment, replacing React Flow's faint default. Hover gets a softer

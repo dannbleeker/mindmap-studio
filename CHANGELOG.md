@@ -7,6 +7,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Wrap width is a snap slider now (UI review — 10b layer 1).** The Style tab's four-option width dropdown
+  (Narrow / Medium / Wide / None) becomes a slider: drag to any wrap width, snapping to the three presets,
+  with the far end = None (no cap). It reflects the selected topic and re-wraps it live, and applies across
+  a multi-selection. Backed by a pure, tested `wrapWidth` scale (snap / clamp / serialise).
+
 - **Export menu remembers the last format (UI review follow-up).** The Export menu now pins a one-click
   **Last: <format>** row at the top, persisted in localStorage and read fresh each time the menu opens —
   re-exporting the same format (the common case) is one click instead of hunting the grouped list.
@@ -255,6 +260,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   many you open.
 
 ### Fixed
+
+- **Per-topic wrap width now applies on the canvas.** A flat `maxWidth: 320` on the topic node silently
+  overrode the per-topic wrap width, so Narrow / Medium / Wide never actually narrowed a node on screen —
+  even though `layout.ts` and the SVG export already wrapped to the set width (a canvas==export mismatch).
+  The rendered node now honours its width (capped at 320), so the slider above visibly re-wraps. Guarded by
+  a render regression test.
 
 - **Bulk edit explains why per-topic fields disappear.** Selecting several topics quietly removed the
   note / links / attachments editors, which read as a bug. The "N topics selected" banner now adds a

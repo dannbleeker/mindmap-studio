@@ -145,6 +145,21 @@ describe("FlowMindMap canvas", () => {
     expect(typeof h.focusNode).toBe("function");
   });
 
+  it("renders a topic at its per-topic wrap width, else the 320 cap (canvas==export)", () => {
+    // Regression: a flat `maxWidth: 320` used to override the per-topic width spread in from `box`, so the
+    // canvas rendered full-width while layout.ts + the SVG export wrapped to the set width. Guard the fix.
+    const doc = baseDoc();
+    doc.root.children[0].style = { maxWidth: "160px" }; // Alpha: Narrow
+    const { container } = mount(doc);
+    const maxWidths = (id: string) =>
+      [...nodeEl(container, id).querySelectorAll("*")]
+        .map((e) => (e as HTMLElement).style.maxWidth)
+        .filter(Boolean);
+    expect(maxWidths("a")).toContain("160px"); // Alpha honours its wrap width
+    expect(maxWidths("b")).toContain("320px"); // Beta (no width set) → the hard cap
+    expect(maxWidths("b")).not.toContain("160px");
+  });
+
   it("runs the selection-free handle actions, mutating the doc via onChange", () => {
     const { h, onChange } = mount();
     run(() => h.setAllExpanded(false));

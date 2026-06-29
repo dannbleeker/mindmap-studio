@@ -62,6 +62,15 @@ import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from 
 import { MAX_VERSIONS, type VersionMeta } from "./store/mapStore";
 import { formatDateShort } from "./taskDate";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
+import {
+  WRAP_MAX,
+  WRAP_MIN,
+  WRAP_PRESETS,
+  snapWrapWidth,
+  styleToWrapWidth,
+  wrapWidthLabel,
+  wrapWidthToStyle,
+} from "./wrapWidth";
 
 // The per-topic fill/border swatch palettes live in the design tokens now (shared with the rest of
 // the chrome). Aliased here so the StyleBar + StylesPanel call-sites read unchanged.
@@ -203,11 +212,18 @@ export function CollapsibleSection({
 export function StyleBar({
   onStyle,
   namedStyles = [],
+  wrapWidth,
 }: {
   onStyle: (patch: Partial<NodeStyle>) => void;
   /** Saved presets surfaced as a quick-apply swatch gallery (#15); empty = no Presets row. */
   namedStyles?: NamedStyle[];
+  /** The selected node's current `style.maxWidth` — seeds the Wrap slider so it reflects the selection. */
+  wrapWidth?: string;
 }) {
+  // The Wrap slider is the one StyleBar control that reflects current state (the rest are write-only); seed
+  // it from the selection and re-seed when the selected node changes.
+  const [wrapPx, setWrapPx] = useState(() => styleToWrapWidth(wrapWidth));
+  useEffect(() => setWrapPx(styleToWrapWidth(wrapWidth)), [wrapWidth]);
   const swatch = (color: string, onClick: () => void, title: string) => (
     <button
       key={title}
@@ -380,22 +396,40 @@ export function StyleBar({
         <option value="monospace">Mono</option>
       </select>
       {label("Wrap")}
-      <select
-        value=""
-        onChange={(e) => {
-          if (e.target.value)
-            onStyle({ maxWidth: e.target.value === "none" ? "" : e.target.value });
-        }}
-        title="Wrap long topics to a width"
+      {/* Continuous wrap width (10b layer 1): drag for any width, snapping to the Narrow/Medium/Wide ticks;
+          the far end = None (no cap). Reflects + re-wraps the selection live via onStyle({ maxWidth }). */}
+      <input
+        type="range"
+        min={WRAP_MIN}
+        max={WRAP_MAX}
+        step={4}
+        value={wrapPx}
+        list="mm-wrap-ticks"
         aria-label="Topic wrap width"
-        style={{ ...styleBtn, padding: "2px 4px", fontSize: 12 }}
+        title="Drag to set the topic wrap width (snaps to Narrow / Medium / Wide; far end = None)"
+        onChange={(e) => {
+          const px = snapWrapWidth(Number(e.target.value));
+          setWrapPx(px);
+          onStyle({ maxWidth: wrapWidthToStyle(px) });
+        }}
+        style={{ width: 92, verticalAlign: "middle", cursor: "ew-resize" }}
+      />
+      <datalist id="mm-wrap-ticks">
+        {WRAP_PRESETS.map((p) => (
+          <option key={p.px} value={p.px} />
+        ))}
+      </datalist>
+      <span
+        aria-hidden="true"
+        style={{
+          fontSize: fontSize.sm,
+          color: "var(--ed-muted)",
+          minWidth: 46,
+          display: "inline-block",
+        }}
       >
-        <option value="">Width…</option>
-        <option value="160px">Narrow</option>
-        <option value="220px">Medium</option>
-        <option value="300px">Wide</option>
-        <option value="none">None</option>
-      </select>
+        {wrapWidthLabel(wrapPx)}
+      </span>
       {namedStyles.length > 0 ? (
         <>
           {label("Presets")}
@@ -2216,7 +2250,11 @@ export function InfoPanel({
               )}
               {activeTab === "style" && (
                 <>
-                  <StyleBar onStyle={onStyle} namedStyles={namedStyles} />
+                  <StyleBar
+                    onStyle={onStyle}
+                    namedStyles={namedStyles}
+                    wrapWidth={node?.style?.maxWidth}
+                  />
                   {!multi && (
                     // Markers lead the Details tab in single + bulk; Style keeps the per-item sticker
                     // grid + fill image (both single-node).

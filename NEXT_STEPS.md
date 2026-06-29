@@ -134,9 +134,11 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
 **UI-review remediation (2026-06-29 review) — Phases 1–12 all shipped** (see CHANGELOG); the Phase 12
 mobile sheet-drag was **device-verified 2026-06-29** (feel + dismiss threshold confirmed on a real phone).
 One deferred tail:
-- **Deferred, low value:** 10b on-canvas wrap-width drag handle (the node's right edge is already contested
-  by ＋/relate-grip/collapse, so a resize bar there collides — and the Narrow/Medium/Wide/None presets
-  already control wrap width). Revisit only if the presets prove too coarse.
+- **10b wrap-width — Layer 1 shipped** (see CHANGELOG): the Style-tab width control is now a snap slider
+  (continuous, presets as ticks, far end = None), and the latent render bug that made per-topic width inert
+  on the canvas is fixed. **Layer 2 (optional, parked):** an on-canvas right-edge drag handle — only worth
+  it where geometry permits (the edge is contested by ＋/relate-grip/collapse), gated behind a clearance
+  test like the de-crowd. The slider covers the need; do Layer 2 only if direct edge-drag is wanted.
   (Export "last format" recency row, full Start radius-scale tokenisation, and the min-height-node
   lower-right de-crowd were the other deferred items — all shipped on request; see CHANGELOG.)
 

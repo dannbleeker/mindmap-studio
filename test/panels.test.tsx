@@ -661,6 +661,23 @@ describe("StyleBar", () => {
     expect(onStyle).toHaveBeenCalledWith({ shadow: undefined });
   });
 
+  it("wrap width is a slider that snaps to presets and re-wraps live (10b layer 1)", () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} wrapWidth="220px" />);
+    const slider = screen.getByRole("slider", { name: "Topic wrap width" }) as HTMLInputElement;
+    // Seeds from the selection.
+    expect(slider.value).toBe("220");
+    // Dragging to a preset writes the px width…
+    fireEvent.change(slider, { target: { value: "160" } });
+    expect(onStyle).toHaveBeenLastCalledWith({ maxWidth: "160px" });
+    // …a near-preset value snaps to it…
+    fireEvent.change(slider, { target: { value: "302" } });
+    expect(onStyle).toHaveBeenLastCalledWith({ maxWidth: "300px" });
+    // …and the far end means None (clears the cap).
+    fireEvent.change(slider, { target: { value: "320" } });
+    expect(onStyle).toHaveBeenLastCalledWith({ maxWidth: "" });
+  });
+
   it("hides the Presets row when no named styles exist (#15)", () => {
     render(<StyleBar onStyle={noop} />);
     expect(screen.queryByText("Presets")).toBeNull();

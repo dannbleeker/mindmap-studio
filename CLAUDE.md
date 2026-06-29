@@ -56,8 +56,8 @@ The `vitest run --coverage` step enforces a no-regression coverage floor
 ## Code quality bars
 
 - Keep a **framework-free core** that's pure and unit-tested. The canonical model
-  (`src/model/`) and the import/export adapters (`src/import/`, later
-  `src/export/`) are deterministic with no DOM coupling. The React Flow canvas is
+  (`src/model/`) and the import/export adapters (`src/io/`, plus the heavy `.mmap`
+  importer in `src/import/`) are deterministic with no DOM coupling. The React Flow canvas is
   wrapped behind a thin contract (`src/mindmap/contract.ts`) so the renderer stays replaceable.
 - **One source of truth** for any cross-cutting rule: the canonical model
   (`src/model/types.ts`), the bundle budget (`scripts/size-budget.mjs`),
@@ -86,7 +86,7 @@ The `vitest run --coverage` step enforces a no-regression coverage floor
 - `C:\devtools` is AppLocker-allowlisted, so `node_modules` binaries run there.
 - Dev server is registered for preview as **`mindmap-dev`** on port **5175**.
 - Engine: React Flow (`src/mindmap/flow/`). Canonical model: `src/model/types.ts`.
-  Importers: `src/import/`. The `.mmap` importer is **one-way + lossy by design**.
+  Import/export adapters: `src/io/`. The `.mmap` importer (`src/import/`) is **one-way + lossy by design**.
 - Scope: **brainstorming/knowledge + presentations/sharing**. The task / Gantt /
   SmartRules / resource PM layer is **out of scope** unless we decide otherwise.
 

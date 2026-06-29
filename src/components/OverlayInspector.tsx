@@ -163,6 +163,23 @@ export function OverlayInspector({
               />
             );
           })}
+          {/* Custom colour — apply an exact brand/accent hue beyond the preset swatches. */}
+          <input
+            type="color"
+            value={current || "#888888"}
+            onChange={(e) => onSetColor(e.target.value)}
+            aria-label="Custom colour"
+            title="Custom colour"
+            style={{
+              width: 24,
+              height: 22,
+              padding: 1,
+              borderRadius: 6,
+              border: "1px solid var(--ed-border)",
+              background: "var(--ed-card)",
+              cursor: "pointer",
+            }}
+          />
           <button
             type="button"
             title="Reset to the default colour"

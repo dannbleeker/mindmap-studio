@@ -126,10 +126,13 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
   (`meta.pinned`, ★, pinned-first ordering); the ⌘K Learn-tip card opens the palette; themed
   rename/delete dialogs (`MapDialogs` + `renameMapTitle`, replacing the native `prompt`/`confirm`);
   catalogue rows + USER_GUIDE notes.
-- [~] **Phase 8 — inspector, dock & tabs.** **8a + 8b shipped (see CHANGELOG):** Map panel collapses its
+- [x] **Phase 8 — inspector, dock & tabs** (shipped — see CHANGELOG): Map panel collapses its
   low-frequency controls behind "More styling" + filter-aware stats; resizable left dock; persisted dock
-  width + active dock/inspector tab; active tab scrolls into view in both strips. **Open:** 8c —
-  custom-colour input on the Edge/Overlay inspectors.
+  width + active dock/inspector tab; active tab scrolls into view in both strips; custom-colour input on
+  the Edge/Overlay inspectors.
+
+**Phases 4–8 of the UI-review remediation are complete.** Phases 9–12 (canvas interactions, canvas
+affordances, visual micro-polish, sheet drag-to-resize) remain open from the 2026-06-29 review plan.
 - [ ] **Phase 9 — canvas interactions:** empty-pane right-click menu (paste-branch-as-floating, add
   topic, fit/reset-zoom); keyboard copy/duplicate branch (`Ctrl+C`/`Ctrl+D`; branch-paste on
   `Ctrl+Shift+V` to avoid the image-paste collision); clickable status-bar zoom % (reset / fit selection).

@@ -1,7 +1,7 @@
 // Component test for EdgeInspector — the right-panel for a selected relationship. Asserts each
 // control fires the right callback (label commit, direction/arrow, colour/width/dash, delete) so the
 // canvas's edge mutators get the correct args. Visible-text/role/label assertions, not structure.
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { EdgeInspector } from "../src/components/EdgeInspector";
@@ -72,6 +72,14 @@ describe("EdgeInspector", () => {
     expect(onSetStyle).toHaveBeenCalledWith({ dash: "solid" });
     await userEvent.click(screen.getByRole("button", { name: "Default" }));
     expect(onSetStyle).toHaveBeenCalledWith({ color: "" });
+  });
+
+  it("applies a custom colour from the native picker", () => {
+    const { onSetStyle } = setup();
+    fireEvent.change(screen.getByLabelText("Custom relationship colour"), {
+      target: { value: "#123456" },
+    });
+    expect(onSetStyle).toHaveBeenCalledWith({ color: "#123456" });
   });
 
   it("a style preset fires onSetStyle with a full one-click patch", async () => {

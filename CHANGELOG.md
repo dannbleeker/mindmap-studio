@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Custom relationship / boundary colours (UI review — Phase 8c).** The Edge and Overlay inspectors'
+  colour rows gain a native colour picker beside the preset swatches, so a relationship or boundary can
+  take an exact brand/accent hue (e.g. matching the map accent) instead of being limited to the ~8
+  presets. Completes Phase 8 — and with it the **Phases 4–8 UI-review block** (shortcut discoverability,
+  mobile/tablet, Start-library scanning & curation, inspector/dock/tabs).
+
 - **Resizable dock + persistent tab state (UI review — Phase 8b).** The left side-panel dock is now
   resizable — a drag handle on its canvas-facing edge with arrow-key nudge and a persisted width — like
   the right inspector already was (it hosts the densest read panels: Outline / Power Filter / Styles /

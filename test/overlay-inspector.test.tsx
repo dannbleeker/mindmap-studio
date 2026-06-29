@@ -1,7 +1,7 @@
 // Component test for OverlayInspector — the right panel for a selected boundary / summary / callout.
 // Asserts each control fires the right callback (label/text commit, delete) and the header reflects
 // the kind + caption. Visible-text/role/label assertions.
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { OverlayInspector } from "../src/components/OverlayInspector";
@@ -76,6 +76,12 @@ describe("OverlayInspector", () => {
     expect(onSetColor).toHaveBeenCalledWith("#e0697f");
     await userEvent.click(screen.getByRole("button", { name: "Default" }));
     expect(onSetColor).toHaveBeenCalledWith("");
+  });
+
+  it("applies a custom colour from the native picker", () => {
+    const { onSetColor } = setup({ kind: "boundary", id: "b", label: "Scope", deletable: true });
+    fireEvent.change(screen.getByLabelText("Custom colour"), { target: { value: "#123456" } });
+    expect(onSetColor).toHaveBeenCalledWith("#123456");
   });
 
   it("pre-selects the current swatch + presses Default when no colour is set", () => {

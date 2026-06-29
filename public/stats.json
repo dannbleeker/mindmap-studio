@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-29T21:49:47.416Z",
-  "commit": "a43590b",
+  "generatedAt": "2026-06-29T21:57:38.991Z",
+  "commit": "42a5462",
   "headline": {
-    "linesTsJs": 62718,
-    "tests": 1748,
-    "lineCoveragePct": 91.27,
-    "commits": 966,
+    "linesTsJs": 62743,
+    "tests": 1749,
+    "lineCoveragePct": 91.29,
+    "commits": 968,
     "ageDays": 18,
-    "trackedFiles": 437,
+    "trackedFiles": 439,
     "featureManualPct": 72.1,
     "featureBookPct": 69.3,
     "featureExamplePct": 69.3
@@ -15,13 +15,13 @@
   "code": [
     {
       "category": "App code (src)",
-      "files": 203,
-      "lines": 36373
+      "files": 204,
+      "lines": 36363
     },
     {
       "category": "Unit tests",
-      "files": 172,
-      "lines": 24623
+      "files": 173,
+      "lines": 24658
     },
     {
       "category": "Build scripts",
@@ -41,19 +41,19 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 91.27,
-      "covered": 23390,
-      "total": 25626
+      "pct": 91.29,
+      "covered": 23382,
+      "total": 25611
     },
     "statements": {
-      "pct": 91.27,
-      "covered": 23390,
-      "total": 25626
+      "pct": 91.29,
+      "covered": 23382,
+      "total": 25611
     },
     "functions": {
-      "pct": 76.48,
+      "pct": 76.52,
       "covered": 1353,
-      "total": 1769
+      "total": 1768
     },
     "branches": {
       "pct": 86.71,
@@ -62,36 +62,36 @@
     }
   },
   "tests": {
-    "unit": 1748,
+    "unit": 1749,
     "e2e": 0,
-    "durationMs": 59918,
+    "durationMs": 79327,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 17171
+        "ms": 22551
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 13819
+        "ms": 18360
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 6489
+        "ms": 8853
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 5970
+        "ms": 8015
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 2932
+        "ms": 3958
       }
     ]
   },
   "domain": {
     "components": 66,
     "hooks": 23,
-    "ioModules": 35,
+    "ioModules": 36,
     "canvasThemes": 4,
     "markers": 15,
     "templates": 21,
@@ -111,7 +111,7 @@
       },
       {
         "name": "App.tsx",
-        "lines": 2397
+        "lines": 2389
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -136,7 +136,7 @@
       },
       {
         "file": "App.tsx",
-        "pct": 58.65
+        "pct": 58.85
       },
       {
         "file": "io/importDispatch.ts",
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 195
+        "commits": 196
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
@@ -172,8 +172,8 @@
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 58.65,
-        "commits": 195
+        "pct": 58.85,
+        "commits": 196
       }
     ]
   },
@@ -188,9 +188,9 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 306,
+    "jsGzipKb": 305.9,
     "cssGzipKb": 9.8,
-    "totalGzipKb": 315.8,
+    "totalGzipKb": 315.7,
     "entryGzipKb": 145.5,
     "budgetKb": 150,
     "withinBudget": true
@@ -198,7 +198,7 @@
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 36373,
+    "appLoc": 36363,
     "docToCodeRatio": 0.47
   },
   "featureCoverage": {
@@ -806,16 +806,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 18,
-    "commits": 966,
-    "commits7d": 193,
+    "commits": 968,
+    "commits7d": 195,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 481
+        "count": 482
       },
       {
         "name": "github-actions[bot]",
-        "count": 450
+        "count": 451
       },
       {
         "name": "Claude",
@@ -823,8 +823,8 @@
       }
     ],
     "churn30d": {
-      "added": 118493,
-      "removed": 37038
+      "added": 118592,
+      "removed": 37112
     },
     "changelogEntries": 358
   }

@@ -131,29 +131,14 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
   width + active dock/inspector tab; active tab scrolls into view in both strips; custom-colour input on
   the Edge/Overlay inspectors.
 
-**Phases 4–8 of the UI-review remediation are complete.** Phases 9–12 (canvas interactions, canvas
-affordances, visual micro-polish, sheet drag-to-resize) remain open from the 2026-06-29 review plan.
-- [x] **Phase 9 — canvas interactions** (shipped — see CHANGELOG): keyboard copy/duplicate/paste of a
-  branch (`Ctrl/⌘+C` / `Ctrl/⌘+D` / `Ctrl/⌘+Shift+V`); empty-pane right-click menu (add topic /
-  paste-branch-as-floating / fit / reset-zoom); clickable status-bar zoom % (reset / fit selection).
-- [~] **Phase 10 — canvas affordances.** **10a shipped (see CHANGELOG):** enlarged + more-visible
-  relate-grip; hover a collapsed `+N` badge to peek the first hidden child titles. **Deferred — 10b
-  on-canvas wrap-width drag handle:** the node's right edge is already contested by three affordances
-  (add-child ＋, relate-grip, collapse toggle), so a full-height resize bar there is collision-prone;
-  the value is incremental (Narrow/Medium/Wide/None presets already control wrap width). Revisit only if
-  the presets prove too coarse. (Min-height lower-right de-crowd also deferred — the weak half.)
-- [x] **Phase 11 — visual micro-polish.** **11a shipped (see CHANGELOG):** indigo `#26215c` → brand
-  tokens (Start thumbnail + `theme-color`); `:active` press nudge (editor + Start); Start card radius
-  12px; active left-rail 3px accent edge. **11b:** Start nav vector (SVG) icons. **11c:** Panels menu
-  grouped into Structure/Analysis/Workflow + de-collided icons. **11d:** context-ranked ⌘K ("For the
-  selected topic" leads when a node is selected). (Export "last format" recency row deferred — minor; ⌘K
-  already fuzzy-searches every export format.)
-  (Full Start-radius-scale tokenisation deferred — sub-perceptual; the card radius was the visible win.)
-- [x] **Phase 12 — sheet drag-to-resize** (shipped — see CHANGELOG): real focusable grab handle replaces
-  the fake one — pointer/keyboard drag resizes the bottom sheet (snap 62↔90dvh), drag-down dismisses;
-  `useSheetDrag` + shared `--mm-sheet-h`. **Pending:** the touch *feel* (snap momentum, drag-to-dismiss
-  threshold) wants a real-device pass — the snap/dismiss logic is unit-tested, but coarse-pointer drag
-  can't be exercised headlessly.
+**UI-review remediation (2026-06-29 review) — Phases 1–12 all shipped** (see CHANGELOG). Open tails only:
+- **Phase 12 touch feel** wants a real-device pass — the snap/dismiss + keyboard logic is unit-tested, but
+  the coarse-pointer drag feel (momentum, dismiss threshold) can't be exercised headlessly.
+- **Deferred, low value (each noted with rationale):** 10b on-canvas wrap-width drag handle (the node's
+  right edge is already contested by ＋/relate-grip/collapse, so a resize bar there collides — and the
+  Narrow/Medium/Wide/None presets already control wrap width); Export "last format" recency row (⌘K already
+  fuzzy-searches every format); full Start radius-scale tokenisation (sub-perceptual — the card radius was
+  the visible win); the min-height-node lower-right de-crowd.
 
 ## Open items
 

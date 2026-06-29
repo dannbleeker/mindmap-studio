@@ -9,6 +9,7 @@ import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import type { CanvasTheme } from "../mindmap/theme";
 import type { MindMapDoc } from "../model/types";
+import { SHORTCUT_BINDINGS } from "../shortcuts";
 import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../templates";
 import { EditorIcon, type EditorIconName } from "./EditorIcons";
@@ -493,7 +494,8 @@ export function Toolbar({
                 </MenuLabel>
                 <MenuItem
                   icon={mi("import")}
-                  label="Open file… (Ctrl+O)"
+                  label="Open file…"
+                  shortcut={SHORTCUT_BINDINGS["open-file"]}
                   onSelect={() => {
                     io.openFile();
                     close();
@@ -501,12 +503,14 @@ export function Toolbar({
                 />
                 <MenuItem
                   icon={mi("export")}
-                  label="Save to file (Ctrl+S)"
+                  label="Save to file"
+                  shortcut={SHORTCUT_BINDINGS["save-file"]}
                   onSelect={() => io.saveFile()}
                 />
                 <MenuItem
                   icon={mi("export")}
-                  label="Save as… (Ctrl+Shift+S)"
+                  label="Save as…"
+                  shortcut={SHORTCUT_BINDINGS["save-file-as"]}
                   onSelect={() => io.saveFileAs()}
                 />
                 <MenuSeparator />
@@ -566,6 +570,16 @@ export function Toolbar({
                   onSelect={() => io.exportLibrary()}
                 />
                 <MenuSeparator />
+                <MenuItem
+                  icon={mi("settings")}
+                  label="Settings & preferences"
+                  onSelect={() => nav.openSettings()}
+                />
+                <MenuItem
+                  icon={mi("help")}
+                  label="Keyboard shortcuts"
+                  onSelect={() => nav.openShortcuts()}
+                />
                 <MenuItem
                   icon={mi("help")}
                   label="About MindMap Studio"

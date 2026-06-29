@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Shortcut discoverability (UI review — Phase 4).** Key bindings now show at the point of use instead
+  of only in the cheat-sheet: the ⌘K command palette renders an inline binding chip on every command
+  that has one (Undo, Redo, Open/Save/Save-as), and the toolbar "More" menu shows the same chips on its
+  File items (the binding moved out of the label text into the right-aligned hint slot). The "More" menu
+  also gained **Settings & preferences** and **Keyboard shortcuts** entries — both were reachable only
+  from the icon rail / ⌘K before. Bindings come from one keyed source (`SHORTCUT_BINDINGS`) that a test
+  pins to the cheat-sheet, so a chip can never claim a binding the cheat-sheet doesn't document.
 - **Accessibility & first-run polish (UI review — Phases 1–3).** A multi-dimension UI review surfaced a
   fresh batch of keyboard / screen-reader / first-run gaps; the first three phases shipped:
   - **Visible keyboard focus across the whole chrome.** Only one button class carried a `:focus-visible`

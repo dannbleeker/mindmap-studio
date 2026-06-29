@@ -707,6 +707,18 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+/* Inline key-binding hint on a command row (mirrors .st-kbd; works in the editor too via the
+   --ed-* token fallbacks, since the palette renders outside .start there). */
+.st-cmdk-kbd {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  border: 1px solid var(--st-border, var(--ed-border, #d9d4c8));
+  background: var(--st-page, var(--ed-page, #f7f4ec));
+  color: var(--st-ink2, var(--ed-ink2, #54513f));
+  white-space: nowrap;
+}
 .st-cmdk-empty {
   padding: 24px;
   text-align: center;

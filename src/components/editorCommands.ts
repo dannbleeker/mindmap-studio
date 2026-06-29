@@ -3,6 +3,7 @@ import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind } from "../mindmap";
 import type { MapNode } from "../model/types";
 import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
+import { SHORTCUT_BINDINGS } from "../shortcuts";
 import type { Command } from "./CommandPalette";
 import type { ToolbarProps } from "./Toolbar";
 
@@ -70,7 +71,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     run: () => void,
     enabled = true,
     extra?: { keywords?: string },
-  ) => cmds.push({ id, label, kind, run, enabled, ...extra });
+  ) => cmds.push({ id, label, kind, run, enabled, shortcut: SHORTCUT_BINDINGS[id], ...extra });
 
   // Map / file
   add("open-file", "Open file…", "map", () => io.openFile());

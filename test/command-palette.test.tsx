@@ -86,6 +86,21 @@ describe("CommandPalette (generic)", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("renders an inline shortcut chip for a command that has a binding", () => {
+    render(
+      <CommandPalette
+        commands={[
+          { id: "undo", label: "Undo", kind: "edit", run: () => {}, shortcut: "Ctrl/⌘ + Z" },
+          { id: "x", label: "No shortcut", kind: "edit", run: () => {} },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getByText("Ctrl/⌘ + Z").tagName).toBe("KBD");
+    // The command without a shortcut shows no chip.
+    expect(screen.getAllByText(/^Ctrl\/⌘/)).toHaveLength(1);
+  });
+
   it("traps Tab inside the aria-modal and keeps options out of the tab order", () => {
     render(<CommandPalette commands={cmds()} onClose={vi.fn()} />);
     // Options are navigated via aria-activedescendant, so they're not in the tab order…

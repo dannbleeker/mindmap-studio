@@ -71,3 +71,15 @@ export const SHORTCUTS: ShortcutGroup[] = [
     ],
   },
 ];
+
+// Display bindings keyed by command id (the ids in editorCommands.ts), so menus + the ⌘K palette can
+// show a shortcut hint at the point of use. ONLY commands that actually have a global key binding are
+// listed — never invent one. Each value MUST appear verbatim as a `keys` string in SHORTCUTS above;
+// `test/shortcut-bindings.test.ts` enforces that, so this map can't drift from the documented cheat-sheet.
+export const SHORTCUT_BINDINGS: Record<string, string> = {
+  undo: "Ctrl/⌘ + Z",
+  redo: "Ctrl/⌘ + Shift + Z",
+  "open-file": "Ctrl/⌘ + O",
+  "save-file": "Ctrl/⌘ + S",
+  "save-file-as": "Ctrl/⌘ + Shift + S",
+};

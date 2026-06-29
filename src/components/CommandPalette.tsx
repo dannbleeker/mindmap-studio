@@ -16,6 +16,8 @@ export interface Command {
   /** Extra text folded into the fuzzy match but NOT displayed — e.g. a topic's note, so "jump to a
    *  topic" finds it by note text too. */
   keywords?: string;
+  /** Optional key-binding hint shown inline (e.g. "Ctrl/⌘ + Z"), for commands that have one. */
+  shortcut?: string;
 }
 
 /** Subsequence match (typo-tolerant enough for a small command set). */
@@ -258,6 +260,9 @@ export function CommandPalette({
                   onClick={() => run(c)}
                 >
                   <span>{c.label}</span>
+                  {/* Inline key-binding hint (when the command has one) — sits next to the label so a
+                      shortcut is discoverable at the point of use. */}
+                  {c.shortcut ? <kbd className="st-cmdk-kbd">{c.shortcut}</kbd> : null}
                   {/* Show the kind badge only at the start of each same-kind run, so a long cluster
                       of one kind (e.g. "map") doesn't repeat the label down every row. */}
                   {i === 0 || items[i - 1]?.kind !== c.kind ? (

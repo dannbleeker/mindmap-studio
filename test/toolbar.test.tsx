@@ -278,6 +278,21 @@ describe("Toolbar — More menu", () => {
     expect(t.nav.openAbout).toHaveBeenCalled();
   });
 
+  it("exposes Settings + Keyboard shortcuts and shows shortcut chips on the File items (#P4)", async () => {
+    const t = setup();
+    const open = () => u.click(screen.getByRole("button", { name: /^more/i }));
+    await open();
+    // The shortcut moved out of the label into an aria-hidden chip; the accessible name is clean.
+    expect(screen.getByRole("menuitem", { name: "Open file…" })).toBeTruthy();
+    expect(screen.getByText("Ctrl/⌘ + O")).toBeTruthy(); // the chip itself
+    // Settings + Keyboard-shortcuts were threaded into nav but rendered nowhere before — now in More.
+    await u.click(screen.getByRole("menuitem", { name: /settings & preferences/i }));
+    expect(t.nav.openSettings).toHaveBeenCalled();
+    await open();
+    await u.click(screen.getByRole("menuitem", { name: /keyboard shortcuts/i }));
+    expect(t.nav.openShortcuts).toHaveBeenCalled();
+  });
+
   it("the Import-files item is a real menuitem button that opens the hidden file input (a11y 2.1.1)", async () => {
     setup();
     await u.click(screen.getByRole("button", { name: /^more/i }));

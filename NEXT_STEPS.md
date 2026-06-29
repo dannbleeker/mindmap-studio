@@ -112,8 +112,9 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
   skip-to-canvas link; save-state announced.
 - [x] **Phase 3 — first-run correctness** (shipped): the canvas keymap falls back to the root on an
   empty map (nothing selected) so the coachmark's Tab/Enter act on the first keystroke.
-- [ ] **Phase 4 — shortcut discoverability:** render the (already built, unused) `shortcut` slot in
-  menus + ⌘K from a drift-guarded bindings map; add Settings + Shortcuts to the "More" menu.
+- [x] **Phase 4 — shortcut discoverability** (shipped — see CHANGELOG): rendered the (previously unused)
+  `shortcut` slot in the toolbar menus + ⌘K from a drift-guarded `SHORTCUT_BINDINGS` map (pinned to the
+  cheat-sheet by a test); added Settings + Keyboard-shortcuts entries to the "More" menu.
 - [ ] **Phase 5 — mobile viewport & sheet hardening:** `viewport-fit=cover` (then the existing
   safe-area padding engages); bottom-sheet safe-area padding; `vh`→`dvh`; touch-size the React Flow
   zoom controls; global touch reset (tap-highlight / overscroll / user-select).

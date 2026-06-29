@@ -7,7 +7,7 @@
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapEntry } from "../src/components/start/MapCard";
-import { handleMapAction } from "../src/components/start/mapActions";
+import { handleMapAction, renameMapTitle } from "../src/components/start/mapActions";
 import type { StartContext } from "../src/components/start/types";
 import type { MindMapDoc } from "../src/model/types";
 import { getAllMaps, loadMap, saveMap } from "../src/store/mapStore";
@@ -30,6 +30,8 @@ beforeEach(() => {
     go: vi.fn(),
     libraryRev: 0,
     onLibraryChange: vi.fn(),
+    requestRename: vi.fn(),
+    requestDelete: vi.fn(),
   };
 });
 
@@ -52,30 +54,30 @@ describe("handleMapAction", () => {
   });
 
   describe("rename", () => {
-    it("persists the new title to both doc.title and root.topic, then refreshes", async () => {
+    it("requests the themed rename dialog with the map's current title (no native prompt)", async () => {
+      const prompt = vi.spyOn(window, "prompt");
       await saveMap(docOf("m-ren", "Old"));
-      vi.spyOn(window, "prompt").mockReturnValue("  New Name  ");
       await handleMapAction("rename", entryOf("m-ren", "Old"), ctx);
-      const saved = await loadMap("m-ren");
+      expect(ctx.requestRename).toHaveBeenCalledWith("m-ren", "Old");
+      expect(prompt).not.toHaveBeenCalled(); // no raw browser prompt
+      expect(ctx.onLibraryChange).not.toHaveBeenCalled(); // the save happens on dialog confirm
+    });
+  });
+
+  describe("renameMapTitle (the store op the dialog calls on confirm)", () => {
+    it("persists the trimmed title to both doc.title and root.topic", async () => {
+      await saveMap(docOf("m-ren2", "Old"));
+      await renameMapTitle("m-ren2", "  New Name  ");
+      const saved = await loadMap("m-ren2");
       expect(saved?.title).toBe("New Name");
       expect(saved?.root.topic).toBe("New Name");
-      expect(ctx.onLibraryChange).toHaveBeenCalledTimes(1);
     });
 
-    it("is a no-op when the prompt is cancelled", async () => {
-      await saveMap(docOf("m-ren2", "Keep"));
-      vi.spyOn(window, "prompt").mockReturnValue(null);
-      await handleMapAction("rename", entryOf("m-ren2", "Keep"), ctx);
-      expect((await loadMap("m-ren2"))?.title).toBe("Keep");
-      expect(ctx.onLibraryChange).not.toHaveBeenCalled();
-    });
-
-    it("is a no-op when the new name is blank", async () => {
+    it("is a no-op on a blank name or an unknown id", async () => {
       await saveMap(docOf("m-ren3", "Keep"));
-      vi.spyOn(window, "prompt").mockReturnValue("   ");
-      await handleMapAction("rename", entryOf("m-ren3", "Keep"), ctx);
+      await renameMapTitle("m-ren3", "   ");
       expect((await loadMap("m-ren3"))?.title).toBe("Keep");
-      expect(ctx.onLibraryChange).not.toHaveBeenCalled();
+      await renameMapTitle("missing", "X"); // unknown id → no throw, no write
     });
   });
 
@@ -114,19 +116,13 @@ describe("handleMapAction", () => {
   });
 
   describe("delete", () => {
-    it("removes the map after confirmation and refreshes", async () => {
+    it("requests the themed confirm dialog and doesn't delete until it's confirmed", async () => {
+      const confirm = vi.spyOn(window, "confirm");
       await saveMap(docOf("m-del", "Doomed"));
-      vi.spyOn(window, "confirm").mockReturnValue(true);
       await handleMapAction("delete", entryOf("m-del", "Doomed"), ctx);
-      expect(await loadMap("m-del")).toBeNull();
-      expect(ctx.onLibraryChange).toHaveBeenCalledTimes(1);
-    });
-
-    it("keeps the map when the confirm is declined", async () => {
-      await saveMap(docOf("m-del2", "Spared"));
-      vi.spyOn(window, "confirm").mockReturnValue(false);
-      await handleMapAction("delete", entryOf("m-del2", "Spared"), ctx);
-      expect(await loadMap("m-del2")).not.toBeNull();
+      expect(ctx.requestDelete).toHaveBeenCalledWith("m-del", "Doomed");
+      expect(confirm).not.toHaveBeenCalled(); // no raw browser confirm
+      expect(await loadMap("m-del")).not.toBeNull(); // still there until the dialog confirms
       expect(ctx.onLibraryChange).not.toHaveBeenCalled();
     });
   });

@@ -1,5 +1,5 @@
 import type { MindMapDoc } from "../../model/types";
-import { deleteMap, loadMap, saveMap } from "../../store/mapStore";
+import { loadMap, saveMap } from "../../store/mapStore";
 import type { MapEntry } from "./MapCard";
 import type { StartContext } from "./types";
 
@@ -32,15 +32,10 @@ export async function handleMapAction(
     case "open":
       ctx.onOpen(doc);
       return;
-    case "rename": {
-      const name = window.prompt("Rename map:", doc.title);
-      if (name == null || !name.trim()) return;
-      doc.title = name.trim();
-      doc.root = { ...doc.root, topic: name.trim() };
-      await saveMap(doc);
-      ctx.onLibraryChange();
+    case "rename":
+      // Hand off to the themed rename dialog (StartScreen owns it) instead of a raw window.prompt.
+      ctx.requestRename?.(entry.id, doc.title);
       return;
-    }
     case "pin": {
       doc.meta = { ...doc.meta, pinned: !doc.meta?.pinned };
       await saveMap(doc);
@@ -59,9 +54,20 @@ export async function handleMapAction(
       download(doc);
       return;
     case "delete":
-      if (!window.confirm(`Delete "${doc.title}"? This can't be undone.`)) return;
-      await deleteMap(entry.id);
-      ctx.onLibraryChange();
+      // Hand off to the themed confirm dialog (StartScreen owns it) instead of a raw window.confirm.
+      ctx.requestDelete?.(entry.id, doc.title);
       return;
   }
+}
+
+/** Apply a rename to the stored map — updates the title + the root topic, then saves. The UI lives in
+ *  the themed rename dialog (StartScreen / MapDialogs); this is the store op it calls on confirm. */
+export async function renameMapTitle(id: string, title: string): Promise<void> {
+  const name = title.trim();
+  if (!name) return;
+  const doc = await loadMap(id);
+  if (!doc) return;
+  doc.title = name;
+  doc.root = { ...doc.root, topic: name };
+  await saveMap(doc);
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MindMapDoc } from "../../model/types";
 import { CommandPalette } from "./CommandPalette";
+import { MapDialogs, type PendingMapAction } from "./MapDialogs";
 import { StartHeader } from "./StartHeader";
 import { StartHome } from "./StartHome";
 import { StartSidebar } from "./StartSidebar";
@@ -45,6 +46,7 @@ export function StartScreen({
   const [section, setSection] = useState<StartSection>("start");
   const [cmdk, setCmdk] = useState(false);
   const [rev, setRev] = useState(0);
+  const [pending, setPending] = useState<PendingMapAction>(null);
   const mapCount = useLibrary(rev).length;
   // A brand-new user hasn't completed a first edit, so the one-shot first-run flag is still unset.
   // Combined with a near-empty library, that's the signal for the "New here?" onboarding banner (O9).
@@ -76,6 +78,8 @@ export function StartScreen({
       libraryRev: rev,
       onLibraryChange: () => setRev((r) => r + 1),
       openCommandPalette: () => setCmdk(true),
+      requestRename: (id, title) => setPending({ kind: "rename", id, title }),
+      requestDelete: (id, title) => setPending({ kind: "delete", id, title }),
       onCheckForUpdates,
       showNewHere,
     }),
@@ -105,6 +109,11 @@ export function StartScreen({
         </div>
       </div>
       {cmdk ? <CommandPalette ctx={ctx} onClose={() => setCmdk(false)} /> : null}
+      <MapDialogs
+        pending={pending}
+        onClose={() => setPending(null)}
+        onDone={() => setRev((r) => r + 1)}
+      />
     </div>
   );
 }

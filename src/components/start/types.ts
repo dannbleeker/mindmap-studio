@@ -31,6 +31,10 @@ export interface StartContext {
   onLibraryChange: () => void;
   /** Open the ⌘K command palette (so e.g. the "Learn the app" ⌘K tip card can actually open it). */
   openCommandPalette?: () => void;
+  /** Open the themed rename dialog for a map (instead of a native window.prompt). */
+  requestRename?: (id: string, title: string) => void;
+  /** Open the themed delete-confirm dialog for a map (instead of a native window.confirm). */
+  requestDelete?: (id: string, title: string) => void;
   /** Trigger a manual PWA update check (About → "Check for updates"). App maps the result to a
    *  toast; the Start screen now renders that toast surface, so the result is visible here. */
   onCheckForUpdates?: () => void;

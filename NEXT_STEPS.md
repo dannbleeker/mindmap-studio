@@ -121,11 +121,11 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
 - [x] **Phase 6 — mobile/tablet layout** (shipped — see CHANGELOG): hide the 56px icon rail on phones
   (its actions live in the toolbar/menus/⌘K); added a `(pointer:coarse)` 641–1024px tablet tier that
   narrows the dock + caps the inspector (`max-width`, so it overrides the inline resized width).
-- [~] **Phase 7 — Start library scanning & curation.** **7a + 7b shipped (see CHANGELOG):** real
-  branch-coloured thumbnails; "Search your maps…" filter; list-view dates; finer Recent buckets;
-  pin/favourite maps (`meta.pinned`, ★, pinned-first ordering); the ⌘K Learn-tip card opens the palette;
-  catalogue rows + USER_GUIDE notes added. **7c open:** themed rename/delete dialogs — replace the native
-  `window.prompt/confirm` in `mapActions.ts` by lifting a small Dialog into `StartScreen`.
+- [x] **Phase 7 — Start library scanning & curation** (shipped — see CHANGELOG): real branch-coloured
+  thumbnails; "Search your maps…" filter; list-view dates; finer Recent buckets; pin/favourite maps
+  (`meta.pinned`, ★, pinned-first ordering); the ⌘K Learn-tip card opens the palette; themed
+  rename/delete dialogs (`MapDialogs` + `renameMapTitle`, replacing the native `prompt`/`confirm`);
+  catalogue rows + USER_GUIDE notes.
 - [ ] **Phase 8 — inspector, dock & tabs:** group + collapse the Map panel's controls + make its
   stats filter-aware; resizable left dock; persist active dock/inspector tab; scroll active tab into
   view; custom-colour input on the Edge/Overlay inspectors.

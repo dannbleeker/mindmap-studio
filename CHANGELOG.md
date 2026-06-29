@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Themed rename/delete dialogs (UI review — Phase 7c).** Renaming or deleting a map from the Start
+  screen now uses an in-app, theme-aware dialog instead of the browser's native `prompt`/`confirm` —
+  which ignored the app theme (a stark white box on a warm/dark Start screen) and, in some PWAs, returned
+  `null` silently so a rename could fail invisibly. The rename store-op (`renameMapTitle`) and the dialog
+  UI (`MapDialogs`, routed through `StartContext`) are kept separate so each is unit-tested. This
+  completes Phase 7.
+
 - **Start library curation (UI review — Phase 7b).** Maps can now be **pinned** (★) to the top of every
   library list — All maps, Recent, and "Pick up where you left off" — independent of recency, via the
   card's ⋯ menu; the pinned state is stored in the map (additive `meta.pinned`) so it survives reload and

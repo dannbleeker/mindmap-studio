@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-29T15:27:43.758Z",
-  "commit": "79fde3b",
+  "generatedAt": "2026-06-29T15:33:33.434Z",
+  "commit": "1969eb2",
   "headline": {
     "linesTsJs": 60831,
     "tests": 1689,
     "lineCoveragePct": 91.1,
-    "commits": 920,
+    "commits": 922,
     "ageDays": 17,
     "trackedFiles": 426,
     "featureManualPct": 71.8,
@@ -31,7 +31,7 @@
     {
       "category": "Styles (CSS)",
       "files": 3,
-      "lines": 2312
+      "lines": 2354
     },
     {
       "category": "Docs (Markdown)",
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 1689,
     "e2e": 0,
-    "durationMs": 77864,
+    "durationMs": 75122,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 21490
+        "ms": 20010
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 19741
+        "ms": 18643
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 7836
+        "ms": 7733
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7601
+        "ms": 7111
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4131
+        "ms": 4063
       }
     ]
   },
@@ -189,8 +189,8 @@
   },
   "bundle": {
     "jsGzipKb": 301.8,
-    "cssGzipKb": 9.4,
-    "totalGzipKb": 311.2,
+    "cssGzipKb": 9.5,
+    "totalGzipKb": 311.3,
     "entryGzipKb": 143.5,
     "budgetKb": 150,
     "withinBudget": true
@@ -796,16 +796,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 17,
-    "commits": 920,
-    "commits7d": 149,
+    "commits": 922,
+    "commits7d": 151,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 458
+        "count": 459
       },
       {
         "name": "github-actions[bot]",
-        "count": 427
+        "count": 428
       },
       {
         "name": "Claude",
@@ -813,9 +813,9 @@
       }
     ],
     "churn30d": {
-      "added": 114967,
-      "removed": 35727
+      "added": 115067,
+      "removed": 35775
     },
-    "changelogEntries": 337
+    "changelogEntries": 338
   }
 }

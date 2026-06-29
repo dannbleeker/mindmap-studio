@@ -188,9 +188,9 @@
   },
   {
     "date": "2026-06-29",
-    "linesTsJs": 61512,
-    "coveragePct": 91.17,
-    "tests": 1705,
+    "linesTsJs": 61560,
+    "coveragePct": 91.18,
+    "tests": 1707,
     "bundleKb": 312.9,
     "mutationScore": null,
     "featureManualPct": 72.1,

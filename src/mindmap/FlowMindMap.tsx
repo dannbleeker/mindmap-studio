@@ -348,6 +348,9 @@ function FlowInner({
   // (caret at end); null for a normal edit (double-click / F2 / new node → seed topic, select all).
   const [editSeed, setEditSeed] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
+  // Empty-pane right-click menu (add topic / paste branch / fit / reset zoom). Separate from the node
+  // menu above; opened from the canvas wrapper's onContextMenu when the bare pane is the target.
+  const [paneMenu, setPaneMenu] = useState<{ x: number; y: number } | null>(null);
   // Right-click menu for overlays (boundary / summary / callout) — recolour / shape / delete. Kept
   // separate from the node `menu` (which is keyed by node id) since it carries the selected overlay.
   const [overlayMenu, setOverlayMenu] = useState<{
@@ -389,7 +392,7 @@ function FlowInner({
   const [guides, setGuides] = useState<GuideLine[]>([]);
   // The cross-link whose label is being inline-edited on the canvas (double-click), or null.
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
-  const { fitView, getNodes, setCenter, getViewport, setViewport, screenToFlowPosition } =
+  const { fitView, getNodes, setCenter, getViewport, setViewport, screenToFlowPosition, zoomTo } =
     useReactFlow();
   const initialized = useNodesInitialized();
 
@@ -1850,6 +1853,16 @@ function FlowInner({
               apply(addFloatingTopic(docRef.current, ""), true);
             }
           }}
+          // Right-click the bare pane → a canvas menu (add topic / paste branch / fit / reset zoom). The
+          // pane-target guard means a right-click on a node still gets the node menu (onNodeContextMenu)
+          // and never a stray pane menu.
+          onContextMenu={(e) => {
+            if ((e.target as HTMLElement)?.classList?.contains("react-flow__pane")) {
+              e.preventDefault();
+              setMenu(null);
+              setPaneMenu({ x: e.clientX, y: e.clientY });
+            }
+          }}
         >
           {/* Polite live region narrating selection changes — gives screen-reader users a sense of
               "you are here" on a canvas that's otherwise an opaque SVG graph. */}
@@ -2039,7 +2052,15 @@ function FlowInner({
               </ViewportPortal>
             ) : null}
             <Controls showInteractive={false} />
-            <StatusBar topics={nodes.length} selected={selectedIds.size} />
+            <StatusBar
+              topics={nodes.length}
+              selected={selectedIds.size}
+              onResetZoom={() => zoomTo(1, { duration: 200 })}
+              onFitSelection={() => {
+                const ids = [...selectedIds];
+                if (ids.length) fitView({ nodes: ids.map((id) => ({ id })), duration: 300 });
+              }}
+            />
             <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
           </ReactFlow>
           {menu ? (
@@ -2330,6 +2351,33 @@ function FlowInner({
                   </>
                 );
               })()}
+            </ContextMenu>
+          ) : null}
+          {/* Empty-pane right-click menu — the one canvas surface that did nothing on right-click. */}
+          {paneMenu ? (
+            <ContextMenu
+              x={paneMenu.x}
+              y={paneMenu.y}
+              onClose={() => setPaneMenu(null)}
+              menuAriaLabel="Canvas actions"
+              sheet={isMobile}
+            >
+              <MenuItem
+                label="Add topic here"
+                onSelect={() => apply(addFloatingTopic(docRef.current, ""), true)}
+              />
+              {getBranch() ? (
+                <MenuItem
+                  label="Paste branch here"
+                  onSelect={() => {
+                    const clip = getBranch();
+                    if (clip) apply(pasteBranch(docRef.current, null, clip));
+                  }}
+                />
+              ) : null}
+              <MenuSeparator />
+              <MenuItem label="Fit to view" onSelect={() => fitView({ duration: 300 })} />
+              <MenuItem label="Reset zoom (100%)" onSelect={() => zoomTo(1, { duration: 200 })} />
             </ContextMenu>
           ) : null}
           {/* Right-click menu for a boundary / summary / callout overlay (recolour · shape · delete).

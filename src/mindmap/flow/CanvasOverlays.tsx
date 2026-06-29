@@ -1,4 +1,5 @@
 import { MiniMap, NodeToolbar, Panel, Position, useStore } from "@xyflow/react";
+import type { CSSProperties } from "react";
 import { colors } from "../../design/tokens";
 import { markerImage } from "../../icons";
 import { buildLegend } from "../../legend";
@@ -43,7 +44,30 @@ export function DropLabel({ dropTargetId, doc }: { dropTargetId: string | null; 
 
 /** A slim bottom status bar — visible topic count, current selection size, and live zoom % (read from
  *  the React Flow store, so it tracks pan/zoom). Canvas-only, like the minimap. */
-export function StatusBar({ topics, selected }: { topics: number; selected: number }) {
+// A text-as-button inside the status bar (the clickable zoom % / selection-count) — no chrome, just a
+// pointer cursor so the read-out doubles as an action.
+const statBtn: CSSProperties = {
+  border: "none",
+  background: "transparent",
+  color: "inherit",
+  font: "inherit",
+  cursor: "pointer",
+  padding: 0,
+};
+
+export function StatusBar({
+  topics,
+  selected,
+  onResetZoom,
+  onFitSelection,
+}: {
+  topics: number;
+  selected: number;
+  /** Click the zoom % → reset to 100%. */
+  onResetZoom?: () => void;
+  /** Click the selection count → zoom to fit the selection. */
+  onFitSelection?: () => void;
+}) {
   const zoom = useStore((s) => s.transform[2]);
   return (
     <Panel position="bottom-center">
@@ -65,8 +89,27 @@ export function StatusBar({ topics, selected }: { topics: number; selected: numb
         <span>
           {topics} topic{topics === 1 ? "" : "s"}
         </span>
-        {selected > 0 ? <span>{selected} selected</span> : null}
-        <span>{Math.round(zoom * 100)}%</span>
+        {selected > 0 ? (
+          onFitSelection ? (
+            <button
+              type="button"
+              style={statBtn}
+              title="Zoom to fit the selection"
+              onClick={onFitSelection}
+            >
+              {selected} selected
+            </button>
+          ) : (
+            <span>{selected} selected</span>
+          )
+        ) : null}
+        {onResetZoom ? (
+          <button type="button" style={statBtn} title="Reset zoom to 100%" onClick={onResetZoom}>
+            {Math.round(zoom * 100)}%
+          </button>
+        ) : (
+          <span>{Math.round(zoom * 100)}%</span>
+        )}
       </div>
     </Panel>
   );

@@ -243,6 +243,41 @@ describe("FlowMindMap canvas", () => {
     expect(a?.children.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("right-clicks the empty pane → a canvas menu (add topic / fit / reset zoom)", () => {
+    localStorage.removeItem("mindmap-branch-clipboard");
+    const { container, onChange } = mount();
+    const pane = container.querySelector(".react-flow__pane") as HTMLElement;
+    run(() => fireEvent.contextMenu(pane));
+    const menu = openMenu() as HTMLElement;
+    expect(menu).toBeTruthy();
+    expect(within(menu).getByText("Add topic here")).toBeTruthy();
+    expect(within(menu).getByText("Fit to view")).toBeTruthy();
+    expect(within(menu).getByText("Reset zoom (100%)")).toBeTruthy();
+    expect(within(menu).queryByText("Paste branch here")).toBeNull(); // empty clipboard → hidden
+    run(() => fireEvent.click(within(menu).getByText("Add topic here")));
+    expect(onChange).toHaveBeenCalled(); // a floating topic was added
+  });
+
+  it("the pane menu pastes a copied branch as a floating topic", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("a"));
+    run(() => fireEvent.keyDown(document, { key: "c", ctrlKey: true })); // copy "a" → clipboard
+    const pane = container.querySelector(".react-flow__pane") as HTMLElement;
+    run(() => fireEvent.contextMenu(pane));
+    const menu = openMenu() as HTMLElement;
+    onChange.mockClear();
+    run(() => fireEvent.click(within(menu).getByText("Paste branch here")));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.floatingTopics?.length ?? 0).toBeGreaterThanOrEqual(1); // pasted as a floating topic
+  });
+
+  it("the status-bar zoom % + selection count are clickable (reset zoom / fit selection)", () => {
+    const { h } = mount();
+    run(() => fireEvent.click(screen.getByTitle("Reset zoom to 100%"))); // no throw (zoomTo)
+    run(() => h.focusNode("a")); // a selection → the fit button appears
+    run(() => fireEvent.click(screen.getByTitle("Zoom to fit the selection"))); // no throw (fitView)
+  });
+
   it("Ctrl+Enter adds a child of the selected node (plain Enter still adds a sibling)", () => {
     const { h, onChange } = mount();
     run(() => h.focusNode("a")); // "a" starts with one child (a1)

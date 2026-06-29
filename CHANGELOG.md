@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Empty-pane menu + interactive zoom (UI review — Phase 9b).** Right-clicking the bare canvas now opens a
+  menu — **Add topic here**, **Paste branch here** (when a branch is copied), **Fit to view**, **Reset zoom
+  (100%)** — the one surface that previously did nothing on right-click. "Paste branch here" finally lets a
+  copied branch land as a free-floating topic, not only under a node. And the status-bar zoom % is now a
+  button (click → 100%), with the "N selected" count zooming to fit the selection. Completes Phase 9.
+
 - **Keyboard branch copy / duplicate / paste (UI review — Phase 9a).** The canvas gains the muscle-memory
   editing keys: **Ctrl/⌘+C** copies the selected branch, **Ctrl/⌘+D** duplicates it as a sibling, and
   **Ctrl/⌘+Shift+V** pastes a copied branch under the selection (plain Ctrl/⌘+V stays the image paste, so

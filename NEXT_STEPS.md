@@ -133,9 +133,9 @@ land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly
 
 **Phases 4–8 of the UI-review remediation are complete.** Phases 9–12 (canvas interactions, canvas
 affordances, visual micro-polish, sheet drag-to-resize) remain open from the 2026-06-29 review plan.
-- [~] **Phase 9 — canvas interactions.** **9a shipped (see CHANGELOG):** keyboard copy/duplicate/paste of
-  a branch (`Ctrl/⌘+C` / `Ctrl/⌘+D` / `Ctrl/⌘+Shift+V`). **Open:** 9b — empty-pane right-click menu
-  (paste-branch-as-floating, add topic, fit/reset-zoom) + clickable status-bar zoom % (reset / fit selection).
+- [x] **Phase 9 — canvas interactions** (shipped — see CHANGELOG): keyboard copy/duplicate/paste of a
+  branch (`Ctrl/⌘+C` / `Ctrl/⌘+D` / `Ctrl/⌘+Shift+V`); empty-pane right-click menu (add topic /
+  paste-branch-as-floating / fit / reset-zoom); clickable status-bar zoom % (reset / fit selection).
 - [ ] **Phase 10 — canvas affordances:** on-canvas wrap-width drag handle; hover a collapsed `+N`
   badge to peek hidden children; enlarge the relate-grip hit area + de-crowd the lower-right corner.
 - [ ] **Phase 11 — visual micro-polish:** Start nav vector icons; token the hardcoded `#26215c`

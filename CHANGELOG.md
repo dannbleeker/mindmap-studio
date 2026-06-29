@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Visual polish — colours, press feedback, active-rail edge (UI review — Phase 11a).** The Start-screen
+  thumbnail node and the mobile browser/PWA `theme-color` move off a legacy indigo (`#26215c`) onto the
+  brand tokens — the thumbnail's central node was near-invisible on the dark page. Buttons (editor + Start)
+  now give a 1px press-down nudge, the Start card radius matches the editor (12px), and the active
+  left-rail tool carries a 3px emerald accent edge so selection reads as the strongest state, not the
+  faintest.
+
 - **Node affordance polish (UI review — Phase 10a).** The drag-to-relate grip is bigger (16px, was 11) and
   clearer at rest on a selected node, so "drag to link" is a reliable target instead of a fiddly dot. And
   hovering a collapsed branch's **+N** toggle now peeks the first hidden child titles in a small card — so

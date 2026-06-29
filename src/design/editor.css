@@ -51,6 +51,7 @@
   border-radius: 10px;
   border: none;
   cursor: pointer;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,6 +67,23 @@
 .mm-rail-btn[aria-pressed="true"] {
   background: var(--ed-accent-tint);
   color: var(--ed-accent);
+}
+/* A 3px accent edge on the active rail item — selection should be the strongest state, not the faintest
+   (the tint alone is weak, especially in dark mode). Matches the doctab/dock-tab accent-edge language. */
+.mm-rail-btn[aria-pressed="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--ed-accent);
+}
+/* Tactile press feedback — a 1px down-nudge on pointer-down (closes the interaction loop, esp. on touch). */
+.mm-tbtn:active,
+.mm-rail-btn:active {
+  transform: translateY(1px);
 }
 .mm-rail-sep {
   width: 22px;

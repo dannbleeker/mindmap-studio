@@ -137,13 +137,16 @@ affordances, visual micro-polish, sheet drag-to-resize) remain open from the 202
   branch (`Ctrl/⌘+C` / `Ctrl/⌘+D` / `Ctrl/⌘+Shift+V`); empty-pane right-click menu (add topic /
   paste-branch-as-floating / fit / reset-zoom); clickable status-bar zoom % (reset / fit selection).
 - [~] **Phase 10 — canvas affordances.** **10a shipped (see CHANGELOG):** enlarged + more-visible
-  relate-grip; hover a collapsed `+N` badge to peek the first hidden child titles. **Open:** 10b —
-  on-canvas wrap-width drag handle. (Lower-right de-crowd on min-height nodes deferred — the weak half;
-  the grip enlarge/visibility was the verified win.)
-- [ ] **Phase 11 — visual micro-polish:** Start nav vector icons; token the hardcoded `#26215c`
-  thumbnail node (dark-mode invisible); `:active` press state; active-rail accent bar; tokenise Start
-  radii + card radius; Start thumbnail surface separation; group the 12-toggle Panels menu; Export
-  "last format" recency row; context-rank ⌘K when a node is selected.
+  relate-grip; hover a collapsed `+N` badge to peek the first hidden child titles. **Deferred — 10b
+  on-canvas wrap-width drag handle:** the node's right edge is already contested by three affordances
+  (add-child ＋, relate-grip, collapse toggle), so a full-height resize bar there is collision-prone;
+  the value is incremental (Narrow/Medium/Wide/None presets already control wrap width). Revisit only if
+  the presets prove too coarse. (Min-height lower-right de-crowd also deferred — the weak half.)
+- [~] **Phase 11 — visual micro-polish.** **11a shipped (see CHANGELOG):** indigo `#26215c` → brand
+  tokens (Start thumbnail + `theme-color`); `:active` press nudge (editor + Start); Start card radius
+  12px; active left-rail 3px accent edge. **Open:** 11b/c — Start nav vector icons; group the 12-toggle
+  Panels menu; Export "last format" recency row; context-rank ⌘K when a node is selected.
+  (Full Start-radius-scale tokenisation deferred — sub-perceptual; the card radius was the visible win.)
 - [ ] **Phase 12 — sheet drag-to-resize (L):** replace the fake (pointer-events:none) grab handle
   with a real pointer-drag (snap detents + drag-down-to-dismiss). Isolated last (only large item).
 

@@ -9,6 +9,8 @@ export interface MapEntry {
   title: string;
   nodeCount: number;
   updatedAt?: number;
+  /** Real branch colours (one per root child) → a structure-bearing thumbnail; absent for a bare root. */
+  branches?: string[];
 }
 
 const KEBAB: { key: string; label: string }[] = [
@@ -36,7 +38,7 @@ export function MapCard({
         onClick={() => onAction("open", entry)}
         title={`Open ${entry.title}`}
       >
-        <MiniMap seed={entry.id} />
+        <MiniMap seed={entry.id} branches={entry.branches} />
       </button>
       <div className="st-tile-body">
         <div className="st-row">

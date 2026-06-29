@@ -60,6 +60,19 @@ describe("MapCard", () => {
       "delete",
     ]);
   });
+
+  it("draws real branch spokes in the thumbnail when the entry carries branch colours", () => {
+    const e: MapEntry = {
+      id: "m3",
+      title: "Colourful",
+      nodeCount: 4,
+      branches: ["#e8593c", "#3b8bd4"],
+    };
+    const { container } = render(<MapCard entry={e} onAction={vi.fn()} />);
+    // One coloured spoke per real branch (circle fill + connecting line stroke) rather than a hash glyph.
+    expect(container.querySelector('circle[fill="#e8593c"]')).toBeTruthy();
+    expect(container.querySelector('line[stroke="#3b8bd4"]')).toBeTruthy();
+  });
 });
 
 describe("About section", () => {
@@ -126,10 +139,22 @@ describe("AllMaps section", () => {
     await u.selectOptions(screen.getByLabelText(/Sort maps/i), "nodes");
     expect(titlesInGrid()[0]).toBe("Apple");
 
-    // Toggle to list view: rows render the title as a link + a node-count span.
+    // Toggle to list view: rows render the title as a link + a node-count·date span.
     await u.click(screen.getByRole("button", { name: /List/i }));
     expect(screen.getByRole("button", { name: "Apple" })).toBeTruthy();
-    expect(screen.getByText("9 nodes")).toBeTruthy();
+    expect(screen.getByText(/9 nodes ·/)).toBeTruthy(); // node count + last-edited date in the list row
+  });
+
+  it("filters the library by a title search and shows a no-match state", async () => {
+    libEntries = lib; // Banana, Apple
+    render(<AllMaps ctx={mkCtx()} />);
+    const box = screen.getByLabelText(/search your maps/i);
+    await u.type(box, "app");
+    expect(screen.getByText("Apple")).toBeTruthy();
+    expect(screen.queryByText("Banana")).toBeNull();
+    await u.clear(box);
+    await u.type(box, "zzznope");
+    expect(screen.getByText(/No maps match/i)).toBeTruthy();
   });
 });
 
@@ -139,18 +164,19 @@ describe("Recent section", () => {
     expect(screen.getByText(/No maps yet/i)).toBeTruthy();
   });
 
-  it("groups maps by last-edited (Today / Earlier / Not yet saved)", () => {
+  it("groups maps by last-edited into finer buckets (Today / Earlier this week / Not yet saved)", () => {
     const now = Date.now();
+    const DAY = 86_400_000;
     libEntries = [
       { id: "t", title: "Fresh", nodeCount: 1, updatedAt: now },
-      { id: "o", title: "Old", nodeCount: 1, updatedAt: now - 5 * 86_400_000 },
+      { id: "w", title: "MidWeek", nodeCount: 1, updatedAt: now - 4 * DAY },
       { id: "n", title: "Unsaved", nodeCount: 1, updatedAt: undefined },
     ];
     render(<Recent ctx={mkCtx()} />);
     expect(screen.getByRole("heading", { name: "Today" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Earlier" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Earlier this week" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Not yet saved" })).toBeTruthy();
     expect(screen.getByText("Fresh")).toBeTruthy();
-    expect(screen.getByText("Old")).toBeTruthy();
+    expect(screen.getByText("MidWeek")).toBeTruthy();
   });
 });

@@ -18,3 +18,22 @@ export function docNodeCount(doc: MindMapDoc): number {
 export function branchLabels(doc: MindMapDoc): string[] {
   return doc.root.children.map((c) => c.topic);
 }
+
+/** The canvas branch palette identity, shared by the real-thumbnail spokes + the MiniMap fallback. */
+export const BRANCH_PALETTE = [
+  "#E8593C",
+  "#3B8BD4",
+  "#27852f",
+  "#BA7517",
+  "#7a3fb0",
+  "#0C447C",
+  "#993C1D",
+];
+
+/** One colour per real root branch — the topic's explicit colour, else a stable palette index — so a
+ *  card's thumbnail mirrors the map's actual branch count + colours instead of a random seed glyph. */
+export function branchSpokes(doc: MindMapDoc): string[] {
+  return doc.root.children.map(
+    (c, i) => c.style?.color ?? BRANCH_PALETTE[i % BRANCH_PALETTE.length],
+  );
+}

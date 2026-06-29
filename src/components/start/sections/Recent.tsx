@@ -4,19 +4,31 @@ import type { StartContext } from "../types";
 import { useLibrary } from "../useLibrary";
 import { EmptyMaps } from "./EmptyMaps";
 
-// Saved maps grouped by last-edited into Today / Yesterday / Earlier (and "Not yet saved" for any
-// map without a timestamp). Uses the same MapCard + actions as All maps.
+// Saved maps grouped by last-edited. Finer buckets than Today/Yesterday/Earlier so a returning user
+// with weeks of history gets temporal landmarks instead of one undifferentiated "Earlier" wall.
+// ("Not yet saved" covers any map without a timestamp.)
 
-const GROUPS = ["Today", "Yesterday", "Earlier", "Not yet saved"] as const;
+const GROUPS = [
+  "Today",
+  "Yesterday",
+  "Earlier this week",
+  "This month",
+  "Older",
+  "Not yet saved",
+] as const;
 type Group = (typeof GROUPS)[number];
+
+const DAY = 86_400_000;
 
 function groupOf(ts: number | undefined): Group {
   if (!ts) return "Not yet saved";
   const now = new Date();
   const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   if (ts >= startToday) return "Today";
-  if (ts >= startToday - 86_400_000) return "Yesterday";
-  return "Earlier";
+  if (ts >= startToday - DAY) return "Yesterday";
+  if (ts >= startToday - 7 * DAY) return "Earlier this week";
+  if (ts >= new Date(now.getFullYear(), now.getMonth(), 1).getTime()) return "This month";
+  return "Older";
 }
 
 export function Recent({ ctx }: { ctx: StartContext }) {

@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Start library scanning (UI review — Phase 7a).** Map (and template) thumbnails now draw one
+  coloured spoke per *real* root branch instead of a random seed-hashed glyph, so two maps look
+  different at a glance (the structure was in memory and thrown away before). "All maps" gained a
+  **Search your maps…** box with a no-match state — the fixed template/example lists were already
+  searchable while the user's own growing library wasn't. The All-maps list view now shows the
+  last-edited date next to the node count (so the default "recently edited" sort is legible), and
+  Recent groups into finer buckets — Today / Yesterday / Earlier this week / This month / Older —
+  instead of collapsing everything older than two days into one "Earlier" wall.
+
 - **Mobile & tablet layout (UI review — Phase 6).** On phones the 56px icon rail is hidden — every one
   of its actions (Home, Paste, Insert image, Getting-started, Settings, Shortcuts) is also reachable from
   the toolbar Row-1 / the More + Insert menus / ⌘K, so the canvas gets back ~14% of a 390px screen. New

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllMaps } from "../../store/mapStore";
 import type { MapEntry } from "./MapCard";
-import { docNodeCount } from "./nodeStats";
+import { branchSpokes, docNodeCount } from "./nodeStats";
 
 // Load the whole library as MapEntry[] (id, title, node count, last-edited, sheet group). Re-runs
 // when `rev` changes (bumped after a delete/rename/duplicate). One read serves Home/All maps/Recent.
@@ -22,6 +22,7 @@ export function useLibrary(rev: number): MapEntry[] {
             title: d.title,
             nodeCount: docNodeCount(d),
             updatedAt: d.meta?.updatedAt,
+            branches: branchSpokes(d),
           })),
         );
       })

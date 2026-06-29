@@ -1,6 +1,6 @@
 import type { MindMapDoc } from "../../model/types";
 import { MiniMap } from "./MiniMap";
-import { branchLabels, docNodeCount } from "./nodeStats";
+import { branchLabels, branchSpokes, docNodeCount } from "./nodeStats";
 
 // A template card: thumbnail + name + COMPUTED node count + branch-preview pills (the first 3 root
 // children + "+N"). Everything is derived from the real `build()`-ed doc, so adding a template to
@@ -32,7 +32,7 @@ export function TemplateCard({
       title={`Open ${name}`}
     >
       <div className="st-thumb">
-        <MiniMap seed={seed} />
+        <MiniMap seed={seed} branches={branchSpokes(doc)} />
       </div>
       <div className="st-tile-body">
         <div className="st-card-title">{name}</div>

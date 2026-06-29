@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { blankDoc, outlineDoc, topicDoc } from "../src/components/start/docBuilders";
-import { branchLabels, countNodes, docNodeCount } from "../src/components/start/nodeStats";
+import {
+  BRANCH_PALETTE,
+  branchLabels,
+  branchSpokes,
+  countNodes,
+  docNodeCount,
+} from "../src/components/start/nodeStats";
 import { ACCENT, startThemeVars } from "../src/components/start/tokens";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 
@@ -41,6 +47,22 @@ describe("nodeStats", () => {
     };
     expect(branchLabels(docOf(root))).toEqual(["Alpha", "Beta"]);
     expect(branchLabels(docOf(leaf("r", "Lonely")))).toEqual([]);
+  });
+
+  it("branchSpokes gives one colour per root child — explicit colour, else a palette index", () => {
+    const root: MapNode = {
+      id: "r",
+      topic: "R",
+      children: [
+        { id: "a", topic: "A", children: [], style: { color: "#abcdef" } },
+        leaf("b", "B"),
+      ],
+    };
+    const spokes = branchSpokes(docOf(root));
+    expect(spokes).toHaveLength(2);
+    expect(spokes[0]).toBe("#abcdef"); // explicit topic colour wins
+    expect(spokes[1]).toBe(BRANCH_PALETTE[1]); // second child → palette index 1
+    expect(branchSpokes(docOf(leaf("r", "Lonely")))).toEqual([]); // bare root → no spokes
   });
 });
 

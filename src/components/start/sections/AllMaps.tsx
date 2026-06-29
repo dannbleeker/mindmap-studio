@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { timeAgo } from "../../../ui";
 import { MapCard } from "../MapCard";
 import { handleMapAction } from "../mapActions";
 import type { StartContext } from "../types";
@@ -14,11 +15,18 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
   const entries = useLibrary(ctx.libraryRev);
   const [sort, setSort] = useState<Sort>("edited");
   const [list, setList] = useState(false);
+  const [q, setQ] = useState("");
   const sorted = [...entries].sort((a, b) => {
     if (sort === "name") return a.title.localeCompare(b.title);
     if (sort === "nodes") return b.nodeCount - a.nodeCount;
     return (b.updatedAt ?? 0) - (a.updatedAt ?? 0);
   });
+  // Filter the user's own (ever-growing) library by title — the fixed template/example lists were
+  // already searchable while this wasn't, which is backwards.
+  const query = q.trim().toLowerCase();
+  const shown = query
+    ? sorted.filter((e) => (e.title || "(untitled)").toLowerCase().includes(query))
+    : sorted;
 
   return (
     <div className="st-content">
@@ -30,6 +38,14 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
           </p>
         </div>
         <div className="st-toolbar">
+          <input
+            className="st-input"
+            style={{ width: 180 }}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search your maps…"
+            aria-label="Search your maps"
+          />
           <select
             className="st-select"
             value={sort}
@@ -48,9 +64,11 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
 
       {entries.length === 0 ? (
         <EmptyMaps ctx={ctx} />
+      ) : shown.length === 0 ? (
+        <div className="st-empty">No maps match “{q}”.</div>
       ) : list ? (
         <div className="st-list">
-          {sorted.map((e) => (
+          {shown.map((e) => (
             <div key={e.id} className="st-list-row">
               <button
                 type="button"
@@ -60,13 +78,16 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
               >
                 {e.title || "(untitled)"}
               </button>
-              <span className="st-card-meta">{e.nodeCount} nodes</span>
+              <span className="st-card-meta">
+                {e.nodeCount} nodes
+                {e.updatedAt ? ` · ${timeAgo(e.updatedAt)}` : ""}
+              </span>
             </div>
           ))}
         </div>
       ) : (
         <div className="st-grid">
-          {sorted.map((e) => (
+          {shown.map((e) => (
             <MapCard key={e.id} entry={e} onAction={(a, en) => handleMapAction(a, en, ctx)} />
           ))}
         </div>

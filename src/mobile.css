@@ -27,7 +27,8 @@
        keeps a stable share of the screen as the iOS Safari URL bar shows/hides (plain vh resolves to
        the LARGE viewport, so the sheet would eat more than 62% while the bar is visible). */
     height: 62vh;
-    height: 62dvh;
+    /* --mm-sheet-h is set live by the drag handle (useSheetDrag); 62dvh is the resting default. */
+    height: var(--mm-sheet-h, 62dvh);
     z-index: 40;
     background: #fff;
     border-left: none;
@@ -57,20 +58,50 @@
     width: 100% !important;
     border-right: none !important;
   }
-  /* A grab handle so the sheet reads as a draggable/dismissible surface (visual affordance). */
-  .mm-panel-host::before,
-  .mm-inspector::before {
+  /* Snap-to-detent animates on release; suppressed mid-drag (the editor carries data-sheet-dragging)
+     so the sheet tracks the finger 1:1. */
+  .mm-panel-host,
+  .mm-inspector {
+    transition: height 0.16s ease;
+  }
+  .mm-editor[data-sheet-dragging] .mm-panel-host,
+  .mm-editor[data-sheet-dragging] .mm-inspector {
+    transition: none;
+  }
+  /* The real, focusable grab handle (App renders it; was a decorative ::before). A pill straddling the
+     sheet's top edge — pointer-events:auto + touch-action:none so the drag owns the gesture rather than
+     scrolling the page. Tracks the live height via the shared --mm-sheet-h var. */
+  .mm-sheet-handle {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--mm-sheet-h, 62dvh);
+    height: 26px;
+    transform: translateY(50%);
+    z-index: 42;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: row-resize;
+    touch-action: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+  .mm-sheet-handle::before {
     content: "";
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
     width: 38px;
-    height: 4px;
+    height: 5px;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.18);
-    z-index: 2;
-    pointer-events: none;
+    background: rgba(0, 0, 0, 0.22);
+  }
+  .mm-sheet-handle:focus-visible {
+    outline: 2px solid var(--ed-accent, #1b8a5e);
+    outline-offset: 3px;
+  }
+  .mm-sheet-handle[data-dragging]::before {
+    background: var(--ed-accent, #1b8a5e);
+    width: 46px;
   }
   /* The minimized inspector strip (a 40px right column) makes no sense as a phone sheet — hide it;
      re-selecting a topic re-opens the full inspector sheet. */

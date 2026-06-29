@@ -149,8 +149,11 @@ affordances, visual micro-polish, sheet drag-to-resize) remain open from the 202
   selected topic" leads when a node is selected). (Export "last format" recency row deferred — minor; ⌘K
   already fuzzy-searches every export format.)
   (Full Start-radius-scale tokenisation deferred — sub-perceptual; the card radius was the visible win.)
-- [ ] **Phase 12 — sheet drag-to-resize (L):** replace the fake (pointer-events:none) grab handle
-  with a real pointer-drag (snap detents + drag-down-to-dismiss). Isolated last (only large item).
+- [x] **Phase 12 — sheet drag-to-resize** (shipped — see CHANGELOG): real focusable grab handle replaces
+  the fake one — pointer/keyboard drag resizes the bottom sheet (snap 62↔90dvh), drag-down dismisses;
+  `useSheetDrag` + shared `--mm-sheet-h`. **Pending:** the touch *feel* (snap momentum, drag-to-dismiss
+  threshold) wants a real-device pass — the snap/dismiss logic is unit-tested, but coarse-pointer drag
+  can't be exercised headlessly.
 
 ## Open items
 

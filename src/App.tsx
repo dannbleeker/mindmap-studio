@@ -62,6 +62,7 @@ import { useNoteEditor } from "./hooks/useNoteEditor";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
 import { usePanels } from "./hooks/usePanels";
 import { usePasteOutline } from "./hooks/usePasteOutline";
+import { useSheetDrag } from "./hooks/useSheetDrag";
 import { useToast } from "./hooks/useToast";
 import { useVersionHistory } from "./hooks/useVersionHistory";
 import { MARKER_PALETTE } from "./icons";
@@ -1320,6 +1321,10 @@ export function App() {
   // dismisses whichever is open, so a user can't get stuck with the canvas obscured. (Logic lives in
   // mobileSheets.ts so it's unit-testable without a forced-mobile integration render.)
   const mobileSheetOpen = isMobile && anyMobileSheetOpen(panels);
+  // Drag-to-resize for whichever bottom sheet is up (mobile). Publishes `--mm-sheet-h` (read by both
+  // .mm-panel-host and .mm-inspector); dragging down past the threshold dismisses every open sheet,
+  // mirroring the tap-out scrim.
+  const sheetDrag = useSheetDrag(() => closeMobileSheets(panels));
 
   // Left dock: the side panels share ONE tabbed column (mm-dock) instead of stacking as N 250px
   // columns that could crush the canvas. `activeDock` is the visible tab; opening a panel makes it
@@ -1376,7 +1381,15 @@ export function App() {
     <div
       className="mm-editor"
       data-theme={chromeDark ? "dark" : "light"}
-      style={editorThemeVars(chromeDark)}
+      // While a sheet drag is live, suppress the height transition so it tracks the finger.
+      data-sheet-dragging={sheetDrag.dragging || undefined}
+      style={{
+        ...editorThemeVars(chromeDark),
+        // Live bottom-sheet height (mobile only); the sheets + handle read this with a 62dvh fallback.
+        ...(sheetDrag.heightVh != null
+          ? ({ "--mm-sheet-h": `${sheetDrag.heightVh}dvh` } as Record<string, string>)
+          : null),
+      }}
     >
       {/* First focusable element — lets keyboard / switch users skip the rail + toolbar straight to
           the map (WCAG 2.4.1). Targets the canvas wrapper's id; off-screen until focused. */}
@@ -1551,6 +1564,20 @@ export function App() {
 
         <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
           {mobileSheetOpen && <MobileSheetScrim onClose={() => closeMobileSheets(panels)} />}
+          {/* Real (was decorative) grab handle for the bottom sheet — drag to resize / dismiss, or
+              focus it and use the arrow keys (Escape closes). Fixed at the sheet's top edge via the
+              shared --mm-sheet-h var, so it tracks the live height. */}
+          {mobileSheetOpen && (
+            <div
+              className="mm-sheet-handle"
+              role="separator"
+              aria-orientation="horizontal"
+              aria-label="Resize panel — drag, arrow keys to resize, Escape to close"
+              tabIndex={0}
+              data-dragging={sheetDrag.dragging || undefined}
+              {...sheetDrag.handleProps}
+            />
+          )}
           <div className="mm-panel-host">
             {(() => {
               const entries: DockEntry[] = [];

@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Mobile sheet drag-to-resize (UI review — Phase 12).** The bottom sheet's grab handle was decorative
+  (`pointer-events:none`) and the sheet was locked at 62dvh. It's now a real, focusable handle: drag to
+  resize the sheet — snapping between 62dvh and ~90dvh — drag down past a threshold to dismiss, or focus it
+  and use ↑/↓ (Escape closes). A shared `--mm-sheet-h` var (set by a `useSheetDrag` hook; snap/dismiss
+  logic unit-tested) drives both the panel host and the inspector. Completes the UI-review remediation.
+
 - **Context-ranked ⌘K (UI review — Phase 11d).** Open the command palette with a topic selected and the
   node-scoped actions (delete, markers, priority, …) now lead the list under a **For the selected topic**
   header — ahead of Recent and All commands — so what you can do to the selection is one keystroke away

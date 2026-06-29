@@ -153,16 +153,19 @@ function PropRow({ label, children }: { label: string; children: ReactNode }) {
 // collapsed when it holds nothing yet (count === 0) so empty Attachments / Links / Linked-from don't
 // pad the panel; expands to reveal — or add — content. Mirrors the PanelSection look as a button.
 // Callers key it by node id so the open/closed state resets per selected topic.
-function CollapsibleSection({
+export function CollapsibleSection({
   label,
   count = 0,
+  defaultOpen,
   children,
 }: {
   label: string;
   count?: number;
+  /** Force the initial open state; defaults to "open when it holds something" (count > 0). */
+  defaultOpen?: boolean;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(count > 0);
+  const [open, setOpen] = useState(defaultOpen ?? count > 0);
   return (
     <>
       <button

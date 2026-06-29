@@ -103,16 +103,35 @@ describe("MapPanel", () => {
     );
     expect((screen.getByLabelText("Canvas theme") as HTMLSelectElement).value).toBe("light");
     expect((screen.getByLabelText("Background colour") as HTMLInputElement).value).toBe("#ffeecc");
-    expect((screen.getByLabelText(/Line jumps/) as HTMLInputElement).checked).toBe(true);
 
     await userEvent.selectOptions(screen.getByLabelText("Canvas theme"), "dark");
     expect(setThemeId).toHaveBeenCalledWith("dark");
     await userEvent.selectOptions(screen.getByLabelText("Layout"), "grid");
     expect(changeLayout).toHaveBeenCalledWith("grid");
-    await userEvent.click(screen.getByLabelText(/Line jumps/));
-    expect(onToggleLineJumps).toHaveBeenCalled();
     await userEvent.click(screen.getByRole("button", { name: "Reset" }));
     expect(onSetBackground).toHaveBeenCalledWith("");
+
+    // Line jumps lives behind the collapsed "More styling" disclosure — hidden until expanded.
+    expect(screen.queryByLabelText(/Line jumps/)).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: /More styling/i }));
+    expect((screen.getByLabelText(/Line jumps/) as HTMLInputElement).checked).toBe(true);
+    await userEvent.click(screen.getByLabelText(/Line jumps/));
+    expect(onToggleLineJumps).toHaveBeenCalled();
+  });
+
+  it("collapses the low-frequency controls behind 'More styling' and reveals them on expand", async () => {
+    setup();
+    expect(screen.getByLabelText("Canvas theme")).toBeTruthy(); // high-frequency control stays visible
+    expect(screen.queryByLabelText("Connector style")).toBeNull(); // advanced control is tucked away
+    await userEvent.click(screen.getByRole("button", { name: /More styling/i }));
+    expect(screen.getByLabelText("Connector style")).toBeTruthy();
+    expect(screen.getByLabelText("Base font family")).toBeTruthy();
+  });
+
+  it("reads the filtered match count in the stats when a Power Filter is active", () => {
+    setup(planDoc, { filteredCount: 2 });
+    expect(screen.getByText("2/5")).toBeTruthy(); // 2 of 5 topics match
+    expect(screen.getByText("topics match")).toBeTruthy();
   });
 
   it("reflects + drives the map accent colour (Reset only once an accent is set)", async () => {

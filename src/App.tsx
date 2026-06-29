@@ -2036,6 +2036,7 @@ export function App() {
                 onBackdropRings={(d) => mapRef.current?.setBackdropRings(d)}
                 onSetBackdropColor={(c) => mapRef.current?.setBackdropColor(c)}
                 onClearBackdrop={() => mapRef.current?.clearBackdrop()}
+                filteredCount={filterHits?.matches}
                 width={panels.inspectorWidth}
                 onResize={panels.setInspectorWidth}
                 onMinimize={() => {

@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Map panel scannability (UI review — Phase 8a).** The no-selection Map panel no longer stacks all
+  ~11 controls in one wall: Theme / Layout / Background / Accent stay visible and the low-frequency
+  styling (Image, Line jumps, Connectors, Branch weight, Font, Text size) tucks behind a collapsed
+  **More styling** disclosure (reusing the inspector's `CollapsibleSection`). And when a Power Filter is
+  active, the topics stat now reads **"N / M topics match"** instead of silently showing the whole-map
+  total that contradicts the dimmed canvas.
+
 - **Themed rename/delete dialogs (UI review — Phase 7c).** Renaming or deleting a map from the Start
   screen now uses an in-app, theme-aware dialog instead of the browser's native `prompt`/`confirm` —
   which ignored the app theme (a stark white box on a warm/dark Start screen) and, in some PWAs, returned

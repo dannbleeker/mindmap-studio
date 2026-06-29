@@ -1,4 +1,5 @@
 import type { ChangeEvent } from "react";
+import { CollapsibleSection } from "../Panels";
 import type { LayoutKind } from "../mindmap";
 import { type CanvasTheme, canvasThemes } from "../mindmap/theme";
 import type { BackdropKind, BranchGrowth, MapNode, MindMapDoc } from "../model/types";
@@ -64,6 +65,7 @@ export function MapPanel({
   onMinimize,
   width,
   onResize,
+  filteredCount,
 }: {
   doc: MindMapDoc;
   theme: CanvasTheme;
@@ -97,6 +99,9 @@ export function MapPanel({
   onMinimize?: () => void;
   width?: number;
   onResize?: (next: number) => void;
+  /** Matching-topic count when a Power Filter is active (whole-map total stays the denominator); the
+   *  stats then read "N / M topics match" instead of silently showing the whole-map total. */
+  filteredCount?: number;
 }) {
   const counts = tally(doc.root, { total: 0, withProgress: 0, done: 0 });
   const branches = doc.root.children.length;
@@ -252,119 +257,125 @@ export function MapPanel({
               ) : null}
             </div>
           </div>
-          <div className="mm-map-field">
-            <span>Image</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <label className="mm-map-control" style={{ cursor: "pointer" }}>
-                {doc.meta?.backgroundImage ? "Replace…" : "Add…"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBackgroundImage}
-                  style={{ display: "none" }}
-                />
-              </label>
-              {doc.meta?.backgroundImage ? (
-                <button
-                  type="button"
-                  className="mm-map-control"
-                  onClick={() => onSetBackgroundImage("")}
-                  title="Clear background image"
-                  style={{ cursor: "pointer" }}
-                >
-                  Clear
-                </button>
-              ) : null}
+        </div>
+        {/* Progressive disclosure: the high-frequency controls (Theme/Layout/Background/Accent) stay
+            visible; the rest tuck behind a collapsed disclosure so the panel isn't an 11-control wall. */}
+        <CollapsibleSection label="More styling" defaultOpen={false}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingBottom: 8 }}>
+            <div className="mm-map-field">
+              <span>Image</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <label className="mm-map-control" style={{ cursor: "pointer" }}>
+                  {doc.meta?.backgroundImage ? "Replace…" : "Add…"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBackgroundImage}
+                    style={{ display: "none" }}
+                  />
+                </label>
+                {doc.meta?.backgroundImage ? (
+                  <button
+                    type="button"
+                    className="mm-map-control"
+                    onClick={() => onSetBackgroundImage("")}
+                    title="Clear background image"
+                    style={{ cursor: "pointer" }}
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
             </div>
-          </div>
-          <label className="mm-map-field" style={{ cursor: "pointer" }}>
-            <span>Line jumps</span>
-            <input
-              type="checkbox"
-              checked={lineJumps}
-              onChange={onToggleLineJumps}
-              aria-label="Line jumps where relationships cross"
-            />
-          </label>
-          {/* Connector style / branch weight / type — moved here from the Canvas menu (T5) so the
+            <label className="mm-map-field" style={{ cursor: "pointer" }}>
+              <span>Line jumps</span>
+              <input
+                type="checkbox"
+                checked={lineJumps}
+                onChange={onToggleLineJumps}
+                aria-label="Line jumps where relationships cross"
+              />
+            </label>
+            {/* Connector style / branch weight / type — moved here from the Canvas menu (T5) so the
               map's persistent styling lives in one place. The Canvas menu now keeps only Design
               presets + Free layout and points here. */}
-          <label className="mm-map-field">
-            <span>Connectors</span>
-            <select
-              className="mm-map-control"
-              value={doc.meta?.connectorStyle ?? "organic"}
-              onChange={(e) => onSetConnectorStyle(e.target.value as ConnectorStyle)}
-              aria-label="Connector style"
-            >
-              <option value="organic">Organic</option>
-              <option value="curved">Curved</option>
-              <option value="elbow">Elbow</option>
-              <option value="straight">Straight</option>
-            </select>
-          </label>
-          <label className="mm-map-field">
-            <span>Branch weight</span>
-            <select
-              className="mm-map-control"
-              value={doc.meta?.branchGrowth ?? "regular"}
-              onChange={(e) => onSetBranchGrowth(e.target.value as BranchGrowth)}
-              aria-label="Branch growth weight"
-            >
-              <option value="fine">Fine</option>
-              <option value="regular">Regular</option>
-              <option value="bold">Bold</option>
-            </select>
-          </label>
-          <label className="mm-map-field">
-            <span>Font</span>
-            <select
-              className="mm-map-control"
-              value={doc.meta?.fontFamily ?? ""}
-              onChange={(e) => onSetFontFamily(e.target.value)}
-              aria-label="Base font family"
-              title="Map-wide base font (a per-topic font still overrides it)"
-            >
-              <option value="">Default</option>
-              <option value="Inter, system-ui, sans-serif">Sans</option>
-              <option value="Georgia, 'Times New Roman', serif">Serif</option>
-              <option value="'Courier New', ui-monospace, monospace">Mono</option>
-            </select>
-          </label>
-          <label className="mm-map-field">
-            <span>Text size</span>
-            <select
-              className="mm-map-control"
-              value={doc.meta?.fontScale ?? "comfortable"}
-              onChange={(e) => onSetFontScale(e.target.value as FontScale)}
-              aria-label="Font size scale"
-              title="Map-wide text size (a per-topic size still overrides it)"
-            >
-              <option value="compact">Compact</option>
-              <option value="comfortable">Comfortable</option>
-              <option value="large">Large</option>
-            </select>
-          </label>
-          {!doc.backdrop && onSetBackdrop ? (
             <label className="mm-map-field">
-              <span>Backdrop</span>
+              <span>Connectors</span>
               <select
                 className="mm-map-control"
-                value=""
-                onChange={(e) => {
-                  if (e.target.value) onSetBackdrop(e.target.value as BackdropKind);
-                }}
-                aria-label="Add a diagram backdrop"
+                value={doc.meta?.connectorStyle ?? "organic"}
+                onChange={(e) => onSetConnectorStyle(e.target.value as ConnectorStyle)}
+                aria-label="Connector style"
               >
-                <option value="">None</option>
-                <option value="onion">Onion (rings)</option>
-                <option value="funnel">Funnel (stages)</option>
-                <option value="venn2">Venn (2 circles)</option>
-                <option value="venn3">Venn (3 circles)</option>
+                <option value="organic">Organic</option>
+                <option value="curved">Curved</option>
+                <option value="elbow">Elbow</option>
+                <option value="straight">Straight</option>
               </select>
             </label>
-          ) : null}
-        </div>
+            <label className="mm-map-field">
+              <span>Branch weight</span>
+              <select
+                className="mm-map-control"
+                value={doc.meta?.branchGrowth ?? "regular"}
+                onChange={(e) => onSetBranchGrowth(e.target.value as BranchGrowth)}
+                aria-label="Branch growth weight"
+              >
+                <option value="fine">Fine</option>
+                <option value="regular">Regular</option>
+                <option value="bold">Bold</option>
+              </select>
+            </label>
+            <label className="mm-map-field">
+              <span>Font</span>
+              <select
+                className="mm-map-control"
+                value={doc.meta?.fontFamily ?? ""}
+                onChange={(e) => onSetFontFamily(e.target.value)}
+                aria-label="Base font family"
+                title="Map-wide base font (a per-topic font still overrides it)"
+              >
+                <option value="">Default</option>
+                <option value="Inter, system-ui, sans-serif">Sans</option>
+                <option value="Georgia, 'Times New Roman', serif">Serif</option>
+                <option value="'Courier New', ui-monospace, monospace">Mono</option>
+              </select>
+            </label>
+            <label className="mm-map-field">
+              <span>Text size</span>
+              <select
+                className="mm-map-control"
+                value={doc.meta?.fontScale ?? "comfortable"}
+                onChange={(e) => onSetFontScale(e.target.value as FontScale)}
+                aria-label="Font size scale"
+                title="Map-wide text size (a per-topic size still overrides it)"
+              >
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+                <option value="large">Large</option>
+              </select>
+            </label>
+            {!doc.backdrop && onSetBackdrop ? (
+              <label className="mm-map-field">
+                <span>Backdrop</span>
+                <select
+                  className="mm-map-control"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) onSetBackdrop(e.target.value as BackdropKind);
+                  }}
+                  aria-label="Add a diagram backdrop"
+                >
+                  <option value="">None</option>
+                  <option value="onion">Onion (rings)</option>
+                  <option value="funnel">Funnel (stages)</option>
+                  <option value="venn2">Venn (2 circles)</option>
+                  <option value="venn3">Venn (3 circles)</option>
+                </select>
+              </label>
+            ) : null}
+          </div>
+        </CollapsibleSection>
 
         {/* Diagram backdrop controls — shown only when the map has one (a singleton on the doc). */}
         {doc.backdrop && (onBackdropRings || onClearBackdrop || onSetBackdropColor) ? (
@@ -451,8 +462,11 @@ export function MapPanel({
 
         <div className="mm-stat-grid">
           <div className="mm-stat">
-            <div className="mm-stat-num">{counts.total}</div>
-            <div className="mm-stat-label">topics</div>
+            <div className="mm-stat-num">
+              {filteredCount != null ? `${filteredCount}/${counts.total}` : counts.total}
+            </div>
+            {/* A Power Filter narrows the canvas; say so instead of silently showing whole-map totals. */}
+            <div className="mm-stat-label">{filteredCount != null ? "topics match" : "topics"}</div>
           </div>
           <div className="mm-stat">
             <div className="mm-stat-num">{branches}</div>

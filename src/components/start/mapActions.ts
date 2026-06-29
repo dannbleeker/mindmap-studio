@@ -41,6 +41,12 @@ export async function handleMapAction(
       ctx.onLibraryChange();
       return;
     }
+    case "pin": {
+      doc.meta = { ...doc.meta, pinned: !doc.meta?.pinned };
+      await saveMap(doc);
+      ctx.onLibraryChange();
+      return;
+    }
     case "duplicate": {
       const copy: MindMapDoc = { ...structuredClone(doc), id: crypto.randomUUID() };
       copy.title = `${doc.title} (copy)`;

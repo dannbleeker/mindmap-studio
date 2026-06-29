@@ -79,6 +79,18 @@ describe("handleMapAction", () => {
     });
   });
 
+  describe("pin", () => {
+    it("toggles meta.pinned and refreshes the library", async () => {
+      await saveMap(docOf("m-pin", "Pinnable"));
+      await handleMapAction("pin", entryOf("m-pin", "Pinnable"), ctx);
+      expect((await loadMap("m-pin"))?.meta?.pinned).toBe(true);
+      expect(ctx.onLibraryChange).toHaveBeenCalledTimes(1);
+      // Toggling again unpins.
+      await handleMapAction("pin", entryOf("m-pin", "Pinnable"), ctx);
+      expect((await loadMap("m-pin"))?.meta?.pinned).toBe(false);
+    });
+  });
+
   describe("duplicate", () => {
     it("saves an independent copy with a fresh id and a (copy) title", async () => {
       await saveMap(docOf("m-dup", "Original"));

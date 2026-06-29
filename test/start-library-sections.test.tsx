@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { AppTips } from "../src/components/start/AppTips";
 import { MapCard, type MapEntry } from "../src/components/start/MapCard";
 import { About } from "../src/components/start/sections/About";
 import { AllMaps } from "../src/components/start/sections/AllMaps";
@@ -73,6 +74,26 @@ describe("MapCard", () => {
     expect(container.querySelector('circle[fill="#e8593c"]')).toBeTruthy();
     expect(container.querySelector('line[stroke="#3b8bd4"]')).toBeTruthy();
   });
+
+  it("shows the pinned indicator and toggles pin via the kebab", async () => {
+    const onAction = vi.fn();
+    const e: MapEntry = { id: "m4", title: "Important", nodeCount: 1, pinned: true };
+    render(<MapCard entry={e} onAction={onAction} />);
+    expect(screen.getByTitle("Pinned")).toBeTruthy(); // ★ indicator on a pinned card
+    await u.click(screen.getByRole("button", { name: "Unpin" })); // pinned → the kebab reads "Unpin"
+    expect(onAction).toHaveBeenCalledWith("pin", e);
+  });
+});
+
+describe("AppTips", () => {
+  it("opens the command palette from the ⌘K card (show, not just tell)", async () => {
+    const onOpen = vi.fn();
+    render(<AppTips onOpenCommandPalette={onOpen} />);
+    await u.click(screen.getByRole("button", { name: /open the command palette/i }));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    // The other tips stay static, non-interactive cards.
+    expect(screen.queryByRole("button", { name: /right-click a topic/i })).toBeNull();
+  });
 });
 
 describe("About section", () => {
@@ -143,6 +164,17 @@ describe("AllMaps section", () => {
     await u.click(screen.getByRole("button", { name: /List/i }));
     expect(screen.getByRole("button", { name: "Apple" })).toBeTruthy();
     expect(screen.getByText(/9 nodes ·/)).toBeTruthy(); // node count + last-edited date in the list row
+  });
+
+  it("floats pinned maps to the top regardless of the chosen sort", () => {
+    libEntries = [
+      { id: "a", title: "Apple", nodeCount: 9, updatedAt: 200 },
+      { id: "b", title: "Banana", nodeCount: 2, updatedAt: 100, pinned: true },
+    ];
+    render(<AllMaps ctx={mkCtx()} />);
+    // Banana is older + fewer nodes but pinned → it leads ahead of the more-recent Apple.
+    const titles = screen.getAllByText(/Apple|Banana/).map((n) => n.textContent ?? "");
+    expect(titles[0]).toMatch(/Banana/);
   });
 
   it("filters the library by a title search and shows a no-match state", async () => {

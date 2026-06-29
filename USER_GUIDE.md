@@ -33,9 +33,13 @@ place and your editor is never touched:
 - **Start** — a capture hero to make a new map three ways: **type a topic**, **paste an outline**
   (indentation or `#` levels set the hierarchy), or open a **blank canvas**. Below it sit your most
   **recent** maps and a few **templates** for a quick start.
-- **All maps** — your whole library as cards or a list, sortable by last-edited, name, or size.
-  Each card's **⋯** menu opens, renames, duplicates, exports, or deletes the map.
-- **Recent** — every map grouped by when you last edited it (Today / Yesterday / Earlier).
+- **All maps** — your whole library as cards or a list, sortable by last-edited, name, or size, with a
+  **search box** to filter by title. Each card's thumbnail mirrors the map's real branches, and its
+  **⋯** menu opens, renames, duplicates, exports, **pins**, or deletes the map. **Pinned** maps (marked
+  ★) float to the top of every list regardless of recency, so your go-to maps stay one click away (the
+  list view also shows when each map was last edited).
+- **Recent** — every map grouped by when you last edited it (Today / Yesterday / Earlier this week /
+  This month / Older).
 - **Templates** — every [starter map](#templates), each with a thumbnail and a **computed** node
   count and branch preview. Picking one opens it pre-filled.
 - **Layouts** — open a blank map directly in any [layout](#layout) (two-sided, org-chart, radial,

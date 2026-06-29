@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 340,
+  "reviewedThroughChangelogBullets": 341,
   "areas": [
     "editing",
     "notes",
@@ -1606,6 +1606,24 @@
       "area": "structure",
       "since": "2026-06-21",
       "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "library-filter",
+      "name": "Filter your maps by title (All maps search box)",
+      "area": "library",
+      "since": "2026-06-29",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "pin-map",
+      "name": "Pin a map to the top of the library",
+      "area": "library",
+      "since": "2026-06-29",
+      "manual": true,
       "book": false,
       "bookExample": false
     }

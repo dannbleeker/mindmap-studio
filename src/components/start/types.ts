@@ -29,6 +29,8 @@ export interface StartContext {
   libraryRev: number;
   /** Notify App that the library changed (delete/rename/duplicate) so it can refresh. */
   onLibraryChange: () => void;
+  /** Open the ⌘K command palette (so e.g. the "Learn the app" ⌘K tip card can actually open it). */
+  openCommandPalette?: () => void;
   /** Trigger a manual PWA update check (About → "Check for updates"). App maps the result to a
    *  toast; the Start screen now renders that toast surface, so the result is visible here. */
   onCheckForUpdates?: () => void;

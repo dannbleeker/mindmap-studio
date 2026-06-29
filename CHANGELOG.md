@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Start library curation (UI review — Phase 7b).** Maps can now be **pinned** (★) to the top of every
+  library list — All maps, Recent, and "Pick up where you left off" — independent of recency, via the
+  card's ⋯ menu; the pinned state is stored in the map (additive `meta.pinned`) so it survives reload and
+  round-trips through `.json` export. The "Learn the app" **⌘K** card is now a real button that opens the
+  command palette — show, don't just tell.
+
 - **Start library scanning (UI review — Phase 7a).** Map (and template) thumbnails now draw one
   coloured spoke per *real* root branch instead of a random seed-hashed glyph, so two maps look
   different at a glance (the structure was in memory and thrown away before). "All maps" gained a

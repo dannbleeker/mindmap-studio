@@ -29,7 +29,11 @@ function pick<
 
 export function StartHome({ ctx }: { ctx: StartContext }) {
   const recent = [...useLibrary(ctx.libraryRev)]
-    .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+    .sort((a, b) => {
+      // Pinned maps lead "pick up where you left off" so a curated map is always one click away.
+      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+      return (b.updatedAt ?? 0) - (a.updatedAt ?? 0);
+    })
     .slice(0, 3);
   const featured = pick(templates, FEATURED_TEMPLATES, TEMPLATE_DESCRIPTIONS);
   const featuredExamples = pick(examples, FEATURED_EXAMPLES, EXAMPLE_DESCRIPTIONS);
@@ -132,7 +136,7 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
         </div>
       </section>
 
-      <AppTips />
+      <AppTips onOpenCommandPalette={ctx.openCommandPalette} />
     </div>
   );
 }

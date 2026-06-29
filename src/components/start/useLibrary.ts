@@ -23,6 +23,7 @@ export function useLibrary(rev: number): MapEntry[] {
             nodeCount: docNodeCount(d),
             updatedAt: d.meta?.updatedAt,
             branches: branchSpokes(d),
+            pinned: d.meta?.pinned ?? false,
           })),
         );
       })

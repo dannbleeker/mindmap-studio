@@ -17,6 +17,8 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
   const [list, setList] = useState(false);
   const [q, setQ] = useState("");
   const sorted = [...entries].sort((a, b) => {
+    // Pinned maps float to the top regardless of the chosen sort, so curated maps stay reachable.
+    if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
     if (sort === "name") return a.title.localeCompare(b.title);
     if (sort === "nodes") return b.nodeCount - a.nodeCount;
     return (b.updatedAt ?? 0) - (a.updatedAt ?? 0);

@@ -11,6 +11,8 @@ export interface MapEntry {
   updatedAt?: number;
   /** Real branch colours (one per root child) → a structure-bearing thumbnail; absent for a bare root. */
   branches?: string[];
+  /** Pinned to the top of the library lists (curated, recency-independent). */
+  pinned?: boolean;
 }
 
 const KEBAB: { key: string; label: string }[] = [
@@ -30,6 +32,8 @@ export function MapCard({
 }) {
   const meta = [`${entry.nodeCount} node${entry.nodeCount === 1 ? "" : "s"}`];
   if (entry.updatedAt) meta.push(timeAgo(entry.updatedAt));
+  // Pin/unpin leads the kebab so a curated map can be kept at (or released from) the top of the lists.
+  const kebabItems = [{ key: "pin", label: entry.pinned ? "Unpin" : "Pin to top" }, ...KEBAB];
   return (
     <div className="st-card st-card-hover st-tile">
       <button
@@ -42,11 +46,18 @@ export function MapCard({
       </button>
       <div className="st-tile-body">
         <div className="st-row">
-          <div className="st-card-title">{entry.title || "(untitled)"}</div>
+          <div className="st-card-title">
+            {entry.pinned ? (
+              <span aria-hidden="true" title="Pinned" style={{ marginRight: 5 }}>
+                ★
+              </span>
+            ) : null}
+            {entry.title || "(untitled)"}
+          </div>
           <details className="st-kebab">
             <summary aria-label="Map actions">⋯</summary>
             <div className="st-kebab-menu">
-              {KEBAB.map((k) => (
+              {kebabItems.map((k) => (
                 <button
                   key={k.key}
                   type="button"

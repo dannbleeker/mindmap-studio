@@ -2,11 +2,12 @@
 // teaches mind-mapping principles). Static, render-only; reuses the .st-principles grid + .st-principle
 // card styling from the Learn section so it themes with the rest of the Start screen.
 
-const TIPS: { icon: string; title: string; body: string }[] = [
+const TIPS: { icon: string; title: string; body: string; action?: "cmdk" }[] = [
   {
     icon: "⌘",
     title: "⌘K for any command",
     body: "Press Ctrl/⌘ + K anywhere to search and run any action.",
+    action: "cmdk",
   },
   {
     icon: "✦",
@@ -25,21 +26,43 @@ const TIPS: { icon: string; title: string; body: string }[] = [
   },
 ];
 
-export function AppTips() {
+export function AppTips({ onOpenCommandPalette }: { onOpenCommandPalette?: () => void }) {
   return (
     <section>
       <h2 className="st-section-title">Learn the app</h2>
       <p className="st-section-sub">Four shortcuts that make the editor faster.</p>
       <div className="st-principles" style={{ marginTop: 12 }}>
-        {TIPS.map((t) => (
-          <div key={t.title} className="st-card st-principle">
-            <div style={{ fontSize: 22, color: "var(--st-accent)" }} aria-hidden="true">
-              {t.icon}
+        {TIPS.map((t) => {
+          const inner = (
+            <>
+              <div style={{ fontSize: 22, color: "var(--st-accent)" }} aria-hidden="true">
+                {t.icon}
+              </div>
+              <h3>{t.title}</h3>
+              <p>{t.body}</p>
+            </>
+          );
+          // The ⌘K card opens the palette right here — show, don't just tell. Others stay static.
+          if (t.action === "cmdk" && onOpenCommandPalette) {
+            return (
+              <button
+                key={t.title}
+                type="button"
+                className="st-card st-card-hover st-principle"
+                style={{ font: "inherit", textAlign: "left", width: "100%", cursor: "pointer" }}
+                aria-label="Open the command palette"
+                onClick={onOpenCommandPalette}
+              >
+                {inner}
+              </button>
+            );
+          }
+          return (
+            <div key={t.title} className="st-card st-principle">
+              {inner}
             </div>
-            <h3>{t.title}</h3>
-            <p>{t.body}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

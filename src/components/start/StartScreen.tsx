@@ -75,6 +75,7 @@ export function StartScreen({
       go: setSection,
       libraryRev: rev,
       onLibraryChange: () => setRev((r) => r + 1),
+      openCommandPalette: () => setCmdk(true),
       onCheckForUpdates,
       showNewHere,
     }),

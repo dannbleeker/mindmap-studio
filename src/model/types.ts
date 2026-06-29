@@ -289,6 +289,9 @@ export interface MindMapDoc {
      *  the topic's own note in the presenter view. Absent/empty ⇒ the auto deck. Entries whose `nodeId`
      *  no longer resolves are skipped. Additive + lossless in .json. */
     slides?: SlideRef[];
+    /** Pinned/favourited: the user curated this map to stay at the top of the library lists,
+     *  independent of recency. Additive + lossless in .json. */
+    pinned?: boolean;
   };
 }
 

@@ -57,4 +57,35 @@ describe("PanelDock", () => {
     );
     expect(screen.getByTestId("body-stats")).toBeTruthy(); // last entry shown
   });
+
+  it("applies the dock width and resizes via the handle (arrow keys + drag-right widens)", () => {
+    const onResize = vi.fn();
+    const { container } = render(
+      <PanelDock
+        entries={[entry("outline", "Outline")]}
+        active="outline"
+        onActivate={vi.fn()}
+        width={280}
+        onResize={onResize}
+      />,
+    );
+    expect((container.querySelector(".mm-dock") as HTMLElement).style.width).toBe("280px");
+    const handle = screen.getByRole("separator", { name: /resize side panels/i });
+    fireEvent.keyDown(handle, { key: "ArrowRight" }); // widen
+    expect(onResize).toHaveBeenLastCalledWith(288);
+    fireEvent.keyDown(handle, { key: "ArrowLeft" }); // narrow
+    expect(onResize).toHaveBeenLastCalledWith(272);
+    // Pointer drag to the right widens (the dock is on the left edge).
+    fireEvent.pointerDown(handle, { clientX: 100 });
+    fireEvent.pointerMove(window, { clientX: 130 }); // +30
+    expect(onResize).toHaveBeenLastCalledWith(310);
+    fireEvent.pointerUp(window);
+  });
+
+  it("has no resize handle without width/onResize", () => {
+    render(
+      <PanelDock entries={[entry("outline", "Outline")]} active="outline" onActivate={vi.fn()} />,
+    );
+    expect(screen.queryByRole("separator")).toBeNull();
+  });
 });

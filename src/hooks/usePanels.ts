@@ -22,6 +22,15 @@ export const clampInspectorWidth = (w: number | undefined): number =>
     ? Math.min(INSPECTOR_MAX, Math.max(INSPECTOR_MIN, w))
     : INSPECTOR_DEFAULT;
 
+/** Resizable left-dock width bounds (px). Default matches the .mm-dock CSS width. */
+export const DOCK_MIN = 200;
+export const DOCK_MAX = 600;
+export const DOCK_DEFAULT = 280;
+export const clampDockWidth = (w: number | undefined): number =>
+  typeof w === "number" && Number.isFinite(w)
+    ? Math.min(DOCK_MAX, Math.max(DOCK_MIN, w))
+    : DOCK_DEFAULT;
+
 /** The persisted slice of panel state (the durable panels — the rest are session-only). */
 interface PersistedPanels {
   outlineOpen?: boolean;
@@ -29,6 +38,9 @@ interface PersistedPanels {
   infoOpen?: boolean;
   infoMinimized?: boolean;
   inspectorWidth?: number;
+  dockWidth?: number;
+  /** The dock tab that was active last (so a reload restores it instead of falling back to the last). */
+  dockActive?: string | null;
   numbered?: boolean;
   spellcheck?: boolean;
 }
@@ -67,6 +79,12 @@ export interface PanelsState {
   /** Persisted inspector width (px), clamped to [INSPECTOR_MIN, INSPECTOR_MAX]. */
   inspectorWidth: number;
   setInspectorWidth: React.Dispatch<React.SetStateAction<number>>;
+  /** Persisted left-dock width (px), clamped to [DOCK_MIN, DOCK_MAX]. */
+  dockWidth: number;
+  setDockWidth: React.Dispatch<React.SetStateAction<number>>;
+  /** Persisted active dock tab key (restored on reload). */
+  dockActive: string | null;
+  setDockActive: React.Dispatch<React.SetStateAction<string | null>>;
   filterOpen: boolean;
   /** Toggle the Filter panel; closing it also clears the active filter (see `toggleFilter`). */
   toggleFilter: () => void;
@@ -154,6 +172,8 @@ export function usePanels(): UsePanels {
   const [inspectorWidth, setInspectorWidth] = useState(() =>
     clampInspectorWidth(persisted.inspectorWidth),
   );
+  const [dockWidth, setDockWidth] = useState(() => clampDockWidth(persisted.dockWidth));
+  const [dockActive, setDockActive] = useState<string | null>(persisted.dockActive ?? null);
   const [numbered, setNumbered] = useState(!!persisted.numbered);
   const [spellcheck, setSpellcheck] = useState(!!persisted.spellcheck);
   // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
@@ -178,6 +198,8 @@ export function usePanels(): UsePanels {
           infoOpen,
           infoMinimized,
           inspectorWidth,
+          dockWidth,
+          dockActive,
           numbered,
           spellcheck,
         }),
@@ -185,7 +207,17 @@ export function usePanels(): UsePanels {
     } catch {
       // preference is best-effort
     }
-  }, [outlineOpen, indexOpen, infoOpen, infoMinimized, inspectorWidth, numbered, spellcheck]);
+  }, [
+    outlineOpen,
+    indexOpen,
+    infoOpen,
+    infoMinimized,
+    inspectorWidth,
+    dockWidth,
+    dockActive,
+    numbered,
+    spellcheck,
+  ]);
 
   // --- Power Filter ---
   const [filterText, setFilterText] = useState("");
@@ -257,6 +289,10 @@ export function usePanels(): UsePanels {
       setInfoMinimized,
       inspectorWidth,
       setInspectorWidth,
+      dockWidth,
+      setDockWidth,
+      dockActive,
+      setDockActive,
       filterOpen,
       toggleFilter,
       stylesOpen,

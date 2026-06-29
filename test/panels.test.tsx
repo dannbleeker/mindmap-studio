@@ -4,7 +4,7 @@
 // so they keep passing after the panels are rebuilt on shared primitives.
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AgendaPanel,
   FilterPanel,
@@ -46,6 +46,16 @@ const sampleRoot = (): MapNode => ({
 });
 
 const noop = () => {};
+
+// The InfoPanel now persists its last tab in localStorage; clear that key per test so each starts on
+// the default Details tab (otherwise a test that switches to Style/Notes leaks into later ones).
+beforeEach(() => {
+  try {
+    localStorage.removeItem("mindmap-info-tab");
+  } catch {
+    // ignore
+  }
+});
 
 describe("OutlinePanel", () => {
   it("renders the filter box and a row for each topic", () => {

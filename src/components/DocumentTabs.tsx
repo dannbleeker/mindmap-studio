@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { EditorIcon } from "./EditorIcons";
 
 // dataTransfer MIME tag identifying a document-tab drag. Carrying the source index on the drag (vs a
@@ -33,6 +34,13 @@ export function DocumentTabs({
   onNew,
   onReorder,
 }: DocumentTabsProps) {
+  const activeRef = useRef<HTMLDivElement>(null);
+  // Keep the active tab visible when the strip overflows (e.g. switching maps via ⌘K). Optional-call
+  // for jsdom, which doesn't implement scrollIntoView.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll only when the active doc changes
+  useEffect(() => {
+    activeRef.current?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
+  }, [activeId]);
   return (
     <div className="mm-doctabs" role="tablist" aria-label="Open documents">
       <div className="mm-doctabs-scroll">
@@ -42,6 +50,7 @@ export function DocumentTabs({
           return (
             <div
               key={d.id}
+              ref={active ? activeRef : undefined}
               className="mm-doctab"
               data-active={active || undefined}
               draggable={onReorder ? true : undefined}

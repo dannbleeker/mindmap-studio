@@ -47,6 +47,28 @@ describe("usePanels — panel toggles + persistence", () => {
     expect(p.spellcheck).toBe(true);
   });
 
+  it("defaults + persists + restores the dock width and active dock tab", () => {
+    const fresh = renderHook(() => usePanels());
+    expect(fresh.result.current.panels.dockWidth).toBe(280); // DOCK_DEFAULT
+    expect(fresh.result.current.panels.dockActive).toBeNull();
+    fresh.unmount();
+
+    const a = renderHook(() => usePanels());
+    act(() => a.result.current.panels.setDockWidth(420));
+    act(() => a.result.current.panels.setDockActive("stats"));
+    a.unmount();
+
+    const b = renderHook(() => usePanels());
+    expect(b.result.current.panels.dockWidth).toBe(420);
+    expect(b.result.current.panels.dockActive).toBe("stats");
+  });
+
+  it("clamps a junk persisted dock width into range", () => {
+    localStorage.setItem("mindmap-panels", JSON.stringify({ dockWidth: 99999 }));
+    const { result } = renderHook(() => usePanels());
+    expect(result.current.panels.dockWidth).toBe(600); // clamped to DOCK_MAX
+  });
+
   it("does NOT persist the session-only panels (styles/history/board/filter) across a remount", () => {
     const first = renderHook(() => usePanels());
     act(() => first.result.current.panels.setStylesOpen(true));

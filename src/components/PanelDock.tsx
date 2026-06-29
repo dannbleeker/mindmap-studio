@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
+import { DockResizer } from "./DockResizer";
 
 // The left dock — the read-mostly side panels share ONE tabbed column instead of stacking as N 250px
 // columns that could crush the canvas. One panel shows at a time; the tab strip switches between the
@@ -25,16 +26,28 @@ export function PanelDock({
   entries,
   active,
   onActivate,
+  width,
+  onResize,
 }: {
   entries: DockEntry[];
   /** The active tab's key; falls back to the last entry when it doesn't match an open panel. */
   active: string | null;
   onActivate: (key: string) => void;
+  /** Persisted dock width (px); when set with onResize, a drag handle on the right edge resizes it. */
+  width?: number;
+  onResize?: (next: number) => void;
 }) {
-  if (entries.length === 0) return null;
+  const activeTabRef = useRef<HTMLButtonElement>(null);
   const activeEntry = entries.find((e) => e.key === active) ?? entries[entries.length - 1];
+  // Keep the active tab visible when the strip overflows (e.g. switching panels via ⌘K). Optional-call
+  // for jsdom, which doesn't implement scrollIntoView.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll only when the active tab changes
+  useEffect(() => {
+    activeTabRef.current?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
+  }, [activeEntry?.key]);
+  if (entries.length === 0 || !activeEntry) return null;
   return (
-    <div className="mm-dock">
+    <div className="mm-dock" style={width ? { width } : undefined}>
       <div className="mm-dock-tabs" role="tablist" aria-label="Side panels">
         {entries.map((e) => (
           <span
@@ -44,6 +57,7 @@ export function PanelDock({
           >
             <button
               type="button"
+              ref={activeEntry.key === e.key ? activeTabRef : undefined}
               role="tab"
               aria-selected={activeEntry.key === e.key}
               onClick={() => onActivate(e.key)}
@@ -63,6 +77,7 @@ export function PanelDock({
         ))}
       </div>
       <div className="mm-dock-body">{activeEntry.node}</div>
+      {width && onResize ? <DockResizer width={width} onResize={onResize} /> : null}
     </div>
   );
 }

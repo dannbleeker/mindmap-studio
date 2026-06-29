@@ -1324,7 +1324,8 @@ export function App() {
   // Left dock: the side panels share ONE tabbed column (mm-dock) instead of stacking as N 250px
   // columns that could crush the canvas. `activeDock` is the visible tab; opening a panel makes it
   // active, and closing the active one falls back to another open panel.
-  const [activeDock, setActiveDock] = useState<string | null>(null);
+  // Persisted in usePanels so the active dock tab (and the dock width) survive a reload.
+  const { dockActive: activeDock, setDockActive: setActiveDock } = panels;
   const openDockKeys = (
     [
       [panels.outlineOpen, "outline"],
@@ -1351,7 +1352,7 @@ export function App() {
     setActiveDock(
       (cur) => newly ?? (cur && keys.includes(cur) ? cur : (keys[keys.length - 1] ?? null)),
     );
-  }, [openDockKey]);
+  }, [openDockKey, setActiveDock]);
 
   if (view === "start") {
     return (
@@ -1726,7 +1727,15 @@ export function App() {
                     />
                   ),
                 });
-              return <PanelDock entries={entries} active={activeDock} onActivate={setActiveDock} />;
+              return (
+                <PanelDock
+                  entries={entries}
+                  active={activeDock}
+                  onActivate={setActiveDock}
+                  width={panels.dockWidth}
+                  onResize={panels.setDockWidth}
+                />
+              );
             })()}
           </div>
           <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

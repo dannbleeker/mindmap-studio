@@ -100,6 +100,7 @@
    the canvas. One panel shows at a time; the tab strip switches between the open ones. */
 .mm-dock {
   width: 280px;
+  position: relative;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -578,8 +579,26 @@
   background: var(--ed-accent-tint);
   outline: none;
 }
+/* The left dock's resize handle — mirror of the inspector resizer, on the dock's RIGHT (canvas-facing)
+   edge (the dock is docked left, so dragging right widens it). */
+.mm-dock-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 5;
+  background: transparent;
+}
+.mm-dock-resizer:hover,
+.mm-dock-resizer:focus-visible {
+  background: var(--ed-accent-tint);
+  outline: none;
+}
 @media (max-width: 640px) {
-  .mm-inspector-resizer {
+  .mm-inspector-resizer,
+  .mm-dock-resizer {
     display: none;
   }
   /* Reclaim the 56px rail on phones — every rail action (Home, Paste, Insert image, Getting-started,
@@ -607,7 +626,8 @@
    clear of the ≤640 phone-sheet rules. */
 @media (pointer: coarse) and (min-width: 641px) and (max-width: 1024px) {
   .mm-dock {
-    width: 220px;
+    /* max-width (not width) so it caps the now-inline resizable dock width on tablets. */
+    max-width: 220px;
   }
   .mm-inspector {
     max-width: 240px;

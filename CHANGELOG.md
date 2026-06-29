@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Resizable dock + persistent tab state (UI review — Phase 8b).** The left side-panel dock is now
+  resizable — a drag handle on its canvas-facing edge with arrow-key nudge and a persisted width — like
+  the right inspector already was (it hosts the densest read panels: Outline / Power Filter / Styles /
+  History). The active dock tab and dock width persist across reloads (in `usePanels`), as does the topic
+  inspector's last tab (Details / Notes / Style) — a reload no longer drops you on the wrong tab. And the
+  active tab in both the document-tab strip and the dock scrolls into view when it changes off-screen
+  (e.g. switching maps/panels via ⌘K).
+
 - **Map panel scannability (UI review — Phase 8a).** The no-selection Map panel no longer stacks all
   ~11 controls in one wall: Theme / Layout / Background / Accent stay visible and the low-frequency
   styling (Image, Line jumps, Connectors, Branch weight, Font, Text size) tucks behind a collapsed

@@ -2003,7 +2003,15 @@ export function InfoPanel({
   spellCheck?: boolean;
 }) {
   const [tagInput, setTagInput] = useState("");
-  const [tab, setTab] = useState<InfoTab>("details");
+  const [tab, setTab] = useState<InfoTab>(() => {
+    // Restore the last-used inspector tab (best-effort) instead of always defaulting to Details.
+    try {
+      const v = localStorage.getItem("mindmap-info-tab");
+      return v === "notes" || v === "style" ? v : "details";
+    } catch {
+      return "details";
+    }
+  });
   // Bulk mode: >1 node selected. The editors that apply cleanly across a set are shown — markers
   // (tri-state) + tags lead the Details tab, plus shape/colour/font, progress, dates, priority. The
   // genuinely per-item editors (notes, stickers, attachments, links) stay single-node.
@@ -2019,6 +2027,14 @@ export function InfoPanel({
   useEffect(() => {
     if (openNoteNonce) setTab("notes");
   }, [openNoteNonce]);
+  // Persist the chosen tab (the underlying state, not the bulk-mode-derived value) so a reload reopens it.
+  useEffect(() => {
+    try {
+      localStorage.setItem("mindmap-info-tab", tab);
+    } catch {
+      // best-effort
+    }
+  }, [tab]);
   const link = node?.hyperlink ?? "";
   // The URL field is for plain web links; #map= / #node= links are managed by the selects below.
   const webUrl = link.startsWith("#") ? "" : link;

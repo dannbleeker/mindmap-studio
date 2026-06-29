@@ -345,7 +345,7 @@ describe("FlowMindMap canvas", () => {
 
   it("drops a URL onto the canvas as a floating topic", () => {
     const { container, onChange } = mount();
-    const surface = container.querySelector("div");
+    const surface = container.querySelector("#mm-canvas");
     if (!surface) throw new Error("no canvas surface");
     const dataTransfer = {
       types: ["text/uri-list"],
@@ -634,6 +634,35 @@ describe("FlowMindMap canvas", () => {
     expect(onChange).toHaveBeenCalled();
     // Lands straight in inline edit of the new topic.
     expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
+  });
+
+  it("names the canvas region for assistive tech and exposes the skip-link target id", () => {
+    const { container } = mount();
+    const canvas = container.querySelector("#mm-canvas") as HTMLElement;
+    expect(canvas).toBeTruthy();
+    expect(canvas.tagName).toBe("SECTION"); // a named landmark region, not an anonymous div
+    expect(canvas.getAttribute("aria-roledescription")).toBe("mind map canvas");
+    expect(canvas.getAttribute("aria-label")).toMatch(/^Mind map:/);
+    // A polite live region narrates the selection for screen readers.
+    expect(canvas.querySelector('[aria-live="polite"]')).toBeTruthy();
+  });
+
+  it("first-run: on an empty map the keymap falls back to root, so Tab acts with nothing selected", () => {
+    const empty: MindMapDoc = { ...baseDoc(), root: { id: "root", topic: "Root", children: [] } };
+    const { onSelect, onChange } = mount(empty);
+    // Nothing is auto-selected — the fresh-map Map-panel view is unchanged…
+    expect(onSelect).not.toHaveBeenCalled();
+    // …but the canvas keymap falls back to the root, so Tab immediately adds a child to it
+    // (previously a no-op against the null selection — the coachmark's instruction was a lie).
+    run(() => fireEvent.keyDown(document, { key: "Tab" }));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children).toHaveLength(1);
+  });
+
+  it("the empty-map fallback is empty-map-only: Tab does nothing on a populated map with no selection", () => {
+    const { onChange } = mount(); // baseDoc is populated, nothing selected
+    run(() => fireEvent.keyDown(document, { key: "Tab" }));
+    expect(onChange).not.toHaveBeenCalled(); // no invented target → no-op
   });
 
   it("shows the empty-map coachmark until the first edit, never on a populated map (#1)", () => {

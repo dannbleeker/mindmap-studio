@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type RefObject, createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -277,6 +277,18 @@ describe("Toolbar — More menu", () => {
     await u.click(screen.getByRole("menuitem", { name: /about/i }));
     expect(t.nav.openAbout).toHaveBeenCalled();
   });
+
+  it("the Import-files item is a real menuitem button that opens the hidden file input (a11y 2.1.1)", async () => {
+    setup();
+    await u.click(screen.getByRole("button", { name: /^more/i }));
+    // A real <button role=menuitem>, not a <label> wrapping a hidden input — natively keyboard-operable.
+    const item = screen.getByRole("menuitem", { name: /import files/i });
+    expect(item.tagName).toBe("BUTTON");
+    const input = item.nextElementSibling as HTMLInputElement; // the hidden file input alongside it
+    const click = vi.spyOn(input, "click").mockImplementation(() => {});
+    fireEvent.click(item);
+    expect(click).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("Toolbar — row 2 (view/edit/canvas)", () => {
@@ -365,6 +377,17 @@ describe("Toolbar — row 2 (view/edit/canvas)", () => {
     await open();
     await u.click(screen.getByRole("menuitem", { name: /refresh all roll-ups/i }));
     expect(t.map.refreshRollupsNow).toHaveBeenCalled();
+  });
+
+  it("the Insert→Image item is a real menuitem button that opens the hidden file input (a11y 2.1.1)", async () => {
+    setup();
+    await u.click(screen.getByRole("button", { name: /^insert/i }));
+    const item = screen.getByRole("menuitem", { name: /image on selected node/i });
+    expect(item.tagName).toBe("BUTTON");
+    const input = item.nextElementSibling as HTMLInputElement;
+    const click = vi.spyOn(input, "click").mockImplementation(() => {});
+    fireEvent.click(item);
+    expect(click).toHaveBeenCalledTimes(1);
   });
 
   it("Insert: Group/Summary are disabled (with a why-tooltip) when nothing is selected", async () => {

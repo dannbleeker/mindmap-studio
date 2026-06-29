@@ -7,6 +7,30 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Accessibility & first-run polish (UI review — Phases 1–3).** A multi-dimension UI review surfaced a
+  fresh batch of keyboard / screen-reader / first-run gaps; the first three phases shipped:
+  - **Visible keyboard focus across the whole chrome.** Only one button class carried a `:focus-visible`
+    ring before; now the icon rail, both toolbar rows / menu triggers, the find-bar toggle chips, the
+    native selects, and every Start-screen control (nav, tiles, links, pills, tabs, kebab) show the
+    emerald keyboard ring — keyboard users can always see where focus is (WCAG 2.4.7).
+  - **Skip-to-canvas link.** The first Tab in the editor now offers a "Skip to canvas" link that jumps
+    past the rail + both toolbar rows straight to the map (WCAG 2.4.1 Bypass Blocks).
+  - **The canvas is named for assistive tech.** The map region carries a role + label ("Mind map:
+    &lt;title&gt;") and a polite live region narrates selection changes, so a screen reader no longer
+    meets an anonymous, silent SVG. Save-state changes — including the data-loss "Couldn't save" — are
+    now announced via a live region too.
+  - **Image / Import are keyboard-operable.** The three file pickers (the rail's "Insert image", and the
+    "Import files…" / "Image on selected node…" menu items) were a `<label>` wrapping a hidden input —
+    unreachable by keyboard and skipped by the menu's arrow-key roving. They're now real button stops
+    that open the picker on Enter / Space (WCAG 2.1.1 Keyboard).
+  - **Toggle "on" state is no longer colour-only.** Pressed toolbar toggles and the Find Match-case /
+    Regex chips gain an inset accent ring, so on ≠ off (and ≠ hover) without relying on hue (WCAG 1.4.1).
+  - **⌘K traps Tab.** The command palette advertised `aria-modal` but let Tab escape to the page behind
+    it; the options are now out of the tab order and Tab stays inside the modal.
+  - **First-run keys work immediately.** On a brand-new map the canvas keymap now falls back to the
+    central topic when nothing is selected, so the empty-canvas coachmark's "Press Tab for a child ·
+    Enter for a sibling" act on the first keystroke instead of no-op'ing against an empty selection.
+    (The fresh-map view is otherwise unchanged — the Map panel still shows until you select a topic.)
 - **Relevance-sweep gap closure.** A verification pass over the remaining UX backlog found six residual
   gaps against the as-built app; all are now closed:
   - **Bulk markers live with the rest of Details.** Selecting several topics used to move the markers

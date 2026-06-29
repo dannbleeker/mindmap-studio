@@ -468,6 +468,61 @@
   outline-offset: 1px;
 }
 
+/* Keyboard focus on the rest of the editor chrome — the rail buttons, the two-row toolbar buttons /
+ * menu triggers, the find-bar toggle chips and the native selects all render border:none (or a faint
+ * border) whose UA outline is routinely clipped on rounded controls. Mirror the .mm-prim-btn ring so
+ * every operable control shows a clear keyboard focus indicator (WCAG 2.4.7). :focus-visible →
+ * keyboard nav only, never on mouse click. */
+.mm-rail-btn:focus-visible,
+.mm-tbtn:focus-visible,
+.mm-toggle-btn:focus-visible,
+.mm-select:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+}
+
+/* Non-colour cue for the "on" state of toolbar toggles + find-bar chips: an inset accent ring, so a
+ * pressed / enabled control differs from off — and from a mere hover — by edge weight, not hue alone
+ * (WCAG 1.4.1 Use of Color). The accent tint fill stays underneath. */
+.mm-tbtn[aria-pressed="true"],
+.mm-toggle-btn.is-on {
+  box-shadow: inset 0 0 0 1.5px var(--ed-accent);
+}
+
+/* Skip-to-canvas link — the first focusable element in the editor shell, so keyboard / switch users
+ * can jump past the rail + both toolbar rows to the map (WCAG 2.4.1 Bypass Blocks). Off-screen until
+ * focused, then it pins to the top-left corner. */
+.mm-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 8px 14px;
+  background: var(--ed-accent);
+  color: #fff;
+  border-radius: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.mm-skip-link:focus {
+  left: 0;
+}
+
+/* Visually-hidden utility — present in the a11y tree (announced by screen readers) but off-screen for
+ * sighted users. Used for the canvas selection live region. */
+.mm-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Keyboard focus inside a menu (roving Arrow/Home/End) — a clear ring without moving layout. */
 .mm-menu-item:focus-visible {
   outline: none;

@@ -1377,6 +1377,11 @@ export function App() {
       data-theme={chromeDark ? "dark" : "light"}
       style={editorThemeVars(chromeDark)}
     >
+      {/* First focusable element — lets keyboard / switch users skip the rail + toolbar straight to
+          the map (WCAG 2.4.1). Targets the canvas wrapper's id; off-screen until focused. */}
+      <a className="mm-skip-link" href="#mm-canvas">
+        Skip to canvas
+      </a>
       <IconRail
         onHome={goHome}
         onImage={handleImage}

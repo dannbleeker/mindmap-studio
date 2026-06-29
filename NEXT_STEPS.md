@@ -100,6 +100,43 @@ and the named coalesce constant (see CHANGELOG). Phase 3's remaining notes (T1 s
 T3; O3 covered by the touch first-run card) need no further work; everything else still open is in
 *Deferred / blocked* below.
 
+## UI review remediation (active — from the 2026-06-29 review)
+
+A fresh multi-dimension UI review (visual design, toolbar/IA, canvas, inspector, onboarding,
+accessibility, responsive) produced 48 novelty-verified suggestions, batched into phases that each
+land green. **Phases 1–3 shipped** (see CHANGELOG); the rest are open, roughly in priority order:
+
+- [x] **Phase 1 — keyboard & focus a11y foundation** (shipped): `:focus-visible` ring across editor
+  chrome + Start; keyboard-operable file pickers; non-colour toggle cue; ⌘K Tab trap.
+- [x] **Phase 2 — canvas a11y + status** (shipped): named canvas landmark + selection live region;
+  skip-to-canvas link; save-state announced.
+- [x] **Phase 3 — first-run correctness** (shipped): the canvas keymap falls back to the root on an
+  empty map (nothing selected) so the coachmark's Tab/Enter act on the first keystroke.
+- [ ] **Phase 4 — shortcut discoverability:** render the (already built, unused) `shortcut` slot in
+  menus + ⌘K from a drift-guarded bindings map; add Settings + Shortcuts to the "More" menu.
+- [ ] **Phase 5 — mobile viewport & sheet hardening:** `viewport-fit=cover` (then the existing
+  safe-area padding engages); bottom-sheet safe-area padding; `vh`→`dvh`; touch-size the React Flow
+  zoom controls; global touch reset (tap-highlight / overscroll / user-select).
+- [ ] **Phase 6 — mobile/tablet layout:** collapse/hide the 56px icon rail on phones; add a
+  `(pointer:coarse)` tablet tier so iPad portrait isn't desktop-with-no-canvas.
+- [ ] **Phase 7 — Start library scanning & curation:** real branch-shaped thumbnails (widen
+  `MapEntry`); search box on All maps (+ Recent); last-edited date in list view; finer Recent
+  buckets; pin/favourite maps; themed rename/delete dialogs; make the ⌘K Learn-tip card open ⌘K.
+- [ ] **Phase 8 — inspector, dock & tabs:** group + collapse the Map panel's controls + make its
+  stats filter-aware; resizable left dock; persist active dock/inspector tab; scroll active tab into
+  view; custom-colour input on the Edge/Overlay inspectors.
+- [ ] **Phase 9 — canvas interactions:** empty-pane right-click menu (paste-branch-as-floating, add
+  topic, fit/reset-zoom); keyboard copy/duplicate branch (`Ctrl+C`/`Ctrl+D`; branch-paste on
+  `Ctrl+Shift+V` to avoid the image-paste collision); clickable status-bar zoom % (reset / fit selection).
+- [ ] **Phase 10 — canvas affordances:** on-canvas wrap-width drag handle; hover a collapsed `+N`
+  badge to peek hidden children; enlarge the relate-grip hit area + de-crowd the lower-right corner.
+- [ ] **Phase 11 — visual micro-polish:** Start nav vector icons; token the hardcoded `#26215c`
+  thumbnail node (dark-mode invisible); `:active` press state; active-rail accent bar; tokenise Start
+  radii + card radius; Start thumbnail surface separation; group the 12-toggle Panels menu; Export
+  "last format" recency row; context-rank ⌘K when a node is selected.
+- [ ] **Phase 12 — sheet drag-to-resize (L):** replace the fake (pointer-events:none) grab handle
+  with a real pointer-drag (snap detents + drag-down-to-dismiss). Isolated last (only large item).
+
 ## Open items
 
 _No other actionable items._ The MindManager `.mmap` importer is now feature-complete for its scope — Phases A–C

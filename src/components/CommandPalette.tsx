@@ -214,6 +214,11 @@ export function CommandPalette({
             } else if (e.key === "Enter") {
               e.preventDefault();
               run(items[active]);
+            } else if (e.key === "Tab") {
+              // aria-modal promises focus containment. The options are navigated via
+              // aria-activedescendant (they're tabIndex=-1), so the input owns focus — keep Tab /
+              // Shift+Tab inside the modal instead of escaping to the page behind it.
+              e.preventDefault();
             }
           }}
         />
@@ -244,6 +249,9 @@ export function CommandPalette({
                   className="st-cmdk-item"
                   id={optionId(i)}
                   role="option"
+                  // Navigated via aria-activedescendant, not real focus — keep them out of the tab
+                  // order so the input stays the single focus stop inside the modal.
+                  tabIndex={-1}
                   aria-selected={i === active}
                   data-active={i === active}
                   onMouseEnter={() => setActive(i)}

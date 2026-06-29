@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import { type ChangeEvent, useRef } from "react";
 import { BrandMark } from "./BrandMark";
 import { EditorIcon } from "./EditorIcons";
 
@@ -46,6 +46,7 @@ export function IconRail({
   onSettings,
   onGettingStarted,
 }: IconRailProps) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
   return (
     <aside className="mm-rail">
       <button
@@ -59,14 +60,25 @@ export function IconRail({
         <BrandMark size={24} />
       </button>
       <span className="mm-rail-sep" />
-      <label
+      {/* A real <button> (not a <label> wrapping a hidden input, which isn't keyboard-operable) that
+          opens the hidden file picker — so the image control is reachable + activatable by keyboard
+          (Enter/Space, native to a button) like every other rail action (a11y SC 2.1.1). */}
+      <button
+        type="button"
         className="mm-rail-btn"
         title="Insert image on the selected node"
         aria-label="Insert image"
+        onClick={() => imageInputRef.current?.click()}
       >
         <EditorIcon name="image" size={19} />
-        <input type="file" accept="image/*" onChange={onImage} style={{ display: "none" }} />
-      </label>
+      </button>
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={onImage}
+        style={{ display: "none" }}
+      />
       <RailBtn icon="paste" label="Paste text → topics" onClick={onPaste} />
       <div className="mm-rail-spacer">
         <RailBtn icon="star" label="Getting started tips" onClick={onGettingStarted} />

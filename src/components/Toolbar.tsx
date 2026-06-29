@@ -1,4 +1,4 @@
-import type { ChangeEvent, FormEvent, ReactNode, RefObject } from "react";
+import { type ChangeEvent, type FormEvent, type ReactNode, type RefObject, useRef } from "react";
 import { BrainstormTimer } from "../BrainstormTimer";
 import { Menu, MenuCheckboxItem, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { designPreviewModel } from "../designPreview";
@@ -306,6 +306,10 @@ export function Toolbar({
 }: ToolbarProps) {
   const { liveDoc } = map;
   const m = () => mapRef.current;
+  // Hidden file inputs driven by their menu buttons (a button is keyboard-operable; a <label>
+  // wrapping a display:none input is not — a11y SC 2.1.1).
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const nodeImageInputRef = useRef<HTMLInputElement>(null);
 
   const EXPORTS: { group: string; items: [string, () => void][] }[] = [
     {
@@ -430,6 +434,10 @@ export function Toolbar({
             <span
               className="mm-saved"
               data-state={saveState ?? "saved"}
+              // Announce save-state transitions to screen readers — in a local-first app the silent
+              // "Couldn't save" path is data loss, so the error state is assertive (the rest polite).
+              // aria-live alone makes the span a live region (no role needed — the text is the status).
+              aria-live={saveState === "error" ? "assertive" : "polite"}
               title={
                 saveState === "error"
                   ? "Couldn't save to this browser — it may be out of storage or in private mode."
@@ -517,20 +525,26 @@ export function Toolbar({
                 />
                 <MenuSeparator />
                 <MenuLabel>Import / backup</MenuLabel>
-                <label className="mm-menu-item">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="mm-menu-item"
+                  onClick={() => importInputRef.current?.click()}
+                >
                   <EditorIcon name="import" size={15} /> Import files…
-                  <input
-                    id="mmap-input"
-                    type="file"
-                    accept=".mmst,.mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
-                    multiple
-                    onChange={(e) => {
-                      io.handleFile(e);
-                      close();
-                    }}
-                    style={{ display: "none" }}
-                  />
-                </label>
+                </button>
+                <input
+                  ref={importInputRef}
+                  id="mmap-input"
+                  type="file"
+                  accept=".mmst,.mmap,.mmp,.md,.markdown,.json,.opml,.mm,.mmd,.mermaid,.xmind,.smmx,.docx,.xlsx,.itmz,.mind,.mup,.textpack,.textbundle"
+                  multiple
+                  onChange={(e) => {
+                    io.handleFile(e);
+                    close();
+                  }}
+                  style={{ display: "none" }}
+                />
                 <MenuItem
                   icon={mi("paste")}
                   label="Paste text → topics"
@@ -924,18 +938,24 @@ export function Toolbar({
                     );
                   }}
                 />
-                <label className="mm-menu-item">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="mm-menu-item"
+                  onClick={() => nodeImageInputRef.current?.click()}
+                >
                   <EditorIcon name="image" size={15} /> Image on selected node…
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      canvas.handleImage(e);
-                      close();
-                    }}
-                    style={{ display: "none" }}
-                  />
-                </label>
+                </button>
+                <input
+                  ref={nodeImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    canvas.handleImage(e);
+                    close();
+                  }}
+                  style={{ display: "none" }}
+                />
                 <MenuSeparator />
                 <MenuLabel>Map part (insert under selected)</MenuLabel>
                 {MAP_PARTS.map((p) => (

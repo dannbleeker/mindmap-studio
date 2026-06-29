@@ -713,6 +713,26 @@
   color: var(--st-muted, var(--ed-muted, #6b6658));
 }
 
+/* Keyboard focus across all Start interactive controls. The editor gives its chrome a visible
+   :focus-visible ring; mirror it here so keyboard focus reads identically on the landing surface
+   (WCAG 2.4.7). Inputs keep their own focus box-shadow (above); these are the button / link / tile /
+   nav surfaces that otherwise fall back to a clipped UA outline. */
+.st-new:focus-visible,
+.st-nav-item:focus-visible,
+.st-cmdk-trigger:focus-visible,
+.st-link:focus-visible,
+.st-btn:focus-visible,
+.st-pill:focus-visible,
+.st-tab:focus-visible,
+.st-tile:focus-visible,
+.st-thumb-btn:focus-visible,
+.st-hamburger:focus-visible,
+.st-newhere-x:focus-visible,
+.st-kebab > summary:focus-visible {
+  outline: 2px solid var(--st-accent);
+  outline-offset: 1px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .start * {
     transition: none !important;

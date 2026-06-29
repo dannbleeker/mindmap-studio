@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { IconRail } from "../src/components/IconRail";
@@ -55,5 +55,18 @@ describe("IconRail", () => {
     const file = new File(["x"], "pic.png", { type: "image/png" });
     await userEvent.upload(input, file);
     expect(p.onImage).toHaveBeenCalledTimes(1);
+  });
+
+  it("the image picker is a real button (keyboard-operable) that opens the hidden file input", () => {
+    setup();
+    // A real <button>, not a <label> wrapping a hidden input — so it's natively keyboard-operable
+    // (Enter/Space) like every other rail action (a11y SC 2.1.1).
+    const btn = screen.getByRole("button", { name: /insert image/i });
+    expect(btn.tagName).toBe("BUTTON");
+    const input = btn.nextElementSibling as HTMLInputElement;
+    expect(input.type).toBe("file");
+    const click = vi.spyOn(input, "click").mockImplementation(() => {});
+    fireEvent.click(btn);
+    expect(click).toHaveBeenCalledTimes(1);
   });
 });

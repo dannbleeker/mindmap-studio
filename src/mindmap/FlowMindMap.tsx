@@ -1264,7 +1264,15 @@ function FlowInner({
         },
         {
           editing: !!editingRef.current,
-          selectedId: selectedRef.current,
+          // First-run: on an empty map (bare root, nothing selected) fall back to the root, so the
+          // coachmark's advertised Tab / Enter / type-to-edit keys act on it instead of no-op'ing on
+          // a null selection. Doesn't touch the mount render (the fresh-map Map panel is unchanged).
+          selectedId:
+            selectedRef.current ??
+            (docRef.current.root.children.length === 0 &&
+            !(docRef.current.floatingTopics?.length ?? 0)
+              ? docRef.current.root.id
+              : null),
           linking: !!linkingFromRef.current,
           pwa: isStandalonePwa(),
         },
@@ -1731,10 +1739,26 @@ function FlowInner({
     ],
   );
 
+  // Terse selection narration for the canvas live region (the SVG graph is otherwise silent to AT).
+  // Kept short so a marquee drag doesn't produce a chatty stream of announcements.
+  const selectionAnnounce =
+    selectedIds.size === 0
+      ? ""
+      : selectedIds.size === 1
+        ? `Selected: ${findAnyNode(renderDoc, [...selectedIds][0])?.topic?.trim() || "topic"}`
+        : `${selectedIds.size} topics selected`;
+
   return (
     <EditingContext.Provider value={editingApi}>
       <LinkEditContext.Provider value={linkEditApi}>
-        <div
+        <section
+          // Name the principal region so assistive tech can identify the canvas (otherwise the
+          // ReactFlow SVG graph is an anonymous box) and the skip-link has a target (#mm-canvas).
+          // A <section> with an accessible name is a navigable landmark — better than role on a div.
+          id="mm-canvas"
+          tabIndex={-1}
+          aria-roledescription="mind map canvas"
+          aria-label={`Mind map: ${renderDoc.title?.trim() || "Untitled"}`}
           style={{
             height: "100%",
             width: "100%",
@@ -1794,6 +1818,11 @@ function FlowInner({
             }
           }}
         >
+          {/* Polite live region narrating selection changes — gives screen-reader users a sense of
+              "you are here" on a canvas that's otherwise an opaque SVG graph. */}
+          <div className="mm-sr-only" aria-live="polite">
+            {selectionAnnounce}
+          </div>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -2388,7 +2417,7 @@ function FlowInner({
               Click a target node to draw a relationship · Esc to cancel
             </div>
           ) : null}
-        </div>
+        </section>
       </LinkEditContext.Provider>
     </EditingContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type Command, CommandPalette } from "../src/components/CommandPalette";
@@ -84,6 +84,19 @@ describe("CommandPalette (generic)", () => {
     render(<CommandPalette commands={cmds()} onClose={onClose} />);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("traps Tab inside the aria-modal and keeps options out of the tab order", () => {
+    render(<CommandPalette commands={cmds()} onClose={vi.fn()} />);
+    // Options are navigated via aria-activedescendant, so they're not in the tab order…
+    for (const opt of screen.getAllByRole("option")) {
+      expect(opt.getAttribute("tabindex")).toBe("-1");
+    }
+    // …and Tab on the input is prevented, so focus can't escape to the page behind the modal.
+    const input = screen.getByRole("combobox");
+    const ev = createEvent.keyDown(input, { key: "Tab" });
+    fireEvent(input, ev);
+    expect(ev.defaultPrevented).toBe(true);
   });
 
   it("matches hidden keywords and surfaces a Recent section after use (#12)", async () => {

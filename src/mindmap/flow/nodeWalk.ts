@@ -13,3 +13,17 @@ export function walkTree(
   visit(node, depth);
   for (const child of node.children) walkTree(child, visit, depth + 1);
 }
+
+/** Count all descendants of a node (the size of the branch beneath it) — drives the delete toast. */
+export function countDescendants(n: MapNode): number {
+  let total = 0;
+  for (const k of n.children) total += 1 + countDescendants(k);
+  return total;
+}
+
+/** The id of a node and every node beneath it — e.g. a drag-to-reparent can't target its own subtree. */
+export function subtreeIds(node: MapNode | null): Set<string> {
+  const ids = new Set<string>();
+  if (node) walkTree(node, (n) => ids.add(n.id));
+  return ids;
+}

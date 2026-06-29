@@ -68,6 +68,7 @@ import {
 import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import { LinkEditContext } from "./flow/linkEdit";
+import { countDescendants, subtreeIds } from "./flow/nodeWalk";
 import {
   type OpResult,
   addAttachment,
@@ -245,24 +246,6 @@ const MENU_SHORTCUT: Record<string, string> = {
   "Copy branch": "Ctrl/⌘+C",
   "Paste branch here": "Ctrl/⌘+Shift+V",
 };
-
-/** Count all descendants of a node (the size of the branch beneath it) — drives the delete toast. */
-function countDescendants(n: MapNode): number {
-  let total = 0;
-  for (const k of n.children) total += 1 + countDescendants(k);
-  return total;
-}
-
-/** The id of a node and every node beneath it — a drag-to-reparent can't target its own subtree. */
-function subtreeIds(node: MapNode | null): Set<string> {
-  const ids = new Set<string>();
-  const walk = (n: MapNode) => {
-    ids.add(n.id);
-    for (const c of n.children) walk(c);
-  };
-  if (node) walk(node);
-  return ids;
-}
 
 function themeVars(theme: MindMapProps["theme"]): CSSProperties {
   const v = (theme ?? mindManagerTheme).cssVar;

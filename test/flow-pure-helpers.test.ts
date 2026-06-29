@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { dashArray, matchBorderColor, r2 } from "../src/mindmap/flow/geometry";
-import { walkTree } from "../src/mindmap/flow/nodeWalk";
+import { countDescendants, subtreeIds, walkTree } from "../src/mindmap/flow/nodeWalk";
 import { summaryLabel } from "../src/mindmap/flow/style";
 import type { MapNode } from "../src/model/types";
 
@@ -63,6 +63,33 @@ describe("walkTree", () => {
     const seen: [string, number][] = [];
     walkTree(leaf("x"), (n, d) => seen.push([n.id, d]), 5);
     expect(seen).toEqual([["x", 5]]);
+  });
+});
+
+describe("countDescendants", () => {
+  it("counts every node beneath, excluding the node itself", () => {
+    const tree: MapNode = {
+      id: "r",
+      topic: "r",
+      children: [{ id: "a", topic: "a", children: [leaf("a1"), leaf("a2")] }, leaf("b")],
+    };
+    expect(countDescendants(tree)).toBe(4); // a, a1, a2, b
+    expect(countDescendants(leaf("x"))).toBe(0);
+  });
+});
+
+describe("subtreeIds", () => {
+  it("collects the node's id plus every descendant id", () => {
+    const tree: MapNode = {
+      id: "r",
+      topic: "r",
+      children: [{ id: "a", topic: "a", children: [leaf("a1")] }],
+    };
+    expect([...subtreeIds(tree)].sort()).toEqual(["a", "a1", "r"]);
+    expect([...subtreeIds(leaf("x"))]).toEqual(["x"]);
+  });
+  it("returns an empty set for null", () => {
+    expect(subtreeIds(null).size).toBe(0);
   });
 });
 

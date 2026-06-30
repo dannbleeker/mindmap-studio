@@ -203,13 +203,13 @@ Wire up fields the model already carries without crossing into the decided-again
 The data-loss-risk items are the high-impact core of a local-first PWA.
 | Gap | What | Tags |
 |---|---|---|
-| Cross-tab / multi-window safety | two tabs blind-overwrite each other's IndexedDB autosaves | `in·high·M·missing` |
-| Trash / undo-delete for maps | soft-delete + restore + empty-trash | `in·high·M·missing` |
-| External-file-change / conflict detection | bound `.mmst` changed on disk (edited elsewhere / synced) | `in·med·M·missing` |
+| ~~Cross-tab / multi-window safety~~ ✅ shipped | BroadcastChannel presence guard warns on two-tab open | `done` |
+| ~~Trash / undo-delete for maps~~ ✅ shipped | soft-delete (`meta.trashedAt`) + Start-screen Trash restore/empty | `done` |
+| ~~External-file-change / conflict detection~~ ✅ shipped | bound `.mmst` tracks `lastModified`; Save prompts, autosave-to-file pauses | `done` |
 | Library folders / organization | group maps beyond a flat list | `?·med·L·missing` |
 | Bulk library ops | multi-select export/delete/move | `in·med·M·missing` |
 | Library restore merge/dedup | replace-only today | `in·med·M·partial` |
-| Recent-files-on-disk list | reopen by persisted handle | `in·med·M·missing` |
+| ~~Recent-files-on-disk list~~ ✅ shipped | File menu lists recent disk files; reopen re-binds the handle | `done` |
 | Named versions + configurable cap + diff | label key versions; diff two | `?·med·M·partial` |
 | Revert-to-saved / read-only open / Save-a-Copy | file-level affordances | `in·low·M·missing` |
 | Preferences export & import | theme, styles, filters, layout → file | `in·low·S·missing` |

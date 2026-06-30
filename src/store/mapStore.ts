@@ -16,6 +16,14 @@ interface VersionRecord {
   doc: MindMapDoc;
 }
 
+/** A recently-opened disk file (Open Recent). The actual handle lives in `handles` keyed by the same
+ *  map id; this store just keeps the ordered, named recents list. */
+export interface RecentFile {
+  id: string; // map id (also the `handles` key)
+  name: string; // the file name, for display
+  ts: number; // last opened/saved (ms epoch) — drives the recency order
+}
+
 interface MindMapDB extends DBSchema {
   maps: { key: string; value: MindMapDoc };
   meta: { key: string; value: string };
@@ -23,10 +31,12 @@ interface MindMapDB extends DBSchema {
   // Disk-file binding per map: a FileSystemFileHandle (structured-cloneable) so a map opened from /
   // saved to a `.mmst` reconnects to it across reloads. Permission is re-checked on use, not here.
   handles: { key: string; value: FileSystemFileHandle };
+  // Recently-opened disk files (Open Recent), keyed by map id; the handle comes from `handles`.
+  recentFiles: { key: string; value: RecentFile };
 }
 
 const DB_NAME = "mindmap-studio";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 /** Keep at most this many snapshots per map; older ones are pruned. */
 export const MAX_VERSIONS = 30;
 
@@ -43,6 +53,8 @@ function db(): Promise<IDBPDatabase<MindMapDB>> {
           store.createIndex("by-map", "mapId");
         }
         if (!database.objectStoreNames.contains("handles")) database.createObjectStore("handles");
+        if (!database.objectStoreNames.contains("recentFiles"))
+          database.createObjectStore("recentFiles");
       },
     });
   }
@@ -72,6 +84,7 @@ export async function deleteMap(id: string): Promise<void> {
   await (await db()).delete("maps", id);
   await deleteVersionsForMap(id); // a deleted map's history goes with it
   await deleteMapHandle(id); // and its disk-file binding
+  await deleteRecentFile(id); // and its Open-Recent entry
 }
 
 // --- trash (soft-delete) ---------------------------------------------------
@@ -127,6 +140,24 @@ export async function loadMapHandle(id: string): Promise<FileSystemFileHandle | 
 
 export async function deleteMapHandle(id: string): Promise<void> {
   await (await db()).delete("handles", id);
+}
+
+// --- recent disk files (Open Recent) ---------------------------------------
+
+/** Record (or refresh) a disk file in the Open-Recent list. */
+export async function noteRecentFile(id: string, name: string): Promise<void> {
+  await (await db()).put("recentFiles", { id, name, ts: Date.now() }, id);
+}
+
+/** The most-recently-opened disk files, newest first (default 10). */
+export async function listRecentFiles(limit = 10): Promise<RecentFile[]> {
+  const all = await (await db()).getAll("recentFiles");
+  return all.sort((a, b) => b.ts - a.ts).slice(0, limit);
+}
+
+/** Drop a file from the Open-Recent list (e.g. when its map is permanently deleted). */
+async function deleteRecentFile(id: string): Promise<void> {
+  await (await db()).delete("recentFiles", id);
 }
 
 export async function listMaps(): Promise<MapSummary[]> {

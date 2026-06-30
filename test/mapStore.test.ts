@@ -10,9 +10,11 @@ import {
   getLastOpened,
   latestVersionDoc,
   listMaps,
+  listRecentFiles,
   listTrashedMaps,
   loadMap,
   loadMapHandle,
+  noteRecentFile,
   restoreMapFromTrash,
   saveMap,
   saveMapHandle,
@@ -251,6 +253,36 @@ describe("mapStore — trash (soft-delete)", () => {
     expect(await loadMap("t6")).toBeNull(); // gone for good
     expect(await loadMap("t5")).not.toBeNull(); // the live map is untouched
     expect(await listTrashedMaps()).toEqual([]);
+  });
+});
+
+describe("mapStore — recent files (Open Recent)", () => {
+  it("notes + lists recently-opened disk files by name", async () => {
+    await noteRecentFile("rf1", "alpha.mmst");
+    await noteRecentFile("rf2", "beta.mmst");
+    const byId = new Map((await listRecentFiles()).map((r) => [r.id, r.name]));
+    expect(byId.get("rf1")).toBe("alpha.mmst");
+    expect(byId.get("rf2")).toBe("beta.mmst");
+  });
+
+  it("re-noting a file refreshes it in place (no duplicate)", async () => {
+    await noteRecentFile("rf3", "gamma.mmst");
+    await noteRecentFile("rf3", "gamma-renamed.mmst");
+    const matches = (await listRecentFiles()).filter((r) => r.id === "rf3");
+    expect(matches).toHaveLength(1);
+    expect(matches[0].name).toBe("gamma-renamed.mmst");
+  });
+
+  it("permanently deleting a map drops it from Open Recent", async () => {
+    await saveMap(docOf("rf4", "Doomed"));
+    await noteRecentFile("rf4", "doomed.mmst");
+    await deleteMap("rf4");
+    expect((await listRecentFiles()).some((r) => r.id === "rf4")).toBe(false);
+  });
+
+  it("respects the requested limit", async () => {
+    for (let i = 0; i < 12; i++) await noteRecentFile(`lim${i}`, `f${i}.mmst`);
+    expect((await listRecentFiles(5)).length).toBe(5);
   });
 });
 

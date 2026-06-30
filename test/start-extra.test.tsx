@@ -63,8 +63,8 @@ describe("StartSidebar", () => {
     const { container } = render(
       <StartSidebar active="start" mapCount={0} onNavigate={vi.fn()} onNewMap={vi.fn()} />,
     );
-    // One inline SVG per nav row (9); the .st-nav-icon selector excludes the brand glyph.
-    expect(container.querySelectorAll(".st-nav-item .st-nav-icon svg").length).toBe(9);
+    // One inline SVG per nav row (10, incl. Trash); the .st-nav-icon selector excludes the brand glyph.
+    expect(container.querySelectorAll(".st-nav-item .st-nav-icon svg").length).toBe(10);
     expect(container.textContent).not.toContain("🕘"); // the old clock emoji is gone
   });
 });

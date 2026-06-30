@@ -206,6 +206,10 @@ export interface ToolbarIo {
   openFile: () => void;
   saveFile: () => void;
   saveFileAs: () => void;
+  /** Re-open a recently-opened disk file by its map id (Open Recent). */
+  openRecentFile: (id: string) => void;
+  /** The Open-Recent list (most-recent first); drives the File → Open Recent submenu. */
+  recentFiles: { id: string; name: string }[];
   /** The active map's linked file name (null = library-only) + whether it's unsaved to disk. */
   fileName: string | null;
   dirty: boolean;
@@ -569,6 +573,22 @@ export function Toolbar({
                   shortcut={SHORTCUT_BINDINGS["save-file-as"]}
                   onSelect={() => io.saveFileAs()}
                 />
+                {io.recentFiles.length > 0 ? (
+                  <>
+                    <MenuLabel>Open recent</MenuLabel>
+                    {io.recentFiles.slice(0, 8).map((f) => (
+                      <MenuItem
+                        key={f.id}
+                        icon={mi("import")}
+                        label={f.name}
+                        onSelect={() => {
+                          io.openRecentFile(f.id);
+                          close();
+                        }}
+                      />
+                    ))}
+                  </>
+                ) : null}
                 <MenuSeparator />
                 <MenuLabel>Map</MenuLabel>
                 <MenuItem icon={mi("present")} label="Present" onSelect={() => map.present()} />

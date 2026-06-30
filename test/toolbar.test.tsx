@@ -146,30 +146,34 @@ function setup(
     findPrev: vi.fn(),
     runReplace: vi.fn(),
   };
-  const io = Object.fromEntries(
-    [
-      "exportJson",
-      "exportMarkdown",
-      "exportMermaid",
-      "exportXmind",
-      "exportSmmx",
-      "exportOpml",
-      "exportFreemind",
-      "exportPng",
-      "exportSvg",
-      "exportHtml",
-      "exportInteractiveHtml",
-      "exportDeck",
-      "exportPdf",
-      "exportDocx",
-      "exportPptx",
-      "exportXlsx",
-      "exportLibrary",
-      "copyOutline",
-      "copyTable",
-      "handleFile",
-    ].map((k) => [k, vi.fn()]),
-  ) as unknown as Parameters<typeof Toolbar>[0]["io"];
+  const io = {
+    ...Object.fromEntries(
+      [
+        "exportJson",
+        "exportMarkdown",
+        "exportMermaid",
+        "exportXmind",
+        "exportSmmx",
+        "exportOpml",
+        "exportFreemind",
+        "exportPng",
+        "exportSvg",
+        "exportHtml",
+        "exportInteractiveHtml",
+        "exportDeck",
+        "exportPdf",
+        "exportDocx",
+        "exportPptx",
+        "exportXlsx",
+        "exportLibrary",
+        "copyOutline",
+        "copyTable",
+        "handleFile",
+        "openRecentFile",
+      ].map((k) => [k, vi.fn()]),
+    ),
+    recentFiles: [],
+  } as unknown as Parameters<typeof Toolbar>[0]["io"];
   const showHint = vi.fn();
   const views = { list: [], onSave: vi.fn(), onApply: vi.fn(), onDelete: vi.fn() };
   const history = {

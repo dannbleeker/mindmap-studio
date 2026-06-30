@@ -12,11 +12,16 @@ vi.mock("../src/io/fileSystem", () => ({
   openMapFile: vi.fn(),
   pickSaveHandle: vi.fn(),
   writeMapToHandle: vi.fn(async () => {}),
+  readMapFromHandle: vi.fn(),
   ensureWritePermission: vi.fn(async () => true),
   downloadMapFile: vi.fn(),
   suggestedFileName: vi.fn(() => "map.mmst"),
 }));
-vi.mock("../src/store/mapStore", () => ({ saveMapHandle: vi.fn(async () => {}) }));
+vi.mock("../src/store/mapStore", () => ({
+  saveMapHandle: vi.fn(async () => {}),
+  noteRecentFile: vi.fn(async () => {}),
+  loadMapHandle: vi.fn(async () => null),
+}));
 const { editorConfirmMock } = vi.hoisted(() => ({ editorConfirmMock: vi.fn() }));
 vi.mock("../src/components/editorDialogs", () => ({ editorConfirm: editorConfirmMock }));
 vi.mock("../src/import/mmap", () => ({
@@ -27,8 +32,10 @@ vi.mock("../src/import/mmap", () => ({
 }));
 
 import { useDiskFile } from "../src/hooks/useDiskFile";
+import * as store from "../src/store/mapStore";
 
 const mocked = fs as unknown as Record<string, ReturnType<typeof vi.fn>>;
+const mockedStore = store as unknown as Record<string, ReturnType<typeof vi.fn>>;
 const doc = (): MindMapDoc => ({
   id: "m1",
   title: "T",
@@ -180,6 +187,40 @@ describe("useDiskFile — external-file conflict detection", () => {
     });
     expect(editorConfirmMock).not.toHaveBeenCalled();
     expect(mocked.writeMapToHandle).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("useDiskFile — openRecentFile (Open Recent)", () => {
+  it("re-opens a recent file: re-binds the handle, reads it, and adopts it", async () => {
+    mockedStore.loadMapHandle.mockResolvedValue(fakeHandle("recent.mmst"));
+    mocked.readMapFromHandle.mockResolvedValue({ ...doc(), id: "recent" });
+    const { result, deps } = setup();
+    await act(async () => {
+      await result.current.openRecentFile("recent");
+    });
+    expect(deps.load).toHaveBeenCalledWith(expect.objectContaining({ id: "recent" }));
+    expect(deps.showHint).toHaveBeenCalledWith("Opened recent.mmst");
+  });
+
+  it("errors when the recent file's handle is gone", async () => {
+    mockedStore.loadMapHandle.mockResolvedValue(null);
+    const { result, deps } = setup();
+    await act(async () => {
+      await result.current.openRecentFile("missing");
+    });
+    expect(deps.setError).toHaveBeenCalledWith(expect.stringMatching(/no longer available/i));
+    expect(deps.load).not.toHaveBeenCalled();
+  });
+
+  it("reports a denied permission instead of opening", async () => {
+    mockedStore.loadMapHandle.mockResolvedValue(fakeHandle("recent.mmst"));
+    mocked.ensureWritePermission.mockResolvedValue(false);
+    const { result, deps } = setup();
+    await act(async () => {
+      await result.current.openRecentFile("recent");
+    });
+    expect(deps.showHint).toHaveBeenCalledWith(expect.stringMatching(/permission/i));
+    expect(deps.load).not.toHaveBeenCalled();
   });
 });
 

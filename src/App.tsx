@@ -111,11 +111,13 @@ import { clearBranch } from "./store/branchClipboard";
 import { clearAllLocalPreferences } from "./store/localPrefs";
 import {
   type MapSummary,
+  type RecentFile,
   clearAllData,
   findMapReferences,
   getAllMaps,
   getTabSession,
   listMaps,
+  listRecentFiles,
   loadMap,
   loadMapHandle,
   restoreMapFromTrash,
@@ -645,10 +647,26 @@ export function App() {
     adoptOpenedFile,
     importForeignFile,
     openFile,
+    openRecentFile,
     saveFile,
     saveFileAs,
     scheduleFileSave,
   } = useDiskFile({ liveDocRef, load, setView, setFileName, setDirty, setError, showHint });
+
+  // Open-Recent list (disk files), refreshed when the active map changes / on entering the editor.
+  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: doc.id/view are re-fetch triggers, not read in the effect
+  useEffect(() => {
+    let alive = true;
+    listRecentFiles()
+      .then((r) => {
+        if (alive) setRecentFiles(r);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [doc.id, view]);
 
   // Refresh the history list whenever the panel opens.
   useEffect(() => {
@@ -1322,6 +1340,8 @@ export function App() {
       copyTable,
       handleFile,
       openFile,
+      openRecentFile,
+      recentFiles,
       saveFile,
       saveFileAs,
       fileName,

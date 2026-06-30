@@ -5,12 +5,13 @@ import {
   ensureWritePermission,
   openMapFile,
   pickSaveHandle,
+  readMapFromHandle,
   suggestedFileName,
   supportsFileSystemAccess,
   writeMapToHandle,
 } from "../io/fileSystem";
 import type { MindMapDoc } from "../model/types";
-import { saveMapHandle } from "../store/mapStore";
+import { loadMapHandle, noteRecentFile, saveMapHandle } from "../store/mapStore";
 
 // Disk-file binding (open / save / save-as / silent autosave-to-file) via the File System Access API.
 // The IndexedDB library is always the safety net; this layer adds real `.mmst` files on disk. On a
@@ -90,6 +91,7 @@ export function useDiskFile({
       if (!opened.id) opened.id = crypto.randomUUID();
       await bindFileHandle(opened.id, handle);
       await recordMtime(opened.id, handle); // baseline for later conflict detection
+      await noteRecentFile(opened.id, handle.name); // add to Open Recent
       load(opened);
       setFileName(handle.name);
       setDirty(false);
@@ -151,12 +153,36 @@ export function useDiskFile({
       await writeMapToHandle(handle, d);
       await bindFileHandle(d.id, handle);
       await recordMtime(d.id, handle);
+      await noteRecentFile(d.id, handle.name); // Save As binds a (new) file → add to Open Recent
       setDirty(false);
       showHint(`Saved ${handle.name}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }, [liveDocRef, bindFileHandle, recordMtime, setDirty, setError, showHint]);
+
+  // Re-open a file from the Open-Recent list: re-bind its persisted handle (re-prompting for permission,
+  // which the menu-click gesture allows), read it, and adopt it as the active map.
+  const openRecentFile = useCallback(
+    async (id: string) => {
+      try {
+        const handle = await loadMapHandle(id);
+        if (!handle) {
+          setError("That file is no longer available — its handle was lost.");
+          return;
+        }
+        if (!(await ensureWritePermission(handle, true))) {
+          showHint("Couldn't open — permission to access the file was denied.");
+          return;
+        }
+        const opened = await readMapFromHandle(handle);
+        await adoptOpenedFile(opened, handle);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    },
+    [adoptOpenedFile, setError, showHint],
+  );
 
   // "Save" (Ctrl+S) — write back to the bound file with no dialog; first save (or no API) defers to
   // Save As / download. Prompts once for write permission if the browser dropped it this session.
@@ -237,6 +263,7 @@ export function useDiskFile({
     adoptOpenedFile,
     importForeignFile,
     openFile,
+    openRecentFile,
     saveFile,
     saveFileAs,
     scheduleFileSave,

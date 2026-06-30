@@ -61,6 +61,11 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 
 ## All gaps, grouped (93, code-verified)
 
+> **Wave-1 update:** the following gaps have since shipped (see CHANGELOG) and are struck through below:
+> free colour pickers (G5 Text/Fill/Branch), paste-URL→titled node (G1), copy-map-as-image (G11),
+> presenter pacing timer + pacing colour + B/W blackout (G7), cross-map quick switcher (G2),
+> reveal-in-outline auto-scroll (G2). The remaining list is what's left to build.
+
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
 "partial" = the model or a sibling surface already exists; the named sub-capability is the delta.
@@ -69,7 +74,7 @@ separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`m
 The single richest cluster; mostly offline UI over existing model fields.
 | Gap | What | Tags |
 |---|---|---|
-| URL → page title resolution | paste a link → de-slugged readable title, not the bare URL | `in·high·S·partial` |
+| ~~URL → page title resolution~~ ✅ shipped | paste a link → de-slugged readable title, not the bare URL | `done` |
 | Node slash-commands (`/` menu) | insert icon/marker/link/note/child/boundary/date from the keyboard | `in·high·M·missing` |
 | Quick-capture inbox | jot now into an Unfiled bucket, file onto the map later | `in·med·M·missing` |
 | Markdown shorthand → structure on paste | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `in·med·M·partial` |
@@ -90,9 +95,9 @@ All pure client-side derivations over the in-memory doc.
 | Scoped / operator search | `tag: marker: has:note priority: due: level:` in Find | `in·high·M·partial` |
 | Search beyond topic+note | also match tags, markers, hyperlink URL, callout text, attachment names | `in·med·S·partial` |
 | Deep-link to a node | `?map=&node=` centres + selects on load | `in·med·S·partial` |
-| Cross-map quick switcher in ⌘K | switch maps / jump across maps from the keyboard | `in·med·S·partial` |
+| ~~Cross-map quick switcher in ⌘K~~ ✅ shipped | switch maps / jump across maps from the keyboard | `done` |
 | Library search result context | path/breadcrumb + snippet, scope-narrowable | `in·low·M·partial` |
-| Reveal-in-outline auto-scroll | Outline scrolls the selected row into view | `in·low·S·partial` |
+| ~~Reveal-in-outline auto-scroll~~ ✅ shipped | Outline scrolls the selected row into view | `done` |
 | Find-results list | clickable list of all matches vs only next/prev | `?·low·M·partial` |
 
 ### 3 · Knowledge structure & linking (13)
@@ -129,9 +134,9 @@ The two map-level grafts are pure model transforms with all building blocks pres
 The three colour gaps are high-impact S-effort: the model fields already accept any CSS colour; only the picker UI is missing.
 | Gap | What | Tags |
 |---|---|---|
-| Free colour picker for node fill | hex/HSV → existing `NodeStyle.background` | `in·high·S·partial` |
-| Node text colour control | `NodeStyle.color` renders but has no setter UI | `in·high·S·missing` |
-| Per-node branch colour via free picker | `setBranchColor` already takes any hex | `in·med·S·missing` |
+| ~~Free colour picker for node fill~~ ✅ shipped | hex/HSV → existing `NodeStyle.background` | `done` |
+| ~~Node text colour control~~ ✅ shipped | `NodeStyle.color` renders but has no setter UI | `done` |
+| ~~Per-node branch colour via free picker~~ ✅ shipped | `setBranchColor` already takes any hex | `done` |
 | Full emoji / Unicode marker picker | beyond the 45-entry catalog | `in·med·M·partial` |
 | Custom / savable themes & palettes | theme designer + import/export | `?·med·L·partial` |
 | Gradient direction / radial gradient | currently a hardcoded vertical linear gradient | `?·low·M·partial` |
@@ -156,7 +161,7 @@ Mostly React Flow flag/viewport work; the cinematic-zoom item overlaps the prese
 The largest lens. Presenter-control items are cheap S-effort wins; visual-slide items are the L-effort flagship.
 | Gap | What | Tags |
 |---|---|---|
-| Presenter pacing timer / elapsed clock | live elapsed/remaining in presenter view | `in·high·S·missing` |
+| ~~Presenter pacing timer / elapsed clock~~ ✅ shipped | live elapsed/remaining in presenter view | `done` |
 | Slides rendered as the visual map | styled fragment (boxes/colours/icons), not a `<ul>` of text | `in·high·L·missing` |
 | Cinematic zoom walkthrough | Prezi / XMind-Pitch camera fly along an authored path | `in·high·L·missing` |
 | Cinematic node-to-node zoom from the deck | smooth fly between nodes vs constant-zoom step | `?·med·L·partial` |
@@ -165,8 +170,8 @@ The largest lens. Presenter-control items are cheap S-effort wins; visual-slide 
 | Export branch / selection only | share one part (image/SVG/HTML/deck) | `in·med·M·missing` |
 | Interactive HTML carries visual fidelity | images, fills, markers, colours, shapes (today it's a text outline) | `in·med·M·partial` |
 | Poster / multi-page tiled print | A0 across N×M sheets with crop marks | `in·med·M·missing` |
-| Pacing colour cue | timer turns amber/red when running long | `in·med·S·missing` |
-| B-to-black / W-to-white blackout | pull attention to the speaker | `in·med·S·missing` |
+| ~~Pacing colour cue~~ ✅ shipped | timer turns amber/red when running long | `done` |
+| ~~B-to-black / W-to-white blackout~~ ✅ shipped | pull attention to the speaker | `done` |
 | Laser pointer / spotlight / pen | draw the audience's eye | `in·med·M·missing` |
 | Incremental bullet reveal (fragments) | reveal points one click at a time | `in·med·M·missing` |
 | Embeddable read-only visual viewer | single-file iframe/web-component of the visual map | `?·med·L·partial` |
@@ -225,7 +230,7 @@ A11y is already strong; these are the genuine remaining deltas.
 Categories none of the 10 lenses surfaced.
 | Gap | What | Tags |
 |---|---|---|
-| Copy map / branch as image to clipboard | fastest map→paste-into-chat path, no file round-trip | `in·high·S·missing` |
+| ~~Copy map / branch as image to clipboard~~ ✅ shipped | fastest map→paste-into-chat path, no file round-trip | `done` |
 | Map document properties | author/subject/keywords → PPTX/DOCX core props | `in·med·S·missing` |
 | Local map encryption / passcode | at-rest protection on a shared/work laptop | `?·med·M·missing` |
 | Zen / distraction-free *edit* mode | hide chrome for editing (distinct from Present) | `?·low·S·missing` |

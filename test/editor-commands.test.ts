@@ -54,6 +54,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       "exportLibrary",
       "copyOutline",
       "copyTable",
+      "copyPng",
       "handleFile",
       "openFile",
       "saveFile",
@@ -219,6 +220,27 @@ describe("buildEditorCommands", () => {
     const props = mkProps({ id: "n1", topic: "N", note: "" });
     byId(props).get("insert-group")?.run();
     expect(props.mapRef.current?.groupBranch).toHaveBeenCalledWith("n1");
+  });
+
+  it("offers a 'Copy map as image' command that defers to io.copyPng", () => {
+    const props = mkProps();
+    byId(props).get("copy-image")?.run();
+    expect(props.io.copyPng).toHaveBeenCalled();
+  });
+
+  it("lists a cross-map switch command for every OTHER library map (not the open one)", () => {
+    const props = mkProps();
+    // liveDoc is the open map (id "m1"); the library also holds "m2".
+    props.map.maps = [
+      { id: "m1", title: "Map" },
+      { id: "m2", title: "Other map" },
+    ];
+    const cmds = byId(props);
+    expect(cmds.get("map-switch:m1")).toBeUndefined(); // the open map isn't offered
+    const other = cmds.get("map-switch:m2");
+    expect(other?.label).toBe("Switch to map: Other map");
+    other?.run();
+    expect(props.map.switchMap).toHaveBeenCalledWith("m2");
   });
 
   it("exposes a 'Keyboard shortcuts' command that opens the cheat-sheet (#2)", () => {

@@ -300,6 +300,19 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
         { keywords: `${n.topic} ${n.note ?? ""}` },
       );
 
+  // Switch to another library map from the keyboard (the cross-map half of the quick switcher; the
+  // in-map "Go to" rows above cover topics within the active map). Skips the map already open.
+  for (const summary of map.maps)
+    if (summary.id !== map.liveDoc.id)
+      add(
+        `map-switch:${summary.id}`,
+        `Switch to map: ${topicLabel(summary.title || "(untitled)")}`,
+        "map",
+        () => map.switchMap(summary.id),
+        true,
+        { keywords: "open map switch go to" },
+      );
+
   // Layout
   for (const l of LAYOUTS)
     add(`layout:${l.id}`, `Layout: ${l.label}`, "layout", () => canvas.changeLayout(l.id));

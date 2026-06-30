@@ -72,6 +72,42 @@ describe("OutlinePanel", () => {
     expect(screen.queryByRole("button", { name: /Research/ })).toBeNull();
   });
 
+  it("reveals the selected row by scrolling it into view when the canvas selection changes", () => {
+    // jsdom doesn't implement scrollIntoView — install a stub so the reveal effect is observable.
+    const orig = Element.prototype.scrollIntoView;
+    const spy = vi.fn();
+    Element.prototype.scrollIntoView = spy;
+    try {
+      const { rerender } = render(
+        <OutlinePanel root={sampleRoot()} filter="" onFilterChange={noop} onPick={noop} />,
+      );
+      expect(spy).not.toHaveBeenCalled(); // no selection → nothing to reveal
+      rerender(
+        <OutlinePanel
+          root={sampleRoot()}
+          filter=""
+          onFilterChange={noop}
+          onPick={noop}
+          selectedId="b"
+        />,
+      );
+      expect(spy).toHaveBeenCalled(); // the "Build" row scrolled into view
+      spy.mockClear();
+      rerender(
+        <OutlinePanel
+          root={sampleRoot()}
+          filter=""
+          onFilterChange={noop}
+          onPick={noop}
+          selectedId="ghost"
+        />,
+      );
+      expect(spy).not.toHaveBeenCalled(); // a selection with no visible row doesn't scroll
+    } finally {
+      Element.prototype.scrollIntoView = orig;
+    }
+  });
+
   it("rapid keyboard entry: Enter adds a sibling, Tab a child, Shift+Tab outdents (A3)", async () => {
     const onRename = vi.fn();
     // Returning ids that DON'T exist in the tree would unmount the editor; map them back to a real row

@@ -114,6 +114,10 @@ export interface ToolbarMap {
   load: (doc: MindMapDoc) => void;
   duplicateMap: () => void;
   deleteCurrent: () => void;
+  /** Copy the selected branch out into a new standalone library map ("New map from topic"). */
+  promoteBranch: () => void;
+  /** Graft another library map's tree under the selected topic ("Insert map as branch"). */
+  mergeMap: (sourceId: string) => void;
   present: () => void;
   refreshRollupsNow: () => void;
 }

@@ -102,6 +102,8 @@ function setup(
     load: vi.fn(),
     duplicateMap: vi.fn(),
     deleteCurrent: vi.fn(),
+    promoteBranch: vi.fn(),
+    mergeMap: vi.fn(),
     present: vi.fn(),
     refreshRollupsNow: vi.fn(),
   };

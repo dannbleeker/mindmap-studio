@@ -774,6 +774,23 @@ export function addSubtree(doc: MindMapDoc, parentId: string, nodes: MapNode[]):
   return { doc: next, selectId: grafted[0]?.id };
 }
 
+/** Build a brand-new standalone map document from a node's branch ("New map from topic") — the subtree
+ *  re-id'd as the new map's root, so the two maps never share ids. Returns null for the central root or
+ *  a missing node. Non-destructive: the source map is untouched (the branch is COPIED). The caller
+ *  assigns the library id + persists. Branch-internal relationships/boundaries aren't carried (they
+ *  reference the source map's ids). */
+export function newMapFromBranch(doc: MindMapDoc, id: string): MindMapDoc | null {
+  if (id === doc.root.id) return null;
+  const node = findAnyNode(doc, id);
+  if (!node) return null;
+  return {
+    schemaVersion: doc.schemaVersion,
+    id: makeId(),
+    title: node.topic || "Untitled map",
+    root: reId(node),
+  };
+}
+
 /** Paste a copied branch: graft it (re-id'd) under `parentId` when that's a tree node, otherwise
  *  drop it in as a floating topic. Always inserts — the cross-map branch paste. Re-ids so the same
  *  clipboard branch can be pasted repeatedly (and across maps) without id clashes. */

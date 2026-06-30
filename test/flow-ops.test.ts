@@ -38,6 +38,7 @@ import {
   moveInTree,
   moveSelectionInTree,
   moveSibling,
+  newMapFromBranch,
   nextSelectionId,
   nodePath,
   outdent,
@@ -1999,5 +2000,27 @@ describe("maximalBranchIds", () => {
   });
   it("keeps independent branches", () => {
     expect(maximalBranchIds(base(), ["a1", "a2"])).toEqual(["a1", "a2"]);
+  });
+});
+
+describe("newMapFromBranch", () => {
+  it("builds a standalone doc rooted at a re-id'd copy of the branch (source untouched)", () => {
+    const src = base();
+    const fresh = newMapFromBranch(src, "a");
+    expect(fresh).not.toBeNull();
+    if (!fresh) return;
+    expect(fresh.title).toBe("A"); // titled from the branch topic
+    expect(fresh.root.topic).toBe("A");
+    expect(fresh.root.children.map((c) => c.topic)).toEqual(["A1", "A2"]);
+    // Fresh ids: the new root must not reuse the source node's id.
+    expect(fresh.root.id).not.toBe("a");
+    expect(fresh.id).not.toBe(src.id);
+    // Non-destructive: the source still has branch "a".
+    expect(findNode(src, "a")?.children.length).toBe(2);
+  });
+
+  it("returns null for the central root or a missing node", () => {
+    expect(newMapFromBranch(base(), "r")).toBeNull();
+    expect(newMapFromBranch(base(), "nope")).toBeNull();
   });
 });

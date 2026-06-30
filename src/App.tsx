@@ -123,6 +123,7 @@ import {
   setLastOpened,
   softDeleteMap,
 } from "./store/mapStore";
+import { useTabPresence } from "./store/tabCoordination";
 import { setTagColor, tagColor } from "./tagColors";
 import { todayISO } from "./taskDate";
 import { buildTemplate } from "./templates";
@@ -421,6 +422,15 @@ export function App() {
   // Guided walk (presentation tour): step through every topic in outline order with a spotlight +
   // speaker notes — state, spotlight, and ←/→ + Esc keyboard handling all live in the hook.
   const guidedWalk = useGuidedWalk({ liveDoc, liveDocRef, mapRef, setFocus, setDrillId });
+
+  // Cross-tab clobber guard: warn once if the active map is also open in another tab (both would
+  // autosave to the same IndexedDB key, and the last write would silently win).
+  const onTabConflict = useCallback(() => {
+    showHint(
+      "This map is open in another tab — edits here may overwrite the other tab's autosaves.",
+    );
+  }, [showHint]);
+  useTabPresence(view === "editor" ? doc.id : null, onTabConflict);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   // First-run "3 things to try" card (#13): shown once for a brand-new user, dismissed for good on

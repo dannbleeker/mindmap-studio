@@ -21,6 +21,7 @@ const st = (over: Partial<KeyState> = {}): KeyState => ({
   editing: false,
   selectedId: "n1",
   linking: false,
+  freeform: false,
   pwa: true,
   ...over,
 });
@@ -61,6 +62,28 @@ describe("keyIntent", () => {
     // None fire without a selection.
     expect(keyIntent(ev({ key: "c", ctrlKey: true }), st({ selectedId: null }))).toBeNull();
     expect(keyIntent(ev({ key: "d", ctrlKey: true }), st({ selectedId: null }))).toBeNull();
+  });
+
+  it("maps Ctrl/⌘+arrow to a freeform position nudge (only in freeform)", () => {
+    // In freeform, Ctrl/⌘+arrow nudges the node's position (a non-drag reposition, WCAG 2.5.7).
+    expect(keyIntent(ev({ key: "ArrowLeft", ctrlKey: true }), st({ freeform: true }))).toEqual({
+      kind: "nudge",
+      id: "n1",
+      dir: "left",
+    });
+    expect(keyIntent(ev({ key: "ArrowUp", metaKey: true }), st({ freeform: true }))).toEqual({
+      kind: "nudge",
+      id: "n1",
+      dir: "up",
+    });
+    // Not in freeform → Ctrl+arrow is unbound (the auto-layouts own positioning).
+    expect(keyIntent(ev({ key: "ArrowLeft", ctrlKey: true }), st({ freeform: false }))).toBeNull();
+    // Bare arrow still moves the selection, freeform or not.
+    expect(keyIntent(ev({ key: "ArrowLeft" }), st({ freeform: true }))).toEqual({
+      kind: "selectDir",
+      id: "n1",
+      dir: "left",
+    });
   });
 
   it("maps relationship linking (keyboard parity for the mouse Link-to gesture)", () => {

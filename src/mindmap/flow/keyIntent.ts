@@ -22,6 +22,7 @@ export type KeyIntent =
   | { kind: "pasteBranch"; id: string }
   | { kind: "startLinking"; id: string }
   | { kind: "completeLink"; id: string }
+  | { kind: "nudge"; id: string; dir: "up" | "down" | "left" | "right" }
   | null;
 
 export interface KeyState {
@@ -31,6 +32,9 @@ export interface KeyState {
   selectedId: string | null;
   /** A relationship link is being drawn (Escape cancels it). */
   linking: boolean;
+  /** The map is in free-canvas (freeform) mode, where nodes carry manual positions — enables the
+   *  Ctrl/⌘+arrow keyboard nudge (a non-drag way to reposition, for WCAG 2.5.7). */
+  freeform: boolean;
   /** Running as an installed PWA (standalone). Gates browser-reserved shortcuts like Ctrl/⌘+T, which
    *  only reach the page in standalone mode (a normal tab hands them to the browser). */
   pwa: boolean;
@@ -86,6 +90,14 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
   // menu + drag grip. Ctrl/⌘+Shift+L, then arrow to a target and Enter to complete (Esc cancels).
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "l")
     return { kind: "startLinking", id };
+  // Free-canvas mode: Ctrl/⌘+arrow nudges the selected node's position by a step (a keyboard / non-drag
+  // alternative to drag-positioning — WCAG 2.5.7). Only in freeform; the auto-layouts ignore node.pos.
+  if (state.freeform && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+    if (e.key === "ArrowUp") return { kind: "nudge", id, dir: "up" };
+    if (e.key === "ArrowDown") return { kind: "nudge", id, dir: "down" };
+    if (e.key === "ArrowLeft") return { kind: "nudge", id, dir: "left" };
+    if (e.key === "ArrowRight") return { kind: "nudge", id, dir: "right" };
+  }
   // Bare arrows move the selection through the tree (left=parent, right=child, up/down=siblings).
   if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
     if (e.key === "ArrowUp") return { kind: "selectDir", id, dir: "up" };

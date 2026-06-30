@@ -47,6 +47,7 @@ import { BranchEdge } from "./flow/BranchEdge";
 import { BulkNodeMenu } from "./flow/BulkNodeMenu";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CoachMark, DropLabel, LegendPanel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
+import { CanvasRelationshipsSR } from "./flow/CanvasRelationshipsSR";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { NodePopover } from "./flow/NodePopover";
@@ -1291,6 +1292,7 @@ function FlowInner({
               ? docRef.current.root.id
               : null),
           linking: !!linkingFromRef.current,
+          freeform: !!docRef.current.meta?.freeform,
           pwa: isStandalonePwa(),
         },
       );
@@ -1309,6 +1311,21 @@ function FlowInner({
           const from = linkingFromRef.current;
           if (from && from !== intent.id) apply(addLink(docRef.current, from, intent.id));
           setLinkingFrom(null);
+          break;
+        }
+        case "nudge": {
+          // Keyboard reposition in freeform (WCAG 2.5.7). Base off the node's stored pos, or its live
+          // on-screen position if it's never been dragged; locked nodes don't move.
+          const n = findAnyNode(docRef.current, intent.id);
+          if (n && !n.locked) {
+            const live = getNodes().find((m) => m.id === intent.id);
+            const base =
+              n.pos ?? (live ? { x: live.position.x, y: live.position.y } : { x: 0, y: 0 });
+            const STEP = 10;
+            const dx = intent.dir === "left" ? -STEP : intent.dir === "right" ? STEP : 0;
+            const dy = intent.dir === "up" ? -STEP : intent.dir === "down" ? STEP : 0;
+            apply(setNodePos(docRef.current, intent.id, base.x + dx, base.y + dy));
+          }
           break;
         }
         case "clearDropTarget":
@@ -1406,6 +1423,7 @@ function FlowInner({
     focusNodeById,
     editingApi,
     fitView,
+    getNodes,
   ]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
@@ -1806,6 +1824,10 @@ function FlowInner({
         ? `Selected: ${findAnyNode(renderDoc, [...selectedIds][0])?.topic?.trim() || "topic"}`
         : `${selectedIds.size} topics selected`;
 
+  // Memoised so the read-only SR overview only re-renders when the doc changes (not on every
+  // selection/hover), keeping its O(nodes) list off the hot path.
+  const relationshipsSr = useMemo(() => <CanvasRelationshipsSR doc={renderDoc} />, [renderDoc]);
+
   return (
     <EditingContext.Provider value={editingApi}>
       <LinkEditContext.Provider value={linkEditApi}>
@@ -1891,6 +1913,9 @@ function FlowInner({
           <div className="mm-sr-only" aria-live="polite">
             {selectionAnnounce}
           </div>
+          {/* Always-present, read-only SR list of the map's relationships (cross-links) — otherwise
+              non-focusable SVG edges, invisible to assistive tech, listed nowhere else. (UI-5 a11y tail.) */}
+          {relationshipsSr}
           <ReactFlow
             nodes={nodes}
             edges={edges}

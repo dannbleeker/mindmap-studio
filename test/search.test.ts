@@ -168,3 +168,53 @@ describe("findDocMatches — fuzzy fallback", () => {
     expect(findDocMatches(doc, "mkt")).toEqual([]);
   });
 });
+
+describe("findDocMatches — scoped/operator search", () => {
+  const doc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "d",
+    title: "T",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "a", topic: "Alpha", tags: ["urgent"], children: [] },
+        { id: "b", topic: "Beta urgent", note: "draft only", children: [] },
+        { id: "c", topic: "Gamma", icons: ["flag-red"], task: { priority: 1 }, children: [] },
+        {
+          id: "d1",
+          topic: "Delta",
+          task: { due: "2020-01-01" },
+          children: [{ id: "d2", topic: "Deep", children: [] }],
+        },
+      ],
+    },
+  };
+  const TODAY = "2020-06-01";
+
+  it("filters by a tag operator (not just text)", () => {
+    // "urgent" as plain text hits both the tag node and the topic; tag: narrows to the tagged one.
+    expect(findDocMatches(doc, "urgent", TODAY)).toEqual(["a", "b"]);
+    expect(findDocMatches(doc, "tag:urgent", TODAY)).toEqual(["a"]);
+  });
+
+  it("filters by marker and priority", () => {
+    expect(findDocMatches(doc, "marker:flag-red", TODAY)).toEqual(["c"]);
+    expect(findDocMatches(doc, "priority:1", TODAY)).toEqual(["c"]);
+  });
+
+  it("excludes terms and ANDs free text with operators", () => {
+    expect(findDocMatches(doc, "urgent -draft", TODAY)).toEqual(["a"]);
+  });
+
+  it("filters by has: and due:", () => {
+    expect(findDocMatches(doc, "has:task", TODAY)).toEqual(["c", "d1"]);
+    expect(findDocMatches(doc, "due:overdue", TODAY)).toEqual(["d1"]);
+    expect(findDocMatches(doc, "due:dated", TODAY)).toEqual(["d1"]);
+  });
+
+  it("filters by level/depth (root = 0)", () => {
+    expect(findDocMatches(doc, "level:2", TODAY)).toEqual(["d2"]);
+    expect(findDocMatches(doc, "level:>=2", TODAY)).toEqual(["d2"]);
+  });
+});

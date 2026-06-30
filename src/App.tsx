@@ -2295,7 +2295,11 @@ export function App() {
         <input
           value={libQuery}
           onChange={(e) => setLibQuery(e.target.value)}
-          placeholder="Find a topic or note across every map…"
+          placeholder="Find across every map… (try tag:foo  priority:1  has:note  -exclude)"
+          title={
+            "Search every map by text, or use operators:\n" +
+            'tag:foo  marker:flag-red  priority:1  due:overdue  has:note  level:>=2  -exclude  "exact phrase"'
+          }
           style={{ ...inputStyle, width: "100%", boxSizing: "border-box" }}
           aria-label="Search query"
         />

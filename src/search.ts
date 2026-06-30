@@ -1,4 +1,7 @@
 import type { MapNode, MindMapDoc } from "./model/types";
+import { progressMap } from "./progress";
+import { type HasField, type ParsedQuery, parseQuery } from "./queryParser";
+import { isDueSoon, isOverdue, todayISO } from "./taskDate";
 
 // Every searchable surface of a node, joined into one lowercased haystack. Topic + note are the
 // primary content; tags, marker (icon) ids, the hyperlink, callout bubbles, attachment filenames,
@@ -52,6 +55,72 @@ const matchesFuzzy = (node: MapNode, q: string): boolean => fuzzyHit(searchableT
 
 const roots = (doc: MindMapDoc): MapNode[] => [doc.root, ...(doc.floatingTopics ?? [])];
 
+// Effective (rolled-up) completion per node id — so a "done" parent isn't reported as overdue. Only
+// built when a due-date scope actually needs it.
+const buildProgress = (doc: MindMapDoc): Map<string, number | undefined> => {
+  const prog = new Map<string, number | undefined>();
+  for (const root of roots(doc)) for (const [k, v] of progressMap(root)) prog.set(k, v.progress);
+  return prog;
+};
+
+const hasField = (n: MapNode, f: HasField): boolean => {
+  switch (f) {
+    case "note":
+      return !!n.note?.trim();
+    case "attachment":
+      return !!n.attachments?.length;
+    case "link":
+      return !!n.hyperlink;
+    case "task":
+      return !!n.task;
+    case "image":
+      return !!n.image;
+  }
+};
+
+// Does a node satisfy a structured (operator) query at the given depth (root = 0)? Free terms are
+// AND'd substrings of the searchable haystack; tag/marker are OR-within / AND-across; has/level/due/
+// priority are hard gates. `today` + `progress` are only consulted for due:overdue / due:soon. Pure.
+function nodeMatchesParsed(
+  n: MapNode,
+  p: ParsedQuery,
+  depth: number,
+  today: string,
+  progress: number | undefined,
+): boolean {
+  const hay = searchableText(n);
+  if (p.include.some((t) => !hay.includes(t))) return false;
+  if (p.exclude.some((t) => hay.includes(t))) return false;
+  if (p.tags.length && !p.tags.some((t) => n.tags?.some((x) => x.toLowerCase() === t)))
+    return false;
+  if (p.markers.length && !p.markers.some((mk) => n.icons?.some((x) => x.toLowerCase() === mk)))
+    return false;
+  if (p.priority !== undefined && n.task?.priority !== p.priority) return false;
+  if (p.has.some((f) => !hasField(n, f))) return false;
+  if (p.due === "dated" && !n.task?.due) return false;
+  if (p.due === "overdue" && !isOverdue(n.task?.due, progress, today)) return false;
+  if (p.due === "soon" && !isDueSoon(n.task?.due, progress, today)) return false;
+  if (p.minLevel !== undefined && depth < p.minLevel) return false;
+  if (p.maxLevel !== undefined && depth > p.maxLevel) return false;
+  return true;
+}
+
+// Visit every node of a doc (central tree + floating topics, each rooted at depth 0) that satisfies a
+// structured query, in DFS order. The progress map is built lazily — only when a due scope needs it.
+function eachScopedMatch(
+  doc: MindMapDoc,
+  p: ParsedQuery,
+  today: string,
+  cb: (n: MapNode) => void,
+): void {
+  const prog = p.due === "overdue" || p.due === "soon" ? buildProgress(doc) : null;
+  const walk = (n: MapNode, depth: number) => {
+    if (nodeMatchesParsed(n, p, depth, today, prog?.get(n.id))) cb(n);
+    for (const c of n.children) walk(c, depth + 1);
+  };
+  for (const root of roots(doc)) walk(root, 0);
+}
+
 // Find node ids whose searchable text contains the query (case-insensitive), in depth-first
 // order. The haystack is every surface a node carries — topic, note, tags, markers, hyperlink,
 // callouts, attachment names, task resources (see searchableText) — so Find reaches a node by
@@ -74,10 +143,17 @@ export function findMatches(
 }
 
 // Find matches across a whole map — the central tree AND floating topics — so in-map Find
-// covers the editable floating branch too. Exact (substring) first; if nothing matches and the
-// query is long enough to be meaningful, fall back to a typo-tolerant fuzzy pass — so exact
-// behaviour is unchanged when there are hits, and a misspelling still lands. DFS order.
-export function findDocMatches(doc: MindMapDoc, query: string): string[] {
+// covers the editable floating branch too. A query carrying operators (tag:/marker:/priority:/due:/
+// has:/level:/-exclude/"phrase") matches the structured, field-aware way; a plain query keeps the
+// historical behaviour: exact (substring) first, then — when long enough and empty-handed — a
+// typo-tolerant fuzzy pass. DFS order. `today` is injected so due-date scopes stay deterministic.
+export function findDocMatches(doc: MindMapDoc, query: string, today = todayISO()): string[] {
+  const parsed = parseQuery(query);
+  if (parsed.scoped) {
+    const ids: string[] = [];
+    eachScopedMatch(doc, parsed, today, (n) => ids.push(n.id));
+    return ids;
+  }
   const exact = roots(doc).flatMap((root) => findMatches(root, query));
   if (exact.length > 0 || query.trim().length < 4) return exact;
   return roots(doc).flatMap((root) => findMatches(root, query, matchesFuzzy));
@@ -95,9 +171,18 @@ export interface LibraryHit {
 // their searchable text (see searchableText), returning hits with enough context to navigate to
 // them. Pure + unit-tested; the UI loads the library, filters with this, and jumps to the chosen
 // map/node.
-export function searchLibrary(docs: MindMapDoc[], query: string): LibraryHit[] {
+export function searchLibrary(docs: MindMapDoc[], query: string, today = todayISO()): LibraryHit[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];
+  const parsed = parseQuery(query);
+  if (parsed.scoped) {
+    const hits: LibraryHit[] = [];
+    for (const doc of docs)
+      eachScopedMatch(doc, parsed, today, (n) =>
+        hits.push({ mapId: doc.id, mapTitle: doc.title, nodeId: n.id, topic: n.topic }),
+      );
+    return hits;
+  }
   const collect = (match: (node: MapNode, q: string) => boolean): LibraryHit[] => {
     const hits: LibraryHit[] = [];
     for (const doc of docs) {

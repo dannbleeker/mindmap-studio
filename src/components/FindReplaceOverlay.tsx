@@ -56,6 +56,10 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
           }}
           placeholder="Find… (↵ next · ⇧↵ prev)"
           aria-label="Find node"
+          title={
+            "Find by text, or use operators:\n" +
+            'tag:foo  marker:flag-red  priority:1  due:overdue  has:note  level:>=2  -exclude  "exact phrase"'
+          }
         />
         <input
           className="mm-input"

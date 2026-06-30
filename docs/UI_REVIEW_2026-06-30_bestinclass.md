@@ -5,208 +5,277 @@ shipped. Where the [June research report](UI_RESEARCH_2026-06-30.md) targeted *p
 density), this one asks a different question: **what best-in-class capabilities would elevate the
 product**, filtered hard against the as-built feature set and the decided-against list.
 
-Method: a multi-lens scan — an as-built code inventory + external best-in-class lenses (competitor
-feature teardown, knowledge-structure/navigation, input/capture, presentation/sharing, and a deep dive
-on interactive offline HTML export). Every "already shipped" claim below is checked against the code;
-every proposed feature is checked for offline (no-backend) feasibility before it's listed.
+This doc was revised after a **23-agent verified gap scan**: a code-grounded as-built inventory → 10
+gap lenses → a **skeptic pass that refuted every claimed gap against the actual repo** (dropping anything
+already shipped) → dedupe/group → a completeness audit. The skeptic pass corrected this review's own first
+draft (see the correction note below), so every "already shipped" and every gap here is code-checked.
+
+> **Correction to the first draft of this doc.** The verified scan proved two items the first draft
+> pitched as "Tier-1 missing" already ship: **interactive offline HTML export** (`io/interactiveHtml.ts` —
+> a single self-contained file with collapsible branches, search/filter, and pan/zoom) and **in-map fuzzy
+> jump-to-topic** (`editorCommands.ts` `jump:*` rows in ⌘K). Their real, narrower gaps survive below
+> (visual fidelity in the HTML export; a *cross-map* quick switcher). Honesty over a clean headline.
 
 ---
 
 ## The honest headline
 
-**This is no longer a "what's missing" exercise.** The inventory turned up ~180 shipped capabilities.
-The app already has the large majority of every competitor's feature set *and* several genuinely
-**best-in-class strengths** that most rivals can't match:
+**This is not a "what's missing" exercise — it's a "what's left" one.** The inventory turned up ~180
+shipped capabilities; the app already has the large majority of every competitor's feature set *and*
+several genuinely **best-in-class strengths** most rivals can't match:
 
 - **Local-first + fully offline, no account, no telemetry** — rare in this category; the core identity.
 - **MindManager `.mmap` round-trip completeness** (rich text, icons→emoji, tasks, relationships,
-  boundaries, callouts, per-topic styling all survive) — better interop than most.
-- **Conditional styling / SmartRules** (render-time auto-formatting by tag/marker/priority/completion,
-  never baked) — unusual for an offline app.
+  boundaries, callouts, per-topic styling all survive) — better interop than most. 14 import + 17 export
+  formats, incl. a **self-contained interactive HTML** and a **standalone HTML slide deck**.
+- **Conditional styling / SmartRules** (render-time auto-formatting by tag/marker/priority/completion).
 - **Canvas == export fidelity** (SVG/PNG/PDF/PPTX render identically to screen, documented + tested).
 - **WCAG 2.2/2.5 maturity** with assertions in CI (incl. the `role="tree"` outline + SR relationships
   list from this month's work).
-- **Presenter view** (speaker notes + clickable agenda + next-slide), **version-history playback**,
-  **13-format import/export with per-format lossy notes**, and a genuinely-working **responsive/touch**
-  build.
+- **Presenter view** (notes + clickable agenda + next-slide), **version-history playback**, **12 layouts**
+  + free canvas, **Power Filter** + saved presets, a genuinely-working **responsive/touch** build.
 
-So "best-in-class features to add" is a **short, high-quality list** — most apparent gaps are either
-already shipped or consciously decided-against. The recommendations below are filtered to: *genuinely
-not present, in-scope (no backend), and worth the effort*.
+So the add-list is a **finite, code-verified set of gaps**, not an open-ended wishlist. Below: first the
+shipped baseline (so nothing here is re-pitched), then **all 93 verified gaps grouped into 11 themes**,
+then the recommended slice.
 
 ---
 
 ## Already shipped — NOT re-pitched (verified in code)
 
-A best-in-class review usually proposes these; this app already has them, so they're off the list:
-focus-mode/drill-into-subtree (`useFocusHotkey`, `drillId`), **saved views/perspectives**
-(`savedViews.ts`: viewport+drill+filter), **detail-level folding** ("Show detail level 1–5" / collapse-
-expand-all in ⌘K), summaries + boundaries + callouts (first-class model types), outline numbering
-(decimal/legal), breadcrumb + minimap, **per-node backlinks / "Linked-from"** in the inspector,
-marker/tag index panel, Power Filter + saved filters, cross-map + in-map fuzzy search with Find
-Next/Prev, an **already-editable Outline panel** (inline rename, drag-reorder, ◂▸ indent, Tab/Enter
-add), **image-paste** onto a node, **paste-text→map** (bullets / indentation / `#` headings), conditional
-styling, Kanban, presenter notes/agenda, 8 layouts + free canvas, roll-ups, the **brainstorm timer**, the
-new contextual action bar + accessible tree, and a `⌘K` command palette.
+A best-in-class review usually proposes these; this app already has them, so they're excluded from the
+gap list below: focus-mode/drill-into-subtree (`useFocusHotkey`, `drillId`), **saved views/perspectives**
+(`savedViews.ts`), **detail-level folding** ("Show detail level 1–5" in ⌘K), summaries + boundaries +
+callouts, outline numbering, breadcrumb + minimap, **per-node backlinks / "Linked-from"**, marker/tag
+index, **Power Filter** + saved filters + extract-matches-to-map, cross-map + in-map **fuzzy search** with
+Find Next/Prev, **find-and-replace** (`replaceTopics`, regex), an **editable Outline panel** (rename,
+drag-reorder, ◂▸ indent, Tab/Enter), **image-paste** + **paste-text→map** + **paste-table→subtree**,
+conditional styling, Kanban, agenda/stats panels, **12 layouts** + free canvas with **align/distribute**
++ **auto branch-colour** + **format painter**, **multi-select bulk** icon/tag ops, **tag rename/merge**,
+**14 node shapes**, roll-ups across maps, version-history playback, the **brainstorm timer**, the
+contextual action bar + accessible tree, a `⌘K` palette with **in-map fuzzy jump-to-topic**, and a
+**self-contained interactive HTML export** (collapsible + searchable + pan/zoom, offline) alongside the
+static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 
 ---
 
-## Best-in-class features worth adding (ranked)
+## All gaps, grouped (93, code-verified)
 
-### Tier 1 — high impact, in-scope, genuinely missing
+Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
+separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
+"partial" = the model or a sibling surface already exists; the named sub-capability is the delta.
 
-**1. Interactive offline HTML export (single self-contained file).**
-*What:* "Export → Interactive HTML" produces **one `.html` file** you can email that opens in any browser
-**fully offline** (no server, no CDN) and lets the recipient **pan, zoom, and expand/collapse the real
-map** — not a static image, not a text outline. *Best-in-class:* only **markmap `--offline`** and
-**MindMup Atlas** actually do this; **XMind's HTML is a static snapshot, and Coggle / Whimsical / Miro
-are static-image or hosted-link-only** (their interactive view needs their backend). So this is a place
-the app could *lead*, not catch up. *Fit:* dead-on for a local-first, no-account app — it's the missing
-**share** verb. Mechanics are proven and zero-network: inline the renderer (d3 + a small view layer, the
-markmap/D3-collapsible-tree model) into the file and embed the tree as an inline JSON literal; the app
-already serialises the model and already owns "canvas == export fidelity", so this extends the existing
-export suite rather than inventing a new surface. *Impact: high · Effort: M.*
+### 1 · Capture & low-friction input (12)
+The single richest cluster; mostly offline UI over existing model fields.
+| Gap | What | Tags |
+|---|---|---|
+| URL → page title resolution | paste a link → de-slugged readable title, not the bare URL | `in·high·S·partial` |
+| Node slash-commands (`/` menu) | insert icon/marker/link/note/child/boundary/date from the keyboard | `in·high·M·missing` |
+| Quick-capture inbox | jot now into an Unfiled bucket, file onto the map later | `in·med·M·missing` |
+| Markdown shorthand → structure on paste | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `in·med·M·partial` |
+| Rich HTML paste → nodes | preserve inline formatting + split lists/headings into nodes | `in·med·M·partial` |
+| Inline tokens on add (`#tag !priority @resource`) | lift typed tokens onto structured fields | `?·med·M·missing` |
+| Natural-language date entry (chrono-node) | "next fri" → ISO date | `?·med·S·missing` |
+| Multi-line / burst quick capture | Quick-add accepts a pasted outline → subtree in one go | `in·low·S·partial` |
+| Template / map-parts on insert (keyboard) | insert SWOT/pros-cons under a node at capture time | `in·low·S·partial` |
+| Inline tag/marker autocomplete in the canvas editor | type-ahead from within the topic editor | `?·low·M·partial` |
+| PWA share-target capture | receive shared text/link/image from the OS | `?·low·M·missing` |
+| Image OCR on paste/drop | tesseract.js WASM, lazy-loaded | `?·low·L·missing` |
 
-**2. Jump-to-node quick switcher.**
-*What:* a `⌘P`-style fuzzy switcher that lists every node title in the map → type a few letters → jump +
-select it. The map-navigation analogue of an editor's "Go to file". *Best-in-class:* VS Code/Obsidian
-quick-open; XMind/Notion node search. *Fit:* trivially local (fuzzy match over the in-memory doc) and a
-natural extension of the existing `⌘K` palette — arguably the highest delight-per-effort item here on big
-maps. *Impact: high · Effort: S.*
+### 2 · Search, navigation & wayfinding (8)
+All pure client-side derivations over the in-memory doc.
+| Gap | What | Tags |
+|---|---|---|
+| Back / forward navigation history | Alt+←/→ to reverse jumps (find hit, breadcrumb, drill-in, follow-link) | `in·high·M·missing` |
+| Scoped / operator search | `tag: marker: has:note priority: due: level:` in Find | `in·high·M·partial` |
+| Search beyond topic+note | also match tags, markers, hyperlink URL, callout text, attachment names | `in·med·S·partial` |
+| Deep-link to a node | `?map=&node=` centres + selects on load | `in·med·S·partial` |
+| Cross-map quick switcher in ⌘K | switch maps / jump across maps from the keyboard | `in·med·S·partial` |
+| Library search result context | path/breadcrumb + snippet, scope-narrowable | `in·low·M·partial` |
+| Reveal-in-outline auto-scroll | Outline scrolls the selected row into view | `in·low·S·partial` |
+| Find-results list | clickable list of all matches vs only next/prev | `?·low·M·partial` |
 
-**3. Promote a branch to its own map ("New map from topic") + merge a map in as a branch.**
-*What:* right-click a subtree → spin it out into a new standalone library map (optionally leaving a
-cross-map link), and the inverse — drop a library map in as a branch. *Best-in-class:* XMind ("New Sheet
-from Topic", Ctrl+Alt+T) + MindManager Map Parts. *Fit:* clean + fully local — today `detachBranch` only
-pops a subtree to a *floating topic in the same map* (`ops.ts`), and the multi-map library + roll-ups
-already exist, so this is the missing reuse/restructure verb. *Impact: high · Effort: M.*
+### 3 · Knowledge structure & linking (13)
+The deepest backlog; several items brush the decided-against "no graph" boundary.
+| Gap | What | Tags |
+|---|---|---|
+| Cross-map topic links | `#node=` into another map (open + focus) + a picker | `in·high·M·partial` |
+| Map-wide relationships / links overview panel | every cross-link + hyperlink, navigable + editable | `in·med·M·missing` |
+| Outgoing-links list in the inspector | mirror of the shipped "Linked from" | `in·med·S·partial` |
+| Typed / categorised relationships | depends-on / causes / supports, drivable in style/filter | `?·med·M·partial` |
+| Cross-map backlinks | incoming references from other maps (library-wide index) | `in·med·M·missing` |
+| Name-based link autocomplete | `[[`/`@` wiki-link authoring | `in·med·M·partial` |
+| In-note in-app links | `#node=`/`[[ ]]` inside a note body | `in·med·S·partial` |
+| Transclusion / embedded references | live kept-in-sync view of another topic (single-parent-safe) | `?·med·L·missing` |
+| Multiple hyperlinks per topic | a list of links, not one | `in·low·M·partial` |
+| Tags-as-navigation pane | tag browser with counts → filter/jump | `?·low·S·partial` |
+| Topic aliases / alternate names | resolve links + search under multiple labels | `?·low·S·missing` |
+| Directional / reverse relationship labels | "blocks" forward / "blocked by" reverse | `?·low·S·missing` |
+| Unlinked mentions | suggest links where a topic names another | `?·low·M·missing` |
 
-**4. Map-wide Relationships / Links panel.**
-*What:* a dockable list of every relationship arrow + cross-node hyperlink (from → to, label, type),
-filterable, click-to-jump — a map-level index of the *link layer*, not just the selected node's
-backlinks. *Best-in-class:* Obsidian's backlinks/outgoing panes; TheBrain centres the link layer.
-*Fit:* the per-node data exists (`doc.links[]`, `#node=` hyperlinks, `backlinksFor` in `outline.ts`);
-the delta is a map-level panel beside the existing Outline/Index docks. *Impact: high · Effort: M.*
+### 4 · Editing & restructuring (7)
+The two map-level grafts are pure model transforms with all building blocks present.
+| Gap | What | Tags |
+|---|---|---|
+| Promote branch to its own map | "New Sheet from Topic" — branch → new library map | `in·high·M·missing` |
+| Merge a map in as a branch | graft another library map's tree under a topic | `in·high·M·missing` |
+| Sort children | A→Z / priority / date / progress | `in·med·S·missing` |
+| Multi-branch clipboard | copy several selected branches at once | `in·med·S·partial` |
+| Drag a branch between two open maps | HTML5 DnD serialization | `?·med·M·partial` |
+| Compare / diff two versions | added/removed/edited vs only restore/playback | `?·low·M·missing` |
+| Undo history tree / branching undo | redo survives editing after an undo | `?·low·L·partial` |
 
-**5. Unified scoped search query (`tag:` `marker:` `has:note` `level:` + free text).**
-*What:* one search box that parses field operators, so `tag:#risk -task has:note` narrows in a single
-expression instead of juggling regex-Find + the separate Power-Filter chips. *Best-in-class:* Obsidian's
-search/backlink operator grammar. *Fit:* the predicates already exist (`FilterCriteria` in `filter.ts`,
-`findDocMatches`) — this is a string→predicate parser over the in-memory doc, zero network. Unifies the
-two search surfaces the app already has. *Impact: high · Effort: M.*
+### 5 · Styling, theming & visual encoding (10)
+The three colour gaps are high-impact S-effort: the model fields already accept any CSS colour; only the picker UI is missing.
+| Gap | What | Tags |
+|---|---|---|
+| Free colour picker for node fill | hex/HSV → existing `NodeStyle.background` | `in·high·S·partial` |
+| Node text colour control | `NodeStyle.color` renders but has no setter UI | `in·high·S·missing` |
+| Per-node branch colour via free picker | `setBranchColor` already takes any hex | `in·med·S·missing` |
+| Full emoji / Unicode marker picker | beyond the 45-entry catalog | `in·med·M·partial` |
+| Custom / savable themes & palettes | theme designer + import/export | `?·med·L·partial` |
+| Gradient direction / radial gradient | currently a hardcoded vertical linear gradient | `?·low·M·partial` |
+| Canvas background pattern | dot/line grid (React Flow `<Background>`) | `?·low·S·missing` |
+| Per-node opacity | de-emphasise / watermark a card | `?·low·S·missing` |
+| Named font choices beyond 3 generic families | a named-font dropdown (not uploaded fonts) | `?·low·S·partial` |
+| One-click "colourful/rainbow node fills" | tint each branch's node fills by palette | `?·low·S·partial` |
 
-### Tier 2 — strong, smaller, or a judgment call
+### 6 · Layout, canvas & scale (7)
+Mostly React Flow flag/viewport work; the cinematic-zoom item overlaps the presentation cluster.
+| Gap | What | Tags |
+|---|---|---|
+| Big-map virtualisation | `onlyRenderVisibleElements` — fluid 1000+ nodes | `in·high·L·missing` |
+| Auto-fit / keep-in-view after structural edits | pan/zoom so new/remaining content stays visible | `in·med·M·partial` |
+| Partial / touch marquee + no-modifier lasso | select any node a marquee touches; plain left-drag | `in·med·S·partial` |
+| Snap-to-grid on free canvas | optional 8/16px grid, distinct from neighbour guides | `in·low·S·missing` |
+| Auto-arrange / tidy free-canvas command | re-flow manual positions to a clean tree | `?·low·S·missing` |
+| Tree-table / matrix layout | XMind "Tree Table" / "Matrix" | `?·low·M·missing` |
+| Minimap match/selection highlighting | show search/filter hits + clearer viewport frame | `?·low·S·partial` |
 
-**6. Smart-paste enrichment (lead with paste-a-URL → titled node).** Today paste-text→map handles
-bullets/indent/`#`. Add: paste a **URL → a node titled from the URL** (derive a readable title from
-`URL.pathname` — slug→Title Case — **no fetch**, fully offline); paste a **TSV/table → subtree or sibling
-set**; paste rich HTML → structured nodes. *Best-in-class:* Workflowy/Notion paste intelligence. *Fit:*
-pure client clipboard parsing; the URL case alone is a cheap, high-value win for research/clipping flows.
-*Impact: high (URL case) · Effort: S–M.*
+### 7 · Presentation, sharing & export (18)
+The largest lens. Presenter-control items are cheap S-effort wins; visual-slide items are the L-effort flagship.
+| Gap | What | Tags |
+|---|---|---|
+| Presenter pacing timer / elapsed clock | live elapsed/remaining in presenter view | `in·high·S·missing` |
+| Slides rendered as the visual map | styled fragment (boxes/colours/icons), not a `<ul>` of text | `in·high·L·missing` |
+| Cinematic zoom walkthrough | Prezi / XMind-Pitch camera fly along an authored path | `in·high·L·missing` |
+| Cinematic node-to-node zoom from the deck | smooth fly between nodes vs constant-zoom step | `?·med·L·partial` |
+| Speaker notes in exported deck / PPTX | the script travels with the artifact | `in·med·M·partial` |
+| PPTX honours the curated deck order/notes | currently builds the auto deck | `in·med·S·partial` |
+| Export branch / selection only | share one part (image/SVG/HTML/deck) | `in·med·M·missing` |
+| Interactive HTML carries visual fidelity | images, fills, markers, colours, shapes (today it's a text outline) | `in·med·M·partial` |
+| Poster / multi-page tiled print | A0 across N×M sheets with crop marks | `in·med·M·missing` |
+| Pacing colour cue | timer turns amber/red when running long | `in·med·S·missing` |
+| B-to-black / W-to-white blackout | pull attention to the speaker | `in·med·S·missing` |
+| Laser pointer / spotlight / pen | draw the audience's eye | `in·med·M·missing` |
+| Incremental bullet reveal (fragments) | reveal points one click at a time | `in·med·M·missing` |
+| Embeddable read-only visual viewer | single-file iframe/web-component of the visual map | `?·med·L·partial` |
+| Slide transitions | fade/slide/zoom between slides | `?·low·S·missing` |
+| Auto-advance / loop / kiosk mode | hands-free booth/lobby replay | `?·low·S·missing` |
+| Print/export options dialog | size/scale/margins/contents before producing | `?·low·M·missing` |
+| Animated GIF / WebM map export | short animation of a walk/history (MediaRecorder) | `?·low·L·missing` |
 
-**7. Big-map virtualisation (render only visible nodes).** On thousand-topic maps, render/measure only
-what's in (or near) the viewport so pan/zoom/edit stays smooth. *Best-in-class:* TheBrain/Heptabase keep
-huge graphs fluid; React-Flow exposes `onlyRenderVisibleElements`. *Fit:* the renderer sits behind
-`contract.ts`/`buildFlowState`, so this is contained; it's the purest enabler of "serious maps at scale"
-and the one item that protects every other feature as maps grow. *Impact: high · Effort: L.*
+### 8 · Task & metadata layer — light, in-scope (5)
+Wire up fields the model already carries without crossing into the decided-against PM engine.
+| Gap | What | Tags |
+|---|---|---|
+| Filter by completion status | complete/incomplete/in-progress (roll-up derived, no filter consumes it) | `in·high·S·partial` |
+| Natural-language / relative due-date entry | "today"/"next fri"/"+7d" → ISO (`addDaysISO` exists) | `in·med·M·missing` |
+| Quick date set / reschedule chip on canvas | inline Today / +1wk like the progress pie (DateChip is display-only) | `?·med·M·missing` |
+| Duration & resources editing UI | model carries + import fills them; user can't set them | `?·med·M·partial` |
+| Resource / assignee index & filter | a filterable facet paralleling markers & tags | `?·low·M·partial` |
 
-**8. Presentation aids + cinematic walkthrough.** Small, high-value win: a **per-slide presenter
-timer/countdown** + green→red **pacing** colour + "**B** to black the screen" (the app has a *brainstorm*
-timer, not a *presenter* one). Reference model is reveal.js' speaker view (per-slide + total countdown,
-pacing colour); a second presenter window is achievable offline via `window.open()` + `BroadcastChannel`.
-Bigger swing: a **cinematic Prezi/XMind-Pitch-style zoom walkthrough** (smooth pan-zoom node→node) as an
-alternative to step-through — **confirmed feasible in React Flow** via `setViewport`/`fitBounds` with a
-`duration`, storing each step as `{x,y,zoom}`. *Timer/pacing: S · Cinematic: M–L (needs-decision).*
+### 9 · Files, library & autosave durability (13)
+The data-loss-risk items are the high-impact core of a local-first PWA.
+| Gap | What | Tags |
+|---|---|---|
+| Cross-tab / multi-window safety | two tabs blind-overwrite each other's IndexedDB autosaves | `in·high·M·missing` |
+| Trash / undo-delete for maps | soft-delete + restore + empty-trash | `in·high·M·missing` |
+| External-file-change / conflict detection | bound `.mmst` changed on disk (edited elsewhere / synced) | `in·med·M·missing` |
+| Library folders / organization | group maps beyond a flat list | `?·med·L·missing` |
+| Bulk library ops | multi-select export/delete/move | `in·med·M·missing` |
+| Library restore merge/dedup | replace-only today | `in·med·M·partial` |
+| Recent-files-on-disk list | reopen by persisted handle | `in·med·M·missing` |
+| Named versions + configurable cap + diff | label key versions; diff two | `?·med·M·partial` |
+| Revert-to-saved / read-only open / Save-a-Copy | file-level affordances | `in·low·M·missing` |
+| Preferences export & import | theme, styles, filters, layout → file | `in·low·S·missing` |
+| Flush autosave-to-disk on tab-hide | last edit reaches the bound file, not just IndexedDB | `?·low·M·partial` |
+| Settings shortcut + start-screen palette entry | dedicated chord; Settings in start ⌘K | `in·low·S·partial` |
+| PWA app shortcuts / richer manifest | `shortcuts` + `screenshots` for install UI | `?·low·S·partial` |
 
-**9. Zen / distraction-free edit mode.** One-key toggle that hides all chrome (rails, toolbars, panels,
-tabs), leaving only the canvas. *Best-in-class:* XMind ZEN. *Fit:* trivially local — CSS state hiding
-chrome + a hotkey; the app has Focus-a-branch and Present mode but no chrome-free *edit* mode. *Medium ·
-S* — high delight-per-effort.
+### 10 · Accessibility & input modalities (13)
+A11y is already strong; these are the genuine remaining deltas.
+| Gap | What | Tags |
+|---|---|---|
+| Touch drag-and-drop fallback | outline/board/marker DnD use HTML5 drag → dead on touch | `in·high·M·partial` |
+| High-contrast theme + `prefers-contrast`/`forced-colors` | OS-aware high-contrast | `in·high·M·missing` |
+| Keyboard reorder/indent in the Outline tree | indent buttons are `tabIndex=-1` | `in·med·M·partial` |
+| i18n / localization | UI strings English-only, no locale layer | `?·med·L·missing` |
+| SR exposure of canvas overlays | boundaries/summaries/callouts, like the shipped relationships SR list | `in·med·S·partial` |
+| Reduced-motion at JS motion sites | guided walk, history playback, timer | `in·med·S·partial` |
+| Long-press context menu on touch | press-and-hold = right-click | `in·med·S·partial` |
+| RTL layout support | `dir=rtl`, logical CSS, right-growing maps | `?·low·L·missing` |
+| In-app motion/animation toggle | independent of the OS setting | `in·low·S·missing` |
+| Focus trap + return-focus for hand-rolled overlays | Find/Replace, BulkNodeMenu, NodePopover | `in·low·S·partial` |
+| `aria-keyshortcuts` on actionable controls | expose the shortcut set to AT | `in·low·S·missing` |
+| Stylus / pen affordances | pressure, palm rejection (`pointerType==='pen'`) | `?·low·M·missing` |
+| Page-zoom reflow to 200–400% | docks use fixed pixel widths (WCAG 1.4.10) | `?·low·M·partial` |
 
-**10. Quick-capture inbox.** A fast, low-friction "jot it now, file it later" entry (global hotkey or a
-small capture box) that drops loose thoughts into an **Unfiled** bucket you triage onto the map later.
-*Best-in-class:* MindNode Quick Entry; the GTD inbox pattern. *Fit:* pure-local; complements brainstorming
-("capture the flood, organise after"). *Medium · M.*
-
-**11. Node slash-commands.** Type `/` inside a node → a menu to insert an icon/marker, a link, a note, a
-child, a boundary, etc. — the actions exist; this is a faster keyboard-first surface for them.
-*Best-in-class:* Notion/Slack slash menus. *Medium · M.*
-
-**12. Tags-as-navigation pane.** Make tags a first-class nav surface: a tag list with counts →
-click-to-filter-and-jump across the subtree, building on the existing `markerTagIndex` + stable per-tag
-colours. *Medium · S.*
-
-**13. Dedicated full-pane outliner mode.** The Outline *side panel* is already a real editing surface; the
-delta vs XMind/MindNode is a roomy, full-width two-pane outliner view (inline notes/markers, multi-line)
-for long-form structuring. *Medium · M.*
-
-### Tier 3 — nice, needs a product call
-
-- **Node emoji picker + branch-tinted stickers** (MindNode's signature). The model already carries
-  `icons: string[]` + node images; system emoji are zero-asset text. *needs-decision · M.*
-- **Natural-language date entry** for task due-dates (type "next fri" → a resolved date) via `chrono-node`
-  (MIT, fully offline). *Best-in-class:* Notion's `@`-date. The task layer is deliberately light, so this
-  is a *judgment call*, not a PM-engine creep. *needs-decision · S.*
-- **Smart checkbox roll-up trigger** (SimpleMind): auto-promote a parent to a progress bar the moment 2+
-  children gain checkboxes — the roll-up math exists, only the *auto-trigger* is missing. *needs-decision
-  · S.*
-- **Markdown note → lightweight knowledge base** (Heptabase): richer markdown note cards + surfaced
-  backlinks so a map doubles as a small KB. Half-present (notes + Linked-from). *needs-decision · M.*
+### 11 · Cross-cutting / modality — audit additions (5)
+Categories none of the 10 lenses surfaced.
+| Gap | What | Tags |
+|---|---|---|
+| Copy map / branch as image to clipboard | fastest map→paste-into-chat path, no file round-trip | `in·high·S·missing` |
+| Map document properties | author/subject/keywords → PPTX/DOCX core props | `in·med·S·missing` |
+| Local map encryption / passcode | at-rest protection on a shared/work laptop | `?·med·M·missing` |
+| Zen / distraction-free *edit* mode | hide chrome for editing (distinct from Present) | `?·low·S·missing` |
+| Per-node review comments | margin remarks separate from the note body | `?·low·M·partial` |
 
 ---
 
 ## Stays decided-against (no change recommended)
 
-The rough-edge scan surfaced these; all are existing, sound decisions for a no-backend local-first app —
-listed so they're not mistaken for oversights: real-time collaboration / multiplayer; a networked/cyclic
-multi-parent graph (TheBrain-style); the project-management engine (Gantt, dependencies, resources,
-formulas, custom attributes); AI assist; voice/audio capture; LaTeX/math; arbitrary custom fonts;
-true split-pane multi-map editing; an infinite Miro-style object canvas; live web/data embeds; and any
-**hosted** share link (Coggle/Whimsical/Miro model) — the interactive-HTML export above is the
-local-first answer to the same need.
+Sound existing decisions for a no-backend local-first app, listed so they're not mistaken for oversights:
+real-time collaboration / multiplayer; a networked/cyclic multi-parent graph (TheBrain-style); the
+project-management engine (Gantt, dependencies, resources, formulas, custom attributes — and its
+fellow-travellers the scan flagged: **due-date reminders/notifications, recurring tasks,
+repeat-last-edit**); AI assist; voice/audio capture; LaTeX/math; arbitrary custom fonts; true split-pane
+multi-map editing; an infinite Miro-style object canvas; live web/data embeds; and any **hosted** share
+link — the shipped offline interactive-HTML export is the local-first answer to that need.
 
 ---
 
 ## Recommended slice (if you build)
 
-Two compounding, all-in-scope, no-backend bundles — pick by what you want to push:
+The verified picture skews to **partials** (the model already carries the fields) and to two heavy
+clusters — presentation/export and knowledge-linking. Three coherent bundles:
 
-- **"Share & present" pack** — **(1) interactive offline HTML export + (8) presenter timer/pacing +
-  cinematic walkthrough**. This is the differentiated one: it turns a finished map into something you can
-  *send* and *present*, in a way the hosted competitors can't match offline. Start with the HTML export
-  (the standout), add the presenter timer (S) as a cheap, immediate win.
-- **"Serious maps" pack** — **(3) promote-branch-to-map + (4) relationships panel + (5) scoped search +
-  (7) virtualisation**, with **(2) jump-to-node** and **(9) Zen mode** as the cheap wins alongside.
-  Together they target the one place this otherwise-complete app still trails best-in-class — *working
-  fluidly with large, structured, interconnected maps* — without touching any decided-against territory.
+- **Quick-wins sprint (high-impact · S-effort · all in-scope):** the three free colour pickers
+  (fill / text / branch), the presenter **timer + B-to-black + pacing-colour** trio, **filter-by-completion**,
+  **URL→title** on paste, and **copy-as-image** to the clipboard. Almost all are UI over fields/derivations
+  that already exist — a high delight-per-effort first pass.
+- **"Serious maps" pack:** **promote-/merge-branch-between-maps** + **map-wide relationships panel** +
+  **scoped search** + **back/forward history** + **big-map virtualisation (L)**, with **cross-tab safety**
+  and **trash/undo-delete** as the data-safety backbone. Targets the one place this otherwise-complete app
+  still trails — working fluidly with large, structured, interconnected maps — plus the local-first
+  durability a single-user PWA owes its data.
+- **"Present like Prezi" pack:** make the existing deck render **slides as the visual map** and add the
+  **cinematic zoom walkthrough** (both L) — the differentiated, demo-able swing once the cheap presenter
+  controls land.
 
-If you build only three things: **jump-to-node (S)**, **paste-URL→title (S)**, and **interactive HTML
-export (M)** — the two cheapest high-value wins plus the one genuinely-differentiating capability.
+If you build only three things: **the colour pickers (S)**, **filter-by-completion (S)**, and
+**promote-branch-to-map (M)** — two near-free high-impact wins plus the most-requested restructure verb.
 
-## Sources
+## Method & sources
 
-Inventory is code-grounded (this repo). External lenses: XMind (New Sheet from Topic, ZEN, Pitch),
-MindNode (stickers, Quick Entry), SimpleMind (smart roll-up), Obsidian (search/backlink operators, tag
-pane, quick-open), Heptabase (markdown cards + backlinks), TheBrain (link-centred graph), Notion
-(slash menu, `@`-date / chrono-node), Workflowy/Notion (paste intelligence), Prezi / XMind Pitch / Miro
-(cinematic present), reveal.js / Keynote / PowerPoint (presenter timer + pacing).
-
-Interactive-HTML-export finding (cited): **markmap `--offline`** inlines d3 + markmap-view and embeds the
-tree as inline JSON for a zero-network single file
-([markmap-cli docs](https://markmap.js.org/docs/packages--markmap-cli),
-[offline discussion #233](https://github.com/markmap/markmap/discussions/233)); **MindMup Atlas** emits a
-self-contained interactive HTML file ([MindMup Atlas](https://www.mindmup.com/help/features/mindmup-atlas/));
-**XMind HTML is a static snapshot** (no drill-down) — staff recommend exporting SVG as the web workaround
-([XMind export thread](https://support.xmind.net/hc/en-us/community/posts/30051271565465-Export-to-HTML));
-**Coggle** exports PDF/PNG only ([formats](https://coggle.help/article/105-supported-export-formats)),
-**Whimsical** exports PNG/PDF/SVG only ([exporting](https://help.whimsical.com/imports-exports/exporting-from-whimsical)),
-**Miro** is hosted-only with no offline mode
-([board access](https://help.miro.com/hc/en-us/articles/360017572194-Board-access-rights)); the
-**D3 collapsible+zoomable tree** is the canonical DIY template for the same single-file result
-([D3 collapsible tree](https://observablehq.com/@d3/collapsible-tree),
-[Schmuecker zoomable tree](https://www.robschmuecker.com/d3-js-drag-and-drop-zoomable-tree/)).
-
-*Method note: the as-built inventory + best-in-class scan ran as a multi-agent fan-out; findings were
-re-checked against the code so "already shipped" items (focus mode, saved views, detail-level folding,
-editable outline, paste-text→map, summaries, numbering, backlinks) were excluded from the recommendations
-rather than re-pitched.*
+Inventory is code-grounded (this repo). The gap scan ran as a 23-agent fan-out (inventory → 10 lenses →
+per-lens skeptic verification against the code → dedupe/group → completeness audit), so every "already
+shipped" exclusion and every gap status (`missing`/`partial`) is checked against the source — the
+skeptic pass is what caught this doc's own first-draft errors (interactive-HTML export and in-map
+jump-to-topic, both already shipped). External best-in-class references: XMind (New Sheet from Topic,
+Tree Table, ZEN, Pitch), MindNode (stickers, Quick Entry, Colorful), SimpleMind (smart roll-up, colour
+wheel), Obsidian (search operators, backlinks/outgoing panes, aliases, quick-switcher, tags pane),
+Roam/Logseq (typed links, transclusion, unlinked mentions), Heptabase (mirrors), TheBrain (link-centred
+graph, nav history), Notion (slash menu, `@`-date, paste intelligence), Workflowy (quick-add tokens),
+Prezi / XMind Pitch (cinematic present), reveal.js / Keynote / PowerPoint (presenter timer, pacing,
+fragments, blackout), VS Code (go-to, back/forward, settings sync).

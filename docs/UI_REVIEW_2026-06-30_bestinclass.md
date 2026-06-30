@@ -61,10 +61,13 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 
 ## All gaps, grouped (93, code-verified)
 
-> **Wave-1 update:** the following gaps have since shipped (see CHANGELOG) and are struck through below:
-> free colour pickers (G5 Text/Fill/Branch), paste-URL→titled node (G1), copy-map-as-image (G11),
-> presenter pacing timer + pacing colour + B/W blackout (G7), cross-map quick switcher (G2),
-> reveal-in-outline auto-scroll (G2). The remaining list is what's left to build.
+> **Shipped since this review** (struck through below; see CHANGELOG):
+> **Wave 1** — free colour pickers (G5 Text/Fill/Branch), paste-URL→titled node (G1), copy-map-as-image
+> (G11), presenter pacing timer + pacing colour + B/W blackout (G7), cross-map quick switcher (G2),
+> reveal-in-outline auto-scroll (G2).
+> **Wave 2 ("serious maps")** — sort children (G4), multi-branch clipboard (G4), "Links to" outgoing
+> inspector (G3), map-wide relationships panel (G3), promote-branch-to-map (G4), merge-map-as-branch (G4).
+> The remaining list is what's left to build.
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
@@ -105,8 +108,8 @@ The deepest backlog; several items brush the decided-against "no graph" boundary
 | Gap | What | Tags |
 |---|---|---|
 | Cross-map topic links | `#node=` into another map (open + focus) + a picker | `in·high·M·partial` |
-| Map-wide relationships / links overview panel | every cross-link + hyperlink, navigable + editable | `in·med·M·missing` |
-| Outgoing-links list in the inspector | mirror of the shipped "Linked from" | `in·med·S·partial` |
+| ~~Map-wide relationships / links overview panel~~ ✅ shipped | every cross-link + hyperlink, navigable | `done` |
+| ~~Outgoing-links list in the inspector~~ ✅ shipped | mirror of the shipped "Linked from" | `done` |
 | Typed / categorised relationships | depends-on / causes / supports, drivable in style/filter | `?·med·M·partial` |
 | Cross-map backlinks | incoming references from other maps (library-wide index) | `in·med·M·missing` |
 | Name-based link autocomplete | `[[`/`@` wiki-link authoring | `in·med·M·partial` |
@@ -122,10 +125,10 @@ The deepest backlog; several items brush the decided-against "no graph" boundary
 The two map-level grafts are pure model transforms with all building blocks present.
 | Gap | What | Tags |
 |---|---|---|
-| Promote branch to its own map | "New Sheet from Topic" — branch → new library map | `in·high·M·missing` |
-| Merge a map in as a branch | graft another library map's tree under a topic | `in·high·M·missing` |
-| Sort children | A→Z / priority / date / progress | `in·med·S·missing` |
-| Multi-branch clipboard | copy several selected branches at once | `in·med·S·partial` |
+| ~~Promote branch to its own map~~ ✅ shipped | "New Sheet from Topic" — branch → new library map | `done` |
+| ~~Merge a map in as a branch~~ ✅ shipped | graft another library map's tree under a topic | `done` |
+| ~~Sort children~~ ✅ shipped | A→Z / priority / date / progress | `done` |
+| ~~Multi-branch clipboard~~ ✅ shipped | copy several selected branches at once | `done` |
 | Drag a branch between two open maps | HTML5 DnD serialization | `?·med·M·partial` |
 | Compare / diff two versions | added/removed/edited vs only restore/playback | `?·low·M·missing` |
 | Undo history tree / branching undo | redo survives editing after an undo | `?·low·L·partial` |

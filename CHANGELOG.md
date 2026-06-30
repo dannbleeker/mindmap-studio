@@ -20,6 +20,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   - **Cross-map quick switcher** (G2): `⌘K` lists "Switch to map: <title>" for every other library map.
   - **Reveal-in-outline** (G2): selecting a node on the canvas scrolls its row into view in the Outline.
 
+- **"Serious maps" pack (UI review — gap groups 2/4).** The cross-map restructure + link-layer verbs:
+  - **Sort children** (`⌘K`): reorder a topic's direct children A→Z / by priority / due date / progress.
+  - **Multi-branch clipboard**: copying a multi-selection (`⌘C`) now copies every selected branch (minus
+    any nested inside another); paste (`⌘⇧V`) grafts them all in one undo step. Cross-map, back-compatible.
+  - **"Links to" inspector section**: the outgoing mirror of "Linked from" — the node's hyperlink target
+    + relationship edges from it, click-to-jump.
+  - **Relationships panel**: a dockable map-wide index of every relationship arrow + in-map topic
+    hyperlink, both ends click-to-jump (`⌘K` → "Relationships panel", or the Panels menu).
+  - **New map from this topic**: copy the selected branch out into a fresh standalone library map.
+  - **Insert map as branch**: graft another library map's tree under the selected topic.
+
 ### Fixed
 
 - **⌘K command palette was unstyled in the editor.** The palette's `.st-cmdk*` CSS lived in `start.css`,

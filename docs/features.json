@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 358,
+  "reviewedThroughChangelogBullets": 369,
   "areas": [
     "editing",
     "notes",
@@ -16,6 +16,114 @@
     "pwa"
   ],
   "features": [
+    {
+      "id": "free-colour-pickers",
+      "name": "Free colour pickers for node text / fill / branch (StyleBar)",
+      "area": "styling",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "paste-url-title",
+      "name": "Paste a URL → a node titled from the URL (offline)",
+      "area": "editing",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "copy-map-image",
+      "name": "Copy the map to the clipboard as a PNG image",
+      "area": "export",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "presenter-timer",
+      "name": "Presenter pacing timer + budget colour + B/W blackout",
+      "area": "presentation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cross-map-switcher",
+      "name": "Switch to another library map from the ⌘K palette",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "reveal-in-outline",
+      "name": "Selecting a node scrolls its row into view in the Outline",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "sort-children",
+      "name": "Sort a topic's children by name / priority / due date / progress",
+      "area": "editing",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "multi-branch-clipboard",
+      "name": "Copy + paste multiple selected branches at once (cross-map)",
+      "area": "editing",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "outgoing-links-inspector",
+      "name": "\"Links to\" inspector section (outgoing links + relationships)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "relationships-panel",
+      "name": "Map-wide Relationships panel (every link + relationship, click-to-jump)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "promote-branch-to-map",
+      "name": "New map from this topic (promote a branch to its own library map)",
+      "area": "library",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "merge-map-as-branch",
+      "name": "Insert a library map as a branch under the selected topic",
+      "area": "library",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
     {
       "id": "add-affordances",
       "name": "Hover ＋ to add a child or sibling topic",

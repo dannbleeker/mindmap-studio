@@ -54,6 +54,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       "exportLibrary",
       "copyOutline",
       "copyTable",
+      "copyDeepLink",
       "copyPng",
       "handleFile",
       "openFile",
@@ -208,6 +209,15 @@ describe("buildEditorCommands", () => {
     expect(props.canvas.changeLayout).toHaveBeenCalledWith("timeline");
     cmds.get("panel-outline")?.run();
     expect(props.panels.setOutlineOpen).toHaveBeenCalled();
+  });
+
+  it("copy-deep-link defers to io and relabels by selection", () => {
+    const props = mkProps({ id: "n1", topic: "N", note: "" });
+    const cmd = byId(props).get("copy-deep-link");
+    expect(cmd?.label).toBe("Copy link to this topic");
+    cmd?.run();
+    expect(props.io.copyDeepLink).toHaveBeenCalled();
+    expect(byId(mkProps(null)).get("copy-deep-link")?.label).toBe("Copy link to this map");
   });
 
   it("focus / group / summary are disabled without a selection, enabled with one", () => {

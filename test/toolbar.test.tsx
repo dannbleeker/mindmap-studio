@@ -168,6 +168,7 @@ function setup(
         "exportLibrary",
         "copyOutline",
         "copyTable",
+        "copyDeepLink",
         "handleFile",
         "openRecentFile",
       ].map((k) => [k, vi.fn()]),

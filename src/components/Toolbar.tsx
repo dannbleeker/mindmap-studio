@@ -199,6 +199,8 @@ export interface ToolbarIo {
   exportLibrary: () => void;
   copyOutline: () => void;
   copyTable: () => void;
+  /** Copy a shareable deep-link (?map=…&node=…) to the selected topic to the clipboard. */
+  copyDeepLink: () => void;
   /** Copy the rendered map to the clipboard as a PNG image (no file). */
   copyPng: () => void;
   handleFile: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -639,6 +641,11 @@ export function Toolbar({
                   icon={mi("copy")}
                   label="Copy as table (TSV)"
                   onSelect={() => io.copyTable()}
+                />
+                <MenuItem
+                  icon={mi("link")}
+                  label="Copy link to this topic"
+                  onSelect={() => io.copyDeepLink()}
                 />
                 <MenuItem
                   icon={mi("export")}

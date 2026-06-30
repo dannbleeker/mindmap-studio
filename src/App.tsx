@@ -564,6 +564,22 @@ export function App() {
     }
   }
 
+  // Copy a shareable deep-link to the current map (and selected topic, if any) to the clipboard:
+  // opening it focuses that exact node. Uses the live origin/path so it works wherever the app is hosted.
+  async function copyDeepLink() {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("map", liveDocRef.current.id);
+      const nodeId = selected?.id;
+      if (nodeId) url.searchParams.set("node", nodeId);
+      else url.searchParams.delete("node");
+      await navigator.clipboard.writeText(url.toString());
+      showHint(nodeId ? "Link to this topic copied" : "Link to this map copied");
+    } catch {
+      showHint("Couldn't access the clipboard");
+    }
+  }
+
   const refreshMaps = useCallback(async () => {
     try {
       setMaps(await listMaps());
@@ -1100,8 +1116,11 @@ export function App() {
     let cancelled = false;
     (async () => {
       // A ?map=<id> deep-link (shareable / bookmarkable) opens that map as the active tab — even on a
-      // first visit with no saved session.
-      const deepLinkId = new URLSearchParams(window.location.search).get("map");
+      // first visit with no saved session. An optional ?node=<id> then focuses that topic once the
+      // map has mounted (via the same pendingFocus path as a cross-map jump).
+      const params = new URLSearchParams(window.location.search);
+      const deepLinkId = params.get("map");
+      const deepLinkNodeId = params.get("node");
       const session = await getTabSession().catch(() => null);
       if (cancelled) return;
       booted.current = true; // boot has decided; the URL ?map= sync may now run
@@ -1134,6 +1153,8 @@ export function App() {
           openTabIds: openTabIds.length ? openTabIds : [activeId],
           activeTabId: activeId,
         });
+        // Focus the deep-linked node after the canvas mounts (the pendingFocus effect, keyed on doc).
+        if (deepLinkNodeId) pendingFocus.current = deepLinkNodeId;
         load(restored);
         setView("editor");
       } else {
@@ -1173,6 +1194,28 @@ export function App() {
       // best-effort; deep-link sync is non-critical
     }
   }, [doc.id, view]);
+
+  // Keep the URL's ?node= in sync with the selected topic, so the address bar always points at a
+  // shareable deep-link to exactly what's focused. Cleared when nothing's selected or off the editor.
+  // replaceState — no history spam (back/forward has its own stack).
+  useEffect(() => {
+    if (!booted.current) return;
+    try {
+      const url = new URL(window.location.href);
+      const want = view === "editor" ? (selected?.id ?? null) : null;
+      if (want) {
+        if (url.searchParams.get("node") !== want) {
+          url.searchParams.set("node", want);
+          window.history.replaceState(null, "", url);
+        }
+      } else if (url.searchParams.has("node")) {
+        url.searchParams.delete("node");
+        window.history.replaceState(null, "", url);
+      }
+    } catch {
+      // best-effort; deep-link sync is non-critical
+    }
+  }, [selected?.id, view]);
 
   // Press "/" to open the Find & Replace overlay (ignored while typing in a field/node).
   useEffect(() => {
@@ -1338,6 +1381,7 @@ export function App() {
       exportLibrary,
       copyOutline,
       copyTable,
+      copyDeepLink,
       handleFile,
       openFile,
       openRecentFile,

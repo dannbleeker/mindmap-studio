@@ -86,6 +86,14 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("paste-topics", "Paste text → topics", "map", () => nav.openPaste());
   add("copy-outline", "Copy outline to clipboard", "map", () => io.copyOutline());
   add("copy-table", "Copy as table (TSV)", "map", () => io.copyTable());
+  add(
+    "copy-deep-link",
+    sel ? "Copy link to this topic" : "Copy link to this map",
+    "map",
+    () => io.copyDeepLink(),
+    true,
+    { keywords: "deep link url share permalink node" },
+  );
   add("copy-image", "Copy map as image", "map", () => io.copyPng(), true, {
     keywords: "png picture clipboard screenshot paste",
   });

@@ -25,7 +25,13 @@ import {
   tabPanelId,
 } from "./design/primitives";
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
-import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
+import {
+  type CompletionMode,
+  type DueMode,
+  type FilterCriteria,
+  type SavedFilter,
+  describeCriteria,
+} from "./filter";
 import { markerImage, searchMarkers } from "./icons";
 import { formatBytes } from "./io/attachment";
 import { suggestNewMarkers } from "./markerSuggest";
@@ -1366,6 +1372,7 @@ export function FilterPanel({
   tags,
   due,
   priority,
+  completion,
   matchCount,
   savedFilters,
   onText,
@@ -1373,6 +1380,7 @@ export function FilterPanel({
   onToggleTag,
   onDue,
   onPriority,
+  onCompletion,
   hide = false,
   onHide,
   onExtract,
@@ -1388,6 +1396,7 @@ export function FilterPanel({
   tags: string[];
   due: DueMode;
   priority: number;
+  completion: CompletionMode;
   matchCount: number;
   savedFilters: SavedFilter[];
   onText: (value: string) => void;
@@ -1395,6 +1404,7 @@ export function FilterPanel({
   onToggleTag: (tag: string) => void;
   onDue: (mode: DueMode) => void;
   onPriority: (priority: number) => void;
+  onCompletion: (mode: CompletionMode) => void;
   /** "Hide non-matches" mode (vs the default fade). */
   hide?: boolean;
   onHide?: (on: boolean) => void;
@@ -1407,7 +1417,12 @@ export function FilterPanel({
 }) {
   const { markers: markerEntries, tags: tagEntries } = markerTagIndex(root, floatingTopics);
   const active =
-    text.trim().length > 0 || markers.length > 0 || tags.length > 0 || due !== "" || priority > 0;
+    text.trim().length > 0 ||
+    markers.length > 0 ||
+    tags.length > 0 ||
+    due !== "" ||
+    priority > 0 ||
+    completion !== "";
   const [saveName, setSaveName] = useState("");
   const chip = (key: string, selected: boolean, onClick: () => void) => (
     <Chip key={key} selected={selected} onClick={onClick}>
@@ -1450,6 +1465,18 @@ export function FilterPanel({
               {PRIORITY_LABEL[p]}
             </option>
           ))}
+        </Select>
+        <PanelSection>Completion</PanelSection>
+        <Select
+          value={completion}
+          onChange={(e) => onCompletion(e.target.value as CompletionMode)}
+          aria-label="Filter by completion"
+          style={{ width: "auto", margin: "0 10px 4px" }}
+        >
+          <option value="">Any</option>
+          <option value="complete">Done</option>
+          <option value="in-progress">In progress</option>
+          <option value="incomplete">Not done</option>
         </Select>
         {markerEntries.length > 0 ? (
           <>

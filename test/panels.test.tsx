@@ -206,6 +206,7 @@ describe("FilterPanel", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={0}
         savedFilters={[]}
         onText={noop}
@@ -213,6 +214,7 @@ describe("FilterPanel", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -223,8 +225,38 @@ describe("FilterPanel", () => {
     expect(screen.getByLabelText("Filter by text")).toBeTruthy();
     expect(screen.getByLabelText("Filter by due date")).toBeTruthy();
     expect(screen.getByLabelText("Filter by priority")).toBeTruthy();
+    expect(screen.getByLabelText("Filter by completion")).toBeTruthy();
     // a chip for the tag present in the sample map
     expect(screen.getByRole("button", { name: "risk" })).toBeTruthy();
+  });
+
+  it("reports a completion choice through onCompletion", async () => {
+    const onCompletion = vi.fn();
+    render(
+      <FilterPanel
+        root={sampleRoot()}
+        text=""
+        markers={[]}
+        tags={[]}
+        due=""
+        priority={0}
+        completion=""
+        matchCount={0}
+        savedFilters={[]}
+        onText={noop}
+        onToggleMarker={noop}
+        onToggleTag={noop}
+        onDue={noop}
+        onPriority={noop}
+        onCompletion={onCompletion}
+        onClear={noop}
+        onSaveFilter={noop}
+        onApplyFilter={noop}
+        onDeleteFilter={noop}
+      />,
+    );
+    await userEvent.selectOptions(screen.getByLabelText("Filter by completion"), "complete");
+    expect(onCompletion).toHaveBeenCalledWith("complete");
   });
 
   it("shows the live match count when a filter is active", () => {
@@ -236,6 +268,7 @@ describe("FilterPanel", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={3}
         savedFilters={[]}
         onText={noop}
@@ -243,6 +276,7 @@ describe("FilterPanel", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -1239,6 +1273,7 @@ describe("FilterPanel (interaction)", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={3}
         savedFilters={[]}
         onText={noop}
@@ -1246,6 +1281,7 @@ describe("FilterPanel (interaction)", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={onClear}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -1267,6 +1303,7 @@ describe("FilterPanel (interaction)", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={0}
         savedFilters={[]}
         onText={noop}
@@ -1274,6 +1311,7 @@ describe("FilterPanel (interaction)", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -1298,6 +1336,7 @@ describe("FilterPanel (interaction)", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={0}
         savedFilters={[]}
         onText={noop}
@@ -1305,6 +1344,7 @@ describe("FilterPanel (interaction)", () => {
         onToggleTag={noop}
         onDue={onDue}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}

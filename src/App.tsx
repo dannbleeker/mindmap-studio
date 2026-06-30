@@ -326,12 +326,19 @@ export function App() {
   // Memoised so the canvas only re-dims when the map or the criteria actually change. The deps stay
   // plain primitives/arrays (the individual filter fields), so a fresh `filter.criteria` object each
   // render doesn't needlessly recompute — only an actual field change does.
-  const { text, markers, tags, due, priority } = filter;
+  const { text, markers, tags, due, priority, completion } = filter;
   const filterHits = useMemo(() => {
-    const criteria: FilterCriteria = { text, markers, tags, due, priority: priority || undefined };
+    const criteria: FilterCriteria = {
+      text,
+      markers,
+      tags,
+      due,
+      priority: priority || undefined,
+      completion: completion || undefined,
+    };
     if (!panels.filterOpen || !isFilterActive(criteria)) return null;
     return filterResult(liveDoc, criteria, todayISO());
-  }, [panels.filterOpen, text, markers, tags, due, priority, liveDoc]);
+  }, [panels.filterOpen, text, markers, tags, due, priority, completion, liveDoc]);
   // Focus / isolate-branch: session-only, reuses the Power Filter's dim pipeline. Focus wins over
   // the filter as the dim source; both fall back to "no dimming".
   // The full selected node (for the Info panel's tags / markers / link state); `selected` only
@@ -1936,6 +1943,7 @@ export function App() {
                       tags={filter.tags}
                       due={filter.due}
                       priority={filter.priority}
+                      completion={filter.completion}
                       matchCount={filterHits?.matches ?? 0}
                       savedFilters={savedFilters.list}
                       onText={filter.setText}
@@ -1943,6 +1951,7 @@ export function App() {
                       onToggleTag={filter.toggleTag}
                       onDue={filter.setDue}
                       onPriority={filter.setPriority}
+                      onCompletion={filter.setCompletion}
                       hide={filter.hide}
                       onHide={filter.setHide}
                       onExtract={extractFilterMatches}

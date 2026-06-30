@@ -171,6 +171,51 @@ describe("filterResult — priority", () => {
   });
 });
 
+describe("filterResult — completion", () => {
+  // done=100%, wip=40%, todo=0%, none has no task. parent rolls up from its children.
+  const compDoc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "d",
+    title: "T",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "done", topic: "Done", task: { progress: 1 }, children: [] },
+        { id: "wip", topic: "WIP", task: { progress: 0.4 }, children: [] },
+        { id: "todo", topic: "Todo", task: { progress: 0 }, children: [] },
+        { id: "none", topic: "None", children: [] },
+      ],
+    },
+  };
+
+  it("matches complete / in-progress / not-done by rolled-up progress", () => {
+    expect([...filterResult(compDoc, crit({ completion: "complete" })).lit].sort()).toEqual([
+      "done",
+      "r",
+    ]);
+    expect([...filterResult(compDoc, crit({ completion: "in-progress" })).lit].sort()).toEqual([
+      "r",
+      "wip",
+    ]);
+    // "not done" covers not-started + in-progress, and the part-done rolled-up root — but not the
+    // 100% node and not the task-less one.
+    expect(filterResult(compDoc, crit({ completion: "incomplete" })).matches).toBe(3); // wip+todo+root
+  });
+
+  it("never matches a node with no task (no completion state)", () => {
+    const lit = filterResult(compDoc, crit({ completion: "incomplete" })).lit;
+    expect(lit.has("none")).toBe(false);
+    // The rolled-up root is part-done, so it counts as in-progress.
+    expect([...filterResult(compDoc, crit({ completion: "in-progress" })).lit]).toContain("r");
+  });
+
+  it("is reflected in isFilterActive + describeCriteria", () => {
+    expect(isFilterActive(crit({ completion: "complete" }))).toBe(true);
+    expect(describeCriteria(crit({ completion: "complete" }))).toContain("done");
+  });
+});
+
 describe("focusSet", () => {
   it("lights a branch's subtree plus its ancestors", () => {
     expect([...focusSet(doc, "m")].sort()).toEqual(["bg", "c", "m", "r"]); // Marketing + kids + root

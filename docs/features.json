@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 370,
+  "reviewedThroughChangelogBullets": 371,
   "areas": [
     "editing",
     "notes",
@@ -16,6 +16,42 @@
     "pwa"
   ],
   "features": [
+    {
+      "id": "trash-undo-delete",
+      "name": "Trash / undo-delete for maps (recoverable soft-delete + Trash view)",
+      "area": "library",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cross-tab-clobber-guard",
+      "name": "Cross-tab clobber guard (warn when a map is open in two tabs)",
+      "area": "library",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "file-conflict-detection",
+      "name": "External-file conflict detection (prompt before overwriting a disk file that changed)",
+      "area": "library",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "open-recent-files",
+      "name": "Open Recent — reopen recently-opened disk files from the File menu",
+      "area": "library",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
     {
       "id": "big-map-virtualisation",
       "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",

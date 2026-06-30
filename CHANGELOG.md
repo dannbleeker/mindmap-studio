@@ -7,6 +7,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Data-safety pack (UI review — gap groups 9/11).** Local-first durability for a no-backend PWA:
+  - **Trash / undo-delete** — deleting a map moves it to a recoverable Trash (a `meta.trashedAt` flag)
+    instead of destroying it; a Start-screen Trash view restores or permanently deletes. Emptying the
+    Trash is the only permanent delete.
+  - **Cross-tab clobber guard** — editor tabs heartbeat on a BroadcastChannel; opening the same map in
+    two tabs (which would race the IndexedDB autosave) shows a one-time warning.
+  - **External-file conflict detection** — a map bound to a `.mmst` tracks the file's `lastModified`; a
+    Save that would overwrite an external change (edited elsewhere / synced) prompts first, and silent
+    autosave-to-file pauses rather than clobbering.
+  - **Open Recent** — the File menu lists recently-opened disk files; reopening re-binds the persisted
+    handle (re-prompting for permission).
+
 - **Wave-1 best-in-class gap fixes (UI review — verified gap map).** The first, cheapest-high-value slice
   of the [features review](docs/UI_REVIEW_2026-06-30_bestinclass.md):
   - **Free colour pickers** (G5): Text / Fill / Branch native colour swatches in the StyleBar, alongside

@@ -222,6 +222,13 @@ describe("buildEditorCommands", () => {
     expect(props.mapRef.current?.groupBranch).toHaveBeenCalledWith("n1");
   });
 
+  it("offers sort-children commands (gated on a selection) that defer to the handle", () => {
+    expect(byId(mkProps(null)).get("sort-children:alpha")?.enabled).toBe(false);
+    const props = mkProps({ id: "n1", topic: "N", note: "" });
+    byId(props).get("sort-children:due")?.run();
+    expect(props.mapRef.current?.sortChildren).toHaveBeenCalledWith("n1", "due");
+  });
+
   it("offers a 'Copy map as image' command that defers to io.copyPng", () => {
     const props = mkProps();
     byId(props).get("copy-image")?.run();

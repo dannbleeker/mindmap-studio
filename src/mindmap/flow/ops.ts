@@ -396,6 +396,51 @@ export function moveSibling(doc: MindMapDoc, id: string, dir: "up" | "down"): Op
   return { doc: next, selectId: loc.node.id };
 }
 
+export type SortKey = "alpha" | "priority" | "due" | "progress";
+
+/** Reorder a node's direct children by a key (stable on ties): A→Z by topic, priority (1 = highest,
+ *  first), due date (earliest first), or progress (least-done first). Unset task fields sort last. */
+export function sortChildren(doc: MindMapDoc, id: string, by: SortKey): OpResult {
+  const probe = findAnyNode(doc, id);
+  if (!probe || probe.children.length < 2) return { doc };
+  const next = structuredClone(doc);
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  const rank = (c: MapNode): number | string => {
+    if (by === "alpha") return c.topic.toLocaleLowerCase();
+    if (by === "priority") return c.task?.priority ?? Number.POSITIVE_INFINITY;
+    if (by === "due") return c.task?.due ?? "￿"; // undated → after every ISO date
+    return c.task?.progress ?? Number.POSITIVE_INFINITY; // no task → last
+  };
+  node.children = node.children
+    .map((c, i) => [c, i] as const)
+    .sort((a, b) => {
+      const ra = rank(a[0]);
+      const rb = rank(b[0]);
+      if (ra < rb) return -1;
+      if (ra > rb) return 1;
+      return a[1] - b[1]; // stable: preserve original order within equal ranks
+    })
+    .map(([c]) => c);
+  return { doc: next, selectId: id };
+}
+
+/** Filter a selection to its "maximal" branch roots: drop the central root, and drop any id nested
+ *  inside another selected id (so selecting a branch + one of its descendants copies just the branch).
+ *  Order-preserving. Used by the multi-branch clipboard. */
+export function maximalBranchIds(doc: MindMapDoc, ids: string[]): string[] {
+  // Drop the central root first so it can't swallow every other selection (it contains them all).
+  const candidates = ids.filter((id) => id !== doc.root.id);
+  return candidates.filter(
+    (id) =>
+      !candidates.some((other) => {
+        if (other === id) return false;
+        const on = findAnyNode(doc, other);
+        return on ? isDescendant(on, id) : false;
+      }),
+  );
+}
+
 /** Remove a node's subtree; prune dangling links/boundaries; select a neighbour. Works on a central-tree
  *  node, a top-level floating topic, or a node nested inside one. No-op for the root. */
 export function deleteNode(doc: MindMapDoc, id: string): OpResult {

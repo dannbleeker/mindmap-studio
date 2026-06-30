@@ -33,6 +33,7 @@ import {
   groupSummary,
   indent,
   isolateBranch,
+  maximalBranchIds,
   mergeStyle,
   moveInTree,
   moveSelectionInTree,
@@ -90,6 +91,7 @@ import {
   setTags,
   setTopic,
   setTopicRich,
+  sortChildren,
   toggleCollapse,
   toggleIcon,
   toggleLocked,
@@ -1939,5 +1941,63 @@ describe("flow ops — floating-topic property edits", () => {
     const out = setTopicRich(withFloat(), "f", "<b>F</b>", "F").doc;
     expect(findAnyNode(out, "f")?.topicRich).toBe("<b>F</b>");
     expect(out.title).toBe("Root");
+  });
+});
+
+describe("sortChildren", () => {
+  const docWith = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "R",
+    root: {
+      id: "r",
+      topic: "R",
+      children: [
+        {
+          id: "c",
+          topic: "Cherry",
+          task: { priority: 3, due: "2026-03-01", progress: 0.9 },
+          children: [],
+        },
+        {
+          id: "a",
+          topic: "apple",
+          task: { priority: 1, due: "2026-01-01", progress: 0.1 },
+          children: [],
+        },
+        { id: "b", topic: "Banana", task: { priority: 2, progress: 0.5 }, children: [] }, // no due
+      ],
+    },
+  });
+
+  it("sorts A→Z case-insensitively", () => {
+    expect(kids(sortChildren(docWith(), "r", "alpha").doc, "r")).toEqual(["a", "b", "c"]);
+  });
+  it("sorts by priority (1 = highest, first)", () => {
+    expect(kids(sortChildren(docWith(), "r", "priority").doc, "r")).toEqual(["a", "b", "c"]);
+  });
+  it("sorts by due date with the undated child last", () => {
+    expect(kids(sortChildren(docWith(), "r", "due").doc, "r")).toEqual(["a", "c", "b"]);
+  });
+  it("sorts by progress, least-done first", () => {
+    expect(kids(sortChildren(docWith(), "r", "progress").doc, "r")).toEqual(["a", "b", "c"]);
+  });
+  it("is a stable no-op (same doc ref) for <2 children or a missing node", () => {
+    const d = base();
+    expect(sortChildren(d, "b", "alpha").doc).toBe(d); // "b" has no children
+    expect(sortChildren(d, "nope", "alpha").doc).toBe(d); // unknown id
+  });
+});
+
+describe("maximalBranchIds", () => {
+  it("drops ids nested inside another selected id", () => {
+    // a1 is a child of a → selecting both yields just a.
+    expect(maximalBranchIds(base(), ["a", "a1", "b"])).toEqual(["a", "b"]);
+  });
+  it("drops the central root and preserves order", () => {
+    expect(maximalBranchIds(base(), ["r", "b", "a"])).toEqual(["b", "a"]);
+  });
+  it("keeps independent branches", () => {
+    expect(maximalBranchIds(base(), ["a1", "a2"])).toEqual(["a1", "a2"]);
   });
 });

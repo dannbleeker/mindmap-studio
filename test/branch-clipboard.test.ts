@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { MapNode } from "../src/model/types";
-import { getBranch, setBranch } from "../src/store/branchClipboard";
+import { getBranch, getBranches, setBranch, setBranches } from "../src/store/branchClipboard";
 
 // The node test env has no localStorage; install a minimal in-memory Storage so the clipboard's real
 // read/write path (and its JSON shape-guard) is exercised, not just the unavailable-storage fallback.
@@ -48,5 +48,25 @@ describe("branchClipboard", () => {
     Reflect.deleteProperty(globalThis, "localStorage");
     expect(() => setBranch(node)).not.toThrow();
     expect(getBranch()).toBeNull();
+  });
+
+  it("round-trips MULTIPLE copied branches and filters out malformed entries", () => {
+    const b: MapNode = { id: "x", topic: "X", children: [] };
+    setBranches([node, b]);
+    const got = getBranches();
+    expect(got.map((n) => n.topic)).toEqual(["A", "X"]);
+    expect(getBranch()?.topic).toBe("A"); // single getter returns the first
+  });
+
+  it("reads the legacy single-node payload as a one-element array (back-compat)", () => {
+    // Old format stored a bare node object, not an array.
+    localStorage.setItem("mindmap-branch-clipboard", JSON.stringify(node));
+    expect(getBranches().map((n) => n.topic)).toEqual(["A"]);
+    expect(getBranch()?.topic).toBe("A");
+  });
+
+  it("getBranches is empty (not throwing) on malformed content", () => {
+    localStorage.setItem("mindmap-branch-clipboard", "{ not json");
+    expect(getBranches()).toEqual([]);
   });
 });

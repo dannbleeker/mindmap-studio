@@ -29,7 +29,7 @@ import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
 import { PRIORITY_LABEL, PRIORITY_LEVELS, cyclePriority } from "../priority";
 import { cycleTaskProgress, nextProgressLevel } from "../progress";
 import { isStandalonePwa } from "../pwa/standalone";
-import { getBranch, setBranch } from "../store/branchClipboard";
+import { getBranches, setBranches } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
 import { useIsMobile } from "../useIsMobile";
 import {
@@ -105,6 +105,7 @@ import {
   groupSummary,
   indent,
   isolateBranch,
+  maximalBranchIds,
   mergeStyle,
   moveInTree,
   moveSelectionInTree,
@@ -165,6 +166,7 @@ import {
   setTags,
   setTopic,
   setTopicRich,
+  sortChildren,
   toggleCollapse,
   toggleIcon,
   toggleLocked,
@@ -1381,11 +1383,21 @@ function FlowInner({
           break;
         }
         case "copyBranch": {
-          const n = findAnyNode(docRef.current, intent.id);
-          if (n) {
-            setBranch(structuredClone(n));
-            onHintRef.current?.("Branch copied — paste with Ctrl/⌘+Shift+V.");
-          }
+          // Multi-select copies every selected branch (minus any nested inside another); a single
+          // selection copies just the anchor. Both land in the cross-map clipboard for paste.
+          const sel = selectedIdsRef.current;
+          const ids = sel.size > 1 ? maximalBranchIds(docRef.current, [...sel]) : [intent.id];
+          const nodes = ids
+            .map((id) => findAnyNode(docRef.current, id))
+            .filter((n): n is MapNode => Boolean(n))
+            .map((n) => structuredClone(n));
+          if (nodes.length === 0) break;
+          setBranches(nodes);
+          onHintRef.current?.(
+            nodes.length === 1
+              ? "Branch copied — paste with Ctrl/⌘+Shift+V."
+              : `${nodes.length} branches copied — paste with Ctrl/⌘+Shift+V.`,
+          );
           break;
         }
         case "duplicateBranch": {
@@ -1401,13 +1413,18 @@ function FlowInner({
           break;
         }
         case "pasteBranch": {
-          const clip = getBranch();
-          if (clip) {
-            apply(pasteBranch(docRef.current, intent.id, clip));
-            onHintRef.current?.("Branch pasted under the selection.");
-          } else {
+          const clips = getBranches();
+          if (clips.length === 0) {
             onHintRef.current?.("Nothing to paste — copy a branch first (Ctrl/⌘+C).");
+            break;
           }
+          // Graft all copied branches under the selection in one undo step (addSubtree re-ids them).
+          apply(addSubtree(docRef.current, intent.id, clips));
+          onHintRef.current?.(
+            clips.length === 1
+              ? "Branch pasted under the selection."
+              : `${clips.length} branches pasted under the selection.`,
+          );
           break;
         }
       }
@@ -1674,6 +1691,12 @@ function FlowInner({
       groupBranch: (id) => {
         apply(groupBranch(docRef.current, id));
         return Boolean(findAnyNode(docRef.current, id));
+      },
+      sortChildren: (id, by) => {
+        const node = findAnyNode(docRef.current, id);
+        if (!node) return false;
+        apply(sortChildren(docRef.current, id, by));
+        return true;
       },
       groupSelection: () => {
         const ids = [...selectedIdsRef.current];
@@ -2181,17 +2204,19 @@ function FlowInner({
                     "Copy branch",
                     () => {
                       const n = findAnyNode(docRef.current, id);
-                      if (n) setBranch(structuredClone(n));
+                      if (n) setBranches([structuredClone(n)]);
                     },
                   ],
                 ];
                 // Cross-map paste: show only when the branch clipboard has something (it persists in
-                // localStorage, so a branch copied in another map shows up here too).
-                const clip = getBranch();
-                if (clip)
+                // localStorage, so branches copied in another map show up here too).
+                const clips = getBranches();
+                if (clips.length)
                   items.push([
-                    "Paste branch here",
-                    () => apply(pasteBranch(docRef.current, id, clip)),
+                    clips.length === 1
+                      ? "Paste branch here"
+                      : `Paste ${clips.length} branches here`,
+                    () => apply(addSubtree(docRef.current, id, clips)),
                   ]);
                 items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
                 items.push([
@@ -2440,12 +2465,20 @@ function FlowInner({
                 label="Add topic here"
                 onSelect={() => apply(addFloatingTopic(docRef.current, ""), true)}
               />
-              {getBranch() ? (
+              {getBranches().length ? (
                 <MenuItem
-                  label="Paste branch here"
+                  label={
+                    getBranches().length === 1
+                      ? "Paste branch here"
+                      : `Paste ${getBranches().length} branches here`
+                  }
                   onSelect={() => {
-                    const clip = getBranch();
-                    if (clip) apply(pasteBranch(docRef.current, null, clip));
+                    const clips = getBranches();
+                    if (clips.length === 0) return;
+                    // Drop each copied branch in as a floating topic, folded into one undo step.
+                    let doc = docRef.current;
+                    for (const c of clips) doc = pasteBranch(doc, null, c).doc;
+                    apply({ doc });
                   }}
                 />
               ) : null}

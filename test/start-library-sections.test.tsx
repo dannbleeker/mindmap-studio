@@ -139,9 +139,13 @@ describe("AllMaps section", () => {
     { id: "b", title: "Apple", nodeCount: 9, updatedAt: 200 },
   ];
 
-  it("shows the empty state when the library is empty", () => {
-    render(<AllMaps ctx={mkCtx()} />);
+  it("shows the empty state when the library is empty, with a templates path (UI-7)", async () => {
+    const ctx = mkCtx();
+    render(<AllMaps ctx={ctx} />);
     expect(screen.getByText(/No maps yet/i)).toBeTruthy();
+    // The returning-but-empty state offers a guided path to templates, not just a blank canvas.
+    await u.click(screen.getByRole("button", { name: /Browse templates/i }));
+    expect(ctx.go).toHaveBeenCalledWith("templates");
   });
 
   it("counts maps, sorts by the chosen key, and toggles grid ↔ list", async () => {

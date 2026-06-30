@@ -63,6 +63,37 @@ describe("keyIntent", () => {
     expect(keyIntent(ev({ key: "d", ctrlKey: true }), st({ selectedId: null }))).toBeNull();
   });
 
+  it("maps relationship linking (keyboard parity for the mouse Link-to gesture)", () => {
+    // Ctrl/⌘+Shift+L starts drawing a relationship from the selected topic.
+    expect(keyIntent(ev({ key: "l", ctrlKey: true, shiftKey: true }), st())).toEqual({
+      kind: "startLinking",
+      id: "n1",
+    });
+    expect(keyIntent(ev({ key: "L", metaKey: true, shiftKey: true }), st())).toEqual({
+      kind: "startLinking",
+      id: "n1",
+    });
+    // No selection → nothing to link from.
+    expect(
+      keyIntent(ev({ key: "l", ctrlKey: true, shiftKey: true }), st({ selectedId: null })),
+    ).toBeNull();
+    // While linking, Enter completes the link to the selected target (instead of adding a sibling).
+    expect(keyIntent(ev({ key: "Enter" }), st({ linking: true }))).toEqual({
+      kind: "completeLink",
+      id: "n1",
+    });
+    // Ctrl+Enter still adds a child even while linking (modifier path is unaffected).
+    expect(keyIntent(ev({ key: "Enter", ctrlKey: true }), st({ linking: true }))).toEqual({
+      kind: "addChild",
+      id: "n1",
+    });
+    // Not linking → Enter is the usual add-sibling.
+    expect(keyIntent(ev({ key: "Enter" }), st({ linking: false }))).toEqual({
+      kind: "addSibling",
+      id: "n1",
+    });
+  });
+
   it("ignores keys while inline-editing or when a form field / link is focused", () => {
     expect(keyIntent(ev({ key: "Enter" }), st({ editing: true }))).toBeNull();
     for (const tagName of ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]) {

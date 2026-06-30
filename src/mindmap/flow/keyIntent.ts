@@ -20,6 +20,8 @@ export type KeyIntent =
   | { kind: "copyBranch"; id: string }
   | { kind: "duplicateBranch"; id: string }
   | { kind: "pasteBranch"; id: string }
+  | { kind: "startLinking"; id: string }
+  | { kind: "completeLink"; id: string }
   | null;
 
 export interface KeyState {
@@ -61,6 +63,10 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") return { kind: "redo" };
   const id = state.selectedId;
   if (!id) return null;
+  // While drawing a relationship, Enter links the source to the currently-selected target (Esc cancels,
+  // handled above). Keyboard parity for the mouse "click a target to finish" step.
+  if (state.linking && e.key === "Enter" && !e.ctrlKey && !e.metaKey)
+    return { kind: "completeLink", id };
   // Reorder among siblings (Ctrl/⌘+Shift+↑/↓) and promote/demote (Alt+Shift+←/→) — MindManager-style
   // restructuring without the mouse. Checked before the single-char type-edit guard (arrows are multi-char).
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "ArrowUp") return { kind: "moveUp", id };
@@ -76,6 +82,10 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
     return { kind: "duplicateBranch", id };
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "v")
     return { kind: "pasteBranch", id };
+  // Start drawing a relationship from the selected topic — keyboard parity for the mouse "Link to…"
+  // menu + drag grip. Ctrl/⌘+Shift+L, then arrow to a target and Enter to complete (Esc cancels).
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "l")
+    return { kind: "startLinking", id };
   // Bare arrows move the selection through the tree (left=parent, right=child, up/down=siblings).
   if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
     if (e.key === "ArrowUp") return { kind: "selectDir", id, dir: "up" };

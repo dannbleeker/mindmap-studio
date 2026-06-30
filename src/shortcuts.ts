@@ -43,6 +43,10 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: "Ctrl/⌘ + Shift + ↑ / ↓", action: "Reorder the topic among its siblings" },
       { keys: "Alt + Shift + ← / →", action: "Outdent / indent the selected topic" },
       { keys: "Shift + drag", action: "Rubber-band select several topics" },
+      {
+        keys: "Ctrl/⌘ + Shift + L",
+        action: "Start a relationship — arrow to a target, Enter to link (Esc cancels)",
+      },
     ],
   },
   {

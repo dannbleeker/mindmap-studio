@@ -246,6 +246,7 @@ const MENU_SHORTCUT: Record<string, string> = {
   Delete: "Del",
   "Copy branch": "Ctrl/⌘+C",
   "Paste branch here": "Ctrl/⌘+Shift+V",
+  "Link to…": "Ctrl/⌘+Shift+L",
 };
 
 function themeVars(theme: MindMapProps["theme"]): CSSProperties {
@@ -1278,6 +1279,16 @@ function FlowInner({
         case "clearLinking":
           setLinkingFrom(null);
           break;
+        case "startLinking":
+          setLinkingFrom(intent.id);
+          onHintRef.current?.("Linking — arrow to a target, Enter to link, Esc to cancel.");
+          break;
+        case "completeLink": {
+          const from = linkingFromRef.current;
+          if (from && from !== intent.id) apply(addLink(docRef.current, from, intent.id));
+          setLinkingFrom(null);
+          break;
+        }
         case "clearDropTarget":
           setDropTargetId(null); // clear a stray drag-reparent indicator
           break;

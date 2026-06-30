@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { MindMapDoc } from "../src/model/types";
 import { Presentation } from "../src/present/Presentation";
@@ -114,5 +114,63 @@ describe("Presentation overlay", () => {
     fireEvent.click(within(aside).getByRole("button", { name: /Second branch/ }));
     expect(heading()).toBe("Second branch");
     expect(within(aside).getByText("No notes for this slide.")).toBeTruthy();
+  });
+
+  it("ticks a presenter elapsed clock that pauses and resets", () => {
+    vi.useFakeTimers();
+    try {
+      render(<Presentation doc={doc} onExit={vi.fn()} />);
+      const clock = () => screen.getByLabelText(/Elapsed/).textContent;
+      expect(clock()).toBe("0:00");
+      act(() => vi.advanceTimersByTime(3000));
+      expect(clock()).toBe("0:03");
+      // Pause → the clock stops advancing.
+      fireEvent.click(screen.getByRole("button", { name: "Pause timer" }));
+      act(() => vi.advanceTimersByTime(5000));
+      expect(clock()).toBe("0:03");
+      // Resume then reset → back to zero, ticking again.
+      fireEvent.click(screen.getByRole("button", { name: "Resume timer" }));
+      fireEvent.click(screen.getByRole("button", { name: "Reset timer" }));
+      expect(clock()).toBe("0:00");
+      act(() => vi.advanceTimersByTime(1000));
+      expect(clock()).toBe("0:01");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("blacks out on B and whites out on W, and any key (or click) resumes", () => {
+    render(<Presentation doc={doc} onExit={vi.fn()} />);
+    fireEvent.keyDown(document, { key: "b" });
+    expect(screen.getByRole("button", { name: /Black screen/ })).toBeTruthy();
+    // The B keypress went to the curtain, not slide navigation.
+    expect(heading()).toBe("My Talk");
+    fireEvent.keyDown(document, { key: "x" }); // any key resumes
+    expect(screen.queryByRole("button", { name: /Black screen/ })).toBeNull();
+
+    fireEvent.keyDown(document, { key: "W" });
+    const white = screen.getByRole("button", { name: /White screen/ });
+    fireEvent.click(white); // clicking the curtain also resumes
+    expect(screen.queryByRole("button", { name: /White screen/ })).toBeNull();
+  });
+
+  it("Escape still exits Present while blacked out", () => {
+    const onExit = vi.fn();
+    render(<Presentation doc={doc} onExit={onExit} />);
+    fireEvent.keyDown(document, { key: "B" });
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onExit).toHaveBeenCalledTimes(1);
+  });
+
+  it("sets a talk budget via the presenter stepper (drives pacing colour)", () => {
+    render(<Presentation doc={doc} onExit={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /Presenter view/ }));
+    const aside = screen.getByRole("complementary", { name: "Presenter view" });
+    expect(within(aside).getByText("off")).toBeTruthy(); // budget starts off → neutral pacing
+    fireEvent.click(within(aside).getByRole("button", { name: "Increase budget" }));
+    fireEvent.click(within(aside).getByRole("button", { name: "Increase budget" }));
+    expect(within(aside).getByText("10 min")).toBeTruthy();
+    fireEvent.click(within(aside).getByRole("button", { name: "Decrease budget" }));
+    expect(within(aside).getByText("5 min")).toBeTruthy();
   });
 });

@@ -3,6 +3,7 @@ import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
 import { presenterContext } from "./presenter";
 import { type Slide, resolveSlides } from "./slides";
+import { mmss, pacingColor } from "./timer";
 
 function Bullets({ node }: { node: MapNode }) {
   if (node.children.length === 0) return null;
@@ -58,12 +59,21 @@ function PresenterSidebar({
   slides,
   index,
   onJump,
+  elapsed,
+  budgetMin,
+  onBudgetChange,
 }: {
   slides: Slide[];
   index: number;
   onJump: (i: number) => void;
+  /** Seconds elapsed since Present began — the big pacing clock. */
+  elapsed: number;
+  /** Total-talk budget in minutes (0 = off); drives the pacing colour + the over/under readout. */
+  budgetMin: number;
+  onBudgetChange: (next: number) => void;
 }) {
   const ctx = presenterContext(slides, index);
+  const clockColor = pacingColor(elapsed, budgetMin * 60);
   return (
     <aside
       aria-label="Presenter view"
@@ -105,7 +115,56 @@ function PresenterSidebar({
         </p>
       </section>
 
-      {/* 3. Agenda — the "map" of the talk; current slide highlighted, click to jump. */}
+      {/* 3. Pacing timer — elapsed clock (coloured vs the budget) + a total-talk budget stepper. */}
+      <section>
+        <h2 style={sectionLabelStyle}>Timer</h2>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <span
+            style={{
+              fontSize: 34,
+              fontWeight: 700,
+              fontVariantNumeric: "tabular-nums",
+              color: clockColor,
+              lineHeight: 1,
+            }}
+          >
+            {mmss(elapsed)}
+          </span>
+          {budgetMin > 0 && (
+            <span style={{ fontSize: 14, color: "#9a93e0", fontVariantNumeric: "tabular-nums" }}>
+              {elapsed > budgetMin * 60 ? "+" : "−"}
+              {mmss(Math.abs(budgetMin * 60 - elapsed))} {elapsed > budgetMin * 60 ? "over" : "left"}
+            </span>
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+          <span style={{ fontSize: 13, color: "#9a93e0" }}>Budget</span>
+          <button
+            type="button"
+            aria-label="Decrease budget"
+            onClick={() => onBudgetChange(Math.max(0, budgetMin - 5))}
+            style={ctrlStyle}
+          >
+            −5
+          </button>
+          <span
+            style={{ fontSize: 14, color: "#ecebfb", minWidth: 64, textAlign: "center" }}
+            aria-live="polite"
+          >
+            {budgetMin > 0 ? `${budgetMin} min` : "off"}
+          </span>
+          <button
+            type="button"
+            aria-label="Increase budget"
+            onClick={() => onBudgetChange(budgetMin + 5)}
+            style={ctrlStyle}
+          >
+            +5
+          </button>
+        </div>
+      </section>
+
+      {/* 4. Agenda — the "map" of the talk; current slide highlighted, click to jump. */}
       <section style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
         <h2 style={sectionLabelStyle}>
           Agenda{" "}
@@ -162,6 +221,14 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
   const slides = resolveSlides(doc);
   const [index, setIndex] = useState(0);
   const [presenter, setPresenter] = useState(false);
+  // Presenter pacing timer: seconds elapsed since entering Present, a running/paused flag, and an
+  // optional total-talk budget (minutes; 0 = off) that drives the green→amber→red pacing colour.
+  const [elapsed, setElapsed] = useState(0);
+  const [running, setRunning] = useState(true);
+  const [budgetMin, setBudgetMin] = useState(0);
+  // Blackout: B blacks the screen / W whites it (a standard "pull attention to the speaker" control);
+  // any key (or a click) resumes. Held separately so it overlays both the audience slide + sidebar.
+  const [blackout, setBlackout] = useState<"black" | "white" | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Focus management for the full-screen overlay (it behaves as a modal dialog): move focus into it on
@@ -192,8 +259,22 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
   const prev = useCallback(() => setIndex((i) => Math.max(i - 1, 0)), []);
   const togglePresenter = useCallback(() => setPresenter((p) => !p), []);
 
+  // Tick the elapsed clock once a second while running (paused or not, the screen can be blacked out —
+  // time still passes, matching a real presenter clock).
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [running]);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // While blacked/whited out, any key but Esc just resumes the slide (Esc still exits Present).
+      if (blackout && e.key !== "Escape") {
+        e.preventDefault();
+        setBlackout(null);
+        return;
+      }
       if (e.key === "Escape") onExit();
       else if (e.key === "ArrowRight" || e.key === " ") {
         e.preventDefault();
@@ -207,13 +288,20 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
       } else if (e.key === "Home") {
         e.preventDefault();
         setIndex(0);
+      } else if (e.key === "b" || e.key === "B") {
+        e.preventDefault();
+        setBlackout("black");
+      } else if (e.key === "w" || e.key === "W") {
+        e.preventDefault();
+        setBlackout("white");
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev, onExit, togglePresenter]);
+  }, [next, prev, onExit, togglePresenter, blackout]);
 
   const slide = slides[index];
+  const clockColor = pacingColor(elapsed, budgetMin * 60);
 
   return (
     <div
@@ -258,7 +346,16 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           )}
         </div>
 
-        {presenter && <PresenterSidebar slides={slides} index={index} onJump={setIndex} />}
+        {presenter && (
+          <PresenterSidebar
+            slides={slides}
+            index={index}
+            onJump={setIndex}
+            elapsed={elapsed}
+            budgetMin={budgetMin}
+            onBudgetChange={setBudgetMin}
+          />
+        )}
       </div>
 
       <div
@@ -284,9 +381,45 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
         >
           Next ›
         </button>
+        <span
+          aria-label={`Elapsed ${mmss(elapsed)}`}
+          title="Elapsed time (set a budget in presenter view for pacing colour)"
+          style={{
+            fontSize: 15,
+            fontWeight: 700,
+            fontVariantNumeric: "tabular-nums",
+            color: clockColor,
+            minWidth: 52,
+            textAlign: "center",
+          }}
+        >
+          {mmss(elapsed)}
+        </span>
+        <button
+          type="button"
+          onClick={() => setRunning((r) => !r)}
+          aria-pressed={!running}
+          aria-label={running ? "Pause timer" : "Resume timer"}
+          title={running ? "Pause timer" : "Resume timer"}
+          style={ctrlStyle}
+        >
+          {running ? "⏸" : "▶"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setElapsed(0);
+            setRunning(true);
+          }}
+          aria-label="Reset timer"
+          title="Reset timer"
+          style={ctrlStyle}
+        >
+          ↺
+        </button>
         <span style={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "#7e78b8", letterSpacing: "0.02em" }}>
-          ← → · Home · Space · P · Esc
+          ← → · Home · Space · P · B/W · Esc
         </span>
         <button
           type="button"
@@ -301,6 +434,24 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           Exit (Esc)
         </button>
       </div>
+
+      {/* Blackout / whiteout — covers the whole screen (slide + sidebar + footer); click or any key
+          resumes. A plain coloured curtain to pull attention to the speaker. */}
+      {blackout && (
+        <button
+          type="button"
+          aria-label={`${blackout === "black" ? "Black" : "White"} screen — click or press any key to resume`}
+          onClick={() => setBlackout(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1100,
+            border: "none",
+            cursor: "pointer",
+            background: blackout === "black" ? "#000" : "#fff",
+          }}
+        />
+      )}
     </div>
   );
 }

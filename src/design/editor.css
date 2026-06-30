@@ -550,6 +550,17 @@
   background: var(--ed-page);
   box-shadow: inset 0 0 0 2px var(--ed-accent);
 }
+
+/* Outline panel as an accessible tree (role="tree"). The roving treeitem rows show a clear keyboard
+   focus ring; the row matching the canvas selection gets a soft tint (aria-selected). */
+.mm-outline-row:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--ed-accent);
+  border-radius: 4px;
+}
+.mm-outline-row[aria-selected="true"] {
+  background: var(--ed-accent-tint);
+}
 .mm-menu-item:disabled,
 .mm-menu-item[aria-disabled="true"] {
   opacity: 0.45;

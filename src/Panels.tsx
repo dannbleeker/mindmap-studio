@@ -1,6 +1,7 @@
 import {
   type CSSProperties,
   type ClipboardEvent as ReactClipboardEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
   useEffect,
   useRef,
@@ -496,6 +497,7 @@ export function OutlinePanel({
   onMove,
   onAddChild,
   onAddSibling,
+  selectedId,
 }: {
   root: MapNode;
   filter: string;
@@ -514,6 +516,9 @@ export function OutlinePanel({
    *  hops to it). Tab = child, Enter = sibling while editing a row. */
   onAddChild?: (id: string) => string | null;
   onAddSibling?: (id: string) => string | null;
+  /** The currently selected canvas node — drives aria-selected + roving focus so the outline tree
+   *  stays in sync with the canvas. */
+  selectedId?: string | null;
 }) {
   const editable = !!(onRename && onIndent && onMove);
   const q = filter.trim().toLowerCase();
@@ -552,6 +557,76 @@ export function OutlinePanel({
   };
   const rapid = !!(onAddChild && onAddSibling);
 
+  // ── Accessible tree (role="tree") keyboard navigation ─────────────────────────────────────────
+  // `rows` is a flat depth-first list; a row has children when the next row is deeper, and its parent
+  // is the nearest earlier shallower row. The outline shows the whole tree (no per-row collapse), so
+  // every parent is aria-expanded. Roving tabindex: exactly one treeitem is tabbable (the active row);
+  // arrows move focus, Enter/Space focuses the canvas node. activeId follows the canvas selection so
+  // the two views stay in sync. (UI-5)
+  const rowIds = rows.map((r) => r.id);
+  const hasChildren = (i: number) => i + 1 < rows.length && rows[i + 1].depth > rows[i].depth;
+  const parentIndex = (i: number) => {
+    for (let j = i - 1; j >= 0; j--) if (rows[j].depth < rows[i].depth) return j;
+    return -1;
+  };
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const rowRefs = useRef(new Map<string, HTMLDivElement | null>());
+  // Follow the canvas selection: when it changes, move the roving focus to that row.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: track selectedId only, not the per-render rowIds array.
+  useEffect(() => {
+    if (selectedId && rowIds.includes(selectedId)) setActiveId(selectedId);
+  }, [selectedId]);
+  const activeRow = activeId && rowIds.includes(activeId) ? activeId : (rowIds[0] ?? null);
+  const focusRow = (id: string | null) => {
+    if (!id) return;
+    setActiveId(id);
+    requestAnimationFrame(() => rowRefs.current.get(id)?.focus());
+  };
+  const onTreeKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (editId) return; // the inline rename input owns the keyboard
+    const i = rows.findIndex((r) => r.id === activeRow);
+    if (i < 0) return;
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        focusRow(rows[Math.min(i + 1, rows.length - 1)].id);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        focusRow(rows[Math.max(i - 1, 0)].id);
+        break;
+      case "Home":
+        e.preventDefault();
+        focusRow(rows[0].id);
+        break;
+      case "End":
+        e.preventDefault();
+        focusRow(rows[rows.length - 1].id);
+        break;
+      case "ArrowRight":
+        // Expanded-by-default: Right moves into the first child (if any).
+        if (hasChildren(i)) {
+          e.preventDefault();
+          focusRow(rows[i + 1].id);
+        }
+        break;
+      case "ArrowLeft": {
+        // Move out to the parent row (the tree is always expanded, so there's nothing to collapse).
+        const p = parentIndex(i);
+        if (p >= 0) {
+          e.preventDefault();
+          focusRow(rows[p].id);
+        }
+        break;
+      }
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        onPick(activeRow);
+        break;
+    }
+  };
+
   return (
     <Panel>
       <Input
@@ -561,8 +636,15 @@ export function OutlinePanel({
         aria-label="Filter outline"
         style={{ width: "auto", margin: "8px 10px 4px" }}
       />
-      <div style={{ overflowY: "auto", padding: "4px 0 8px" }}>
-        {rows.map((row) => {
+      {/* The Outline panel is the screen-reader-primary tree (UI-5). Keyboard nav (arrows/Home/End/
+          Enter) is handled here on the container; focus rides the roving treeitem rows below. */}
+      <div
+        role="tree"
+        aria-label="Outline tree"
+        onKeyDown={onTreeKeyDown}
+        style={{ overflowY: "auto", padding: "4px 0 8px" }}
+      >
+        {rows.map((row, i) => {
           const isEditing = editId === row.id;
           const dropHere = drop?.id === row.id ? drop.where : null;
           // Dragging is disabled on the root + while filtering (the flat filtered view hides structure).
@@ -570,6 +652,16 @@ export function OutlinePanel({
           return (
             <div
               key={row.id}
+              ref={(el) => {
+                rowRefs.current.set(row.id, el);
+              }}
+              role="treeitem"
+              aria-level={row.depth + 1}
+              aria-selected={row.id === selectedId}
+              aria-expanded={hasChildren(i) ? true : undefined}
+              tabIndex={row.id === activeRow ? 0 : -1}
+              className="mm-outline-row"
+              onFocus={() => setActiveId(row.id)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -630,6 +722,8 @@ export function OutlinePanel({
                 <>
                   <button
                     type="button"
+                    // -1: the treeitem row owns the tab stop (roving); this stays mouse-clickable.
+                    tabIndex={-1}
                     onClick={() => onPick(row.id)}
                     onDoubleClick={() => editable && startEdit(row.id, row.topic)}
                     title={editable ? `${row.topic} — double-click to rename` : row.topic}
@@ -648,6 +742,7 @@ export function OutlinePanel({
                     <span style={{ display: "inline-flex", gap: 2, paddingRight: 6 }}>
                       <button
                         type="button"
+                        tabIndex={-1}
                         onClick={() => onIndent?.(row.id, "out")}
                         title="Promote (outdent)"
                         aria-label="Promote topic"
@@ -657,6 +752,7 @@ export function OutlinePanel({
                       </button>
                       <button
                         type="button"
+                        tabIndex={-1}
                         onClick={() => onIndent?.(row.id, "in")}
                         title="Demote (indent)"
                         aria-label="Demote topic"

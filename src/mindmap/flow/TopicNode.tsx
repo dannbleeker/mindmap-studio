@@ -647,6 +647,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               ref={editRef}
               contentEditable
               suppressContentEditableWarning
+              // contentEditable already exposes an implicit textbox role + focusability; just name it.
+              aria-label={`Edit topic${topic ? `: ${topic}` : ""}`}
               spellCheck={editing?.spellcheck ?? false}
               className="nodrag nopan"
               style={{ outline: "none", display: "inline-block", minWidth: 16 }}
@@ -854,6 +856,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           type="button"
           className="mm-collapse-toggle nodrag nopan"
           title={collapsed ? "Expand" : "Collapse"}
+          aria-expanded={!collapsed}
+          aria-label={
+            collapsed ? `Expand${hiddenCount ? ` (${hiddenCount} hidden)` : ""}` : "Collapse"
+          }
           onClick={(e) => {
             e.stopPropagation();
             editing?.toggleCollapse(id);

@@ -1594,6 +1594,7 @@ export function App() {
                       filter={outlineFilter}
                       numbered={panels.numbered}
                       numberStyle={liveDoc.meta?.numberStyle}
+                      selectedId={selected?.id ?? null}
                       onFilterChange={setOutlineFilter}
                       onPick={(id) => mapRef.current?.focusNode(id)}
                       onRename={(id, topic) => mapRef.current?.renameNode(id, topic)}

@@ -134,6 +134,47 @@ export function backlinksFor(doc: MindMapDoc, targetId: string): Backlink[] {
   return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
 }
 
+/** A link OUT of a node — to where it points (mirror of Backlink). */
+export interface OutgoingLink {
+  /** The target node this node points at. */
+  id: string;
+  topic: string;
+  kind: "hyperlink" | "relationship";
+  /** The relationship edge's label, when set (relationship kind only). */
+  label?: string;
+}
+
+// Find every topic THIS node points at — via its own `#node=` hyperlink or a relationship edge whose
+// `from` is the source. The outgoing mirror of backlinksFor; the inspector renders these as clickable
+// "Links to" jumps. Pure + deterministic (sorted by topic, then kind). Dangling targets are skipped.
+export function outgoingLinksFor(doc: MindMapDoc, sourceId: string): OutgoingLink[] {
+  const byId = new Map<string, MapNode>();
+  const walk = (n: MapNode) => {
+    byId.set(n.id, n);
+    for (const c of n.children) walk(c);
+  };
+  walk(doc.root);
+  for (const f of doc.floatingTopics ?? []) walk(f);
+
+  const out: OutgoingLink[] = [];
+  const src = byId.get(sourceId);
+  // The source's own #node= hyperlink (an outgoing jump to another topic).
+  if (src?.hyperlink) {
+    const link = classifyLink(src.hyperlink);
+    if (link.kind === "node" && link.id !== sourceId) {
+      const tgt = byId.get(link.id);
+      if (tgt) out.push({ id: tgt.id, topic: tgt.topic, kind: "hyperlink" });
+    }
+  }
+  // Relationship edges originating at the source (to===source is incoming, handled by backlinksFor).
+  for (const l of doc.links ?? []) {
+    if (l.from !== sourceId || l.to === sourceId) continue;
+    const tgt = byId.get(l.to);
+    if (tgt) out.push({ id: l.to, topic: tgt.topic, kind: "relationship", label: l.label });
+  }
+  return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
+}
+
 /** 1-based index → uppercase letters (1→A, 26→Z, 27→AA). */
 function toAlpha(n: number): string {
   let s = "";

@@ -92,7 +92,13 @@ import { findAnyNode } from "./mindmap/flow/ops";
 import { anyMobileSheetOpen, closeMobileSheets } from "./mobileSheets";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
-import { backlinksFor, markerTagIndex, outlineNumbers, outlineRows } from "./outline";
+import {
+  backlinksFor,
+  markerTagIndex,
+  outgoingLinksFor,
+  outlineNumbers,
+  outlineRows,
+} from "./outline";
 import { deckRows, hasCustomDeck } from "./present/slides";
 import { checkForUpdate, initPwaUpdateToast } from "./pwa/pwaUpdate";
 import { refreshRollups } from "./rollup";
@@ -354,6 +360,10 @@ export function App() {
   // tree on every render; rename of a source stays correct because liveDoc is a dependency.
   const backlinks = useMemo(
     () => (selected ? backlinksFor(liveDoc, selected.id) : []),
+    [selected, liveDoc],
+  );
+  const outgoingLinks = useMemo(
+    () => (selected ? outgoingLinksFor(liveDoc, selected.id) : []),
     [selected, liveDoc],
   );
   // Every tag already used in the map — drives the inspector's Add-a-tag autocomplete.
@@ -2050,6 +2060,7 @@ export function App() {
                   .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
                 onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
                 backlinks={backlinks}
+                outgoingLinks={outgoingLinks}
                 onFollowBacklink={(id) => mapRef.current?.focusNode(id)}
                 onMinimize={() => {
                   panels.setInfoOpen(false);

@@ -49,6 +49,7 @@ import {
   type Backlink,
   type IndexEntry,
   type IndexHit,
+  type OutgoingLink,
   markerTagIndex,
   outlineDropWhere,
   outlineNumbers,
@@ -2123,6 +2124,7 @@ export function InfoPanel({
   jumpTargets,
   onJump,
   backlinks,
+  outgoingLinks,
   onFollowBacklink,
   onMinimize,
   onSetFillImage,
@@ -2188,8 +2190,10 @@ export function InfoPanel({
   onJump: (id: string) => void;
   /** Topics that point AT the selected node (incoming #node= links + relationship edges). */
   backlinks: Backlink[];
+  /** Topics the selected node points at (its #node= hyperlink target + relationship edges from it). */
+  outgoingLinks: OutgoingLink[];
   /** Navigate to a backlink's source node (focus + select it) — distinct from onJump, which creates
-   *  an outgoing link. */
+   *  an outgoing link. Reused for outgoing-link jumps (both just focus a node by id). */
   onFollowBacklink: (id: string) => void;
   onMinimize: () => void;
   /** Set / clear the topic's fill image (covers the whole card). */
@@ -2927,6 +2931,55 @@ export function InfoPanel({
                             }}
                           >
                             {backlinks.map((b) => (
+                              <button
+                                key={`${b.kind}:${b.id}`}
+                                type="button"
+                                onClick={() => onFollowBacklink(b.id)}
+                                title={`Go to "${b.topic || "(untitled)"}"`}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  textAlign: "left",
+                                  border: "none",
+                                  background: "transparent",
+                                  cursor: "pointer",
+                                  fontSize: fontSize.sm,
+                                  color: "var(--ed-ink)",
+                                  padding: "2px 4px",
+                                  borderRadius: radius.md,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                <span style={{ color: "var(--ed-faint)" }}>
+                                  {b.kind === "relationship" ? "↬ " : "↪ "}
+                                </span>
+                                {b.topic || "(untitled)"}
+                                {b.label ? (
+                                  <span style={{ color: "var(--ed-faint)" }}> — {b.label}</span>
+                                ) : null}
+                              </button>
+                            ))}
+                          </div>
+                        </CollapsibleSection>
+                      )}
+
+                      {outgoingLinks.length > 0 && (
+                        <CollapsibleSection
+                          key={`outgoing:${node.id}`}
+                          label="Links to"
+                          count={outgoingLinks.length}
+                        >
+                          <div
+                            style={{
+                              padding: "0 10px 6px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            {outgoingLinks.map((b) => (
                               <button
                                 key={`${b.kind}:${b.id}`}
                                 type="button"

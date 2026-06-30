@@ -7,6 +7,32 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Canvas accessibility pass (UI research — UI-5).** The canvas keyboard model is now owned end-to-end
+  by the app's custom keymap: React Flow's built-in node-keyboard a11y is disabled (`disableKeyboardA11y`
+  + `nodesFocusable`/`edgesFocusable` off) so Tab=add-child / Enter=add-sibling / arrows=move-selection
+  no longer risk double-handling. The **Outline panel is now a `role="tree"`** screen-reader-primary view
+  — `treeitem` rows with `aria-level`/`aria-expanded`/`aria-selected`, a roving tabindex, full keyboard
+  nav (↑↓ move, → first child, ← parent, Home/End, Enter focuses the canvas node), and selection synced
+  to the canvas. **Relationships are keyboard-creatable** (Ctrl/⌘+Shift+L → arrow to a target → Enter;
+  Esc cancels) with a live hint, registered in the cheat-sheet + the "Link to…" menu hint. WCAG 2.2
+  fixes: 24px collapse-toggle + task-checkbox hit targets (2.5.8, with the touch escalation that an inline
+  width had been silently outranking), `:focus-visible` rings on the node affordances (2.4.7), and
+  accessible names on the inline edit field + collapse toggle. A node-fill/label **contrast assertion** is
+  now in the gate (`test/contrast.test.ts`): branch/root pills clear WCAG AA-large (3:1), tint swatches AA
+  body (4.5:1).
+
+- **Themed prompt/confirm on the canvas (UI research — UI-1).** The editor canvas's eight native
+  `window.prompt`/`window.confirm` calls (summary + relationship labels, relationship delete, name-a-view,
+  image/link URLs, restore-version, delete-all-data) now use an imperative `editorPrompt`/`editorConfirm`
+  on the existing themed `<Dialog>` (one mounted `<DialogHost/>`, promise-based, with a native fallback
+  before the host mounts) — so they follow the app theme instead of being white OS boxes in dark mode and
+  can't silently return null in some PWAs. Start was already migrated; this finishes the sweep.
+
+- **Token/clarity pass (UI research — UI-2 core).** The floating rich-text edit bar no longer hard-codes a
+  white card + dark ink (it was a light box over the dark-mode node surface) — it consumes `--ed-*` tokens.
+  The two same-named `Chip`s are disambiguated: the read-only node/board badge becomes `Badge`
+  (`src/Badge.tsx`), leaving the interactive toggle `Chip` in `design/primitives.tsx`.
+
 - **Wrap width is a snap slider now (UI review — 10b layer 1).** The Style tab's four-option width dropdown
   (Narrow / Medium / Wide / None) becomes a slider: drag to any wrap width, snapping to the three presets,
   with the far end = None (no cap). It reflects the selected topic and re-wraps it live, and applies across

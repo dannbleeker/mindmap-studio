@@ -151,18 +151,32 @@ the report is the *next tier* (polished-functional → best-in-class feel), with
 against the as-built app so nothing duplicates shipped work. Proposed additive phases UI-1…UI-7, in
 priority order:
 
-- **UI-1** — themed dialogs for the editor canvas (native `window.prompt`/`confirm` still in
-  `FlowMindMap.tsx`/`Panels.tsx`/`App.tsx`; Start was already migrated). **S**
-- **UI-2** — token maturation: type/weight/motion/elevation/opacity scales; fix `RichEditToolbar`
-  dark-mode (`#fff` literal); unify the two `Chip`s; add a node-fill/label contrast assertion to the gate. **M**
+- [x] **UI-1** — themed dialogs for the editor canvas (shipped — see CHANGELOG): imperative
+  `editorPrompt`/`editorConfirm` + a single `<DialogHost/>` on the existing themed `<Dialog>`; all 8
+  native `window.prompt`/`confirm` canvas sites migrated; `danger` colour token added.
+- [~] **UI-2** — token maturation. **Shipped (core):** `RichEditToolbar` dark-mode fix; the two
+  `Chip`s disambiguated (`src/Chip.tsx` → `Badge`/`src/Badge.tsx`, leaving the interactive toggle
+  `Chip`); a WCAG node-fill/label contrast assertion in the gate (`test/contrast.test.ts`).
+  **Deferred:** the broader motion / elevation / type-preset token *scales* (larger, visual-regression
+  risk; each new token also needs a consumer for knip).
 - **UI-3** — *(marquee)* transient selection-anchored contextual action bar; de-crowd node affordances. **M–L**
 - **UI-4** — collapsible-dock default + tablet inspector-overlay breakpoint (reclaim the ~44% chrome). **M**
-- **UI-5** — React-Flow-native keyboard a11y + `role="tree"` SR view + WCAG-2.2 audit (2.5.7/2.5.8/2.4.11). **M**
+- [x] **UI-5** — accessibility (shipped — see CHANGELOG). **5a:** the custom keymap now owns the canvas
+  keyboard (RF `disableKeyboardA11y` + `nodesFocusable`/`edgesFocusable` off — removes the latent
+  double-handling); WCAG 2.5.8 target sizes (collapse 18→24, task-check 17→24 + touch) and 2.4.7
+  focus-visible rings. **5b:** canvas accessible names (edit field + collapse `aria-expanded`).
+  **5c:** the Outline panel is now a `role="tree"` (treeitem/level/expanded/selected, roving tabindex,
+  arrow/Home/End/Enter nav, canvas-selection sync) — the screen-reader-primary view. **5d:**
+  keyboard-create relationships (Ctrl/⌘+Shift+L → arrow → Enter). **Deferred tails:** always-mount a
+  visually-hidden Outline so the tree is an SR surface even when the panel is closed (a structural/perf
+  change — the panel is keyboard-openable today); keyboard node-*repositioning* in free layout (tree-mode
+  reorder keys already exist); programmatic `aria-label`s on cross-link edges (non-focusable SVG paths —
+  better surfaced via a future relationships list).
 - **UI-6** — motion/depth polish on the new tokens; zoom-to-selection + Shift+1/2. **S–M**
 - **UI-7** — empty-state split (first-run vs deleted-everything) + optional first-run intent picker. **S**
 
-Nothing here is committed scope — it's a researched backlog to pull from. AI assist stays decided-against
-(see *Deferred*); the report only notes the category's positioning shift, not a reversal.
+UI-3/4/6/7 + the UI-2 token-scale tail remain open. AI assist stays decided-against (see *Deferred*);
+the report only notes the category's positioning shift, not a reversal.
 
 ## Open items
 

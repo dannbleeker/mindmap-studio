@@ -12,6 +12,7 @@ import type {
   NumberStyle,
   SlideRef,
 } from "../model/types";
+import type { SortKey } from "./flow/ops";
 import type { MindMapTheme } from "./theme";
 
 // The contract between the app and the canvas. The React Flow engine implements this surface,
@@ -163,6 +164,8 @@ export interface MindMapHandle {
   setSelectedHyperlink: (url: string) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
   groupBranch: (id: string) => boolean;
+  /** Reorder a node's direct children by topic / priority / due / progress; false if it isn't found. */
+  sortChildren: (id: string, by: SortKey) => boolean;
   /** Group the current multi-selection (2+ topics) in one filled boundary box; false if <2 selected. */
   groupSelection: () => boolean;
   /** Add a labelled summary bracket around the node and its subtree; false if it isn't found. */

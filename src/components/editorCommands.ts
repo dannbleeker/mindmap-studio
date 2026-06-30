@@ -1,6 +1,7 @@
 import { MARKER_PALETTE } from "../icons";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind } from "../mindmap";
+import type { SortKey } from "../mindmap/flow/ops";
 import type { MapNode } from "../model/types";
 import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
 import { SHORTCUT_BINDINGS } from "../shortcuts";
@@ -276,6 +277,23 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     () => m()?.setSelectedPriority(undefined),
     !!sel,
   );
+  // Reorder the selected topic's direct children by a key (topic / priority / due / progress).
+  const SORTS: [SortKey, string][] = [
+    ["alpha", "A → Z"],
+    ["priority", "by priority"],
+    ["due", "by due date"],
+    ["progress", "by progress"],
+  ];
+  for (const [key, label] of SORTS)
+    add(
+      `sort-children:${key}`,
+      `Sort children ${label}`,
+      "node",
+      () => {
+        if (sel) m()?.sortChildren(sel.id, key);
+      },
+      !!sel,
+    );
 
   // Jump to any topic — fuzzy over the topic text AND its note (keywords), then select + centre it.
   for (const n of walkTopics(map.liveDoc.root))

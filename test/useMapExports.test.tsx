@@ -272,7 +272,8 @@ describe("useMapExports — copy image to clipboard", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    delete (navigator as { clipboard?: unknown }).clipboard;
+    // navigator.clipboard is a read-only accessor in jsdom — reset it via defineProperty, not assignment.
+    Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
   });
 
   const withClipboard = (write: ReturnType<typeof vi.fn>) =>

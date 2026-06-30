@@ -401,7 +401,13 @@ export function StyleBar({
       </button>
       {label("Colour")}
       {colorCtl(textColor, "#2b2a26", (c) => onStyle({ color: c }), "Text colour", "Text colour")}
-      {colorCtl(fillColor, "#ffffff", (c) => onStyle({ background: c }), "Fill colour", "Fill colour")}
+      {colorCtl(
+        fillColor,
+        "#ffffff",
+        (c) => onStyle({ background: c }),
+        "Fill colour",
+        "Fill colour",
+      )}
       {onBranchColor
         ? colorCtl(
             branchColor,

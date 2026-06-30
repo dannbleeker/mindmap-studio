@@ -650,16 +650,41 @@
 
 /* Tablet tier (coarse pointer, between the phone bottom-sheet breakpoint and the desktop comfort zone):
    iPad portrait got the full desktop chrome — 56 (rail) + 280 (dock) + 300 (inspector) ≈ 636px, leaving
-   almost no canvas with both open. Narrow the dock + cap the inspector so the working area stays usable.
-   max-width caps the inspector's inline (resizable) width without !important; min-width:641 keeps this
-   clear of the ≤640 phone-sheet rules. */
+   almost no canvas. The dock stays a capped sidebar, but the inspector — which auto-opens on every
+   selection and at 240px crushed the canvas to ~33% — now docks to a bottom SHEET (the same pattern as
+   phones), out of flow so the canvas runs full-width behind it. Deselecting (tap the canvas above the
+   sheet) or the inspector's own minimise closes it; the 40px rail is hidden here as on phones. min-width
+   641 keeps this clear of the ≤640 phone rules. */
 @media (pointer: coarse) and (min-width: 641px) and (max-width: 1024px) {
   .mm-dock {
     /* max-width (not width) so it caps the now-inline resizable dock width on tablets. */
     max-width: 220px;
   }
   .mm-inspector {
-    max-width: 240px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    max-width: none;
+    /* vh fallback then dvh (tracks the live visible viewport); --mm-sheet-h falls back to 62dvh on
+       tablet, where the drag handle (mobile-only) isn't present. */
+    height: 62vh;
+    height: var(--mm-sheet-h, 62dvh);
+    z-index: 41;
+    display: flex;
+    flex-direction: column;
+    background: var(--ed-card, #fff);
+    border-left: none;
+    border-top: 1px solid var(--ed-border, #e2e0d8);
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.2);
+    overflow: auto;
+    padding-top: 14px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  /* The minimised 40px inspector strip makes no sense as a sheet — hide it; re-selecting reopens. */
+  .mm-inspector-rail {
+    display: none;
   }
 }
 .mm-inspector-head {

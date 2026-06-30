@@ -32,7 +32,13 @@ export interface UseGuidedWalk {
   exit: () => void;
   /** Move `delta` steps (clamped to the ends); no-op when not walking. */
   step: (delta: number) => void;
+  /** Cinematic mode: frame each step's whole branch with an animated zoom (Prezi-style) instead of
+   *  centring the single topic at 100%. Remembered across sessions. */
+  cinematic: boolean;
+  toggleCinematic: () => void;
 }
+
+const CINEMATIC_KEY = "mindmap-cinematic-walk";
 
 export function useGuidedWalk(opts: {
   liveDoc: MindMapDoc;
@@ -43,6 +49,24 @@ export function useGuidedWalk(opts: {
 }): UseGuidedWalk {
   const { liveDoc, liveDocRef, mapRef, setFocus, setDrillId } = opts;
   const [walk, setWalk] = useState<number | null>(null);
+  const [cinematic, setCinematic] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(CINEMATIC_KEY) === "on";
+    } catch {
+      return false;
+    }
+  });
+  const toggleCinematic = useCallback(() => {
+    setCinematic((c) => {
+      const next = !c;
+      try {
+        localStorage.setItem(CINEMATIC_KEY, next ? "on" : "off");
+      } catch {
+        // best-effort
+      }
+      return next;
+    });
+  }, []);
   const walkOrder = useMemo(() => outlineRows(liveDoc.root).map((r) => r.id), [liveDoc]);
   const node = walk != null ? findAnyNode(liveDoc, walkOrder[walk] ?? "") : null;
 
@@ -59,16 +83,21 @@ export function useGuidedWalk(opts: {
     [walkOrder.length],
   );
 
-  // On each step: spotlight the topic (reuse the focus dim pipeline) and centre it on the canvas.
-  // (Reads the doc via liveDocRef so it re-runs only when the step changes, not on every edit.)
+  // On each step: spotlight the topic (reuse the focus dim pipeline) and move the camera to it. In
+  // cinematic mode the camera frames the topic's whole branch with an animated zoom (a Prezi-style
+  // fly); otherwise it centres the single topic at 100%. (Reads the doc via liveDocRef so it re-runs
+  // only when the step / mode changes, not on every edit.)
   useEffect(() => {
     if (walk == null) return;
     const id = walkOrder[walk];
     const found = id ? findAnyNode(liveDocRef.current, id) : null;
     if (!found) return;
     setFocus({ id, topic: found.topic });
-    requestAnimationFrame(() => mapRef.current?.focusNode(id));
-  }, [walk, walkOrder, liveDocRef, mapRef, setFocus]);
+    requestAnimationFrame(() => {
+      if (cinematic) mapRef.current?.frameBranch(id, { duration: 550 });
+      else mapRef.current?.focusNode(id);
+    });
+  }, [walk, walkOrder, liveDocRef, mapRef, setFocus, cinematic]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -96,5 +125,14 @@ export function useGuidedWalk(opts: {
     return () => window.removeEventListener("keydown", onKey);
   }, [walk, step, setFocus, setDrillId]);
 
-  return { index: walk, total: walkOrder.length, node, start, exit, step };
+  return {
+    index: walk,
+    total: walkOrder.length,
+    node,
+    start,
+    exit,
+    step,
+    cinematic,
+    toggleCinematic,
+  };
 }

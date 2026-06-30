@@ -1090,6 +1090,45 @@ describe("WalkBar", () => {
     rerender(<WalkBar index={2} total={3} topic="C" onPrev={noop} onNext={noop} onExit={noop} />);
     expect(screen.getByRole("button", { name: "Next topic" })).toHaveProperty("disabled", true);
   });
+
+  it("shows a cinematic-zoom toggle (only when wired) that reflects + fires its state", async () => {
+    // No handler → no toggle (keeps the bar clean when cinematic isn't available).
+    const { rerender } = render(
+      <WalkBar index={0} total={2} topic="A" onPrev={noop} onNext={noop} onExit={noop} />,
+    );
+    expect(screen.queryByRole("button", { name: "🎬" })).toBeNull();
+
+    const onToggle = vi.fn();
+    rerender(
+      <WalkBar
+        index={0}
+        total={2}
+        topic="A"
+        onPrev={noop}
+        onNext={noop}
+        onExit={noop}
+        cinematic={false}
+        onToggleCinematic={onToggle}
+      />,
+    );
+    const btn = screen.getByRole("button", { name: "🎬" });
+    expect(btn.getAttribute("aria-pressed")).toBe("false");
+    await userEvent.click(btn);
+    expect(onToggle).toHaveBeenCalled();
+    rerender(
+      <WalkBar
+        index={0}
+        total={2}
+        topic="A"
+        onPrev={noop}
+        onNext={noop}
+        onExit={noop}
+        cinematic={true}
+        onToggleCinematic={onToggle}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "🎬" }).getAttribute("aria-pressed")).toBe("true");
+  });
 });
 
 describe("NoteEditorPanel", () => {

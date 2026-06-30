@@ -25,14 +25,15 @@ function setup() {
   const setFocus = vi.fn();
   const setDrillId = vi.fn();
   const focusNode = vi.fn();
+  const frameBranch = vi.fn();
   const liveDocRef = { current: doc } as RefObject<MindMapDoc>;
   const mapRef = {
-    current: { focusNode } as unknown as MindMapHandle,
+    current: { focusNode, frameBranch } as unknown as MindMapHandle,
   } as RefObject<MindMapHandle | null>;
   const hook = renderHook(() =>
     useGuidedWalk({ liveDoc: doc, liveDocRef, mapRef, setFocus, setDrillId }),
   );
-  return { hook, setFocus, setDrillId, focusNode };
+  return { hook, setFocus, setDrillId, focusNode, frameBranch };
 }
 
 const key = (k: string) =>
@@ -45,6 +46,11 @@ beforeEach(() => {
     cb(0);
     return 0;
   }) as typeof globalThis.requestAnimationFrame;
+  try {
+    localStorage.removeItem("mindmap-cinematic-walk"); // each test starts with cinematic off
+  } catch {
+    // ignore
+  }
 });
 afterEach(() => vi.restoreAllMocks());
 
@@ -98,5 +104,31 @@ describe("useGuidedWalk", () => {
     act(() => hook.result.current.exit());
     expect(hook.result.current.index).toBeNull();
     expect(setFocus).toHaveBeenLastCalledWith(null);
+  });
+
+  it("cinematic mode frames each branch (vs centring the topic) and persists the choice", () => {
+    const { hook, focusNode, frameBranch } = setup();
+    expect(hook.result.current.cinematic).toBe(false);
+    act(() => hook.result.current.start());
+    expect(focusNode).toHaveBeenCalledWith("r"); // flat: centre the topic
+    expect(frameBranch).not.toHaveBeenCalled();
+
+    act(() => hook.result.current.toggleCinematic());
+    expect(hook.result.current.cinematic).toBe(true);
+    expect(localStorage.getItem("mindmap-cinematic-walk")).toBe("on"); // remembered
+    // Toggling re-frames the current step cinematically.
+    expect(frameBranch).toHaveBeenCalledWith("r", { duration: 550 });
+
+    frameBranch.mockClear();
+    focusNode.mockClear();
+    act(() => hook.result.current.step(1)); // → "a"
+    expect(frameBranch).toHaveBeenCalledWith("a", { duration: 550 });
+    expect(focusNode).not.toHaveBeenCalled();
+  });
+
+  it("restores cinematic mode from a previous session", () => {
+    localStorage.setItem("mindmap-cinematic-walk", "on");
+    const { hook } = setup();
+    expect(hook.result.current.cinematic).toBe(true);
   });
 });

@@ -87,6 +87,8 @@ export interface SelectedOverlay {
 export interface MindMapHandle {
   exportSvg: () => Blob | null;
   focusNode: (id: string) => void;
+  /** Animate the camera to frame a node's whole subtree (zoom + pan) — the cinematic walk's framing. */
+  frameBranch: (id: string, opts?: { duration?: number; padding?: number }) => void;
   fit: () => void;
   /** Snapshot the live canvas session — viewport (pan/zoom) + undo/redo stacks — so the app can
    *  stash it when switching away from a document tab and restore it (via `initialSession`) on a

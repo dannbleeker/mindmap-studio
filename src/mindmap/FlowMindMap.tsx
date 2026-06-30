@@ -183,6 +183,7 @@ import {
 import { type GuideLine, computeSnap } from "./flow/snap";
 import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { useLatestRef } from "./flow/useLatestRef";
+import { shouldVirtualize } from "./flow/virtualize";
 import { mindManagerTheme } from "./theme";
 
 // React Flow canvas — a fully editable engine. Inline topic editing (double-click / F2),
@@ -852,6 +853,25 @@ function FlowInner({
       setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: motion.dur.fit });
     },
     [getNodes, fireSelect, setCenter, selectOnly],
+  );
+
+  // Cinematic framing: animate the camera to fit a node's whole SUBTREE (zoom + pan), the building
+  // block of the cinematic guided walk — stepping root→child→leaf progressively zooms in, Prezi-style.
+  // Uses React Flow's fitView node filter so the zoom level adapts to the branch's on-screen size.
+  const frameBranch = useCallback(
+    (id: string, opts?: { duration?: number; padding?: number }) => {
+      const node = findAnyNode(docRef.current, id);
+      if (!node) return;
+      selectOnly(id);
+      fireSelect(id);
+      const ids = [...subtreeIds(node)].map((nid) => ({ id: nid }));
+      fitView({
+        nodes: ids,
+        duration: opts?.duration ?? motion.dur.fit,
+        padding: opts?.padding ?? 0.2,
+      });
+    },
+    [fitView, selectOnly, fireSelect],
   );
 
   // Editing API for the topic nodes. Commits arrive as raw contenteditable HTML; sanitise to a
@@ -1617,6 +1637,7 @@ function FlowInner({
       getViewport: () => getViewport(),
       setViewport: (vp) => setViewport(vp, { duration: motion.dur.viewport }),
       focusNode: focusNodeById,
+      frameBranch,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
       // Id-based variants for the drag-a-file-onto-a-topic path (the target is the dropped-on node,
       // not necessarily the selected one). Return false if the node no longer exists.
@@ -1834,6 +1855,7 @@ function FlowInner({
       deleteSelectedOverlay,
       fireSelectOverlay,
       focusNodeById,
+      frameBranch,
       deleteSelectionWithUndo,
       undoAction,
       redoAction,
@@ -1973,6 +1995,10 @@ function FlowInner({
             proOptions={{ hideAttribution: true }}
             minZoom={0.2}
             maxZoom={3}
+            // Big-map virtualisation: above a node-count threshold, let React Flow cull off-screen
+            // nodes/edges from the DOM so pan/zoom/edit stays fluid (nodes carry measured sizes, which
+            // RF needs to compute visibility). Off on smaller maps to avoid pop-in + per-frame overhead.
+            onlyRenderVisibleElements={shouldVirtualize(nodes.length)}
             // Restore a saved viewport (lossless tab switch) when present; else fit to view on mount.
             // Read from the mount-captured session so a later re-render (after App clears the one-shot
             // cache) can't flip fitView back on and re-fit away the restored viewport.

@@ -175,6 +175,60 @@ export function outgoingLinksFor(doc: MindMapDoc, sourceId: string): OutgoingLin
   return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
 }
 
+/** One row of the map-wide link layer: a relationship edge or a `#node=` hyperlink, both ends resolved. */
+export interface MapLink {
+  fromId: string;
+  fromTopic: string;
+  toId: string;
+  toTopic: string;
+  kind: "relationship" | "hyperlink";
+  /** The relationship edge's label, when set (relationship kind only). */
+  label?: string;
+}
+
+// Flatten the whole map's navigable link layer: every relationship edge + every in-map `#node=`
+// hyperlink, with both endpoints resolved to topics (dangling/`#map=`/external links are skipped, since
+// every row is click-to-jump on both ends). Pure + deterministic (sorted by source topic, then kind).
+export function mapLinks(doc: MindMapDoc): MapLink[] {
+  const byId = new Map<string, MapNode>();
+  const walk = (n: MapNode) => {
+    byId.set(n.id, n);
+    for (const c of n.children) walk(c);
+  };
+  walk(doc.root);
+  for (const f of doc.floatingTopics ?? []) walk(f);
+
+  const out: MapLink[] = [];
+  for (const l of doc.links ?? []) {
+    const from = byId.get(l.from);
+    const to = byId.get(l.to);
+    if (from && to)
+      out.push({
+        fromId: l.from,
+        fromTopic: from.topic,
+        toId: l.to,
+        toTopic: to.topic,
+        kind: "relationship",
+        label: l.label,
+      });
+  }
+  for (const n of byId.values()) {
+    if (!n.hyperlink) continue;
+    const link = classifyLink(n.hyperlink);
+    if (link.kind !== "node" || link.id === n.id) continue; // in-map jumps only; skip self-links
+    const to = byId.get(link.id);
+    if (to)
+      out.push({
+        fromId: n.id,
+        fromTopic: n.topic,
+        toId: to.id,
+        toTopic: to.topic,
+        kind: "hyperlink",
+      });
+  }
+  return out.sort((a, b) => a.fromTopic.localeCompare(b.fromTopic) || a.kind.localeCompare(b.kind));
+}
+
 /** 1-based index → uppercase letters (1→A, 26→Z, 27→AA). */
 function toAlpha(n: number): string {
   let s = "";

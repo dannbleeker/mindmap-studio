@@ -90,6 +90,8 @@ export interface PanelsState {
   toggleFilter: () => void;
   stylesOpen: boolean;
   setStylesOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  relationshipsOpen: boolean;
+  setRelationshipsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   historyOpen: boolean;
   setHistoryOpen: React.Dispatch<React.SetStateAction<boolean>>;
   boardOpen: boolean;
@@ -179,6 +181,7 @@ export function usePanels(): UsePanels {
   // Read-only Power Filter (session-only — never persisted, so a reload never starts dimmed).
   const [filterOpen, setFilterOpen] = useState(false);
   const [stylesOpen, setStylesOpen] = useState(false);
+  const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [boardOpen, setBoardOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -297,6 +300,8 @@ export function usePanels(): UsePanels {
       toggleFilter,
       stylesOpen,
       setStylesOpen,
+      relationshipsOpen,
+      setRelationshipsOpen,
       historyOpen,
       setHistoryOpen,
       boardOpen,

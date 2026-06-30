@@ -16,6 +16,7 @@ import {
   NoteEditorPanel,
   NotesPanel,
   OutlinePanel,
+  RelationshipsPanel,
   SlideDeckEditorPanel,
   StatsPanel,
   StyleBar,
@@ -142,6 +143,39 @@ describe("OutlinePanel", () => {
     // Shift+Tab outdents the current node.
     fireEvent.keyDown(screen.getByLabelText("Rename topic"), { key: "Tab", shiftKey: true });
     expect(onIndent).toHaveBeenCalledWith("a", "out");
+  });
+});
+
+describe("RelationshipsPanel", () => {
+  const linked = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "T",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "a", topic: "Alpha", children: [] },
+        { id: "b", topic: "Beta", children: [] },
+      ],
+    },
+    links: [{ id: "l", from: "a", to: "b", label: "blocks" }],
+  });
+
+  it("lists each relationship and jumps to an endpoint on click", async () => {
+    const onPick = vi.fn();
+    render(<RelationshipsPanel doc={linked()} onPick={onPick} />);
+    expect(screen.getByText(/Relationships/)).toBeTruthy();
+    expect(screen.getByText(/blocks/)).toBeTruthy(); // the edge label
+    await userEvent.click(screen.getByRole("button", { name: "Beta" }));
+    expect(onPick).toHaveBeenCalledWith("b"); // jumped to the target end
+    await userEvent.click(screen.getByRole("button", { name: "Alpha" }));
+    expect(onPick).toHaveBeenCalledWith("a"); // …and the source end
+  });
+
+  it("shows an empty state when the map has no links", () => {
+    render(<RelationshipsPanel doc={{ ...linked(), links: [] }} onPick={noop} />);
+    expect(screen.getByText(/No relationships or topic links/)).toBeTruthy();
   });
 });
 

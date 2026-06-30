@@ -199,6 +199,9 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("panel-index", "Toggle Markers & tags index", "panel", () => panels.setIndexOpen((v) => !v));
   add("panel-filter", "Toggle Power Filter", "panel", () => panels.toggleFilter());
   add("panel-styles", "Toggle Conditional styles", "panel", () => panels.setStylesOpen((v) => !v));
+  add("panel-relationships", "Toggle Relationships panel", "panel", () =>
+    panels.setRelationshipsOpen((v) => !v),
+  );
   add("panel-history", "Toggle Version history", "panel", () => panels.setHistoryOpen((v) => !v));
   add("panel-board", "Toggle Board (Kanban)", "panel", () => panels.setBoardOpen((v) => !v));
   add("panel-stats", "Toggle Map statistics", "panel", () => panels.setStatsOpen((v) => !v));

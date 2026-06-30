@@ -89,6 +89,7 @@ import {
   type SelectedOverlay,
   type SelectionFields,
   type SelectionMarkerTags,
+  classifyLink,
 } from "./mindmap";
 import { findAnyNode, newMapFromBranch } from "./mindmap/flow/ops";
 import { anyMobileSheetOpen, closeMobileSheets } from "./mobileSheets";
@@ -1296,6 +1297,21 @@ export function App() {
     }
   }
 
+  // Follow an in-app link from a note body (`#node=…` / `#map=…[&node=…]`) through the canvas: focus
+  // the topic, or switch maps and focus the target once it mounts (the pendingFocus path). External
+  // links inside notes already render as real http anchors, so they don't reach here.
+  const followInAppLink = useCallback(
+    (url: string) => {
+      const link = classifyLink(url);
+      if (link.kind === "node") mapRef.current?.focusNode(link.id);
+      else if (link.kind === "map") {
+        if (link.nodeId) pendingFocus.current = link.nodeId;
+        void switchMap(link.id);
+      }
+    },
+    [switchMap],
+  );
+
   // Record each focused-topic location (map + node) into the back/forward history, so Alt+←/→ can
   // retrace where you've been — across maps too. Plain (null) selections aren't recorded; a jump in
   // progress (pendingNav) is suppressed so going back doesn't itself count as a new visit.
@@ -1930,6 +1946,7 @@ export function App() {
                       onChange={onNoteChange}
                       onBlur={flushNote}
                       onClose={() => panels.setNoteEditorOpen(false)}
+                      onOpenLink={followInAppLink}
                       spellCheck={panels.spellcheck}
                     />
                   ),
@@ -2061,7 +2078,12 @@ export function App() {
                   panels.setInfoOpen(true);
                   bumpNoteNonce();
                 }}
-                onMapLink={(id) => switchMap(id)}
+                onMapLink={(id, nodeId) => {
+                  // Cross-map topic link: focus the target node once the new map mounts (the
+                  // pendingFocus effect, keyed on doc). A bare map link just switches.
+                  if (nodeId) pendingFocus.current = nodeId;
+                  void switchMap(id);
+                }}
                 onDropFilesOnNode={async (id, files) => {
                   // An image becomes the topic's picture (first image wins); everything else attaches.
                   try {
@@ -2218,6 +2240,7 @@ export function App() {
                 noteDraft={noteDraft}
                 onNoteChange={onNoteChange}
                 onNoteBlur={flushNote}
+                onOpenLink={followInAppLink}
                 onExpandNote={() => panels.setNoteEditorOpen(() => true)}
                 markers={MARKER_PALETTE}
                 onToggleMarker={(mk) => {

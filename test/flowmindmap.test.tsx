@@ -921,7 +921,7 @@ describe("FlowMindMap canvas", () => {
     run(() =>
       fireEvent.click(within(nodeEl(container, "b") as HTMLElement).getByTitle(/Follow link/)),
     );
-    expect(onMapLink).toHaveBeenCalledWith("m2");
+    expect(onMapLink).toHaveBeenCalledWith("m2", undefined); // bare #map= link → no target node
 
     // Relationship edge: clicking it selects the edge and surfaces the resolved SelectedEdge. RF
     // wires the edge click on the wide invisible interaction path (the visible <g> has none).

@@ -303,16 +303,29 @@ export const NODE_LINK_PREFIX = "#node=";
 /** What a node's hyperlink points at, once classified. */
 export type ResolvedLink =
   | { kind: "node"; id: string }
-  | { kind: "map"; id: string }
+  | { kind: "map"; id: string; nodeId?: string }
   | { kind: "external"; url: string };
 
-/** Classify a node hyperlink: an in-map topic jump, an in-app map link, or an external URL. Pure. */
+/** Classify a node hyperlink: an in-map topic jump, an in-app map link (optionally focusing a node in
+ *  that map — `#map=<id>&node=<id>`), or an external URL. Backward-compatible: a bare `#map=<id>` still
+ *  classifies as a map link with no target node. Pure. */
 export function classifyLink(url: string): ResolvedLink {
   if (url.startsWith(NODE_LINK_PREFIX))
     return { kind: "node", id: url.slice(NODE_LINK_PREFIX.length) };
-  if (url.startsWith(MAP_LINK_PREFIX))
-    return { kind: "map", id: url.slice(MAP_LINK_PREFIX.length) };
+  if (url.startsWith(MAP_LINK_PREFIX)) {
+    const rest = url.slice(MAP_LINK_PREFIX.length);
+    const sep = rest.indexOf("&node=");
+    if (sep >= 0)
+      return { kind: "map", id: rest.slice(0, sep), nodeId: rest.slice(sep + "&node=".length) };
+    return { kind: "map", id: rest };
+  }
   return { kind: "external", url };
+}
+
+/** Build an in-app map link, optionally targeting a specific topic in that map. The inverse of
+ *  classifyLink for the "map" kind. Pure. */
+export function buildMapLink(mapId: string, nodeId?: string): string {
+  return nodeId ? `${MAP_LINK_PREFIX}${mapId}&node=${nodeId}` : `${MAP_LINK_PREFIX}${mapId}`;
 }
 
 /** The three horizontal directions (two-sided, or all branches left / right). */
@@ -374,8 +387,9 @@ export interface MindMapProps {
   /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
    *  Notes tab for the (now-selected) node. */
   onOpenNote?: () => void;
-  /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
-  onMapLink?: (mapId: string) => void;
+  /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id and — for a
+   *  `#map=<id>&node=<id>` cross-map topic link — the topic to focus once that map mounts. */
+  onMapLink?: (mapId: string, nodeId?: string) => void;
   /** Fires when desktop files are dropped onto a topic, with that topic's id + the dropped files. The
    *  app reads them (an image → the topic's image; anything else → an attachment) via the id-based
    *  setNodeImage / addNodeAttachment handle methods. */

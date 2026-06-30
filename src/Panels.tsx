@@ -2217,6 +2217,7 @@ export function InfoPanel({
   noteDraft,
   onNoteChange,
   onNoteBlur,
+  onOpenLink,
   onExpandNote,
   markers,
   onToggleMarker,
@@ -2276,6 +2277,8 @@ export function InfoPanel({
   noteDraft: string;
   onNoteChange: (value: string) => void;
   onNoteBlur: () => void;
+  /** Follow an in-app note link (`#node=…` / `#map=…`) through the canvas. */
+  onOpenLink?: (url: string) => void;
   /** Open the dockable note editor — the Notes tab's "expand for more room" target (P6). */
   onExpandNote?: () => void;
   markers: readonly string[];
@@ -2616,6 +2619,7 @@ export function InfoPanel({
                     value={noteDraft}
                     onChange={onNoteChange}
                     onBlur={onNoteBlur}
+                    onOpenLink={onOpenLink}
                     spellCheck={spellCheck}
                   />
                 </div>
@@ -3153,6 +3157,7 @@ export function NoteEditorPanel({
   onChange,
   onBlur,
   onClose,
+  onOpenLink,
   spellCheck = false,
 }: {
   selected: SelectedNode | null;
@@ -3160,6 +3165,7 @@ export function NoteEditorPanel({
   onChange: (value: string) => void;
   onBlur: () => void;
   onClose: () => void;
+  onOpenLink?: (url: string) => void;
   spellCheck?: boolean;
 }) {
   return (
@@ -3171,6 +3177,7 @@ export function NoteEditorPanel({
           onChange={onChange}
           onBlur={onBlur}
           onClose={onClose}
+          onOpenLink={onOpenLink}
           cue="The selected topic's note — the same note as the inspector's Notes tab, docked here for more room."
           spellCheck={spellCheck}
         />
@@ -3202,6 +3209,7 @@ export function NotesPanel({
   onChange,
   onBlur,
   onClose,
+  onOpenLink,
   cue,
   spellCheck = false,
 }: {
@@ -3211,6 +3219,8 @@ export function NotesPanel({
   onBlur: () => void;
   /** Optional — when omitted (e.g. embedded in the Info panel) the Close button is hidden. */
   onClose?: () => void;
+  /** Follow an in-app note link (`#node=…` / `#map=…`) — the app routes it through the canvas. */
+  onOpenLink?: (url: string) => void;
   /** Optional faint sub-line under the header — used by the dockable panel to flag that it's the same
    *  note as the inspector's Notes tab (P6). */
   cue?: string;
@@ -3469,6 +3479,7 @@ export function NotesPanel({
               ▦ Table
             </Button>
           </div>
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: contentEditable note editor — the onClick only reroutes in-app links through the canvas; the same targets stay keyboard-reachable via the inspector's Links section + the Outline jumps. */}
           <div
             ref={ref}
             className="mm-note-editor"
@@ -3483,6 +3494,15 @@ export function NotesPanel({
             onInput={serialize}
             onPaste={onPaste}
             onBlur={onBlur}
+            onClick={(e) => {
+              // Follow an in-app note link through the canvas (a topic jump / cross-map link) rather
+              // than letting the browser navigate. getAttribute keeps the decoded `#…` form.
+              const a = (e.target as HTMLElement).closest?.("a.mm-inote-link");
+              if (a && onOpenLink) {
+                e.preventDefault();
+                onOpenLink(a.getAttribute("href") ?? "");
+              }
+            }}
             style={{
               flex: 1,
               minHeight: 0,

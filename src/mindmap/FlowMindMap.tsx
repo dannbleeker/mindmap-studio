@@ -945,7 +945,7 @@ function FlowInner({
       openLink: (url: string) => {
         const link = classifyLink(url);
         if (link.kind === "node") focusNodeById(link.id);
-        else if (link.kind === "map") onMapLinkRef.current?.(link.id);
+        else if (link.kind === "map") onMapLinkRef.current?.(link.id, link.nodeId);
         else if (!isDangerousUrl(link.url)) window.open(link.url, "_blank", "noopener,noreferrer");
       },
       // Click the on-canvas pie to step a leaf task's completion (0→25→50→75→100→0). A rapid spree on

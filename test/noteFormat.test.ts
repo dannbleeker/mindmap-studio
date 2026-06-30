@@ -40,6 +40,18 @@ describe("renderNote", () => {
     );
   });
 
+  it("renders in-app note links (#node= / #map=) as marked, non-navigating anchors", () => {
+    expect(renderNote("[topic](#node=n3)")).toContain(
+      '<a href="#node=n3" class="mm-inote-link">topic</a>',
+    );
+    // A cross-map link's & is escaped to &amp; in the href; the DOM decodes it back on read.
+    expect(renderNote("[plan](#map=m7&node=n3)")).toContain(
+      '<a href="#map=m7&amp;node=n3" class="mm-inote-link">plan</a>',
+    );
+    // A javascript: target is NOT matched (only #node= / #map=), so it stays inert text.
+    expect(renderNote("[x](#javascript=alert(1))")).not.toContain("<a ");
+  });
+
   it("renders images, only for http(s) / data:image URLs (#11)", () => {
     expect(renderNote("![cat](https://x.test/c.png)")).toContain(
       '<img src="https://x.test/c.png" alt="cat" />',

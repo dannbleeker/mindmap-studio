@@ -10,7 +10,10 @@ import { gzipSync } from "node:zlib";
 // 150 → 153: the search & nav pack adds editor-core code (broadened Find +
 // operator/scoped search parser + back/forward navigation history) that can't be
 // meaningfully lazy-loaded, nudging the entry from 149.9 to ~152 kB gz.
-const BUDGET_KB = 153;
+// 153 → 158: the knowledge-linking / capture / accessibility packs (cross-map +
+// in-note links, slash-capture, keyboard + SR a11y) add more editor-core UI that
+// likewise can't be lazy-loaded. Headroom for the whole multi-pack effort.
+const BUDGET_KB = 158;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

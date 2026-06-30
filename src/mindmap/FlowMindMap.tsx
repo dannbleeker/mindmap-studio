@@ -48,6 +48,7 @@ import { BranchEdge } from "./flow/BranchEdge";
 import { BulkNodeMenu } from "./flow/BulkNodeMenu";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CoachMark, DropLabel, LegendPanel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
+import { CanvasOverlaysSR } from "./flow/CanvasOverlaysSR";
 import { CanvasRelationshipsSR } from "./flow/CanvasRelationshipsSR";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
@@ -1893,7 +1894,15 @@ function FlowInner({
 
   // Memoised so the read-only SR overview only re-renders when the doc changes (not on every
   // selection/hover), keeping its O(nodes) list off the hot path.
-  const relationshipsSr = useMemo(() => <CanvasRelationshipsSR doc={renderDoc} />, [renderDoc]);
+  const relationshipsSr = useMemo(
+    () => (
+      <>
+        <CanvasRelationshipsSR doc={renderDoc} />
+        <CanvasOverlaysSR doc={renderDoc} />
+      </>
+    ),
+    [renderDoc],
+  );
 
   return (
     <EditingContext.Provider value={editingApi}>

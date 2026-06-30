@@ -637,6 +637,24 @@ export function OutlinePanel({
     for (let j = i - 1; j >= 0; j--) if (rows[j].depth < rows[i].depth) return j;
     return -1;
   };
+  // The previous / next row at the SAME depth under the SAME parent (a true sibling) — for keyboard
+  // reorder. Stops at the parent boundary (a shallower row) so a move never jumps out of the branch.
+  const prevSibling = (i: number) => {
+    const d = rows[i].depth;
+    for (let j = i - 1; j >= 0; j--) {
+      if (rows[j].depth < d) return -1;
+      if (rows[j].depth === d) return j;
+    }
+    return -1;
+  };
+  const nextSibling = (i: number) => {
+    const d = rows[i].depth;
+    for (let j = i + 1; j < rows.length; j++) {
+      if (rows[j].depth < d) return -1;
+      if (rows[j].depth === d) return j;
+    }
+    return -1;
+  };
   const [activeId, setActiveId] = useState<string | null>(null);
   const rowRefs = useRef(new Map<string, HTMLDivElement | null>());
   // Follow the canvas selection: when it changes, move the roving focus to that row AND scroll it into
@@ -658,6 +676,25 @@ export function OutlinePanel({
     if (editId) return; // the inline rename input owns the keyboard
     const i = rows.findIndex((r) => r.id === activeRow);
     if (i < 0) return;
+    // Shift+Arrows reorder / re-indent the active row (the keyboard equivalent of the ◂ ▸ drag-only
+    // controls), keeping focus on the moved row. Only when the outline is editable (onMove/onIndent set).
+    if (e.shiftKey && editable && activeRow) {
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        const j = e.key === "ArrowUp" ? prevSibling(i) : nextSibling(i);
+        if (j >= 0) {
+          e.preventDefault();
+          onMove?.(activeRow, rows[j].id, e.key === "ArrowUp" ? "before" : "after");
+          focusRow(activeRow);
+        }
+        return;
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        onIndent?.(activeRow, e.key === "ArrowLeft" ? "out" : "in");
+        focusRow(activeRow);
+        return;
+      }
+    }
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();

@@ -109,6 +109,35 @@ describe("OutlinePanel", () => {
     }
   });
 
+  it("Shift+Arrows reorder and re-indent the active row from the keyboard (a11y)", () => {
+    const onMove = vi.fn();
+    const onIndent = vi.fn();
+    render(
+      <OutlinePanel
+        root={sampleRoot()}
+        filter=""
+        onFilterChange={noop}
+        onPick={noop}
+        onRename={noop}
+        onIndent={onIndent}
+        onMove={onMove}
+      />,
+    );
+    const tree = screen.getByRole("tree");
+    // Move the roving focus from the root down to "Research" (a).
+    fireEvent.keyDown(tree, { key: "ArrowDown" });
+    // Shift+ArrowDown reorders Research after its sibling Build.
+    fireEvent.keyDown(tree, { key: "ArrowDown", shiftKey: true });
+    expect(onMove).toHaveBeenCalledWith("a", "b", "after");
+    // Shift+ArrowUp on the same row moves it before its previous sibling.
+    fireEvent.keyDown(tree, { key: "ArrowUp", shiftKey: true });
+    // (no previous sibling for the first child → no-op; assert demote instead)
+    fireEvent.keyDown(tree, { key: "ArrowRight", shiftKey: true });
+    expect(onIndent).toHaveBeenCalledWith("a", "in");
+    fireEvent.keyDown(tree, { key: "ArrowLeft", shiftKey: true });
+    expect(onIndent).toHaveBeenCalledWith("a", "out");
+  });
+
   it("rapid keyboard entry: Enter adds a sibling, Tab a child, Shift+Tab outdents (A3)", async () => {
     const onRename = vi.fn();
     // Returning ids that DON'T exist in the tree would unmount the editor; map them back to a real row

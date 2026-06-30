@@ -142,34 +142,69 @@ export function findMatches(
   return ids;
 }
 
-// Find matches across a whole map — the central tree AND floating topics — so in-map Find
-// covers the editable floating branch too. A query carrying operators (tag:/marker:/priority:/due:/
-// has:/level:/-exclude/"phrase") matches the structured, field-aware way; a plain query keeps the
-// historical behaviour: exact (substring) first, then — when long enough and empty-handed — a
-// typo-tolerant fuzzy pass. DFS order. `today` is injected so due-date scopes stay deterministic.
-export function findDocMatches(doc: MindMapDoc, query: string, today = todayISO()): string[] {
-  const parsed = parseQuery(query);
-  if (parsed.scoped) {
-    const ids: string[] = [];
-    eachScopedMatch(doc, parsed, today, (n) => ids.push(n.id));
-    return ids;
-  }
-  const exact = roots(doc).flatMap((root) => findMatches(root, query));
-  if (exact.length > 0 || query.trim().length < 4) return exact;
-  return roots(doc).flatMap((root) => findMatches(root, query, matchesFuzzy));
-}
-
-/** A library-wide search hit: which map, which node, the node's topic, and enough context to place it
- *  — the ancestor breadcrumb, plus a note snippet when the match isn't in the topic itself. */
-export interface LibraryHit {
-  mapId: string;
-  mapTitle: string;
+/** A single-map match with enough context to list it: the node, its topic, the ancestor breadcrumb,
+ *  and a note snippet when the match isn't in the topic. The in-map Find list renders these. */
+export interface NodeHit {
   nodeId: string;
   topic: string;
-  /** Ancestor topics from the map root down to the match's parent (empty for a root / floating topic). */
+  /** Ancestor topics from the root down to the match's parent (empty for a root / floating topic). */
   path: string[];
   /** A short slice of the note around the query, when the match landed in the note (not the topic). */
   snippet?: string;
+}
+
+const hitOf = (n: MapNode, ancestors: string[], q: string): NodeHit => ({
+  nodeId: n.id,
+  topic: n.topic,
+  path: ancestors,
+  snippet: n.topic.toLowerCase().includes(q) ? undefined : noteSnippet(n.note, q),
+});
+
+// Walk a doc (central tree + floating topics) collecting rich hits for nodes the predicate accepts,
+// threading the ancestor breadcrumb, in DFS order.
+function plainHits(
+  doc: MindMapDoc,
+  match: (n: MapNode, q: string) => boolean,
+  q: string,
+): NodeHit[] {
+  const hits: NodeHit[] = [];
+  const walk = (n: MapNode, ancestors: string[]) => {
+    if (match(n, q)) hits.push(hitOf(n, ancestors, q));
+    for (const c of n.children) walk(c, [...ancestors, n.topic]);
+  };
+  for (const root of roots(doc)) walk(root, []);
+  return hits;
+}
+
+// Find matches across a whole map — the central tree AND floating topics — as rich hits (topic +
+// breadcrumb + snippet). A query carrying operators (tag:/marker:/priority:/due:/has:/level:/-exclude/
+// "phrase") matches the structured, field-aware way; a plain query keeps the historical behaviour:
+// exact (substring) first, then — when long enough and empty-handed — a typo-tolerant fuzzy pass.
+// DFS order. `today` is injected so due-date scopes stay deterministic.
+export function findDocHits(doc: MindMapDoc, query: string, today = todayISO()): NodeHit[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const parsed = parseQuery(query);
+  if (parsed.scoped) {
+    const hits: NodeHit[] = [];
+    eachScopedMatch(doc, parsed, today, (n, ancestors) => hits.push(hitOf(n, ancestors, q)));
+    return hits;
+  }
+  const exact = plainHits(doc, matchesQuery, q);
+  if (exact.length > 0 || q.length < 4) return exact;
+  return plainHits(doc, matchesFuzzy, q);
+}
+
+// The node ids of every in-map match, in DFS order — the cycler's source of truth (the list uses the
+// richer findDocHits). Kept as a thin projection so the two surfaces can't drift in order or membership.
+export function findDocMatches(doc: MindMapDoc, query: string, today = todayISO()): string[] {
+  return findDocHits(doc, query, today).map((h) => h.nodeId);
+}
+
+/** A library-wide search hit: a single-node hit (topic + breadcrumb + snippet) tagged with its map. */
+export interface LibraryHit extends NodeHit {
+  mapId: string;
+  mapTitle: string;
 }
 
 // A ~60-char window of the note centred on the first occurrence of the (plain-text) query, ellipsised
@@ -192,14 +227,11 @@ export function searchLibrary(docs: MindMapDoc[], query: string, today = todayIS
   const q = query.trim().toLowerCase();
   if (!q) return [];
   const parsed = parseQuery(query);
-  // Build a hit with its breadcrumb path + (for a plain-text match in the note) a context snippet.
+  // A library hit is a single-node hit (topic + breadcrumb + snippet) tagged with its map.
   const mk = (doc: MindMapDoc, n: MapNode, ancestors: string[]): LibraryHit => ({
     mapId: doc.id,
     mapTitle: doc.title,
-    nodeId: n.id,
-    topic: n.topic,
-    path: ancestors,
-    snippet: n.topic.toLowerCase().includes(q) ? undefined : noteSnippet(n.note, q),
+    ...hitOf(n, ancestors, q),
   });
   if (parsed.scoped) {
     const hits: LibraryHit[] = [];

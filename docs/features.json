@@ -1833,6 +1833,15 @@
       "manual": false,
       "book": false,
       "bookExample": false
+    },
+    {
+      "id": "find-results-list",
+      "name": "In-map Find 'List all' — clickable list of every match (vs only next/prev)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
     }
   ]
 }

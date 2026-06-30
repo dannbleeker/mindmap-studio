@@ -1,18 +1,31 @@
-import type { LibraryHit } from "../search";
+/** One row of a search-result list. `payload` is handed back verbatim to `onPick` so the caller acts
+ *  on its own object (a LibraryHit, a node id, …) without re-deriving it from the row. `mapTitle` is
+ *  shown ("— Roadmap") only when present — the across-maps search sets it; in-map Find omits it. */
+export interface ResultRow<T> {
+  /** Stable list key, also matched against `activeKey` for the current-row highlight. */
+  key: string;
+  topic: string;
+  /** Ancestor breadcrumb, joined with " › " when non-empty. */
+  path: string[];
+  snippet?: string;
+  mapTitle?: string;
+  payload: T;
+}
 
-// The result list for "Search across every map": one clickable row per hit, showing the topic, its
-// map, the ancestor breadcrumb (so a bare topic like "Tasks" is placeable), and — when the match
-// landed in the note rather than the topic — a short context snippet. Capped at 50 rows with an
-// overflow hint. Presentational + pure (state + the searchLibrary call live in App), so it's
-// unit-testable on crafted hits.
-export function SearchResults({
-  hits,
+// A clickable result list shared by "Search across every map" and the in-map Find "all matches" view.
+// Each row shows the topic, optional map, the ancestor breadcrumb (so a bare topic like "Tasks" is
+// placeable), and — when the match is in the note — a context snippet. Capped at 50 rows with an
+// overflow hint. Presentational + pure (the matching + state live in the caller), so it's unit-testable.
+export function SearchResults<T>({
+  rows,
   onPick,
+  activeKey,
 }: {
-  hits: LibraryHit[];
-  onPick: (hit: LibraryHit) => void;
+  rows: ResultRow<T>[];
+  onPick: (payload: T) => void;
+  activeKey?: string | null;
 }) {
-  if (hits.length === 0)
+  if (rows.length === 0)
     return (
       <p style={{ color: "var(--ed-muted)", fontSize: 13, margin: "12px 2px 0" }}>No matches.</p>
     );
@@ -32,35 +45,42 @@ export function SearchResults({
         overflow: "auto",
       }}
     >
-      {hits.slice(0, 50).map((h) => (
-        <li key={`${h.mapId}:${h.nodeId}`}>
+      {rows.slice(0, 50).map((r) => (
+        <li key={r.key}>
           <button
             type="button"
-            onClick={() => onPick(h)}
+            aria-current={r.key === activeKey ? "true" : undefined}
+            onClick={() => onPick(r.payload)}
             style={{
               display: "block",
               width: "100%",
               textAlign: "left",
               border: "none",
               borderRadius: 6,
-              background: "transparent",
+              background:
+                r.key === activeKey ? "var(--ed-hover, rgba(127,127,127,0.16))" : "transparent",
               padding: "6px 8px",
               cursor: "pointer",
               font: "inherit",
             }}
           >
-            <span>{h.topic}</span>{" "}
-            <span style={{ color: "var(--ed-faint)", fontSize: 12 }}>— {h.mapTitle}</span>
-            {h.path.length > 0 && <span style={faint(11)}>{h.path.join(" › ")}</span>}
-            {h.snippet && (
-              <span style={{ ...faint(12), color: "var(--ed-muted)" }}>{h.snippet}</span>
+            <span>{r.topic}</span>
+            {r.mapTitle && (
+              <>
+                {" "}
+                <span style={{ color: "var(--ed-faint)", fontSize: 12 }}>— {r.mapTitle}</span>
+              </>
+            )}
+            {r.path.length > 0 && <span style={faint(11)}>{r.path.join(" › ")}</span>}
+            {r.snippet && (
+              <span style={{ ...faint(12), color: "var(--ed-muted)" }}>{r.snippet}</span>
             )}
           </button>
         </li>
       ))}
-      {hits.length > 50 && (
+      {rows.length > 50 && (
         <li style={{ color: "var(--ed-faint)", fontSize: 12, padding: "6px 8px" }}>
-          +{hits.length - 50} more — refine your search
+          +{rows.length - 50} more — refine your search
         </li>
       )}
     </ul>

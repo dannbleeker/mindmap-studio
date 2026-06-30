@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { SearchResults } from "./SearchResults";
 import type { ToolbarFind } from "./Toolbar";
 
 /**
@@ -9,6 +10,8 @@ import type { ToolbarFind } from "./Toolbar";
  */
 export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClose: () => void }) {
   const queryRef = useRef<HTMLInputElement>(null);
+  // The "all matches" list is a disclosure: collapsed by default to keep the panel compact.
+  const [showList, setShowList] = useState(false);
 
   // Focus the Find box on open so you can type immediately.
   useEffect(() => {
@@ -132,7 +135,31 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
               screen-reader users hear "3/12" / "no matches" / "invalid regex" as they cycle — the
               count was previously a silent, button-less span. */}
           <output className="mm-find-info">{find.matchInfo}</output>
+          {find.matches.length > 0 && (
+            <button
+              type="button"
+              className="mm-tbtn mm-tbtn-ghost"
+              aria-expanded={showList}
+              title="Show every match as a clickable list"
+              onClick={() => setShowList((v) => !v)}
+            >
+              {showList ? "Hide list" : `List all (${find.matches.length})`}
+            </button>
+          )}
         </div>
+        {showList && find.matches.length > 0 && (
+          <SearchResults
+            rows={find.matches.map((m) => ({
+              key: m.nodeId,
+              topic: m.topic,
+              path: m.path,
+              snippet: m.snippet,
+              payload: m.nodeId,
+            }))}
+            onPick={find.goTo}
+            activeKey={find.activeId}
+          />
+        )}
       </form>
     </div>
   );

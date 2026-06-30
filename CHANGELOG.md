@@ -23,6 +23,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   - **Search-across-maps result context** — each cross-map hit now shows its ancestor breadcrumb
     (`Root › Branch › …`) and, when the match is in the note, a short snippet — so a bare topic like
     "Tasks" is placeable at a glance. Operators (above) narrow scope in this overlay too.
+  - **In-map Find results list** — the Find overlay's "List all (N)" disclosure shows every match as a
+    clickable, breadcrumbed list (jump straight to any one, current match highlighted), alongside the
+    existing `Enter` / `Shift+Enter` cycler. Reuses the same result-row component as the across-maps
+    search.
 
 - **Data-safety pack (UI review — gap groups 9/11).** Local-first durability for a no-backend PWA:
   - **Trash / undo-delete** — deleting a map moves it to a recoverable Trash (a `meta.trashedAt` flag)

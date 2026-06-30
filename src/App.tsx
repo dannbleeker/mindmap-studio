@@ -272,6 +272,9 @@ export function App() {
     matchCase,
     setMatchCase,
     matchInfo,
+    matches: findHits,
+    activeId: findActiveId,
+    goTo: findGoTo,
     runSearch,
     findNext,
     findPrev,
@@ -1433,6 +1436,9 @@ export function App() {
       matchCase,
       setMatchCase,
       matchInfo,
+      matches: findHits,
+      activeId: findActiveId,
+      goTo: findGoTo,
       runSearch,
       findNext,
       findPrev,
@@ -2383,7 +2389,17 @@ export function App() {
           aria-label="Search query"
         />
         {libQuery.trim() && (
-          <SearchResults hits={searchLibrary(libDocs, libQuery)} onPick={goToHit} />
+          <SearchResults
+            rows={searchLibrary(libDocs, libQuery).map((h) => ({
+              key: `${h.mapId}:${h.nodeId}`,
+              topic: h.topic,
+              path: h.path,
+              snippet: h.snippet,
+              mapTitle: h.mapTitle,
+              payload: h,
+            }))}
+            onPick={goToHit}
+          />
         )}
       </Dialog>
 

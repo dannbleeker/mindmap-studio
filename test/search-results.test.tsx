@@ -2,52 +2,70 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { SearchResults } from "../src/components/SearchResults";
-import type { LibraryHit } from "../src/search";
+import { type ResultRow, SearchResults } from "../src/components/SearchResults";
 
-const hit = (over: Partial<LibraryHit> = {}): LibraryHit => ({
-  mapId: "m1",
-  mapTitle: "Roadmap",
-  nodeId: "n1",
+const row = (over: Partial<ResultRow<string>> = {}): ResultRow<string> => ({
+  key: "n1",
   topic: "Ship it",
   path: [],
+  payload: "n1",
   ...over,
 });
 
 const u = userEvent.setup();
 
 describe("SearchResults", () => {
-  it("shows 'No matches.' for an empty hit list", () => {
-    render(<SearchResults hits={[]} onPick={vi.fn()} />);
+  it("shows 'No matches.' for an empty list", () => {
+    render(<SearchResults rows={[]} onPick={vi.fn()} />);
     expect(screen.getByText("No matches.")).toBeTruthy();
   });
 
-  it("renders topic, map, breadcrumb path and a note snippet; picks the clicked hit", async () => {
+  it("renders topic, map, breadcrumb and snippet; picks the row's payload", async () => {
     const onPick = vi.fn();
-    const h = hit({
+    const r = row({
+      key: "m1:b",
       topic: "Beta",
       path: ["Plan", "Marketing"],
       snippet: "…quota and pipeline notes…",
+      mapTitle: "Roadmap",
+      payload: "b",
     });
-    render(<SearchResults hits={[h]} onPick={onPick} />);
+    render(<SearchResults rows={[r]} onPick={onPick} />);
     expect(screen.getByText("Beta")).toBeTruthy();
     expect(screen.getByText("— Roadmap")).toBeTruthy();
     expect(screen.getByText("Plan › Marketing")).toBeTruthy();
     expect(screen.getByText("…quota and pipeline notes…")).toBeTruthy();
     await u.click(screen.getByText("Beta"));
-    expect(onPick).toHaveBeenCalledWith(h);
+    expect(onPick).toHaveBeenCalledWith("b");
   });
 
-  it("omits the breadcrumb for a root hit and shows no snippet when absent", () => {
-    const { container } = render(<SearchResults hits={[hit()]} onPick={vi.fn()} />);
-    // One row, with the topic + map but no extra context spans.
+  it("omits the map label and breadcrumb for a bare in-map row", () => {
+    const { container } = render(<SearchResults rows={[row()]} onPick={vi.fn()} />);
     expect(container.querySelectorAll("li").length).toBe(1);
+    expect(screen.queryByText(/—/)).toBeNull(); // no "— mapTitle"
     expect(screen.queryByText("›")).toBeNull();
   });
 
+  it("marks the active row with aria-current", () => {
+    render(
+      <SearchResults
+        rows={[
+          row({ key: "a", topic: "A", payload: "a" }),
+          row({ key: "b", topic: "B", payload: "b" }),
+        ]}
+        onPick={vi.fn()}
+        activeKey="b"
+      />,
+    );
+    expect(screen.getByText("A").closest("button")?.getAttribute("aria-current")).toBeNull();
+    expect(screen.getByText("B").closest("button")?.getAttribute("aria-current")).toBe("true");
+  });
+
   it("caps at 50 rows and shows an overflow hint", () => {
-    const many = Array.from({ length: 63 }, (_, i) => hit({ nodeId: `n${i}`, topic: `T${i}` }));
-    render(<SearchResults hits={many} onPick={vi.fn()} />);
+    const many = Array.from({ length: 63 }, (_, i) =>
+      row({ key: `n${i}`, topic: `T${i}`, payload: `n${i}` }),
+    );
+    render(<SearchResults rows={many} onPick={vi.fn()} />);
     expect(screen.getByText(/\+13 more — refine your search/)).toBeTruthy();
   });
 });

@@ -71,8 +71,9 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 > guided walk).
 > **Data-safety pack (G9/G11)** — trash/undo-delete, cross-tab clobber guard, external-file conflict
 > detection, Open Recent.
-> **Search & nav pack (G2)** — search beyond topic+note, scoped/operator search, deep-link to a node,
-> back/forward navigation history. The remaining list is what's left to build.
+> **Search & nav pack (G2 — now complete)** — search beyond topic+note, scoped/operator search,
+> deep-link to a node, back/forward navigation history, across-maps result context (breadcrumb +
+> snippet), and the in-map Find "List all" results list. The remaining list is what's left to build.
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
@@ -106,7 +107,7 @@ All pure client-side derivations over the in-memory doc.
 | ~~Cross-map quick switcher in ⌘K~~ ✅ shipped | switch maps / jump across maps from the keyboard | `done` |
 | ~~Library search result context~~ ✅ shipped | path/breadcrumb + note snippet; operators narrow scope | `done` |
 | ~~Reveal-in-outline auto-scroll~~ ✅ shipped | Outline scrolls the selected row into view | `done` |
-| Find-results list | clickable list of all matches vs only next/prev | `?·low·M·partial` |
+| ~~Find-results list~~ ✅ shipped | the Find overlay's "List all" disclosure — clickable, breadcrumbed match list | `done` |
 
 ### 3 · Knowledge structure & linking (13)
 The deepest backlog; several items brush the decided-against "no graph" boundary.

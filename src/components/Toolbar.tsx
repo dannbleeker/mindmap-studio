@@ -9,6 +9,7 @@ import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import type { CanvasTheme } from "../mindmap/theme";
 import type { MindMapDoc } from "../model/types";
+import type { NodeHit } from "../search";
 import { SHORTCUT_BINDINGS } from "../shortcuts";
 import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../templates";
@@ -170,6 +171,12 @@ export interface ToolbarFind {
   matchCase: boolean;
   setMatchCase: (value: boolean) => void;
   matchInfo: string;
+  /** Every current match (topic + breadcrumb + snippet), for the overlay's "all matches" list. */
+  matches: NodeHit[];
+  /** The id the cycler / list currently sits on (drives the active-row highlight). */
+  activeId: string | null;
+  /** Jump straight to a match by id (a list-row click). */
+  goTo: (id: string) => void;
   runSearch: (event: FormEvent) => void;
   /** Advance to the next / previous match (the overlay's ▾ ▴ buttons; Enter / Shift+Enter). */
   findNext: () => void;

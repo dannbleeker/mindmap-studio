@@ -658,85 +658,10 @@
   color: var(--st-ink2);
 }
 
-/* --- command palette --- */
-.st-cmdk-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(20, 16, 8, 0.34);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 12vh;
-}
-.st-cmdk {
-  width: min(560px, calc(100% - 32px));
-  /* The cmdk renders on the Start screen (--st-* tokens on .start) AND in the editor (outside .start,
-     where only --ed-* tokens exist). Chain --st-* → --ed-* → a literal so the panel always has an
-     opaque background — otherwise in the editor the canvas bleeds through and rows overlap. */
-  background: var(--st-card, var(--ed-card, #fff));
-  border: 1px solid var(--st-border, var(--ed-border, #d9d4c8));
-  border-radius: var(--st-radius-xl);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-}
-.st-cmdk-input {
-  width: 100%;
-  border: none;
-  border-bottom: 1px solid var(--st-divider, var(--ed-divider, #ece8df));
-  background: transparent;
-  color: var(--st-ink, var(--ed-ink, #23211c));
-  font: inherit;
-  font-size: 15px;
-  padding: 14px 16px;
-  outline: none;
-}
-.st-cmdk-list {
-  max-height: 340px;
-  overflow-y: auto;
-  padding: 6px;
-}
-.st-cmdk-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: transparent;
-  color: var(--st-ink, var(--ed-ink, #23211c));
-  font: inherit;
-  padding: 9px 11px;
-  border-radius: var(--st-radius-lg);
-  cursor: pointer;
-}
-.st-cmdk-item[data-active="true"] {
-  background: var(--st-accent-tint, var(--ed-accent-tint, rgba(27, 138, 94, 0.12)));
-}
-.st-cmdk-kind {
-  margin-left: auto;
-  font-size: 10.5px;
-  color: var(--st-muted, var(--ed-muted, #6b6658));
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-/* Inline key-binding hint on a command row (mirrors .st-kbd; works in the editor too via the
-   --ed-* token fallbacks, since the palette renders outside .start there). */
-.st-cmdk-kbd {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10.5px;
-  padding: 1px 5px;
-  border-radius: var(--st-radius-sm);
-  border: 1px solid var(--st-border, var(--ed-border, #d9d4c8));
-  background: var(--st-page, var(--ed-page, #f7f4ec));
-  color: var(--st-ink2, var(--ed-ink2, #54513f));
-  white-space: nowrap;
-}
-.st-cmdk-empty {
-  padding: 24px;
-  text-align: center;
-  color: var(--st-muted, var(--ed-muted, #6b6658));
-}
+/* The command-palette (⌘K) modal styles moved to a co-located CommandPalette.css imported by the
+   component, so they load in the editor too — this start.css is lazy-loaded with the Start screen, which
+   left ⌘K unstyled (a full-viewport list) when a map opened straight into the editor. The Start-only
+   `.st-cmdk-trigger` button (the header search field) stays here. */
 
 /* Keyboard focus across all Start interactive controls. The editor gives its chrome a visible
    :focus-visible ring; mirror it here so keyboard focus reads identically on the landing surface
@@ -863,8 +788,5 @@
   }
   .st-content {
     padding: 18px 16px;
-  }
-  .st-cmdk {
-    width: 92vw;
   }
 }

@@ -1,9 +1,11 @@
 import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
+import "./CommandPalette.css";
 
 // A generic ⌘K command palette: fuzzy (subsequence) search over a list of commands, arrow-key nav,
 // Enter to run, Esc / click-outside to close. The Start screen and the editor both build a
-// `Command[]` and render this — the shared substrate behind both palettes. Styled with the existing
-// `.st-cmdk*` classes so it looks identical wherever it's used.
+// `Command[]` and render this — the shared substrate behind both palettes. Styled with the `.st-cmdk*`
+// classes in the co-located CommandPalette.css (imported above) so they load wherever the palette
+// renders — the editor's lazy Start chunk no longer owns them (that left ⌘K unstyled in the editor).
 
 export interface Command {
   id: string;

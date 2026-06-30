@@ -237,3 +237,75 @@ describe("useMapExports — PDF print path", () => {
     expect(iframe.srcdoc).toContain("<svg");
   });
 });
+
+describe("useMapExports — copy image to clipboard", () => {
+  // Same SVG→PNG raster seam as exportPng, but the blob lands on the clipboard (no download). Stub the
+  // raster bits jsdom lacks + a ClipboardItem/navigator.clipboard.write the hook can call.
+  beforeEach(() => {
+    class FakeImage {
+      naturalWidth = 10;
+      naturalHeight = 10;
+      src = "";
+      decode() {
+        return Promise.resolve();
+      }
+    }
+    vi.stubGlobal("Image", FakeImage);
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      fillRect: () => {},
+      drawImage: () => {},
+      fillStyle: "",
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb: BlobCallback) => {
+      cb(new Blob(["PNG"], { type: "image/png" }));
+    });
+    vi.stubGlobal(
+      "ClipboardItem",
+      class {
+        items: Record<string, Blob>;
+        constructor(items: Record<string, Blob>) {
+          this.items = items;
+        }
+      },
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (navigator as { clipboard?: unknown }).clipboard;
+  });
+
+  const withClipboard = (write: ReturnType<typeof vi.fn>) =>
+    Object.defineProperty(navigator, "clipboard", { value: { write }, configurable: true });
+
+  it("rasters the map and writes a PNG ClipboardItem (no download), then hints success", async () => {
+    const write = vi.fn().mockResolvedValue(undefined);
+    withClipboard(write);
+    const onHint = vi.fn();
+    const ex = useMapExports(handleRef(SVG), () => docOf("Demo Map"), undefined, onHint);
+    await ex.copyPng();
+    expect(downloads).toHaveLength(0); // clipboard, not a file
+    expect(write).toHaveBeenCalledTimes(1);
+    const item = write.mock.calls[0][0][0] as { items: Record<string, Blob> };
+    expect(item.items["image/png"]).toBeInstanceOf(Blob);
+    expect(onHint).toHaveBeenCalledWith(expect.stringMatching(/clipboard/i));
+  });
+
+  it("hints (and never throws) when the clipboard write is blocked", async () => {
+    withClipboard(vi.fn().mockRejectedValue(new Error("denied")));
+    const onHint = vi.fn();
+    const ex = useMapExports(handleRef(SVG), () => docOf("Demo Map"), undefined, onHint);
+    await ex.copyPng();
+    expect(onHint).toHaveBeenCalledWith(expect.stringMatching(/couldn.t copy/i));
+  });
+
+  it("hints to open a map when there is no live canvas (no clipboard write)", async () => {
+    const write = vi.fn();
+    withClipboard(write);
+    const onHint = vi.fn();
+    const ex = useMapExports(handleRef(null), () => docOf("Demo Map"), undefined, onHint);
+    await ex.copyPng();
+    expect(write).not.toHaveBeenCalled();
+    expect(onHint).toHaveBeenCalledWith(expect.stringMatching(/canvas/i));
+  });
+});

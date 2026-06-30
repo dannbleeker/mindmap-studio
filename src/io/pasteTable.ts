@@ -1,5 +1,6 @@
 import type { MapNode } from "../model/types";
 import { parseOutline } from "./pasteOutline";
+import { isDangerousUrl } from "./urlSafety";
 
 // Paste a spreadsheet selection (Excel / Google Sheets / a TSV or CSV block) as a subtree: each row
 // becomes a topic, extra columns become the topic's note (and a "Tags" column its tags). Detected by
@@ -69,9 +70,37 @@ export function tableToForest(rows: string[][]): MapNode[] {
   return out;
 }
 
-/** The unified paste entry point: a tabular block → row-per-topic forest, otherwise the outline
- *  parser. Pure; callers graft the result under a node or wrap it in a new map. */
+// A paste whose entire content is one http(s) URL (no surrounding text/whitespace).
+const SINGLE_URL_RE = /^https?:\/\/\S+$/i;
+
+/** Derive a human-readable node title from a URL — fully offline, no fetch. Uses the last meaningful
+ *  path segment (minus a file extension), de-slugged + Title Cased; falls back to the host (sans `www.`)
+ *  when the path carries nothing, e.g. `https://www.example.com/blog/my-great-post` → "My Great Post". */
+export function urlToTitle(url: string): string {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    const segs = u.pathname.split("/").filter(Boolean);
+    const last = (segs[segs.length - 1] ?? "").replace(/\.[a-z0-9]{1,8}$/i, "");
+    const slug = decodeURIComponent(last)
+      .replace(/[-_+]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (slug) return slug.replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 120);
+    return host || url;
+  } catch {
+    return url;
+  }
+}
+
+/** The unified paste entry point: a lone URL → one titled, linked node; a tabular block →
+ *  row-per-topic forest; otherwise the outline parser. Pure; callers graft the result or wrap it. */
 export function parsePaste(text: string): MapNode[] {
+  const trimmed = text.trim();
+  if (SINGLE_URL_RE.test(trimmed) && !isDangerousUrl(trimmed)) {
+    pid = 0;
+    return [{ id: nextId(), topic: urlToTitle(trimmed), hyperlink: trimmed, children: [] }];
+  }
   const table = parseTable(text);
   return table ? tableToForest(table) : parseOutline(text);
 }

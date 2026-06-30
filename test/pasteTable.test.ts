@@ -74,4 +74,27 @@ describe("parsePaste", () => {
     expect(forest[0].topic).toBe("Theme");
     expect(forest[0].children.map((c) => c.topic)).toEqual(["Idea"]);
   });
+
+  it("turns a lone URL into one titled, linked node (offline, no fetch)", () => {
+    const forest = parsePaste("https://www.example.com/blog/my-great-post");
+    expect(forest).toHaveLength(1);
+    expect(forest[0]).toMatchObject({
+      topic: "My Great Post", // last path segment, de-slugged + Title Cased
+      hyperlink: "https://www.example.com/blog/my-great-post",
+    });
+    expect(forest[0].children).toEqual([]);
+  });
+
+  it("falls back to the host when the URL has no path slug, and strips a file extension", () => {
+    expect(parsePaste("https://www.example.com/").at(0)?.topic).toBe("example.com");
+    expect(parsePaste("https://example.com/docs/report.pdf").at(0)?.topic).toBe("Report");
+  });
+
+  it("does not hijack text that merely contains a URL, or a non-http(s) scheme", () => {
+    // A URL with trailing prose is an outline line, not a single-link paste.
+    expect(parsePaste("see https://example.com for more")[0].hyperlink).toBeUndefined();
+    // A dangerous scheme is never linkified.
+    const bad = parsePaste("javascript:alert(1)");
+    expect(bad[0].hyperlink).toBeUndefined();
+  });
 });

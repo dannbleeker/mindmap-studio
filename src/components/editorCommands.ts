@@ -85,6 +85,9 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("paste-topics", "Paste text → topics", "map", () => nav.openPaste());
   add("copy-outline", "Copy outline to clipboard", "map", () => io.copyOutline());
   add("copy-table", "Copy as table (TSV)", "map", () => io.copyTable());
+  add("copy-image", "Copy map as image", "map", () => io.copyPng(), true, {
+    keywords: "png picture clipboard screenshot paste",
+  });
   add("backup", "Back up whole library", "map", () => io.exportLibrary());
   add("shortcuts", "Keyboard shortcuts", "map", () => nav.openShortcuts());
   add("settings", "Settings & preferences", "map", () => nav.openSettings());

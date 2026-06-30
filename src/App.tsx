@@ -989,6 +989,7 @@ export function App() {
     exportOpml,
     exportFreemind,
     exportPng,
+    copyPng,
     exportSvg,
     exportHtml,
     exportInteractiveHtml,
@@ -1234,6 +1235,7 @@ export function App() {
       exportOpml,
       exportFreemind,
       exportPng,
+      copyPng,
       exportSvg,
       exportHtml,
       exportInteractiveHtml,
@@ -1982,6 +1984,10 @@ export function App() {
                 onStyle={(patch) => {
                   const ok = mapRef.current?.setSelectedStyle(patch);
                   if (!ok) showHint("Select a node first, then style it.");
+                }}
+                onBranchColor={(color) => {
+                  const ok = mapRef.current?.setSelectedBranchColor(color);
+                  if (!ok) showHint("Select a node first, then set its branch colour.");
                 }}
                 namedStyles={namedStyles}
                 onSetFillImage={async (file) => {

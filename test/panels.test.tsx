@@ -693,6 +693,39 @@ describe("StyleBar", () => {
     await userEvent.click(screen.getByRole("button", { name: "Apply preset Warning" }));
     expect(onStyle).toHaveBeenCalledWith(preset);
   });
+
+  it("free colour pickers write text + fill via onStyle, seeded from the live values", () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} textColor="#112233" fillColor="#abcdef" />);
+    const text = screen.getByLabelText("Text colour") as HTMLInputElement;
+    const fill = screen.getByLabelText("Fill colour") as HTMLInputElement;
+    expect(text.value).toBe("#112233"); // seeded from the selection's hex
+    expect(fill.value).toBe("#abcdef");
+    fireEvent.change(text, { target: { value: "#ff0000" } });
+    expect(onStyle).toHaveBeenLastCalledWith({ color: "#ff0000" });
+    fireEvent.change(fill, { target: { value: "#00ff00" } });
+    expect(onStyle).toHaveBeenLastCalledWith({ background: "#00ff00" });
+  });
+
+  it("shows the Branch colour picker only when onBranchColor is wired, and dispatches to it", () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} />);
+    expect(screen.queryByLabelText("Branch colour")).toBeNull(); // no handler → no picker
+
+    const onBranchColor = vi.fn();
+    render(<StyleBar onStyle={onStyle} onBranchColor={onBranchColor} branchColor="#1b8a5e" />);
+    const branch = screen.getByLabelText("Branch colour") as HTMLInputElement;
+    expect(branch.value).toBe("#1b8a5e");
+    fireEvent.change(branch, { target: { value: "#0000ff" } });
+    expect(onBranchColor).toHaveBeenCalledWith("#0000ff");
+    expect(onStyle).not.toHaveBeenCalled(); // branch colour never rides onStyle
+  });
+
+  it("falls back to a default colour when the live value is not 6-digit hex", () => {
+    render(<StyleBar onStyle={noop} textColor="rebeccapurple" />);
+    // A non-hex CSS colour can't seed a native picker; it opens on the documented default instead.
+    expect((screen.getByLabelText("Text colour") as HTMLInputElement).value).toBe("#2b2a26");
+  });
 });
 
 describe("OutlinePanel (interaction)", () => {

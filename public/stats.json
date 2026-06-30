@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-06-30T15:33:10.447Z",
-  "commit": "7ba796f",
+  "generatedAt": "2026-06-30T18:43:20.345Z",
+  "commit": "4141b83",
   "headline": {
-    "linesTsJs": 63607,
-    "tests": 1769,
-    "lineCoveragePct": 91.22,
-    "commits": 993,
-    "ageDays": 18,
-    "trackedFiles": 447,
-    "featureManualPct": 72.1,
-    "featureBookPct": 69.3,
-    "featureExamplePct": 69.3
+    "linesTsJs": 65105,
+    "tests": 1815,
+    "lineCoveragePct": 91.1,
+    "commits": 1008,
+    "ageDays": 19,
+    "trackedFiles": 452,
+    "featureManualPct": 66.8,
+    "featureBookPct": 64.2,
+    "featureExamplePct": 64.2
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 206,
-      "lines": 36878
+      "files": 208,
+      "lines": 37770
     },
     {
       "category": "Unit tests",
-      "files": 177,
-      "lines": 25007
+      "files": 179,
+      "lines": 25613
     },
     {
       "category": "Build scripts",
@@ -35,56 +35,56 @@
     },
     {
       "category": "Docs (Markdown)",
-      "files": 14,
-      "lines": 2001
+      "files": 15,
+      "lines": 2291
     }
   ],
   "coverage": {
     "lines": {
-      "pct": 91.22,
-      "covered": 23678,
-      "total": 25955
+      "pct": 91.1,
+      "covered": 24255,
+      "total": 26624
     },
     "statements": {
-      "pct": 91.22,
-      "covered": 23678,
-      "total": 25955
+      "pct": 91.1,
+      "covered": 24255,
+      "total": 26624
     },
     "functions": {
-      "pct": 76.66,
-      "covered": 1373,
-      "total": 1791
+      "pct": 76.7,
+      "covered": 1403,
+      "total": 1829
     },
     "branches": {
-      "pct": 86.68,
-      "covered": 7003,
-      "total": 8079
+      "pct": 86.62,
+      "covered": 7178,
+      "total": 8286
     }
   },
   "tests": {
-    "unit": 1769,
+    "unit": 1815,
     "e2e": 0,
-    "durationMs": 84814,
+    "durationMs": 83966,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 24018
+        "ms": 23623
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 19745
+        "ms": 18825
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8092
+        "ms": 8271
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7686
+        "ms": 7949
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4387
+        "ms": 3978
       }
     ]
   },
@@ -103,23 +103,23 @@
     "biggestFiles": [
       {
         "name": "Panels.tsx",
-        "lines": 3437
+        "lines": 3651
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 2588
+        "lines": 2649
       },
       {
         "name": "App.tsx",
-        "lines": 2399
+        "lines": 2482
       },
       {
         "name": "mindmap/flow/ops.ts",
-        "lines": 1699
+        "lines": 1761
       },
       {
         "name": "components/Toolbar.tsx",
-        "lines": 1288
+        "lines": 1304
       }
     ]
   },
@@ -136,7 +136,7 @@
       },
       {
         "file": "App.tsx",
-        "pct": 58.84
+        "pct": 57.51
       },
       {
         "file": "io/importDispatch.ts",
@@ -150,30 +150,30 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 198
+        "commits": 203
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 123
+        "commits": 126
       },
       {
         "file": "Panels.tsx",
-        "commits": 78
-      },
-      {
-        "file": "mindmap/flow/ops.ts",
-        "commits": 70
+        "commits": 84
       },
       {
         "file": "mindmap/contract.ts",
-        "commits": 69
+        "commits": 72
+      },
+      {
+        "file": "mindmap/flow/ops.ts",
+        "commits": 72
       }
     ],
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 58.84,
-        "commits": 198
+        "pct": 57.51,
+        "commits": 203
       }
     ]
   },
@@ -188,42 +188,62 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 308,
+    "jsGzipKb": 311.1,
     "cssGzipKb": 9.9,
-    "totalGzipKb": 317.9,
-    "entryGzipKb": 146.9,
+    "totalGzipKb": 321,
+    "entryGzipKb": 148.9,
     "budgetKb": 150,
     "withinBudget": true
   },
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 36878,
-    "docToCodeRatio": 0.47
+    "appLoc": 37770,
+    "docToCodeRatio": 0.45
   },
   "featureCoverage": {
-    "total": 179,
+    "total": 193,
     "manual": 129,
-    "manualPct": 72.1,
+    "manualPct": 66.8,
     "book": 124,
-    "bookPct": 69.3,
+    "bookPct": 64.2,
     "bookExample": 124,
-    "bookExamplePct": 69.3,
+    "bookExamplePct": 64.2,
     "byArea": {
+      "navigation": {
+        "total": 40,
+        "manual": 24,
+        "book": 24
+      },
+      "presentation": {
+        "total": 5,
+        "manual": 2,
+        "book": 2
+      },
+      "styling": {
+        "total": 22,
+        "manual": 13,
+        "book": 12
+      },
       "editing": {
-        "total": 20,
+        "total": 23,
         "manual": 15,
         "book": 14
+      },
+      "export": {
+        "total": 20,
+        "manual": 17,
+        "book": 17
+      },
+      "library": {
+        "total": 17,
+        "manual": 13,
+        "book": 11
       },
       "structure": {
         "total": 23,
         "manual": 13,
         "book": 12
-      },
-      "navigation": {
-        "total": 35,
-        "manual": 24,
-        "book": 24
       },
       "notes": {
         "total": 6,
@@ -235,35 +255,15 @@
         "manual": 7,
         "book": 7
       },
-      "styling": {
-        "total": 21,
-        "manual": 13,
-        "book": 12
-      },
       "images": {
         "total": 3,
         "manual": 1,
         "book": 1
       },
-      "library": {
-        "total": 15,
-        "manual": 13,
-        "book": 11
-      },
       "import": {
         "total": 18,
         "manual": 17,
         "book": 17
-      },
-      "export": {
-        "total": 19,
-        "manual": 17,
-        "book": 17
-      },
-      "presentation": {
-        "total": 3,
-        "manual": 2,
-        "book": 2
       },
       "pwa": {
         "total": 4,
@@ -273,6 +273,76 @@
     },
     "gaps": {
       "noManual": [
+        {
+          "id": "big-map-virtualisation",
+          "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cinematic-walkthrough",
+          "name": "Cinematic visual-map walkthrough (guided walk frames each branch with animated zoom)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "free-colour-pickers",
+          "name": "Free colour pickers for node text / fill / branch (StyleBar)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "paste-url-title",
+          "name": "Paste a URL → a node titled from the URL (offline)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "copy-map-image",
+          "name": "Copy the map to the clipboard as a PNG image",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "presenter-timer",
+          "name": "Presenter pacing timer + budget colour + B/W blackout",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cross-map-switcher",
+          "name": "Switch to another library map from the ⌘K palette",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "reveal-in-outline",
+          "name": "Selecting a node scrolls its row into view in the Outline",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "sort-children",
+          "name": "Sort a topic's children by name / priority / due date / progress",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "multi-branch-clipboard",
+          "name": "Copy + paste multiple selected branches at once (cross-map)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "outgoing-links-inspector",
+          "name": "\"Links to\" inspector section (outgoing links + relationships)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "relationships-panel",
+          "name": "Map-wide Relationships panel (every link + relationship, click-to-jump)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "promote-branch-to-map",
+          "name": "New map from this topic (promote a branch to its own library map)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "merge-map-as-branch",
+          "name": "Insert a library map as a branch under the selected topic",
+          "since": "2026-06-30"
+        },
         {
           "id": "map-typography",
           "name": "Per-map typography (base font family + size scale; canvas == export)",
@@ -525,6 +595,76 @@
         }
       ],
       "noBook": [
+        {
+          "id": "big-map-virtualisation",
+          "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cinematic-walkthrough",
+          "name": "Cinematic visual-map walkthrough (guided walk frames each branch with animated zoom)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "free-colour-pickers",
+          "name": "Free colour pickers for node text / fill / branch (StyleBar)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "paste-url-title",
+          "name": "Paste a URL → a node titled from the URL (offline)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "copy-map-image",
+          "name": "Copy the map to the clipboard as a PNG image",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "presenter-timer",
+          "name": "Presenter pacing timer + budget colour + B/W blackout",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cross-map-switcher",
+          "name": "Switch to another library map from the ⌘K palette",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "reveal-in-outline",
+          "name": "Selecting a node scrolls its row into view in the Outline",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "sort-children",
+          "name": "Sort a topic's children by name / priority / due date / progress",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "multi-branch-clipboard",
+          "name": "Copy + paste multiple selected branches at once (cross-map)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "outgoing-links-inspector",
+          "name": "\"Links to\" inspector section (outgoing links + relationships)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "relationships-panel",
+          "name": "Map-wide Relationships panel (every link + relationship, click-to-jump)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "promote-branch-to-map",
+          "name": "New map from this topic (promote a branch to its own library map)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "merge-map-as-branch",
+          "name": "Insert a library map as a branch under the selected topic",
+          "since": "2026-06-30"
+        },
         {
           "id": "library-filter",
           "name": "Filter your maps by title (All maps search box)",
@@ -805,9 +945,9 @@
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
-    "ageDays": 18,
-    "commits": 993,
-    "commits7d": 207,
+    "ageDays": 19,
+    "commits": 1008,
+    "commits7d": 222,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
@@ -815,17 +955,17 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 456
+        "count": 457
       },
       {
         "name": "Claude",
-        "count": 40
+        "count": 54
       }
     ],
     "churn30d": {
-      "added": 120542,
-      "removed": 37600
+      "added": 122823,
+      "removed": 37933
     },
-    "changelogEntries": 367
+    "changelogEntries": 370
   }
 }

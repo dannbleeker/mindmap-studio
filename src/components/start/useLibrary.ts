@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllMaps } from "../../store/mapStore";
+import { getAllMaps, listTrashedMaps } from "../../store/mapStore";
 import type { MapEntry } from "./MapCard";
 import { branchSpokes, docNodeCount } from "./nodeStats";
 
@@ -17,15 +17,42 @@ export function useLibrary(rev: number): MapEntry[] {
       .then((docs) => {
         if (!alive) return;
         setEntries(
-          docs.map((d) => ({
-            id: d.id,
-            title: d.title,
-            nodeCount: docNodeCount(d),
-            updatedAt: d.meta?.updatedAt,
-            branches: branchSpokes(d),
-            pinned: d.meta?.pinned ?? false,
-          })),
+          docs
+            .filter((d) => !d.meta?.trashedAt) // trashed maps live in the Trash view, not the library
+            .map((d) => ({
+              id: d.id,
+              title: d.title,
+              nodeCount: docNodeCount(d),
+              updatedAt: d.meta?.updatedAt,
+              branches: branchSpokes(d),
+              pinned: d.meta?.pinned ?? false,
+            })),
         );
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [rev]);
+  return entries;
+}
+
+/** One map in the Trash (soft-deleted), for the Trash view. */
+export interface TrashEntry {
+  id: string;
+  title: string;
+  trashedAt: number;
+}
+
+/** The Trash contents (soft-deleted maps), re-fetched when `rev` bumps. */
+export function useTrashMaps(rev: number): TrashEntry[] {
+  const [entries, setEntries] = useState<TrashEntry[]>([]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: rev is the re-fetch signal, by design
+  useEffect(() => {
+    let alive = true;
+    listTrashedMaps()
+      .then((rows) => {
+        if (alive) setEntries(rows);
       })
       .catch(() => {});
     return () => {

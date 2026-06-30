@@ -112,15 +112,16 @@ import { clearAllLocalPreferences } from "./store/localPrefs";
 import {
   type MapSummary,
   clearAllData,
-  deleteMap,
   findMapReferences,
   getAllMaps,
   getTabSession,
   listMaps,
   loadMap,
   loadMapHandle,
+  restoreMapFromTrash,
   saveMap,
   setLastOpened,
+  softDeleteMap,
 } from "./store/mapStore";
 import { setTagColor, tagColor } from "./tagColors";
 import { todayISO } from "./taskDate";
@@ -987,7 +988,7 @@ export function App() {
       // reference scan is best-effort
     }
     try {
-      await deleteMap(deleted.id);
+      await softDeleteMap(deleted.id); // to the Trash (recoverable), not destroyed
       sessionCache.current.delete(deleted.id); // its stashed canvas session goes with it
       // Drop its tab and prefer the adjacent open tab; only fall back to the library / a blank map
       // when no other tab is open.
@@ -1003,7 +1004,7 @@ export function App() {
           label: "Undo",
           run: async () => {
             try {
-              await saveMap(deleted);
+              await restoreMapFromTrash(deleted.id);
               await setLastOpened(deleted.id);
               load(deleted);
             } catch {

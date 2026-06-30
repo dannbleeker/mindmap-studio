@@ -74,6 +74,43 @@ export async function deleteMap(id: string): Promise<void> {
   await deleteMapHandle(id); // and its disk-file binding
 }
 
+// --- trash (soft-delete) ---------------------------------------------------
+// Deleting a map moves it to the Trash (a `meta.trashedAt` flag) rather than destroying it, so a
+// delete is recoverable beyond the brief Undo toast (until the Trash is emptied). Trashed maps are
+// hidden from the library (listMaps / useLibrary filter them out); their versions + disk handle are
+// kept so Restore is lossless. Emptying the Trash is the only permanent delete.
+
+/** Move a map to the Trash (recoverable). No-op if it isn't found. */
+export async function softDeleteMap(id: string): Promise<void> {
+  const doc = (await (await db()).get("maps", id)) ?? null;
+  if (!doc) return;
+  const trashed: MindMapDoc = { ...doc, meta: { ...doc.meta, trashedAt: Date.now() } };
+  await (await db()).put("maps", trashed, id);
+}
+
+/** Restore a map from the Trash (clears its trashed flag); preserves its last-edited time. */
+export async function restoreMapFromTrash(id: string): Promise<void> {
+  const doc = (await (await db()).get("maps", id)) ?? null;
+  if (!doc?.meta?.trashedAt) return;
+  const meta = { ...doc.meta };
+  meta.trashedAt = undefined;
+  await (await db()).put("maps", { ...doc, meta }, id);
+}
+
+/** Maps currently in the Trash, most-recently-trashed first. */
+export async function listTrashedMaps(): Promise<(MapSummary & { trashedAt: number })[]> {
+  const docs = await (await db()).getAll("maps");
+  return docs
+    .filter((d): d is MindMapDoc & { meta: { trashedAt: number } } => !!d.meta?.trashedAt)
+    .map((d) => ({ id: d.id, title: d.title, trashedAt: d.meta.trashedAt }))
+    .sort((a, b) => b.trashedAt - a.trashedAt);
+}
+
+/** Permanently delete every map in the Trash (maps + versions + handles). */
+export async function emptyTrash(): Promise<void> {
+  for (const t of await listTrashedMaps()) await deleteMap(t.id);
+}
+
 // --- disk-file handles -----------------------------------------------------
 // A map opened from / saved to a `.mmst` keeps a FileSystemFileHandle here, so a later session can
 // reconnect and Save back to the same file. Handles are structured-cloneable, so IndexedDB stores
@@ -95,6 +132,7 @@ export async function deleteMapHandle(id: string): Promise<void> {
 export async function listMaps(): Promise<MapSummary[]> {
   const docs = await (await db()).getAll("maps");
   return docs
+    .filter((doc) => !doc.meta?.trashedAt) // trashed maps are hidden from the library
     .map((doc) => ({ id: doc.id, title: doc.title }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }

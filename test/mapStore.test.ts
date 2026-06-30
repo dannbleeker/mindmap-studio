@@ -4,17 +4,21 @@ import type { MindMapDoc } from "../src/model/types";
 import {
   clearAllData,
   deleteMap,
+  emptyTrash,
   findMapReferences,
   getAllMaps,
   getLastOpened,
   latestVersionDoc,
   listMaps,
+  listTrashedMaps,
   loadMap,
   loadMapHandle,
+  restoreMapFromTrash,
   saveMap,
   saveMapHandle,
   saveVersion,
   setLastOpened,
+  softDeleteMap,
 } from "../src/store/mapStore";
 
 const docOf = (id: string, title: string): MindMapDoc => ({
@@ -219,6 +223,34 @@ describe("mapStore — concurrency", () => {
     ]);
     const ids = (await getAllMaps()).map((d) => d.id);
     expect(ids).toEqual(expect.arrayContaining(["p1", "p2", "p3"]));
+  });
+});
+
+describe("mapStore — trash (soft-delete)", () => {
+  it("soft-deletes to Trash: hidden from the library but not destroyed, and listed in trash", async () => {
+    await saveMap(docOf("t1", "Trashed One"));
+    await softDeleteMap("t1");
+    expect((await listMaps()).some((m) => m.id === "t1")).toBe(false); // hidden from the library
+    expect(await loadMap("t1")).not.toBeNull(); // but the record is kept (recoverable)
+    expect((await listTrashedMaps()).map((t) => t.id)).toContain("t1");
+  });
+
+  it("restores a trashed map back into the library", async () => {
+    await saveMap(docOf("t2", "Trashed Two"));
+    await softDeleteMap("t2");
+    await restoreMapFromTrash("t2");
+    expect((await listMaps()).some((m) => m.id === "t2")).toBe(true);
+    expect((await listTrashedMaps()).some((t) => t.id === "t2")).toBe(false);
+  });
+
+  it("emptyTrash permanently deletes trashed maps but leaves live ones", async () => {
+    await saveMap(docOf("t5", "Keep me")); // stays live
+    await saveMap(docOf("t6", "Purge me"));
+    await softDeleteMap("t6");
+    await emptyTrash();
+    expect(await loadMap("t6")).toBeNull(); // gone for good
+    expect(await loadMap("t5")).not.toBeNull(); // the live map is untouched
+    expect(await listTrashedMaps()).toEqual([]);
   });
 });
 

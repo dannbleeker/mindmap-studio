@@ -292,6 +292,9 @@ export interface MindMapDoc {
     /** Pinned/favourited: the user curated this map to stay at the top of the library lists,
      *  independent of recency. Additive + lossless in .json. */
     pinned?: boolean;
+    /** Soft-delete timestamp (ms epoch): when set, the map is in the Trash — hidden from the normal
+     *  library but recoverable (Restore) until permanently deleted. Absent ⇒ live. Additive. */
+    trashedAt?: number;
   };
 }
 

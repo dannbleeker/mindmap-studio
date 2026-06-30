@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { typeScale } from "../../design/tokens";
-import { deleteMap } from "../../store/mapStore";
+import { softDeleteMap } from "../../store/mapStore";
 import { Dialog } from "../Dialog";
 import { renameMapTitle } from "./mapActions";
 
@@ -50,7 +50,7 @@ export function MapDialogs({
   };
   const confirmDelete = async () => {
     if (pending?.kind === "delete") {
-      await deleteMap(pending.id);
+      await softDeleteMap(pending.id); // to the Trash (recoverable), not destroyed
       onDone();
     }
     onClose();
@@ -101,10 +101,10 @@ export function MapDialogs({
 
       {deleting ? (
         <Dialog open onClose={onClose} ariaLabel="Delete map" style={SURFACE}>
-          <h3 style={{ ...typeScale.title, margin: "0 0 8px" }}>Delete map</h3>
+          <h3 style={{ ...typeScale.title, margin: "0 0 8px" }}>Move map to Trash</h3>
           <p style={{ margin: "0 0 4px", color: "var(--st-ink2)" }}>
-            Delete “{pending?.kind === "delete" ? pending.title || "(untitled)" : ""}”? This can’t
-            be undone.
+            Move “{pending?.kind === "delete" ? pending.title || "(untitled)" : ""}” to the Trash?
+            You can restore it from Trash until you empty it.
           </p>
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
             <button type="button" className="st-btn" onClick={onClose}>
@@ -120,7 +120,7 @@ export function MapDialogs({
               }}
               onClick={confirmDelete}
             >
-              Delete
+              Move to Trash
             </button>
           </div>
         </Dialog>

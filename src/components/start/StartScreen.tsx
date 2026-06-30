@@ -14,6 +14,7 @@ import { Layouts } from "./sections/Layouts";
 import { Learn } from "./sections/Learn";
 import { Recent } from "./sections/Recent";
 import { Templates } from "./sections/Templates";
+import { Trash } from "./sections/Trash";
 import { startThemeVars } from "./tokens";
 import type { StartContext, StartSection } from "./types";
 import { useLibrary } from "./useLibrary";
@@ -29,6 +30,7 @@ const TITLES: Record<StartSection, string> = {
   import: "Import",
   learn: "Learn mind mapping",
   about: "About",
+  trash: "Trash",
 };
 
 export function StartScreen({
@@ -106,6 +108,7 @@ export function StartScreen({
           {section === "import" ? <ImportView ctx={ctx} /> : null}
           {section === "learn" ? <Learn /> : null}
           {section === "about" ? <About onCheckForUpdates={onCheckForUpdates} /> : null}
+          {section === "trash" ? <Trash ctx={ctx} /> : null}
         </div>
       </div>
       {cmdk ? <CommandPalette ctx={ctx} onClose={() => setCmdk(false)} /> : null}

@@ -159,8 +159,12 @@ priority order:
   `Chip`); a WCAG node-fill/label contrast assertion in the gate (`test/contrast.test.ts`).
   **Deferred:** the broader motion / elevation / type-preset token *scales* (larger, visual-regression
   risk; each new token also needs a consumer for knip).
-- **UI-3** — *(marquee)* transient selection-anchored contextual action bar; de-crowd node affordances. **M–L**
-- **UI-4** — collapsible-dock default + tablet inspector-overlay breakpoint (reclaim the ~44% chrome). **M**
+- [x] **UI-3** — *(marquee)* contextual action bar (shipped — see CHANGELOG): the on-selection
+  NodePopover grew into the transient action bar (note / priority / link + collapse + More), and the
+  on-hover `.mm-node-bar` pill was removed — a node is uncluttered at rest, actions appear on selection.
+- [x] **UI-4** — tablet inspector overlay (shipped — see CHANGELOG): the 641–1024px coarse-pointer tier
+  docks the inspector to a full-width bottom sheet (canvas ~33%→~64%). **Deferred:** the
+  "dock-collapsed-by-default" toggle (the dock is already empty unless a panel is opened — low ROI).
 - [x] **UI-5** — accessibility (shipped — see CHANGELOG). **5a:** the custom keymap now owns the canvas
   keyboard (RF `disableKeyboardA11y` + `nodesFocusable`/`edgesFocusable` off — removes the latent
   double-handling); WCAG 2.5.8 target sizes (collapse 18→24, task-check 17→24 + touch) and 2.4.7
@@ -172,11 +176,19 @@ priority order:
   change — the panel is keyboard-openable today); keyboard node-*repositioning* in free layout (tree-mode
   reorder keys already exist); programmatic `aria-label`s on cross-link edges (non-focusable SVG paths —
   better surfaced via a future relationships list).
-- **UI-6** — motion/depth polish on the new tokens; zoom-to-selection + Shift+1/2. **S–M**
-- **UI-7** — empty-state split (first-run vs deleted-everything) + optional first-run intent picker. **S**
+- [x] **UI-6** — zoom + motion (shipped — see CHANGELOG): Shift+1 (fit all) / Shift+2 (fit selection,
+  clamped) keybindings; canvas-animation durations consolidated into a `motion.dur` token. **Deferred:**
+  tokenising the chrome's `0.12s`-style CSS transitions + an elevation ramp (low-impact, large diff).
+- [x] **UI-7** — empty states (shipped — see CHANGELOG): the returning-but-empty library gets a
+  "Browse templates →" path. The researched first-run **intent-picker modal was deliberately skipped** —
+  Start's capture card + template gallery already cover intent selection; a modal gate would duplicate
+  them (progressive-disclosure / overlay-overuse guidance).
 
-UI-3/4/6/7 + the UI-2 token-scale tail remain open. AI assist stays decided-against (see *Deferred*);
-the report only notes the category's positioning shift, not a reversal.
+**The UI research report's actionable phases are complete.** Shipped: UI-1, UI-3, UI-4, UI-5, UI-6, UI-7,
+and UI-2 core. Still open (deferred, low-priority): the **UI-2 token-scale tail** (motion/elevation/
+type-preset *scales* + the chrome-transition tokenisation) and a couple of UI-5 tails (always-mount a
+hidden Outline; free-layout keyboard node-repositioning; edge aria-labels). AI assist stays
+decided-against (see *Deferred*); the report only notes the category's positioning shift, not a reversal.
 
 ## Open items
 

@@ -7,6 +7,28 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Contextual action bar on selection (UI research — UI-3).** The on-selection popover grew into a
+  transient, selection-anchored action bar above the node — note / priority / link (the mouse twin of
+  Ctrl/⌘+Shift+L) plus the existing collapse + "More…", with active state lighting up the note/priority
+  buttons. The separate on-hover `.mm-node-bar` pill was removed, so a node is uncluttered at rest and
+  the actions appear on selection rather than on every hover. The on-node ＋ add affordances + inline
+  badges are unchanged.
+
+- **Tablet inspector docks to a bottom sheet (UI research — UI-4).** On a coarse-pointer tablet
+  (641–1024px) the inspector — which auto-opens on every selection — used to be an inline 240px column
+  that crushed the canvas to ~33%. It now docks to a full-width bottom sheet (the phone pattern), out of
+  flow so the canvas runs full-width behind it (~64%); deselect or the inspector's minimise closes it.
+
+- **Fit-to-view shortcuts (UI research — UI-6).** Shift+1 fits the whole map; Shift+2 fits the current
+  selection (clamped to 1.5× so a single node doesn't slam to max zoom). Keyed on `e.code` so they're
+  keyboard-layout robust and don't collide with type-to-edit; registered in the cheat-sheet. The
+  scattered canvas-animation durations are consolidated into a `motion.dur` token.
+
+- **Guided templates path on the empty library (UI research — UI-7).** The "No maps yet" state now
+  offers a "Browse templates →" path alongside "New map", so a returning user who cleared their library
+  has a guided start. (The researched first-run intent-picker modal was deliberately skipped — Start's
+  capture card + template gallery already cover intent selection.)
+
 - **Canvas accessibility pass (UI research — UI-5).** The canvas keyboard model is now owned end-to-end
   by the app's custom keymap: React Flow's built-in node-keyboard a11y is disabled (`disableKeyboardA11y`
   + `nodesFocusable`/`edgesFocusable` off) so Tab=add-child / Enter=add-sibling / arrows=move-selection

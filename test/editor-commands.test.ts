@@ -74,6 +74,10 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       openFind: vi.fn(),
       openSettings: vi.fn(),
       reShowGettingStarted: vi.fn(),
+      navBack: vi.fn(),
+      navForward: vi.fn(),
+      canBack: true,
+      canForward: false,
     },
     panels: {
       outlineOpen: false,
@@ -209,6 +213,18 @@ describe("buildEditorCommands", () => {
     expect(props.canvas.changeLayout).toHaveBeenCalledWith("timeline");
     cmds.get("panel-outline")?.run();
     expect(props.panels.setOutlineOpen).toHaveBeenCalled();
+  });
+
+  it("nav back/forward defer to handlers and gate on canBack/canForward", () => {
+    const props = mkProps();
+    const cmds = byId(props);
+    cmds.get("nav-back")?.run();
+    expect(props.nav.navBack).toHaveBeenCalled();
+    cmds.get("nav-forward")?.run();
+    expect(props.nav.navForward).toHaveBeenCalled();
+    // mkProps sets canBack:true, canForward:false.
+    expect(cmds.get("nav-back")?.enabled).toBe(true);
+    expect(cmds.get("nav-forward")?.enabled).toBe(false);
   });
 
   it("copy-deep-link defers to io and relabels by selection", () => {

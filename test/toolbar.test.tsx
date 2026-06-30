@@ -52,6 +52,10 @@ function setup(
     openFind: vi.fn(),
     openSettings: vi.fn(),
     reShowGettingStarted: vi.fn(),
+    navBack: vi.fn(),
+    navForward: vi.fn(),
+    canBack: false,
+    canForward: false,
   };
   const panels = {
     outlineOpen: false,

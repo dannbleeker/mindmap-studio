@@ -244,6 +244,12 @@ export interface ToolbarProps {
     openSettings: () => void;
     /** Re-show the first-run "3 things to try" card (clears the one-shot flag) — from ⌘K / Settings. */
     reShowGettingStarted: () => void;
+    /** Step back / forward through the navigation history (Alt+← / Alt+→). */
+    navBack: () => void;
+    navForward: () => void;
+    /** Whether there's anywhere to go back / forward (gates the ⌘K commands). */
+    canBack: boolean;
+    canForward: boolean;
   };
   panels: ToolbarPanels;
   map: ToolbarMap;

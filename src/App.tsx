@@ -93,6 +93,7 @@ import { findAnyNode, newMapFromBranch } from "./mindmap/flow/ops";
 import { anyMobileSheetOpen, closeMobileSheets } from "./mobileSheets";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
+import { NavHistory, type NavPoint } from "./navHistory";
 import {
   backlinksFor,
   markerTagIndex,
@@ -496,6 +497,12 @@ export function App() {
   const [libQuery, setLibQuery] = useState("");
   const pendingFocus = useRef<string | null>(null);
   const selectedIdRef = useRef<string | null>(null);
+  // Back/forward navigation history (map + focused node). One instance; the recording effect feeds it
+  // and Alt+←/→ (or the ⌘K commands) walk it. `pendingNav` suppresses re-recording while we apply a
+  // jump, so going back doesn't itself count as a new visit and wipe the forward history.
+  const navHistory = useRef(new NavHistory());
+  const pendingNav = useRef<NavPoint | null>(null);
+  const [navState, setNavState] = useState({ canBack: false, canForward: false });
 
   // Note editor (debounced draft + commit, and the "switch to Notes tab" nonce) — its own hook.
   const { noteNonce, noteDraft, setNoteDraft, onNoteChange, flushNote, bumpNoteNonce } =
@@ -889,16 +896,19 @@ export function App() {
     }
   }
 
-  async function switchMap(id: string) {
-    if (id === doc.id) return;
-    try {
-      await saveMap(liveDocRef.current); // flush current edits before switching
-      const next = await loadMap(id);
-      if (next) load(next);
-    } catch {
-      // ignore
-    }
-  }
+  const switchMap = useCallback(
+    async (id: string) => {
+      if (id === liveDocRef.current.id) return;
+      try {
+        await saveMap(liveDocRef.current); // flush current edits before switching
+        const next = await loadMap(id);
+        if (next) load(next);
+      } catch {
+        // ignore
+      }
+    },
+    [load],
+  );
 
   // Open a doc from the start screen in the editor (optionally applying its layout), and switch view.
   function openFromStart(next: MindMapDoc, nextLayout?: string) {
@@ -1270,6 +1280,70 @@ export function App() {
     }
   }
 
+  // Record each focused-topic location (map + node) into the back/forward history, so Alt+←/→ can
+  // retrace where you've been — across maps too. Plain (null) selections aren't recorded; a jump in
+  // progress (pendingNav) is suppressed so going back doesn't itself count as a new visit.
+  useEffect(() => {
+    if (view !== "editor") return;
+    const id = selected?.id ?? null;
+    if (!id) return;
+    const pn = pendingNav.current;
+    if (pn) {
+      if (pn.mapId === doc.id && pn.nodeId === id) {
+        pendingNav.current = null; // arrived at the jump target — don't double-record it
+        return;
+      }
+      // Same map but a different node ⇒ the jump landed and the user moved on (branch). A different
+      // map ⇒ a cross-map switch is still settling, so keep waiting.
+      if (pn.mapId === doc.id) pendingNav.current = null;
+      else return;
+    }
+    navHistory.current.visit({ mapId: doc.id, nodeId: id });
+    setNavState({
+      canBack: navHistory.current.canBack,
+      canForward: navHistory.current.canForward,
+    });
+  }, [doc.id, selected?.id, view]);
+
+  // Apply a back/forward destination: focus the node (switching maps first if it lives in another).
+  const applyNav = useCallback(
+    (pt: NavPoint | null) => {
+      if (!pt?.nodeId) return;
+      pendingNav.current = pt;
+      if (pt.mapId === liveDocRef.current.id) {
+        mapRef.current?.focusNode(pt.nodeId);
+      } else {
+        pendingFocus.current = pt.nodeId;
+        void switchMap(pt.mapId);
+      }
+      setNavState({
+        canBack: navHistory.current.canBack,
+        canForward: navHistory.current.canForward,
+      });
+    },
+    [switchMap],
+  );
+  const navBack = useCallback(() => applyNav(navHistory.current.back()), [applyNav]);
+  const navForward = useCallback(() => applyNav(navHistory.current.forward()), [applyNav]);
+
+  // Alt+← / Alt+→ walk the navigation history (browser-style). Editor-only; ignored while typing in a
+  // field/note so they don't fight text editing. Alt+Shift+← / → stays promote/demote on the canvas.
+  useEffect(() => {
+    if (view !== "editor") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.altKey || e.shiftKey || e.ctrlKey || e.metaKey) return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable))
+        return;
+      e.preventDefault();
+      if (e.key === "ArrowLeft") navBack();
+      else navForward();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [view, navBack, navForward]);
+
   // Keep the current map selectable even before its first save lands.
   const mapOptions = maps.some((m) => m.id === doc.id)
     ? maps
@@ -1289,6 +1363,10 @@ export function App() {
       openFind: () => setFindOpen(true),
       openSettings: () => setSettingsOpen(true),
       reShowGettingStarted: reShowFirstRun,
+      navBack,
+      navForward,
+      canBack: navState.canBack,
+      canForward: navState.canForward,
     },
     panels,
     map: {

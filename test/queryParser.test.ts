@@ -37,11 +37,14 @@ describe("parseQuery", () => {
 
   it("falls back to literal text for an unknown operator or invalid value", () => {
     expect(parseQuery("foo:bar")).toMatchObject({ scoped: false, include: ["foo:bar"] });
-    expect(parseQuery("priority:high")).toMatchObject({ scoped: false, include: ["priority:high"] });
+    expect(parseQuery("priority:high")).toMatchObject({
+      scoped: false,
+      include: ["priority:high"],
+    });
     expect(parseQuery("due:whenever")).toMatchObject({ scoped: false, include: ["due:whenever"] });
   });
 
-  it("lower-cases operator values and supports tag:\"quoted value\"", () => {
+  it('lower-cases operator values and supports tag:"quoted value"', () => {
     const p = parseQuery('tag:"Red Team"');
     expect(p.scoped).toBe(true);
     expect(p.tags).toEqual(["red team"]);

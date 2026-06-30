@@ -133,7 +133,8 @@ function PresenterSidebar({
           {budgetMin > 0 && (
             <span style={{ fontSize: 14, color: "#9a93e0", fontVariantNumeric: "tabular-nums" }}>
               {elapsed > budgetMin * 60 ? "+" : "−"}
-              {mmss(Math.abs(budgetMin * 60 - elapsed))} {elapsed > budgetMin * 60 ? "over" : "left"}
+              {mmss(Math.abs(budgetMin * 60 - elapsed))}{" "}
+              {elapsed > budgetMin * 60 ? "over" : "left"}
             </span>
           )}
         </div>

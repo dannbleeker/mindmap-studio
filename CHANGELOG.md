@@ -5,6 +5,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Added
+
+- **Wave-1 best-in-class gap fixes (UI review — verified gap map).** The first, cheapest-high-value slice
+  of the [features review](docs/UI_REVIEW_2026-06-30_bestinclass.md):
+  - **Free colour pickers** (G5): Text / Fill / Branch native colour swatches in the StyleBar, alongside
+    the preset rows (the model fields already accepted any CSS colour — only the picker UI was missing).
+  - **Paste a lone URL → one titled, linked node** (G1): a single pasted http(s) URL becomes a node titled
+    from the path slug (Title Cased), fully offline — no fetch.
+  - **Copy map as image** (G11): `⌘K → "Copy map as image"` (+ the Export menu) writes a PNG of the map to
+    the clipboard — the fastest map→paste path, no file round-trip.
+  - **Presenter pacing timer + blackout** (G7): an elapsed clock with pause/reset, a total-talk budget
+    that colours the clock green → amber → red, and `B`/`W` to black/white the screen (any key resumes).
+  - **Cross-map quick switcher** (G2): `⌘K` lists "Switch to map: <title>" for every other library map.
+  - **Reveal-in-outline** (G2): selecting a node on the canvas scrolls its row into view in the Outline.
+
 ### Fixed
 
 - **⌘K command palette was unstyled in the editor.** The palette's `.st-cmdk*` CSS lived in `start.css`,

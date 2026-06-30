@@ -1,6 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect, useRef } from "react";
 import { Button } from "../design/primitives";
-import { radius, space } from "../design/tokens";
+import { radius, space, typeScale } from "../design/tokens";
 
 // A controlled wrapper around the native <dialog> element. Driving a real <dialog> via showModal()
 // gives us the top-layer backdrop, focus trap, and Escape-to-close for free; this component owns that
@@ -88,7 +88,7 @@ export function Dialog({ open, onClose, onOpen, title, ariaLabel, style, childre
             marginBottom: space.xl,
           }}
         >
-          <strong style={{ fontSize: 15, flex: 1 }}>{title}</strong>
+          <strong style={{ ...typeScale.title, flex: 1 }}>{title}</strong>
           <Button onClick={onClose} aria-label="Close dialog">
             ✕
           </Button>

@@ -95,7 +95,8 @@ export function NodePopover({
           border: `1px solid ${colors.border}`,
           borderRadius: 11,
           padding: 4,
-          boxShadow: "0 10px 30px rgba(40,30,16,0.18)",
+          // Themed elevation so the action bar's shadow follows light/dark (was a fixed light shadow).
+          boxShadow: "var(--ed-shadow-pop, 0 10px 30px rgba(40,30,16,0.18))",
         }}
       >
         <PopBtn

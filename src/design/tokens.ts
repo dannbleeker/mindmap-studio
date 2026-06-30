@@ -69,6 +69,12 @@ export function editorThemeVars(dark: boolean): CSSProperties {
     "--ed-toast-warn-border": dark ? "rgba(214,170,80,0.46)" : "#fac775",
     "--ed-shadow": dark ? "0 6px 22px rgba(0,0,0,0.38)" : "0 6px 22px rgba(40,30,16,0.08)",
     "--ed-shadow-pop": dark ? "0 12px 32px rgba(0,0,0,0.5)" : "0 12px 32px rgba(40,30,16,0.18)",
+    // Motion timings (not theme-dependent — same in light/dark; emitted here so editor.css transitions
+    // read one source instead of scattered `0.12s` literals).
+    "--ed-dur-fast": `${motion.dur.fast}ms`,
+    "--ed-dur-base": `${motion.dur.base}ms`,
+    "--ed-dur-slow": `${motion.dur.slow}ms`,
+    "--ed-ease": motion.ease.standard,
     "--ed-font-sans": EDITOR_FONT_SANS,
     "--ed-font-mono": EDITOR_FONT_MONO,
   } as CSSProperties;
@@ -195,14 +201,42 @@ export const fontWeight = {
   bold: 700,
 } as const;
 
-/** Motion timings (ms). One source for the canvas viewport animations (fit-to-view, centre-on-node,
- *  saved-viewport restore) so every zoom/fit gesture shares a feel. (Chrome CSS transitions still use
- *  literal `0.12s`-style values — tokenising those + an elevation ramp is a deferred follow-up.) */
+/** Motion timings (ms) + easing — one source for both the chrome CSS transitions (emitted as the
+ *  `--ed-dur-*` / `--ed-ease` custom properties by editorThemeVars, consumed in editor.css) and the
+ *  canvas viewport animations (read directly as `motion.dur.*`). */
 export const motion = {
   dur: {
-    /** Fit-to-view / fit-to-selection. */
+    /** Chrome micro-interactions — hover / press / toggle (the recurring `0.12s`). */
+    fast: 120,
+    /** Default chrome transition — menus, panels, sheet snap. */
+    base: 160,
+    /** Larger chrome moves — drawer / sheet slide. */
+    slow: 240,
+    /** Fit-to-view / fit-to-selection (canvas). */
     fit: 300,
-    /** Programmatic viewport set (saved-view restore, tab switch). */
+    /** Programmatic viewport set — saved-view restore, tab switch (canvas). */
     viewport: 350,
   },
+  ease: {
+    /** The chrome's standard easing. */
+    standard: "ease",
+  },
 } as const;
+
+/** Type presets — each bundles size + weight + line-height (+ tracking/case for labels) for a role, so
+ *  headings/body/labels can't drift to ad-hoc inline `fontSize`s. Spread onto a `style`. (Named
+ *  `typeScale`, not `type`, so `import { type … }` isn't mistaken for TS's type-only import syntax.) */
+export const typeScale = {
+  /** Dialog + section titles (was an off-scale inline `fontSize: 15`). */
+  title: { fontSize: 15, fontWeight: 700, lineHeight: 1.3 },
+  /** Body / control text. */
+  body: { fontSize: 13, fontWeight: 400, lineHeight: 1.45 },
+  /** Small-caps section sub-labels. */
+  label: {
+    fontSize: 11,
+    fontWeight: 600,
+    lineHeight: 1.4,
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
+  },
+} as const satisfies Record<string, CSSProperties>;

@@ -55,7 +55,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--ed-dur-fast), color var(--ed-dur-fast);
   background: transparent;
   color: var(--ed-muted);
   font-family: inherit;
@@ -297,7 +297,8 @@
   font-weight: 600;
   font-family: inherit;
   white-space: nowrap;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition: background var(--ed-dur-fast), color var(--ed-dur-fast), border-color
+    var(--ed-dur-fast);
 }
 .mm-tbtn:hover {
   background: rgba(127, 119, 90, 0.08);
@@ -927,7 +928,7 @@
   cursor: pointer;
   z-index: 2;
   box-shadow: 0 1px 4px rgba(40, 30, 16, 0.18);
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: background var(--ed-dur-fast) var(--ed-ease), color var(--ed-dur-fast) var(--ed-ease);
 }
 .mm-node-add:hover {
   background: var(--mm-add-color, #1b8a5e);
@@ -1014,7 +1015,7 @@
    discoverable without cluttering every node. React Flow renders handles inside .react-flow__node. */
 .react-flow__node .mm-relate-handle {
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--ed-dur-fast) var(--ed-ease);
 }
 .react-flow__node:hover .mm-relate-handle {
   opacity: 0.7;
@@ -1064,7 +1065,7 @@
   line-height: 1;
   color: var(--ed-ink, #23211c);
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--ed-dur-fast) var(--ed-ease);
 }
 .react-flow__node:hover .mm-task-check,
 .mm-task-check[aria-pressed="true"] {

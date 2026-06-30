@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { typeScale } from "../../design/tokens";
 import { deleteMap } from "../../store/mapStore";
 import { Dialog } from "../Dialog";
 import { renameMapTitle } from "./mapActions";
@@ -70,7 +71,7 @@ export function MapDialogs({
           }}
           style={SURFACE}
         >
-          <h3 style={{ margin: "0 0 12px", fontSize: 15 }}>Rename map</h3>
+          <h3 style={{ ...typeScale.title, margin: "0 0 12px" }}>Rename map</h3>
           <input
             ref={inputRef}
             className="st-input"
@@ -100,7 +101,7 @@ export function MapDialogs({
 
       {deleting ? (
         <Dialog open onClose={onClose} ariaLabel="Delete map" style={SURFACE}>
-          <h3 style={{ margin: "0 0 8px", fontSize: 15 }}>Delete map</h3>
+          <h3 style={{ ...typeScale.title, margin: "0 0 8px" }}>Delete map</h3>
           <p style={{ margin: "0 0 4px", color: "var(--st-ink2)" }}>
             Delete “{pending?.kind === "delete" ? pending.title || "(untitled)" : ""}”? This can’t
             be undone.

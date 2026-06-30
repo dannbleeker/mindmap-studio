@@ -7,6 +7,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Knowledge-linking, capture & accessibility packs (UI review — gap groups 3/1/10).** A slice of each:
+  - **Cross-map topic links** (G3) — a node/note link can open another map *and* focus a specific topic
+    there (`#map=<id>&node=<id>`); bare `#map=` links are unchanged.
+  - **In-note in-app links** (G3) — `[text](#node=…)` / `[text](#map=…)` in a note render as links that
+    route through the canvas (jump to a topic / switch maps) instead of the browser.
+  - **Multi-line burst quick-capture** (G1) — pasting a multi-line outline into Quick-add builds a whole
+    subtree (indentation/headings → nesting) in one undo step, not a single flat topic.
+  - **Keyboard Outline reorder** (G10) — `Shift+↑/↓` reorder a row among its siblings and `Shift+←/→`
+    outdent/indent it, the keyboard equivalent of the drag-only ◂ ▸ controls.
+  - **Screen-reader overlay lists** (G10) — boundaries, summary brackets, and callouts now have
+    SR-only landmark lists (like the existing relationships list), so AT can discover them.
+
 - **Quick-wins pack (UI review — gap groups 8/9/10).** Cheap, high-value singles across areas:
   - **Filter by completion status** (G8) — the Power Filter gains a Completion select (Done / In
     progress / Not done) over each node's rolled-up effective progress; only task-bearing nodes match.

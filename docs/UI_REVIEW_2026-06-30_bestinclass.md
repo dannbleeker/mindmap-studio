@@ -75,7 +75,10 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 > deep-link to a node, back/forward navigation history, across-maps result context (breadcrumb +
 > snippet), and the in-map Find "List all" results list.
 > **Quick-wins pack** — filter by completion status (G8), `Ctrl/⌘+,` opens Settings (G9), reduced-motion
-> support + in-app toggle (G10). The remaining list is what's left to build.
+> support + in-app toggle (G10).
+> **Knowledge-linking / capture / a11y packs** — cross-map topic links + in-note in-app links (G3),
+> multi-line burst quick-capture (G1), keyboard Outline reorder + SR overlay lists (G10). The remaining
+> list is what's left to build.
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
@@ -92,7 +95,7 @@ The single richest cluster; mostly offline UI over existing model fields.
 | Rich HTML paste → nodes | preserve inline formatting + split lists/headings into nodes | `in·med·M·partial` |
 | Inline tokens on add (`#tag !priority @resource`) | lift typed tokens onto structured fields | `?·med·M·missing` |
 | Natural-language date entry (chrono-node) | "next fri" → ISO date | `?·med·S·missing` |
-| Multi-line / burst quick capture | Quick-add accepts a pasted outline → subtree in one go | `in·low·S·partial` |
+| ~~Multi-line / burst quick capture~~ ✅ shipped | Quick-add runs text through parseOutline → subtree | `done` |
 | Template / map-parts on insert (keyboard) | insert SWOT/pros-cons under a node at capture time | `in·low·S·partial` |
 | Inline tag/marker autocomplete in the canvas editor | type-ahead from within the topic editor | `?·low·M·partial` |
 | PWA share-target capture | receive shared text/link/image from the OS | `?·low·M·missing` |
@@ -115,13 +118,13 @@ All pure client-side derivations over the in-memory doc.
 The deepest backlog; several items brush the decided-against "no graph" boundary.
 | Gap | What | Tags |
 |---|---|---|
-| Cross-map topic links | `#node=` into another map (open + focus) + a picker | `in·high·M·partial` |
+| ~~Cross-map topic links~~ ✅ shipped | `#map=<id>&node=<id>` opens a map + focuses a topic (runtime; a topic-picker UI still open) | `done` |
 | ~~Map-wide relationships / links overview panel~~ ✅ shipped | every cross-link + hyperlink, navigable | `done` |
 | ~~Outgoing-links list in the inspector~~ ✅ shipped | mirror of the shipped "Linked from" | `done` |
 | Typed / categorised relationships | depends-on / causes / supports, drivable in style/filter | `?·med·M·partial` |
 | Cross-map backlinks | incoming references from other maps (library-wide index) | `in·med·M·missing` |
 | Name-based link autocomplete | `[[`/`@` wiki-link authoring | `in·med·M·partial` |
-| In-note in-app links | `#node=`/`[[ ]]` inside a note body | `in·med·S·partial` |
+| ~~In-note in-app links~~ ✅ shipped | `[text](#node=…/#map=…)` in a note routes through the canvas | `done` |
 | Transclusion / embedded references | live kept-in-sync view of another topic (single-parent-safe) | `?·med·L·missing` |
 | Multiple hyperlinks per topic | a list of links, not one | `in·low·M·partial` |
 | Tags-as-navigation pane | tag browser with counts → filter/jump | `?·low·S·partial` |
@@ -225,9 +228,9 @@ A11y is already strong; these are the genuine remaining deltas.
 |---|---|---|
 | Touch drag-and-drop fallback | outline/board/marker DnD use HTML5 drag → dead on touch | `in·high·M·partial` |
 | High-contrast theme + `prefers-contrast`/`forced-colors` | OS-aware high-contrast | `in·high·M·missing` |
-| Keyboard reorder/indent in the Outline tree | indent buttons are `tabIndex=-1` | `in·med·M·partial` |
+| ~~Keyboard reorder/indent in the Outline tree~~ ✅ shipped | Shift+↑/↓ reorder, Shift+←/→ outdent/indent | `done` |
 | i18n / localization | UI strings English-only, no locale layer | `?·med·L·missing` |
-| SR exposure of canvas overlays | boundaries/summaries/callouts, like the shipped relationships SR list | `in·med·S·partial` |
+| ~~SR exposure of canvas overlays~~ ✅ shipped | CanvasOverlaysSR lists boundaries/summaries/callouts for AT | `done` |
 | ~~Reduced-motion at JS motion sites~~ ✅ shipped | canvas zoom/fit/centre + guided-walk zoom honour reduced motion | `done` |
 | Long-press context menu on touch | press-and-hold = right-click | `in·med·S·partial` |
 | RTL layout support | `dir=rtl`, logical CSS, right-growing maps | `?·low·L·missing` |

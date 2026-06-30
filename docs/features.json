@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 373,
+  "reviewedThroughChangelogBullets": 374,
   "areas": [
     "editing",
     "notes",
@@ -1864,6 +1864,51 @@
     {
       "id": "reduced-motion",
       "name": "Reduced-motion support — OS prefers-reduced-motion + in-app toggle (canvas + guided walk)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cross-map-topic-links",
+      "name": "Cross-map topic links — #map=<id>&node=<id> opens another map + focuses a topic",
+      "area": "structure",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "in-note-app-links",
+      "name": "In-note in-app links — [text](#node=…/#map=…) jump through the canvas",
+      "area": "structure",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "burst-quick-capture",
+      "name": "Multi-line burst quick-capture — a pasted outline becomes a subtree in one step",
+      "area": "editing",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "outline-keyboard-reorder",
+      "name": "Keyboard Outline reorder/indent (Shift+Arrows)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "sr-overlay-lists",
+      "name": "Screen-reader lists for boundaries / summaries / callouts",
       "area": "navigation",
       "since": "2026-06-30",
       "manual": false,

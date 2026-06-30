@@ -68,7 +68,11 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 > **Wave 2 ("serious maps")** — sort children (G4), multi-branch clipboard (G4), "Links to" outgoing
 > inspector (G3), map-wide relationships panel (G3), promote-branch-to-map (G4), merge-map-as-branch (G4).
 > **Flagships** — big-map virtualisation (G6), visual-map slides + cinematic zoom (G7, as a 🎬 mode on the
-> guided walk). The remaining list is what's left to build.
+> guided walk).
+> **Data-safety pack (G9/G11)** — trash/undo-delete, cross-tab clobber guard, external-file conflict
+> detection, Open Recent.
+> **Search & nav pack (G2)** — search beyond topic+note, scoped/operator search, deep-link to a node,
+> back/forward navigation history. The remaining list is what's left to build.
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
@@ -95,10 +99,10 @@ The single richest cluster; mostly offline UI over existing model fields.
 All pure client-side derivations over the in-memory doc.
 | Gap | What | Tags |
 |---|---|---|
-| Back / forward navigation history | Alt+←/→ to reverse jumps (find hit, breadcrumb, drill-in, follow-link) | `in·high·M·missing` |
-| Scoped / operator search | `tag: marker: has:note priority: due: level:` in Find | `in·high·M·partial` |
-| Search beyond topic+note | also match tags, markers, hyperlink URL, callout text, attachment names | `in·med·S·partial` |
-| Deep-link to a node | `?map=&node=` centres + selects on load | `in·med·S·partial` |
+| ~~Back / forward navigation history~~ ✅ shipped | Alt+←/→ retrace visited topics (across maps) | `done` |
+| ~~Scoped / operator search~~ ✅ shipped | `tag: marker: has: priority: due: level: -exclude "phrase"` in Find | `done` |
+| ~~Search beyond topic+note~~ ✅ shipped | also matches tags, markers, hyperlink, callouts, attachment names, resources | `done` |
+| ~~Deep-link to a node~~ ✅ shipped | `?map=&node=` centres + selects on load; Copy-link command | `done` |
 | ~~Cross-map quick switcher in ⌘K~~ ✅ shipped | switch maps / jump across maps from the keyboard | `done` |
 | Library search result context | path/breadcrumb + snippet, scope-narrowable | `in·low·M·partial` |
 | ~~Reveal-in-outline auto-scroll~~ ✅ shipped | Outline scrolls the selected row into view | `done` |

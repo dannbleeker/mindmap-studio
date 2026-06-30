@@ -7,6 +7,20 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Search & nav pack (UI review — gap group 2).** Find what you mean and retrace where you've been:
+  - **Search beyond topic + note** — Find (in-map and across-every-map) now reaches a node by any text it
+    carries: tags, marker (icon) ids, hyperlink, callout bubbles, attachment filenames, and task
+    resources, via a single `searchableText` haystack shared by the exact, fuzzy, and library passes.
+  - **Scoped / operator search** — the Find box understands operators so a query can target fields, not
+    just text: `tag:foo`, `marker:`/`icon:flag-red`, `priority:1`, `due:dated|overdue|soon`,
+    `has:note|attachment|link|task|image`, `level:>=2` (depth bounds), `-term` exclusions, and
+    `"exact phrases"`. A plain query is unchanged (exact-then-fuzzy substring).
+  - **Deep-link to a node** — the URL carries the focused topic as `?node=<id>` alongside `?map=<id>`, so
+    the address bar is always a shareable permalink; opening one boots the map and focuses that node. A
+    "Copy link to this topic" command + More-menu item copy it (a standalone PWA has no address bar).
+  - **Back / forward navigation** — `Alt+←` / `Alt+→` (and ⌘K "Go back" / "Go forward") retrace the
+    topics you've visited, across maps too, browser-style.
+
 - **Data-safety pack (UI review — gap groups 9/11).** Local-first durability for a no-backend PWA:
   - **Trash / undo-delete** — deleting a map moves it to a recoverable Trash (a `meta.trashedAt` flag)
     instead of destroying it; a Start-screen Trash view restores or permanently deletes. Emptying the

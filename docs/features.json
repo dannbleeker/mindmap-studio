@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 371,
+  "reviewedThroughChangelogBullets": 372,
   "areas": [
     "editing",
     "notes",
@@ -1786,6 +1786,42 @@
       "area": "library",
       "since": "2026-06-29",
       "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "search-all-fields",
+      "name": "Find searches every node field (tags, markers, hyperlink, callouts, attachments, resources)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "search-operators",
+      "name": "Scoped / operator search (tag:, marker:, priority:, due:, has:, level:, -exclude, \"phrase\")",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "deep-link-node",
+      "name": "Deep-link to a node (?node= URL + Copy link to this topic)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "nav-back-forward",
+      "name": "Back / forward navigation history (Alt+← / Alt+→)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
       "book": false,
       "bookExample": false
     }

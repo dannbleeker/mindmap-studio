@@ -111,14 +111,14 @@ function eachScopedMatch(
   doc: MindMapDoc,
   p: ParsedQuery,
   today: string,
-  cb: (n: MapNode) => void,
+  cb: (n: MapNode, ancestors: string[]) => void,
 ): void {
   const prog = p.due === "overdue" || p.due === "soon" ? buildProgress(doc) : null;
-  const walk = (n: MapNode, depth: number) => {
-    if (nodeMatchesParsed(n, p, depth, today, prog?.get(n.id))) cb(n);
-    for (const c of n.children) walk(c, depth + 1);
+  const walk = (n: MapNode, depth: number, ancestors: string[]) => {
+    if (nodeMatchesParsed(n, p, depth, today, prog?.get(n.id))) cb(n, ancestors);
+    for (const c of n.children) walk(c, depth + 1, [...ancestors, n.topic]);
   };
-  for (const root of roots(doc)) walk(root, 0);
+  for (const root of roots(doc)) walk(root, 0, []);
 }
 
 // Find node ids whose searchable text contains the query (case-insensitive), in depth-first
@@ -159,12 +159,29 @@ export function findDocMatches(doc: MindMapDoc, query: string, today = todayISO(
   return roots(doc).flatMap((root) => findMatches(root, query, matchesFuzzy));
 }
 
-/** A library-wide search hit: which map, which node, and the node's topic for display. */
+/** A library-wide search hit: which map, which node, the node's topic, and enough context to place it
+ *  — the ancestor breadcrumb, plus a note snippet when the match isn't in the topic itself. */
 export interface LibraryHit {
   mapId: string;
   mapTitle: string;
   nodeId: string;
   topic: string;
+  /** Ancestor topics from the map root down to the match's parent (empty for a root / floating topic). */
+  path: string[];
+  /** A short slice of the note around the query, when the match landed in the note (not the topic). */
+  snippet?: string;
+}
+
+// A ~60-char window of the note centred on the first occurrence of the (plain-text) query, ellipsised
+// at each clipped end. Returns undefined when the query isn't a literal substring of the note (a scoped
+// or fuzzy hit, or a topic-only match) — so the snippet only ever shows genuine, locatable context.
+function noteSnippet(note: string | undefined, q: string): string | undefined {
+  if (!note) return undefined;
+  const i = note.toLowerCase().indexOf(q);
+  if (i < 0) return undefined;
+  const start = Math.max(0, i - 30);
+  const end = Math.min(note.length, i + q.length + 30);
+  return `${start > 0 ? "…" : ""}${note.slice(start, end).trim()}${end < note.length ? "…" : ""}`;
 }
 
 // Search every map's nodes — the central tree AND floating topics — for the query across all
@@ -175,24 +192,29 @@ export function searchLibrary(docs: MindMapDoc[], query: string, today = todayIS
   const q = query.trim().toLowerCase();
   if (!q) return [];
   const parsed = parseQuery(query);
+  // Build a hit with its breadcrumb path + (for a plain-text match in the note) a context snippet.
+  const mk = (doc: MindMapDoc, n: MapNode, ancestors: string[]): LibraryHit => ({
+    mapId: doc.id,
+    mapTitle: doc.title,
+    nodeId: n.id,
+    topic: n.topic,
+    path: ancestors,
+    snippet: n.topic.toLowerCase().includes(q) ? undefined : noteSnippet(n.note, q),
+  });
   if (parsed.scoped) {
     const hits: LibraryHit[] = [];
     for (const doc of docs)
-      eachScopedMatch(doc, parsed, today, (n) =>
-        hits.push({ mapId: doc.id, mapTitle: doc.title, nodeId: n.id, topic: n.topic }),
-      );
+      eachScopedMatch(doc, parsed, today, (n, ancestors) => hits.push(mk(doc, n, ancestors)));
     return hits;
   }
   const collect = (match: (node: MapNode, q: string) => boolean): LibraryHit[] => {
     const hits: LibraryHit[] = [];
     for (const doc of docs) {
-      const walk = (node: MapNode) => {
-        if (match(node, q)) {
-          hits.push({ mapId: doc.id, mapTitle: doc.title, nodeId: node.id, topic: node.topic });
-        }
-        for (const child of node.children) walk(child);
+      const walk = (node: MapNode, ancestors: string[]) => {
+        if (match(node, q)) hits.push(mk(doc, node, ancestors));
+        for (const child of node.children) walk(child, [...ancestors, node.topic]);
       };
-      for (const root of roots(doc)) walk(root);
+      for (const root of roots(doc)) walk(root, []);
     }
     return hits;
   };

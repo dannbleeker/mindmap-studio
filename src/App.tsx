@@ -41,6 +41,7 @@ import { MapPanel } from "./components/MapPanel";
 import { MobileSheetScrim } from "./components/MobileSheetScrim";
 import { OverlayInspector } from "./components/OverlayInspector";
 import { type DockEntry, PanelDock } from "./components/PanelDock";
+import { SearchResults } from "./components/SearchResults";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { ToastBar } from "./components/ToastBar";
@@ -2381,56 +2382,9 @@ export function App() {
           style={{ ...inputStyle, width: "100%", boxSizing: "border-box" }}
           aria-label="Search query"
         />
-        {libQuery.trim() &&
-          (() => {
-            const hits = searchLibrary(libDocs, libQuery);
-            if (hits.length === 0) {
-              return (
-                <p style={{ color: "var(--ed-muted)", fontSize: 13, margin: "12px 2px 0" }}>
-                  No matches.
-                </p>
-              );
-            }
-            return (
-              <ul
-                style={{
-                  listStyle: "none",
-                  margin: "10px 0 0",
-                  padding: 0,
-                  maxHeight: 320,
-                  overflow: "auto",
-                }}
-              >
-                {hits.slice(0, 50).map((h) => (
-                  <li key={`${h.mapId}:${h.nodeId}`}>
-                    <button
-                      type="button"
-                      onClick={() => goToHit(h)}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        textAlign: "left",
-                        border: "none",
-                        borderRadius: 6,
-                        background: "transparent",
-                        padding: "6px 8px",
-                        cursor: "pointer",
-                        font: "inherit",
-                      }}
-                    >
-                      <span>{h.topic}</span>{" "}
-                      <span style={{ color: "var(--ed-faint)", fontSize: 12 }}>— {h.mapTitle}</span>
-                    </button>
-                  </li>
-                ))}
-                {hits.length > 50 && (
-                  <li style={{ color: "var(--ed-faint)", fontSize: 12, padding: "6px 8px" }}>
-                    +{hits.length - 50} more — refine your search
-                  </li>
-                )}
-              </ul>
-            );
-          })()}
+        {libQuery.trim() && (
+          <SearchResults hits={searchLibrary(libDocs, libQuery)} onPick={goToHit} />
+        )}
       </Dialog>
 
       {/* About — controlled <Dialog>; the browser handles modal semantics, focus trap and Esc. */}

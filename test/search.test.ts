@@ -120,12 +120,27 @@ describe("searchLibrary", () => {
   it("searches floating topics, not just the central tree", () => {
     const hits = searchLibrary(docs, "Legend");
     expect(hits).toEqual([
-      { mapId: "m2", mapTitle: "Roadmap", nodeId: "f1", topic: "Legend: market codes" },
+      { mapId: "m2", mapTitle: "Roadmap", nodeId: "f1", topic: "Legend: market codes", path: [] },
     ]);
   });
 
   it("matches notes too, case-insensitively", () => {
     expect(searchLibrary(docs, "PIPELINE").map((h) => h.nodeId)).toEqual(["b"]);
+  });
+
+  it("carries the ancestor breadcrumb path for each hit", () => {
+    const byId = new Map(searchLibrary(docs, "market").map((h) => [h.nodeId, h.path]));
+    expect(byId.get("a")).toEqual(["Plan"]); // Plan › Marketing
+    expect(byId.get("a1")).toEqual(["Plan", "Marketing"]); // Plan › Marketing › market research
+    expect(byId.get("f1")).toEqual([]); // a floating topic is its own root
+  });
+
+  it("includes a note snippet when the match is in the note (not the topic)", () => {
+    const [hit] = searchLibrary(docs, "pipeline");
+    expect(hit.nodeId).toBe("b");
+    expect(hit.snippet).toContain("pipeline");
+    // A topic match carries no snippet (the topic itself is the context).
+    expect(searchLibrary(docs, "Sales")[0].snippet).toBeUndefined();
   });
 
   it("returns an empty list for a blank query", () => {

@@ -104,7 +104,7 @@ All pure client-side derivations over the in-memory doc.
 | ~~Search beyond topic+note~~ ✅ shipped | also matches tags, markers, hyperlink, callouts, attachment names, resources | `done` |
 | ~~Deep-link to a node~~ ✅ shipped | `?map=&node=` centres + selects on load; Copy-link command | `done` |
 | ~~Cross-map quick switcher in ⌘K~~ ✅ shipped | switch maps / jump across maps from the keyboard | `done` |
-| Library search result context | path/breadcrumb + snippet, scope-narrowable | `in·low·M·partial` |
+| ~~Library search result context~~ ✅ shipped | path/breadcrumb + note snippet; operators narrow scope | `done` |
 | ~~Reveal-in-outline auto-scroll~~ ✅ shipped | Outline scrolls the selected row into view | `done` |
 | Find-results list | clickable list of all matches vs only next/prev | `?·low·M·partial` |
 

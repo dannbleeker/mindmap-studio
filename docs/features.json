@@ -1824,6 +1824,15 @@
       "manual": false,
       "book": false,
       "bookExample": false
+    },
+    {
+      "id": "search-result-context",
+      "name": "Search-across-maps results show ancestor breadcrumb + note snippet",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
     }
   ]
 }

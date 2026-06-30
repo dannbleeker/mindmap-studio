@@ -20,6 +20,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
     "Copy link to this topic" command + More-menu item copy it (a standalone PWA has no address bar).
   - **Back / forward navigation** — `Alt+←` / `Alt+→` (and ⌘K "Go back" / "Go forward") retrace the
     topics you've visited, across maps too, browser-style.
+  - **Search-across-maps result context** — each cross-map hit now shows its ancestor breadcrumb
+    (`Root › Branch › …`) and, when the match is in the note, a short snippet — so a bare topic like
+    "Tasks" is placeable at a glance. Operators (above) narrow scope in this overlay too.
 
 - **Data-safety pack (UI review — gap groups 9/11).** Local-first durability for a no-backend PWA:
   - **Trash / undo-delete** — deleting a map moves it to a recoverable Trash (a `meta.trashedAt` flag)

@@ -31,6 +31,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   - **New map from this topic**: copy the selected branch out into a fresh standalone library map.
   - **Insert map as branch**: graft another library map's tree under the selected topic.
 
+- **Big-map virtualisation + cinematic walkthrough (UI review — gap groups 6/7).**
+  - **Big-map virtualisation**: above ~500 nodes the canvas renders only the elements in/near the
+    viewport (React Flow `onlyRenderVisibleElements`), keeping pan/zoom/edit fluid on large maps; off on
+    smaller maps to avoid pop-in.
+  - **Cinematic visual-map walkthrough**: the guided walk gains a 🎬 toggle that frames each step's whole
+    branch with an animated zoom (Prezi-style) on the real canvas — the styled map *is* the slide, and the
+    camera flies between branches. Remembered across sessions.
+
 ### Fixed
 
 - **⌘K command palette was unstyled in the editor.** The palette's `.st-cmdk*` CSS lived in `start.css`,

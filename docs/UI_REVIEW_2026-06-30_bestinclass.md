@@ -67,7 +67,8 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 > reveal-in-outline auto-scroll (G2).
 > **Wave 2 ("serious maps")** — sort children (G4), multi-branch clipboard (G4), "Links to" outgoing
 > inspector (G3), map-wide relationships panel (G3), promote-branch-to-map (G4), merge-map-as-branch (G4).
-> The remaining list is what's left to build.
+> **Flagships** — big-map virtualisation (G6), visual-map slides + cinematic zoom (G7, as a 🎬 mode on the
+> guided walk). The remaining list is what's left to build.
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
@@ -152,7 +153,7 @@ The three colour gaps are high-impact S-effort: the model fields already accept 
 Mostly React Flow flag/viewport work; the cinematic-zoom item overlaps the presentation cluster.
 | Gap | What | Tags |
 |---|---|---|
-| Big-map virtualisation | `onlyRenderVisibleElements` — fluid 1000+ nodes | `in·high·L·missing` |
+| ~~Big-map virtualisation~~ ✅ shipped | `onlyRenderVisibleElements` — fluid 1000+ nodes | `done` |
 | Auto-fit / keep-in-view after structural edits | pan/zoom so new/remaining content stays visible | `in·med·M·partial` |
 | Partial / touch marquee + no-modifier lasso | select any node a marquee touches; plain left-drag | `in·med·S·partial` |
 | Snap-to-grid on free canvas | optional 8/16px grid, distinct from neighbour guides | `in·low·S·missing` |
@@ -165,9 +166,9 @@ The largest lens. Presenter-control items are cheap S-effort wins; visual-slide 
 | Gap | What | Tags |
 |---|---|---|
 | ~~Presenter pacing timer / elapsed clock~~ ✅ shipped | live elapsed/remaining in presenter view | `done` |
-| Slides rendered as the visual map | styled fragment (boxes/colours/icons), not a `<ul>` of text | `in·high·L·missing` |
-| Cinematic zoom walkthrough | Prezi / XMind-Pitch camera fly along an authored path | `in·high·L·missing` |
-| Cinematic node-to-node zoom from the deck | smooth fly between nodes vs constant-zoom step | `?·med·L·partial` |
+| ~~Slides rendered as the visual map~~ ✅ shipped | the guided-walk canvas IS the styled slide (🎬 mode) | `done` |
+| ~~Cinematic zoom walkthrough~~ ✅ shipped | animated branch-framing fly on the real canvas (🎬 walk) | `done` |
+| ~~Cinematic node-to-node zoom~~ ✅ shipped | 🎬 walk frames each branch with an animated zoom | `done` |
 | Speaker notes in exported deck / PPTX | the script travels with the artifact | `in·med·M·partial` |
 | PPTX honours the curated deck order/notes | currently builds the auto deck | `in·med·S·partial` |
 | Export branch / selection only | share one part (image/SVG/HTML/deck) | `in·med·M·missing` |

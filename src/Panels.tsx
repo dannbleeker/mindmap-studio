@@ -1790,6 +1790,8 @@ export function WalkBar({
   onPrev,
   onNext,
   onExit,
+  cinematic,
+  onToggleCinematic,
 }: {
   index: number;
   total: number;
@@ -1798,6 +1800,9 @@ export function WalkBar({
   onPrev: () => void;
   onNext: () => void;
   onExit: () => void;
+  /** Cinematic framing on? (zoom to each branch vs centre the topic). */
+  cinematic?: boolean;
+  onToggleCinematic?: () => void;
 }) {
   const btn: CSSProperties = { padding: "2px 9px", fontSize: fontSize.md };
   return (
@@ -1846,6 +1851,23 @@ export function WalkBar({
         <span style={{ fontSize: fontSize.sm, color: colors.muted, whiteSpace: "nowrap" }}>
           {index + 1} / {total}
         </span>
+        {onToggleCinematic ? (
+          <Button
+            onClick={onToggleCinematic}
+            aria-pressed={!!cinematic}
+            style={{
+              ...btn,
+              ...(cinematic ? { background: colors.accent, color: colors.white } : {}),
+            }}
+            title={
+              cinematic
+                ? "Cinematic zoom on — frames each branch (click for flat 100%)"
+                : "Cinematic zoom off — centres each topic (click to zoom each branch)"
+            }
+          >
+            🎬
+          </Button>
+        ) : null}
         <Button onClick={onExit} style={btn} title="Exit walk (Esc)">
           Exit
         </Button>

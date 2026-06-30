@@ -1989,6 +1989,8 @@ export function App() {
                   onPrev={() => guidedWalk.step(-1)}
                   onNext={() => guidedWalk.step(1)}
                   onExit={guidedWalk.exit}
+                  cinematic={guidedWalk.cinematic}
+                  onToggleCinematic={guidedWalk.toggleCinematic}
                 />
               ) : null}
             </div>

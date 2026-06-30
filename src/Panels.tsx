@@ -623,10 +623,14 @@ export function OutlinePanel({
   };
   const [activeId, setActiveId] = useState<string | null>(null);
   const rowRefs = useRef(new Map<string, HTMLDivElement | null>());
-  // Follow the canvas selection: when it changes, move the roving focus to that row.
+  // Follow the canvas selection: when it changes, move the roving focus to that row AND scroll it into
+  // view (reveal-in-outline), so selecting a node on the canvas surfaces its row in a long outline.
   // biome-ignore lint/correctness/useExhaustiveDependencies: track selectedId only, not the per-render rowIds array.
   useEffect(() => {
-    if (selectedId && rowIds.includes(selectedId)) setActiveId(selectedId);
+    if (selectedId && rowIds.includes(selectedId)) {
+      setActiveId(selectedId);
+      rowRefs.current.get(selectedId)?.scrollIntoView?.({ block: "nearest" });
+    }
   }, [selectedId]);
   const activeRow = activeId && rowIds.includes(activeId) ? activeId : (rowIds[0] ?? null);
   const focusRow = (id: string | null) => {

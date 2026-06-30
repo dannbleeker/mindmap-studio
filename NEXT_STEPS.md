@@ -142,6 +142,28 @@ One deferred tail:
   (Export "last format" recency row, full Start radius-scale tokenisation, and the min-height-node
   lower-right de-crowd were the other deferred items — all shipped on request; see CHANGELOG.)
 
+## UI improvement research (2026-06-30) — advisory, not yet scheduled
+
+A fresh deep-research pass (app run + screenshotted, full design-system/chrome/node code inventory,
+six external research fan-outs on 2025–2026 canvas-app UX, React-Flow a11y, and onboarding) is written
+up in [`docs/UI_RESEARCH_2026-06-30.md`](docs/UI_RESEARCH_2026-06-30.md). The app is already polished;
+the report is the *next tier* (polished-functional → best-in-class feel), with everything cross-checked
+against the as-built app so nothing duplicates shipped work. Proposed additive phases UI-1…UI-7, in
+priority order:
+
+- **UI-1** — themed dialogs for the editor canvas (native `window.prompt`/`confirm` still in
+  `FlowMindMap.tsx`/`Panels.tsx`/`App.tsx`; Start was already migrated). **S**
+- **UI-2** — token maturation: type/weight/motion/elevation/opacity scales; fix `RichEditToolbar`
+  dark-mode (`#fff` literal); unify the two `Chip`s; add a node-fill/label contrast assertion to the gate. **M**
+- **UI-3** — *(marquee)* transient selection-anchored contextual action bar; de-crowd node affordances. **M–L**
+- **UI-4** — collapsible-dock default + tablet inspector-overlay breakpoint (reclaim the ~44% chrome). **M**
+- **UI-5** — React-Flow-native keyboard a11y + `role="tree"` SR view + WCAG-2.2 audit (2.5.7/2.5.8/2.4.11). **M**
+- **UI-6** — motion/depth polish on the new tokens; zoom-to-selection + Shift+1/2. **S–M**
+- **UI-7** — empty-state split (first-run vs deleted-everything) + optional first-run intent picker. **S**
+
+Nothing here is committed scope — it's a researched backlog to pull from. AI assist stays decided-against
+(see *Deferred*); the report only notes the category's positioning shift, not a reversal.
+
 ## Open items
 
 _No other actionable items._ The MindManager `.mmap` importer is now feature-complete for its scope — Phases A–C

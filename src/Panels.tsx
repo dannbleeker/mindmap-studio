@@ -211,16 +211,31 @@ export function CollapsibleSection({
 }
 
 // Per-topic styling bar: shape, fill, border, bold — applied to the selected node.
+// Native <input type="color"> only round-trips 6-digit hex; seed it from the live value when that's a
+// hex string, else fall back to a sensible default so the picker opens somewhere reasonable.
+const hexOr = (v: string | undefined, fallback: string) =>
+  v && /^#[0-9a-fA-F]{6}$/.test(v) ? v : fallback;
+
 export function StyleBar({
   onStyle,
+  onBranchColor,
   namedStyles = [],
   wrapWidth,
+  textColor,
+  fillColor,
+  branchColor,
 }: {
   onStyle: (patch: Partial<NodeStyle>) => void;
+  /** Set the per-node branch/connector colour (separate from NodeStyle); enables the Branch picker. */
+  onBranchColor?: (color: string) => void;
   /** Saved presets surfaced as a quick-apply swatch gallery (#15); empty = no Presets row. */
   namedStyles?: NamedStyle[];
   /** The selected node's current `style.maxWidth` — seeds the Wrap slider so it reflects the selection. */
   wrapWidth?: string;
+  /** Current text / fill / branch colours — seed the native colour pickers so they open on the live value. */
+  textColor?: string;
+  fillColor?: string;
+  branchColor?: string;
 }) {
   // The Wrap slider is the one StyleBar control that reflects current state (the rest are write-only); seed
   // it from the selection and re-seed when the selected node changes.
@@ -247,6 +262,31 @@ export function StyleBar({
     <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)", margin: "0 2px 0 6px" }}>
       {text}
     </span>
+  );
+  // A free colour picker (native swatch) — the arbitrary-colour complement to the FILL/BORDER preset rows.
+  const colorCtl = (
+    value: string | undefined,
+    fallback: string,
+    onPick: (c: string) => void,
+    title: string,
+    aria: string,
+  ) => (
+    <input
+      type="color"
+      value={hexOr(value, fallback)}
+      onChange={(e) => onPick(e.target.value)}
+      title={title}
+      aria-label={aria}
+      style={{
+        width: 22,
+        height: 18,
+        padding: 0,
+        border: `1px solid ${colors.controlBorder}`,
+        borderRadius: radius.xs,
+        background: "none",
+        cursor: "pointer",
+      }}
+    />
   );
   // A mini preview of each geometric shape, drawn from the very same path builder the canvas and
   // exporter use — so the picker icon always matches what lands on the node.
@@ -359,6 +399,18 @@ export function StyleBar({
       >
         ✕
       </button>
+      {label("Colour")}
+      {colorCtl(textColor, "#2b2a26", (c) => onStyle({ color: c }), "Text colour", "Text colour")}
+      {colorCtl(fillColor, "#ffffff", (c) => onStyle({ background: c }), "Fill colour", "Fill colour")}
+      {onBranchColor
+        ? colorCtl(
+            branchColor,
+            "#4f46e5",
+            onBranchColor,
+            "Branch (connector) colour",
+            "Branch colour",
+          )
+        : null}
       <button
         type="button"
         style={styleBtn}
@@ -2044,6 +2096,7 @@ export function InfoPanel({
   onBulkToggleTag,
   onPickSticker,
   onStyle,
+  onBranchColor,
   namedStyles,
   onAddTag,
   onRemoveTag,
@@ -2104,6 +2157,8 @@ export function InfoPanel({
   onBulkToggleTag?: (tag: string) => void;
   onPickSticker: (sticker: Sticker) => void;
   onStyle: (patch: Partial<NodeStyle>) => void;
+  /** Set the selected node's branch/connector colour (drives the StyleBar Branch colour picker). */
+  onBranchColor?: (color: string) => void;
   /** Saved presets for the StyleBar quick-apply gallery (#15). */
   namedStyles?: NamedStyle[];
   onAddTag: (tag: string) => void;
@@ -2349,8 +2404,12 @@ export function InfoPanel({
                 <>
                   <StyleBar
                     onStyle={onStyle}
+                    onBranchColor={onBranchColor}
                     namedStyles={namedStyles}
                     wrapWidth={node?.style?.maxWidth}
+                    textColor={node?.style?.color}
+                    fillColor={node?.style?.background}
+                    branchColor={node?.branchColor}
                   />
                   {!multi && (
                     // Markers lead the Details tab in single + bulk; Style keeps the per-item sticker

@@ -43,6 +43,8 @@ export interface MapExports {
   exportSmmx: () => Promise<void>;
   exportMmap: () => Promise<void>;
   exportPng: () => Promise<void>;
+  /** Copy the rendered map to the system clipboard as a PNG image (no file download). */
+  copyPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
   exportInteractiveHtml: () => Promise<void>;
@@ -146,6 +148,29 @@ export function useMapExports(
       }
       const blob = await svgToPng(clean);
       if (blob) downloadBlob(blob, `${baseName()}.png`);
+    },
+    // Copy the rendered map to the clipboard as a PNG — the fastest map→paste path (into chat, email,
+    // a slide) with no file round-trip. Same SVG→PNG raster as exportPng; writes via the async Clipboard
+    // API, which needs a user gesture + a secure context (https/localhost) and is caught when blocked.
+    async copyPng() {
+      const clean = await cleanSvg();
+      if (!clean) {
+        noCanvas();
+        return;
+      }
+      const blob = await svgToPng(clean);
+      if (!blob) {
+        onHint?.("Couldn't render the map to an image.");
+        return;
+      }
+      try {
+        if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write)
+          throw new Error("clipboard image write unsupported");
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        onHint?.("Map copied to the clipboard as an image.");
+      } catch {
+        onHint?.("Couldn't copy the image — your browser may block clipboard image writes.");
+      }
     },
     async exportSvg() {
       const clean = await cleanSvg();

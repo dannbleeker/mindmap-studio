@@ -1657,6 +1657,8 @@ function FlowInner({
       setBackdropRings: (delta) => apply(setBackdropRings(docRef.current, delta)),
       clearBackdrop: () => apply(clearBackdrop(docRef.current)),
       setSelectedStyle: (patch) => withSelectedAll((doc, id) => mergeStyle(doc, id, patch)),
+      setSelectedBranchColor: (color) =>
+        withSelectedAll((doc, id) => setBranchColor(doc, id, color)),
       copySelectedStyle: () => {
         const id = selectedRef.current;
         return id ? (findAnyNode(docRef.current, id)?.style ?? {}) : null;

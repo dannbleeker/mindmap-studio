@@ -143,6 +143,10 @@ export interface MindMapHandle {
   /** Merge a style patch into the selected node(s) ("" / null clears a key); false if none selected.
    *  Applies to the whole selection (bulk). */
   setSelectedStyle: (patch: Partial<NodeStyle>) => boolean;
+  /** Set the per-node branch/connector colour on the selected node(s) ("" clears it, falling back to the
+   *  auto-assigned palette colour); false if nothing is selected. `branchColor` lives on the node, not in
+   *  NodeStyle, so it needs its own setter rather than riding `setSelectedStyle`. */
+  setSelectedBranchColor: (color: string) => boolean;
   /** Read the anchor selected node's style (the Format-Painter "copy"); null if nothing is selected.
    *  Returns an empty object for a selected-but-unstyled node. Paste with `setSelectedStyle`. */
   copySelectedStyle: () => NodeStyle | null;

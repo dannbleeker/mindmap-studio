@@ -193,6 +193,8 @@ export interface ToolbarIo {
   exportLibrary: () => void;
   copyOutline: () => void;
   copyTable: () => void;
+  /** Copy the rendered map to the clipboard as a PNG image (no file). */
+  copyPng: () => void;
   handleFile: (event: ChangeEvent<HTMLInputElement>) => void;
   /** Native disk-file actions (File System Access API, with a download/upload fallback). */
   openFile: () => void;
@@ -350,6 +352,7 @@ export function Toolbar({
       group: "Image",
       items: [
         [".png (image)", io.exportPng],
+        ["Copy image to clipboard", io.copyPng],
         [".svg (vector)", io.exportSvg],
       ],
     },

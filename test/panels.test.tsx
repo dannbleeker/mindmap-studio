@@ -412,6 +412,7 @@ describe("InfoPanel", () => {
         jumpTargets={[]}
         onJump={noop}
         backlinks={backlinks}
+        outgoingLinks={[]}
         onFollowBacklink={onFollowBacklink}
         onMinimize={noop}
         {...over}
@@ -631,6 +632,32 @@ describe("InfoPanel", () => {
     expect(screen.getByText(/blocks/)).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: /Risk/ }));
     expect(onFollow).toHaveBeenCalledWith("src2");
+  });
+
+  it("lists outgoing links ('Links to') and follows one on click", async () => {
+    const onFollow = vi.fn();
+    const outgoingLinks = [
+      { id: "t1", topic: "Spec", kind: "hyperlink" as const },
+      { id: "t2", topic: "Owner", kind: "relationship" as const, label: "assigned" },
+    ];
+    renderInfo(
+      selected,
+      node,
+      undefined,
+      undefined,
+      undefined,
+      [],
+      onFollow,
+      undefined,
+      undefined,
+      {
+        outgoingLinks,
+      },
+    );
+    expect(screen.getByText("Links to")).toBeTruthy();
+    expect(screen.getByText(/assigned/)).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: /Spec/ }));
+    expect(onFollow).toHaveBeenCalledWith("t1");
   });
 
   it("hides 'Linked from' in bulk mode (per-item, single-topic only)", () => {
@@ -1251,6 +1278,7 @@ describe("InfoPanel (interaction)", () => {
         jumpTargets={[]}
         onJump={noop}
         backlinks={[]}
+        outgoingLinks={[]}
         onFollowBacklink={noop}
         onMinimize={onMinimize}
       />,

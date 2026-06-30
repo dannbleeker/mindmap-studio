@@ -4,6 +4,7 @@ import {
   backlinksFor,
   dropWhereInBox,
   markerTagIndex,
+  outgoingLinksFor,
   outlineDropWhere,
   outlineNumbers,
   outlineRows,
@@ -193,5 +194,24 @@ describe("backlinksFor", () => {
     expect(backlinksFor(linkDoc(), "a")).toEqual([
       { id: "b", topic: "Beta", kind: "relationship" },
     ]);
+  });
+});
+
+describe("outgoingLinksFor", () => {
+  it("collects the node's own #node= hyperlink target + relationship edges FROM it", () => {
+    expect(outgoingLinksFor(linkDoc(), "a")).toEqual([
+      { id: "b", topic: "Beta", kind: "hyperlink" }, // Alpha's #node=b
+    ]);
+    expect(outgoingLinksFor(linkDoc(), "c")).toEqual([
+      { id: "b", topic: "Beta", kind: "relationship", label: "blocks" }, // c→b edge
+    ]);
+  });
+
+  it("excludes self-links, #map= / external hyperlinks, and incoming edges", () => {
+    // Beta's own hyperlink is a self-link (excluded); only the b→a relationship is outgoing.
+    expect(outgoingLinksFor(linkDoc(), "b")).toEqual([
+      { id: "a", topic: "Alpha", kind: "relationship" },
+    ]);
+    expect(outgoingLinksFor(linkDoc(), "e")).toEqual([]); // external hyperlink ignored
   });
 });

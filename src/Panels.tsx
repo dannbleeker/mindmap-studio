@@ -677,8 +677,10 @@ export function OutlinePanel({
     const i = rows.findIndex((r) => r.id === activeRow);
     if (i < 0) return;
     // Shift+Arrows reorder / re-indent the active row (the keyboard equivalent of the ◂ ▸ drag-only
-    // controls), keeping focus on the moved row. Only when the outline is editable (onMove/onIndent set).
-    if (e.shiftKey && editable && activeRow) {
+    // controls), keeping focus on the moved row. Only when the outline is editable (onMove/onIndent set)
+    // AND not filtering — the flat filtered view hides structure, so sibling math would reparent across
+    // branches (mirrors the drag path's `!q` guard).
+    if (e.shiftKey && editable && activeRow && !q) {
       if (e.key === "ArrowUp" || e.key === "ArrowDown") {
         const j = e.key === "ArrowUp" ? prevSibling(i) : nextSibling(i);
         if (j >= 0) {

@@ -1811,9 +1811,10 @@ function FlowInner({
         const t = text.trim();
         if (!t) return;
         const parentId = selectedRef.current ?? docRef.current.root.id;
-        // Burst capture: a pasted multi-line outline becomes a whole subtree (indentation/headings →
-        // nesting) in one undo step; a single line is just one topic. addSubtree re-ids the forest.
-        const parsed = parseOutline(t);
+        // Burst capture: a pasted MULTI-line outline becomes a whole subtree (indentation/headings →
+        // nesting) in one undo step. A single line is captured verbatim — parseOutline would strip a
+        // leading bullet/number/heading from a lone topic (e.g. "1. Intro" → "Intro"). addSubtree re-ids.
+        const parsed = t.includes("\n") ? parseOutline(t) : [];
         const nodes = parsed.length ? parsed : [{ id: "q", topic: t, children: [] }];
         // Apply without a selectId so the parent stays selected — rapid entry adds siblings.
         const res = addSubtree(docRef.current, parentId, nodes);

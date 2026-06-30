@@ -1305,8 +1305,14 @@ export function App() {
       const link = classifyLink(url);
       if (link.kind === "node") mapRef.current?.focusNode(link.id);
       else if (link.kind === "map") {
-        if (link.nodeId) pendingFocus.current = link.nodeId;
-        void switchMap(link.id);
+        // If the target IS the current map, focus directly — switchMap early-returns on the same id,
+        // so going through pendingFocus would never fire (and would strand a stale id). Mirrors goToHit.
+        if (link.id === liveDocRef.current.id) {
+          if (link.nodeId) mapRef.current?.focusNode(link.nodeId);
+        } else {
+          if (link.nodeId) pendingFocus.current = link.nodeId;
+          void switchMap(link.id);
+        }
       }
     },
     [switchMap],
@@ -2080,9 +2086,14 @@ export function App() {
                 }}
                 onMapLink={(id, nodeId) => {
                   // Cross-map topic link: focus the target node once the new map mounts (the
-                  // pendingFocus effect, keyed on doc). A bare map link just switches.
-                  if (nodeId) pendingFocus.current = nodeId;
-                  void switchMap(id);
+                  // pendingFocus effect, keyed on doc). If it's already the current map, focus directly —
+                  // switchMap early-returns on the same id, so pendingFocus would never fire.
+                  if (id === liveDocRef.current.id) {
+                    if (nodeId) mapRef.current?.focusNode(nodeId);
+                  } else {
+                    if (nodeId) pendingFocus.current = nodeId;
+                    void switchMap(id);
+                  }
                 }}
                 onDropFilesOnNode={async (id, files) => {
                   // An image becomes the topic's picture (first image wins); everything else attaches.

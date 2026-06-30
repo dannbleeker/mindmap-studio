@@ -138,6 +138,27 @@ describe("OutlinePanel", () => {
     expect(onIndent).toHaveBeenCalledWith("a", "out");
   });
 
+  it("disables Shift+Arrow reorder while filtering (the flat view hides structure)", () => {
+    const onMove = vi.fn();
+    const onIndent = vi.fn();
+    render(
+      <OutlinePanel
+        root={sampleRoot()}
+        filter="Surveys"
+        onFilterChange={noop}
+        onPick={noop}
+        onRename={noop}
+        onIndent={onIndent}
+        onMove={onMove}
+      />,
+    );
+    const tree = screen.getByRole("tree");
+    fireEvent.keyDown(tree, { key: "ArrowDown", shiftKey: true });
+    fireEvent.keyDown(tree, { key: "ArrowRight", shiftKey: true });
+    expect(onMove).not.toHaveBeenCalled();
+    expect(onIndent).not.toHaveBeenCalled();
+  });
+
   it("rapid keyboard entry: Enter adds a sibling, Tab a child, Shift+Tab outdents (A3)", async () => {
     const onRename = vi.fn();
     // Returning ids that DON'T exist in the tree would unmount the editor; map them back to a real row

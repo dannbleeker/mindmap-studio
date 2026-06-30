@@ -270,6 +270,18 @@ describe("FlowMindMap canvas", () => {
     expect(parent?.children.map((c) => c.topic)).toEqual(["Child 1", "Child 2"]);
   });
 
+  it("quickAdd keeps a single line verbatim (no markdown-marker stripping)", () => {
+    const { h, onChange } = mount();
+    run(() => h.focusNode("a"));
+    onChange.mockClear();
+    // A lone topic that begins with a list/heading marker must NOT be reinterpreted as an outline.
+    run(() => h.quickAdd("1. Introduction"));
+    const a = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "a",
+    );
+    expect(a?.children.at(-1)?.topic).toBe("1. Introduction");
+  });
+
   it("hovers a collapsed +N toggle to peek the first hidden child titles (Phase 10)", () => {
     const collapsedDoc: MindMapDoc = {
       schemaVersion: 1,

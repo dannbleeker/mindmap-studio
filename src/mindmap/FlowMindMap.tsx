@@ -23,6 +23,7 @@ import { editorConfirm, editorPrompt } from "../components/editorDialogs";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors, motion } from "../design/tokens";
 import { MARKER_PALETTE, markerImage } from "../icons";
+import { parseOutline } from "../io/pasteOutline";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
@@ -1809,8 +1810,12 @@ function FlowInner({
         const t = text.trim();
         if (!t) return;
         const parentId = selectedRef.current ?? docRef.current.root.id;
+        // Burst capture: a pasted multi-line outline becomes a whole subtree (indentation/headings →
+        // nesting) in one undo step; a single line is just one topic. addSubtree re-ids the forest.
+        const parsed = parseOutline(t);
+        const nodes = parsed.length ? parsed : [{ id: "q", topic: t, children: [] }];
         // Apply without a selectId so the parent stays selected — rapid entry adds siblings.
-        const res = addSubtree(docRef.current, parentId, [{ id: "q", topic: t, children: [] }]);
+        const res = addSubtree(docRef.current, parentId, nodes);
         apply({ doc: res.doc });
       },
       addChildToSelected: () => withSelected((id) => apply(addChild(docRef.current, id), true)),

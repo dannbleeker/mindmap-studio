@@ -258,6 +258,18 @@ describe("FlowMindMap canvas", () => {
     expect(a?.children.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("quickAdd splits a pasted multi-line outline into a subtree (burst capture)", () => {
+    const { h, onChange } = mount(); // root > [a (> a1), b]
+    run(() => h.focusNode("a"));
+    onChange.mockClear();
+    run(() => h.quickAdd("Parent\n  Child 1\n  Child 2"));
+    const a = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "a",
+    );
+    const parent = a?.children.find((n) => n.topic === "Parent");
+    expect(parent?.children.map((c) => c.topic)).toEqual(["Child 1", "Child 2"]);
+  });
+
   it("hovers a collapsed +N toggle to peek the first hidden child titles (Phase 10)", () => {
     const collapsedDoc: MindMapDoc = {
       schemaVersion: 1,

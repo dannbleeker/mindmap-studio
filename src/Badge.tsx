@@ -1,10 +1,12 @@
 import type { CSSProperties, ReactNode } from "react";
 import { formatDateShort } from "./taskDate";
 
-// Small badge "chips" shown on topic nodes + board cards. Centralised here so the node and the
-// Kanban card render identical chips (they had drifted) and the chip shape lives in one place.
+// Small read-only badges shown on topic nodes + board cards. Centralised here so the node and the
+// Kanban card render identical badges (they had drifted) and the shape lives in one place. Named
+// `Badge` (a <span>) to disambiguate from the interactive toggle `Chip` (a <button>) in
+// design/primitives.tsx — they're different widgets that previously shared the bare name "Chip".
 
-const CHIP: CSSProperties = {
+const BADGE: CSSProperties = {
   fontSize: 10.5,
   lineHeight: "16px",
   padding: "0 5px",
@@ -12,8 +14,8 @@ const CHIP: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-/** A small badge. Neutral grey by default; pass bg/color/fontWeight for variants. */
-export function Chip({
+/** A small read-only badge. Neutral grey by default; pass bg/color/fontWeight for variants. */
+export function Badge({
   children,
   bg = "rgba(0,0,0,0.06)",
   color = "inherit",
@@ -27,13 +29,13 @@ export function Chip({
   title?: string;
 }) {
   return (
-    <span title={title} style={{ ...CHIP, background: bg, color, fontWeight }}>
+    <span title={title} style={{ ...BADGE, background: bg, color, fontWeight }}>
       {children}
     </span>
   );
 }
 
-/** A due-date chip; red when overdue. `variant="badge"` = a full chip (on a node); `"text"` = plain
+/** A due-date badge; red when overdue. `variant="badge"` = a full badge (on a node); `"text"` = plain
  *  coloured text (on a board card, where it inherits the card's font size). */
 export function DateChip({
   due,
@@ -57,13 +59,13 @@ export function DateChip({
     );
   }
   return (
-    <Chip
+    <Badge
       title={title}
       bg={overdue ? "#fde2e2" : "rgba(0,0,0,0.06)"}
       color={overdue ? "#b42318" : "inherit"}
       fontWeight={overdue ? 600 : 400}
     >
       {label}
-    </Chip>
+    </Badge>
   );
 }

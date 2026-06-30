@@ -669,7 +669,7 @@ export function buildFlowSvg(
     }
     if (d.due) {
       const over = isOverdue(d.due, d.progress?.progress ?? 0, today);
-      const label = `📅 ${formatDateShort(d.due)}`; // match the canvas DateChip (Chip.tsx) — keep the glyph
+      const label = `📅 ${formatDateShort(d.due)}`; // match the canvas DateChip (Badge.tsx) — keep the glyph
       const chipW = label.length * 6.2 + 10;
       const chipY = r.y + r.h - 20;
       parts.push(

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DateChip } from "./Chip";
+import { DateChip } from "./Badge";
 import { ProgressPie } from "./ProgressPie";
 import { type BoardColumn, CARD_DND_TYPE, UNTAGGED, boardColumns } from "./board";
 import type { MindMapDoc } from "./model/types";

@@ -113,7 +113,7 @@ export function Select({
 }
 
 // The toggle-chip look used by the Filter panel marker/tag chips: a rounded outline that fills with
-// the accent when selected. (Distinct from src/Chip.tsx, which is a tiny read-only badge on nodes.)
+// the accent when selected. (Distinct from `Badge` in src/Badge.tsx, a tiny read-only <span> badge.)
 const CHIP_BASE: CSSProperties = {
   borderRadius: radius.md,
   cursor: "pointer",

@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Chip, DateChip } from "../../Chip";
+import { Badge, DateChip } from "../../Badge";
 import { ProgressPie } from "../../ProgressPie";
 import { markerImage } from "../../icons";
 import { sanitizeRich } from "../../io/richText";
@@ -114,7 +114,9 @@ function RichEditToolbar() {
     background: "transparent",
     cursor: "pointer",
     font: "inherit",
-    color: "#1f2933",
+    // Themed so the floating rich-text bar follows the app appearance (was a fixed near-black that
+    // sat unreadable on the dark-mode card surface below).
+    color: "var(--ed-ink, #1f2933)",
   };
   return (
     <div
@@ -128,8 +130,9 @@ function RichEditToolbar() {
         gap: 2,
         padding: 3,
         borderRadius: 7,
-        background: "#fff",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+        // Themed surface + shadow (was a hardcoded white card + dark shadow — a light box in dark mode).
+        background: "var(--ed-card, #fff)",
+        boxShadow: "var(--ed-shadow-pop, 0 2px 10px rgba(0,0,0,0.2))",
         zIndex: 6,
       }}
     >
@@ -160,7 +163,14 @@ function RichEditToolbar() {
       >
         U
       </button>
-      <span style={{ width: 1, alignSelf: "stretch", background: "#e4e4e7", margin: "0 2px" }} />
+      <span
+        style={{
+          width: 1,
+          alignSelf: "stretch",
+          background: "var(--ed-border, #e4e4e7)",
+          margin: "0 2px",
+        }}
+      />
       {RICH_COLORS.map((c) => (
         <button
           key={c}
@@ -787,19 +797,19 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                   }}
                   style={{ border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
                 >
-                  <Chip bg={priorityColor(priority)} color="#fff" fontWeight={600}>
+                  <Badge bg={priorityColor(priority)} color="#fff" fontWeight={600}>
                     {priorityLabel(priority)}
-                  </Chip>
+                  </Badge>
                 </button>
               ) : (
-                <Chip
+                <Badge
                   title={`${priorityLabel(priority)} priority`}
                   bg={priorityColor(priority)}
                   color="#fff"
                   fontWeight={600}
                 >
                   {priorityLabel(priority)}
-                </Chip>
+                </Badge>
               )
             ) : null}
             {progress ? (
@@ -812,7 +822,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               <DateChip due={due} overdue={isOverdue(due, progress?.progress ?? 0, todayISO())} />
             ) : null}
             {attachmentCount ? (
-              <Chip
+              <Badge
                 title={
                   attachmentNames?.length
                     ? `Attachments:\n${attachmentNames.join("\n")}`
@@ -820,7 +830,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 }
               >
                 📎 {attachmentCount}
-              </Chip>
+              </Badge>
             ) : null}
           </div>
         ) : null}

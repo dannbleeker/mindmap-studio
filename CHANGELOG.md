@@ -5,7 +5,23 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **⌘K command palette was unstyled in the editor.** The palette's `.st-cmdk*` CSS lived in `start.css`,
+  which is imported only by the lazily-loaded Start screen — so opening a map straight into the editor
+  (the default view) left the palette as an unstyled, full-viewport list of every command. Moved the
+  modal styles into a co-located `CommandPalette.css` imported by the component, so they ship in the main
+  bundle and load wherever the palette renders.
+
 ### Added
+
+- **UI token-scale + a11y tails (UI research — UI-2 / UI-5 tails).** A `motion` scale (`--ed-dur-*` /
+  `--ed-ease`, consumed by the editor.css transitions) and a `typeScale` (title/body/label presets,
+  consumed in the dialogs) land the deferred UI-2 token work; the NodePopover shadow is tokenised onto
+  `--ed-shadow-pop` (now follows dark mode). For UI-5: a free-layout keyboard node-nudge (Ctrl/⌘+arrow
+  moves the selected node ±10px — a non-drag reposition, WCAG 2.5.7) and an always-present, read-only
+  screen-reader list of the map's relationships (cross-links were non-focusable SVG edges, invisible to
+  assistive tech).
 
 - **Contextual action bar on selection (UI research — UI-3).** The on-selection popover grew into a
   transient, selection-anchored action bar above the node — note / priority / link (the mouse twin of

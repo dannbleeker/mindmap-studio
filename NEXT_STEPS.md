@@ -154,11 +154,13 @@ priority order:
 - [x] **UI-1** — themed dialogs for the editor canvas (shipped — see CHANGELOG): imperative
   `editorPrompt`/`editorConfirm` + a single `<DialogHost/>` on the existing themed `<Dialog>`; all 8
   native `window.prompt`/`confirm` canvas sites migrated; `danger` colour token added.
-- [~] **UI-2** — token maturation. **Shipped (core):** `RichEditToolbar` dark-mode fix; the two
-  `Chip`s disambiguated (`src/Chip.tsx` → `Badge`/`src/Badge.tsx`, leaving the interactive toggle
-  `Chip`); a WCAG node-fill/label contrast assertion in the gate (`test/contrast.test.ts`).
-  **Deferred:** the broader motion / elevation / type-preset token *scales* (larger, visual-regression
-  risk; each new token also needs a consumer for knip).
+- [x] **UI-2** — token maturation (shipped — see CHANGELOG). **Core:** `RichEditToolbar` dark-mode fix;
+  the two `Chip`s disambiguated (`src/Chip.tsx` → `Badge`/`src/Badge.tsx`); a WCAG node-fill/label
+  contrast assertion in the gate (`test/contrast.test.ts`). **Token-scale tail (shipped):** a `motion`
+  scale (`--ed-dur-*`/`--ed-ease`, consumed by the editor.css transitions) + a `typeScale` (title/body/
+  label presets, consumed in the dialogs); NodePopover shadow tokenised onto `--ed-shadow-pop`. **Still
+  deferred (lowest ROI):** no elevation ramp (the 2-tier `--ed-shadow*` covers the chrome per the
+  research) and the inline-style transition sweep beyond editor.css.
 - [x] **UI-3** — *(marquee)* contextual action bar (shipped — see CHANGELOG): the on-selection
   NodePopover grew into the transient action bar (note / priority / link + collapse + More), and the
   on-hover `.mm-node-bar` pill was removed — a node is uncluttered at rest, actions appear on selection.
@@ -171,11 +173,12 @@ priority order:
   focus-visible rings. **5b:** canvas accessible names (edit field + collapse `aria-expanded`).
   **5c:** the Outline panel is now a `role="tree"` (treeitem/level/expanded/selected, roving tabindex,
   arrow/Home/End/Enter nav, canvas-selection sync) — the screen-reader-primary view. **5d:**
-  keyboard-create relationships (Ctrl/⌘+Shift+L → arrow → Enter). **Deferred tails:** always-mount a
-  visually-hidden Outline so the tree is an SR surface even when the panel is closed (a structural/perf
-  change — the panel is keyboard-openable today); keyboard node-*repositioning* in free layout (tree-mode
-  reorder keys already exist); programmatic `aria-label`s on cross-link edges (non-focusable SVG paths —
-  better surfaced via a future relationships list).
+  keyboard-create relationships (Ctrl/⌘+Shift+L → arrow → Enter). **Tails (shipped):** free-layout
+  keyboard node-nudge (Ctrl/⌘+arrow, WCAG 2.5.7); an always-present read-only SR list of relationships
+  (cross-links were invisible to AT). **Skipped (with rationale):** always-mounting the topic tree for
+  SR — it would duplicate every title in the DOM (breaking `getByText` across the suite) for marginal
+  gain over the canvas nodes + the openable Outline tree; cross-link edge `aria-label`s — superseded by
+  the SR relationships list (the edges are non-focusable SVG paths).
 - [x] **UI-6** — zoom + motion (shipped — see CHANGELOG): Shift+1 (fit all) / Shift+2 (fit selection,
   clamped) keybindings; canvas-animation durations consolidated into a `motion.dur` token. **Deferred:**
   tokenising the chrome's `0.12s`-style CSS transitions + an elevation ramp (low-impact, large diff).
@@ -184,11 +187,15 @@ priority order:
   Start's capture card + template gallery already cover intent selection; a modal gate would duplicate
   them (progressive-disclosure / overlay-overuse guidance).
 
-**The UI research report's actionable phases are complete.** Shipped: UI-1, UI-3, UI-4, UI-5, UI-6, UI-7,
-and UI-2 core. Still open (deferred, low-priority): the **UI-2 token-scale tail** (motion/elevation/
-type-preset *scales* + the chrome-transition tokenisation) and a couple of UI-5 tails (always-mount a
-hidden Outline; free-layout keyboard node-repositioning; edge aria-labels). AI assist stays
-decided-against (see *Deferred*); the report only notes the category's positioning shift, not a reversal.
+**The UI research report's actionable phases + their tails are complete** (UI-1…UI-7, incl. the UI-2
+token-scale tail and the UI-5 a11y tails). What remains is explicitly out of scope or skipped-with-
+rationale above (no elevation ramp; no always-mounted topic tree; the inline-transition sweep). AI assist
+stays decided-against (see *Deferred*); the report only notes the category's positioning shift, not a
+reversal.
+
+_Also fixed this session:_ a pre-existing bug where the ⌘K command palette rendered unstyled (a
+full-viewport list) in the editor — its CSS was lazy-loaded with the Start screen; moved to a co-located
+`CommandPalette.css`.
 
 ## Open items
 

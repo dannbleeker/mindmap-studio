@@ -65,7 +65,8 @@ function nodeMatches(
   today: string,
   effectiveProgress: number | undefined,
 ): boolean {
-  // Text matches topic or note (the same surfaces Find searches), case-insensitive.
+  // Text matches topic or note, case-insensitive. (The Power Filter has dedicated marker/tag
+  // pickers, so its free-text box stays scoped to the prose surfaces.)
   if (q && !`${n.topic} ${n.note ?? ""}`.toLowerCase().includes(q)) return false;
   // Marker / tag constraints are AND across categories, OR within one (any selected marker counts).
   if (c.markers.length && !c.markers.some((m) => n.icons?.includes(m))) return false;

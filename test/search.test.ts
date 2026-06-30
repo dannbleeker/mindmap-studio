@@ -37,6 +37,37 @@ describe("findMatches", () => {
   it("returns an empty list when nothing matches", () => {
     expect(findMatches(root, "xyz")).toEqual([]);
   });
+
+  it("matches a node by its tags, markers, hyperlink, callouts, attachments and resources", () => {
+    const rich: MapNode = {
+      id: "x",
+      topic: "Topic",
+      children: [
+        { id: "tag", topic: "n1", tags: ["urgent"], children: [] },
+        { id: "mark", topic: "n2", icons: ["flag-red"], children: [] },
+        { id: "link", topic: "n3", hyperlink: "https://example.com/spec", children: [] },
+        {
+          id: "call",
+          topic: "n4",
+          callouts: [{ id: "c", text: "remember the budget", dx: 0, dy: 0 }],
+          children: [],
+        },
+        {
+          id: "att",
+          topic: "n5",
+          attachments: [{ name: "contract.pdf", dataUrl: "data:,", size: 1 }],
+          children: [],
+        },
+        { id: "res", topic: "n6", task: { resources: ["Alice"] }, children: [] },
+      ],
+    };
+    expect(findMatches(rich, "urgent")).toEqual(["tag"]);
+    expect(findMatches(rich, "flag-red")).toEqual(["mark"]);
+    expect(findMatches(rich, "example.com")).toEqual(["link"]);
+    expect(findMatches(rich, "budget")).toEqual(["call"]);
+    expect(findMatches(rich, "contract.pdf")).toEqual(["att"]);
+    expect(findMatches(rich, "alice")).toEqual(["res"]);
+  });
 });
 
 describe("findDocMatches", () => {

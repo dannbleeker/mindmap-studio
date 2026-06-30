@@ -1,7 +1,23 @@
 import type { MapNode, MindMapDoc } from "./model/types";
 
-const matchesQuery = (node: MapNode, q: string): boolean =>
-  node.topic.toLowerCase().includes(q) || (node.note?.toLowerCase().includes(q) ?? false);
+// Every searchable surface of a node, joined into one lowercased haystack. Topic + note are the
+// primary content; tags, marker (icon) ids, the hyperlink, callout bubbles, attachment filenames,
+// and task resources are searchable too — so Find reaches a node by anything it actually carries.
+export const searchableText = (node: MapNode): string =>
+  [
+    node.topic,
+    node.note ?? "",
+    ...(node.tags ?? []),
+    ...(node.icons ?? []),
+    node.hyperlink ?? "",
+    ...(node.callouts?.map((c) => c.text) ?? []),
+    ...(node.attachments?.map((a) => a.name) ?? []),
+    ...(node.task?.resources ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+const matchesQuery = (node: MapNode, q: string): boolean => searchableText(node).includes(q);
 
 // Levenshtein edit distance, bounded: returns early (as max + 1) once the best possible exceeds
 // `max`, so a no-match is cheap. Pure.
@@ -32,15 +48,15 @@ export function fuzzyHit(text: string, q: string): boolean {
   return t.split(/\s+/).some((w) => w.length > 0 && editDistance(w, q, max) <= max);
 }
 
-const matchesFuzzy = (node: MapNode, q: string): boolean =>
-  fuzzyHit(node.topic, q) || (node.note ? fuzzyHit(node.note, q) : false);
+const matchesFuzzy = (node: MapNode, q: string): boolean => fuzzyHit(searchableText(node), q);
 
 const roots = (doc: MindMapDoc): MapNode[] => [doc.root, ...(doc.floatingTopics ?? [])];
 
-// Find node ids whose topic OR note contains the query (case-insensitive), in
-// depth-first order. Notes often hold the substantive content of a map, so Find
-// searches both. Pure + deterministic so it's unit-testable; the UI cycles
-// through the returned ids and focuses each on the canvas.
+// Find node ids whose searchable text contains the query (case-insensitive), in depth-first
+// order. The haystack is every surface a node carries — topic, note, tags, markers, hyperlink,
+// callouts, attachment names, task resources (see searchableText) — so Find reaches a node by
+// anything on it. Pure + deterministic so it's unit-testable; the UI cycles through the returned
+// ids and focuses each on the canvas.
 export function findMatches(
   root: MapNode,
   query: string,
@@ -75,9 +91,10 @@ export interface LibraryHit {
   topic: string;
 }
 
-// Search every map's topics + notes — the central tree AND floating topics — for the
-// query, returning hits with enough context to navigate to them. Pure + unit-tested; the
-// UI loads the library, filters with this, and jumps to the chosen map/node.
+// Search every map's nodes — the central tree AND floating topics — for the query across all
+// their searchable text (see searchableText), returning hits with enough context to navigate to
+// them. Pure + unit-tested; the UI loads the library, filters with this, and jumps to the chosen
+// map/node.
 export function searchLibrary(docs: MindMapDoc[], query: string): LibraryHit[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];

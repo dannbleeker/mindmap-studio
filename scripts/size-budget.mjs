@@ -7,7 +7,10 @@ import { gzipSync } from "node:zlib";
 
 // Raise/lower this deliberately (in the same commit as the change that moves it),
 // never silently. The entry chunk is the JS that loads on first visit.
-const BUDGET_KB = 150;
+// 150 → 153: the search & nav pack adds editor-core code (broadened Find +
+// operator/scoped search parser + back/forward navigation history) that can't be
+// meaningfully lazy-loaded, nudging the entry from 149.9 to ~152 kB gz.
+const BUDGET_KB = 153;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

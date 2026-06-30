@@ -12,6 +12,18 @@ import * as mapStore from "../src/store/mapStore";
 
 const flush = () => act(() => new Promise((r) => setTimeout(r, 0)));
 
+// Canvas viewport animations (fit / setCenter) run zero-duration here — see the design/tokens mock
+// below — so d3 completes them in a single frame instead of rescheduling itself frame-by-frame. That
+// keeps the synchronous-RAF mock below from recursing until wall-clock time elapses (a stack overflow)
+// and from leaking a half-finished transition past unmount.
+vi.mock("../src/design/tokens", async (importActual) => {
+  const actual = await importActual<typeof import("../src/design/tokens")>();
+  return {
+    ...actual,
+    motion: { ...actual.motion, dur: { ...actual.motion.dur, fit: 0, viewport: 0 } },
+  };
+});
+
 // App defers a focusNode via requestAnimationFrame on selection. Run RAF callbacks synchronously in
 // this suite so that deferred work executes inline (while still mounted) instead of firing after the
 // component unmounts at teardown — which would otherwise reach into a torn-down jsdom (null document).
@@ -296,6 +308,53 @@ describe("App (integration)", () => {
         await user.click(btn);
         await flush();
       }
+    }
+    expect(container.querySelector(".mm-editor")).toBeTruthy();
+  });
+
+  it("records back/forward navigation and copies a deep-link to the selected topic", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+    await flush();
+    await openEditor(user, container);
+
+    // Select topics so the nav history records places. fireEvent.click (no mousedown) avoids
+    // tripping React Flow's d3-drag in jsdom. Click every rendered node so ≥1 place is recorded.
+    const nodes = container.querySelectorAll(".react-flow__node");
+    expect(nodes.length).toBeGreaterThan(0);
+    for (const n of nodes) {
+      act(() => fireEvent.click(n));
+      await flush();
+    }
+
+    // Alt+← steps back through the history, Alt+→ steps forward — the editor stays mounted.
+    act(() =>
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true, bubbles: true }),
+      ),
+    );
+    await flush();
+    act(() =>
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, bubbles: true }),
+      ),
+    );
+    await flush();
+
+    // The URL now carries a ?node= deep-link to the selected topic (kept in sync on selection).
+    expect(new URLSearchParams(window.location.search).has("node")).toBe(true);
+
+    // "Copy link to this topic" (More menu) writes a shareable map+node URL to the clipboard.
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
+    await user.click(screen.getAllByRole("button", { name: /More/ })[0]);
+    await flush();
+    const copy = screen.queryByText(/Copy link to this (topic|map)/);
+    if (copy) {
+      await user.click(copy);
+      await flush();
+      expect(writeText).toHaveBeenCalled();
+      expect(String(writeText.mock.calls.at(-1)?.[0])).toContain("map=");
     }
     expect(container.querySelector(".mm-editor")).toBeTruthy();
   });

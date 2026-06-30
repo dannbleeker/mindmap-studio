@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 372,
+  "reviewedThroughChangelogBullets": 373,
   "areas": [
     "editing",
     "notes",
@@ -1837,6 +1837,33 @@
     {
       "id": "find-results-list",
       "name": "In-map Find 'List all' — clickable list of every match (vs only next/prev)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "filter-completion",
+      "name": "Power Filter by completion status (Done / In progress / Not done)",
+      "area": "structure",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "settings-shortcut",
+      "name": "Ctrl/⌘+, opens Settings & preferences",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "reduced-motion",
+      "name": "Reduced-motion support — OS prefers-reduced-motion + in-app toggle (canvas + guided walk)",
       "area": "navigation",
       "since": "2026-06-30",
       "manual": false,

@@ -73,7 +73,9 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 > detection, Open Recent.
 > **Search & nav pack (G2 — now complete)** — search beyond topic+note, scoped/operator search,
 > deep-link to a node, back/forward navigation history, across-maps result context (breadcrumb +
-> snippet), and the in-map Find "List all" results list. The remaining list is what's left to build.
+> snippet), and the in-map Find "List all" results list.
+> **Quick-wins pack** — filter by completion status (G8), `Ctrl/⌘+,` opens Settings (G9), reduced-motion
+> support + in-app toggle (G10). The remaining list is what's left to build.
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
@@ -193,7 +195,7 @@ The largest lens. Presenter-control items are cheap S-effort wins; visual-slide 
 Wire up fields the model already carries without crossing into the decided-against PM engine.
 | Gap | What | Tags |
 |---|---|---|
-| Filter by completion status | complete/incomplete/in-progress (roll-up derived, no filter consumes it) | `in·high·S·partial` |
+| ~~Filter by completion status~~ ✅ shipped | Power Filter Completion select over rolled-up progress | `done` |
 | Natural-language / relative due-date entry | "today"/"next fri"/"+7d" → ISO (`addDaysISO` exists) | `in·med·M·missing` |
 | Quick date set / reschedule chip on canvas | inline Today / +1wk like the progress pie (DateChip is display-only) | `?·med·M·missing` |
 | Duration & resources editing UI | model carries + import fills them; user can't set them | `?·med·M·partial` |
@@ -214,7 +216,7 @@ The data-loss-risk items are the high-impact core of a local-first PWA.
 | Revert-to-saved / read-only open / Save-a-Copy | file-level affordances | `in·low·M·missing` |
 | Preferences export & import | theme, styles, filters, layout → file | `in·low·S·missing` |
 | Flush autosave-to-disk on tab-hide | last edit reaches the bound file, not just IndexedDB | `?·low·M·partial` |
-| Settings shortcut + start-screen palette entry | dedicated chord; Settings in start ⌘K | `in·low·S·partial` |
+| Settings shortcut + start-screen palette entry | ✅ chord `Ctrl/⌘+,` shipped; start-screen ⌘K Settings entry still open | `in·low·S·partial` |
 | PWA app shortcuts / richer manifest | `shortcuts` + `screenshots` for install UI | `?·low·S·partial` |
 
 ### 10 · Accessibility & input modalities (13)
@@ -226,10 +228,10 @@ A11y is already strong; these are the genuine remaining deltas.
 | Keyboard reorder/indent in the Outline tree | indent buttons are `tabIndex=-1` | `in·med·M·partial` |
 | i18n / localization | UI strings English-only, no locale layer | `?·med·L·missing` |
 | SR exposure of canvas overlays | boundaries/summaries/callouts, like the shipped relationships SR list | `in·med·S·partial` |
-| Reduced-motion at JS motion sites | guided walk, history playback, timer | `in·med·S·partial` |
+| ~~Reduced-motion at JS motion sites~~ ✅ shipped | canvas zoom/fit/centre + guided-walk zoom honour reduced motion | `done` |
 | Long-press context menu on touch | press-and-hold = right-click | `in·med·S·partial` |
 | RTL layout support | `dir=rtl`, logical CSS, right-growing maps | `?·low·L·missing` |
-| In-app motion/animation toggle | independent of the OS setting | `in·low·S·missing` |
+| ~~In-app motion/animation toggle~~ ✅ shipped | Settings → Reduce motion (System / On / Off) | `done` |
 | Focus trap + return-focus for hand-rolled overlays | Find/Replace, BulkNodeMenu, NodePopover | `in·low·S·partial` |
 | `aria-keyshortcuts` on actionable controls | expose the shortcut set to AT | `in·low·S·missing` |
 | Stylus / pen affordances | pressure, palm rejection (`pointerType==='pen'`) | `?·low·M·missing` |

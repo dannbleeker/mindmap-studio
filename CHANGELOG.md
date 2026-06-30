@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Quick-wins pack (UI review — gap groups 8/9/10).** Cheap, high-value singles across areas:
+  - **Filter by completion status** (G8) — the Power Filter gains a Completion select (Done / In
+    progress / Not done) over each node's rolled-up effective progress; only task-bearing nodes match.
+  - **`Ctrl/⌘+,` opens Settings** (G9) — the conventional preferences chord, documented in the
+    cheat-sheet (the existing Settings command now shows the shortcut chip).
+  - **Reduced motion** (G10) — canvas zoom/fit/centre tweens and the guided walk's cinematic zoom now
+    honour the OS `prefers-reduced-motion` (previously only CSS transitions did) plus a new
+    Settings → Reduce motion toggle (System / On / Off); the toggle also drops chrome transitions.
+
 - **Search & nav pack (UI review — gap group 2).** Find what you mean and retrace where you've been:
   - **Search beyond topic + note** — Find (in-map and across-every-map) now reaches a node by any text it
     carries: tags, marker (icon) ids, hyperlink, callout bubbles, attachment filenames, and task

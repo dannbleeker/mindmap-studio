@@ -1381,6 +1381,14 @@
   }
 }
 
+/* The in-app "Reduce motion" toggle (useReducedMotion) sets body.reduce-motion, so the user can drop
+   chrome transitions/animations even when the OS preference isn't set (and we honour the OS value too,
+   above). JS-driven canvas/walk animations are handled separately by passing a 0 duration. */
+.reduce-motion .mm-editor * {
+  transition: none !important;
+  animation: none !important;
+}
+
 /* --- document tabs (open maps) --- */
 .mm-doctabs {
   flex-shrink: 0;

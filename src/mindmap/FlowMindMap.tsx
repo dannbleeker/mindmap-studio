@@ -290,10 +290,16 @@ function FlowInner({
   onHint,
   initialSession,
   libraryMaps = [],
+  reducedMotion = false,
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
   const isMobile = useIsMobile();
+  // Latest-value ref so the many viewport-animation callsites can read the current reduced-motion
+  // preference without each callback/handle taking it as a dependency (refs are exempt from
+  // exhaustive-deps). Each animation duration becomes 0 when motion is reduced.
+  const reducedMotionRef = useRef(reducedMotion);
+  reducedMotionRef.current = reducedMotion;
   // Drill-in (#4): re-root the *view* at `drillId` so its subtree fills the canvas. `viewDoc` returns
   // the full doc unchanged when not drilled, so the normal path is untouched; edits still run on the
   // full doc (docRef), making drilling a pure view transform.
@@ -534,7 +540,9 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    const raf = requestAnimationFrame(() => fitView({ duration: motion.dur.fit }));
+    const raf = requestAnimationFrame(() =>
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+    );
     return () => cancelAnimationFrame(raf);
   }, [drillId, sync, fitView]);
 
@@ -850,7 +858,10 @@ function FlowInner({
       fireSelect(id);
       const w = n.measured?.width ?? 0;
       const h = n.measured?.height ?? 0;
-      setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: motion.dur.fit });
+      setCenter(n.position.x + w / 2, n.position.y + h / 2, {
+        zoom: 1,
+        duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+      });
     },
     [getNodes, fireSelect, setCenter, selectOnly],
   );
@@ -867,7 +878,7 @@ function FlowInner({
       const ids = [...subtreeIds(node)].map((nid) => ({ id: nid }));
       fitView({
         nodes: ids,
-        duration: opts?.duration ?? motion.dur.fit,
+        duration: reducedMotionRef.current ? 0 : (opts?.duration ?? motion.dur.fit),
         padding: opts?.padding ?? 0.2,
       });
     },
@@ -1156,7 +1167,9 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    const raf = requestAnimationFrame(() => fitView({ duration: motion.dur.fit }));
+    const raf = requestAnimationFrame(() =>
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+    );
     return () => cancelAnimationFrame(raf);
   }, [direction, sync, fitView]);
 
@@ -1281,11 +1294,12 @@ function FlowInner({
           (tgt?.tagName ? /^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName) : false);
         if (!inField) {
           e.preventDefault();
-          if (e.code === "Digit1") fitView({ duration: motion.dur.fit });
+          if (e.code === "Digit1")
+            fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit });
           else {
             const ids = [...selectedIdsRef.current];
             fitView({
-              duration: motion.dur.fit,
+              duration: reducedMotionRef.current ? 0 : motion.dur.fit,
               maxZoom: 1.5,
               nodes: ids.length ? ids.map((id) => ({ id })) : undefined,
             });
@@ -1631,11 +1645,12 @@ function FlowInner({
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
-      fit: () => fitView({ duration: motion.dur.fit }),
+      fit: () => fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
       // Snapshot viewport + undo/redo stacks so the tab switcher can restore them on a remount.
       getSession: (): CanvasSession => ({ viewport: getViewport(), history: historyRef.current }),
       getViewport: () => getViewport(),
-      setViewport: (vp) => setViewport(vp, { duration: motion.dur.viewport }),
+      setViewport: (vp) =>
+        setViewport(vp, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
       focusNode: focusNodeById,
       frameBranch,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
@@ -2181,7 +2196,10 @@ function FlowInner({
               onFitSelection={() => {
                 const ids = [...selectedIds];
                 if (ids.length)
-                  fitView({ nodes: ids.map((id) => ({ id })), duration: motion.dur.fit });
+                  fitView({
+                    nodes: ids.map((id) => ({ id })),
+                    duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+                  });
               }}
             />
             <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
@@ -2511,7 +2529,9 @@ function FlowInner({
               <MenuSeparator />
               <MenuItem
                 label="Fit to view"
-                onSelect={() => fitView({ duration: motion.dur.fit })}
+                onSelect={() =>
+                  fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit })
+                }
               />
               <MenuItem label="Reset zoom (100%)" onSelect={() => zoomTo(1, { duration: 200 })} />
             </ContextMenu>

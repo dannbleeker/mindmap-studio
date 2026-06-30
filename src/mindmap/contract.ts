@@ -415,5 +415,8 @@ export interface MindMapProps {
   /** The library's other maps `{ id, title }` — lets the node right-click menu bind a roll-up source
    *  (mirror another map). Empty/absent → the roll-up binder is hidden. */
   libraryMaps?: { id: string; title: string }[];
+  /** When true, viewport animations (fit / centre / set) run instantly — honours the user's
+   *  reduced-motion preference (OS or the in-app toggle). Absent → animated. */
+  reducedMotion?: boolean;
   ref?: Ref<MindMapHandle>;
 }

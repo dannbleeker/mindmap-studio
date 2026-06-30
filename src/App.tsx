@@ -136,6 +136,7 @@ import { resolveChromeDark, useAppearance } from "./useAppearance";
 import { useFind } from "./useFind";
 import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
+import { useReducedMotion } from "./useReducedMotion";
 import { useTheme } from "./useTheme";
 
 // DEV-only verification hooks the headless render harness reads off `window` (set in a DEV effect below).
@@ -228,6 +229,7 @@ export function App() {
   // App-wide chrome appearance (Phase 8) — independent of the canvas theme. Resolves to a single
   // light/dark for all chrome surfaces; a dark canvas theme also darkens the chrome under "system".
   const { appearance, setAppearance, prefersDark } = useAppearance();
+  const { motionPref, setMotionPref, reducedMotion } = useReducedMotion();
   const chromeDark = resolveChromeDark(appearance, prefersDark, theme.theme.type === "dark");
   // Mirror the resolved appearance onto <html> so native UI (scrollbars, form controls) + any
   // selector-based CSS can react, and the body backdrop behind the app matches.
@@ -2035,6 +2037,7 @@ export function App() {
                 highlightIds={playback ? null : searchMatchIds}
                 drillId={playback ? null : drillId}
                 libraryMaps={maps.map((m) => ({ id: m.id, title: m.title }))}
+                reducedMotion={reducedMotion}
                 onChange={(d) => {
                   if (playback) return; // read-only while reviewing history
                   liveDocRef.current = d;
@@ -2519,6 +2522,8 @@ export function App() {
         onClose={() => setSettingsOpen(false)}
         appearance={appearance}
         setAppearance={setAppearance}
+        motionPref={motionPref}
+        setMotionPref={setMotionPref}
         theme={theme}
         setThemeId={setThemeId}
         onReShowGettingStarted={reShowFirstRun}

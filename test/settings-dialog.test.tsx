@@ -26,6 +26,8 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
     onClose: vi.fn(),
     appearance: "system" as const,
     setAppearance: vi.fn(),
+    motionPref: "system" as const,
+    setMotionPref: vi.fn(),
     theme: themeById("light"),
     setThemeId: vi.fn(),
     onReShowGettingStarted: vi.fn(),
@@ -52,6 +54,12 @@ describe("SettingsDialog", () => {
     const p = setup();
     await userEvent.selectOptions(screen.getByLabelText("App theme"), "dark");
     expect(p.setAppearance).toHaveBeenCalledWith("dark");
+  });
+
+  it("drives the reduce-motion select", async () => {
+    const p = setup();
+    await userEvent.selectOptions(screen.getByLabelText("Reduce motion"), "reduced");
+    expect(p.setMotionPref).toHaveBeenCalledWith("reduced");
   });
 
   it("shows the local-storage usage line when an estimate is available", async () => {

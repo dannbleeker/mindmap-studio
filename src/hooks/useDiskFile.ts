@@ -1,4 +1,5 @@
 import { type RefObject, useCallback, useRef } from "react";
+import { editorConfirm } from "../components/editorDialogs";
 import {
   downloadMapFile,
   ensureWritePermission,
@@ -42,6 +43,33 @@ export function useDiskFile({
   // survives a reload). Exposed so the boot-restore + edit-autosave paths can read/rebind it.
   const handleCache = useRef<Map<string, FileSystemFileHandle>>(new Map());
   const fileSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // On-disk freshness per map: the file's lastModified the last time we read/wrote it. Lets a Save
+  // detect that the file changed underneath us (edited elsewhere, Dropbox-synced) before overwriting.
+  // In-memory (per session) — re-opening a file re-establishes the baseline anyway.
+  const lastMtime = useRef<Map<string, number>>(new Map());
+  const conflictWarned = useRef<Set<string>>(new Set()); // ids we've already flagged during autosave
+
+  // Stamp the on-disk file's lastModified as our baseline (after a read or a write we performed).
+  const recordMtime = useCallback(async (id: string, handle: FileSystemFileHandle) => {
+    try {
+      lastMtime.current.set(id, (await handle.getFile()).lastModified);
+      conflictWarned.current.delete(id);
+    } catch {
+      // best-effort — if we can't read the file, just don't track a baseline
+    }
+  }, []);
+
+  // True when the on-disk file is NEWER than the version we last read/wrote (an external change). No
+  // baseline ⇒ false (we can't tell, so we never block the first save).
+  const diskChangedSince = useCallback(async (id: string, handle: FileSystemFileHandle) => {
+    const known = lastMtime.current.get(id);
+    if (known == null) return false;
+    try {
+      return (await handle.getFile()).lastModified > known;
+    } catch {
+      return false;
+    }
+  }, []);
 
   // Bind a map to a file handle: cache it, mirror to IndexedDB, and reflect it in the title bar.
   const bindFileHandle = useCallback(
@@ -61,13 +89,14 @@ export function useDiskFile({
     async (opened: MindMapDoc, handle: FileSystemFileHandle) => {
       if (!opened.id) opened.id = crypto.randomUUID();
       await bindFileHandle(opened.id, handle);
+      await recordMtime(opened.id, handle); // baseline for later conflict detection
       load(opened);
       setFileName(handle.name);
       setDirty(false);
       setView("editor");
       showHint(`Opened ${handle.name}`);
     },
-    [bindFileHandle, load, setFileName, setDirty, setView, showHint],
+    [bindFileHandle, recordMtime, load, setFileName, setDirty, setView, showHint],
   );
 
   // Open a foreign file (a MindManager `.mmap`) as a one-way import: convert its bytes into a fresh
@@ -121,12 +150,13 @@ export function useDiskFile({
       if (!handle) return; // cancelled
       await writeMapToHandle(handle, d);
       await bindFileHandle(d.id, handle);
+      await recordMtime(d.id, handle);
       setDirty(false);
       showHint(`Saved ${handle.name}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
-  }, [liveDocRef, bindFileHandle, setDirty, setError, showHint]);
+  }, [liveDocRef, bindFileHandle, recordMtime, setDirty, setError, showHint]);
 
   // "Save" (Ctrl+S) — write back to the bound file with no dialog; first save (or no API) defers to
   // Save As / download. Prompts once for write permission if the browser dropped it this session.
@@ -147,13 +177,29 @@ export function useDiskFile({
         showHint("Couldn't save — permission to write the file was denied.");
         return;
       }
+      // The file changed on disk since we last read/wrote it — confirm before overwriting it.
+      if (await diskChangedSince(d.id, handle)) {
+        const overwrite = await editorConfirm({
+          title: "File changed on disk",
+          body: `“${handle.name}” was modified since you opened it (edited elsewhere, or synced). Overwrite it with this version? Your map stays in the library either way.`,
+          confirmText: "Overwrite",
+          danger: true,
+        });
+        if (!overwrite) {
+          showHint(
+            "Save cancelled — the file on disk was left as-is (your edits are kept in the library).",
+          );
+          return;
+        }
+      }
       await writeMapToHandle(handle, d);
+      await recordMtime(d.id, handle);
       setDirty(false);
       showHint(`Saved ${handle.name}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
-  }, [liveDocRef, saveFileAs, setDirty, setError, showHint]);
+  }, [liveDocRef, saveFileAs, diskChangedSince, recordMtime, setDirty, setError, showHint]);
 
   // Background write-through after an edit — silent (never prompts): only writes when the browser still
   // holds write permission, so a denied/revoked grant simply leaves the IndexedDB copy as the record.
@@ -164,14 +210,26 @@ export function useDiskFile({
       const handle = handleCache.current.get(d.id);
       if (!handle) return;
       if (!(await ensureWritePermission(handle, false))) return; // don't prompt during autosave
+      // Never silently clobber an external change — pause autosave-to-file for this map + warn once;
+      // an explicit Save (which prompts to overwrite) is the way to resolve it.
+      if (await diskChangedSince(d.id, handle)) {
+        if (!conflictWarned.current.has(d.id)) {
+          conflictWarned.current.add(d.id);
+          showHint(
+            `“${handle.name}” changed on disk — use Save to overwrite (auto-save to file paused).`,
+          );
+        }
+        return;
+      }
       try {
         await writeMapToHandle(handle, d);
+        await recordMtime(d.id, handle);
         if (d.id === liveDocRef.current.id) setDirty(false);
       } catch {
         // best-effort; the IndexedDB autosave still holds the edit
       }
     }, 1500);
-  }, [liveDocRef, setDirty]);
+  }, [liveDocRef, setDirty, diskChangedSince, recordMtime, showHint]);
 
   return {
     handleCache,

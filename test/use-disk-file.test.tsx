@@ -17,6 +17,8 @@ vi.mock("../src/io/fileSystem", () => ({
   suggestedFileName: vi.fn(() => "map.mmst"),
 }));
 vi.mock("../src/store/mapStore", () => ({ saveMapHandle: vi.fn(async () => {}) }));
+const { editorConfirmMock } = vi.hoisted(() => ({ editorConfirmMock: vi.fn() }));
+vi.mock("../src/components/editorDialogs", () => ({ editorConfirm: editorConfirmMock }));
 vi.mock("../src/import/mmap", () => ({
   parseMmap: vi.fn(() => ({
     doc: { id: "", title: "Imp", root: { id: "r", topic: "R", children: [] }, schemaVersion: 1 },
@@ -119,6 +121,65 @@ describe("useDiskFile — save / save-as", () => {
     expect(deps.showHint).toHaveBeenCalledWith(
       "Couldn't save — permission to write the file was denied.",
     );
+  });
+});
+
+describe("useDiskFile — external-file conflict detection", () => {
+  // A handle whose getFile() reports a mutable lastModified, so a test can simulate the file changing
+  // on disk between the baseline (Save As) and a later Save.
+  const mtimeHandle = (name: string, getMtime: () => number) =>
+    ({
+      name,
+      getFile: async () => ({ lastModified: getMtime() }),
+    }) as unknown as FileSystemFileHandle;
+
+  it("prompts to overwrite when the file changed on disk, and aborts on cancel", async () => {
+    let mtime = 1000;
+    mocked.pickSaveHandle.mockResolvedValue(mtimeHandle("plan.mmst", () => mtime));
+    const { result, deps } = setup();
+    await act(async () => {
+      await result.current.saveFileAs(); // writes + records baseline mtime=1000
+    });
+    mocked.writeMapToHandle.mockClear();
+    mtime = 5000; // the file was changed elsewhere
+    editorConfirmMock.mockResolvedValue(false); // user declines to overwrite
+    await act(async () => {
+      await result.current.saveFile();
+    });
+    expect(editorConfirmMock).toHaveBeenCalledTimes(1);
+    expect(mocked.writeMapToHandle).not.toHaveBeenCalled(); // aborted — disk file left as-is
+    expect(deps.showHint).toHaveBeenCalledWith(expect.stringMatching(/Save cancelled/i));
+  });
+
+  it("overwrites when the user confirms the conflict", async () => {
+    let mtime = 1000;
+    mocked.pickSaveHandle.mockResolvedValue(mtimeHandle("plan.mmst", () => mtime));
+    const { result } = setup();
+    await act(async () => {
+      await result.current.saveFileAs();
+    });
+    mocked.writeMapToHandle.mockClear();
+    mtime = 5000;
+    editorConfirmMock.mockResolvedValue(true); // user chooses Overwrite
+    await act(async () => {
+      await result.current.saveFile();
+    });
+    expect(mocked.writeMapToHandle).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not prompt when the file is unchanged since we last wrote it", async () => {
+    const mtime = 1000;
+    mocked.pickSaveHandle.mockResolvedValue(mtimeHandle("plan.mmst", () => mtime));
+    const { result } = setup();
+    await act(async () => {
+      await result.current.saveFileAs();
+    });
+    mocked.writeMapToHandle.mockClear();
+    await act(async () => {
+      await result.current.saveFile(); // mtime still 1000 → no conflict
+    });
+    expect(editorConfirmMock).not.toHaveBeenCalled();
+    expect(mocked.writeMapToHandle).toHaveBeenCalledTimes(1);
   });
 });
 

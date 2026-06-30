@@ -253,12 +253,12 @@ describe("App (integration)", () => {
     await flush();
     await user.click(screen.getByRole("button", { name: /clear command history/i }));
     await flush();
-    // "Clear all local data" confirms first — declining is a safe no-op (the editor stays put).
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    // "Clear all local data" confirms first via the themed dialog — declining is a safe no-op.
     await user.click(screen.getByRole("button", { name: /clear all local data/i }));
     await flush();
-    expect(confirmSpy).toHaveBeenCalled();
-    confirmSpy.mockRestore();
+    expect(screen.getByText("Delete all local data?")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await flush();
     expect(container.querySelector(".mm-editor")).toBeTruthy();
   });
 

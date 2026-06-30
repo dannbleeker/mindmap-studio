@@ -110,6 +110,8 @@ export const colors = {
   accentSlider: "var(--ed-accent, #1b8a5e)",
   /** Active marker chip background (a soft emerald tint, distinct from the solid accent fill). */
   accentTint: "var(--ed-accent-tint, #e3f1ea)",
+  /** Destructive action colour (delete confirms, danger buttons). */
+  danger: "var(--ed-danger, #b23b3a)",
 
   /** Context-menu chrome (FlowMindMap right-click menu + linking banner). */
   menu: {

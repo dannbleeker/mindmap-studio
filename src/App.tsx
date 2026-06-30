@@ -45,6 +45,7 @@ import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { ToastBar } from "./components/ToastBar";
 import { Toolbar, type ToolbarProps } from "./components/Toolbar";
 import { buildEditorCommands } from "./components/editorCommands";
+import { DialogHost, editorConfirm, editorPrompt } from "./components/editorDialogs";
 import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
 import { designById } from "./designs";
@@ -439,22 +440,21 @@ export function App() {
     }
     setSettingsOpen(false);
   }, []);
-  const clearAllLocalData = useCallback(() => {
-    if (
-      !window.confirm(
-        "Delete ALL local data — every map, its version history, and your preferences in this browser? This cannot be undone.",
-      )
-    )
-      return;
-    void (async () => {
-      try {
-        await clearAllData();
-      } catch {
-        // proceed to clear prefs + reload regardless
-      }
-      clearAllLocalPreferences();
-      location.reload();
-    })();
+  const clearAllLocalData = useCallback(async () => {
+    const ok = await editorConfirm({
+      title: "Delete all local data?",
+      body: "Every map, its version history, and your preferences in this browser will be removed. This cannot be undone.",
+      confirmText: "Delete everything",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await clearAllData();
+    } catch {
+      // proceed to clear prefs + reload regardless
+    }
+    clearAllLocalPreferences();
+    location.reload();
   }, []);
   const [searchAllOpen, setSearchAllOpen] = useState(false);
   // Find & Replace overlay (#…): opened with Ctrl/⌘+F, the "/" key, or the toolbar's Find button.
@@ -915,9 +915,12 @@ export function App() {
           .map((r) => `“${r.title || "Untitled"}”`)
           .join(", ");
         const more = refs.length > 3 ? `, and ${refs.length - 3} more` : "";
-        const ok = window.confirm(
-          `${refs.length} other map${refs.length === 1 ? "" : "s"} link to this one (${names}${more}). Those links will break. Delete anyway?`,
-        );
+        const ok = await editorConfirm({
+          title: "Delete this map?",
+          body: `${refs.length} other map${refs.length === 1 ? "" : "s"} link to this one (${names}${more}). Those links will break.`,
+          confirmText: "Delete anyway",
+          danger: true,
+        });
         if (!ok) return;
       }
     } catch {
@@ -1251,8 +1254,10 @@ export function App() {
     },
     views: {
       list: savedViews.list.map((v) => ({ id: v.id, name: v.name })),
-      onSave: () => {
-        const name = window.prompt("Name this view:", "")?.trim();
+      onSave: async () => {
+        const name = (
+          await editorPrompt({ title: "Name this view", placeholder: "View name" })
+        )?.trim();
         if (!name) return;
         const vp = mapRef.current?.getViewport();
         if (!vp) return;
@@ -2281,6 +2286,10 @@ export function App() {
 
       {/* Keyboard shortcuts cheat-sheet (#2) — opened from the icon-rail (?) and ⌘K. */}
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+      {/* Host for the imperative themed prompt/confirm (editorPrompt / editorConfirm) used across the
+          canvas + panels in place of native window.prompt/confirm. */}
+      <DialogHost />
 
       <SettingsDialog
         open={settingsOpen}

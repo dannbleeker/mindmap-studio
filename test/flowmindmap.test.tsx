@@ -781,13 +781,15 @@ describe("FlowMindMap canvas", () => {
     expect(screen.queryByText("Start your map")).toBeNull();
   });
 
-  it("draws a relationship via the Link to… gesture", () => {
+  it("draws a relationship via the Link to… gesture", async () => {
     const { container, onChange } = mount();
     run(() => fireEvent.contextMenu(nodeEl(container, "a")));
     run(() => fireEvent.click(within(openMenu() as HTMLElement).getByText("Link to…")));
     expect(screen.getByText(/Click a target node/)).toBeTruthy();
-    run(() => fireEvent.click(nodeEl(container, "b"))); // completes the link (prompt → "Label")
-    expect(onChange).toHaveBeenCalled();
+    run(() => fireEvent.click(nodeEl(container, "b"))); // completes the link (label prompt → "Label")
+    // The relationship label prompt resolves asynchronously now (themed dialog; here the no-host
+    // fallback resolves from the mocked window.prompt in a microtask), so await the resulting edit.
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
   });
 
   it("commits inline edits and runs the node affordances (link / progress / collapse)", () => {

@@ -2,7 +2,7 @@
 // later Panels refactor (Phase D): each panel must mount without throwing AND show a known piece of
 // user-visible content. Assertions target visible text / roles / labels — NOT internal structure —
 // so they keep passing after the panels are rebuilt on shared primitives.
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -902,7 +902,7 @@ describe("NotesPanel (paste hardening, F2)", () => {
     expect(screen.getByLabelText("Node note").querySelector("table")).not.toBeNull();
   });
 
-  it("inserts an image by URL via the Image button, rejecting non-image schemes (#11)", () => {
+  it("inserts an image by URL via the Image button, rejecting non-image schemes (#11)", async () => {
     const onChange = vi.fn();
     const prompt = vi.spyOn(window, "prompt").mockReturnValue("https://x.test/c.png");
     render(
@@ -913,12 +913,15 @@ describe("NotesPanel (paste hardening, F2)", () => {
         onBlur={() => {}}
       />,
     );
+    // The URL prompt resolves asynchronously now (no-host fallback → mocked window.prompt in a
+    // microtask), so await the resulting edit.
     fireEvent.click(screen.getByRole("button", { name: /Image/ }));
-    expect(onChange).toHaveBeenCalledWith("![](https://x.test/c.png)");
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith("![](https://x.test/c.png)"));
     // a javascript: URL is rejected — no further onChange
     onChange.mockClear();
     prompt.mockReturnValue("javascript:alert(1)");
     fireEvent.click(screen.getByRole("button", { name: /Image/ }));
+    await new Promise((r) => setTimeout(r, 0)); // flush the rejected prompt's microtask
     expect(onChange).not.toHaveBeenCalled();
     prompt.mockRestore();
   });

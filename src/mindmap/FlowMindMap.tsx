@@ -19,6 +19,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { editorConfirm, editorPrompt } from "../components/editorDialogs";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors } from "../design/tokens";
 import { MARKER_PALETTE, markerImage } from "../icons";
@@ -1019,9 +1020,13 @@ function FlowInner({
   // Stable overlay callbacks (deps: the stable `apply`) so the memoised Summaries/Callouts aren't
   // re-rendered by a fresh inline closure every render. Each reads docRef.current for live state.
   const handleRenameSummary = useCallback(
-    (sid: string) => {
+    async (sid: string) => {
       const current = (docRef.current.summaries ?? []).find((s) => s.id === sid);
-      const next = window.prompt("Summary label (leave empty to remove):", current?.label ?? "");
+      const next = await editorPrompt({
+        title: "Summary label",
+        placeholder: "Leave empty to remove",
+        defaultValue: current?.label ?? "",
+      });
       if (next === null) return; // cancelled
       apply(
         next.trim()
@@ -1890,9 +1895,11 @@ function FlowInner({
             onNodeClick={(ev, node) => {
               // In "Link to…" mode, the next click on a *different* node completes the relationship.
               if (linkingFrom && node.id !== linkingFrom) {
-                const label = window.prompt("Relationship label (optional):", "") ?? "";
-                apply(addLink(docRef.current, linkingFrom, node.id, label));
+                const from = linkingFrom;
                 setLinkingFrom(null);
+                void editorPrompt({ title: "Relationship label", placeholder: "Optional" }).then(
+                  (label) => apply(addLink(docRef.current, from, node.id, label ?? "")),
+                );
                 return;
               }
               setLinkingFrom(null);
@@ -1948,8 +1955,13 @@ function FlowInner({
             onEdgeContextMenu={(e, edge) => {
               e.preventDefault();
               if (edge.type !== "crosslink") return;
-              if (window.confirm("Delete this relationship?"))
-                apply(deleteLink(docRef.current, edge.id));
+              void editorConfirm({
+                title: "Delete this relationship?",
+                confirmText: "Delete",
+                danger: true,
+              }).then((ok) => {
+                if (ok) apply(deleteLink(docRef.current, edge.id));
+              });
             }}
           >
             <BackgroundImage url={renderDoc.meta?.backgroundImage} />

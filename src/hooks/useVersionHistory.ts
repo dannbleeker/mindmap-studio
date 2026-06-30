@@ -1,4 +1,5 @@
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { editorConfirm } from "../components/editorDialogs";
 import { nextPlaybackIndex } from "../historyPlayback";
 import type { MindMapDoc } from "../model/types";
 import {
@@ -92,12 +93,12 @@ export function useVersionHistory({
   async function restoreVersion(id: string) {
     const v = await loadVersion(id);
     if (!v) return;
-    if (
-      !window.confirm(
-        "Restore this version? Your current map is saved to history first, so you can undo.",
-      )
-    )
-      return;
+    const ok = await editorConfirm({
+      title: "Restore this version?",
+      body: "Your current map is saved to history first, so you can undo.",
+      confirmText: "Restore",
+    });
+    if (!ok) return;
     try {
       await saveVersion(liveDocRef.current, Date.now()); // checkpoint current before replacing
       const next: MindMapDoc = { ...structuredClone(v), id: liveDocRef.current.id };

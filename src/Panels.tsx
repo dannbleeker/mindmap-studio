@@ -9,6 +9,7 @@ import {
 import { ProgressPie } from "./ProgressPie";
 import { type AgendaItem, agendaBuckets, agendaIsEmpty } from "./agenda";
 import { InspectorResizer } from "./components/InspectorResizer";
+import { editorPrompt } from "./components/editorDialogs";
 import {
   Button,
   Chip,
@@ -2922,21 +2923,33 @@ export function NotesPanel({
     onChange(next);
     if (ref.current) ref.current.innerHTML = renderNote(next);
   };
-  const insertImage = () => {
-    const url = window.prompt("Image URL (http(s):// or data:image/…)")?.trim();
+  const insertImage = async () => {
+    const url = (
+      await editorPrompt({
+        title: "Insert image",
+        label: "Image URL",
+        placeholder: "https://… or data:image/…",
+      })
+    )?.trim();
     if (!url || !/^(https?:\/\/|data:image\/)/i.test(url)) return;
     appendBlock(`![](${url})`);
   };
   // Insert an inline link. With text selected, wrap it (createLink → <a>, which htmlToNote serialises
   // to [text](url)); with nothing selected, append the URL as its own markdown link. The selection is
-  // captured + restored because window.prompt can drop it. The renderer already round-trips links —
+  // captured + restored because opening the prompt dialog drops it. The renderer already round-trips links —
   // this just gives the capability a button (matching image/table) instead of hand-typed markdown.
-  const insertLink = () => {
+  const insertLink = async () => {
     const sel = window.getSelection();
     const range =
       sel && sel.rangeCount > 0 && !sel.isCollapsed ? sel.getRangeAt(0).cloneRange() : null;
     const hasText = !!range && range.toString().trim().length > 0;
-    const url = window.prompt("Link URL (https://… or mailto:…)")?.trim();
+    const url = (
+      await editorPrompt({
+        title: "Insert link",
+        label: "Link URL",
+        placeholder: "https://… or mailto:…",
+      })
+    )?.trim();
     if (!url || !/^(https?:\/\/|mailto:|#)/i.test(url)) return;
     ref.current?.focus();
     if (hasText && range) {

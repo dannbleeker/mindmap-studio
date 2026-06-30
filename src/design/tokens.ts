@@ -194,3 +194,15 @@ export const fontWeight = {
   semibold: 600,
   bold: 700,
 } as const;
+
+/** Motion timings (ms). One source for the canvas viewport animations (fit-to-view, centre-on-node,
+ *  saved-viewport restore) so every zoom/fit gesture shares a feel. (Chrome CSS transitions still use
+ *  literal `0.12s`-style values — tokenising those + an elevation ramp is a deferred follow-up.) */
+export const motion = {
+  dur: {
+    /** Fit-to-view / fit-to-selection. */
+    fit: 300,
+    /** Programmatic viewport set (saved-view restore, tab switch). */
+    viewport: 350,
+  },
+} as const;

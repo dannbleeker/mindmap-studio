@@ -72,6 +72,8 @@ export const SHORTCUTS: ShortcutGroup[] = [
     items: [
       { keys: "Drag the background", action: "Pan the canvas" },
       { keys: "Scroll / ⌘ + scroll", action: "Zoom in and out" },
+      { keys: "Shift + 1", action: "Fit the whole map to view" },
+      { keys: "Shift + 2", action: "Fit the selection to view" },
       { keys: "Double-click a topic", action: "Rename it" },
       { keys: "Double-click the canvas", action: "Add a floating topic" },
       { keys: "Drag a topic's grip", action: "Draw a relationship to another topic" },

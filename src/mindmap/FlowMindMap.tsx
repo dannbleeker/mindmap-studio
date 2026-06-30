@@ -21,7 +21,7 @@ import {
 } from "react";
 import { editorConfirm, editorPrompt } from "../components/editorDialogs";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
-import { colors } from "../design/tokens";
+import { colors, motion } from "../design/tokens";
 import { MARKER_PALETTE, markerImage } from "../icons";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
@@ -530,7 +530,7 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    const raf = requestAnimationFrame(() => fitView({ duration: 300 }));
+    const raf = requestAnimationFrame(() => fitView({ duration: motion.dur.fit }));
     return () => cancelAnimationFrame(raf);
   }, [drillId, sync, fitView]);
 
@@ -846,7 +846,7 @@ function FlowInner({
       fireSelect(id);
       const w = n.measured?.width ?? 0;
       const h = n.measured?.height ?? 0;
-      setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: 300 });
+      setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: motion.dur.fit });
     },
     [getNodes, fireSelect, setCenter, selectOnly],
   );
@@ -1133,7 +1133,7 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    const raf = requestAnimationFrame(() => fitView({ duration: 300 }));
+    const raf = requestAnimationFrame(() => fitView({ duration: motion.dur.fit }));
     return () => cancelAnimationFrame(raf);
   }, [direction, sync, fitView]);
 
@@ -1248,6 +1248,28 @@ function FlowInner({
   // pure key→intent mapping lives in flow/keyIntent.ts; here we only wire the listener + dispatch.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Fit-to-view shortcuts: Shift+1 = fit all, Shift+2 = fit the current selection. Keyed on e.code
+      // (Digit1/Digit2) so they're keyboard-layout robust — e.key would be "!"/"@" with Shift held, and
+      // would otherwise fall through to type-to-edit. Skipped while inline-editing or focused in a field.
+      if (e.shiftKey && (e.code === "Digit1" || e.code === "Digit2") && !editingRef.current) {
+        const tgt = e.target as HTMLElement | null;
+        const inField =
+          !!tgt?.isContentEditable ||
+          (tgt?.tagName ? /^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName) : false);
+        if (!inField) {
+          e.preventDefault();
+          if (e.code === "Digit1") fitView({ duration: motion.dur.fit });
+          else {
+            const ids = [...selectedIdsRef.current];
+            fitView({
+              duration: motion.dur.fit,
+              maxZoom: 1.5,
+              nodes: ids.length ? ids.map((id) => ({ id })) : undefined,
+            });
+          }
+          return;
+        }
+      }
       const intent = keyIntent(
         {
           key: e.key,
@@ -1383,6 +1405,7 @@ function FlowInner({
     startEdit,
     focusNodeById,
     editingApi,
+    fitView,
   ]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
@@ -1553,11 +1576,11 @@ function FlowInner({
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
-      fit: () => fitView({ duration: 300 }),
+      fit: () => fitView({ duration: motion.dur.fit }),
       // Snapshot viewport + undo/redo stacks so the tab switcher can restore them on a remount.
       getSession: (): CanvasSession => ({ viewport: getViewport(), history: historyRef.current }),
       getViewport: () => getViewport(),
-      setViewport: (vp) => setViewport(vp, { duration: 350 }),
+      setViewport: (vp) => setViewport(vp, { duration: motion.dur.viewport }),
       focusNode: focusNodeById,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
       // Id-based variants for the drag-a-file-onto-a-topic path (the target is the dropped-on node,
@@ -2081,7 +2104,8 @@ function FlowInner({
               onResetZoom={() => zoomTo(1, { duration: 200 })}
               onFitSelection={() => {
                 const ids = [...selectedIds];
-                if (ids.length) fitView({ nodes: ids.map((id) => ({ id })), duration: 300 });
+                if (ids.length)
+                  fitView({ nodes: ids.map((id) => ({ id })), duration: motion.dur.fit });
               }}
             />
             <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
@@ -2399,7 +2423,10 @@ function FlowInner({
                 />
               ) : null}
               <MenuSeparator />
-              <MenuItem label="Fit to view" onSelect={() => fitView({ duration: 300 })} />
+              <MenuItem
+                label="Fit to view"
+                onSelect={() => fitView({ duration: motion.dur.fit })}
+              />
               <MenuItem label="Reset zoom (100%)" onSelect={() => zoomTo(1, { duration: 200 })} />
             </ContextMenu>
           ) : null}

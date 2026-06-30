@@ -24,6 +24,9 @@ describe("NodePopover", () => {
         editingId={null}
         doc={doc}
         onToggleCollapse={noop}
+        onOpenNote={noop}
+        onCyclePriority={noop}
+        onStartLink={noop}
         onMore={noop}
       />,
     );
@@ -32,7 +35,16 @@ describe("NodePopover", () => {
 
   it("renders nothing while the selected node is being inline-edited", () => {
     const { container } = render(
-      <NodePopover selectedId="r" editingId="r" doc={doc} onToggleCollapse={noop} onMore={noop} />,
+      <NodePopover
+        selectedId="r"
+        editingId="r"
+        doc={doc}
+        onToggleCollapse={noop}
+        onOpenNote={noop}
+        onCyclePriority={noop}
+        onStartLink={noop}
+        onMore={noop}
+      />,
     );
     expect(container.firstChild).toBeNull();
   });

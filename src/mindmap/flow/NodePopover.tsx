@@ -4,39 +4,47 @@ import { colors } from "../../design/tokens";
 import type { MindMapDoc } from "../../model/types";
 import { findAnyNode } from "./ops";
 
-/** One button in the inline node popover (the on-selection quick-action toolbar). */
+/** One button in the inline node popover (the on-selection quick-action toolbar). Renders an
+ *  EditorIcon, or a text `glyph` (emoji) for actions with no icon in the set (e.g. priority ⚑). */
 function PopBtn({
   icon,
+  glyph,
   label,
+  active,
   danger,
   onClick,
 }: {
-  icon: EditorIconName;
+  icon?: EditorIconName;
+  glyph?: string;
   label: string;
+  active?: boolean;
   danger?: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      className="nodrag nopan"
+      className="mm-pop-btn nodrag nopan"
       title={label}
       aria-label={label}
+      aria-pressed={active}
       onClick={onClick}
       style={{
         width: 30,
         height: 30,
         borderRadius: 7,
         border: "none",
-        background: "transparent",
+        background: active ? colors.accentTint : "transparent",
         cursor: "pointer",
-        color: danger ? "#b23b3a" : colors.muted,
+        color: danger ? "#b23b3a" : active ? colors.accent : colors.muted,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        fontSize: glyph ? 15 : undefined,
+        lineHeight: 1,
       }}
     >
-      <EditorIcon name={icon} size={16} />
+      {glyph ?? (icon ? <EditorIcon name={icon} size={16} /> : null)}
     </button>
   );
 }
@@ -51,20 +59,32 @@ export function NodePopover({
   editingId,
   doc,
   onToggleCollapse,
+  onOpenNote,
+  onCyclePriority,
+  onStartLink,
   onMore,
 }: {
   selectedId: string | null;
   editingId: string | null;
   doc: MindMapDoc;
   onToggleCollapse: (id: string) => void;
+  onOpenNote: (id: string) => void;
+  onCyclePriority: (id: string) => void;
+  onStartLink: (id: string) => void;
   onMore: (id: string) => void;
 }) {
   if (!selectedId || editingId === selectedId) return null;
   const sid = selectedId;
   const sel = findAnyNode(doc, sid);
   const hasKids = (sel?.children?.length ?? 0) > 0;
+  const hasNote = !!sel?.note?.trim();
+  const hasPriority = !!sel?.task?.priority;
   return (
     <NodeToolbar nodeId={sid} isVisible position={Position.Top} offset={10}>
+      {/* The transient contextual action bar (UI-3): the high-value per-node edits surface here on
+          selection — note / priority / link — replacing the hover pill that used to pop in over the
+          node. Add child/sibling stay as the on-node ＋ affordances; Rename / Delete / markers etc.
+          live behind "More…". Node-tracked via NodeToolbar so it stays put through pan/zoom. */}
       <div
         className="nodrag nopan"
         style={{
@@ -78,8 +98,19 @@ export function NodePopover({
           boxShadow: "0 10px 30px rgba(40,30,16,0.18)",
         }}
       >
-        {/* Add child / sibling are re-homed onto the node as the hover ＋ affordances (#1); Rename +
-            Delete moved into the "More…" menu (C6) — this popover keeps Collapse + the menu opener. */}
+        <PopBtn
+          icon="note"
+          label={hasNote ? "Open note" : "Add note"}
+          active={hasNote}
+          onClick={() => onOpenNote(sid)}
+        />
+        <PopBtn
+          glyph="⚑"
+          label={hasPriority ? "Cycle priority" : "Add priority"}
+          active={hasPriority}
+          onClick={() => onCyclePriority(sid)}
+        />
+        <PopBtn icon="link" label="Link to…" onClick={() => onStartLink(sid)} />
         {hasKids ? (
           <PopBtn icon="minus" label="Collapse / expand" onClick={() => onToggleCollapse(sid)} />
         ) : null}

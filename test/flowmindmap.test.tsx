@@ -695,20 +695,20 @@ describe("FlowMindMap canvas", () => {
     expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
   });
 
-  it("reveals the on-topic hover action bar (#3) wiring note + priority quick-actions", () => {
+  it("the on-selection action bar wires note + priority quick-actions (UI-3)", () => {
     const onOpenNote = vi.fn();
     const { container, onChange } = mount(baseDoc(), { onOpenNote });
-    // Nothing hovered → no action bar.
+    // Nothing selected → no action bar.
     expect(screen.queryByRole("button", { name: /Add note/ })).toBeNull();
-    // Hovering a note-less, priority-less node reveals the add-note + add-priority quick-actions.
-    const inner = nodeEl(container, "b").firstElementChild as HTMLElement;
-    run(() => fireEvent.mouseOver(inner));
-    const noteBtn = screen.getByRole("button", { name: /Add note/ });
+    // Selecting a note-less, priority-less node reveals the note + priority quick-actions in the
+    // contextual action bar (the popover above the selection — note/priority moved here from the hover pill).
+    run(() => fireEvent.click(nodeEl(container, "b")));
     const prioBtn = screen.getByRole("button", { name: "Add priority" });
     // Add-priority sets a priority on the topic (cyclePriority undefined → High).
     run(() => fireEvent.click(prioBtn));
     expect(onChange).toHaveBeenCalled();
     // Add-note asks the app to open the inspector's Notes tab.
+    const noteBtn = screen.getByRole("button", { name: /Add note/ });
     run(() => fireEvent.click(noteBtn));
     expect(onOpenNote).toHaveBeenCalled();
   });

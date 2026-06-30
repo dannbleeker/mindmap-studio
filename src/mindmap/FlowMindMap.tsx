@@ -2016,6 +2016,14 @@ function FlowInner({
               editingId={editingId}
               doc={renderDoc}
               onToggleCollapse={(id) => apply(toggleCollapse(docRef.current, id))}
+              onOpenNote={editingApi.openNote}
+              onCyclePriority={editingApi.cyclePriority}
+              onStartLink={(id) => {
+                setLinkingFrom(id);
+                onHintRef.current?.(
+                  "Linking — click or arrow to a target, Enter to link, Esc to cancel.",
+                );
+              }}
               onMore={openNodeMenuAt}
             />
             <CoachMark show={showCoach} rootId={renderDoc.root.id} />

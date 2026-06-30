@@ -920,51 +920,15 @@
   }
 }
 
-/* On-topic hover action bar (#3) — a small floating toolbar above the node giving one-click access
-   to actions otherwise locked in the inspector (add/open note, add/cycle priority). Shown on
-   hover/selection; canvas-only (nodrag nopan), never authored into exports. */
-.mm-node-bar {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  margin-bottom: 6px;
-  display: flex;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 8px;
-  background: var(--mm-node-bg, #fff);
-  box-shadow: 0 2px 8px rgba(40, 30, 16, 0.18);
-  z-index: 3;
+/* Contextual action-bar buttons (NodePopover, UI-3) — the on-selection toolbar above the node.
+   Sizing/colour are inline (PopBtn); these add the hover + keyboard-focus affordances. */
+.mm-pop-btn:hover {
+  background: rgba(0, 0, 0, 0.07) !important;
+  color: var(--ed-ink, #23211c) !important;
 }
-.mm-node-bar button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  color: var(--ed-ink, #23211c);
-  transition: background 0.12s ease;
-}
-.mm-node-bar button:hover {
-  background: rgba(0, 0, 0, 0.08);
-}
-.mm-node-bar button:focus-visible {
+.mm-pop-btn:focus-visible {
   outline: 2px solid var(--ed-accent, #1b8a5e);
   outline-offset: 1px;
-}
-@media (pointer: coarse) {
-  .mm-node-bar button {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
 }
 
 /* "Double-click to edit" first-hover microcopy (#5) — a small tooltip above the node. */

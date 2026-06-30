@@ -4,6 +4,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -49,7 +50,9 @@ import {
   type Backlink,
   type IndexEntry,
   type IndexHit,
+  type MapLink,
   type OutgoingLink,
+  mapLinks,
   markerTagIndex,
   outlineDropWhere,
   outlineNumbers,
@@ -1003,6 +1006,73 @@ export function MarkerTagIndex({
 
 // Map statistics: a read-only at-a-glance summary of the whole map (topics, depth, task health,
 // content tallies). Numbers come from the pure mapStats() so they're unit-tested independently.
+// The map-wide link layer as a dockable index: every relationship arrow + in-map topic hyperlink,
+// each end click-to-jump. The map-level complement to the inspector's per-node "Linked from / Links to".
+export function RelationshipsPanel({
+  doc,
+  onPick,
+}: {
+  doc: MindMapDoc;
+  onPick: (id: string) => void;
+}) {
+  const links: MapLink[] = useMemo(() => mapLinks(doc), [doc]);
+  const linkBtn: CSSProperties = {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    color: colors.text,
+    fontSize: fontSize.sm,
+    padding: "1px 2px",
+    borderRadius: radius.sm,
+    maxWidth: 140,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  };
+  return (
+    <Panel>
+      <div style={panelTitle}>🔗 Relationships</div>
+      {links.length === 0 ? (
+        <div style={{ padding: "8px 12px", color: colors.muted, fontSize: fontSize.sm }}>
+          No relationships or topic links in this map yet.
+        </div>
+      ) : (
+        <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+          {links.map((l, i) => (
+            <div
+              key={`${l.kind}:${l.fromId}:${l.toId}:${i}`}
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 4,
+                padding: "2px 10px",
+                fontSize: fontSize.sm,
+              }}
+            >
+              <span
+                style={{ color: colors.muted }}
+                title={l.kind === "relationship" ? "Relationship" : "Topic link"}
+              >
+                {l.kind === "relationship" ? "↬" : "↪"}
+              </span>
+              <button type="button" onClick={() => onPick(l.fromId)} style={linkBtn}>
+                {l.fromTopic || "(untitled)"}
+              </button>
+              <span style={{ color: colors.muted }}>→</span>
+              <button type="button" onClick={() => onPick(l.toId)} style={linkBtn}>
+                {l.toTopic || "(untitled)"}
+              </button>
+              {l.label ? (
+                <span style={{ color: colors.muted, whiteSpace: "nowrap" }}>· {l.label}</span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
 export function StatsPanel({ doc }: { doc: MindMapDoc }) {
   const s = mapStats(doc);
   const pct = Math.round(s.completion * 100);

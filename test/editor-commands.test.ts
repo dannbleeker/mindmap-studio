@@ -83,6 +83,8 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       toggleFilter: vi.fn(),
       stylesOpen: false,
       setStylesOpen: vi.fn(),
+      relationshipsOpen: false,
+      setRelationshipsOpen: vi.fn(),
       historyOpen: false,
       setHistoryOpen: vi.fn(),
       boardOpen: false,
@@ -187,7 +189,7 @@ describe("buildEditorCommands", () => {
 
   it("covers all 9 side-panel toggles and all 10 layouts", () => {
     const cmds = buildEditorCommands(mkProps());
-    expect(cmds.filter((c) => c.kind === "panel")).toHaveLength(9);
+    expect(cmds.filter((c) => c.kind === "panel")).toHaveLength(10);
     expect(cmds.filter((c) => c.kind === "layout")).toHaveLength(10);
   });
 

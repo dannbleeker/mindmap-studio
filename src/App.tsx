@@ -20,6 +20,7 @@ import {
   NoteEditorPanel,
   OutlinePanel,
   PlaybackBar,
+  RelationshipsPanel,
   SlideDeckEditorPanel,
   StatsPanel,
   StylesPanel,
@@ -1635,6 +1636,18 @@ export function App() {
                       onSetTagColor={(t, color) =>
                         mapRef.current?.setRules(setTagColor(liveDoc.rules, t, color))
                       }
+                    />
+                  ),
+                });
+              if (panels.relationshipsOpen)
+                entries.push({
+                  key: "relationships",
+                  label: "Relationships",
+                  onClose: () => panels.setRelationshipsOpen(false),
+                  node: (
+                    <RelationshipsPanel
+                      doc={liveDoc}
+                      onPick={(id) => mapRef.current?.focusNode(id)}
                     />
                   ),
                 });

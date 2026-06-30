@@ -62,6 +62,8 @@ function setup(
     toggleFilter: vi.fn(),
     stylesOpen: false,
     setStylesOpen: vi.fn(),
+    relationshipsOpen: false,
+    setRelationshipsOpen: vi.fn(),
     historyOpen: false,
     setHistoryOpen: vi.fn(),
     boardOpen: false,

@@ -3,6 +3,7 @@ import type { MapNode, MindMapDoc } from "../src/model/types";
 import {
   backlinksFor,
   dropWhereInBox,
+  mapLinks,
   markerTagIndex,
   outgoingLinksFor,
   outlineDropWhere,
@@ -213,5 +214,29 @@ describe("outgoingLinksFor", () => {
       { id: "a", topic: "Alpha", kind: "relationship" },
     ]);
     expect(outgoingLinksFor(linkDoc(), "e")).toEqual([]); // external hyperlink ignored
+  });
+});
+
+describe("mapLinks", () => {
+  it("flattens relationships + in-map #node= hyperlinks (both ends resolved), sorted by source", () => {
+    expect(mapLinks(linkDoc())).toEqual([
+      { fromId: "a", fromTopic: "Alpha", toId: "b", toTopic: "Beta", kind: "hyperlink" },
+      { fromId: "b", fromTopic: "Beta", toId: "a", toTopic: "Alpha", kind: "relationship" },
+      { fromId: "f", fromTopic: "Float", toId: "b", toTopic: "Beta", kind: "hyperlink" },
+      {
+        fromId: "c",
+        fromTopic: "Gamma",
+        toId: "b",
+        toTopic: "Beta",
+        kind: "relationship",
+        label: "blocks",
+      },
+    ]);
+  });
+
+  it("skips self-links, #map= / external hyperlinks, and dangling edges", () => {
+    const doc = { ...linkDoc(), links: [{ id: "d1", from: "a", to: "zzz" }] }; // target doesn't exist
+    // Only the two #node=b hyperlinks survive (Alpha, Float); the dangling relationship is dropped.
+    expect(mapLinks(doc).map((l) => `${l.fromId}->${l.toId}`)).toEqual(["a->b", "f->b"]);
   });
 });

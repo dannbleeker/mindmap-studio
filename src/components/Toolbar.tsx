@@ -77,6 +77,8 @@ export interface ToolbarPanels {
   toggleFilter: () => void;
   stylesOpen: boolean;
   setStylesOpen: (fn: (v: boolean) => boolean) => void;
+  relationshipsOpen: boolean;
+  setRelationshipsOpen: (fn: (v: boolean) => boolean) => void;
   historyOpen: boolean;
   setHistoryOpen: (fn: (v: boolean) => boolean) => void;
   boardOpen: boolean;
@@ -707,6 +709,13 @@ export function Toolbar({
             checked={panels.stylesOpen}
             trailing={mi("check")}
             onSelect={() => panels.setStylesOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("link")}
+            label="Relationships"
+            checked={panels.relationshipsOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setRelationshipsOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("grid")}

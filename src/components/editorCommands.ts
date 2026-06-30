@@ -321,18 +321,28 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
         { keywords: `${n.topic} ${n.note ?? ""}` },
       );
 
+  // Restructure across maps: promote the selected branch to its own map, or merge another library
+  // map in as a branch under the selection.
+  add("promote-branch", "New map from this topic", "map", () => map.promoteBranch(), !!sel);
+
   // Switch to another library map from the keyboard (the cross-map half of the quick switcher; the
-  // in-map "Go to" rows above cover topics within the active map). Skips the map already open.
+  // in-map "Go to" rows above cover topics within the active map). Skips the map already open. The
+  // same other-maps list also powers "Insert map as branch" (merge), gated on a selection.
   for (const summary of map.maps)
-    if (summary.id !== map.liveDoc.id)
-      add(
-        `map-switch:${summary.id}`,
-        `Switch to map: ${topicLabel(summary.title || "(untitled)")}`,
-        "map",
-        () => map.switchMap(summary.id),
-        true,
-        { keywords: "open map switch go to" },
+    if (summary.id !== map.liveDoc.id) {
+      const title = topicLabel(summary.title || "(untitled)");
+      add(`map-switch:${summary.id}`, `Switch to map: ${title}`, "map", () =>
+        map.switchMap(summary.id),
       );
+      add(
+        `merge-map:${summary.id}`,
+        `Insert map as branch: ${title}`,
+        "map",
+        () => map.mergeMap(summary.id),
+        !!sel,
+        { keywords: "merge insert graft subtree under" },
+      );
+    }
 
   // Layout
   for (const l of LAYOUTS)

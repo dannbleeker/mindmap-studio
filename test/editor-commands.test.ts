@@ -117,6 +117,8 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       load: vi.fn(),
       duplicateMap: vi.fn(),
       deleteCurrent: vi.fn(),
+      promoteBranch: vi.fn(),
+      mergeMap: vi.fn(),
       present: vi.fn(),
       refreshRollupsNow: vi.fn(),
     },
@@ -250,6 +252,25 @@ describe("buildEditorCommands", () => {
     expect(other?.label).toBe("Switch to map: Other map");
     other?.run();
     expect(props.map.switchMap).toHaveBeenCalledWith("m2");
+  });
+
+  it("promotes a branch (selection-gated) and merges other maps as a branch", () => {
+    // Promote needs a selection.
+    expect(byId(mkProps(null)).get("promote-branch")?.enabled).toBe(false);
+    const props = mkProps({ id: "n1", topic: "N", note: "" });
+    props.map.maps = [
+      { id: "m1", title: "Map" },
+      { id: "m2", title: "Other map" },
+    ];
+    const cmds = byId(props);
+    cmds.get("promote-branch")?.run();
+    expect(props.map.promoteBranch).toHaveBeenCalled();
+    // Merge: one command per OTHER map, gated on the selection, deferring to mergeMap(id).
+    expect(cmds.get("merge-map:m1")).toBeUndefined(); // not the open map
+    const merge = cmds.get("merge-map:m2");
+    expect(merge?.label).toBe("Insert map as branch: Other map");
+    merge?.run();
+    expect(props.map.mergeMap).toHaveBeenCalledWith("m2");
   });
 
   it("exposes a 'Keyboard shortcuts' command that opens the cheat-sheet (#2)", () => {

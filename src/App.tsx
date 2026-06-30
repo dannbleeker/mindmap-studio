@@ -89,7 +89,7 @@ import {
   type SelectionFields,
   type SelectionMarkerTags,
 } from "./mindmap";
-import { findAnyNode } from "./mindmap/flow/ops";
+import { findAnyNode, newMapFromBranch } from "./mindmap/flow/ops";
 import { anyMobileSheetOpen, closeMobileSheets } from "./mobileSheets";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
@@ -896,6 +896,55 @@ export function App() {
     load(copy);
   }
 
+  // "New map from this topic": copy the selected branch out into a fresh standalone library map and
+  // open it (non-destructive — the source map keeps the branch). The restructure verb the multi-map
+  // library was missing; the inverse of merge-map-as-branch below.
+  async function promoteBranchToMap() {
+    const id = selected?.id;
+    if (!id) {
+      showHint("Select a topic first to promote it to a new map.");
+      return;
+    }
+    const fresh = newMapFromBranch(liveDocRef.current, id);
+    if (!fresh) {
+      showHint("Pick a branch (not the central topic) to promote.");
+      return;
+    }
+    fresh.id = crypto.randomUUID();
+    try {
+      await saveMap(liveDocRef.current); // flush the source map's edits before switching
+      await saveMap(fresh);
+      load(fresh);
+      showHint(`Promoted "${fresh.title}" to a new map.`);
+    } catch {
+      showHint("Couldn't create the new map.");
+    }
+  }
+
+  // "Insert map as branch": graft another library map's whole tree under the selected topic (re-id'd,
+  // so ids never clash). The inverse of promote-to-map; reuses the cross-map branch-graft path.
+  async function mergeMapAsBranch(sourceId: string) {
+    if (!selected) {
+      showHint("Select a topic first to merge a map under it.");
+      return;
+    }
+    if (sourceId === liveDocRef.current.id) {
+      showHint("Pick a different map to merge in.");
+      return;
+    }
+    try {
+      const src = await loadMap(sourceId);
+      if (!src) {
+        showHint("Couldn't load that map.");
+        return;
+      }
+      const ok = mapRef.current?.addSubtreeToSelected([src.root]);
+      showHint(ok ? `Merged "${src.title}" under the selection.` : "Select a topic first.");
+    } catch {
+      showHint("Couldn't merge that map.");
+    }
+  }
+
   // Power Filter → "Extract matches to a new map": prune the live doc to the lit set (matches +
   // ancestors) and open it as a fresh library map. No-op (with a hint) when nothing matches.
   function extractFilterMatches() {
@@ -1179,6 +1228,8 @@ export function App() {
       load,
       duplicateMap,
       deleteCurrent,
+      promoteBranch: promoteBranchToMap,
+      mergeMap: mergeMapAsBranch,
       present: () => setPresentDoc(liveDocRef.current),
       refreshRollupsNow,
     },

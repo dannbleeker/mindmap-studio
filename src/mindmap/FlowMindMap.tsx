@@ -1875,6 +1875,15 @@ function FlowInner({
               }
             }}
             deleteKeyCode={null}
+            // Keyboard is owned end-to-end by the app's custom keymap (keyIntent.ts on a document
+            // listener): Tab=add-child, Enter=add-sibling, arrows=move selection, F2=rename, Delete,
+            // reorder, undo/redo. React Flow's built-in node-keyboard a11y (Tab-to-node + arrow-move)
+            // would otherwise fire alongside it and double-handle those keys — so disable RF's model
+            // outright and make our keymap the single source of truth. The accessible tree lives in the
+            // Outline panel (role="tree"); canvas nodes carry names/roles but aren't RF tab stops. (UI-5)
+            disableKeyboardA11y
+            nodesFocusable={false}
+            edgesFocusable={false}
             zoomOnDoubleClick={false}
             colorMode={(theme ?? mindManagerTheme).type}
             proOptions={{ hideAttribution: true }}

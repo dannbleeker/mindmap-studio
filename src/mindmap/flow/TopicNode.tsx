@@ -864,17 +864,14 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             position: "absolute",
             // Leaf-facing edge: left for a left-growing branch (two-sided left half / all-left), else
             // right — so the toggle sits at the branch tip like MindManager, not toward the root.
-            ...(tipLeft ? { left: -9 } : { right: -9 }),
-            bottom: -9,
-            width: 18,
-            height: 18,
-            borderRadius: "50%",
+            ...(tipLeft ? { left: -12 } : { right: -12 }),
+            bottom: -12,
+            // Size/shape/font live in CSS (.mm-collapse-toggle) so the touch (coarse-pointer) escalation
+            // actually applies — inline width would otherwise outrank the @media rule. Only the dynamic
+            // branch-coloured border/text stays inline.
             border: `1px solid ${branchColor}`,
             background: "var(--mm-node-bg, #fff)",
             color: branchColor,
-            fontSize: 11,
-            lineHeight: "16px",
-            padding: 0,
             cursor: "pointer",
             zIndex: 1,
           }}

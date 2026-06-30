@@ -1047,11 +1047,12 @@
    (☑, set by aria-pressed) stays visible so completed tasks read at a glance. */
 .mm-task-check {
   position: absolute;
-  left: -7px;
+  left: -10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 17px;
-  height: 17px;
+  /* 24×24 hit target (WCAG 2.5.8); the ☑ glyph stays small via font-size. */
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1069,8 +1070,37 @@
 .mm-task-check[aria-pressed="true"] {
   opacity: 0.8;
 }
-.mm-task-check:hover {
+.mm-task-check:hover,
+/* Reveal + ring on keyboard focus so a Tab-focused checkbox isn't invisible (WCAG 2.4.7). */
+  .mm-task-check:focus-visible {
   opacity: 1;
+}
+.mm-task-check:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+/* Branch-tip collapse toggle — size/shape/font here (the branch-coloured border/text are inline) so
+   the coarse-pointer escalation below isn't outranked by an inline width. 24px desktop hit target
+   (WCAG 2.5.8); 28px on touch. */
+.mm-collapse-toggle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 13px;
+  line-height: 22px;
+}
+.mm-collapse-toggle:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .mm-task-check {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
 }
 
 /* Empty-map onboarding coachmark (#1) — anchored under the root, theme-reactive via --ed-*. */

@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 369,
+  "reviewedThroughChangelogBullets": 370,
   "areas": [
     "editing",
     "notes",
@@ -16,6 +16,24 @@
     "pwa"
   ],
   "features": [
+    {
+      "id": "big-map-virtualisation",
+      "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
+      "area": "navigation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cinematic-walkthrough",
+      "name": "Cinematic visual-map walkthrough (guided walk frames each branch with animated zoom)",
+      "area": "presentation",
+      "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
     {
       "id": "free-colour-pickers",
       "name": "Free colour pickers for node text / fill / branch (StyleBar)",

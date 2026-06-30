@@ -249,6 +249,20 @@ describe("App (integration)", () => {
     await waitFor(() => expect(screen.queryByText(/OPML/i)).toBeNull());
   });
 
+  it("opens Settings with the Ctrl/⌘+, shortcut", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+    await flush();
+    await openEditor(user, container);
+    expect(container.querySelector(".mm-editor")).toBeTruthy();
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: ",", ctrlKey: true, bubbles: true }),
+      );
+    });
+    await waitFor(() => expect(screen.getByText("Local data")).toBeTruthy());
+  });
+
   it("opens Settings from the rail and drives its actions", async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);

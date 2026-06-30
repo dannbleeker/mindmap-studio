@@ -759,6 +759,9 @@ export function App() {
           return;
         e.preventDefault();
         setFindOpen(true);
+      } else if (k === "," && !e.shiftKey) {
+        e.preventDefault();
+        setSettingsOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);

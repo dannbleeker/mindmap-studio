@@ -16,6 +16,14 @@ interface VersionRecord {
   doc: MindMapDoc;
 }
 
+/** A recently-opened disk file (Open Recent). The actual handle lives in `handles` keyed by the same
+ *  map id; this store just keeps the ordered, named recents list. */
+export interface RecentFile {
+  id: string; // map id (also the `handles` key)
+  name: string; // the file name, for display
+  ts: number; // last opened/saved (ms epoch) — drives the recency order
+}
+
 interface MindMapDB extends DBSchema {
   maps: { key: string; value: MindMapDoc };
   meta: { key: string; value: string };
@@ -23,10 +31,12 @@ interface MindMapDB extends DBSchema {
   // Disk-file binding per map: a FileSystemFileHandle (structured-cloneable) so a map opened from /
   // saved to a `.mmst` reconnects to it across reloads. Permission is re-checked on use, not here.
   handles: { key: string; value: FileSystemFileHandle };
+  // Recently-opened disk files (Open Recent), keyed by map id; the handle comes from `handles`.
+  recentFiles: { key: string; value: RecentFile };
 }
 
 const DB_NAME = "mindmap-studio";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 /** Keep at most this many snapshots per map; older ones are pruned. */
 export const MAX_VERSIONS = 30;
 
@@ -43,6 +53,8 @@ function db(): Promise<IDBPDatabase<MindMapDB>> {
           store.createIndex("by-map", "mapId");
         }
         if (!database.objectStoreNames.contains("handles")) database.createObjectStore("handles");
+        if (!database.objectStoreNames.contains("recentFiles"))
+          database.createObjectStore("recentFiles");
       },
     });
   }
@@ -72,6 +84,44 @@ export async function deleteMap(id: string): Promise<void> {
   await (await db()).delete("maps", id);
   await deleteVersionsForMap(id); // a deleted map's history goes with it
   await deleteMapHandle(id); // and its disk-file binding
+  await deleteRecentFile(id); // and its Open-Recent entry
+}
+
+// --- trash (soft-delete) ---------------------------------------------------
+// Deleting a map moves it to the Trash (a `meta.trashedAt` flag) rather than destroying it, so a
+// delete is recoverable beyond the brief Undo toast (until the Trash is emptied). Trashed maps are
+// hidden from the library (listMaps / useLibrary filter them out); their versions + disk handle are
+// kept so Restore is lossless. Emptying the Trash is the only permanent delete.
+
+/** Move a map to the Trash (recoverable). No-op if it isn't found. */
+export async function softDeleteMap(id: string): Promise<void> {
+  const doc = (await (await db()).get("maps", id)) ?? null;
+  if (!doc) return;
+  const trashed: MindMapDoc = { ...doc, meta: { ...doc.meta, trashedAt: Date.now() } };
+  await (await db()).put("maps", trashed, id);
+}
+
+/** Restore a map from the Trash (clears its trashed flag); preserves its last-edited time. */
+export async function restoreMapFromTrash(id: string): Promise<void> {
+  const doc = (await (await db()).get("maps", id)) ?? null;
+  if (!doc?.meta?.trashedAt) return;
+  const meta = { ...doc.meta };
+  meta.trashedAt = undefined;
+  await (await db()).put("maps", { ...doc, meta }, id);
+}
+
+/** Maps currently in the Trash, most-recently-trashed first. */
+export async function listTrashedMaps(): Promise<(MapSummary & { trashedAt: number })[]> {
+  const docs = await (await db()).getAll("maps");
+  return docs
+    .filter((d): d is MindMapDoc & { meta: { trashedAt: number } } => !!d.meta?.trashedAt)
+    .map((d) => ({ id: d.id, title: d.title, trashedAt: d.meta.trashedAt }))
+    .sort((a, b) => b.trashedAt - a.trashedAt);
+}
+
+/** Permanently delete every map in the Trash (maps + versions + handles). */
+export async function emptyTrash(): Promise<void> {
+  for (const t of await listTrashedMaps()) await deleteMap(t.id);
 }
 
 // --- disk-file handles -----------------------------------------------------
@@ -92,9 +142,28 @@ export async function deleteMapHandle(id: string): Promise<void> {
   await (await db()).delete("handles", id);
 }
 
+// --- recent disk files (Open Recent) ---------------------------------------
+
+/** Record (or refresh) a disk file in the Open-Recent list. */
+export async function noteRecentFile(id: string, name: string): Promise<void> {
+  await (await db()).put("recentFiles", { id, name, ts: Date.now() }, id);
+}
+
+/** The most-recently-opened disk files, newest first (default 10). */
+export async function listRecentFiles(limit = 10): Promise<RecentFile[]> {
+  const all = await (await db()).getAll("recentFiles");
+  return all.sort((a, b) => b.ts - a.ts).slice(0, limit);
+}
+
+/** Drop a file from the Open-Recent list (e.g. when its map is permanently deleted). */
+async function deleteRecentFile(id: string): Promise<void> {
+  await (await db()).delete("recentFiles", id);
+}
+
 export async function listMaps(): Promise<MapSummary[]> {
   const docs = await (await db()).getAll("maps");
   return docs
+    .filter((doc) => !doc.meta?.trashedAt) // trashed maps are hidden from the library
     .map((doc) => ({ id: doc.id, title: doc.title }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }
@@ -170,6 +239,40 @@ export async function getTabSession(): Promise<TabSession | null> {
   }
   const last = await getLastOpened();
   return last ? { openTabIds: [last], activeTabId: last } : null;
+}
+
+// --- quick-capture inbox ---------------------------------------------------
+// A map-independent "Unfiled" bucket: jot a thought now (from any map, or none) and file it onto a
+// map later. Stored as a JSON list under a single `meta` key — no new object store, so no schema
+// bump. Small by nature (short text snippets), so read/write-whole is fine.
+
+/** One unfiled capture: a short note to be turned into a topic later. */
+export interface InboxItem {
+  id: string;
+  text: string;
+  ts: number; // captured-at (ms epoch) — drives newest-first order
+}
+
+const INBOX_KEY = "inbox";
+
+/** The quick-capture inbox, newest first. Tolerates a missing/corrupt entry (returns []). */
+export async function getInbox(): Promise<InboxItem[]> {
+  const raw = await (await db()).get("meta", INBOX_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as InboxItem[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((i): i is InboxItem => !!i && typeof i.id === "string" && typeof i.text === "string")
+      .sort((a, b) => b.ts - a.ts);
+  } catch {
+    return [];
+  }
+}
+
+/** Persist the whole inbox (the hook writes the full list on every change). */
+export async function saveInbox(items: InboxItem[]): Promise<void> {
+  await (await db()).put("meta", JSON.stringify(items), INBOX_KEY);
 }
 
 // --- version history -------------------------------------------------------

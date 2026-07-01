@@ -1381,6 +1381,88 @@
   }
 }
 
+/* The in-app "Reduce motion" toggle (useReducedMotion) sets body.reduce-motion, so the user can drop
+   chrome transitions/animations even when the OS preference isn't set (and we honour the OS value too,
+   above). JS-driven canvas/walk animations are handled separately by passing a 0 duration. */
+.reduce-motion .mm-editor * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Slash `/` command menu — the popup under the inline topic editor (TopicNode). Anchored to the
+   editor span (its parent is position:relative), floats above neighbouring nodes. Keyboard-driven:
+   the highlighted row carries data-active; hover mirrors it. */
+.mm-slash-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 190px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  background: var(--ed-card, #fff);
+  color: var(--ed-ink, #222);
+  border: 1px solid var(--ed-border, #cfcfe0);
+  border-radius: 8px;
+  box-shadow: var(--ed-shadow-pop, 0 12px 32px rgba(40, 30, 16, 0.18));
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+}
+.mm-slash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.mm-slash-item[data-active] {
+  background: var(--ed-accent-tint, rgba(27, 138, 94, 0.1));
+}
+.mm-slash-hint {
+  color: var(--ed-muted, #706a5f);
+  font-size: 12px;
+}
+
+/* High-contrast mode (useHighContrast → body.high-contrast, or the OS prefers-contrast/forced-colors
+   under "system"). The heavy lifting is token-level: editorThemeVars(dark, true) pushes borders,
+   dividers and text to their extremes. These supplements cover what tokens can't: bolder, always-on
+   focus rings so keyboard focus is unmissable, and underlined chrome links so colour isn't the only
+   affordance. Canvas node colours (per-topic fills) are left alone — the mind map keeps its palette. */
+.high-contrast .mm-editor :focus-visible {
+  outline: 3px solid var(--ed-accent-ring);
+  outline-offset: 2px;
+}
+.high-contrast .mm-editor a {
+  text-decoration: underline;
+}
+
+/* Forced-colors (Windows High Contrast): the browser overrides our palette with system colours. Keep
+   the canvas mind map exact — its per-topic fills/markers carry meaning — while letting the chrome
+   adopt system colours as intended. Focus uses the system Highlight so it tracks the active scheme. */
+@media (forced-colors: active) {
+  .react-flow__renderer,
+  .react-flow__viewport {
+    forced-color-adjust: none;
+  }
+  .mm-editor :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
 /* --- document tabs (open maps) --- */
 .mm-doctabs {
   flex-shrink: 0;

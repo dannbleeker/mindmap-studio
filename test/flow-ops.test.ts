@@ -5,6 +5,7 @@ import {
   addAttachment,
   addChild,
   addFloatingTopic,
+  addHyperlink,
   addLink,
   addSibling,
   addStickyNote,
@@ -44,6 +45,7 @@ import {
   outdent,
   pasteBranch,
   removeAttachment,
+  removeHyperlink,
   renameTag,
   reparent,
   replaceTopics,
@@ -573,6 +575,42 @@ describe("flow ops — content", () => {
       findNode(setHyperlink(base(), "a", "java\tscript:alert(1)").doc, "a")?.hyperlink,
     ).toBeUndefined();
     expect(findNode(setHyperlink(base(), "a", "").doc, "a")?.hyperlink).toBeUndefined();
+  });
+
+  it("addHyperlink appends extras, dedups, and rejects blank/dangerous URLs", () => {
+    let d = addHyperlink(base(), "a", "https://one.com").doc;
+    d = addHyperlink(d, "a", "https://two.com").doc;
+    expect(findNode(d, "a")?.hyperlinks).toEqual(["https://one.com", "https://two.com"]);
+    // Duplicate of an existing extra is a no-op (same array reference-value).
+    expect(findNode(addHyperlink(d, "a", "https://one.com").doc, "a")?.hyperlinks).toEqual([
+      "https://one.com",
+      "https://two.com",
+    ]);
+    // Blank + script-bearing schemes never persist.
+    expect(findNode(addHyperlink(base(), "a", "   ").doc, "a")?.hyperlinks).toBeUndefined();
+    expect(
+      findNode(addHyperlink(base(), "a", "javascript:alert(1)").doc, "a")?.hyperlinks,
+    ).toBeUndefined();
+  });
+
+  it("addHyperlink won't duplicate the primary hyperlink into the extras", () => {
+    const withPrimary = setHyperlink(base(), "a", "https://primary.com").doc;
+    expect(
+      findNode(addHyperlink(withPrimary, "a", "https://primary.com").doc, "a")?.hyperlinks,
+    ).toBeUndefined();
+  });
+
+  it("removeHyperlink drops one extra and clears the array when empty", () => {
+    let d = addHyperlink(base(), "a", "https://one.com").doc;
+    d = addHyperlink(d, "a", "https://two.com").doc;
+    const afterFirst = removeHyperlink(d, "a", 0).doc;
+    expect(findNode(afterFirst, "a")?.hyperlinks).toEqual(["https://two.com"]);
+    expect(findNode(removeHyperlink(afterFirst, "a", 0).doc, "a")?.hyperlinks).toBeUndefined();
+    // Out-of-range index is a no-op.
+    expect(findNode(removeHyperlink(d, "a", 9).doc, "a")?.hyperlinks).toEqual([
+      "https://one.com",
+      "https://two.com",
+    ]);
   });
 
   it("nextSelectionId moves selection by logical tree direction", () => {

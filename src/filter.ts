@@ -21,7 +21,13 @@ export interface FilterCriteria {
   due?: DueMode;
   /** Task-priority constraint: 1=High..3=Low, or 0/undefined for "any". */
   priority?: number;
+  /** Completion constraint over the node's rolled-up progress; only task-bearing nodes match.
+   *  "" / undefined = any. (Optional, so older saved filters still load.) */
+  completion?: CompletionMode;
 }
+
+/** Completion-status filter mode: any (off), fully done, not done, or partially done. */
+export type CompletionMode = "" | "complete" | "incomplete" | "in-progress";
 
 /** Is any criterion set? When false the canvas shows everything (no dimming). */
 export function isFilterActive(c: FilterCriteria): boolean {
@@ -30,7 +36,8 @@ export function isFilterActive(c: FilterCriteria): boolean {
     c.markers.length > 0 ||
     c.tags.length > 0 ||
     (c.due ?? "") !== "" ||
-    !!c.priority
+    !!c.priority ||
+    (c.completion ?? "") !== ""
   );
 }
 
@@ -47,6 +54,12 @@ const DUE_LABEL: Record<Exclude<DueMode, "">, string> = {
   soon: "📅 due ≤7d",
 };
 
+const COMPLETION_LABEL: Record<Exclude<CompletionMode, "">, string> = {
+  complete: "✓ done",
+  incomplete: "○ not done",
+  "in-progress": "◐ in progress",
+};
+
 /** A short human label for a saved filter's criteria (for the saved-filters list tooltip). */
 export function describeCriteria(c: FilterCriteria): string {
   const parts: string[] = [];
@@ -55,6 +68,7 @@ export function describeCriteria(c: FilterCriteria): string {
   if (c.tags.length) parts.push(c.tags.map((t) => `#${t}`).join(" "));
   if (c.due) parts.push(DUE_LABEL[c.due]);
   if (c.priority) parts.push(`${priorityLabel(c.priority)} priority`);
+  if (c.completion) parts.push(COMPLETION_LABEL[c.completion]);
   return parts.join(" · ") || "everything";
 }
 
@@ -65,7 +79,8 @@ function nodeMatches(
   today: string,
   effectiveProgress: number | undefined,
 ): boolean {
-  // Text matches topic or note (the same surfaces Find searches), case-insensitive.
+  // Text matches topic or note, case-insensitive. (The Power Filter has dedicated marker/tag
+  // pickers, so its free-text box stays scoped to the prose surfaces.)
   if (q && !`${n.topic} ${n.note ?? ""}`.toLowerCase().includes(q)) return false;
   // Marker / tag constraints are AND across categories, OR within one (any selected marker counts).
   if (c.markers.length && !c.markers.some((m) => n.icons?.includes(m))) return false;
@@ -76,6 +91,15 @@ function nodeMatches(
   if (due === "overdue" && !isOverdue(n.task?.due, effectiveProgress, today)) return false;
   if (due === "soon" && !isDueSoon(n.task?.due, effectiveProgress, today)) return false;
   if (c.priority && n.task?.priority !== c.priority) return false;
+  // Completion uses the node's effective (rolled-up) progress. A node with no task anywhere in its
+  // subtree has no completion state (undefined), so it never matches a completion constraint.
+  const comp = c.completion ?? "";
+  if (comp) {
+    if (effectiveProgress === undefined) return false;
+    if (comp === "complete" && effectiveProgress < 1) return false;
+    if (comp === "incomplete" && effectiveProgress >= 1) return false;
+    if (comp === "in-progress" && (effectiveProgress <= 0 || effectiveProgress >= 1)) return false;
+  }
   return true;
 }
 

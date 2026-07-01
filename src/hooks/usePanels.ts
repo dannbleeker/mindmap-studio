@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { type DueMode, type FilterCriteria, type SavedFilter, isFilterActive } from "../filter";
+import {
+  type CompletionMode,
+  type DueMode,
+  type FilterCriteria,
+  type SavedFilter,
+  isFilterActive,
+} from "../filter";
 
 // Panel + filter UI state for the editor, extracted from App.tsx (behaviour-preserving). Owns:
 //   • the eight side-panel open/close toggles (outline / index / info / filter / styles / history /
@@ -102,6 +108,8 @@ export interface PanelsState {
   setAgendaOpen: React.Dispatch<React.SetStateAction<boolean>>;
   mapsOpen: boolean;
   setMapsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  inboxOpen: boolean;
+  setInboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
   deckEditorOpen: boolean;
   setDeckEditorOpen: React.Dispatch<React.SetStateAction<boolean>>;
   noteEditorOpen: boolean;
@@ -124,6 +132,8 @@ export interface FilterState {
   setDue: React.Dispatch<React.SetStateAction<DueMode>>;
   priority: number;
   setPriority: React.Dispatch<React.SetStateAction<number>>;
+  completion: CompletionMode;
+  setCompletion: React.Dispatch<React.SetStateAction<CompletionMode>>;
   /** "Hide" mode: non-matches are removed from the canvas instead of dimmed. */
   hide: boolean;
   setHide: React.Dispatch<React.SetStateAction<boolean>>;
@@ -160,8 +170,16 @@ function buildCriteria(
   tags: string[],
   due: DueMode,
   priority: number,
+  completion: CompletionMode,
 ): FilterCriteria {
-  return { text, markers, tags, due, priority: priority || undefined };
+  return {
+    text,
+    markers,
+    tags,
+    due,
+    priority: priority || undefined,
+    completion: completion || undefined,
+  };
 }
 
 export function usePanels(): UsePanels {
@@ -187,6 +205,7 @@ export function usePanels(): UsePanels {
   const [statsOpen, setStatsOpen] = useState(false);
   const [agendaOpen, setAgendaOpen] = useState(false);
   const [mapsOpen, setMapsOpen] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
   const [deckEditorOpen, setDeckEditorOpen] = useState(false);
   const [noteEditorOpen, setNoteEditorOpen] = useState(false);
 
@@ -228,6 +247,7 @@ export function usePanels(): UsePanels {
   const [filterTags, setFilterTags] = useState<string[]>([]);
   const [filterDue, setFilterDue] = useState<DueMode>("");
   const [filterPriority, setFilterPriority] = useState(0);
+  const [filterCompletion, setFilterCompletion] = useState<CompletionMode>("");
   const [filterHide, setFilterHide] = useState(false);
 
   const clearFilter = () => {
@@ -236,6 +256,7 @@ export function usePanels(): UsePanels {
     setFilterTags([]);
     setFilterDue("");
     setFilterPriority(0);
+    setFilterCompletion("");
     setFilterHide(false);
   };
   // Toggling the panel off also clears the filter, so dimming can't outlive a visible control.
@@ -262,6 +283,7 @@ export function usePanels(): UsePanels {
       filterTags,
       filterDue,
       filterPriority,
+      filterCompletion,
     );
     if (!name.trim() || !isFilterActive(criteria)) return;
     // Replace any existing preset with the same name, then add.
@@ -276,6 +298,7 @@ export function usePanels(): UsePanels {
     setFilterTags([...criteria.tags]);
     setFilterDue(criteria.due ?? "");
     setFilterPriority(criteria.priority ?? 0);
+    setFilterCompletion(criteria.completion ?? "");
   };
   const deleteSavedFilter = (id: string) =>
     setSavedFilters((prev) => prev.filter((f) => f.id !== id));
@@ -312,6 +335,8 @@ export function usePanels(): UsePanels {
       setAgendaOpen,
       mapsOpen,
       setMapsOpen,
+      inboxOpen,
+      setInboxOpen,
       deckEditorOpen,
       setDeckEditorOpen,
       noteEditorOpen,
@@ -332,12 +357,21 @@ export function usePanels(): UsePanels {
       setDue: setFilterDue,
       priority: filterPriority,
       setPriority: setFilterPriority,
+      completion: filterCompletion,
+      setCompletion: setFilterCompletion,
       hide: filterHide,
       setHide: setFilterHide,
       clear: clearFilter,
       toggleMarker: (marker) => setFilterMarkers((list) => toggleIn(list, marker)),
       toggleTag: (tag) => setFilterTags((list) => toggleIn(list, tag)),
-      criteria: buildCriteria(filterText, filterMarkers, filterTags, filterDue, filterPriority),
+      criteria: buildCriteria(
+        filterText,
+        filterMarkers,
+        filterTags,
+        filterDue,
+        filterPriority,
+        filterCompletion,
+      ),
     },
     savedFilters: {
       list: savedFilters,

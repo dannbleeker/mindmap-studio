@@ -64,4 +64,30 @@ describe("editorThemeVars", () => {
       expect(v[key], key).toBeTruthy();
     }
   });
+
+  it("pushes borders + text to their extremes in high-contrast light", () => {
+    const v = editorThemeVars(false, true) as Vars;
+    expect(v["--ed-border"]).toBe("#000000");
+    expect(v["--ed-ink"]).toBe("#000000");
+    expect(v["--ed-divider"]).toBe("#111111");
+    // Secondary text is far darker than the normal light muted/faint (stronger contrast).
+    expect(v["--ed-muted"]).toBe("#232323");
+    expect(v["--ed-faint"]).toBe("#2c2c2c");
+    // Same surfaces as normal light — only separation/text change, not the layout colours.
+    expect(v["--ed-page"]).toBe("#faf9f5");
+    expect(v["--ed-card"]).toBe("#ffffff");
+  });
+
+  it("pushes borders + text to their extremes in high-contrast dark", () => {
+    const v = editorThemeVars(true, true) as Vars;
+    expect(v["--ed-border"]).toBe("#ffffff");
+    expect(v["--ed-ink"]).toBe("#ffffff");
+    expect(v["--ed-page"]).toBe("#1d1c22"); // dark surface preserved
+  });
+
+  it("keeps the full --ed-* contract under high contrast (no dropped keys)", () => {
+    const normal = editorThemeVars(false) as Vars;
+    const hc = editorThemeVars(false, true) as Vars;
+    for (const key of Object.keys(normal)) expect(hc[key], key).toBeTruthy();
+  });
 });

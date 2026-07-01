@@ -102,6 +102,14 @@ export interface Backlink {
   label?: string;
 }
 
+/** Every hyperlink a node carries — the primary `hyperlink` first, then any `hyperlinks` extras —
+ *  so the link scans below treat a multi-link topic the same as a single-link one. Blank/undefined
+ *  entries are dropped. */
+function nodeLinks(n: MapNode): string[] {
+  const all = n.hyperlink ? [n.hyperlink, ...(n.hyperlinks ?? [])] : (n.hyperlinks ?? []);
+  return all.filter((h): h is string => typeof h === "string" && h !== "");
+}
+
 // Find every topic that points AT `targetId` — via a `#node=` hyperlink or a relationship edge
 // whose `to` is the target. Walks the central tree + every floating topic; self-references are
 // excluded. Pure + deterministic (sorted by topic, then kind); the inspector renders these as
@@ -117,13 +125,15 @@ export function backlinksFor(doc: MindMapDoc, targetId: string): Backlink[] {
   for (const f of doc.floatingTopics ?? []) walk(f);
 
   const out: Backlink[] = [];
-  // Topic hyperlinks (#node=<target>) — incoming "jump" references.
+  // Topic hyperlinks (#node=<target>) — incoming "jump" references. Any of a node's links (primary or
+  // extra) pointing at the target contributes a single hyperlink backlink for that node.
   for (const n of byId.values()) {
-    if (n.id === targetId || !n.hyperlink) continue;
-    const link = classifyLink(n.hyperlink);
-    if (link.kind === "node" && link.id === targetId) {
-      out.push({ id: n.id, topic: n.topic, kind: "hyperlink" });
-    }
+    if (n.id === targetId) continue;
+    const points = nodeLinks(n).some((h) => {
+      const link = classifyLink(h);
+      return link.kind === "node" && link.id === targetId;
+    });
+    if (points) out.push({ id: n.id, topic: n.topic, kind: "hyperlink" });
   }
   // Relationship edges that point at the target ("what points AT me"); from===target is outgoing.
   for (const l of doc.links ?? []) {
@@ -158,12 +168,17 @@ export function outgoingLinksFor(doc: MindMapDoc, sourceId: string): OutgoingLin
 
   const out: OutgoingLink[] = [];
   const src = byId.get(sourceId);
-  // The source's own #node= hyperlink (an outgoing jump to another topic).
-  if (src?.hyperlink) {
-    const link = classifyLink(src.hyperlink);
-    if (link.kind === "node" && link.id !== sourceId) {
+  // The source's own #node= hyperlinks (outgoing jumps) — primary + extras, each distinct target once.
+  if (src) {
+    const seen = new Set<string>();
+    for (const h of nodeLinks(src)) {
+      const link = classifyLink(h);
+      if (link.kind !== "node" || link.id === sourceId || seen.has(link.id)) continue;
       const tgt = byId.get(link.id);
-      if (tgt) out.push({ id: tgt.id, topic: tgt.topic, kind: "hyperlink" });
+      if (tgt) {
+        out.push({ id: tgt.id, topic: tgt.topic, kind: "hyperlink" });
+        seen.add(link.id);
+      }
     }
   }
   // Relationship edges originating at the source (to===source is incoming, handled by backlinksFor).
@@ -173,6 +188,53 @@ export function outgoingLinksFor(doc: MindMapDoc, sourceId: string): OutgoingLin
     if (tgt) out.push({ id: l.to, topic: tgt.topic, kind: "relationship", label: l.label });
   }
   return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
+}
+
+/** An incoming reference from ANOTHER map's topic (via a `#map=` / `#map=&node=` hyperlink). */
+export interface CrossMapBacklink {
+  sourceMapId: string;
+  sourceMapTitle: string;
+  /** The linking node in the source map. */
+  id: string;
+  topic: string;
+  /** The specific node targeted (when the link was `#map=X&node=Y`); absent for a whole-map link. */
+  targetNodeId?: string;
+}
+
+// Scan every OTHER map in the library for hyperlinks pointing at `targetMapId` (a whole-map `#map=`
+// link or a node-specific `#map=X&node=Y` one), returning incoming references with their source map so
+// the inspector can show "Linked from other maps" and navigate there. Pure + deterministic (sorted by
+// source map title, then topic). The current map is skipped — same-map jumps are `backlinksFor`.
+export function crossMapBacklinksFor(docs: MindMapDoc[], targetMapId: string): CrossMapBacklink[] {
+  const out: CrossMapBacklink[] = [];
+  for (const doc of docs) {
+    if (doc.id === targetMapId) continue;
+    const walk = (n: MapNode) => {
+      // A node can link to the target map more than once (e.g. a whole-map link plus a node-anchored
+      // one); dedup by the resolved target node so each distinct destination is listed once.
+      const seen = new Set<string>();
+      for (const h of nodeLinks(n)) {
+        const link = classifyLink(h);
+        if (link.kind !== "map" || link.id !== targetMapId) continue;
+        const key = link.nodeId ?? "";
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({
+          sourceMapId: doc.id,
+          sourceMapTitle: doc.title,
+          id: n.id,
+          topic: n.topic,
+          targetNodeId: link.nodeId,
+        });
+      }
+      for (const c of n.children) walk(c);
+    };
+    walk(doc.root);
+    for (const f of doc.floatingTopics ?? []) walk(f);
+  }
+  return out.sort(
+    (a, b) => a.sourceMapTitle.localeCompare(b.sourceMapTitle) || a.topic.localeCompare(b.topic),
+  );
 }
 
 /** One row of the map-wide link layer: a relationship edge or a `#node=` hyperlink, both ends resolved. */
@@ -213,11 +275,13 @@ export function mapLinks(doc: MindMapDoc): MapLink[] {
       });
   }
   for (const n of byId.values()) {
-    if (!n.hyperlink) continue;
-    const link = classifyLink(n.hyperlink);
-    if (link.kind !== "node" || link.id === n.id) continue; // in-map jumps only; skip self-links
-    const to = byId.get(link.id);
-    if (to)
+    const seen = new Set<string>();
+    for (const h of nodeLinks(n)) {
+      const link = classifyLink(h);
+      if (link.kind !== "node" || link.id === n.id || seen.has(link.id)) continue; // in-map jumps only
+      const to = byId.get(link.id);
+      if (!to) continue;
+      seen.add(link.id);
       out.push({
         fromId: n.id,
         fromTopic: n.topic,
@@ -225,6 +289,7 @@ export function mapLinks(doc: MindMapDoc): MapLink[] {
         toTopic: to.topic,
         kind: "hyperlink",
       });
+    }
   }
   return out.sort((a, b) => a.fromTopic.localeCompare(b.fromTopic) || a.kind.localeCompare(b.kind));
 }

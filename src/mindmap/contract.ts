@@ -164,6 +164,11 @@ export interface MindMapHandle {
   toggleLocked: (id: string) => void;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
   setSelectedHyperlink: (url: string) => boolean;
+  /** Append an ADDITIONAL hyperlink to the selected node (beyond its primary `hyperlink`); no-op for a
+   *  blank/dangerous/duplicate URL. False if nothing is selected. */
+  addSelectedHyperlink: (url: string) => boolean;
+  /** Remove the additional hyperlink at `index` from the selected node's extras. False if none selected. */
+  removeSelectedHyperlink: (index: number) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
   groupBranch: (id: string) => boolean;
   /** Reorder a node's direct children by topic / priority / due / progress; false if it isn't found. */
@@ -249,6 +254,10 @@ export interface MindMapHandle {
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the
    *  current selection so repeated calls add siblings under the same parent. */
   quickAdd: (text: string) => void;
+  /** Add a detached floating topic carrying `text` (the quick-capture inbox's "file onto the map"):
+   *  it lands unattached on the canvas for the user to position + selected, in one undo step. Blank
+   *  is ignored. */
+  addFloatingTopic: (text: string) => void;
   /** Add an empty child to the selected node and drop straight into editing it (the ⌘K / command
    *  path for "add child"); false if nothing is selected. */
   addChildToSelected: () => boolean;
@@ -303,16 +312,29 @@ export const NODE_LINK_PREFIX = "#node=";
 /** What a node's hyperlink points at, once classified. */
 export type ResolvedLink =
   | { kind: "node"; id: string }
-  | { kind: "map"; id: string }
+  | { kind: "map"; id: string; nodeId?: string }
   | { kind: "external"; url: string };
 
-/** Classify a node hyperlink: an in-map topic jump, an in-app map link, or an external URL. Pure. */
+/** Classify a node hyperlink: an in-map topic jump, an in-app map link (optionally focusing a node in
+ *  that map — `#map=<id>&node=<id>`), or an external URL. Backward-compatible: a bare `#map=<id>` still
+ *  classifies as a map link with no target node. Pure. */
 export function classifyLink(url: string): ResolvedLink {
   if (url.startsWith(NODE_LINK_PREFIX))
     return { kind: "node", id: url.slice(NODE_LINK_PREFIX.length) };
-  if (url.startsWith(MAP_LINK_PREFIX))
-    return { kind: "map", id: url.slice(MAP_LINK_PREFIX.length) };
+  if (url.startsWith(MAP_LINK_PREFIX)) {
+    const rest = url.slice(MAP_LINK_PREFIX.length);
+    const sep = rest.indexOf("&node=");
+    if (sep >= 0)
+      return { kind: "map", id: rest.slice(0, sep), nodeId: rest.slice(sep + "&node=".length) };
+    return { kind: "map", id: rest };
+  }
   return { kind: "external", url };
+}
+
+/** Build an in-app map link, optionally targeting a specific topic in that map. The inverse of
+ *  classifyLink for the "map" kind. Pure. */
+export function buildMapLink(mapId: string, nodeId?: string): string {
+  return nodeId ? `${MAP_LINK_PREFIX}${mapId}&node=${nodeId}` : `${MAP_LINK_PREFIX}${mapId}`;
 }
 
 /** The three horizontal directions (two-sided, or all branches left / right). */
@@ -374,8 +396,9 @@ export interface MindMapProps {
   /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
    *  Notes tab for the (now-selected) node. */
   onOpenNote?: () => void;
-  /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id. */
-  onMapLink?: (mapId: string) => void;
+  /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id and — for a
+   *  `#map=<id>&node=<id>` cross-map topic link — the topic to focus once that map mounts. */
+  onMapLink?: (mapId: string, nodeId?: string) => void;
   /** Fires when desktop files are dropped onto a topic, with that topic's id + the dropped files. The
    *  app reads them (an image → the topic's image; anything else → an attachment) via the id-based
    *  setNodeImage / addNodeAttachment handle methods. */
@@ -415,5 +438,8 @@ export interface MindMapProps {
   /** The library's other maps `{ id, title }` — lets the node right-click menu bind a roll-up source
    *  (mirror another map). Empty/absent → the roll-up binder is hidden. */
   libraryMaps?: { id: string; title: string }[];
+  /** When true, viewport animations (fit / centre / set) run instantly — honours the user's
+   *  reduced-motion preference (OS or the in-app toggle). Absent → animated. */
+  reducedMotion?: boolean;
   ref?: Ref<MindMapHandle>;
 }

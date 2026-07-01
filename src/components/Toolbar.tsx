@@ -9,6 +9,7 @@ import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import type { CanvasTheme } from "../mindmap/theme";
 import type { MindMapDoc } from "../model/types";
+import type { NodeHit } from "../search";
 import { SHORTCUT_BINDINGS } from "../shortcuts";
 import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../templates";
@@ -89,6 +90,8 @@ export interface ToolbarPanels {
   setAgendaOpen: (fn: (v: boolean) => boolean) => void;
   mapsOpen: boolean;
   setMapsOpen: (fn: (v: boolean) => boolean) => void;
+  inboxOpen: boolean;
+  setInboxOpen: (fn: (v: boolean) => boolean) => void;
   deckEditorOpen: boolean;
   setDeckEditorOpen: (fn: (v: boolean) => boolean) => void;
   noteEditorOpen: boolean;
@@ -170,6 +173,12 @@ export interface ToolbarFind {
   matchCase: boolean;
   setMatchCase: (value: boolean) => void;
   matchInfo: string;
+  /** Every current match (topic + breadcrumb + snippet), for the overlay's "all matches" list. */
+  matches: NodeHit[];
+  /** The id the cycler / list currently sits on (drives the active-row highlight). */
+  activeId: string | null;
+  /** Jump straight to a match by id (a list-row click). */
+  goTo: (id: string) => void;
   runSearch: (event: FormEvent) => void;
   /** Advance to the next / previous match (the overlay's ▾ ▴ buttons; Enter / Shift+Enter). */
   findNext: () => void;
@@ -199,6 +208,8 @@ export interface ToolbarIo {
   exportLibrary: () => void;
   copyOutline: () => void;
   copyTable: () => void;
+  /** Copy a shareable deep-link (?map=…&node=…) to the selected topic to the clipboard. */
+  copyDeepLink: () => void;
   /** Copy the rendered map to the clipboard as a PNG image (no file). */
   copyPng: () => void;
   handleFile: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -206,6 +217,10 @@ export interface ToolbarIo {
   openFile: () => void;
   saveFile: () => void;
   saveFileAs: () => void;
+  /** Re-open a recently-opened disk file by its map id (Open Recent). */
+  openRecentFile: (id: string) => void;
+  /** The Open-Recent list (most-recent first); drives the File → Open Recent submenu. */
+  recentFiles: { id: string; name: string }[];
   /** The active map's linked file name (null = library-only) + whether it's unsaved to disk. */
   fileName: string | null;
   dirty: boolean;
@@ -238,6 +253,12 @@ export interface ToolbarProps {
     openSettings: () => void;
     /** Re-show the first-run "3 things to try" card (clears the one-shot flag) — from ⌘K / Settings. */
     reShowGettingStarted: () => void;
+    /** Step back / forward through the navigation history (Alt+← / Alt+→). */
+    navBack: () => void;
+    navForward: () => void;
+    /** Whether there's anywhere to go back / forward (gates the ⌘K commands). */
+    canBack: boolean;
+    canForward: boolean;
   };
   panels: ToolbarPanels;
   map: ToolbarMap;
@@ -569,6 +590,22 @@ export function Toolbar({
                   shortcut={SHORTCUT_BINDINGS["save-file-as"]}
                   onSelect={() => io.saveFileAs()}
                 />
+                {io.recentFiles.length > 0 ? (
+                  <>
+                    <MenuLabel>Open recent</MenuLabel>
+                    {io.recentFiles.slice(0, 8).map((f) => (
+                      <MenuItem
+                        key={f.id}
+                        icon={mi("import")}
+                        label={f.name}
+                        onSelect={() => {
+                          io.openRecentFile(f.id);
+                          close();
+                        }}
+                      />
+                    ))}
+                  </>
+                ) : null}
                 <MenuSeparator />
                 <MenuLabel>Map</MenuLabel>
                 <MenuItem icon={mi("present")} label="Present" onSelect={() => map.present()} />
@@ -619,6 +656,11 @@ export function Toolbar({
                   icon={mi("copy")}
                   label="Copy as table (TSV)"
                   onSelect={() => io.copyTable()}
+                />
+                <MenuItem
+                  icon={mi("link")}
+                  label="Copy link to this topic"
+                  onSelect={() => io.copyDeepLink()}
                 />
                 <MenuItem
                   icon={mi("export")}
@@ -742,6 +784,13 @@ export function Toolbar({
             checked={panels.agendaOpen}
             trailing={mi("check")}
             onSelect={() => panels.setAgendaOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("paste")}
+            label="Inbox (quick capture)"
+            checked={panels.inboxOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setInboxOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("board")}

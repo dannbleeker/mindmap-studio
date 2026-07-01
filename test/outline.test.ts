@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 import {
   backlinksFor,
+  crossMapBacklinksFor,
   dropWhereInBox,
   mapLinks,
   markerTagIndex,
@@ -198,6 +199,58 @@ describe("backlinksFor", () => {
   });
 });
 
+describe("crossMapBacklinksFor", () => {
+  const docs = (): MindMapDoc[] => [
+    {
+      schemaVersion: 1,
+      id: "target",
+      title: "Target",
+      root: { id: "tr", topic: "Target root", children: [] },
+    },
+    {
+      schemaVersion: 1,
+      id: "src1",
+      title: "Roadmap",
+      root: {
+        id: "s1",
+        topic: "Roadmap",
+        children: [
+          { id: "n1", topic: "See target", hyperlink: "#map=target", children: [] }, // whole-map
+          { id: "n2", topic: "See topic", hyperlink: "#map=target&node=tx", children: [] }, // node
+          { id: "n3", topic: "Other", hyperlink: "#map=elsewhere", children: [] }, // other map
+        ],
+      },
+      floatingTopics: [{ id: "n4", topic: "Float ref", hyperlink: "#map=target", children: [] }],
+    },
+    {
+      schemaVersion: 1,
+      id: "src2",
+      title: "Archive",
+      root: {
+        id: "s2",
+        topic: "Archive",
+        children: [{ id: "m1", topic: "Old ref", hyperlink: "#map=target", children: [] }],
+      },
+    },
+  ];
+
+  it("collects every other map's #map= reference to the target (whole-map + node-specific)", () => {
+    const hits = crossMapBacklinksFor(docs(), "target");
+    // Sorted by source map title (Archive < Roadmap), then topic.
+    expect(hits.map((h) => [h.sourceMapTitle, h.topic, h.targetNodeId])).toEqual([
+      ["Archive", "Old ref", undefined],
+      ["Roadmap", "Float ref", undefined],
+      ["Roadmap", "See target", undefined],
+      ["Roadmap", "See topic", "tx"],
+    ]);
+  });
+
+  it("skips the target map itself and returns [] when nothing links in", () => {
+    expect(crossMapBacklinksFor(docs(), "elsewhere").map((h) => h.topic)).toEqual(["Other"]);
+    expect(crossMapBacklinksFor([docs()[0]], "target")).toEqual([]); // only the target present
+  });
+});
+
 describe("outgoingLinksFor", () => {
   it("collects the node's own #node= hyperlink target + relationship edges FROM it", () => {
     expect(outgoingLinksFor(linkDoc(), "a")).toEqual([
@@ -238,5 +291,53 @@ describe("mapLinks", () => {
     const doc = { ...linkDoc(), links: [{ id: "d1", from: "a", to: "zzz" }] }; // target doesn't exist
     // Only the two #node=b hyperlinks survive (Alpha, Float); the dangling relationship is dropped.
     expect(mapLinks(doc).map((l) => `${l.fromId}->${l.toId}`)).toEqual(["a->b", "f->b"]);
+  });
+});
+
+// A topic's `hyperlinks` extras participate in every link scan exactly like the primary `hyperlink`.
+describe("multiple hyperlinks per topic", () => {
+  // Alpha carries a primary #node=b PLUS extras: another #node=c and a #map=other&node=x.
+  const multiDoc = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "Root",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        {
+          id: "a",
+          topic: "Alpha",
+          hyperlink: "#node=b",
+          hyperlinks: ["#node=c", "#map=other&node=x"],
+          children: [],
+        },
+        { id: "b", topic: "Beta", children: [] },
+        { id: "c", topic: "Gamma", children: [] },
+      ],
+    },
+  });
+
+  it("backlinksFor sees a target reached only via an extra link", () => {
+    expect(backlinksFor(multiDoc(), "c")).toEqual([{ id: "a", topic: "Alpha", kind: "hyperlink" }]);
+  });
+
+  it("outgoingLinksFor lists every distinct #node= target (primary + extras)", () => {
+    expect(outgoingLinksFor(multiDoc(), "a")).toEqual([
+      { id: "b", topic: "Beta", kind: "hyperlink" },
+      { id: "c", topic: "Gamma", kind: "hyperlink" },
+    ]);
+  });
+
+  it("mapLinks flattens both the primary and the extra in-map jump", () => {
+    expect(mapLinks(multiDoc()).map((l) => `${l.fromId}->${l.toId}`)).toEqual(["a->b", "a->c"]);
+  });
+
+  it("crossMapBacklinksFor picks up a #map= reference carried in an extra", () => {
+    const hits = crossMapBacklinksFor(
+      [multiDoc(), { ...multiDoc(), id: "other", title: "Other" }],
+      "other",
+    );
+    expect(hits.map((h) => [h.topic, h.targetNodeId])).toEqual([["Alpha", "x"]]);
   });
 });

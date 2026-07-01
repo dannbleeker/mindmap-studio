@@ -41,6 +41,13 @@ function inline(s: string): string {
         /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
         '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
       )
+      // [text](#node=… / #map=…) — in-app links to a topic or another map. Marked with a class so the
+      // note view can intercept the click and route it through the canvas, not the browser. (`&` in a
+      // `#map=X&node=Y` target is `&amp;` after escaping; the DOM decodes it back on read.)
+      .replace(
+        /\[([^\]]+)\]\((#(?:node|map)=[^)\s]+)\)/g,
+        '<a href="$2" class="mm-inote-link">$1</a>',
+      )
   );
 }
 

@@ -16,6 +16,7 @@ const NAV: { id: StartSection; label: string }[] = [
   { id: "import", label: "Import" },
   { id: "learn", label: "Learn mind mapping" },
   { id: "about", label: "About" },
+  { id: "trash", label: "Trash" },
 ];
 
 /** Inline 20×20 line icons for the section nav (stroke = currentColor, so the active emerald tint flows
@@ -100,6 +101,14 @@ function NavIcon({ id }: { id: StartSection }) {
           <circle {...s} cx="10" cy="10" r="6.5" />
           <path {...s} d="M10 9.2v3.6" />
           <circle cx="10" cy="6.7" r="0.95" fill="currentColor" />
+        </>
+      );
+      break;
+    case "trash": // waste bin
+      body = (
+        <>
+          <path {...s} d="M4.5 6.5h11M8 6.5V5h4v1.5M6 6.5l.7 9h6.6l.7-9" />
+          <path {...s} d="M9 9v4M11 9v4" />
         </>
       );
       break;

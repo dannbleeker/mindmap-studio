@@ -32,10 +32,50 @@ export const EDITOR_FONT_MONO = '"JetBrains Mono", ui-monospace, SFMono-Regular,
  *  (Phase 8): `dark` is resolved app-wide (system / light / dark) independently of the canvas theme,
  *  so the chrome can be dark over a light canvas and vice-versa. Chrome surfaces are neutral light/dark
  *  values; the emerald accent is constant. Consumed by editor.css + the redesigned chrome components. */
-export function editorThemeVars(dark: boolean): CSSProperties {
+export function editorThemeVars(dark: boolean, highContrast = false): CSSProperties {
   const page = dark ? "#1d1c22" : "#faf9f5";
   const card = dark ? "#2a2930" : "#ffffff";
   const ink = dark ? "#e8e6df" : "#23211c";
+  // High-contrast mode (OS `prefers-contrast: more` / `forced-colors`, or the explicit toggle): push
+  // the neutral chrome tokens to their extremes so borders, dividers and secondary text stop being
+  // subtle — max-contrast ink, hard black/white borders, and a denser accent focus ring. Surfaces
+  // (page/card) stay as-is so the layout reads the same; only separation + text contrast increase.
+  if (highContrast) {
+    return {
+      "--ed-page": page,
+      "--ed-card": card,
+      "--ed-sidebar": dark ? "#0e0e14" : "#f0eee7",
+      "--ed-border": dark ? "#ffffff" : "#000000",
+      "--ed-divider": dark ? "#e6e6e6" : "#111111",
+      "--ed-ink": dark ? "#ffffff" : "#000000",
+      "--ed-ink2": dark ? "#ececec" : "#161616",
+      "--ed-muted": dark ? "#dcdcdc" : "#232323",
+      "--ed-faint": dark ? "#cfcfcf" : "#2c2c2c",
+      "--ed-accent": dark ? "#5fd39a" : "#0a6b40",
+      "--ed-accent-hover": dark ? "#7ee0af" : "#085432",
+      "--ed-accent-tint": dark ? "rgba(95,211,154,0.26)" : "rgba(10,107,64,0.16)",
+      "--ed-accent-ring": dark ? "rgba(120,224,175,0.85)" : "rgba(10,107,64,0.85)",
+      "--ed-danger": dark ? "#ff8a88" : "#8f1210",
+      "--ed-toast-ink": dark ? "#dfe7f2" : "#1a1550",
+      "--ed-toast-border": dark ? "#ffffff" : "#000000",
+      "--ed-toast-success-bg": dark ? "rgba(95,211,154,0.24)" : "#e2f7ec",
+      "--ed-toast-info-bg": dark ? "rgba(90,110,170,0.28)" : "#e7edfb",
+      "--ed-toast-error-bg": dark ? "rgba(255,138,136,0.26)" : "#fbe4e4",
+      "--ed-toast-error-ink": dark ? "#ffb3b1" : "#5f0f0e",
+      "--ed-toast-error-border": dark ? "#ff8a88" : "#8f1210",
+      "--ed-toast-warn-bg": dark ? "rgba(214,170,80,0.30)" : "#f7e7cd",
+      "--ed-toast-warn-ink": dark ? "#f0d6a6" : "#4a2a04",
+      "--ed-toast-warn-border": dark ? "#e8cfa0" : "#7a4a08",
+      "--ed-shadow": dark ? "0 0 0 1px #ffffff" : "0 0 0 1px #000000",
+      "--ed-shadow-pop": dark ? "0 0 0 2px #ffffff" : "0 0 0 2px #000000",
+      "--ed-dur-fast": `${motion.dur.fast}ms`,
+      "--ed-dur-base": `${motion.dur.base}ms`,
+      "--ed-dur-slow": `${motion.dur.slow}ms`,
+      "--ed-ease": motion.ease.standard,
+      "--ed-font-sans": EDITOR_FONT_SANS,
+      "--ed-font-mono": EDITOR_FONT_MONO,
+    } as CSSProperties;
+  }
   return {
     "--ed-page": page,
     "--ed-card": card,

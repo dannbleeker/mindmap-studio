@@ -62,9 +62,12 @@ export const SHORTCUTS: ShortcutGroup[] = [
     title: "Navigation",
     items: [
       { keys: "Ctrl/⌘ + K", action: "Open the command palette (do anything)" },
+      { keys: "Ctrl/⌘ + ,", action: "Open Settings & preferences" },
       { keys: "Ctrl/⌘ + .", action: "Focus on the selected topic (Esc to exit)" },
       { keys: "Ctrl/⌘ + F", action: "Open Find & Replace (or press /)" },
       { keys: "/", action: "Open Find & Replace" },
+      { keys: "Alt + ←", action: "Go back to the previous topic you visited" },
+      { keys: "Alt + →", action: "Go forward again" },
       { keys: "Esc", action: "Cancel / clear the current selection" },
     ],
   },
@@ -92,4 +95,7 @@ export const SHORTCUT_BINDINGS: Record<string, string> = {
   "open-file": "Ctrl/⌘ + O",
   "save-file": "Ctrl/⌘ + S",
   "save-file-as": "Ctrl/⌘ + Shift + S",
+  "nav-back": "Alt + ←",
+  "nav-forward": "Alt + →",
+  settings: "Ctrl/⌘ + ,",
 };

@@ -25,7 +25,13 @@ import {
   tabPanelId,
 } from "./design/primitives";
 import { colors, fontSize, fontWeight, radius, space } from "./design/tokens";
-import { type DueMode, type FilterCriteria, type SavedFilter, describeCriteria } from "./filter";
+import {
+  type CompletionMode,
+  type DueMode,
+  type FilterCriteria,
+  type SavedFilter,
+  describeCriteria,
+} from "./filter";
 import { markerImage, searchMarkers } from "./icons";
 import { formatBytes } from "./io/attachment";
 import { suggestNewMarkers } from "./markerSuggest";
@@ -34,6 +40,7 @@ import {
   type MarkerTagSummary,
   type SelectedNode,
   type SelectionFields,
+  buildMapLink,
 } from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
 import type {
@@ -48,6 +55,7 @@ import type {
 import { htmlToNote, renderNote } from "./noteFormat";
 import {
   type Backlink,
+  type CrossMapBacklink,
   type IndexEntry,
   type IndexHit,
   type MapLink,
@@ -631,6 +639,24 @@ export function OutlinePanel({
     for (let j = i - 1; j >= 0; j--) if (rows[j].depth < rows[i].depth) return j;
     return -1;
   };
+  // The previous / next row at the SAME depth under the SAME parent (a true sibling) — for keyboard
+  // reorder. Stops at the parent boundary (a shallower row) so a move never jumps out of the branch.
+  const prevSibling = (i: number) => {
+    const d = rows[i].depth;
+    for (let j = i - 1; j >= 0; j--) {
+      if (rows[j].depth < d) return -1;
+      if (rows[j].depth === d) return j;
+    }
+    return -1;
+  };
+  const nextSibling = (i: number) => {
+    const d = rows[i].depth;
+    for (let j = i + 1; j < rows.length; j++) {
+      if (rows[j].depth < d) return -1;
+      if (rows[j].depth === d) return j;
+    }
+    return -1;
+  };
   const [activeId, setActiveId] = useState<string | null>(null);
   const rowRefs = useRef(new Map<string, HTMLDivElement | null>());
   // Follow the canvas selection: when it changes, move the roving focus to that row AND scroll it into
@@ -652,6 +678,27 @@ export function OutlinePanel({
     if (editId) return; // the inline rename input owns the keyboard
     const i = rows.findIndex((r) => r.id === activeRow);
     if (i < 0) return;
+    // Shift+Arrows reorder / re-indent the active row (the keyboard equivalent of the ◂ ▸ drag-only
+    // controls), keeping focus on the moved row. Only when the outline is editable (onMove/onIndent set)
+    // AND not filtering — the flat filtered view hides structure, so sibling math would reparent across
+    // branches (mirrors the drag path's `!q` guard).
+    if (e.shiftKey && editable && activeRow && !q) {
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        const j = e.key === "ArrowUp" ? prevSibling(i) : nextSibling(i);
+        if (j >= 0) {
+          e.preventDefault();
+          onMove?.(activeRow, rows[j].id, e.key === "ArrowUp" ? "before" : "after");
+          focusRow(activeRow);
+        }
+        return;
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        onIndent?.(activeRow, e.key === "ArrowLeft" ? "out" : "in");
+        focusRow(activeRow);
+        return;
+      }
+    }
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
@@ -1241,6 +1288,107 @@ export function MapsPanel({
   );
 }
 
+// Quick-capture inbox: a map-independent "Unfiled" bucket. Jot a thought (Enter to capture), then
+// file it onto the current map as a floating topic — or discard it. Captures survive across maps and
+// reloads (persisted in IndexedDB via useInbox). The list is newest-first.
+export function InboxPanel({
+  items,
+  onCapture,
+  onFile,
+  onDiscard,
+  canFile,
+}: {
+  items: readonly { id: string; text: string; ts: number }[];
+  /** Capture a new snippet (already trimmed by the hook; blank is ignored). */
+  onCapture: (text: string) => void;
+  /** File a snippet onto the current map (adds it as a floating topic, then removes it here). */
+  onFile: (id: string, text: string) => void;
+  /** Drop a snippet without filing it. */
+  onDiscard: (id: string) => void;
+  /** Whether a map is open to file onto (the "→ map" button is disabled otherwise). */
+  canFile: boolean;
+}) {
+  const [draft, setDraft] = useState("");
+  const capture = () => {
+    if (!draft.trim()) return;
+    onCapture(draft);
+    setDraft("");
+  };
+  return (
+    <Panel>
+      <div style={panelTitle}>📥 Inbox</div>
+      <div style={{ padding: "0 10px 6px", display: "flex", gap: 6 }}>
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              capture();
+            }
+          }}
+          placeholder="Jot a thought…"
+          aria-label="Capture to inbox"
+          style={{ width: "auto", flex: 1 }}
+        />
+        <Button onClick={capture} disabled={!draft.trim()} style={{ padding: "2px 8px" }}>
+          Add
+        </Button>
+      </div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {items.length === 0 ? (
+          <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
+            Nothing unfiled. Jot ideas here, file them onto a map later.
+          </div>
+        ) : (
+          items.map((it) => (
+            <div
+              key={it.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "3px 10px",
+              }}
+            >
+              <span
+                title={it.text}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontSize: fontSize.md,
+                }}
+              >
+                {it.text}
+              </span>
+              <Button
+                onClick={() => onFile(it.id, it.text)}
+                disabled={!canFile}
+                title={canFile ? "File onto the current map" : "Open a map to file onto"}
+                aria-label={`File "${it.text}" onto the map`}
+                style={{ padding: "2px 6px", fontSize: fontSize.sm }}
+              >
+                → map
+              </Button>
+              <Button
+                onClick={() => onDiscard(it.id)}
+                title="Discard"
+                aria-label={`Discard "${it.text}"`}
+                style={{ padding: "2px 6px", fontSize: fontSize.sm }}
+              >
+                ×
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+    </Panel>
+  );
+}
+
 // Custom slide-deck editor (#3): reorder / add / remove the presentation slides and give each a
 // speaker note, overriding the auto walk-through. The deck is seeded from the resolved slides (so it
 // starts as today's auto deck), and every edit commits the full explicit deck via onChange — turning
@@ -1366,6 +1514,7 @@ export function FilterPanel({
   tags,
   due,
   priority,
+  completion,
   matchCount,
   savedFilters,
   onText,
@@ -1373,6 +1522,7 @@ export function FilterPanel({
   onToggleTag,
   onDue,
   onPriority,
+  onCompletion,
   hide = false,
   onHide,
   onExtract,
@@ -1388,6 +1538,7 @@ export function FilterPanel({
   tags: string[];
   due: DueMode;
   priority: number;
+  completion: CompletionMode;
   matchCount: number;
   savedFilters: SavedFilter[];
   onText: (value: string) => void;
@@ -1395,6 +1546,7 @@ export function FilterPanel({
   onToggleTag: (tag: string) => void;
   onDue: (mode: DueMode) => void;
   onPriority: (priority: number) => void;
+  onCompletion: (mode: CompletionMode) => void;
   /** "Hide non-matches" mode (vs the default fade). */
   hide?: boolean;
   onHide?: (on: boolean) => void;
@@ -1407,7 +1559,12 @@ export function FilterPanel({
 }) {
   const { markers: markerEntries, tags: tagEntries } = markerTagIndex(root, floatingTopics);
   const active =
-    text.trim().length > 0 || markers.length > 0 || tags.length > 0 || due !== "" || priority > 0;
+    text.trim().length > 0 ||
+    markers.length > 0 ||
+    tags.length > 0 ||
+    due !== "" ||
+    priority > 0 ||
+    completion !== "";
   const [saveName, setSaveName] = useState("");
   const chip = (key: string, selected: boolean, onClick: () => void) => (
     <Chip key={key} selected={selected} onClick={onClick}>
@@ -1450,6 +1607,18 @@ export function FilterPanel({
               {PRIORITY_LABEL[p]}
             </option>
           ))}
+        </Select>
+        <PanelSection>Completion</PanelSection>
+        <Select
+          value={completion}
+          onChange={(e) => onCompletion(e.target.value as CompletionMode)}
+          aria-label="Filter by completion"
+          style={{ width: "auto", margin: "0 10px 4px" }}
+        >
+          <option value="">Any</option>
+          <option value="complete">Done</option>
+          <option value="in-progress">In progress</option>
+          <option value="incomplete">Not done</option>
         </Select>
         {markerEntries.length > 0 ? (
           <>
@@ -2190,6 +2359,7 @@ export function InfoPanel({
   noteDraft,
   onNoteChange,
   onNoteBlur,
+  onOpenLink,
   onExpandNote,
   markers,
   onToggleMarker,
@@ -2211,13 +2381,19 @@ export function InfoPanel({
   onAddAttachment,
   onRemoveAttachment,
   onSetHyperlink,
+  onAddHyperlink,
+  onRemoveHyperlink,
   maps,
   onLinkMap,
   jumpTargets,
   onJump,
+  crossLinkMapId,
+  crossLinkTopics,
   backlinks,
   outgoingLinks,
   onFollowBacklink,
+  crossMapBacklinks,
+  onFollowCrossMapBacklink,
   onMinimize,
   onSetFillImage,
   onClearFillImage,
@@ -2249,6 +2425,8 @@ export function InfoPanel({
   noteDraft: string;
   onNoteChange: (value: string) => void;
   onNoteBlur: () => void;
+  /** Follow an in-app note link (`#node=…` / `#map=…`) through the canvas. */
+  onOpenLink?: (url: string) => void;
   /** Open the dockable note editor — the Notes tab's "expand for more room" target (P6). */
   onExpandNote?: () => void;
   markers: readonly string[];
@@ -2276,10 +2454,18 @@ export function InfoPanel({
   onAddAttachment: (file: File) => void;
   onRemoveAttachment: (index: number) => void;
   onSetHyperlink: (url: string) => void;
+  /** Append an additional link (beyond the primary hyperlink) to the selected node. */
+  onAddHyperlink: (url: string) => void;
+  /** Remove the additional link at `index` from the selected node's extras. */
+  onRemoveHyperlink: (index: number) => void;
   maps: { id: string; title: string }[];
   onLinkMap: (mapId: string) => void;
   jumpTargets: { id: string; topic: string; depth: number }[];
   onJump: (id: string) => void;
+  /** When the node's link points at another map, that map's id + its topics — for the cross-map
+   *  "…and a topic" refine select (upgrades a whole-map link to `#map=X&node=Y`). */
+  crossLinkMapId?: string | null;
+  crossLinkTopics?: { id: string; topic: string; depth: number }[];
   /** Topics that point AT the selected node (incoming #node= links + relationship edges). */
   backlinks: Backlink[];
   /** Topics the selected node points at (its #node= hyperlink target + relationship edges from it). */
@@ -2287,6 +2473,10 @@ export function InfoPanel({
   /** Navigate to a backlink's source node (focus + select it) — distinct from onJump, which creates
    *  an outgoing link. Reused for outgoing-link jumps (both just focus a node by id). */
   onFollowBacklink: (id: string) => void;
+  /** Topics in OTHER maps that link to this map (incoming #map= references). */
+  crossMapBacklinks?: CrossMapBacklink[];
+  /** Open the source map + focus the linking node for a cross-map backlink. */
+  onFollowCrossMapBacklink?: (mapId: string, nodeId: string) => void;
   onMinimize: () => void;
   /** Set / clear the topic's fill image (covers the whole card). */
   onSetFillImage?: (file: File) => void;
@@ -2589,6 +2779,7 @@ export function InfoPanel({
                     value={noteDraft}
                     onChange={onNoteChange}
                     onBlur={onNoteBlur}
+                    onOpenLink={onOpenLink}
                     spellCheck={spellCheck}
                   />
                 </div>
@@ -2945,7 +3136,7 @@ export function InfoPanel({
                       <CollapsibleSection
                         key={`links:${node.id}`}
                         label="Links"
-                        count={link ? 1 : 0}
+                        count={(link ? 1 : 0) + (node.hyperlinks?.length ?? 0)}
                       >
                         <Input
                           key={`${node.id}:url`}
@@ -2988,6 +3179,25 @@ export function InfoPanel({
                             </option>
                           ))}
                         </Select>
+                        {crossLinkMapId && crossLinkTopics && crossLinkTopics.length > 0 && (
+                          <Select
+                            value=""
+                            onChange={(e) =>
+                              onSetHyperlink(
+                                buildMapLink(crossLinkMapId, e.target.value || undefined),
+                              )
+                            }
+                            aria-label="Focus a topic in the linked map"
+                            style={{ width: "auto", margin: "0 10px 4px" }}
+                          >
+                            <option value="">🗺 …and a topic (whole map)</option>
+                            {crossLinkTopics.map((row) => (
+                              <option key={row.id} value={row.id}>
+                                {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+                              </option>
+                            ))}
+                          </Select>
+                        )}
                         {link && (
                           <Button
                             onClick={() => onSetHyperlink("")}
@@ -3006,6 +3216,92 @@ export function InfoPanel({
                             )
                           </Button>
                         )}
+                        {/* Additional links beyond the primary — a topic can point at more than one
+                            place. The primary above stays canonical (canvas 🔗 + exporters); these are
+                            managed here and picked up by search + the backlink scans. */}
+                        <div
+                          style={{
+                            margin: "2px 10px 0",
+                            paddingTop: 6,
+                            borderTop: "1px solid var(--ed-divider, #efece4)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: fontSize.sm,
+                              color: colors.faint,
+                              marginBottom: 4,
+                            }}
+                          >
+                            Additional links
+                          </div>
+                          {(node.hyperlinks ?? []).map((h, i) => (
+                            <div
+                              key={h}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                marginBottom: 4,
+                              }}
+                            >
+                              {onOpenLink ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenLink(h)}
+                                  title={`Open ${h}`}
+                                  style={{
+                                    ...listRow,
+                                    padding: 0,
+                                    color: colors.accent,
+                                    textDecoration: "underline",
+                                  }}
+                                >
+                                  {h}
+                                </button>
+                              ) : (
+                                <span
+                                  title={h}
+                                  style={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    fontSize: fontSize.md,
+                                  }}
+                                >
+                                  {h}
+                                </span>
+                              )}
+                              <Button
+                                onClick={() => onRemoveHyperlink(i)}
+                                title="Remove this link"
+                                aria-label={`Remove additional link ${h}`}
+                                style={{ padding: "0 6px", fontSize: fontSize.sm }}
+                              >
+                                ✕
+                              </Button>
+                            </div>
+                          ))}
+                          <Input
+                            key={`${node.id}:addlink`}
+                            defaultValue=""
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                const el = e.target as HTMLInputElement;
+                                const v = el.value.trim();
+                                if (v) {
+                                  onAddHyperlink(v);
+                                  el.value = "";
+                                }
+                              }
+                            }}
+                            placeholder="Add another link + Enter"
+                            aria-label="Add another link"
+                            style={{ width: "auto", marginBottom: 6 }}
+                          />
+                        </div>
                       </CollapsibleSection>
 
                       {backlinks.length > 0 && (
@@ -3105,6 +3401,54 @@ export function InfoPanel({
                           </div>
                         </CollapsibleSection>
                       )}
+
+                      {crossMapBacklinks && crossMapBacklinks.length > 0 && (
+                        <CollapsibleSection
+                          key={`xmap:${node.id}`}
+                          label="Linked from other maps"
+                          count={crossMapBacklinks.length}
+                        >
+                          <div
+                            style={{
+                              padding: "0 10px 6px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            {crossMapBacklinks.map((b) => (
+                              <button
+                                key={`${b.sourceMapId}:${b.id}`}
+                                type="button"
+                                onClick={() => onFollowCrossMapBacklink?.(b.sourceMapId, b.id)}
+                                title={`Go to "${b.topic || "(untitled)"}" in ${b.sourceMapTitle}`}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  textAlign: "left",
+                                  border: "none",
+                                  background: "transparent",
+                                  cursor: "pointer",
+                                  fontSize: fontSize.sm,
+                                  color: "var(--ed-ink)",
+                                  padding: "2px 4px",
+                                  borderRadius: radius.md,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                <span style={{ color: "var(--ed-faint)" }}>🗺 </span>
+                                {b.topic || "(untitled)"}
+                                <span style={{ color: "var(--ed-faint)" }}>
+                                  {" "}
+                                  — {b.sourceMapTitle}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </CollapsibleSection>
+                      )}
                     </>
                   )}
                 </>
@@ -3126,6 +3470,7 @@ export function NoteEditorPanel({
   onChange,
   onBlur,
   onClose,
+  onOpenLink,
   spellCheck = false,
 }: {
   selected: SelectedNode | null;
@@ -3133,6 +3478,7 @@ export function NoteEditorPanel({
   onChange: (value: string) => void;
   onBlur: () => void;
   onClose: () => void;
+  onOpenLink?: (url: string) => void;
   spellCheck?: boolean;
 }) {
   return (
@@ -3144,6 +3490,7 @@ export function NoteEditorPanel({
           onChange={onChange}
           onBlur={onBlur}
           onClose={onClose}
+          onOpenLink={onOpenLink}
           cue="The selected topic's note — the same note as the inspector's Notes tab, docked here for more room."
           spellCheck={spellCheck}
         />
@@ -3175,6 +3522,7 @@ export function NotesPanel({
   onChange,
   onBlur,
   onClose,
+  onOpenLink,
   cue,
   spellCheck = false,
 }: {
@@ -3184,6 +3532,8 @@ export function NotesPanel({
   onBlur: () => void;
   /** Optional — when omitted (e.g. embedded in the Info panel) the Close button is hidden. */
   onClose?: () => void;
+  /** Follow an in-app note link (`#node=…` / `#map=…`) — the app routes it through the canvas. */
+  onOpenLink?: (url: string) => void;
   /** Optional faint sub-line under the header — used by the dockable panel to flag that it's the same
    *  note as the inspector's Notes tab (P6). */
   cue?: string;
@@ -3442,6 +3792,7 @@ export function NotesPanel({
               ▦ Table
             </Button>
           </div>
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: contentEditable note editor — the onClick only reroutes in-app links through the canvas; the same targets stay keyboard-reachable via the inspector's Links section + the Outline jumps. */}
           <div
             ref={ref}
             className="mm-note-editor"
@@ -3456,6 +3807,15 @@ export function NotesPanel({
             onInput={serialize}
             onPaste={onPaste}
             onBlur={onBlur}
+            onClick={(e) => {
+              // Follow an in-app note link through the canvas (a topic jump / cross-map link) rather
+              // than letting the browser navigate. getAttribute keeps the decoded `#…` form.
+              const a = (e.target as HTMLElement).closest?.("a.mm-inote-link");
+              if (a && onOpenLink) {
+                e.preventDefault();
+                onOpenLink(a.getAttribute("href") ?? "");
+              }
+            }}
             style={{
               flex: 1,
               minHeight: 0,

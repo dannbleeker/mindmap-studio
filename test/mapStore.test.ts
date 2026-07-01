@@ -4,17 +4,25 @@ import type { MindMapDoc } from "../src/model/types";
 import {
   clearAllData,
   deleteMap,
+  emptyTrash,
   findMapReferences,
   getAllMaps,
+  getInbox,
   getLastOpened,
   latestVersionDoc,
   listMaps,
+  listRecentFiles,
+  listTrashedMaps,
   loadMap,
   loadMapHandle,
+  noteRecentFile,
+  restoreMapFromTrash,
+  saveInbox,
   saveMap,
   saveMapHandle,
   saveVersion,
   setLastOpened,
+  softDeleteMap,
 } from "../src/store/mapStore";
 
 const docOf = (id: string, title: string): MindMapDoc => ({
@@ -39,6 +47,10 @@ describe("mapStore — cold boot", () => {
   it("latestVersionDoc returns null for a map with no snapshots", async () => {
     expect(await latestVersionDoc("never-saved")).toBeNull();
   });
+
+  it("getInbox returns an empty list before anything is captured", async () => {
+    expect(await getInbox()).toEqual([]);
+  });
 });
 
 describe("mapStore", () => {
@@ -58,6 +70,22 @@ describe("mapStore", () => {
 
   it("returns null for an unknown id", async () => {
     expect(await loadMap("nope")).toBeNull();
+  });
+
+  it("round-trips the quick-capture inbox, newest first", async () => {
+    await saveInbox([
+      { id: "a", text: "older", ts: 100 },
+      { id: "b", text: "newer", ts: 200 },
+    ]);
+    const back = await getInbox();
+    expect(back.map((i) => i.text)).toEqual(["newer", "older"]); // getInbox sorts ts desc
+  });
+
+  it("tolerates a non-array inbox payload (returns [])", async () => {
+    await saveInbox([{ id: "x", text: "keep", ts: 1 }]);
+    // A non-array shape under the same meta key must degrade to empty, not throw.
+    await saveInbox(42 as never);
+    expect(await getInbox()).toEqual([]);
   });
 
   it("lists saved maps (sorted by title)", async () => {
@@ -219,6 +247,64 @@ describe("mapStore — concurrency", () => {
     ]);
     const ids = (await getAllMaps()).map((d) => d.id);
     expect(ids).toEqual(expect.arrayContaining(["p1", "p2", "p3"]));
+  });
+});
+
+describe("mapStore — trash (soft-delete)", () => {
+  it("soft-deletes to Trash: hidden from the library but not destroyed, and listed in trash", async () => {
+    await saveMap(docOf("t1", "Trashed One"));
+    await softDeleteMap("t1");
+    expect((await listMaps()).some((m) => m.id === "t1")).toBe(false); // hidden from the library
+    expect(await loadMap("t1")).not.toBeNull(); // but the record is kept (recoverable)
+    expect((await listTrashedMaps()).map((t) => t.id)).toContain("t1");
+  });
+
+  it("restores a trashed map back into the library", async () => {
+    await saveMap(docOf("t2", "Trashed Two"));
+    await softDeleteMap("t2");
+    await restoreMapFromTrash("t2");
+    expect((await listMaps()).some((m) => m.id === "t2")).toBe(true);
+    expect((await listTrashedMaps()).some((t) => t.id === "t2")).toBe(false);
+  });
+
+  it("emptyTrash permanently deletes trashed maps but leaves live ones", async () => {
+    await saveMap(docOf("t5", "Keep me")); // stays live
+    await saveMap(docOf("t6", "Purge me"));
+    await softDeleteMap("t6");
+    await emptyTrash();
+    expect(await loadMap("t6")).toBeNull(); // gone for good
+    expect(await loadMap("t5")).not.toBeNull(); // the live map is untouched
+    expect(await listTrashedMaps()).toEqual([]);
+  });
+});
+
+describe("mapStore — recent files (Open Recent)", () => {
+  it("notes + lists recently-opened disk files by name", async () => {
+    await noteRecentFile("rf1", "alpha.mmst");
+    await noteRecentFile("rf2", "beta.mmst");
+    const byId = new Map((await listRecentFiles()).map((r) => [r.id, r.name]));
+    expect(byId.get("rf1")).toBe("alpha.mmst");
+    expect(byId.get("rf2")).toBe("beta.mmst");
+  });
+
+  it("re-noting a file refreshes it in place (no duplicate)", async () => {
+    await noteRecentFile("rf3", "gamma.mmst");
+    await noteRecentFile("rf3", "gamma-renamed.mmst");
+    const matches = (await listRecentFiles()).filter((r) => r.id === "rf3");
+    expect(matches).toHaveLength(1);
+    expect(matches[0].name).toBe("gamma-renamed.mmst");
+  });
+
+  it("permanently deleting a map drops it from Open Recent", async () => {
+    await saveMap(docOf("rf4", "Doomed"));
+    await noteRecentFile("rf4", "doomed.mmst");
+    await deleteMap("rf4");
+    expect((await listRecentFiles()).some((r) => r.id === "rf4")).toBe(false);
+  });
+
+  it("respects the requested limit", async () => {
+    for (let i = 0; i < 12; i++) await noteRecentFile(`lim${i}`, `f${i}.mmst`);
+    expect((await listRecentFiles(5)).length).toBe(5);
   });
 });
 

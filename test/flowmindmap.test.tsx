@@ -204,6 +204,7 @@ describe("FlowMindMap canvas", () => {
     run(() => h.toggleSelectedIcon("⭐"));
     run(() => h.setSelectedStyle({ shape: "diamond" }));
     run(() => h.setSelectedHyperlink("https://example.com"));
+    run(() => h.addSelectedHyperlink("https://extra.example.com"));
     run(() => h.setSelectedTags(["tag"]));
     run(() => h.setSelectedProgress(0.5));
     run(() => h.setSelectedDue("2026-06-20"));
@@ -213,6 +214,7 @@ describe("FlowMindMap canvas", () => {
       h.addSelectedAttachment({ name: "f.txt", dataUrl: "data:text/plain;base64,AA", size: 3 }),
     );
     run(() => h.removeSelectedAttachment(0));
+    run(() => h.removeSelectedHyperlink(0));
     run(() => h.addSubtreeToSelected([{ id: "x", topic: "Grafted", children: [] }]));
     run(() => h.setSelectedRollup("m99"));
     run(() => h.groupBranch("a"));
@@ -256,6 +258,45 @@ describe("FlowMindMap canvas", () => {
       (n) => n.id === "a",
     );
     expect(a?.children.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("quickAdd splits a pasted multi-line outline into a subtree (burst capture)", () => {
+    const { h, onChange } = mount(); // root > [a (> a1), b]
+    run(() => h.focusNode("a"));
+    onChange.mockClear();
+    run(() => h.quickAdd("Parent\n  Child 1\n  Child 2"));
+    const a = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "a",
+    );
+    const parent = a?.children.find((n) => n.topic === "Parent");
+    expect(parent?.children.map((c) => c.topic)).toEqual(["Child 1", "Child 2"]);
+  });
+
+  it("quickAdd keeps a single line verbatim (no markdown-marker stripping)", () => {
+    const { h, onChange } = mount();
+    run(() => h.focusNode("a"));
+    onChange.mockClear();
+    // A lone topic that begins with a list/heading marker must NOT be reinterpreted as an outline.
+    run(() => h.quickAdd("1. Introduction"));
+    const a = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "a",
+    );
+    expect(a?.children.at(-1)?.topic).toBe("1. Introduction");
+  });
+
+  it("addFloatingTopic files inbox text as a detached floating topic", () => {
+    const { h, onChange } = mount();
+    onChange.mockClear();
+    run(() => h.addFloatingTopic("  Filed from inbox  "));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.floatingTopics?.map((f) => f.topic)).toContain("Filed from inbox"); // trimmed
+  });
+
+  it("addFloatingTopic ignores a blank capture", () => {
+    const { h, onChange } = mount();
+    onChange.mockClear();
+    run(() => h.addFloatingTopic("   "));
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("hovers a collapsed +N toggle to peek the first hidden child titles (Phase 10)", () => {
@@ -346,6 +387,136 @@ describe("FlowMindMap canvas", () => {
     run(() => h.focusNode("a"));
     run(() => fireEvent.keyDown(document, { key: "b", ctrlKey: true })); // a shortcut, not an edit
     expect(container.querySelector('[contenteditable="true"]')).toBeNull();
+  });
+
+  it("slash menu: typing / opens the command menu; Enter runs a command and preserves the topic", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("b")); // Beta, no children
+    // Type-to-edit with "/" seeds the editor and opens the slash menu (all commands, index 0 = child).
+    run(() => fireEvent.keyDown(document, { key: "/" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    expect(editable).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Add child topic/ })).toBeTruthy();
+    onChange.mockClear();
+    // Enter selects the highlighted command (Add child topic).
+    run(() => fireEvent.keyDown(editable, { key: "Enter" }));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    const b = doc.root.children.find((n) => n.id === "b");
+    expect(b?.children).toHaveLength(1); // a child was added under Beta
+    expect(b?.topic).toBe("Beta"); // the "/query" buffer was discarded — the real topic stands
+  });
+
+  it("slash menu: filtering to a command and Enter applies its effect (Due today)", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "/" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    // Narrow to the Due-today command by setting the editor text + firing input.
+    editable.textContent = "/due";
+    run(() => fireEvent.input(editable));
+    expect(screen.getByRole("button", { name: /Due today/ })).toBeTruthy();
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" }));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    const b = doc.root.children.find((n) => n.id === "b");
+    expect(b?.task?.due).toBeTruthy(); // a due date was stamped
+  });
+
+  // Set the editor text and drop the caret at its end (mirrors the user having just typed it).
+  const typeInEditor = (editable: HTMLElement, text: string) => {
+    editable.textContent = text;
+    const range = document.createRange();
+    range.selectNodeContents(editable);
+    range.collapse(false); // caret to the end
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    run(() => fireEvent.input(editable));
+  };
+
+  it("link autocomplete: typing [[ opens a topic picker; selecting inserts the name + attaches the link", () => {
+    const { container, h, onChange } = mount(); // root > [a "Alpha" (→ a1 "Alpha 1"), b "Beta"]
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" })); // enter edit on Beta
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    // Author a wiki link.
+    typeInEditor(editable, "[[Al");
+    // Both "Alpha" and "Alpha 1" match "Al"; the menu is open with ≥2 candidates.
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(2);
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" })); // pick the first (Alpha, id "a")
+    expect(editable.textContent).toBe("Alpha"); // the "[[Al" token was replaced by the topic name
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children.find((n) => n.id === "b")?.hyperlink).toBe("#node=a"); // linked to Alpha
+  });
+
+  it("link autocomplete: a second link on the same node lands in the extras (hyperlinks[])", () => {
+    const { container, h, onChange } = mount();
+    // b already has a primary link, so the autocomplete should add to the extras.
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    typeInEditor(editable, "[[Alpha");
+    run(() => fireEvent.keyDown(editable, { key: "Enter" })); // → primary #node=a
+    // Author another link to "Alpha 1".
+    typeInEditor(editable, "[[Alpha 1");
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" }));
+    const b = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "b",
+    );
+    expect(b?.hyperlink).toBe("#node=a"); // primary unchanged
+    expect(b?.hyperlinks).toEqual(["#node=a1"]); // the second link is an extra
+  });
+
+  it("link autocomplete: Escape dismisses the picker and stays closed until the text changes", () => {
+    const { container, h } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    typeInEditor(editable, "[[Al");
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(2);
+    // Escape closes it — and the keyup re-sync must NOT reopen it (the bug this guards).
+    run(() => fireEvent.keyDown(editable, { key: "Escape" }));
+    run(() => fireEvent.keyUp(editable, { key: "Escape" }));
+    expect(container.querySelectorAll(".mm-slash-item").length).toBe(0);
+    // Typing more re-opens it (the dismissal only holds for the exact dismissed text).
+    typeInEditor(editable, "[[Alp");
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("slash menu: Escape dismisses it and it stays closed on keyup", () => {
+    const { container, h } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "/" })); // seeds "/", opens the menu
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(1);
+    run(() => fireEvent.keyDown(editable, { key: "Escape" }));
+    run(() => fireEvent.keyUp(editable, { key: "Escape" }));
+    expect(container.querySelectorAll(".mm-slash-item").length).toBe(0);
+  });
+
+  it("link autocomplete preserves rich formatting in the topic (splices only the token)", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    // A formatted buffer: bold "Beta" then a wiki token typed after it.
+    editable.innerHTML = "<b>Beta</b> [[Al";
+    const range = document.createRange();
+    range.selectNodeContents(editable);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    run(() => fireEvent.input(editable));
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" })); // pick "Alpha"
+    // The bold run survives; only the "[[Al" token became "Alpha".
+    expect(editable.querySelector("b")?.textContent).toBe("Beta");
+    expect(editable.textContent).toBe("Beta Alpha");
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children.find((n) => n.id === "b")?.hyperlink).toBe("#node=a");
   });
 
   it("Delete removes a node with children immediately (no modal) + reports it for the undo toast (#9)", () => {
@@ -921,7 +1092,7 @@ describe("FlowMindMap canvas", () => {
     run(() =>
       fireEvent.click(within(nodeEl(container, "b") as HTMLElement).getByTitle(/Follow link/)),
     );
-    expect(onMapLink).toHaveBeenCalledWith("m2");
+    expect(onMapLink).toHaveBeenCalledWith("m2", undefined); // bare #map= link → no target node
 
     // Relationship edge: clicking it selects the edge and surfaces the resolved SelectedEdge. RF
     // wires the edge click on the wide invisible interaction path (the visible <g> has none).

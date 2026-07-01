@@ -1094,6 +1094,33 @@ export function setHyperlink(doc: MindMapDoc, id: string, url: string): OpResult
   return { doc: next };
 }
 
+/** Append an additional hyperlink to a node's `hyperlinks` (the extras beyond the primary). No-op for
+ *  a blank/dangerous URL or an exact duplicate (of the primary or an existing extra). */
+export function addHyperlink(doc: MindMapDoc, id: string, url: string): OpResult {
+  const trimmed = url.trim();
+  if (!trimmed || isDangerousUrl(trimmed)) return { doc };
+  const next = structuredClone(doc);
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  const existing = node.hyperlinks ?? [];
+  if (trimmed === node.hyperlink || existing.includes(trimmed)) return { doc };
+  node.hyperlinks = [...existing, trimmed];
+  touch(node, opsClock());
+  return { doc: next };
+}
+
+/** Remove the additional hyperlink at `index` from a node's `hyperlinks` (drops the array when empty).
+ *  No-op if the node/index isn't found. */
+export function removeHyperlink(doc: MindMapDoc, id: string, index: number): OpResult {
+  const next = structuredClone(doc);
+  const node = findAnyNode(next, id);
+  if (!node?.hyperlinks || index < 0 || index >= node.hyperlinks.length) return { doc };
+  const rest = node.hyperlinks.filter((_, i) => i !== index);
+  node.hyperlinks = rest.length > 0 ? rest : undefined;
+  touch(node, opsClock());
+  return { doc: next };
+}
+
 /** Append a file attachment to a node. */
 export function addAttachment(doc: MindMapDoc, id: string, attachment: MapAttachment): OpResult {
   const next = structuredClone(doc);

@@ -22,7 +22,9 @@ import {
 import { editorConfirm, editorPrompt } from "../components/editorDialogs";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors, motion } from "../design/tokens";
+import { useLongPress } from "../hooks/useLongPress";
 import { MARKER_PALETTE, markerImage } from "../icons";
+import { parseOutline } from "../io/pasteOutline";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
@@ -47,6 +49,7 @@ import { BranchEdge } from "./flow/BranchEdge";
 import { BulkNodeMenu } from "./flow/BulkNodeMenu";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
 import { CoachMark, DropLabel, LegendPanel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
+import { CanvasOverlaysSR } from "./flow/CanvasOverlaysSR";
 import { CanvasRelationshipsSR } from "./flow/CanvasRelationshipsSR";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
@@ -69,6 +72,7 @@ import {
 } from "./flow/history";
 import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
+import type { LinkCandidate } from "./flow/linkAutocomplete";
 import { LinkEditContext } from "./flow/linkEdit";
 import { countDescendants, subtreeIds } from "./flow/nodeWalk";
 import {
@@ -77,6 +81,7 @@ import {
   addCallout,
   addChild,
   addFloatingTopic,
+  addHyperlink,
   addLink,
   addSibling,
   addStickyNote,
@@ -114,6 +119,7 @@ import {
   outdent,
   pasteBranch,
   removeAttachment,
+  removeHyperlink,
   renameTag,
   reparent,
   replaceTopics,
@@ -290,10 +296,16 @@ function FlowInner({
   onHint,
   initialSession,
   libraryMaps = [],
+  reducedMotion = false,
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
   const isMobile = useIsMobile();
+  // Latest-value ref so the many viewport-animation callsites can read the current reduced-motion
+  // preference without each callback/handle taking it as a dependency (refs are exempt from
+  // exhaustive-deps). Each animation duration becomes 0 when motion is reduced.
+  const reducedMotionRef = useRef(reducedMotion);
+  reducedMotionRef.current = reducedMotion;
   // Drill-in (#4): re-root the *view* at `drillId` so its subtree fills the canvas. `viewDoc` returns
   // the full doc unchanged when not drilled, so the normal path is untouched; edits still run on the
   // full doc (docRef), making drilling a pure view transform.
@@ -340,6 +352,14 @@ function FlowInner({
   // Empty-pane right-click menu (add topic / paste branch / fit / reset zoom). Separate from the node
   // menu above; opened from the canvas wrapper's onContextMenu when the bare pane is the target.
   const [paneMenu, setPaneMenu] = useState<{ x: number; y: number } | null>(null);
+  // Touch/pen long-press on the bare canvas → the same pane menu right-click opens (touch has no
+  // right-click). The target guard mirrors onContextMenu so a press on a node/control doesn't fire it.
+  const paneLongPress = useLongPress((e) => {
+    if ((e.target as HTMLElement)?.classList?.contains("react-flow__pane")) {
+      setMenu(null);
+      setPaneMenu({ x: e.clientX, y: e.clientY });
+    }
+  });
   // Right-click menu for overlays (boundary / summary / callout) — recolour / shape / delete. Kept
   // separate from the node `menu` (which is keyed by node id) since it carries the selected overlay.
   const [overlayMenu, setOverlayMenu] = useState<{
@@ -419,6 +439,10 @@ function FlowInner({
   // The id of the node just created via an add-and-edit (Tab/Enter/＋), so leaving it empty (Escape or
   // click-away) can discard it instead of stranding a blank node — MindManager-style. Cleared on commit.
   const justAddedRef = useRef<string | null>(null);
+  // Set to a node id by runSlashCommand: the editor is about to unmount and its blur would otherwise
+  // commit/discard the "/query" buffer, clobbering the command's effect. This makes the next
+  // commit/cancel for that id a no-op. Self-clears when consumed; also reset on entering a fresh edit.
+  const suppressCommitRef = useRef<string | null>(null);
   const linkingFromRef = useLatestRef(linkingFrom);
   const onChangeRef = useLatestRef(onChange);
   const onSelectRef = useLatestRef(onSelect);
@@ -534,7 +558,9 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    const raf = requestAnimationFrame(() => fitView({ duration: motion.dur.fit }));
+    const raf = requestAnimationFrame(() =>
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+    );
     return () => cancelAnimationFrame(raf);
   }, [drillId, sync, fitView]);
 
@@ -655,6 +681,7 @@ function FlowInner({
   // Enter inline edit for a node; `seed` is the character to start typing with (type-to-edit),
   // or null for a normal edit (seed the existing topic + select all).
   const startEdit = useCallback((id: string, seed: string | null = null) => {
+    suppressCommitRef.current = null; // a fresh edit is never a leftover slash-command suppression
     setEditSeed(seed);
     setEditingId(id);
   }, []);
@@ -850,7 +877,10 @@ function FlowInner({
       fireSelect(id);
       const w = n.measured?.width ?? 0;
       const h = n.measured?.height ?? 0;
-      setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: 1, duration: motion.dur.fit });
+      setCenter(n.position.x + w / 2, n.position.y + h / 2, {
+        zoom: 1,
+        duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+      });
     },
     [getNodes, fireSelect, setCenter, selectOnly],
   );
@@ -867,7 +897,7 @@ function FlowInner({
       const ids = [...subtreeIds(node)].map((nid) => ({ id: nid }));
       fitView({
         nodes: ids,
-        duration: opts?.duration ?? motion.dur.fit,
+        duration: reducedMotionRef.current ? 0 : (opts?.duration ?? motion.dur.fit),
         padding: opts?.padding ?? 0.2,
       });
     },
@@ -899,6 +929,12 @@ function FlowInner({
         const id = editingRef.current;
         setEditingId(null);
         setEditSeed(null);
+        // A slash command already handled this node (and its "/query" buffer); don't discard/revert it.
+        if (id && suppressCommitRef.current === id) {
+          suppressCommitRef.current = null;
+          justAddedRef.current = null;
+          return;
+        }
         const wasJustAdded = !!id && id === justAddedRef.current;
         justAddedRef.current = null;
         if (!id || !wasJustAdded) return; // existing node → plain cancel (its committed text stands)
@@ -913,6 +949,13 @@ function FlowInner({
       commitEdit: (id: string, html: string) => {
         setEditingId(null);
         setEditSeed(null);
+        // The editor unmounting after a slash command fires this blur with the stale "/query" buffer —
+        // ignore it so the command's effect (and the node's real topic) stands.
+        if (suppressCommitRef.current === id) {
+          suppressCommitRef.current = null;
+          justAddedRef.current = null;
+          return;
+        }
         const { rich, plain } = parse(html);
         // Click-away (blur) that leaves a just-created node empty discards it (same as Escape).
         const wasJustAdded = id === justAddedRef.current;
@@ -934,7 +977,7 @@ function FlowInner({
       openLink: (url: string) => {
         const link = classifyLink(url);
         if (link.kind === "node") focusNodeById(link.id);
-        else if (link.kind === "map") onMapLinkRef.current?.(link.id);
+        else if (link.kind === "map") onMapLinkRef.current?.(link.id, link.nodeId);
         else if (!isDangerousUrl(link.url)) window.open(link.url, "_blank", "noopener,noreferrer");
       },
       // Click the on-canvas pie to step a leaf task's completion (0→25→50→75→100→0). A rapid spree on
@@ -978,6 +1021,74 @@ function FlowInner({
       },
       // Drop a marker dragged from the palette onto a node — toggles it on that topic.
       dropMarker: (id: string, marker: string) => apply(toggleIcon(docRef.current, id, marker)),
+      // Slash `/` command menu: the "/query" lives only in the uncommitted editor buffer, so leave edit
+      // mode WITHOUT committing (the node keeps its real committed topic — empty for a fresh node) and
+      // suppress the unmount blur, then apply the picked command's effect in one undo step. Add-commands
+      // re-enter edit on the new node (apply select=true); the rest just stamp the attribute.
+      runSlashCommand: (id: string, commandId: string) => {
+        const d = docRef.current;
+        suppressCommitRef.current = id;
+        setEditingId(null);
+        setEditSeed(null);
+        justAddedRef.current = null;
+        switch (commandId) {
+          case "child":
+            apply(addChild(d, id), true);
+            return;
+          case "sibling":
+            apply(addSibling(d, id), true);
+            return;
+          case "todo":
+            apply(setProgress(d, id, 0));
+            return;
+          case "done":
+            apply(setProgress(d, id, 100));
+            return;
+          case "due-today":
+            apply(setDue(d, id, todayISO()));
+            return;
+          case "priority-high":
+            apply(setPriority(d, id, PRIORITY_LEVELS[0]));
+            return;
+          case "boundary":
+            apply(groupBranch(d, id));
+            return;
+          case "marker-star":
+            apply(toggleIcon(d, id, "⭐"));
+            return;
+          case "note":
+            // No doc mutation — just select the node and open the inspector's Notes tab.
+            selectOnly(id);
+            fireSelect(id);
+            onOpenNoteRef.current?.();
+            return;
+          default:
+            break; // unknown id: nothing to do (the "/query" buffer is discarded on unmount)
+        }
+      },
+      // `[[`/`@` link autocomplete: every named topic in this map (tree + floating), minus the one being
+      // edited (no self-link). The picker inserts the label into the text + attaches the link.
+      linkCandidates: (excludeId: string) => {
+        const out: LinkCandidate[] = [];
+        const walk = (n: MapNode) => {
+          if (n.id !== excludeId && n.topic.trim())
+            out.push({ id: n.id, label: n.topic, link: `#node=${n.id}`, kind: "node" });
+          for (const c of n.children) walk(c);
+        };
+        walk(docRef.current.root);
+        for (const f of docRef.current.floatingTopics ?? []) walk(f);
+        return out;
+      },
+      // Attach an autocompleted link: the first link becomes the visible primary hyperlink (canvas 🔗),
+      // any further ones its additional hyperlinks. Edit stays open — the user keeps typing the topic.
+      addNodeLink: (id: string, link: string) => {
+        const n = findNode(docRef.current, id);
+        apply(
+          n?.hyperlink
+            ? addHyperlink(docRef.current, id, link)
+            : setHyperlink(docRef.current, id, link),
+        );
+      },
       // Native browser spell-check on the topic editors (view setting; off by default).
       spellcheck,
     };
@@ -1156,7 +1267,9 @@ function FlowInner({
       return;
     }
     sync(docRef.current);
-    const raf = requestAnimationFrame(() => fitView({ duration: motion.dur.fit }));
+    const raf = requestAnimationFrame(() =>
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+    );
     return () => cancelAnimationFrame(raf);
   }, [direction, sync, fitView]);
 
@@ -1281,11 +1394,12 @@ function FlowInner({
           (tgt?.tagName ? /^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName) : false);
         if (!inField) {
           e.preventDefault();
-          if (e.code === "Digit1") fitView({ duration: motion.dur.fit });
+          if (e.code === "Digit1")
+            fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit });
           else {
             const ids = [...selectedIdsRef.current];
             fitView({
-              duration: motion.dur.fit,
+              duration: reducedMotionRef.current ? 0 : motion.dur.fit,
               maxZoom: 1.5,
               nodes: ids.length ? ids.map((id) => ({ id })) : undefined,
             });
@@ -1631,11 +1745,12 @@ function FlowInner({
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
-      fit: () => fitView({ duration: motion.dur.fit }),
+      fit: () => fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
       // Snapshot viewport + undo/redo stacks so the tab switcher can restore them on a remount.
       getSession: (): CanvasSession => ({ viewport: getViewport(), history: historyRef.current }),
       getViewport: () => getViewport(),
-      setViewport: (vp) => setViewport(vp, { duration: motion.dur.viewport }),
+      setViewport: (vp) =>
+        setViewport(vp, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
       focusNode: focusNodeById,
       frameBranch,
       setSelectedImage: (image) => withSelected((id) => apply(setImage(docRef.current, id, image))),
@@ -1709,6 +1824,10 @@ function FlowInner({
       toggleLocked: (id) => apply(toggleLocked(docRef.current, id)),
       setSelectedHyperlink: (url) =>
         withSelected((id) => apply(setHyperlink(docRef.current, id, url))),
+      addSelectedHyperlink: (url) =>
+        withSelected((id) => apply(addHyperlink(docRef.current, id, url))),
+      removeSelectedHyperlink: (index) =>
+        withSelected((id) => apply(removeHyperlink(docRef.current, id, index))),
       groupBranch: (id) => {
         apply(groupBranch(docRef.current, id));
         return Boolean(findAnyNode(docRef.current, id));
@@ -1788,14 +1907,24 @@ function FlowInner({
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
       addStickyNote: () => apply(addStickyNote(docRef.current)),
+      addFloatingTopic: (text) => {
+        const t = text.trim();
+        if (!t) return;
+        apply(addFloatingTopic(docRef.current, t), true);
+      },
       setSelectedRollup: (mapId) =>
         withSelected((id) => apply(setRollup(docRef.current, id, mapId || undefined))),
       quickAdd: (text) => {
         const t = text.trim();
         if (!t) return;
         const parentId = selectedRef.current ?? docRef.current.root.id;
+        // Burst capture: a pasted MULTI-line outline becomes a whole subtree (indentation/headings →
+        // nesting) in one undo step. A single line is captured verbatim — parseOutline would strip a
+        // leading bullet/number/heading from a lone topic (e.g. "1. Intro" → "Intro"). addSubtree re-ids.
+        const parsed = t.includes("\n") ? parseOutline(t) : [];
+        const nodes = parsed.length ? parsed : [{ id: "q", topic: t, children: [] }];
         // Apply without a selectId so the parent stays selected — rapid entry adds siblings.
-        const res = addSubtree(docRef.current, parentId, [{ id: "q", topic: t, children: [] }]);
+        const res = addSubtree(docRef.current, parentId, nodes);
         apply({ doc: res.doc });
       },
       addChildToSelected: () => withSelected((id) => apply(addChild(docRef.current, id), true)),
@@ -1873,7 +2002,15 @@ function FlowInner({
 
   // Memoised so the read-only SR overview only re-renders when the doc changes (not on every
   // selection/hover), keeping its O(nodes) list off the hot path.
-  const relationshipsSr = useMemo(() => <CanvasRelationshipsSR doc={renderDoc} />, [renderDoc]);
+  const relationshipsSr = useMemo(
+    () => (
+      <>
+        <CanvasRelationshipsSR doc={renderDoc} />
+        <CanvasOverlaysSR doc={renderDoc} />
+      </>
+    ),
+    [renderDoc],
+  );
 
   return (
     <EditingContext.Provider value={editingApi}>
@@ -1886,6 +2023,7 @@ function FlowInner({
           tabIndex={-1}
           aria-roledescription="mind map canvas"
           aria-label={`Mind map: ${renderDoc.title?.trim() || "Untitled"}`}
+          {...paneLongPress}
           style={{
             height: "100%",
             width: "100%",
@@ -2181,7 +2319,10 @@ function FlowInner({
               onFitSelection={() => {
                 const ids = [...selectedIds];
                 if (ids.length)
-                  fitView({ nodes: ids.map((id) => ({ id })), duration: motion.dur.fit });
+                  fitView({
+                    nodes: ids.map((id) => ({ id })),
+                    duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+                  });
               }}
             />
             <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
@@ -2511,7 +2652,9 @@ function FlowInner({
               <MenuSeparator />
               <MenuItem
                 label="Fit to view"
-                onSelect={() => fitView({ duration: motion.dur.fit })}
+                onSelect={() =>
+                  fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit })
+                }
               />
               <MenuItem label="Reset zoom (100%)" onSelect={() => zoomTo(1, { duration: 200 })} />
             </ContextMenu>

@@ -14,6 +14,7 @@ import {
   AgendaPanel,
   FilterPanel,
   HistoryPanel,
+  InboxPanel,
   InfoPanel,
   MapsPanel,
   MarkerTagIndex,
@@ -41,6 +42,7 @@ import { MapPanel } from "./components/MapPanel";
 import { MobileSheetScrim } from "./components/MobileSheetScrim";
 import { OverlayInspector } from "./components/OverlayInspector";
 import { type DockEntry, PanelDock } from "./components/PanelDock";
+import { SearchResults } from "./components/SearchResults";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { ToastBar } from "./components/ToastBar";
@@ -59,6 +61,7 @@ import { useFocusHotkey } from "./hooks/useFocusHotkey";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
 import { useIdbAutosave } from "./hooks/useIdbAutosave";
+import { useInbox } from "./hooks/useInbox";
 import { useNamedStyles } from "./hooks/useNamedStyles";
 import { useNoteEditor } from "./hooks/useNoteEditor";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
@@ -88,13 +91,16 @@ import {
   type SelectedOverlay,
   type SelectionFields,
   type SelectionMarkerTags,
+  classifyLink,
 } from "./mindmap";
 import { findAnyNode, newMapFromBranch } from "./mindmap/flow/ops";
 import { anyMobileSheetOpen, closeMobileSheets } from "./mobileSheets";
 import { sampleDoc } from "./model/sampleMap";
 import type { MapNode, MindMapDoc } from "./model/types";
+import { NavHistory, type NavPoint } from "./navHistory";
 import {
   backlinksFor,
+  crossMapBacklinksFor,
   markerTagIndex,
   outgoingLinksFor,
   outlineNumbers,
@@ -111,25 +117,31 @@ import { clearBranch } from "./store/branchClipboard";
 import { clearAllLocalPreferences } from "./store/localPrefs";
 import {
   type MapSummary,
+  type RecentFile,
   clearAllData,
-  deleteMap,
   findMapReferences,
   getAllMaps,
   getTabSession,
   listMaps,
+  listRecentFiles,
   loadMap,
   loadMapHandle,
+  restoreMapFromTrash,
   saveMap,
   setLastOpened,
+  softDeleteMap,
 } from "./store/mapStore";
+import { useTabPresence } from "./store/tabCoordination";
 import { setTagColor, tagColor } from "./tagColors";
 import { todayISO } from "./taskDate";
 import { buildTemplate } from "./templates";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 import { resolveChromeDark, useAppearance } from "./useAppearance";
 import { useFind } from "./useFind";
+import { useHighContrast } from "./useHighContrast";
 import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
+import { useReducedMotion } from "./useReducedMotion";
 import { useTheme } from "./useTheme";
 
 // DEV-only verification hooks the headless render harness reads off `window` (set in a DEV effect below).
@@ -222,6 +234,8 @@ export function App() {
   // App-wide chrome appearance (Phase 8) — independent of the canvas theme. Resolves to a single
   // light/dark for all chrome surfaces; a dark canvas theme also darkens the chrome under "system".
   const { appearance, setAppearance, prefersDark } = useAppearance();
+  const { motionPref, setMotionPref, reducedMotion } = useReducedMotion();
+  const { contrastPref, setContrastPref, highContrast } = useHighContrast();
   const chromeDark = resolveChromeDark(appearance, prefersDark, theme.theme.type === "dark");
   // Mirror the resolved appearance onto <html> so native UI (scrollbars, form controls) + any
   // selector-based CSS can react, and the body backdrop behind the app matches.
@@ -266,6 +280,9 @@ export function App() {
     matchCase,
     setMatchCase,
     matchInfo,
+    matches: findHits,
+    activeId: findActiveId,
+    goTo: findGoTo,
     runSearch,
     findNext,
     findPrev,
@@ -308,6 +325,9 @@ export function App() {
   // live in usePanels; App threads `panels` into <Toolbar> and `filter`/`savedFilters` into the
   // FilterPanel. Auto-numbering (`panels.numbered`) draws hierarchical outline numbers on the canvas.
   const { panels, filter, savedFilters } = usePanels();
+  // Quick-capture inbox: a map-independent "Unfiled" bucket (persisted in IndexedDB). Filing an item
+  // adds it to the current map as a floating topic, then drops it from the inbox.
+  const inbox = useInbox();
   const savedViews = useSavedViews(liveDoc.id);
   // Open-document tabs: which maps are open + which is active (persisted). The active map's state
   // still lives in the doc/liveDoc singletons below — this registry just follows it (load() calls
@@ -317,12 +337,19 @@ export function App() {
   // Memoised so the canvas only re-dims when the map or the criteria actually change. The deps stay
   // plain primitives/arrays (the individual filter fields), so a fresh `filter.criteria` object each
   // render doesn't needlessly recompute — only an actual field change does.
-  const { text, markers, tags, due, priority } = filter;
+  const { text, markers, tags, due, priority, completion } = filter;
   const filterHits = useMemo(() => {
-    const criteria: FilterCriteria = { text, markers, tags, due, priority: priority || undefined };
+    const criteria: FilterCriteria = {
+      text,
+      markers,
+      tags,
+      due,
+      priority: priority || undefined,
+      completion: completion || undefined,
+    };
     if (!panels.filterOpen || !isFilterActive(criteria)) return null;
     return filterResult(liveDoc, criteria, todayISO());
-  }, [panels.filterOpen, text, markers, tags, due, priority, liveDoc]);
+  }, [panels.filterOpen, text, markers, tags, due, priority, completion, liveDoc]);
   // Focus / isolate-branch: session-only, reuses the Power Filter's dim pipeline. Focus wins over
   // the filter as the dim source; both fall back to "no dimming".
   // The full selected node (for the Info panel's tags / markers / link state); `selected` only
@@ -367,6 +394,53 @@ export function App() {
     () => (selected ? outgoingLinksFor(liveDoc, selected.id) : []),
     [selected, liveDoc],
   );
+  // Cross-map backlinks: other maps whose topics link to THIS map (via #map= hyperlinks). The scan
+  // needs every other map's doc, loaded lazily only while the inspector is open (and refreshed when
+  // the library or current map changes) so we don't pull the whole library into memory on boot.
+  const [crossMapDocs, setCrossMapDocs] = useState<MindMapDoc[]>([]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reload on library (maps) / current-map change; `selected` only gates the first load.
+  useEffect(() => {
+    if (!panels.infoOpen || !selected) return;
+    let live = true;
+    void getAllMaps()
+      .then((all) => {
+        if (live) setCrossMapDocs(all);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [panels.infoOpen, maps, doc.id]);
+  const crossMapBacklinks = useMemo(
+    () => (selected ? crossMapBacklinksFor(crossMapDocs, doc.id) : []),
+    [selected, crossMapDocs, doc.id],
+  );
+  // When the selected node's link points at another map (#map=X), load THAT map's topics so the
+  // inspector can offer a "…and a topic" refine select — turning a whole-map link into #map=X&node=Y.
+  const selectedMapLink = selectedNode?.hyperlink ? classifyLink(selectedNode.hyperlink) : null;
+  const crossLinkMapId = selectedMapLink?.kind === "map" ? selectedMapLink.id : null;
+  const [crossLinkTopics, setCrossLinkTopics] = useState<
+    { id: string; topic: string; depth: number }[]
+  >([]);
+  useEffect(() => {
+    if (!crossLinkMapId) {
+      setCrossLinkTopics([]);
+      return;
+    }
+    let live = true;
+    void loadMap(crossLinkMapId)
+      .then((d) => {
+        if (live && d)
+          setCrossLinkTopics(
+            outlineRows(d.root).map((r) => ({ id: r.id, topic: r.topic, depth: r.depth })),
+          );
+        else if (live) setCrossLinkTopics([]);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [crossLinkMapId]);
   // Every tag already used in the map — drives the inspector's Add-a-tag autocomplete.
   const allTags = useMemo(
     () => markerTagIndex(liveDoc.root, liveDoc.floatingTopics).tags.map((e) => e.key),
@@ -420,6 +494,15 @@ export function App() {
   // Guided walk (presentation tour): step through every topic in outline order with a spotlight +
   // speaker notes — state, spotlight, and ←/→ + Esc keyboard handling all live in the hook.
   const guidedWalk = useGuidedWalk({ liveDoc, liveDocRef, mapRef, setFocus, setDrillId });
+
+  // Cross-tab clobber guard: warn once if the active map is also open in another tab (both would
+  // autosave to the same IndexedDB key, and the last write would silently win).
+  const onTabConflict = useCallback(() => {
+    showHint(
+      "This map is open in another tab — edits here may overwrite the other tab's autosaves.",
+    );
+  }, [showHint]);
+  useTabPresence(view === "editor" ? doc.id : null, onTabConflict);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   // First-run "3 things to try" card (#13): shown once for a brand-new user, dismissed for good on
@@ -483,6 +566,12 @@ export function App() {
   const [libQuery, setLibQuery] = useState("");
   const pendingFocus = useRef<string | null>(null);
   const selectedIdRef = useRef<string | null>(null);
+  // Back/forward navigation history (map + focused node). One instance; the recording effect feeds it
+  // and Alt+←/→ (or the ⌘K commands) walk it. `pendingNav` suppresses re-recording while we apply a
+  // jump, so going back doesn't itself count as a new visit and wipe the forward history.
+  const navHistory = useRef(new NavHistory());
+  const pendingNav = useRef<NavPoint | null>(null);
+  const [navState, setNavState] = useState({ canBack: false, canForward: false });
 
   // Note editor (debounced draft + commit, and the "switch to Notes tab" nonce) — its own hook.
   const { noteNonce, noteDraft, setNoteDraft, onNoteChange, flushNote, bumpNoteNonce } =
@@ -546,6 +635,22 @@ export function App() {
     try {
       await navigator.clipboard.writeText(mapToTsv(liveDocRef.current));
       showHint("Map copied as a table (TSV)");
+    } catch {
+      showHint("Couldn't access the clipboard");
+    }
+  }
+
+  // Copy a shareable deep-link to the current map (and selected topic, if any) to the clipboard:
+  // opening it focuses that exact node. Uses the live origin/path so it works wherever the app is hosted.
+  async function copyDeepLink() {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("map", liveDocRef.current.id);
+      const nodeId = selected?.id;
+      if (nodeId) url.searchParams.set("node", nodeId);
+      else url.searchParams.delete("node");
+      await navigator.clipboard.writeText(url.toString());
+      showHint(nodeId ? "Link to this topic copied" : "Link to this map copied");
     } catch {
       showHint("Couldn't access the clipboard");
     }
@@ -634,10 +739,26 @@ export function App() {
     adoptOpenedFile,
     importForeignFile,
     openFile,
+    openRecentFile,
     saveFile,
     saveFileAs,
     scheduleFileSave,
   } = useDiskFile({ liveDocRef, load, setView, setFileName, setDirty, setError, showHint });
+
+  // Open-Recent list (disk files), refreshed when the active map changes / on entering the editor.
+  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: doc.id/view are re-fetch triggers, not read in the effect
+  useEffect(() => {
+    let alive = true;
+    listRecentFiles()
+      .then((r) => {
+        if (alive) setRecentFiles(r);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [doc.id, view]);
 
   // Refresh the history list whenever the panel opens.
   useEffect(() => {
@@ -696,6 +817,9 @@ export function App() {
           return;
         e.preventDefault();
         setFindOpen(true);
+      } else if (k === "," && !e.shiftKey) {
+        e.preventDefault();
+        setSettingsOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -844,16 +968,19 @@ export function App() {
     }
   }
 
-  async function switchMap(id: string) {
-    if (id === doc.id) return;
-    try {
-      await saveMap(liveDocRef.current); // flush current edits before switching
-      const next = await loadMap(id);
-      if (next) load(next);
-    } catch {
-      // ignore
-    }
-  }
+  const switchMap = useCallback(
+    async (id: string) => {
+      if (id === liveDocRef.current.id) return;
+      try {
+        await saveMap(liveDocRef.current); // flush current edits before switching
+        const next = await loadMap(id);
+        if (next) load(next);
+      } catch {
+        // ignore
+      }
+    },
+    [load],
+  );
 
   // Open a doc from the start screen in the editor (optionally applying its layout), and switch view.
   function openFromStart(next: MindMapDoc, nextLayout?: string) {
@@ -987,7 +1114,7 @@ export function App() {
       // reference scan is best-effort
     }
     try {
-      await deleteMap(deleted.id);
+      await softDeleteMap(deleted.id); // to the Trash (recoverable), not destroyed
       sessionCache.current.delete(deleted.id); // its stashed canvas session goes with it
       // Drop its tab and prefer the adjacent open tab; only fall back to the library / a blank map
       // when no other tab is open.
@@ -1003,7 +1130,7 @@ export function App() {
           label: "Undo",
           run: async () => {
             try {
-              await saveMap(deleted);
+              await restoreMapFromTrash(deleted.id);
               await setLastOpened(deleted.id);
               load(deleted);
             } catch {
@@ -1071,8 +1198,11 @@ export function App() {
     let cancelled = false;
     (async () => {
       // A ?map=<id> deep-link (shareable / bookmarkable) opens that map as the active tab — even on a
-      // first visit with no saved session.
-      const deepLinkId = new URLSearchParams(window.location.search).get("map");
+      // first visit with no saved session. An optional ?node=<id> then focuses that topic once the
+      // map has mounted (via the same pendingFocus path as a cross-map jump).
+      const params = new URLSearchParams(window.location.search);
+      const deepLinkId = params.get("map");
+      const deepLinkNodeId = params.get("node");
       const session = await getTabSession().catch(() => null);
       if (cancelled) return;
       booted.current = true; // boot has decided; the URL ?map= sync may now run
@@ -1105,6 +1235,8 @@ export function App() {
           openTabIds: openTabIds.length ? openTabIds : [activeId],
           activeTabId: activeId,
         });
+        // Focus the deep-linked node after the canvas mounts (the pendingFocus effect, keyed on doc).
+        if (deepLinkNodeId) pendingFocus.current = deepLinkNodeId;
         load(restored);
         setView("editor");
       } else {
@@ -1144,6 +1276,28 @@ export function App() {
       // best-effort; deep-link sync is non-critical
     }
   }, [doc.id, view]);
+
+  // Keep the URL's ?node= in sync with the selected topic, so the address bar always points at a
+  // shareable deep-link to exactly what's focused. Cleared when nothing's selected or off the editor.
+  // replaceState — no history spam (back/forward has its own stack).
+  useEffect(() => {
+    if (!booted.current) return;
+    try {
+      const url = new URL(window.location.href);
+      const want = view === "editor" ? (selected?.id ?? null) : null;
+      if (want) {
+        if (url.searchParams.get("node") !== want) {
+          url.searchParams.set("node", want);
+          window.history.replaceState(null, "", url);
+        }
+      } else if (url.searchParams.has("node")) {
+        url.searchParams.delete("node");
+        window.history.replaceState(null, "", url);
+      }
+    } catch {
+      // best-effort; deep-link sync is non-critical
+    }
+  }, [selected?.id, view]);
 
   // Press "/" to open the Find & Replace overlay (ignored while typing in a field/node).
   useEffect(() => {
@@ -1198,6 +1352,91 @@ export function App() {
     }
   }
 
+  // Follow an in-app link from a note body (`#node=…` / `#map=…[&node=…]`) through the canvas: focus
+  // the topic, or switch maps and focus the target once it mounts (the pendingFocus path). External
+  // links inside notes already render as real http anchors, so they don't reach here.
+  const followInAppLink = useCallback(
+    (url: string) => {
+      const link = classifyLink(url);
+      if (link.kind === "node") mapRef.current?.focusNode(link.id);
+      else if (link.kind === "map") {
+        // If the target IS the current map, focus directly — switchMap early-returns on the same id,
+        // so going through pendingFocus would never fire (and would strand a stale id). Mirrors goToHit.
+        if (link.id === liveDocRef.current.id) {
+          if (link.nodeId) mapRef.current?.focusNode(link.nodeId);
+        } else {
+          if (link.nodeId) pendingFocus.current = link.nodeId;
+          void switchMap(link.id);
+        }
+      }
+    },
+    [switchMap],
+  );
+
+  // Record each focused-topic location (map + node) into the back/forward history, so Alt+←/→ can
+  // retrace where you've been — across maps too. Plain (null) selections aren't recorded; a jump in
+  // progress (pendingNav) is suppressed so going back doesn't itself count as a new visit.
+  useEffect(() => {
+    if (view !== "editor") return;
+    const id = selected?.id ?? null;
+    if (!id) return;
+    const pn = pendingNav.current;
+    if (pn) {
+      if (pn.mapId === doc.id && pn.nodeId === id) {
+        pendingNav.current = null; // arrived at the jump target — don't double-record it
+        return;
+      }
+      // Same map but a different node ⇒ the jump landed and the user moved on (branch). A different
+      // map ⇒ a cross-map switch is still settling, so keep waiting.
+      if (pn.mapId === doc.id) pendingNav.current = null;
+      else return;
+    }
+    navHistory.current.visit({ mapId: doc.id, nodeId: id });
+    setNavState({
+      canBack: navHistory.current.canBack,
+      canForward: navHistory.current.canForward,
+    });
+  }, [doc.id, selected?.id, view]);
+
+  // Apply a back/forward destination: focus the node (switching maps first if it lives in another).
+  const applyNav = useCallback(
+    (pt: NavPoint | null) => {
+      if (!pt?.nodeId) return;
+      pendingNav.current = pt;
+      if (pt.mapId === liveDocRef.current.id) {
+        mapRef.current?.focusNode(pt.nodeId);
+      } else {
+        pendingFocus.current = pt.nodeId;
+        void switchMap(pt.mapId);
+      }
+      setNavState({
+        canBack: navHistory.current.canBack,
+        canForward: navHistory.current.canForward,
+      });
+    },
+    [switchMap],
+  );
+  const navBack = useCallback(() => applyNav(navHistory.current.back()), [applyNav]);
+  const navForward = useCallback(() => applyNav(navHistory.current.forward()), [applyNav]);
+
+  // Alt+← / Alt+→ walk the navigation history (browser-style). Editor-only; ignored while typing in a
+  // field/note so they don't fight text editing. Alt+Shift+← / → stays promote/demote on the canvas.
+  useEffect(() => {
+    if (view !== "editor") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.altKey || e.shiftKey || e.ctrlKey || e.metaKey) return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable))
+        return;
+      e.preventDefault();
+      if (e.key === "ArrowLeft") navBack();
+      else navForward();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [view, navBack, navForward]);
+
   // Keep the current map selectable even before its first save lands.
   const mapOptions = maps.some((m) => m.id === doc.id)
     ? maps
@@ -1217,6 +1456,10 @@ export function App() {
       openFind: () => setFindOpen(true),
       openSettings: () => setSettingsOpen(true),
       reShowGettingStarted: reShowFirstRun,
+      navBack,
+      navForward,
+      canBack: navState.canBack,
+      canForward: navState.canForward,
     },
     panels,
     map: {
@@ -1282,6 +1525,9 @@ export function App() {
       matchCase,
       setMatchCase,
       matchInfo,
+      matches: findHits,
+      activeId: findActiveId,
+      goTo: findGoTo,
       runSearch,
       findNext,
       findPrev,
@@ -1309,8 +1555,11 @@ export function App() {
       exportLibrary,
       copyOutline,
       copyTable,
+      copyDeepLink,
       handleFile,
       openFile,
+      openRecentFile,
+      recentFiles,
       saveFile,
       saveFileAs,
       fileName,
@@ -1404,6 +1653,7 @@ export function App() {
       [panels.statsOpen, "stats"],
       [panels.agendaOpen, "agenda"],
       [panels.mapsOpen, "maps"],
+      [panels.inboxOpen, "inbox"],
       [panels.deckEditorOpen, "deck"],
       [panels.noteEditorOpen, "note"],
       [panels.filterOpen, "filter"],
@@ -1450,7 +1700,7 @@ export function App() {
       // While a sheet drag is live, suppress the height transition so it tracks the finger.
       data-sheet-dragging={sheetDrag.dragging || undefined}
       style={{
-        ...editorThemeVars(chromeDark),
+        ...editorThemeVars(chromeDark, highContrast),
         // Live bottom-sheet height (mobile only); the sheets + handle read this with a 62dvh fallback.
         ...(sheetDrag.heightVh != null
           ? ({ "--mm-sheet-h": `${sheetDrag.heightVh}dvh` } as Record<string, string>)
@@ -1731,6 +1981,24 @@ export function App() {
                     <MapsPanel maps={maps} currentId={doc.id} onOpen={(id) => void switchMap(id)} />
                   ),
                 });
+              if (panels.inboxOpen)
+                entries.push({
+                  key: "inbox",
+                  label: "Inbox",
+                  onClose: () => panels.setInboxOpen(false),
+                  node: (
+                    <InboxPanel
+                      items={inbox.items}
+                      canFile={!!liveDoc}
+                      onCapture={inbox.add}
+                      onFile={(id, text) => {
+                        mapRef.current?.addFloatingTopic(text);
+                        inbox.remove(id);
+                      }}
+                      onDiscard={inbox.remove}
+                    />
+                  ),
+                });
               if (panels.deckEditorOpen)
                 entries.push({
                   key: "deck",
@@ -1758,6 +2026,7 @@ export function App() {
                       onChange={onNoteChange}
                       onBlur={flushNote}
                       onClose={() => panels.setNoteEditorOpen(false)}
+                      onOpenLink={followInAppLink}
                       spellCheck={panels.spellcheck}
                     />
                   ),
@@ -1776,6 +2045,7 @@ export function App() {
                       tags={filter.tags}
                       due={filter.due}
                       priority={filter.priority}
+                      completion={filter.completion}
                       matchCount={filterHits?.matches ?? 0}
                       savedFilters={savedFilters.list}
                       onText={filter.setText}
@@ -1783,6 +2053,7 @@ export function App() {
                       onToggleTag={filter.toggleTag}
                       onDue={filter.setDue}
                       onPriority={filter.setPriority}
+                      onCompletion={filter.setCompletion}
                       hide={filter.hide}
                       onHide={filter.setHide}
                       onExtract={extractFilterMatches}
@@ -1863,6 +2134,7 @@ export function App() {
                 highlightIds={playback ? null : searchMatchIds}
                 drillId={playback ? null : drillId}
                 libraryMaps={maps.map((m) => ({ id: m.id, title: m.title }))}
+                reducedMotion={reducedMotion}
                 onChange={(d) => {
                   if (playback) return; // read-only while reviewing history
                   liveDocRef.current = d;
@@ -1886,7 +2158,17 @@ export function App() {
                   panels.setInfoOpen(true);
                   bumpNoteNonce();
                 }}
-                onMapLink={(id) => switchMap(id)}
+                onMapLink={(id, nodeId) => {
+                  // Cross-map topic link: focus the target node once the new map mounts (the
+                  // pendingFocus effect, keyed on doc). If it's already the current map, focus directly —
+                  // switchMap early-returns on the same id, so pendingFocus would never fire.
+                  if (id === liveDocRef.current.id) {
+                    if (nodeId) mapRef.current?.focusNode(nodeId);
+                  } else {
+                    if (nodeId) pendingFocus.current = nodeId;
+                    void switchMap(id);
+                  }
+                }}
                 onDropFilesOnNode={async (id, files) => {
                   // An image becomes the topic's picture (first image wins); everything else attaches.
                   try {
@@ -2043,6 +2325,7 @@ export function App() {
                 noteDraft={noteDraft}
                 onNoteChange={onNoteChange}
                 onNoteBlur={flushNote}
+                onOpenLink={followInAppLink}
                 onExpandNote={() => panels.setNoteEditorOpen(() => true)}
                 markers={MARKER_PALETTE}
                 onToggleMarker={(mk) => {
@@ -2115,6 +2398,11 @@ export function App() {
                   const ok = mapRef.current?.setSelectedHyperlink(url);
                   if (!ok) showHint("Select a node first, then add a link.");
                 }}
+                onAddHyperlink={(url) => {
+                  const ok = mapRef.current?.addSelectedHyperlink(url);
+                  if (!ok) showHint("Select a node first, then add a link.");
+                }}
+                onRemoveHyperlink={(i) => mapRef.current?.removeSelectedHyperlink(i)}
                 maps={maps
                   .filter((mm) => mm.id !== doc.id)
                   .map((mm) => ({ id: mm.id, title: mm.title }))}
@@ -2125,9 +2413,16 @@ export function App() {
                   .filter((r) => r.id !== selected?.id)
                   .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
                 onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
+                crossLinkMapId={crossLinkMapId}
+                crossLinkTopics={crossLinkTopics}
                 backlinks={backlinks}
                 outgoingLinks={outgoingLinks}
                 onFollowBacklink={(id) => mapRef.current?.focusNode(id)}
+                crossMapBacklinks={crossMapBacklinks}
+                onFollowCrossMapBacklink={(mapId, nodeId) => {
+                  pendingFocus.current = nodeId;
+                  void switchMap(mapId);
+                }}
                 onMinimize={() => {
                   panels.setInfoOpen(false);
                   panels.setInfoMinimized(true);
@@ -2220,60 +2515,27 @@ export function App() {
         <input
           value={libQuery}
           onChange={(e) => setLibQuery(e.target.value)}
-          placeholder="Find a topic or note across every map…"
+          placeholder="Find across every map… (try tag:foo  priority:1  has:note  -exclude)"
+          title={
+            "Search every map by text, or use operators:\n" +
+            'tag:foo  marker:flag-red  priority:1  due:overdue  has:note  level:>=2  -exclude  "exact phrase"'
+          }
           style={{ ...inputStyle, width: "100%", boxSizing: "border-box" }}
           aria-label="Search query"
         />
-        {libQuery.trim() &&
-          (() => {
-            const hits = searchLibrary(libDocs, libQuery);
-            if (hits.length === 0) {
-              return (
-                <p style={{ color: "var(--ed-muted)", fontSize: 13, margin: "12px 2px 0" }}>
-                  No matches.
-                </p>
-              );
-            }
-            return (
-              <ul
-                style={{
-                  listStyle: "none",
-                  margin: "10px 0 0",
-                  padding: 0,
-                  maxHeight: 320,
-                  overflow: "auto",
-                }}
-              >
-                {hits.slice(0, 50).map((h) => (
-                  <li key={`${h.mapId}:${h.nodeId}`}>
-                    <button
-                      type="button"
-                      onClick={() => goToHit(h)}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        textAlign: "left",
-                        border: "none",
-                        borderRadius: 6,
-                        background: "transparent",
-                        padding: "6px 8px",
-                        cursor: "pointer",
-                        font: "inherit",
-                      }}
-                    >
-                      <span>{h.topic}</span>{" "}
-                      <span style={{ color: "var(--ed-faint)", fontSize: 12 }}>— {h.mapTitle}</span>
-                    </button>
-                  </li>
-                ))}
-                {hits.length > 50 && (
-                  <li style={{ color: "var(--ed-faint)", fontSize: 12, padding: "6px 8px" }}>
-                    +{hits.length - 50} more — refine your search
-                  </li>
-                )}
-              </ul>
-            );
-          })()}
+        {libQuery.trim() && (
+          <SearchResults
+            rows={searchLibrary(libDocs, libQuery).map((h) => ({
+              key: `${h.mapId}:${h.nodeId}`,
+              topic: h.topic,
+              path: h.path,
+              snippet: h.snippet,
+              mapTitle: h.mapTitle,
+              payload: h,
+            }))}
+            onPick={goToHit}
+          />
+        )}
       </Dialog>
 
       {/* About — controlled <Dialog>; the browser handles modal semantics, focus trap and Esc. */}
@@ -2380,6 +2642,10 @@ export function App() {
         onClose={() => setSettingsOpen(false)}
         appearance={appearance}
         setAppearance={setAppearance}
+        motionPref={motionPref}
+        setMotionPref={setMotionPref}
+        contrastPref={contrastPref}
+        setContrastPref={setContrastPref}
         theme={theme}
         setThemeId={setThemeId}
         onReShowGettingStarted={reShowFirstRun}

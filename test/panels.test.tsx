@@ -9,6 +9,7 @@ import {
   AgendaPanel,
   FilterPanel,
   HistoryPanel,
+  InboxPanel,
   InfoPanel,
   MapsPanel,
   MarkerTagIndex,
@@ -109,6 +110,56 @@ describe("OutlinePanel", () => {
     }
   });
 
+  it("Shift+Arrows reorder and re-indent the active row from the keyboard (a11y)", () => {
+    const onMove = vi.fn();
+    const onIndent = vi.fn();
+    render(
+      <OutlinePanel
+        root={sampleRoot()}
+        filter=""
+        onFilterChange={noop}
+        onPick={noop}
+        onRename={noop}
+        onIndent={onIndent}
+        onMove={onMove}
+      />,
+    );
+    const tree = screen.getByRole("tree");
+    // Move the roving focus from the root down to "Research" (a).
+    fireEvent.keyDown(tree, { key: "ArrowDown" });
+    // Shift+ArrowDown reorders Research after its sibling Build.
+    fireEvent.keyDown(tree, { key: "ArrowDown", shiftKey: true });
+    expect(onMove).toHaveBeenCalledWith("a", "b", "after");
+    // Shift+ArrowUp on the same row moves it before its previous sibling.
+    fireEvent.keyDown(tree, { key: "ArrowUp", shiftKey: true });
+    // (no previous sibling for the first child → no-op; assert demote instead)
+    fireEvent.keyDown(tree, { key: "ArrowRight", shiftKey: true });
+    expect(onIndent).toHaveBeenCalledWith("a", "in");
+    fireEvent.keyDown(tree, { key: "ArrowLeft", shiftKey: true });
+    expect(onIndent).toHaveBeenCalledWith("a", "out");
+  });
+
+  it("disables Shift+Arrow reorder while filtering (the flat view hides structure)", () => {
+    const onMove = vi.fn();
+    const onIndent = vi.fn();
+    render(
+      <OutlinePanel
+        root={sampleRoot()}
+        filter="Surveys"
+        onFilterChange={noop}
+        onPick={noop}
+        onRename={noop}
+        onIndent={onIndent}
+        onMove={onMove}
+      />,
+    );
+    const tree = screen.getByRole("tree");
+    fireEvent.keyDown(tree, { key: "ArrowDown", shiftKey: true });
+    fireEvent.keyDown(tree, { key: "ArrowRight", shiftKey: true });
+    expect(onMove).not.toHaveBeenCalled();
+    expect(onIndent).not.toHaveBeenCalled();
+  });
+
   it("rapid keyboard entry: Enter adds a sibling, Tab a child, Shift+Tab outdents (A3)", async () => {
     const onRename = vi.fn();
     // Returning ids that DON'T exist in the tree would unmount the editor; map them back to a real row
@@ -206,6 +257,7 @@ describe("FilterPanel", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={0}
         savedFilters={[]}
         onText={noop}
@@ -213,6 +265,7 @@ describe("FilterPanel", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -223,8 +276,38 @@ describe("FilterPanel", () => {
     expect(screen.getByLabelText("Filter by text")).toBeTruthy();
     expect(screen.getByLabelText("Filter by due date")).toBeTruthy();
     expect(screen.getByLabelText("Filter by priority")).toBeTruthy();
+    expect(screen.getByLabelText("Filter by completion")).toBeTruthy();
     // a chip for the tag present in the sample map
     expect(screen.getByRole("button", { name: "risk" })).toBeTruthy();
+  });
+
+  it("reports a completion choice through onCompletion", async () => {
+    const onCompletion = vi.fn();
+    render(
+      <FilterPanel
+        root={sampleRoot()}
+        text=""
+        markers={[]}
+        tags={[]}
+        due=""
+        priority={0}
+        completion=""
+        matchCount={0}
+        savedFilters={[]}
+        onText={noop}
+        onToggleMarker={noop}
+        onToggleTag={noop}
+        onDue={noop}
+        onPriority={noop}
+        onCompletion={onCompletion}
+        onClear={noop}
+        onSaveFilter={noop}
+        onApplyFilter={noop}
+        onDeleteFilter={noop}
+      />,
+    );
+    await userEvent.selectOptions(screen.getByLabelText("Filter by completion"), "complete");
+    expect(onCompletion).toHaveBeenCalledWith("complete");
   });
 
   it("shows the live match count when a filter is active", () => {
@@ -236,6 +319,7 @@ describe("FilterPanel", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={3}
         savedFilters={[]}
         onText={noop}
@@ -243,6 +327,7 @@ describe("FilterPanel", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -441,6 +526,8 @@ describe("InfoPanel", () => {
         onAddAttachment={noop}
         onRemoveAttachment={noop}
         onSetHyperlink={noop}
+        onAddHyperlink={noop}
+        onRemoveHyperlink={noop}
         maps={[]}
         onLinkMap={noop}
         jumpTargets={[]}
@@ -1197,6 +1284,74 @@ describe("MapsPanel (#18)", () => {
   });
 });
 
+describe("InboxPanel (quick capture)", () => {
+  const items = [
+    { id: "a", text: "Call the vendor", ts: 200 },
+    { id: "b", text: "Draft the agenda", ts: 100 },
+  ];
+
+  it("captures a jotted thought on Add and clears the field", async () => {
+    const onCapture = vi.fn();
+    render(
+      <InboxPanel items={[]} canFile={true} onCapture={onCapture} onFile={noop} onDiscard={noop} />,
+    );
+    const field = screen.getByLabelText("Capture to inbox") as HTMLInputElement;
+    await userEvent.type(field, "New idea");
+    await userEvent.click(screen.getByRole("button", { name: "Add" }));
+    expect(onCapture).toHaveBeenCalledWith("New idea");
+    expect(field.value).toBe("");
+  });
+
+  it("captures on Enter", async () => {
+    const onCapture = vi.fn();
+    render(
+      <InboxPanel items={[]} canFile={true} onCapture={onCapture} onFile={noop} onDiscard={noop} />,
+    );
+    await userEvent.type(screen.getByLabelText("Capture to inbox"), "Quick note{Enter}");
+    expect(onCapture).toHaveBeenCalledWith("Quick note");
+  });
+
+  it("files an item onto the map and discards another", async () => {
+    const onFile = vi.fn();
+    const onDiscard = vi.fn();
+    render(
+      <InboxPanel
+        items={items}
+        canFile={true}
+        onCapture={noop}
+        onFile={onFile}
+        onDiscard={onDiscard}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: 'File "Call the vendor" onto the map' }),
+    );
+    expect(onFile).toHaveBeenCalledWith("a", "Call the vendor");
+    await userEvent.click(screen.getByRole("button", { name: 'Discard "Draft the agenda"' }));
+    expect(onDiscard).toHaveBeenCalledWith("b");
+  });
+
+  it("disables filing when no map is open", () => {
+    render(
+      <InboxPanel items={items} canFile={false} onCapture={noop} onFile={noop} onDiscard={noop} />,
+    );
+    expect(
+      (
+        screen.getByRole("button", {
+          name: 'File "Call the vendor" onto the map',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+  });
+
+  it("shows an empty-state hint with no items", () => {
+    render(
+      <InboxPanel items={[]} canFile={true} onCapture={noop} onFile={noop} onDiscard={noop} />,
+    );
+    expect(screen.getByText(/Nothing unfiled/)).toBeTruthy();
+  });
+});
+
 describe("AgendaPanel (#9)", () => {
   const agendaDoc: MindMapDoc = {
     schemaVersion: 1,
@@ -1239,6 +1394,7 @@ describe("FilterPanel (interaction)", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={3}
         savedFilters={[]}
         onText={noop}
@@ -1246,6 +1402,7 @@ describe("FilterPanel (interaction)", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={onClear}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -1267,6 +1424,7 @@ describe("FilterPanel (interaction)", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={0}
         savedFilters={[]}
         onText={noop}
@@ -1274,6 +1432,7 @@ describe("FilterPanel (interaction)", () => {
         onToggleTag={noop}
         onDue={noop}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -1298,6 +1457,7 @@ describe("FilterPanel (interaction)", () => {
         tags={[]}
         due=""
         priority={0}
+        completion=""
         matchCount={0}
         savedFilters={[]}
         onText={noop}
@@ -1305,6 +1465,7 @@ describe("FilterPanel (interaction)", () => {
         onToggleTag={noop}
         onDue={onDue}
         onPriority={noop}
+        onCompletion={noop}
         onClear={noop}
         onSaveFilter={noop}
         onApplyFilter={noop}
@@ -1346,6 +1507,8 @@ describe("InfoPanel (interaction)", () => {
         onAddAttachment={noop}
         onRemoveAttachment={noop}
         onSetHyperlink={noop}
+        onAddHyperlink={noop}
+        onRemoveHyperlink={noop}
         maps={[]}
         onLinkMap={noop}
         jumpTargets={[]}
@@ -1364,6 +1527,104 @@ describe("InfoPanel (interaction)", () => {
     const minBtn = screen.getByRole("button", { name: /Minimize/ });
     await userEvent.click(minBtn);
     expect(onMinimize).toHaveBeenCalled();
+  });
+
+  it("upgrades a whole-map link to a topic via the cross-map refine select", async () => {
+    const onSetHyperlink = vi.fn();
+    const linkedNode: MapNode = { ...sampleRoot().children[0], hyperlink: "#map=other" };
+    render(
+      <InfoPanel
+        selected={{ id: "a", topic: "Research", note: "" }}
+        width={300}
+        onResize={noop}
+        node={linkedNode}
+        noteDraft=""
+        onNoteChange={noop}
+        onNoteBlur={noop}
+        markers={["⭐"]}
+        onToggleMarker={noop}
+        onPickSticker={noop}
+        onStyle={noop}
+        onAddTag={noop}
+        onRemoveTag={noop}
+        onSetProgress={noop}
+        onSetDue={noop}
+        onSetStart={noop}
+        onSetPriority={noop}
+        onAddAttachment={noop}
+        onRemoveAttachment={noop}
+        onSetHyperlink={onSetHyperlink}
+        onAddHyperlink={noop}
+        onRemoveHyperlink={noop}
+        maps={[{ id: "other", title: "Other map" }]}
+        onLinkMap={noop}
+        jumpTargets={[]}
+        onJump={noop}
+        crossLinkMapId="other"
+        crossLinkTopics={[{ id: "x", topic: "Topic X", depth: 0 }]}
+        backlinks={[]}
+        outgoingLinks={[]}
+        onFollowBacklink={noop}
+        onMinimize={noop}
+      />,
+    );
+    const select = await screen.findByLabelText("Focus a topic in the linked map");
+    await userEvent.selectOptions(select, "x");
+    expect(onSetHyperlink).toHaveBeenCalledWith("#map=other&node=x");
+  });
+
+  it("adds and removes additional hyperlinks (multiple links per topic)", async () => {
+    const onAddHyperlink = vi.fn();
+    const onRemoveHyperlink = vi.fn();
+    const node: MapNode = {
+      ...sampleRoot().children[0],
+      hyperlink: "https://primary.test",
+      hyperlinks: ["https://extra-one.test", "https://extra-two.test"],
+    };
+    render(
+      <InfoPanel
+        selected={{ id: "a", topic: "Research", note: "" }}
+        width={300}
+        onResize={noop}
+        node={node}
+        noteDraft=""
+        onNoteChange={noop}
+        onNoteBlur={noop}
+        markers={["⭐"]}
+        onToggleMarker={noop}
+        onPickSticker={noop}
+        onStyle={noop}
+        onAddTag={noop}
+        onRemoveTag={noop}
+        onSetProgress={noop}
+        onSetDue={noop}
+        onSetStart={noop}
+        onSetPriority={noop}
+        onAddAttachment={noop}
+        onRemoveAttachment={noop}
+        onSetHyperlink={noop}
+        onAddHyperlink={onAddHyperlink}
+        onRemoveHyperlink={onRemoveHyperlink}
+        maps={[]}
+        onLinkMap={noop}
+        jumpTargets={[]}
+        onJump={noop}
+        backlinks={[]}
+        outgoingLinks={[]}
+        onFollowBacklink={noop}
+        onMinimize={noop}
+      />,
+    );
+    // Both extras render with remove buttons.
+    expect(screen.getByText("https://extra-one.test")).toBeTruthy();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove additional link https://extra-two.test" }),
+    );
+    expect(onRemoveHyperlink).toHaveBeenCalledWith(1);
+    // Typing a new link + Enter appends it.
+    const add = screen.getByLabelText("Add another link");
+    await userEvent.type(add, "https://new-link.test{Enter}");
+    expect(onAddHyperlink).toHaveBeenCalledWith("https://new-link.test");
   });
 });
 

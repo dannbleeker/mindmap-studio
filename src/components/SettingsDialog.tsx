@@ -3,6 +3,8 @@ import { Button } from "../design/primitives";
 import type { CanvasTheme } from "../mindmap/theme";
 import { canvasThemes } from "../mindmap/theme";
 import type { Appearance } from "../useAppearance";
+import type { ContrastPref } from "../useHighContrast";
+import type { MotionPref } from "../useReducedMotion";
 import { Dialog } from "./Dialog";
 
 // Settings / Preferences — the one place to see and reset the bits of app state that otherwise live
@@ -17,6 +19,12 @@ export interface SettingsDialogProps {
   /** App chrome appearance — System / Light / Dark (independent of the canvas theme). */
   appearance: Appearance;
   setAppearance: (a: Appearance) => void;
+  /** Motion preference — System (follow the OS) / Reduced / Full. */
+  motionPref: MotionPref;
+  setMotionPref: (p: MotionPref) => void;
+  /** High-contrast preference — System (follow the OS) / High / Normal. */
+  contrastPref: ContrastPref;
+  setContrastPref: (p: ContrastPref) => void;
   theme: CanvasTheme;
   setThemeId: (id: string) => void;
   /** Re-show the first-run "3 things to try" card. */
@@ -49,6 +57,10 @@ export function SettingsDialog({
   onClose,
   appearance,
   setAppearance,
+  motionPref,
+  setMotionPref,
+  contrastPref,
+  setContrastPref,
   theme,
   setThemeId,
   onReShowGettingStarted,
@@ -119,6 +131,40 @@ export function SettingsDialog({
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
           App theme colours the chrome (toolbar, panels, dialogs); canvas theme colours the topics.
           A dark canvas always darkens the chrome too.
+        </p>
+        <label className="mm-map-field">
+          <span>Reduce motion</span>
+          <select
+            className="mm-map-control"
+            value={motionPref}
+            onChange={(e) => setMotionPref(e.target.value as MotionPref)}
+            aria-label="Reduce motion"
+          >
+            <option value="system">System</option>
+            <option value="reduced">On</option>
+            <option value="full">Off</option>
+          </select>
+        </label>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
+          Reduce motion makes canvas zoom/fit and the guided walk instant, and drops chrome
+          transitions. System follows your device's reduced-motion setting.
+        </p>
+        <label className="mm-map-field">
+          <span>High contrast</span>
+          <select
+            className="mm-map-control"
+            value={contrastPref}
+            onChange={(e) => setContrastPref(e.target.value as ContrastPref)}
+            aria-label="High contrast"
+          >
+            <option value="system">System</option>
+            <option value="high">On</option>
+            <option value="normal">Off</option>
+          </select>
+        </label>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
+          High contrast strengthens chrome borders, dividers and text, and adds bolder focus rings.
+          System follows your device's contrast / forced-colors setting.
         </p>
       </Section>
 

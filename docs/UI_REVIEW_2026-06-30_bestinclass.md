@@ -68,7 +68,17 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 > **Wave 2 ("serious maps")** — sort children (G4), multi-branch clipboard (G4), "Links to" outgoing
 > inspector (G3), map-wide relationships panel (G3), promote-branch-to-map (G4), merge-map-as-branch (G4).
 > **Flagships** — big-map virtualisation (G6), visual-map slides + cinematic zoom (G7, as a 🎬 mode on the
-> guided walk). The remaining list is what's left to build.
+> guided walk).
+> **Data-safety pack (G9/G11)** — trash/undo-delete, cross-tab clobber guard, external-file conflict
+> detection, Open Recent.
+> **Search & nav pack (G2 — now complete)** — search beyond topic+note, scoped/operator search,
+> deep-link to a node, back/forward navigation history, across-maps result context (breadcrumb +
+> snippet), and the in-map Find "List all" results list.
+> **Quick-wins pack** — filter by completion status (G8), `Ctrl/⌘+,` opens Settings (G9), reduced-motion
+> support + in-app toggle (G10).
+> **Knowledge-linking / capture / a11y packs** — cross-map topic links + in-note in-app links (G3),
+> multi-line burst quick-capture (G1), keyboard Outline reorder + SR overlay lists (G10). The remaining
+> list is what's left to build.
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
@@ -79,13 +89,13 @@ The single richest cluster; mostly offline UI over existing model fields.
 | Gap | What | Tags |
 |---|---|---|
 | ~~URL → page title resolution~~ ✅ shipped | paste a link → de-slugged readable title, not the bare URL | `done` |
-| Node slash-commands (`/` menu) | insert icon/marker/link/note/child/boundary/date from the keyboard | `in·high·M·missing` |
-| Quick-capture inbox | jot now into an Unfiled bucket, file onto the map later | `in·med·M·missing` |
-| Markdown shorthand → structure on paste | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `in·med·M·partial` |
+| ~~Node slash-commands (`/` menu)~~ ✅ shipped | insert icon/marker/link/note/child/boundary/date from the keyboard | `done` |
+| ~~Quick-capture inbox~~ ✅ shipped | jot now into an Unfiled bucket, file onto the map later | `done` |
+| ~~Markdown shorthand → structure on paste~~ ✅ shipped | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `done` |
 | Rich HTML paste → nodes | preserve inline formatting + split lists/headings into nodes | `in·med·M·partial` |
 | Inline tokens on add (`#tag !priority @resource`) | lift typed tokens onto structured fields | `?·med·M·missing` |
 | Natural-language date entry (chrono-node) | "next fri" → ISO date | `?·med·S·missing` |
-| Multi-line / burst quick capture | Quick-add accepts a pasted outline → subtree in one go | `in·low·S·partial` |
+| ~~Multi-line / burst quick capture~~ ✅ shipped | Quick-add runs text through parseOutline → subtree | `done` |
 | Template / map-parts on insert (keyboard) | insert SWOT/pros-cons under a node at capture time | `in·low·S·partial` |
 | Inline tag/marker autocomplete in the canvas editor | type-ahead from within the topic editor | `?·low·M·partial` |
 | PWA share-target capture | receive shared text/link/image from the OS | `?·low·M·missing` |
@@ -95,28 +105,28 @@ The single richest cluster; mostly offline UI over existing model fields.
 All pure client-side derivations over the in-memory doc.
 | Gap | What | Tags |
 |---|---|---|
-| Back / forward navigation history | Alt+←/→ to reverse jumps (find hit, breadcrumb, drill-in, follow-link) | `in·high·M·missing` |
-| Scoped / operator search | `tag: marker: has:note priority: due: level:` in Find | `in·high·M·partial` |
-| Search beyond topic+note | also match tags, markers, hyperlink URL, callout text, attachment names | `in·med·S·partial` |
-| Deep-link to a node | `?map=&node=` centres + selects on load | `in·med·S·partial` |
+| ~~Back / forward navigation history~~ ✅ shipped | Alt+←/→ retrace visited topics (across maps) | `done` |
+| ~~Scoped / operator search~~ ✅ shipped | `tag: marker: has: priority: due: level: -exclude "phrase"` in Find | `done` |
+| ~~Search beyond topic+note~~ ✅ shipped | also matches tags, markers, hyperlink, callouts, attachment names, resources | `done` |
+| ~~Deep-link to a node~~ ✅ shipped | `?map=&node=` centres + selects on load; Copy-link command | `done` |
 | ~~Cross-map quick switcher in ⌘K~~ ✅ shipped | switch maps / jump across maps from the keyboard | `done` |
-| Library search result context | path/breadcrumb + snippet, scope-narrowable | `in·low·M·partial` |
+| ~~Library search result context~~ ✅ shipped | path/breadcrumb + note snippet; operators narrow scope | `done` |
 | ~~Reveal-in-outline auto-scroll~~ ✅ shipped | Outline scrolls the selected row into view | `done` |
-| Find-results list | clickable list of all matches vs only next/prev | `?·low·M·partial` |
+| ~~Find-results list~~ ✅ shipped | the Find overlay's "List all" disclosure — clickable, breadcrumbed match list | `done` |
 
 ### 3 · Knowledge structure & linking (13)
 The deepest backlog; several items brush the decided-against "no graph" boundary.
 | Gap | What | Tags |
 |---|---|---|
-| Cross-map topic links | `#node=` into another map (open + focus) + a picker | `in·high·M·partial` |
+| ~~Cross-map topic links~~ ✅ shipped | `#map=<id>&node=<id>` opens a map + focuses a topic; inspector topic-picker to author it | `done` |
 | ~~Map-wide relationships / links overview panel~~ ✅ shipped | every cross-link + hyperlink, navigable | `done` |
 | ~~Outgoing-links list in the inspector~~ ✅ shipped | mirror of the shipped "Linked from" | `done` |
 | Typed / categorised relationships | depends-on / causes / supports, drivable in style/filter | `?·med·M·partial` |
-| Cross-map backlinks | incoming references from other maps (library-wide index) | `in·med·M·missing` |
-| Name-based link autocomplete | `[[`/`@` wiki-link authoring | `in·med·M·partial` |
-| In-note in-app links | `#node=`/`[[ ]]` inside a note body | `in·med·S·partial` |
+| ~~Cross-map backlinks~~ ✅ shipped | inspector "Linked from other maps" — incoming `#map=` refs, lazy-loaded | `done` |
+| ~~Name-based link autocomplete~~ ✅ shipped | `[[`/`@` wiki-link authoring | `done` |
+| ~~In-note in-app links~~ ✅ shipped | `[text](#node=…/#map=…)` in a note routes through the canvas | `done` |
 | Transclusion / embedded references | live kept-in-sync view of another topic (single-parent-safe) | `?·med·L·missing` |
-| Multiple hyperlinks per topic | a list of links, not one | `in·low·M·partial` |
+| ~~Multiple hyperlinks per topic~~ ✅ shipped | a list of links, not one | `done` |
 | Tags-as-navigation pane | tag browser with counts → filter/jump | `?·low·S·partial` |
 | Topic aliases / alternate names | resolve links + search under multiple labels | `?·low·S·missing` |
 | Directional / reverse relationship labels | "blocks" forward / "blocked by" reverse | `?·low·S·missing` |
@@ -188,7 +198,7 @@ The largest lens. Presenter-control items are cheap S-effort wins; visual-slide 
 Wire up fields the model already carries without crossing into the decided-against PM engine.
 | Gap | What | Tags |
 |---|---|---|
-| Filter by completion status | complete/incomplete/in-progress (roll-up derived, no filter consumes it) | `in·high·S·partial` |
+| ~~Filter by completion status~~ ✅ shipped | Power Filter Completion select over rolled-up progress | `done` |
 | Natural-language / relative due-date entry | "today"/"next fri"/"+7d" → ISO (`addDaysISO` exists) | `in·med·M·missing` |
 | Quick date set / reschedule chip on canvas | inline Today / +1wk like the progress pie (DateChip is display-only) | `?·med·M·missing` |
 | Duration & resources editing UI | model carries + import fills them; user can't set them | `?·med·M·partial` |
@@ -198,18 +208,18 @@ Wire up fields the model already carries without crossing into the decided-again
 The data-loss-risk items are the high-impact core of a local-first PWA.
 | Gap | What | Tags |
 |---|---|---|
-| Cross-tab / multi-window safety | two tabs blind-overwrite each other's IndexedDB autosaves | `in·high·M·missing` |
-| Trash / undo-delete for maps | soft-delete + restore + empty-trash | `in·high·M·missing` |
-| External-file-change / conflict detection | bound `.mmst` changed on disk (edited elsewhere / synced) | `in·med·M·missing` |
+| ~~Cross-tab / multi-window safety~~ ✅ shipped | BroadcastChannel presence guard warns on two-tab open | `done` |
+| ~~Trash / undo-delete for maps~~ ✅ shipped | soft-delete (`meta.trashedAt`) + Start-screen Trash restore/empty | `done` |
+| ~~External-file-change / conflict detection~~ ✅ shipped | bound `.mmst` tracks `lastModified`; Save prompts, autosave-to-file pauses | `done` |
 | Library folders / organization | group maps beyond a flat list | `?·med·L·missing` |
 | Bulk library ops | multi-select export/delete/move | `in·med·M·missing` |
 | Library restore merge/dedup | replace-only today | `in·med·M·partial` |
-| Recent-files-on-disk list | reopen by persisted handle | `in·med·M·missing` |
+| ~~Recent-files-on-disk list~~ ✅ shipped | File menu lists recent disk files; reopen re-binds the handle | `done` |
 | Named versions + configurable cap + diff | label key versions; diff two | `?·med·M·partial` |
 | Revert-to-saved / read-only open / Save-a-Copy | file-level affordances | `in·low·M·missing` |
 | Preferences export & import | theme, styles, filters, layout → file | `in·low·S·missing` |
 | Flush autosave-to-disk on tab-hide | last edit reaches the bound file, not just IndexedDB | `?·low·M·partial` |
-| Settings shortcut + start-screen palette entry | dedicated chord; Settings in start ⌘K | `in·low·S·partial` |
+| Settings shortcut + start-screen palette entry | ✅ chord `Ctrl/⌘+,` shipped; start-screen ⌘K Settings entry still open | `in·low·S·partial` |
 | PWA app shortcuts / richer manifest | `shortcuts` + `screenshots` for install UI | `?·low·S·partial` |
 
 ### 10 · Accessibility & input modalities (13)
@@ -217,14 +227,14 @@ A11y is already strong; these are the genuine remaining deltas.
 | Gap | What | Tags |
 |---|---|---|
 | Touch drag-and-drop fallback | outline/board/marker DnD use HTML5 drag → dead on touch | `in·high·M·partial` |
-| High-contrast theme + `prefers-contrast`/`forced-colors` | OS-aware high-contrast | `in·high·M·missing` |
-| Keyboard reorder/indent in the Outline tree | indent buttons are `tabIndex=-1` | `in·med·M·partial` |
+| ~~High-contrast theme + `prefers-contrast`/`forced-colors`~~ ✅ shipped | OS-aware high-contrast | `done` |
+| ~~Keyboard reorder/indent in the Outline tree~~ ✅ shipped | Shift+↑/↓ reorder, Shift+←/→ outdent/indent | `done` |
 | i18n / localization | UI strings English-only, no locale layer | `?·med·L·missing` |
-| SR exposure of canvas overlays | boundaries/summaries/callouts, like the shipped relationships SR list | `in·med·S·partial` |
-| Reduced-motion at JS motion sites | guided walk, history playback, timer | `in·med·S·partial` |
-| Long-press context menu on touch | press-and-hold = right-click | `in·med·S·partial` |
+| ~~SR exposure of canvas overlays~~ ✅ shipped | CanvasOverlaysSR lists boundaries/summaries/callouts for AT | `done` |
+| ~~Reduced-motion at JS motion sites~~ ✅ shipped | canvas zoom/fit/centre + guided-walk zoom honour reduced motion | `done` |
+| ~~Long-press context menu on touch~~ ✅ shipped | press-and-hold = right-click | `done` |
 | RTL layout support | `dir=rtl`, logical CSS, right-growing maps | `?·low·L·missing` |
-| In-app motion/animation toggle | independent of the OS setting | `in·low·S·missing` |
+| ~~In-app motion/animation toggle~~ ✅ shipped | Settings → Reduce motion (System / On / Off) | `done` |
 | Focus trap + return-focus for hand-rolled overlays | Find/Replace, BulkNodeMenu, NodePopover | `in·low·S·partial` |
 | `aria-keyshortcuts` on actionable controls | expose the shortcut set to AT | `in·low·S·missing` |
 | Stylus / pen affordances | pressure, palm rejection (`pointerType==='pen'`) | `?·low·M·missing` |

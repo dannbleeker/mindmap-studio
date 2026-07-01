@@ -7,6 +7,116 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **`[[` / `@` name-based link autocomplete (UI review — gap group 3).** Type `[[` or `@` while editing
+  a topic to open a name picker over the map's topics; pick one to drop its name into the text and
+  attach the link. The first link becomes the node's primary `hyperlink` (the canvas 🔗), further ones
+  its additional `hyperlinks` (composing with multiple-links-per-topic). Built on a pure, unit-tested
+  core (caret-anchored trigger detection — nearest of `[[`/`@` wins, `@` only at a word boundary, no
+  cross-line spans — buffer rewrite, candidate matching) and reuses the slash menu's key routing +
+  popup; the two menus are mutually exclusive (leading `/` vs mid-text `[[`/`@`). This closes the last
+  deferred item from the best-in-class gap review.
+
+- **Slash `/` command menu (UI review — gap group 8).** Type `/` at the start of a topic to open a
+  keyboard-driven insert menu: filter as you type, Arrow keys + Enter/Tab to pick, Escape to close (or
+  click a row). Commands act on the current node — add child / sibling, mark to-do / done, due today,
+  high priority, group in a boundary, add a note, star marker. The `/query` lives only in the editor
+  buffer, so picking a command keeps the node's real topic (a fresh node stays empty; an existing one
+  is never clobbered). Built on a pure, unit-tested command core (`slashCommands.ts`) routed through
+  the extracted editor-key seam so ordinary typing and Enter/Tab editing are unaffected.
+
+- **Multiple hyperlinks per topic (UI review — gap group 3).** A topic can point at more than one
+  place. The primary `hyperlink` stays canonical (the canvas 🔗 and every exporter use it); an additive
+  `hyperlinks?: string[]` holds the extras, managed in the inspector's Links section ("Additional
+  links" — type + Enter to add, per-row open/remove). Extras are picked up everywhere links matter:
+  Find searches them (and they satisfy the has-a-link filter), and all four link scans (in-map
+  backlinks, outgoing links, cross-map backlinks, the map-wide link layer) treat a multi-link topic
+  exactly like a single-link one. Unsafe/blank links are stripped on load and never persist. (v1 shows
+  only the primary 🔗 on the canvas; extras are inspector-managed.)
+
+- **High-contrast theme + OS awareness (UI review — gap group 10).** An accessibility high-contrast
+  mode for the chrome: Settings ▸ Appearance ▸ High contrast (System / On / Off). "System" follows the
+  OS `prefers-contrast: more` or `forced-colors: active`. When on, the neutral `--ed-*` chrome tokens
+  go to their extremes — hard black/white borders + dividers, max-contrast text, and a denser accent
+  focus ring — while surfaces stay put so the layout is unchanged. Focus rings become always-on and
+  bold, chrome links gain underlines, and under forced-colors the canvas keeps its per-topic palette
+  (the mind-map colours carry meaning) while focus uses the system `Highlight`.
+
+- **Quick-capture inbox (UI review — gap group 1).** A map-independent "Unfiled" bucket (View ▸
+  Inbox): jot a thought from any map — or none — and file it onto the current map later. Filing adds
+  it as a floating topic (in one undo step) and drops it from the inbox; captures persist across maps
+  and reloads (IndexedDB, under a single `meta` key — no schema bump). Each row can also be discarded,
+  and "→ map" is disabled until a map is open.
+
+- **Deferred-backlog wave 2 — capture & touch (UI review — gap groups 1/10).**
+  - **Markdown shorthand on paste** — the paste-to-topics parser reads inline markdown per line:
+    `- [ ]`/`- [x]` → a 0%/100% task, a whole-line `[text](url)` → a topic with that hyperlink (safe
+    schemes only), and `**bold**`/`_italic_`/`` `code` `` capture as plain text. Applies to the Paste
+    dialog and multi-line burst quick-capture.
+  - **Long-press context menu on touch** — a `useLongPress` hook opens the canvas menu on a stationary
+    touch/pen press (a pan cancels), since touch has no right-click.
+
+- **Deferred-backlog wave 1 — cross-map linking (UI review — gap group 3).** Completing the link layer:
+  - **Cross-map backlinks** — the inspector's "Linked from other maps" lists topics in other library maps
+    that link here (via `#map=` hyperlinks), click-to-navigate. The scan loads other maps lazily (only
+    while the inspector is open).
+  - **Cross-map topic picker** — when a node links to another map, an "…and a topic" select upgrades the
+    whole-map link to a specific topic there (`#map=X&node=Y`), so cross-map links are authorable to a
+    node, not just a map.
+
+- **Knowledge-linking, capture & accessibility packs (UI review — gap groups 3/1/10).** A slice of each:
+  - **Cross-map topic links** (G3) — a node/note link can open another map *and* focus a specific topic
+    there (`#map=<id>&node=<id>`); bare `#map=` links are unchanged.
+  - **In-note in-app links** (G3) — `[text](#node=…)` / `[text](#map=…)` in a note render as links that
+    route through the canvas (jump to a topic / switch maps) instead of the browser.
+  - **Multi-line burst quick-capture** (G1) — pasting a multi-line outline into Quick-add builds a whole
+    subtree (indentation/headings → nesting) in one undo step, not a single flat topic.
+  - **Keyboard Outline reorder** (G10) — `Shift+↑/↓` reorder a row among its siblings and `Shift+←/→`
+    outdent/indent it, the keyboard equivalent of the drag-only ◂ ▸ controls.
+  - **Screen-reader overlay lists** (G10) — boundaries, summary brackets, and callouts now have
+    SR-only landmark lists (like the existing relationships list), so AT can discover them.
+
+- **Quick-wins pack (UI review — gap groups 8/9/10).** Cheap, high-value singles across areas:
+  - **Filter by completion status** (G8) — the Power Filter gains a Completion select (Done / In
+    progress / Not done) over each node's rolled-up effective progress; only task-bearing nodes match.
+  - **`Ctrl/⌘+,` opens Settings** (G9) — the conventional preferences chord, documented in the
+    cheat-sheet (the existing Settings command now shows the shortcut chip).
+  - **Reduced motion** (G10) — canvas zoom/fit/centre tweens and the guided walk's cinematic zoom now
+    honour the OS `prefers-reduced-motion` (previously only CSS transitions did) plus a new
+    Settings → Reduce motion toggle (System / On / Off); the toggle also drops chrome transitions.
+
+- **Search & nav pack (UI review — gap group 2).** Find what you mean and retrace where you've been:
+  - **Search beyond topic + note** — Find (in-map and across-every-map) now reaches a node by any text it
+    carries: tags, marker (icon) ids, hyperlink, callout bubbles, attachment filenames, and task
+    resources, via a single `searchableText` haystack shared by the exact, fuzzy, and library passes.
+  - **Scoped / operator search** — the Find box understands operators so a query can target fields, not
+    just text: `tag:foo`, `marker:`/`icon:flag-red`, `priority:1`, `due:dated|overdue|soon`,
+    `has:note|attachment|link|task|image`, `level:>=2` (depth bounds), `-term` exclusions, and
+    `"exact phrases"`. A plain query is unchanged (exact-then-fuzzy substring).
+  - **Deep-link to a node** — the URL carries the focused topic as `?node=<id>` alongside `?map=<id>`, so
+    the address bar is always a shareable permalink; opening one boots the map and focuses that node. A
+    "Copy link to this topic" command + More-menu item copy it (a standalone PWA has no address bar).
+  - **Back / forward navigation** — `Alt+←` / `Alt+→` (and ⌘K "Go back" / "Go forward") retrace the
+    topics you've visited, across maps too, browser-style.
+  - **Search-across-maps result context** — each cross-map hit now shows its ancestor breadcrumb
+    (`Root › Branch › …`) and, when the match is in the note, a short snippet — so a bare topic like
+    "Tasks" is placeable at a glance. Operators (above) narrow scope in this overlay too.
+  - **In-map Find results list** — the Find overlay's "List all (N)" disclosure shows every match as a
+    clickable, breadcrumbed list (jump straight to any one, current match highlighted), alongside the
+    existing `Enter` / `Shift+Enter` cycler. Reuses the same result-row component as the across-maps
+    search.
+
+- **Data-safety pack (UI review — gap groups 9/11).** Local-first durability for a no-backend PWA:
+  - **Trash / undo-delete** — deleting a map moves it to a recoverable Trash (a `meta.trashedAt` flag)
+    instead of destroying it; a Start-screen Trash view restores or permanently deletes. Emptying the
+    Trash is the only permanent delete.
+  - **Cross-tab clobber guard** — editor tabs heartbeat on a BroadcastChannel; opening the same map in
+    two tabs (which would race the IndexedDB autosave) shows a one-time warning.
+  - **External-file conflict detection** — a map bound to a `.mmst` tracks the file's `lastModified`; a
+    Save that would overwrite an external change (edited elsewhere / synced) prompts first, and silent
+    autosave-to-file pauses rather than clobbering.
+  - **Open Recent** — the File menu lists recently-opened disk files; reopening re-binds the persisted
+    handle (re-prompting for permission).
+
 - **Wave-1 best-in-class gap fixes (UI review — verified gap map).** The first, cheapest-high-value slice
   of the [features review](docs/UI_REVIEW_2026-06-30_bestinclass.md):
   - **Free colour pickers** (G5): Text / Fill / Branch native colour swatches in the StyleBar, alongside

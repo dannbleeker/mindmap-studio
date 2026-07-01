@@ -12,7 +12,8 @@ export type StartSection =
   | "layouts"
   | "import"
   | "learn"
-  | "about";
+  | "about"
+  | "trash";
 
 /** Props every section view receives — read-only data + the one callback that lands a doc in the
  *  editor. Sections read the store directly for the live library; `onOpen` hands a built/loaded doc

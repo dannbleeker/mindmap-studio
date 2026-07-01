@@ -35,6 +35,15 @@ function normalizeNode(value: unknown): MapNode {
   // (the download attribute is ignored for javascript: URLs).
   if (typeof node.hyperlink === "string" && isDangerousUrl(node.hyperlink))
     node.hyperlink = undefined;
+  // Additional hyperlinks: keep only non-empty strings with a safe scheme; drop the array entirely
+  // when nothing survives, so a clean node stays lossless (no stray empty `hyperlinks: []`).
+  if (Array.isArray(node.hyperlinks)) {
+    const safe = (node.hyperlinks as unknown[]).filter(
+      (u): u is string => typeof u === "string" && u.trim() !== "" && !isDangerousUrl(u),
+    );
+    if (safe.length !== node.hyperlinks.length)
+      node.hyperlinks = safe.length > 0 ? safe : undefined;
+  }
   if (Array.isArray(node.attachments)) {
     const safe = (node.attachments as MapAttachment[]).filter(
       (a) =>

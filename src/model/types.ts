@@ -100,6 +100,13 @@ export interface MapNode {
   topicRich?: string;
   note?: string;
   hyperlink?: string;
+  /**
+   * Additional hyperlinks beyond the primary `hyperlink` (a topic can point at more than one place).
+   * The primary stays canonical — the canvas 🔗, exporters, and single-link consumers use it — while
+   * these extras are managed in the inspector and picked up by search + the cross-map/in-map backlink
+   * scans. Additive + optional: a clean node omits it; absent ⇒ no extras.
+   */
+  hyperlinks?: string[];
   image?: MapImage;
   /** Marker / icon ids (priority, progress, flags, ...). */
   icons?: string[];
@@ -292,6 +299,9 @@ export interface MindMapDoc {
     /** Pinned/favourited: the user curated this map to stay at the top of the library lists,
      *  independent of recency. Additive + lossless in .json. */
     pinned?: boolean;
+    /** Soft-delete timestamp (ms epoch): when set, the map is in the Trash — hidden from the normal
+     *  library but recoverable (Restore) until permanently deleted. Absent ⇒ live. Additive. */
+    trashedAt?: number;
   };
 }
 

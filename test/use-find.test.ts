@@ -74,3 +74,31 @@ describe("useFind — cycling", () => {
     expect(result.current.matchInfo).toBe("1/2");
   });
 });
+
+describe("useFind — match list + jump", () => {
+  it("exposes the full match list (topic + breadcrumb) for the query", () => {
+    const { result } = setup();
+    act(() => result.current.setQuery("ap"));
+    expect(result.current.matches.map((m) => m.nodeId)).toEqual(["a", "b"]);
+    expect(result.current.matches[0].topic).toBe("apple");
+    expect(result.current.matches[0].path).toEqual(["root"]); // root › apple
+  });
+
+  it("goTo jumps straight to a match, setting the active id + counter", () => {
+    const { result, focusNode } = setup();
+    act(() => result.current.setQuery("ap"));
+    act(() => result.current.goTo("b"));
+    expect(focusNode).toHaveBeenLastCalledWith("b");
+    expect(result.current.activeId).toBe("b");
+    expect(result.current.matchInfo).toBe("2/2");
+  });
+
+  it("tracks activeId as the cycler advances, and clears it on a new query", () => {
+    const { result } = setup();
+    act(() => result.current.setQuery("ap"));
+    act(() => result.current.findNext());
+    expect(result.current.activeId).toBe("a");
+    act(() => result.current.setQuery("ban")); // a new query drops the stale highlight
+    expect(result.current.activeId).toBeNull();
+  });
+});

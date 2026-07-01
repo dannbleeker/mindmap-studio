@@ -3,6 +3,7 @@ import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   memo,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -18,10 +19,19 @@ import { toPercent } from "../../progress";
 import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
 import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
+import { handleEditorKeyDown } from "./editorKeys";
 import { matchBorderColor } from "./geometry";
+import {
+  type LinkCandidate,
+  type LinkTrigger,
+  applyLinkSelection,
+  linkTriggerAt,
+  matchLinkCandidates,
+} from "./linkAutocomplete";
 import { showNodeAffordances } from "./nodeChrome";
 import { relateGripTopCss } from "./relateGripGeometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
+import { type SlashCommand, matchSlashCommands, slashMenuKey, slashQuery } from "./slashCommands";
 import {
   TOPIC_SHADOW_CSS,
   levelFontSize,
@@ -72,6 +82,71 @@ function markRelateHintSeen() {
   } catch {
     // best-effort
   }
+}
+
+// Plain-text caret offset within a contentEditable (how many characters precede the caret). Used to
+// locate the `[[`/`@` link-autocomplete trigger. Returns the end of the text when there's no selection.
+function caretOffset(el: HTMLElement): number {
+  const sel = typeof window !== "undefined" ? window.getSelection() : null;
+  const end = el.textContent?.length ?? 0;
+  if (!sel || sel.rangeCount === 0) return end;
+  const range = sel.getRangeAt(0);
+  // A selection left over from before an imperative text reset points at a detached node — treat a
+  // caret outside this editor as "at the end" (the common case just after typing).
+  if (!el.contains(range.endContainer)) return end;
+  const pre = range.cloneRange();
+  pre.selectNodeContents(el);
+  pre.setEnd(range.endContainer, range.endOffset);
+  return pre.toString().length;
+}
+
+// Place the caret at a plain-text offset in a contentEditable whose content was just reset to one text
+// node (the plain link-autocomplete rewrite path). Clamps to the text length.
+function placeCaret(el: HTMLElement, offset: number): void {
+  const node = el.firstChild ?? el;
+  const len = node.textContent?.length ?? 0;
+  const range = document.createRange();
+  range.setStart(node, Math.min(offset, len));
+  range.collapse(true);
+  const sel = window.getSelection();
+  sel?.removeAllRanges();
+  sel?.addRange(range);
+}
+
+// Map a plain-text offset to a DOM (text node, offset) position inside a contentEditable — the inverse
+// of caretOffset. Used to replace only the `[[`/`@` token range while leaving surrounding rich markup
+// intact. Falls back to the end of the element if the offset runs past the text.
+function domPositionAt(el: HTMLElement, target: number): { node: Node; offset: number } {
+  let remaining = target;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    const len = node.textContent?.length ?? 0;
+    if (remaining <= len) return { node, offset: remaining };
+    remaining -= len;
+    node = walker.nextNode();
+  }
+  return { node: el, offset: el.childNodes.length };
+}
+
+// Replace the plain-text range [start, end) in a contentEditable with `label`, preserving any markup
+// outside the range, and leave the caret just after the inserted text. Used by the link autocomplete
+// so inserting a link into a formatted topic doesn't flatten its bold/italic/colour runs.
+function replaceTokenRange(el: HTMLElement, start: number, end: number, label: string): void {
+  const from = domPositionAt(el, start);
+  const to = domPositionAt(el, end);
+  const range = document.createRange();
+  range.setStart(from.node, from.offset);
+  range.setEnd(to.node, to.offset);
+  range.deleteContents();
+  const inserted = document.createTextNode(label);
+  range.insertNode(inserted);
+  const after = document.createRange();
+  after.setStartAfter(inserted);
+  after.collapse(true);
+  const sel = window.getSelection();
+  sel?.removeAllRanges();
+  sel?.addRange(after);
 }
 
 const HANDLE: CSSProperties = {
@@ -309,6 +384,74 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const [markerDragOver, setMarkerDragOver] = useState(false);
   // Re-sanitise on render too (defence-in-depth: a topicRich could arrive via an imported .json).
   const richHtml = useMemo(() => (topicRich ? sanitizeRich(topicRich) : null), [topicRich]);
+  // Slash `/` command menu: opens when the editor text starts with "/", filtered by what follows.
+  // `items` empty ⇒ closed. `index` is the highlighted row (Arrow keys move it, Enter/Tab selects).
+  const [slashItems, setSlashItems] = useState<SlashCommand[]>([]);
+  const [slashIndex, setSlashIndex] = useState(0);
+  const slashOpen = isEditing && slashItems.length > 0;
+  // `[[`/`@` link autocomplete: a mid-text trigger at the caret opens a topic picker.
+  const [linkItems, setLinkItems] = useState<LinkCandidate[]>([]);
+  const [linkIndex, setLinkIndex] = useState(0);
+  const [linkTrigger, setLinkTrigger] = useState<LinkTrigger | null>(null);
+  const linkOpen = isEditing && linkTrigger !== null && linkItems.length > 0;
+  // The editor text at which the user pressed Escape to dismiss a menu — syncMenus keeps the menu shut
+  // while the text is unchanged, so the keyup/caret-move re-sync doesn't immediately reopen it. Cleared
+  // once the text changes (they typed something) or on leaving edit.
+  const dismissedRef = useRef<string | null>(null);
+  // Recompute both menus from the editor's current text (+ caret for the link one). Slash wins: a
+  // leading "/" and a mid-text "[["/"@" can't sensibly coexist, so only one menu is ever open.
+  const syncMenus = useCallback(() => {
+    const el = editRef.current;
+    const text = el?.textContent ?? "";
+    if (dismissedRef.current !== null) {
+      // Stay dismissed until the text actually changes from what was Escaped.
+      if (dismissedRef.current === text) {
+        setSlashItems([]);
+        setLinkTrigger(null);
+        setLinkItems([]);
+        return;
+      }
+      dismissedRef.current = null;
+    }
+    const slash = slashQuery(text);
+    if (slash !== null) {
+      const items = matchSlashCommands(slash);
+      setSlashItems(items);
+      setSlashIndex(0);
+      setLinkTrigger(null);
+      setLinkItems([]);
+      return;
+    }
+    setSlashItems([]);
+    const trigger = el ? linkTriggerAt(text, caretOffset(el)) : null;
+    const items =
+      trigger && editing ? matchLinkCandidates(editing.linkCandidates(id), trigger.query) : [];
+    setLinkTrigger(items.length ? trigger : null);
+    setLinkItems(items);
+    setLinkIndex(0);
+  }, [editing, id]);
+
+  // Pick a link-autocomplete candidate: rewrite the buffer (replace the `[[`/`@` token with the topic
+  // name), restore the caret after it, attach the link to the node, and close the menu. Edit stays open.
+  const selectLink = useCallback(
+    (cand: LinkCandidate) => {
+      const el = editRef.current;
+      if (!el || !linkTrigger) return;
+      if (el.children.length === 0) {
+        // Plain buffer (no markup): recompute the whole string — simple + exercised by the tests.
+        const { text, caret } = applyLinkSelection(el.textContent ?? "", linkTrigger, cand.label);
+        el.textContent = text;
+        placeCaret(el, caret);
+      } else {
+        // Formatted buffer: splice only the token range so bold/italic/colour runs survive.
+        replaceTokenRange(el, linkTrigger.start, linkTrigger.end, cand.label);
+      }
+      editing?.addNodeLink(id, cand.link);
+      setLinkTrigger(null);
+      setLinkItems([]);
+    },
+    [editing, id, linkTrigger],
+  );
 
   // On entering edit mode: seed the text, focus, and select all (uncontrolled — React must
   // not re-render over the user's keystrokes, so the text is set imperatively, once).
@@ -343,10 +486,24 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       }
     };
     place();
+    // Type-to-edit could seed a leading "/" (open the slash menu immediately); otherwise this closes it.
+    syncMenus();
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isEditing, topic, richHtml, seed]);
+  }, [isEditing, topic, richHtml, seed, syncMenus]);
+
+  // Leaving edit mode tears both menus down so they can't linger with stale items on the next edit.
+  useEffect(() => {
+    if (!isEditing) {
+      setSlashItems([]);
+      setSlashIndex(0);
+      setLinkItems([]);
+      setLinkTrigger(null);
+      setLinkIndex(0);
+      dismissedRef.current = null;
+    }
+  }, [isEditing]);
 
   // The first real edit retires the "double-click to edit" microcopy for good.
   useEffect(() => {
@@ -638,37 +795,102 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           ) : null}
           {isEditing ? <RichEditToolbar /> : null}
           {isEditing ? (
-            <span
-              ref={editRef}
-              contentEditable
-              suppressContentEditableWarning
-              // contentEditable already exposes an implicit textbox role + focusability; just name it.
-              aria-label={`Edit topic${topic ? `: ${topic}` : ""}`}
-              spellCheck={editing?.spellcheck ?? false}
-              className="nodrag nopan"
-              style={{ outline: "none", display: "inline-block", minWidth: 16 }}
-              onKeyDown={(e) => {
-                // Inline formatting: Ctrl/Cmd + B / I / U (execCommand works in contenteditable).
-                if ((e.ctrlKey || e.metaKey) && /^[biu]$/i.test(e.key)) {
-                  e.preventDefault();
-                  const k = e.key.toLowerCase();
-                  document.execCommand(k === "b" ? "bold" : k === "i" ? "italic" : "underline");
-                  return;
-                }
-                const html = editRef.current?.innerHTML ?? "";
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  editing?.commitAndAdd(id, html, "sibling");
-                } else if (e.key === "Tab") {
-                  e.preventDefault();
-                  editing?.commitAndAdd(id, html, "child");
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  editing?.cancelEdit(html);
-                }
-              }}
-              onBlur={() => editing?.commitEdit(id, editRef.current?.innerHTML ?? "")}
-            />
+            <span style={{ position: "relative", display: "inline-block" }}>
+              <span
+                ref={editRef}
+                contentEditable
+                suppressContentEditableWarning
+                // contentEditable already exposes an implicit textbox role + focusability; just name it.
+                aria-label={`Edit topic${topic ? `: ${topic}` : ""}`}
+                spellCheck={editing?.spellcheck ?? false}
+                className="nodrag nopan"
+                style={{ outline: "none", display: "inline-block", minWidth: 16 }}
+                // Also re-sync on keyup/click so the link menu tracks caret moves (arrow keys, clicks),
+                // not just text changes — onInput alone misses a caret that moves without editing.
+                onInput={syncMenus}
+                onKeyUp={syncMenus}
+                onClick={syncMenus}
+                onKeyDown={(e) => {
+                  // An open menu owns Arrow/Enter/Tab/Escape; anything else falls through to normal
+                  // typing (and re-filters via onInput/onKeyUp). Slash and link menus never co-exist.
+                  if (slashOpen) {
+                    const r = slashMenuKey(e.key, slashIndex, slashItems.length);
+                    if (r.action !== "passthrough") {
+                      e.preventDefault();
+                      if (r.action === "move") setSlashIndex(r.index);
+                      else if (r.action === "close") {
+                        setSlashItems([]);
+                        // Latch the current text so the keyup re-sync doesn't reopen the menu.
+                        dismissedRef.current = editRef.current?.textContent ?? "";
+                      } else if (r.action === "select")
+                        editing?.runSlashCommand(id, slashItems[slashIndex].id);
+                      return;
+                    }
+                  } else if (linkOpen) {
+                    const r = slashMenuKey(e.key, linkIndex, linkItems.length);
+                    if (r.action !== "passthrough") {
+                      e.preventDefault();
+                      if (r.action === "move") setLinkIndex(r.index);
+                      else if (r.action === "close") {
+                        setLinkTrigger(null);
+                        dismissedRef.current = editRef.current?.textContent ?? "";
+                      } else if (r.action === "select") selectLink(linkItems[linkIndex]);
+                      return;
+                    }
+                  }
+                  const html = editRef.current?.innerHTML ?? "";
+                  handleEditorKeyDown(e, {
+                    format: (cmd) => document.execCommand(cmd),
+                    commitAndAdd: (what) => editing?.commitAndAdd(id, html, what),
+                    cancel: () => editing?.cancelEdit(html),
+                  });
+                }}
+                onBlur={() => editing?.commitEdit(id, editRef.current?.innerHTML ?? "")}
+              />
+              {slashOpen ? (
+                // Plain buttons (not an ARIA listbox): keyboard focus stays in the editor — the menu is
+                // driven by the editor's keydown + aria-pressed reflects the highlighted row — so a
+                // focusable listbox would fight the contentEditable. Buttons are natively interactive.
+                <div className="nodrag nopan mm-slash-menu" aria-label="Insert command">
+                  {slashItems.map((cmd, i) => (
+                    <button
+                      key={cmd.id}
+                      type="button"
+                      aria-pressed={i === slashIndex}
+                      // Keep focus in the editor (a blur would commit/discard the node before the
+                      // command runs); the click still fires.
+                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseEnter={() => setSlashIndex(i)}
+                      onClick={() => editing?.runSlashCommand(id, cmd.id)}
+                      data-active={i === slashIndex || undefined}
+                      className="mm-slash-item"
+                    >
+                      <span>{cmd.label}</span>
+                      {cmd.hint ? <span className="mm-slash-hint">{cmd.hint}</span> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {linkOpen ? (
+                <div className="nodrag nopan mm-slash-menu" aria-label="Link to a topic">
+                  {linkItems.map((cand, i) => (
+                    <button
+                      key={cand.id}
+                      type="button"
+                      aria-pressed={i === linkIndex}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseEnter={() => setLinkIndex(i)}
+                      onClick={() => selectLink(cand)}
+                      data-active={i === linkIndex || undefined}
+                      className="mm-slash-item"
+                    >
+                      <span>{cand.label}</span>
+                      <span className="mm-slash-hint">🔗</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </span>
           ) : richHtml ? (
             // biome-ignore lint/security/noDangerouslySetInnerHtml: richHtml is sanitised in io/richText
             <span dangerouslySetInnerHTML={{ __html: richHtml }} />

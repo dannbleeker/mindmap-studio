@@ -19,6 +19,9 @@ function makeFind(over: Partial<ToolbarFind> = {}): ToolbarFind {
     matchCase: false,
     setMatchCase: vi.fn(),
     matchInfo: "",
+    matches: [],
+    activeId: null,
+    goTo: vi.fn(),
     runSearch: vi.fn((e: { preventDefault: () => void }) => e.preventDefault()),
     findNext: vi.fn(),
     findPrev: vi.fn(),
@@ -63,6 +66,34 @@ describe("FindReplaceOverlay", () => {
     expect(find.findPrev).toHaveBeenCalledTimes(2);
     // The match counter is a live region so AT announces "2/5".
     expect(screen.getByRole("status").textContent).toBe("2/5");
+  });
+
+  it("discloses the 'all matches' list and jumps to a clicked row", async () => {
+    const u = userEvent.setup();
+    const goTo = vi.fn();
+    const find = makeFind({
+      matchInfo: "1/2",
+      activeId: "a",
+      goTo,
+      matches: [
+        { nodeId: "a", topic: "Apple", path: ["Fruit"] },
+        { nodeId: "b", topic: "Apricot", path: ["Fruit"] },
+      ],
+    });
+    render(<FindReplaceOverlay find={find} onClose={vi.fn()} />);
+    // The list is collapsed until you open it.
+    expect(screen.queryByText("Apricot")).toBeNull();
+    await u.click(screen.getByRole("button", { name: /List all \(2\)/ }));
+    expect(screen.getByText("Apple")).toBeTruthy();
+    // The active match is marked for AT + styling.
+    expect(screen.getByText("Apple").closest("button")?.getAttribute("aria-current")).toBe("true");
+    await u.click(screen.getByText("Apricot"));
+    expect(goTo).toHaveBeenCalledWith("b");
+  });
+
+  it("offers no match list when there are no matches", () => {
+    render(<FindReplaceOverlay find={makeFind()} onClose={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: /List all/ })).toBeNull();
   });
 
   it("closes on the × button and on Escape", async () => {

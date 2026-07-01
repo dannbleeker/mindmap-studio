@@ -15,6 +15,37 @@ function nextId(): string {
   return `p${pid}`;
 }
 
+// Inline-markdown shorthand on a single outline line (after the heading/list marker is stripped):
+//   - `[ ] task` / `[x] done`  → a task at 0% / 100% (the leading `- ` was already removed upstream)
+//   - `[text](url)` spanning the whole line → topic text + a hyperlink (safe http(s)/mailto/tel only)
+//   - `**bold**` / `_italic_` / `` `code` `` → captured as plain topic text (markers dropped)
+// Pure; keeps the paste path forgiving without a full markdown parser.
+export function parseMdShorthand(body: string): {
+  topic: string;
+  hyperlink?: string;
+  task?: { progress: number };
+} {
+  let topic = body;
+  let task: { progress: number } | undefined;
+  let hyperlink: string | undefined;
+  const cb = topic.match(/^\[([ xX])\]\s+(.*)$/);
+  if (cb) {
+    task = { progress: cb[1].toLowerCase() === "x" ? 1 : 0 };
+    topic = cb[2].trim();
+  }
+  const link = topic.match(/^\[([^\]]+)\]\((\S+)\)$/);
+  if (link && /^(https?:\/\/|mailto:|tel:)/i.test(link[2])) {
+    hyperlink = link[2];
+    topic = link[1].trim();
+  }
+  topic = topic
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1");
+  return { topic, hyperlink, task };
+}
+
 export function parseOutline(text: string): MapNode[] {
   pid = 0;
   const forest: MapNode[] = [];
@@ -38,7 +69,11 @@ export function parseOutline(text: string): MapNode[] {
     }
     if (!body) continue;
 
-    const node: MapNode = { id: nextId(), topic: body, children: [] };
+    const md = parseMdShorthand(body);
+    if (!md.topic) continue; // e.g. a lone "[x]" with no text
+    const node: MapNode = { id: nextId(), topic: md.topic, children: [] };
+    if (md.hyperlink) node.hyperlink = md.hyperlink;
+    if (md.task) node.task = md.task;
     while (stack.length > 0 && stack[stack.length - 1].key >= key) stack.pop();
     const parent = stack.length > 0 ? stack[stack.length - 1].node : null;
     if (parent) parent.children.push(node);

@@ -469,6 +469,56 @@ describe("FlowMindMap canvas", () => {
     expect(b?.hyperlinks).toEqual(["#node=a1"]); // the second link is an extra
   });
 
+  it("link autocomplete: Escape dismisses the picker and stays closed until the text changes", () => {
+    const { container, h } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    typeInEditor(editable, "[[Al");
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(2);
+    // Escape closes it — and the keyup re-sync must NOT reopen it (the bug this guards).
+    run(() => fireEvent.keyDown(editable, { key: "Escape" }));
+    run(() => fireEvent.keyUp(editable, { key: "Escape" }));
+    expect(container.querySelectorAll(".mm-slash-item").length).toBe(0);
+    // Typing more re-opens it (the dismissal only holds for the exact dismissed text).
+    typeInEditor(editable, "[[Alp");
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("slash menu: Escape dismisses it and it stays closed on keyup", () => {
+    const { container, h } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "/" })); // seeds "/", opens the menu
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(1);
+    run(() => fireEvent.keyDown(editable, { key: "Escape" }));
+    run(() => fireEvent.keyUp(editable, { key: "Escape" }));
+    expect(container.querySelectorAll(".mm-slash-item").length).toBe(0);
+  });
+
+  it("link autocomplete preserves rich formatting in the topic (splices only the token)", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    // A formatted buffer: bold "Beta" then a wiki token typed after it.
+    editable.innerHTML = "<b>Beta</b> [[Al";
+    const range = document.createRange();
+    range.selectNodeContents(editable);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    run(() => fireEvent.input(editable));
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" })); // pick "Alpha"
+    // The bold run survives; only the "[[Al" token became "Alpha".
+    expect(editable.querySelector("b")?.textContent).toBe("Beta");
+    expect(editable.textContent).toBe("Beta Alpha");
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children.find((n) => n.id === "b")?.hyperlink).toBe("#node=a");
+  });
+
   it("Delete removes a node with children immediately (no modal) + reports it for the undo toast (#9)", () => {
     const { h, onChange, onDelete } = mount();
     run(() => h.focusNode("a")); // "a" (Alpha) has child a1

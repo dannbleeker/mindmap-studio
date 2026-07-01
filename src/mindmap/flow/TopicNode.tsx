@@ -101,7 +101,7 @@ function caretOffset(el: HTMLElement): number {
 }
 
 // Place the caret at a plain-text offset in a contentEditable whose content was just reset to one text
-// node (the link-autocomplete rewrite path). Clamps to the text length.
+// node (the plain link-autocomplete rewrite path). Clamps to the text length.
 function placeCaret(el: HTMLElement, offset: number): void {
   const node = el.firstChild ?? el;
   const len = node.textContent?.length ?? 0;
@@ -111,6 +111,42 @@ function placeCaret(el: HTMLElement, offset: number): void {
   const sel = window.getSelection();
   sel?.removeAllRanges();
   sel?.addRange(range);
+}
+
+// Map a plain-text offset to a DOM (text node, offset) position inside a contentEditable — the inverse
+// of caretOffset. Used to replace only the `[[`/`@` token range while leaving surrounding rich markup
+// intact. Falls back to the end of the element if the offset runs past the text.
+function domPositionAt(el: HTMLElement, target: number): { node: Node; offset: number } {
+  let remaining = target;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    const len = node.textContent?.length ?? 0;
+    if (remaining <= len) return { node, offset: remaining };
+    remaining -= len;
+    node = walker.nextNode();
+  }
+  return { node: el, offset: el.childNodes.length };
+}
+
+// Replace the plain-text range [start, end) in a contentEditable with `label`, preserving any markup
+// outside the range, and leave the caret just after the inserted text. Used by the link autocomplete
+// so inserting a link into a formatted topic doesn't flatten its bold/italic/colour runs.
+function replaceTokenRange(el: HTMLElement, start: number, end: number, label: string): void {
+  const from = domPositionAt(el, start);
+  const to = domPositionAt(el, end);
+  const range = document.createRange();
+  range.setStart(from.node, from.offset);
+  range.setEnd(to.node, to.offset);
+  range.deleteContents();
+  const inserted = document.createTextNode(label);
+  range.insertNode(inserted);
+  const after = document.createRange();
+  after.setStartAfter(inserted);
+  after.collapse(true);
+  const sel = window.getSelection();
+  sel?.removeAllRanges();
+  sel?.addRange(after);
 }
 
 const HANDLE: CSSProperties = {
@@ -358,11 +394,25 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const [linkIndex, setLinkIndex] = useState(0);
   const [linkTrigger, setLinkTrigger] = useState<LinkTrigger | null>(null);
   const linkOpen = isEditing && linkTrigger !== null && linkItems.length > 0;
+  // The editor text at which the user pressed Escape to dismiss a menu — syncMenus keeps the menu shut
+  // while the text is unchanged, so the keyup/caret-move re-sync doesn't immediately reopen it. Cleared
+  // once the text changes (they typed something) or on leaving edit.
+  const dismissedRef = useRef<string | null>(null);
   // Recompute both menus from the editor's current text (+ caret for the link one). Slash wins: a
   // leading "/" and a mid-text "[["/"@" can't sensibly coexist, so only one menu is ever open.
   const syncMenus = useCallback(() => {
     const el = editRef.current;
     const text = el?.textContent ?? "";
+    if (dismissedRef.current !== null) {
+      // Stay dismissed until the text actually changes from what was Escaped.
+      if (dismissedRef.current === text) {
+        setSlashItems([]);
+        setLinkTrigger(null);
+        setLinkItems([]);
+        return;
+      }
+      dismissedRef.current = null;
+    }
     const slash = slashQuery(text);
     if (slash !== null) {
       const items = matchSlashCommands(slash);
@@ -387,9 +437,15 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     (cand: LinkCandidate) => {
       const el = editRef.current;
       if (!el || !linkTrigger) return;
-      const { text, caret } = applyLinkSelection(el.textContent ?? "", linkTrigger, cand.label);
-      el.textContent = text;
-      placeCaret(el, caret);
+      if (el.children.length === 0) {
+        // Plain buffer (no markup): recompute the whole string — simple + exercised by the tests.
+        const { text, caret } = applyLinkSelection(el.textContent ?? "", linkTrigger, cand.label);
+        el.textContent = text;
+        placeCaret(el, caret);
+      } else {
+        // Formatted buffer: splice only the token range so bold/italic/colour runs survive.
+        replaceTokenRange(el, linkTrigger.start, linkTrigger.end, cand.label);
+      }
       editing?.addNodeLink(id, cand.link);
       setLinkTrigger(null);
       setLinkItems([]);
@@ -445,6 +501,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       setLinkItems([]);
       setLinkTrigger(null);
       setLinkIndex(0);
+      dismissedRef.current = null;
     }
   }, [isEditing]);
 
@@ -761,8 +818,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                     if (r.action !== "passthrough") {
                       e.preventDefault();
                       if (r.action === "move") setSlashIndex(r.index);
-                      else if (r.action === "close") setSlashItems([]);
-                      else if (r.action === "select")
+                      else if (r.action === "close") {
+                        setSlashItems([]);
+                        // Latch the current text so the keyup re-sync doesn't reopen the menu.
+                        dismissedRef.current = editRef.current?.textContent ?? "";
+                      } else if (r.action === "select")
                         editing?.runSlashCommand(id, slashItems[slashIndex].id);
                       return;
                     }
@@ -771,8 +831,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                     if (r.action !== "passthrough") {
                       e.preventDefault();
                       if (r.action === "move") setLinkIndex(r.index);
-                      else if (r.action === "close") setLinkTrigger(null);
-                      else if (r.action === "select") selectLink(linkItems[linkIndex]);
+                      else if (r.action === "close") {
+                        setLinkTrigger(null);
+                        dismissedRef.current = editRef.current?.textContent ?? "";
+                      } else if (r.action === "select") selectLink(linkItems[linkIndex]);
                       return;
                     }
                   }

@@ -16,6 +16,12 @@ draft (see the correction note below), so every "already shipped" and every gap 
 > jump-to-topic** (`editorCommands.ts` `jump:*` rows in ⌘K). Their real, narrower gaps survive below
 > (visual fidelity in the HTML export; a *cross-map* quick switcher). Honesty over a clean headline.
 
+> **Pruned (2026-07-01).** This doc is now open-items-only: every gap the review found that has since
+> shipped is removed from the tables below (the full shipped history — waves, packs, and the
+> nine-item deferred backlog — lives in `CHANGELOG.md`, not duplicated here). Section numbering is
+> kept stable even where a section emptied out, since it's referenced loosely elsewhere. **65 open
+> gaps remain** (down from the original 111 the scan surfaced).
+
 ---
 
 ## The honest headline
@@ -36,8 +42,7 @@ several genuinely **best-in-class strengths** most rivals can't match:
   + free canvas, **Power Filter** + saved presets, a genuinely-working **responsive/touch** build.
 
 So the add-list is a **finite, code-verified set of gaps**, not an open-ended wishlist. Below: first the
-shipped baseline (so nothing here is re-pitched), then **all 93 verified gaps grouped into 11 themes**,
-then the recommended slice.
+shipped baseline (so nothing here is re-pitched), then the **65 open gaps** grouped into 11 themes.
 
 ---
 
@@ -59,98 +64,47 @@ static-image HTML, PPTX, PDF (+notes), DOCX, XLSX, and 8 mind-map formats.
 
 ---
 
-## All gaps, grouped (93, code-verified)
-
-> **Shipped since this review** (struck through below; see CHANGELOG):
-> **Wave 1** — free colour pickers (G5 Text/Fill/Branch), paste-URL→titled node (G1), copy-map-as-image
-> (G11), presenter pacing timer + pacing colour + B/W blackout (G7), cross-map quick switcher (G2),
-> reveal-in-outline auto-scroll (G2).
-> **Wave 2 ("serious maps")** — sort children (G4), multi-branch clipboard (G4), "Links to" outgoing
-> inspector (G3), map-wide relationships panel (G3), promote-branch-to-map (G4), merge-map-as-branch (G4).
-> **Flagships** — big-map virtualisation (G6), visual-map slides + cinematic zoom (G7, as a 🎬 mode on the
-> guided walk).
-> **Data-safety pack (G9/G11)** — trash/undo-delete, cross-tab clobber guard, external-file conflict
-> detection, Open Recent.
-> **Search & nav pack (G2 — now complete)** — search beyond topic+note, scoped/operator search,
-> deep-link to a node, back/forward navigation history, across-maps result context (breadcrumb +
-> snippet), and the in-map Find "List all" results list.
-> **Quick-wins pack** — filter by completion status (G8), `Ctrl/⌘+,` opens Settings (G9), reduced-motion
-> support + in-app toggle (G10).
-> **Knowledge-linking / capture / a11y packs** — cross-map topic links + in-note in-app links (G3),
-> multi-line burst quick-capture (G1), keyboard Outline reorder + SR overlay lists (G10). The remaining
-> list is what's left to build.
+## Open gaps, grouped (65, code-verified)
 
 Tags per gap: **scope** (`in` in-scope · `?` needs a product call · all out-of-scope items are listed
 separately) · **impact** (high/med/low) · **effort** (S/M/L) · **status** (`missing` / `partial`).
 "partial" = the model or a sibling surface already exists; the named sub-capability is the delta.
 
-### 1 · Capture & low-friction input (12)
-The single richest cluster; mostly offline UI over existing model fields.
+### 1 · Capture & low-friction input (7)
 | Gap | What | Tags |
 |---|---|---|
-| ~~URL → page title resolution~~ ✅ shipped | paste a link → de-slugged readable title, not the bare URL | `done` |
-| ~~Node slash-commands (`/` menu)~~ ✅ shipped | insert icon/marker/link/note/child/boundary/date from the keyboard | `done` |
-| ~~Quick-capture inbox~~ ✅ shipped | jot now into an Unfiled bucket, file onto the map later | `done` |
-| ~~Markdown shorthand → structure on paste~~ ✅ shipped | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `done` |
 | Rich HTML paste → nodes | preserve inline formatting + split lists/headings into nodes | `in·med·M·partial` |
 | Inline tokens on add (`#tag !priority @resource`) | lift typed tokens onto structured fields | `?·med·M·missing` |
 | Natural-language date entry (chrono-node) | "next fri" → ISO date | `?·med·S·missing` |
-| ~~Multi-line / burst quick capture~~ ✅ shipped | Quick-add runs text through parseOutline → subtree | `done` |
 | Template / map-parts on insert (keyboard) | insert SWOT/pros-cons under a node at capture time | `in·low·S·partial` |
 | Inline tag/marker autocomplete in the canvas editor | type-ahead from within the topic editor | `?·low·M·partial` |
 | PWA share-target capture | receive shared text/link/image from the OS | `?·low·M·missing` |
 | Image OCR on paste/drop | tesseract.js WASM, lazy-loaded | `?·low·L·missing` |
 
-### 2 · Search, navigation & wayfinding (8)
-All pure client-side derivations over the in-memory doc.
-| Gap | What | Tags |
-|---|---|---|
-| ~~Back / forward navigation history~~ ✅ shipped | Alt+←/→ retrace visited topics (across maps) | `done` |
-| ~~Scoped / operator search~~ ✅ shipped | `tag: marker: has: priority: due: level: -exclude "phrase"` in Find | `done` |
-| ~~Search beyond topic+note~~ ✅ shipped | also matches tags, markers, hyperlink, callouts, attachment names, resources | `done` |
-| ~~Deep-link to a node~~ ✅ shipped | `?map=&node=` centres + selects on load; Copy-link command | `done` |
-| ~~Cross-map quick switcher in ⌘K~~ ✅ shipped | switch maps / jump across maps from the keyboard | `done` |
-| ~~Library search result context~~ ✅ shipped | path/breadcrumb + note snippet; operators narrow scope | `done` |
-| ~~Reveal-in-outline auto-scroll~~ ✅ shipped | Outline scrolls the selected row into view | `done` |
-| ~~Find-results list~~ ✅ shipped | the Find overlay's "List all" disclosure — clickable, breadcrumbed match list | `done` |
+### 2 · Search, navigation & wayfinding — all shipped ✅
+Every gap this lens surfaced has shipped — see `CHANGELOG.md`.
 
-### 3 · Knowledge structure & linking (13)
-The deepest backlog; several items brush the decided-against "no graph" boundary.
+### 3 · Knowledge structure & linking (6)
+Several items brush the decided-against "no graph" boundary.
 | Gap | What | Tags |
 |---|---|---|
-| ~~Cross-map topic links~~ ✅ shipped | `#map=<id>&node=<id>` opens a map + focuses a topic; inspector topic-picker to author it | `done` |
-| ~~Map-wide relationships / links overview panel~~ ✅ shipped | every cross-link + hyperlink, navigable | `done` |
-| ~~Outgoing-links list in the inspector~~ ✅ shipped | mirror of the shipped "Linked from" | `done` |
 | Typed / categorised relationships | depends-on / causes / supports, drivable in style/filter | `?·med·M·partial` |
-| ~~Cross-map backlinks~~ ✅ shipped | inspector "Linked from other maps" — incoming `#map=` refs, lazy-loaded | `done` |
-| ~~Name-based link autocomplete~~ ✅ shipped | `[[`/`@` wiki-link authoring | `done` |
-| ~~In-note in-app links~~ ✅ shipped | `[text](#node=…/#map=…)` in a note routes through the canvas | `done` |
 | Transclusion / embedded references | live kept-in-sync view of another topic (single-parent-safe) | `?·med·L·missing` |
-| ~~Multiple hyperlinks per topic~~ ✅ shipped | a list of links, not one | `done` |
 | Tags-as-navigation pane | tag browser with counts → filter/jump | `?·low·S·partial` |
 | Topic aliases / alternate names | resolve links + search under multiple labels | `?·low·S·missing` |
 | Directional / reverse relationship labels | "blocks" forward / "blocked by" reverse | `?·low·S·missing` |
 | Unlinked mentions | suggest links where a topic names another | `?·low·M·missing` |
 
-### 4 · Editing & restructuring (7)
-The two map-level grafts are pure model transforms with all building blocks present.
+### 4 · Editing & restructuring (3)
 | Gap | What | Tags |
 |---|---|---|
-| ~~Promote branch to its own map~~ ✅ shipped | "New Sheet from Topic" — branch → new library map | `done` |
-| ~~Merge a map in as a branch~~ ✅ shipped | graft another library map's tree under a topic | `done` |
-| ~~Sort children~~ ✅ shipped | A→Z / priority / date / progress | `done` |
-| ~~Multi-branch clipboard~~ ✅ shipped | copy several selected branches at once | `done` |
 | Drag a branch between two open maps | HTML5 DnD serialization | `?·med·M·partial` |
 | Compare / diff two versions | added/removed/edited vs only restore/playback | `?·low·M·missing` |
 | Undo history tree / branching undo | redo survives editing after an undo | `?·low·L·partial` |
 
-### 5 · Styling, theming & visual encoding (10)
-The three colour gaps are high-impact S-effort: the model fields already accept any CSS colour; only the picker UI is missing.
+### 5 · Styling, theming & visual encoding (7)
 | Gap | What | Tags |
 |---|---|---|
-| ~~Free colour picker for node fill~~ ✅ shipped | hex/HSV → existing `NodeStyle.background` | `done` |
-| ~~Node text colour control~~ ✅ shipped | `NodeStyle.color` renders but has no setter UI | `done` |
-| ~~Per-node branch colour via free picker~~ ✅ shipped | `setBranchColor` already takes any hex | `done` |
 | Full emoji / Unicode marker picker | beyond the 45-entry catalog | `in·med·M·partial` |
 | Custom / savable themes & palettes | theme designer + import/export | `?·med·L·partial` |
 | Gradient direction / radial gradient | currently a hardcoded vertical linear gradient | `?·low·M·partial` |
@@ -159,11 +113,9 @@ The three colour gaps are high-impact S-effort: the model fields already accept 
 | Named font choices beyond 3 generic families | a named-font dropdown (not uploaded fonts) | `?·low·S·partial` |
 | One-click "colourful/rainbow node fills" | tint each branch's node fills by palette | `?·low·S·partial` |
 
-### 6 · Layout, canvas & scale (7)
-Mostly React Flow flag/viewport work; the cinematic-zoom item overlaps the presentation cluster.
+### 6 · Layout, canvas & scale (6)
 | Gap | What | Tags |
 |---|---|---|
-| ~~Big-map virtualisation~~ ✅ shipped | `onlyRenderVisibleElements` — fluid 1000+ nodes | `done` |
 | Auto-fit / keep-in-view after structural edits | pan/zoom so new/remaining content stays visible | `in·med·M·partial` |
 | Partial / touch marquee + no-modifier lasso | select any node a marquee touches; plain left-drag | `in·med·S·partial` |
 | Snap-to-grid on free canvas | optional 8/16px grid, distinct from neighbour guides | `in·low·S·missing` |
@@ -171,21 +123,15 @@ Mostly React Flow flag/viewport work; the cinematic-zoom item overlaps the prese
 | Tree-table / matrix layout | XMind "Tree Table" / "Matrix" | `?·low·M·missing` |
 | Minimap match/selection highlighting | show search/filter hits + clearer viewport frame | `?·low·S·partial` |
 
-### 7 · Presentation, sharing & export (18)
-The largest lens. Presenter-control items are cheap S-effort wins; visual-slide items are the L-effort flagship.
+### 7 · Presentation, sharing & export (12)
+The largest remaining lens.
 | Gap | What | Tags |
 |---|---|---|
-| ~~Presenter pacing timer / elapsed clock~~ ✅ shipped | live elapsed/remaining in presenter view | `done` |
-| ~~Slides rendered as the visual map~~ ✅ shipped | the guided-walk canvas IS the styled slide (🎬 mode) | `done` |
-| ~~Cinematic zoom walkthrough~~ ✅ shipped | animated branch-framing fly on the real canvas (🎬 walk) | `done` |
-| ~~Cinematic node-to-node zoom~~ ✅ shipped | 🎬 walk frames each branch with an animated zoom | `done` |
 | Speaker notes in exported deck / PPTX | the script travels with the artifact | `in·med·M·partial` |
 | PPTX honours the curated deck order/notes | currently builds the auto deck | `in·med·S·partial` |
 | Export branch / selection only | share one part (image/SVG/HTML/deck) | `in·med·M·missing` |
 | Interactive HTML carries visual fidelity | images, fills, markers, colours, shapes (today it's a text outline) | `in·med·M·partial` |
 | Poster / multi-page tiled print | A0 across N×M sheets with crop marks | `in·med·M·missing` |
-| ~~Pacing colour cue~~ ✅ shipped | timer turns amber/red when running long | `done` |
-| ~~B-to-black / W-to-white blackout~~ ✅ shipped | pull attention to the speaker | `done` |
 | Laser pointer / spotlight / pen | draw the audience's eye | `in·med·M·missing` |
 | Incremental bullet reveal (fragments) | reveal points one click at a time | `in·med·M·missing` |
 | Embeddable read-only visual viewer | single-file iframe/web-component of the visual map | `?·med·L·partial` |
@@ -194,27 +140,21 @@ The largest lens. Presenter-control items are cheap S-effort wins; visual-slide 
 | Print/export options dialog | size/scale/margins/contents before producing | `?·low·M·missing` |
 | Animated GIF / WebM map export | short animation of a walk/history (MediaRecorder) | `?·low·L·missing` |
 
-### 8 · Task & metadata layer — light, in-scope (5)
+### 8 · Task & metadata layer — light, in-scope (4)
 Wire up fields the model already carries without crossing into the decided-against PM engine.
 | Gap | What | Tags |
 |---|---|---|
-| ~~Filter by completion status~~ ✅ shipped | Power Filter Completion select over rolled-up progress | `done` |
 | Natural-language / relative due-date entry | "today"/"next fri"/"+7d" → ISO (`addDaysISO` exists) | `in·med·M·missing` |
 | Quick date set / reschedule chip on canvas | inline Today / +1wk like the progress pie (DateChip is display-only) | `?·med·M·missing` |
 | Duration & resources editing UI | model carries + import fills them; user can't set them | `?·med·M·partial` |
 | Resource / assignee index & filter | a filterable facet paralleling markers & tags | `?·low·M·partial` |
 
-### 9 · Files, library & autosave durability (13)
-The data-loss-risk items are the high-impact core of a local-first PWA.
+### 9 · Files, library & autosave durability (9)
 | Gap | What | Tags |
 |---|---|---|
-| ~~Cross-tab / multi-window safety~~ ✅ shipped | BroadcastChannel presence guard warns on two-tab open | `done` |
-| ~~Trash / undo-delete for maps~~ ✅ shipped | soft-delete (`meta.trashedAt`) + Start-screen Trash restore/empty | `done` |
-| ~~External-file-change / conflict detection~~ ✅ shipped | bound `.mmst` tracks `lastModified`; Save prompts, autosave-to-file pauses | `done` |
 | Library folders / organization | group maps beyond a flat list | `?·med·L·missing` |
 | Bulk library ops | multi-select export/delete/move | `in·med·M·missing` |
 | Library restore merge/dedup | replace-only today | `in·med·M·partial` |
-| ~~Recent-files-on-disk list~~ ✅ shipped | File menu lists recent disk files; reopen re-binds the handle | `done` |
 | Named versions + configurable cap + diff | label key versions; diff two | `?·med·M·partial` |
 | Revert-to-saved / read-only open / Save-a-Copy | file-level affordances | `in·low·M·missing` |
 | Preferences export & import | theme, styles, filters, layout → file | `in·low·S·missing` |
@@ -222,29 +162,22 @@ The data-loss-risk items are the high-impact core of a local-first PWA.
 | Settings shortcut + start-screen palette entry | ✅ chord `Ctrl/⌘+,` shipped; start-screen ⌘K Settings entry still open | `in·low·S·partial` |
 | PWA app shortcuts / richer manifest | `shortcuts` + `screenshots` for install UI | `?·low·S·partial` |
 
-### 10 · Accessibility & input modalities (13)
+### 10 · Accessibility & input modalities (7)
 A11y is already strong; these are the genuine remaining deltas.
 | Gap | What | Tags |
 |---|---|---|
 | Touch drag-and-drop fallback | outline/board/marker DnD use HTML5 drag → dead on touch | `in·high·M·partial` |
-| ~~High-contrast theme + `prefers-contrast`/`forced-colors`~~ ✅ shipped | OS-aware high-contrast | `done` |
-| ~~Keyboard reorder/indent in the Outline tree~~ ✅ shipped | Shift+↑/↓ reorder, Shift+←/→ outdent/indent | `done` |
 | i18n / localization | UI strings English-only, no locale layer | `?·med·L·missing` |
-| ~~SR exposure of canvas overlays~~ ✅ shipped | CanvasOverlaysSR lists boundaries/summaries/callouts for AT | `done` |
-| ~~Reduced-motion at JS motion sites~~ ✅ shipped | canvas zoom/fit/centre + guided-walk zoom honour reduced motion | `done` |
-| ~~Long-press context menu on touch~~ ✅ shipped | press-and-hold = right-click | `done` |
 | RTL layout support | `dir=rtl`, logical CSS, right-growing maps | `?·low·L·missing` |
-| ~~In-app motion/animation toggle~~ ✅ shipped | Settings → Reduce motion (System / On / Off) | `done` |
 | Focus trap + return-focus for hand-rolled overlays | Find/Replace, BulkNodeMenu, NodePopover | `in·low·S·partial` |
 | `aria-keyshortcuts` on actionable controls | expose the shortcut set to AT | `in·low·S·missing` |
 | Stylus / pen affordances | pressure, palm rejection (`pointerType==='pen'`) | `?·low·M·missing` |
 | Page-zoom reflow to 200–400% | docks use fixed pixel widths (WCAG 1.4.10) | `?·low·M·partial` |
 
-### 11 · Cross-cutting / modality — audit additions (5)
+### 11 · Cross-cutting / modality — audit additions (4)
 Categories none of the 10 lenses surfaced.
 | Gap | What | Tags |
 |---|---|---|
-| ~~Copy map / branch as image to clipboard~~ ✅ shipped | fastest map→paste-into-chat path, no file round-trip | `done` |
 | Map document properties | author/subject/keywords → PPTX/DOCX core props | `in·med·S·missing` |
 | Local map encryption / passcode | at-rest protection on a shared/work laptop | `?·med·M·missing` |
 | Zen / distraction-free *edit* mode | hide chrome for editing (distinct from Present) | `?·low·S·missing` |
@@ -264,26 +197,13 @@ link — the shipped offline interactive-HTML export is the local-first answer t
 
 ---
 
-## Recommended slice (if you build)
+## Recommended slice
 
-The verified picture skews to **partials** (the model already carries the fields) and to two heavy
-clusters — presentation/export and knowledge-linking. Three coherent bundles:
-
-- **Quick-wins sprint (high-impact · S-effort · all in-scope):** the three free colour pickers
-  (fill / text / branch), the presenter **timer + B-to-black + pacing-colour** trio, **filter-by-completion**,
-  **URL→title** on paste, and **copy-as-image** to the clipboard. Almost all are UI over fields/derivations
-  that already exist — a high delight-per-effort first pass.
-- **"Serious maps" pack:** **promote-/merge-branch-between-maps** + **map-wide relationships panel** +
-  **scoped search** + **back/forward history** + **big-map virtualisation (L)**, with **cross-tab safety**
-  and **trash/undo-delete** as the data-safety backbone. Targets the one place this otherwise-complete app
-  still trails — working fluidly with large, structured, interconnected maps — plus the local-first
-  durability a single-user PWA owes its data.
-- **"Present like Prezi" pack:** make the existing deck render **slides as the visual map** and add the
-  **cinematic zoom walkthrough** (both L) — the differentiated, demo-able swing once the cheap presenter
-  controls land.
-
-If you build only three things: **the colour pickers (S)**, **filter-by-completion (S)**, and
-**promote-branch-to-map (M)** — two near-free high-impact wins plus the most-requested restructure verb.
+The three original recommended bundles (quick-wins sprint, "serious maps" pack, "Present like Prezi"
+pack) and the "if you build only three things" pick are **all fully shipped** — see `CHANGELOG.md`.
+No fresh curated slice is proposed here: what's left in the grouped tables above skews to lower-impact
+or product-judgment-gated items (`?` scope), so the next move is opportunistic — pick whatever a real
+workflow need surfaces, rather than a speculative priority order.
 
 ## Method & sources
 

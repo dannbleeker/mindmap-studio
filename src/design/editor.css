@@ -1389,6 +1389,33 @@
   animation: none !important;
 }
 
+/* High-contrast mode (useHighContrast → body.high-contrast, or the OS prefers-contrast/forced-colors
+   under "system"). The heavy lifting is token-level: editorThemeVars(dark, true) pushes borders,
+   dividers and text to their extremes. These supplements cover what tokens can't: bolder, always-on
+   focus rings so keyboard focus is unmissable, and underlined chrome links so colour isn't the only
+   affordance. Canvas node colours (per-topic fills) are left alone — the mind map keeps its palette. */
+.high-contrast .mm-editor :focus-visible {
+  outline: 3px solid var(--ed-accent-ring);
+  outline-offset: 2px;
+}
+.high-contrast .mm-editor a {
+  text-decoration: underline;
+}
+
+/* Forced-colors (Windows High Contrast): the browser overrides our palette with system colours. Keep
+   the canvas mind map exact — its per-topic fills/markers carry meaning — while letting the chrome
+   adopt system colours as intended. Focus uses the system Highlight so it tracks the active scheme. */
+@media (forced-colors: active) {
+  .react-flow__renderer,
+  .react-flow__viewport {
+    forced-color-adjust: none;
+  }
+  .mm-editor :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
 /* --- document tabs (open maps) --- */
 .mm-doctabs {
   flex-shrink: 0;

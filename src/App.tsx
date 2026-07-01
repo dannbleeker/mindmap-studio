@@ -138,6 +138,7 @@ import { buildTemplate } from "./templates";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 import { resolveChromeDark, useAppearance } from "./useAppearance";
 import { useFind } from "./useFind";
+import { useHighContrast } from "./useHighContrast";
 import { useIsMobile } from "./useIsMobile";
 import { useMapExports } from "./useMapExports";
 import { useReducedMotion } from "./useReducedMotion";
@@ -234,6 +235,7 @@ export function App() {
   // light/dark for all chrome surfaces; a dark canvas theme also darkens the chrome under "system".
   const { appearance, setAppearance, prefersDark } = useAppearance();
   const { motionPref, setMotionPref, reducedMotion } = useReducedMotion();
+  const { contrastPref, setContrastPref, highContrast } = useHighContrast();
   const chromeDark = resolveChromeDark(appearance, prefersDark, theme.theme.type === "dark");
   // Mirror the resolved appearance onto <html> so native UI (scrollbars, form controls) + any
   // selector-based CSS can react, and the body backdrop behind the app matches.
@@ -1698,7 +1700,7 @@ export function App() {
       // While a sheet drag is live, suppress the height transition so it tracks the finger.
       data-sheet-dragging={sheetDrag.dragging || undefined}
       style={{
-        ...editorThemeVars(chromeDark),
+        ...editorThemeVars(chromeDark, highContrast),
         // Live bottom-sheet height (mobile only); the sheets + handle read this with a 62dvh fallback.
         ...(sheetDrag.heightVh != null
           ? ({ "--mm-sheet-h": `${sheetDrag.heightVh}dvh` } as Record<string, string>)
@@ -2637,6 +2639,8 @@ export function App() {
         setAppearance={setAppearance}
         motionPref={motionPref}
         setMotionPref={setMotionPref}
+        contrastPref={contrastPref}
+        setContrastPref={setContrastPref}
         theme={theme}
         setThemeId={setThemeId}
         onReShowGettingStarted={reShowFirstRun}

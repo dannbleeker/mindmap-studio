@@ -28,6 +28,8 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
     setAppearance: vi.fn(),
     motionPref: "system" as const,
     setMotionPref: vi.fn(),
+    contrastPref: "system" as const,
+    setContrastPref: vi.fn(),
     theme: themeById("light"),
     setThemeId: vi.fn(),
     onReShowGettingStarted: vi.fn(),
@@ -60,6 +62,12 @@ describe("SettingsDialog", () => {
     const p = setup();
     await userEvent.selectOptions(screen.getByLabelText("Reduce motion"), "reduced");
     expect(p.setMotionPref).toHaveBeenCalledWith("reduced");
+  });
+
+  it("drives the high-contrast select", async () => {
+    const p = setup();
+    await userEvent.selectOptions(screen.getByLabelText("High contrast"), "high");
+    expect(p.setContrastPref).toHaveBeenCalledWith("high");
   });
 
   it("shows the local-storage usage line when an estimate is available", async () => {

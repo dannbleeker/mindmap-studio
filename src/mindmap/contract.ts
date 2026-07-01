@@ -10,6 +10,7 @@ import type {
   MindMapDoc,
   NodeStyle,
   NumberStyle,
+  RelationshipType,
   SlideRef,
 } from "../model/types";
 import type { SortKey } from "./flow/ops";
@@ -61,6 +62,11 @@ export interface SelectedEdge {
   dash: "dashed" | "solid" | "dotted";
   /** Curve bow (perpendicular offset, px); `0` = straight, `undefined` = the gentle auto-bow. */
   curve?: number;
+  /** Semantic category; resolved to "relates-to" when the link carries no explicit type. */
+  type: RelationshipType;
+  /** Whether the map currently shows the on-canvas type pills (meta.showLinkTypes) — the EdgeInspector
+   *  reflects this in its "Show type labels" toggle. */
+  showTypes: boolean;
 }
 
 /** A selected overlay object (boundary box / summary bracket / callout bubble), surfaced to the
@@ -284,7 +290,10 @@ export interface MindMapHandle {
     dash?: SelectedEdge["dash"];
     curve?: number;
     arrow?: SelectedEdge["arrow"];
+    type?: RelationshipType;
   }) => boolean;
+  /** Toggle the map-wide on-canvas relationship type pills (meta.showLinkTypes). */
+  setShowLinkTypes: (on: boolean) => void;
   /** Delete the selected relationship; false if no edge is selected. */
   deleteLink: () => boolean;
   /** Set the selected overlay's label (boundary/summary) or text (callout); false if none selected. */

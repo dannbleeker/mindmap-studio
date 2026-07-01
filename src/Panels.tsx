@@ -30,6 +30,7 @@ import {
   type CompletionMode,
   type DueMode,
   type FilterCriteria,
+  type RelDir,
   type SavedFilter,
   describeCriteria,
 } from "./filter";
@@ -1687,6 +1688,8 @@ export function FilterPanel({
   due,
   priority,
   completion,
+  relDir,
+  relType,
   matchCount,
   savedFilters,
   onText,
@@ -1695,6 +1698,8 @@ export function FilterPanel({
   onDue,
   onPriority,
   onCompletion,
+  onRelDir,
+  onRelType,
   hide = false,
   onHide,
   onExtract,
@@ -1711,6 +1716,8 @@ export function FilterPanel({
   due: DueMode;
   priority: number;
   completion: CompletionMode;
+  relDir: RelDir | "";
+  relType: string;
   matchCount: number;
   savedFilters: SavedFilter[];
   onText: (value: string) => void;
@@ -1719,6 +1726,8 @@ export function FilterPanel({
   onDue: (mode: DueMode) => void;
   onPriority: (priority: number) => void;
   onCompletion: (mode: CompletionMode) => void;
+  onRelDir: (dir: RelDir | "") => void;
+  onRelType: (type: string) => void;
   /** "Hide non-matches" mode (vs the default fade). */
   hide?: boolean;
   onHide?: (on: boolean) => void;
@@ -1736,7 +1745,8 @@ export function FilterPanel({
     tags.length > 0 ||
     due !== "" ||
     priority > 0 ||
-    completion !== "";
+    completion !== "" ||
+    relDir !== "";
   const [saveName, setSaveName] = useState("");
   const chip = (key: string, selected: boolean, onClick: () => void) => (
     <Chip key={key} selected={selected} onClick={onClick}>
@@ -1792,6 +1802,34 @@ export function FilterPanel({
           <option value="in-progress">In progress</option>
           <option value="incomplete">Not done</option>
         </Select>
+        <PanelSection>Has relationship</PanelSection>
+        <div style={{ display: "flex", gap: 4, padding: "0 10px 4px" }}>
+          <Select
+            value={relDir}
+            onChange={(e) => onRelDir(e.target.value as RelDir | "")}
+            aria-label="Filter by relationship direction"
+            style={{ width: "auto", flex: 1 }}
+          >
+            <option value="">Any / off</option>
+            <option value="out">Outgoing →</option>
+            <option value="in">Incoming ←</option>
+            <option value="either">Either ↔</option>
+          </Select>
+          <Select
+            value={relType}
+            onChange={(e) => onRelType(e.target.value)}
+            aria-label="Filter by relationship type"
+            disabled={relDir === ""}
+            style={{ width: "auto", flex: 1 }}
+          >
+            <option value="">Any type</option>
+            <option value="relates-to">relates-to</option>
+            <option value="depends-on">depends-on</option>
+            <option value="causes">causes</option>
+            <option value="supports">supports</option>
+            <option value="blocks">blocks</option>
+          </Select>
+        </div>
         {markerEntries.length > 0 ? (
           <>
             <PanelSection>Markers</PanelSection>
@@ -2376,6 +2414,7 @@ export function StylesPanel({
             <option value="priority">priority ≤</option>
             <option value="textContains">text contains</option>
             <option value="hasAttachment">has attachment</option>
+            <option value="relationshipType">has relationship</option>
           </Select>
         </div>
         {kind === "tag" ? (
@@ -2420,6 +2459,20 @@ export function StylesPanel({
             aria-label="Rule text"
             style={{ width: "auto", margin: "0 10px 4px" }}
           />
+        ) : kind === "relationshipType" ? (
+          <Select
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            aria-label="Rule relationship type"
+            style={{ width: "auto", margin: "0 10px 4px" }}
+          >
+            <option value="">any relationship</option>
+            <option value="relates-to">relates-to</option>
+            <option value="depends-on">depends-on</option>
+            <option value="causes">causes</option>
+            <option value="supports">supports</option>
+            <option value="blocks">blocks</option>
+          </Select>
         ) : null}
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}

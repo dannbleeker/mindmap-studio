@@ -1007,6 +1007,13 @@ export function setLegend(doc: MindMapDoc, on: boolean): OpResult {
   return { doc: next };
 }
 
+/** Toggle the on-canvas relationship type pills (meta.showLinkTypes); false clears the flag. */
+export function setShowLinkTypes(doc: MindMapDoc, on: boolean): OpResult {
+  const next = structuredClone(doc);
+  next.meta = { ...next.meta, showLinkTypes: on || undefined };
+  return { doc: next };
+}
+
 /** Set the map's outline-numbering scheme; "decimal" (the default) clears the override. */
 export function setNumberStyle(doc: MindMapDoc, style: NumberStyle): OpResult {
   const next = structuredClone(doc);
@@ -1280,6 +1287,7 @@ export function setLinkStyle(
     dash?: CrossLink["dash"];
     curve?: number;
     arrow?: CrossLink["arrow"];
+    type?: CrossLink["type"];
   },
 ): OpResult {
   if (!(doc.links ?? []).some((l) => l.id === id)) return { doc };
@@ -1301,6 +1309,11 @@ export function setLinkStyle(
       // Arrow: "to" (or falsy) is the implicit default → dropped, like setLinkArrow.
       ...("arrow" in patch
         ? { arrow: patch.arrow && patch.arrow !== "to" ? patch.arrow : undefined }
+        : {}),
+      // Type: "relates-to" (or falsy) is the implicit default → dropped, so a plain link serialises
+      // field-free.
+      ...("type" in patch
+        ? { type: patch.type && patch.type !== "relates-to" ? patch.type : undefined }
         : {}),
     };
     // Strip keys now undefined so a cleared field doesn't survive in the lossless .json.

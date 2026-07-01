@@ -337,7 +337,7 @@ export function App() {
   // Memoised so the canvas only re-dims when the map or the criteria actually change. The deps stay
   // plain primitives/arrays (the individual filter fields), so a fresh `filter.criteria` object each
   // render doesn't needlessly recompute — only an actual field change does.
-  const { text, markers, tags, due, priority, completion } = filter;
+  const { text, markers, tags, due, priority, completion, relDir, relType } = filter;
   const filterHits = useMemo(() => {
     const criteria: FilterCriteria = {
       text,
@@ -346,10 +346,12 @@ export function App() {
       due,
       priority: priority || undefined,
       completion: completion || undefined,
+      relDir: relDir || undefined,
+      relType: (relType as FilterCriteria["relType"]) || undefined,
     };
     if (!panels.filterOpen || !isFilterActive(criteria)) return null;
     return filterResult(liveDoc, criteria, todayISO());
-  }, [panels.filterOpen, text, markers, tags, due, priority, completion, liveDoc]);
+  }, [panels.filterOpen, text, markers, tags, due, priority, completion, relDir, relType, liveDoc]);
   // Focus / isolate-branch: session-only, reuses the Power Filter's dim pipeline. Focus wins over
   // the filter as the dim source; both fall back to "no dimming".
   // The full selected node (for the Info panel's tags / markers / link state); `selected` only
@@ -2054,6 +2056,10 @@ export function App() {
                       onDue={filter.setDue}
                       onPriority={filter.setPriority}
                       onCompletion={filter.setCompletion}
+                      relDir={filter.relDir}
+                      relType={filter.relType}
+                      onRelDir={filter.setRelDir}
+                      onRelType={filter.setRelType}
                       hide={filter.hide}
                       onHide={filter.setHide}
                       onExtract={extractFilterMatches}
@@ -2288,6 +2294,7 @@ export function App() {
                 onSetLabel={(label) => mapRef.current?.setLinkLabel(label)}
                 onSetArrow={(arrow) => mapRef.current?.setLinkArrow(arrow)}
                 onSetStyle={(patch) => mapRef.current?.setLinkStyle(patch)}
+                onToggleShowTypes={(on) => mapRef.current?.setShowLinkTypes(on)}
                 onDelete={() => mapRef.current?.deleteLink()}
                 onMinimize={() => {
                   panels.setInfoOpen(false);

@@ -1,4 +1,5 @@
 import type { SelectedEdge } from "../mindmap";
+import type { RelationshipType } from "../model/types";
 import { InspectorResizer } from "./InspectorResizer";
 import { EDGE_PRESETS } from "./edgePresets";
 import { SWATCHES, fieldLabel, seg, segRow } from "./inspectorControls";
@@ -24,6 +25,13 @@ const ARROWS: { a: SelectedEdge["arrow"]; glyph: string; title: string }[] = [
   { a: "both", glyph: "↔", title: "Arrows at both ends" },
   { a: "none", glyph: "—", title: "No arrowheads (a plain line)" },
 ];
+const TYPES: { t: RelationshipType; label: string }[] = [
+  { t: "relates-to", label: "Relates" },
+  { t: "depends-on", label: "Depends" },
+  { t: "causes", label: "Causes" },
+  { t: "supports", label: "Supports" },
+  { t: "blocks", label: "Blocks" },
+];
 
 export function EdgeInspector({
   edge,
@@ -32,6 +40,7 @@ export function EdgeInspector({
   onSetLabel,
   onSetArrow,
   onSetStyle,
+  onToggleShowTypes,
   onDelete,
   onMinimize,
   width,
@@ -48,7 +57,10 @@ export function EdgeInspector({
     dash?: SelectedEdge["dash"];
     curve?: number;
     arrow?: SelectedEdge["arrow"];
+    type?: RelationshipType;
   }) => void;
+  /** Toggle the map-wide on-canvas type pills (edge.showTypes reflects the current state). */
+  onToggleShowTypes: (on: boolean) => void;
   onDelete: () => void;
   onMinimize?: () => void;
   width?: number;
@@ -161,6 +173,41 @@ export function EdgeInspector({
             </button>
           ))}
         </div>
+
+        {/* Type — a semantic category (B3), independent of the free label above. */}
+        <div style={fieldLabel}>Type</div>
+        <div style={segRow}>
+          {TYPES.map(({ t, label }) => (
+            <button
+              key={t}
+              type="button"
+              title={`Mark this relationship as “${t}”`}
+              aria-pressed={edge.type === t}
+              onClick={() => onSetStyle({ type: t })}
+              style={seg(edge.type === t)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            marginTop: 6,
+            fontSize: 12,
+            color: "var(--ed-muted)",
+            cursor: "pointer",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={edge.showTypes}
+            onChange={(e) => onToggleShowTypes(e.target.checked)}
+          />
+          Show type labels on the canvas
+        </label>
 
         {/* Line colour */}
         <div style={fieldLabel}>Colour</div>

@@ -3,6 +3,7 @@ import {
   type CompletionMode,
   type DueMode,
   type FilterCriteria,
+  type RelDir,
   type SavedFilter,
   isFilterActive,
 } from "../filter";
@@ -134,6 +135,12 @@ export interface FilterState {
   setPriority: React.Dispatch<React.SetStateAction<number>>;
   completion: CompletionMode;
   setCompletion: React.Dispatch<React.SetStateAction<CompletionMode>>;
+  /** "Has relationship" direction ("" = off); with relType it drives the relationship filter. */
+  relDir: RelDir | "";
+  setRelDir: React.Dispatch<React.SetStateAction<RelDir | "">>;
+  /** Narrow the relationship filter to a type ("" = any). */
+  relType: string;
+  setRelType: React.Dispatch<React.SetStateAction<string>>;
   /** "Hide" mode: non-matches are removed from the canvas instead of dimmed. */
   hide: boolean;
   setHide: React.Dispatch<React.SetStateAction<boolean>>;
@@ -171,6 +178,8 @@ function buildCriteria(
   due: DueMode,
   priority: number,
   completion: CompletionMode,
+  relDir: RelDir | "",
+  relType: string,
 ): FilterCriteria {
   return {
     text,
@@ -179,6 +188,8 @@ function buildCriteria(
     due,
     priority: priority || undefined,
     completion: completion || undefined,
+    relDir: relDir || undefined,
+    relType: (relType as FilterCriteria["relType"]) || undefined,
   };
 }
 
@@ -248,6 +259,8 @@ export function usePanels(): UsePanels {
   const [filterDue, setFilterDue] = useState<DueMode>("");
   const [filterPriority, setFilterPriority] = useState(0);
   const [filterCompletion, setFilterCompletion] = useState<CompletionMode>("");
+  const [filterRelDir, setFilterRelDir] = useState<RelDir | "">("");
+  const [filterRelType, setFilterRelType] = useState("");
   const [filterHide, setFilterHide] = useState(false);
 
   const clearFilter = () => {
@@ -257,6 +270,8 @@ export function usePanels(): UsePanels {
     setFilterDue("");
     setFilterPriority(0);
     setFilterCompletion("");
+    setFilterRelDir("");
+    setFilterRelType("");
     setFilterHide(false);
   };
   // Toggling the panel off also clears the filter, so dimming can't outlive a visible control.
@@ -284,6 +299,8 @@ export function usePanels(): UsePanels {
       filterDue,
       filterPriority,
       filterCompletion,
+      filterRelDir,
+      filterRelType,
     );
     if (!name.trim() || !isFilterActive(criteria)) return;
     // Replace any existing preset with the same name, then add.
@@ -299,6 +316,8 @@ export function usePanels(): UsePanels {
     setFilterDue(criteria.due ?? "");
     setFilterPriority(criteria.priority ?? 0);
     setFilterCompletion(criteria.completion ?? "");
+    setFilterRelDir(criteria.relDir ?? "");
+    setFilterRelType(criteria.relType ?? "");
   };
   const deleteSavedFilter = (id: string) =>
     setSavedFilters((prev) => prev.filter((f) => f.id !== id));
@@ -359,6 +378,10 @@ export function usePanels(): UsePanels {
       setPriority: setFilterPriority,
       completion: filterCompletion,
       setCompletion: setFilterCompletion,
+      relDir: filterRelDir,
+      setRelDir: setFilterRelDir,
+      relType: filterRelType,
+      setRelType: setFilterRelType,
       hide: filterHide,
       setHide: setFilterHide,
       clear: clearFilter,
@@ -371,6 +394,8 @@ export function usePanels(): UsePanels {
         filterDue,
         filterPriority,
         filterCompletion,
+        filterRelDir,
+        filterRelType,
       ),
     },
     savedFilters: {

@@ -6,6 +6,7 @@ import {
   describeRule,
   describeRuleActions,
   matchesRule,
+  relationshipTypeIndex,
 } from "../src/rules";
 
 const node = (over: Partial<MapNode> = {}): MapNode => ({
@@ -174,5 +175,33 @@ describe("describeRule", () => {
     expect(describeRule(rule({ kind: "hasAttachment", value: undefined }))).toBe("has attachment");
     expect(describeRule(rule({ kind: "priority", value: "2" }))).toBe("priority ≤ 2 (1=High)");
     expect(describeRule(rule({ kind: "textContains", value: "x" }))).toBe('text contains "x"');
+    expect(describeRule(rule({ kind: "relationshipType", value: "causes" }))).toBe(
+      "relationship: causes",
+    );
+    expect(describeRule(rule({ kind: "relationshipType", value: undefined }))).toBe(
+      "has a relationship",
+    );
+  });
+});
+
+describe("relationshipType rule (B3)", () => {
+  it("indexes each node by the relationship types it is an endpoint of", () => {
+    const idx = relationshipTypeIndex([
+      { id: "a", from: "n1", to: "n2", type: "causes" },
+      { id: "b", from: "n2", to: "n3" }, // untyped → relates-to
+    ]);
+    expect([...(idx.get("n1") ?? [])]).toEqual(["causes"]);
+    expect([...(idx.get("n2") ?? [])].sort()).toEqual(["causes", "relates-to"]);
+    expect([...(idx.get("n3") ?? [])]).toEqual(["relates-to"]);
+    expect(idx.get("nX")).toBeUndefined();
+  });
+
+  it("matches a node touching a relationship of the given type (or any when blank)", () => {
+    const r = (value?: string) => rule({ kind: "relationshipType", value });
+    expect(matchesRule(node(), r("causes"), undefined, undefined, new Set(["causes"]))).toBe(true);
+    expect(matchesRule(node(), r("blocks"), undefined, undefined, new Set(["causes"]))).toBe(false);
+    expect(matchesRule(node(), r(), undefined, undefined, new Set(["relates-to"]))).toBe(true);
+    // No relationship context (undefined set) → never matches.
+    expect(matchesRule(node(), r("causes"), undefined, undefined, undefined)).toBe(false);
   });
 });

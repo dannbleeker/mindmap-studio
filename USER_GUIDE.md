@@ -456,6 +456,13 @@ backdrop you see on the canvas. The second **✕** removes the image.
   style** (dashed / solid / dotted), or **delete** it (right-click still deletes as a shortcut). The
   selected relationship gets a highlight halo. Styling is lossless in `.json` and carries into every
   image / PDF / HTML export; drawn and imported (`.mmap`) relationships both persist.
+  - **Relationship types** — give a relationship a semantic **type** in the inspector: *relates-to*
+    (the default), *depends-on*, *causes*, *supports*, or *blocks*. This is separate from its text
+    label. Turn on **Show type labels** to draw the type as a small pill near the arrowhead. Types
+    drive two queries: a **has relationship** [conditional-formatting rule](#conditional-formatting)
+    that styles the endpoints, and a **Has relationship** section in the [Power Filter](#power-filter)
+    (by direction — outgoing / incoming / either — and optionally a specific type). Types are saved in
+    `.json`; flat exports (including `.mmap`) drop them.
   - **Line jumps** — on a busy map where relationship arrows cross each other, click **⌒ Line jumps**
     in the toolbar. Wherever two relationships cross, one of them draws a small semicircular **hop**
     over the other, so the lines clearly *pass over* rather than appear to join (you get one bump per

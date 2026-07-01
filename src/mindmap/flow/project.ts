@@ -1,7 +1,7 @@
 import type { MapNode, MindMapDoc } from "../../model/types";
 import { outlineNumbers } from "../../outline";
 import { type ProgressInfo, progressMap } from "../../progress";
-import { conditionalActions, conditionalStyle } from "../../rules";
+import { conditionalActions, conditionalStyle, relationshipTypeIndex } from "../../rules";
 import type { LayoutKind } from "../contract";
 import { CROSSLINK_COLOR, fontScaleFactor } from "./style";
 import type { FlowEdge, TopicNode } from "./types";
@@ -92,6 +92,11 @@ export function project(
   for (const f of doc.floatingTopics ?? []) for (const [k, v] of progressMap(f)) progress.set(k, v);
   // Conditional formatting: a view-only style layered *under* each node's own style.
   const rules = doc.rules ?? [];
+  // Per-node relationship-type sets, so a "relationshipType" rule can match endpoints. Built once (the
+  // whole map's links) rather than per node. Empty when no rule needs it — cheap either way.
+  const relTypes = rules.some((r) => r.kind === "relationshipType")
+    ? relationshipTypeIndex(doc.links)
+    : undefined;
 
   const emit = (
     node: MapNode,
@@ -113,7 +118,13 @@ export function project(
     // colour. Merged into the projected `icons` / `branchColor` here, so TopicNode AND the SVG export
     // (both read this projected data) render them identically — canvas == export, nothing baked into
     // the model.
-    const actions = conditionalActions(node, rules, progress.get(node.id)?.progress);
+    const actions = conditionalActions(
+      node,
+      rules,
+      progress.get(node.id)?.progress,
+      undefined,
+      relTypes?.get(node.id),
+    );
     // A node's own `branchColor` override (if set) recolours it AND its subtree (inherited via the
     // `color` passed down to children); a rule-applied branch colour is next; otherwise it keeps the
     // inherited auto-palette colour. `||` (not `??`): an imported/hand-edited "" branchColor must fall
@@ -148,7 +159,13 @@ export function project(
         style: node.style,
         // Conditional formatting is a separate view-only overlay (merged under `style` at render),
         // so the model + fromFlow stay lossless — nothing bakes into node.style.
-        condStyle: conditionalStyle(node, rules, progress.get(node.id)?.progress),
+        condStyle: conditionalStyle(
+          node,
+          rules,
+          progress.get(node.id)?.progress,
+          undefined,
+          relTypes?.get(node.id),
+        ),
         pos: node.pos,
         layout: node.layout,
         isRoot,
@@ -243,6 +260,8 @@ export function project(
         width: link.width,
         dash: link.dash,
         curve: link.curve,
+        linkType: link.type,
+        showLinkTypes: Boolean(doc.meta?.showLinkTypes),
       },
     });
   }

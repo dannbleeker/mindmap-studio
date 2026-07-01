@@ -14,12 +14,15 @@ const edge: SelectedEdge = {
   color: "#8b87e0",
   width: 1.5,
   dash: "dashed",
+  type: "relates-to",
+  showTypes: false,
 };
 
 function setup(over: Partial<SelectedEdge> = {}) {
   const onSetLabel = vi.fn();
   const onSetArrow = vi.fn();
   const onSetStyle = vi.fn();
+  const onToggleShowTypes = vi.fn();
   const onDelete = vi.fn();
   render(
     <EdgeInspector
@@ -29,10 +32,11 @@ function setup(over: Partial<SelectedEdge> = {}) {
       onSetLabel={onSetLabel}
       onSetArrow={onSetArrow}
       onSetStyle={onSetStyle}
+      onToggleShowTypes={onToggleShowTypes}
       onDelete={onDelete}
     />,
   );
-  return { onSetLabel, onSetArrow, onSetStyle, onDelete };
+  return { onSetLabel, onSetArrow, onSetStyle, onToggleShowTypes, onDelete };
 }
 
 describe("EdgeInspector", () => {
@@ -94,5 +98,17 @@ describe("EdgeInspector", () => {
     const { onDelete } = setup();
     await userEvent.click(screen.getByRole("button", { name: /Delete relationship/ }));
     expect(onDelete).toHaveBeenCalled();
+  });
+
+  it("sets the relationship type from the Type control", async () => {
+    const { onSetStyle } = setup();
+    await userEvent.click(screen.getByRole("button", { name: "Causes" }));
+    expect(onSetStyle).toHaveBeenCalledWith({ type: "causes" });
+  });
+
+  it("toggles on-canvas type labels", async () => {
+    const { onToggleShowTypes } = setup();
+    await userEvent.click(screen.getByLabelText(/Show type labels/));
+    expect(onToggleShowTypes).toHaveBeenCalledWith(true);
   });
 });

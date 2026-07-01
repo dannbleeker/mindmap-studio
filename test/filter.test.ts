@@ -6,6 +6,7 @@ import {
   filterToDoc,
   focusSet,
   isFilterActive,
+  relationshipDirIndex,
 } from "../src/filter";
 import type { MindMapDoc } from "../src/model/types";
 
@@ -254,5 +255,60 @@ describe("filterToDoc", () => {
 
   it("returns null when nothing matches (empty lit set)", () => {
     expect(filterToDoc(doc, new Set(), "x")).toBeNull();
+  });
+});
+
+describe("has-relationship filter (B3)", () => {
+  const rd: MindMapDoc = {
+    schemaVersion: 1,
+    id: "d",
+    title: "Rel",
+    root: {
+      id: "root",
+      topic: "R",
+      children: [
+        { id: "a", topic: "A", children: [] },
+        { id: "b", topic: "B", children: [] },
+        { id: "c", topic: "C", children: [] },
+      ],
+    },
+    links: [
+      { id: "l1", from: "a", to: "b", type: "depends-on" },
+      { id: "l2", from: "b", to: "c" }, // untyped → relates-to
+    ],
+  };
+  const crit = (over: Partial<FilterCriteria>): FilterCriteria => ({
+    text: "",
+    markers: [],
+    tags: [],
+    ...over,
+  });
+
+  it("indexes out/in relationship types per node", () => {
+    const idx = relationshipDirIndex(rd);
+    const empty = { out: new Set<string>(), in: new Set<string>() };
+    const a = idx.get("a") ?? empty;
+    const b = idx.get("b") ?? empty;
+    expect([...a.out]).toEqual(["depends-on"]);
+    expect(a.in.size).toBe(0);
+    expect([...b.out]).toEqual(["relates-to"]);
+    expect([...b.in]).toEqual(["depends-on"]);
+  });
+
+  it("filters by an outgoing relationship of a given type", () => {
+    const r = filterResult(rd, crit({ relDir: "out", relType: "depends-on" }), "2026-01-01");
+    expect(r.lit.has("a")).toBe(true); // a --depends-on--> b
+    expect(r.lit.has("b")).toBe(false); // b's only outgoing is relates-to
+    expect(r.matches).toBe(1);
+  });
+
+  it("either direction, any type, lights every relationship endpoint", () => {
+    const r = filterResult(rd, crit({ relDir: "either" }), "2026-01-01");
+    expect(r.matches).toBe(3); // a, b, c each touch a relationship; root does not
+  });
+
+  it("isFilterActive + describeCriteria reflect the relationship constraint", () => {
+    expect(isFilterActive(crit({ relDir: "out", relType: "causes" }))).toBe(true);
+    expect(describeCriteria(crit({ relDir: "out", relType: "causes" }))).toContain("→ causes");
   });
 });

@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Typed relationship categories (B3).** A relationship can now carry an optional semantic **type** —
+  `relates-to` (the default), `depends-on`, `causes`, `supports`, or `blocks` — set in the
+  EdgeInspector, independent of its free text label. A per-map **Show type labels** toggle draws the
+  type as a small pill near the arrowhead. Conditional formatting gains a **has relationship** rule
+  (`relationshipType`, optionally narrowed to a type) that styles the endpoints, and the Power Filter
+  gains a **Has relationship** section (direction — outgoing / incoming / either — plus an optional
+  type). Lossless in `.json`; deliberately dropped by the `.mmap` exporter (MindManager has its own
+  relationship-type system). Backed by unit tests across the model, ops, inspector, rules, filter, and
+  the JSON round-trip.
+
 - **Touch drag-to-reorder in the Outline (A6).** HTML5 drag events never fire on touch, so the Outline
   panel now runs its own long-press → pointer drag on a coarse pointer: press and hold a row for a
   moment to pick it up, slide over other rows (the same before / child / after drop zones), and lift to

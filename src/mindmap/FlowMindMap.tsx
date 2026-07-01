@@ -165,6 +165,7 @@ import {
   setProgress,
   setRollup,
   setRules,
+  setShowLinkTypes,
   setSlides,
   setStart,
   setSummaryColor,
@@ -1921,6 +1922,12 @@ function FlowInner({
       setFontFamily: (family) => apply(setFontFamily(docRef.current, family)),
       setFontScale: (scale) => apply(setFontScale(docRef.current, scale)),
       setLegend: (on) => apply(setLegend(docRef.current, on)),
+      setShowLinkTypes: (on) => {
+        apply(setShowLinkTypes(docRef.current, on));
+        // Re-resolve the selected edge so the EdgeInspector's "Show type labels" checkbox reflects the
+        // new map-wide state live (edge.showTypes is captured at selection time otherwise).
+        if (selectedEdgeIdRef.current) fireSelectEdge(selectedEdgeIdRef.current);
+      },
       setRules: (rules) => apply(setRules(docRef.current, rules)),
       setSlides: (slides) => apply(setSlides(docRef.current, slides)),
       setSelectedTags: (tags) => withSelected((id) => apply(setTags(docRef.current, id, tags))),
@@ -2023,6 +2030,7 @@ function FlowInner({
       withSelectedOverlay,
       measuredSizes,
       deleteSelectedOverlay,
+      fireSelectEdge,
       fireSelectOverlay,
       focusNodeById,
       frameBranch,

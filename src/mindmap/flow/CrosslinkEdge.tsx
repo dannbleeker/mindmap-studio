@@ -230,6 +230,30 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
           </div>
         </EdgeLabelRenderer>
       ) : null}
+      {data?.showLinkTypes && data?.linkType && data.linkType !== "relates-to" ? (
+        // Type pill (B3): the semantic category as a small solid pill near the arrowhead, distinct from
+        // the user's free label chip at the midpoint. Only for a non-default type, only when the map has
+        // meta.showLinkTypes on. Sits 72% along the chord so it clears the midpoint label/handle.
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${sx + (tx - sx) * 0.72}px, ${sy + (ty - sy) * 0.72}px)`,
+              fontSize: 10,
+              fontWeight: 600,
+              color: "#fff",
+              background: color,
+              padding: "0 5px",
+              borderRadius: 8,
+              pointerEvents: "none",
+              opacity: dimOpacity,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {data.linkType}
+          </div>
+        </EdgeLabelRenderer>
+      ) : null}
     </>
   );
 }

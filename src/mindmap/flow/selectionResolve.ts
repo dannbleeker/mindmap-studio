@@ -27,6 +27,8 @@ export function resolveSelectedEdge(doc: MindMapDoc, id: string | null): Selecte
     width: l.width ?? CROSSLINK_WIDTH,
     dash: l.dash ?? "dashed",
     curve: l.curve,
+    type: l.type ?? "relates-to",
+    showTypes: !!doc.meta?.showLinkTypes,
   };
 }
 

@@ -66,6 +66,8 @@ describe("resolveSelectedEdge", () => {
       width: CROSSLINK_WIDTH,
       dash: "dashed",
       curve: undefined,
+      type: "relates-to",
+      showTypes: false,
     });
   });
   it("preserves explicit values", () => {
@@ -77,6 +79,8 @@ describe("resolveSelectedEdge", () => {
       width: 3,
       dash: "dotted",
       curve: 5,
+      type: "relates-to",
+      showTypes: false,
     });
   });
   it("returns null for a null or missing id", () => {

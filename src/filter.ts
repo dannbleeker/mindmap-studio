@@ -1,4 +1,4 @@
-import type { MapNode, MindMapDoc } from "./model/types";
+import type { MapNode, MindMapDoc, RelationshipType } from "./model/types";
 import { priorityLabel } from "./priority";
 import { progressMap } from "./progress";
 import { isDueSoon, isOverdue, todayISO } from "./taskDate";
@@ -24,7 +24,15 @@ export interface FilterCriteria {
   /** Completion constraint over the node's rolled-up progress; only task-bearing nodes match.
    *  "" / undefined = any. (Optional, so older saved filters still load.) */
   completion?: CompletionMode;
+  /** "Has relationship" constraint: the node must be an endpoint of a relationship in this direction
+   *  (outgoing = its `from`, incoming = its `to`, either = both). Undefined = off. */
+  relDir?: RelDir;
+  /** Narrow the "has relationship" constraint to relationships of this type; undefined = any type. */
+  relType?: RelationshipType;
 }
+
+/** "Has relationship" direction (see FilterCriteria.relDir). Undefined = the constraint is off. */
+export type RelDir = "out" | "in" | "either";
 
 /** Completion-status filter mode: any (off), fully done, not done, or partially done. */
 export type CompletionMode = "" | "complete" | "incomplete" | "in-progress";
@@ -37,7 +45,8 @@ export function isFilterActive(c: FilterCriteria): boolean {
     c.tags.length > 0 ||
     (c.due ?? "") !== "" ||
     !!c.priority ||
-    (c.completion ?? "") !== ""
+    (c.completion ?? "") !== "" ||
+    !!c.relDir
   );
 }
 
@@ -69,7 +78,42 @@ export function describeCriteria(c: FilterCriteria): string {
   if (c.due) parts.push(DUE_LABEL[c.due]);
   if (c.priority) parts.push(`${priorityLabel(c.priority)} priority`);
   if (c.completion) parts.push(COMPLETION_LABEL[c.completion]);
+  if (c.relDir) {
+    const dir = c.relDir === "out" ? "→" : c.relDir === "in" ? "←" : "↔";
+    parts.push(`${dir} ${c.relType ?? "relationship"}`);
+  }
   return parts.join(" · ") || "everything";
+}
+
+/** Build `nodeId → { out, in }` sets of relationship types, for the "has relationship" filter. Pure. */
+export function relationshipDirIndex(
+  doc: MindMapDoc,
+): Map<string, { out: Set<string>; in: Set<string> }> {
+  const index = new Map<string, { out: Set<string>; in: Set<string> }>();
+  const slot = (id: string) => {
+    const s = index.get(id) ?? { out: new Set<string>(), in: new Set<string>() };
+    index.set(id, s);
+    return s;
+  };
+  for (const l of doc.links ?? []) {
+    const type = l.type ?? "relates-to";
+    slot(l.from).out.add(type);
+    slot(l.to).in.add(type);
+  }
+  return index;
+}
+
+/** Does a node satisfy a "has relationship" constraint given its out/in type sets? */
+function relMatches(
+  c: FilterCriteria,
+  rel: { out: Set<string>; in: Set<string> } | undefined,
+): boolean {
+  if (!c.relDir) return true; // constraint off
+  const hit = (set: Set<string> | undefined) =>
+    !!set && (c.relType ? set.has(c.relType) : set.size > 0);
+  const out = hit(rel?.out);
+  const inc = hit(rel?.in);
+  return c.relDir === "out" ? out : c.relDir === "in" ? inc : out || inc;
 }
 
 function nodeMatches(
@@ -78,6 +122,7 @@ function nodeMatches(
   q: string,
   today: string,
   effectiveProgress: number | undefined,
+  rel: { out: Set<string>; in: Set<string> } | undefined,
 ): boolean {
   // Text matches topic or note, case-insensitive. (The Power Filter has dedicated marker/tag
   // pickers, so its free-text box stays scoped to the prose surfaces.)
@@ -100,6 +145,7 @@ function nodeMatches(
     if (comp === "incomplete" && effectiveProgress >= 1) return false;
     if (comp === "in-progress" && (effectiveProgress <= 0 || effectiveProgress >= 1)) return false;
   }
+  if (!relMatches(c, rel)) return false;
   return true;
 }
 
@@ -175,10 +221,12 @@ export function filterResult(
   // Effective (rolled-up) completion per node, so a "done" parent isn't flagged overdue.
   const prog = new Map(progressMap(doc.root));
   for (const f of doc.floatingTopics ?? []) for (const [k, v] of progressMap(f)) prog.set(k, v);
+  // Per-node out/in relationship-type sets, built once, only when the "has relationship" filter is on.
+  const rel = c.relDir ? relationshipDirIndex(doc) : undefined;
   const lit = new Set<string>();
   let matches = 0;
   const walk = (n: MapNode, ancestors: string[]): void => {
-    if (nodeMatches(n, c, q, today, prog.get(n.id)?.progress)) {
+    if (nodeMatches(n, c, q, today, prog.get(n.id)?.progress, rel?.get(n.id))) {
       matches += 1;
       lit.add(n.id);
       for (const a of ancestors) lit.add(a);

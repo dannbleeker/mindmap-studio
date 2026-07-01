@@ -1,5 +1,22 @@
-import type { ConditionalRule, MapNode, NodeStyle } from "./model/types";
+import type { ConditionalRule, CrossLink, MapNode, NodeStyle } from "./model/types";
 import { isOverdue, todayISO } from "./taskDate";
+
+/** Build `nodeId → set of relationship types it is an endpoint of` (source OR target), resolving an
+ *  absent `CrossLink.type` to "relates-to". Feeds the "relationshipType" conditional rule. Pure. */
+export function relationshipTypeIndex(links: CrossLink[] = []): Map<string, Set<string>> {
+  const index = new Map<string, Set<string>>();
+  const add = (id: string, type: string) => {
+    const set = index.get(id) ?? new Set<string>();
+    set.add(type);
+    index.set(id, set);
+  };
+  for (const l of links) {
+    const type = l.type ?? "relates-to";
+    add(l.from, type);
+    add(l.to, type);
+  }
+  return index;
+}
 
 // Conditional formatting: given a node + the map's rules, compute the style that should be layered
 // onto it (view-only — never written to the node). A rule matches by tag, marker, "completed" (task
@@ -15,6 +32,9 @@ export function matchesRule(
   rule: ConditionalRule,
   progress?: number,
   today: string = todayISO(),
+  /** The set of relationship types this node is an endpoint of (from relationshipTypeIndex); required
+   *  for a "relationshipType" rule to match, absent → that rule never matches. */
+  relTypes?: Set<string>,
 ): boolean {
   switch (rule.kind) {
     case "tag":
@@ -34,6 +54,9 @@ export function matchesRule(
       return !!rule.value && node.topic.toLowerCase().includes(rule.value.toLowerCase());
     case "hasAttachment":
       return (node.attachments?.length ?? 0) > 0;
+    case "relationshipType":
+      // A blank value matches any relationship endpoint; a set value matches that specific type.
+      return !!relTypes && (rule.value ? relTypes.has(rule.value) : relTypes.size > 0);
     default:
       return false;
   }
@@ -45,10 +68,11 @@ export function conditionalStyle(
   rules: ConditionalRule[],
   progress?: number,
   today: string = todayISO(),
+  relTypes?: Set<string>,
 ): NodeStyle | undefined {
   let merged: NodeStyle | undefined;
   for (const rule of rules) {
-    if (matchesRule(node, rule, progress, today)) merged = { ...merged, ...rule.style };
+    if (matchesRule(node, rule, progress, today, relTypes)) merged = { ...merged, ...rule.style };
   }
   return merged;
 }
@@ -61,11 +85,12 @@ export function conditionalActions(
   rules: ConditionalRule[],
   progress?: number,
   today: string = todayISO(),
+  relTypes?: Set<string>,
 ): { icons: string[]; branchColor?: string } {
   const icons: string[] = [];
   let branchColor: string | undefined;
   for (const rule of rules) {
-    if (!matchesRule(node, rule, progress, today)) continue;
+    if (!matchesRule(node, rule, progress, today, relTypes)) continue;
     for (const ic of rule.icons ?? []) if (!icons.includes(ic)) icons.push(ic);
     if (rule.branchColor) branchColor = rule.branchColor;
   }
@@ -85,6 +110,8 @@ export function describeRule(rule: ConditionalRule): string {
       return `priority ≤ ${rule.value ?? "?"} (1=High)`;
     case "textContains":
       return `text contains "${rule.value ?? ""}"`;
+    case "relationshipType":
+      return rule.value ? `relationship: ${rule.value}` : "has a relationship";
     default:
       return `${rule.kind} ${rule.value ?? ""}`.trim();
   }

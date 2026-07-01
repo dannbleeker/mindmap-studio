@@ -1,5 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
-import type { BranchGrowth, MapImage, NodeStyle } from "../../model/types";
+import type { BranchGrowth, MapImage, NodeStyle, RelationshipType } from "../../model/types";
 import type { ProgressInfo } from "../../progress";
 import type { AttachSide, ConnectorStyle } from "./floating";
 
@@ -103,6 +103,10 @@ export type EdgeData = {
   accent?: string;
   /** Relationship arc bow: signed perpendicular offset of the midpoint (crosslink edges only). */
   curve?: number;
+  /** Relationship semantic type (crosslink edges only); absent = the default "relates-to". */
+  linkType?: RelationshipType;
+  /** Show the type pill on this relationship (per-map meta.showLinkTypes). Crosslink edges only. */
+  showLinkTypes?: boolean;
   /** Dimmed by the read-only Power Filter (an endpoint isn't lit); view-only opacity. */
   dimmed?: boolean;
   /** Which side of the parent this branch springs from — one shared origin per parent-side, computed

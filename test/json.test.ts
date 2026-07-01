@@ -28,4 +28,16 @@ describe("json I/O", () => {
     expect(() => parseDoc('{"hello":"world"}')).toThrow(/MindMap Studio/);
     expect(() => parseDoc('{"schemaVersion":1}')).toThrow(/MindMap Studio/);
   });
+
+  it("round-trips a typed relationship + the showLinkTypes flag (B3)", () => {
+    const typed: MindMapDoc = {
+      ...doc,
+      links: [{ id: "l1", from: "r", to: "a", label: "rel", type: "depends-on" }],
+      meta: { showLinkTypes: true },
+    };
+    const back = parseDoc(serializeDoc(typed));
+    expect(back.links?.[0].type).toBe("depends-on");
+    expect(back.meta?.showLinkTypes).toBe(true);
+    expect(back).toEqual(typed);
+  });
 });

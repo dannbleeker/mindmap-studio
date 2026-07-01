@@ -169,7 +169,16 @@ export interface CrossLink {
    *  curve handle / inspector sets it to bow the relationship around clutter. Absent = a gentle
    *  auto-bow. Lossless in .json, ignored by flat exporters. */
   curve?: number;
+  /** Semantic category of the relationship (a small fixed vocabulary). Absent = "relates-to" (the
+   *  historical plain relationship). Drives the optional on-canvas type pill, conditional formatting
+   *  ("relationshipType" rules), and the Power Filter's "has relationship" query. Lossless in .json,
+   *  dropped by flat exporters (incl. .mmap — MindManager has its own relationship-type system). */
+  type?: RelationshipType;
 }
+
+/** The fixed vocabulary of relationship categories (see CrossLink.type). "relates-to" is the default
+ *  (an absent `type`), matching today's plain relationship. */
+export type RelationshipType = "relates-to" | "depends-on" | "causes" | "supports" | "blocks";
 
 /** A visual grouping around a set of nodes (MindManager "boundary"). */
 export interface Boundary {
@@ -203,9 +212,20 @@ export interface ConditionalRule {
    *  - `overdue` — a task past its due date and not finished
    *  - `priority` — task priority at or above `value` (1=High; matches priority ≤ value)
    *  - `textContains` — the topic text includes `value` (case-insensitive)
-   *  - `hasAttachment` — the node has at least one attached file */
-  kind: "tag" | "marker" | "completed" | "overdue" | "priority" | "textContains" | "hasAttachment";
-  /** The tag/marker/text to match, or the priority threshold (unused for completed/overdue/hasAttachment). */
+   *  - `hasAttachment` — the node has at least one attached file
+   *  - `relationshipType` — the node is an endpoint (source or target) of a relationship whose
+   *    `type` equals `value` (a `RelationshipType`; blank `value` = any typed or plain relationship) */
+  kind:
+    | "tag"
+    | "marker"
+    | "completed"
+    | "overdue"
+    | "priority"
+    | "textContains"
+    | "hasAttachment"
+    | "relationshipType";
+  /** The tag/marker/text to match, the priority threshold, or the relationship type (unused for
+   *  completed/overdue/hasAttachment). */
   value?: string;
   /** View-only style layered onto a matching node (under its own explicit style). */
   style: NodeStyle;
@@ -281,6 +301,10 @@ export interface MindMapDoc {
     /** Show the map legend (markers / tags / conditional rules in use) on the canvas + in exports.
      *  Off by default. Lossless in .json, ignored by flat exporters. */
     legend?: boolean;
+    /** Show a small type pill (e.g. "causes") on every relationship that carries a non-default `type`.
+     *  Off by default. Lossless in .json, ignored by flat exporters; carried into the image/PDF/HTML
+     *  export (canvas == export). */
+    showLinkTypes?: boolean;
     /** Map-wide base font family (CSS family list) used as the default for every topic; a per-topic
      *  `NodeStyle.fontFamily` still overrides it. Absent = the canvas default. Lossless in .json,
      *  carried into the SVG/image/PDF export (canvas == export). */

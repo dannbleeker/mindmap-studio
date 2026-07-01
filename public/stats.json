@@ -1,96 +1,96 @@
 {
-  "generatedAt": "2026-06-30T18:43:20.345Z",
-  "commit": "4141b83",
+  "generatedAt": "2026-07-01T07:27:01.989Z",
+  "commit": "175c17a",
   "headline": {
-    "linesTsJs": 65105,
-    "tests": 1815,
-    "lineCoveragePct": 91.1,
-    "commits": 1008,
+    "linesTsJs": 69923,
+    "tests": 1957,
+    "lineCoveragePct": 91.08,
+    "commits": 1010,
     "ageDays": 19,
-    "trackedFiles": 452,
-    "featureManualPct": 66.8,
-    "featureBookPct": 64.2,
-    "featureExamplePct": 64.2
+    "trackedFiles": 478,
+    "featureManualPct": 58.6,
+    "featureBookPct": 56.4,
+    "featureExamplePct": 56.4
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 208,
-      "lines": 37770
+      "files": 221,
+      "lines": 40574
     },
     {
       "category": "Unit tests",
-      "files": 179,
-      "lines": 25613
+      "files": 192,
+      "lines": 27621
     },
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1722
+      "lines": 1728
     },
     {
       "category": "Styles (CSS)",
       "files": 4,
-      "lines": 2510
+      "lines": 2592
     },
     {
       "category": "Docs (Markdown)",
       "files": 15,
-      "lines": 2291
+      "lines": 2301
     }
   ],
   "coverage": {
     "lines": {
-      "pct": 91.1,
-      "covered": 24255,
-      "total": 26624
+      "pct": 91.08,
+      "covered": 26044,
+      "total": 28592
     },
     "statements": {
-      "pct": 91.1,
-      "covered": 24255,
-      "total": 26624
+      "pct": 91.08,
+      "covered": 26044,
+      "total": 28592
     },
     "functions": {
-      "pct": 76.7,
-      "covered": 1403,
-      "total": 1829
+      "pct": 77.28,
+      "covered": 1511,
+      "total": 1955
     },
     "branches": {
-      "pct": 86.62,
-      "covered": 7178,
-      "total": 8286
+      "pct": 86.84,
+      "covered": 7879,
+      "total": 9072
     }
   },
   "tests": {
-    "unit": 1815,
+    "unit": 1957,
     "e2e": 0,
-    "durationMs": 83966,
+    "durationMs": 91717,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 23623
+        "ms": 27400
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 18825
-      },
-      {
-        "file": "test/toolbar.test.tsx",
-        "ms": 8271
+        "ms": 23827
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7949
+        "ms": 9267
+      },
+      {
+        "file": "test/toolbar.test.tsx",
+        "ms": 8475
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3978
+        "ms": 4071
       }
     ]
   },
   "domain": {
-    "components": 68,
-    "hooks": 23,
+    "components": 71,
+    "hooks": 27,
     "ioModules": 36,
     "canvasThemes": 4,
     "markers": 15,
@@ -103,23 +103,23 @@
     "biggestFiles": [
       {
         "name": "Panels.tsx",
-        "lines": 3651
+        "lines": 4011
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 2649
+        "lines": 2792
       },
       {
         "name": "App.tsx",
-        "lines": 2482
+        "lines": 2748
       },
       {
         "name": "mindmap/flow/ops.ts",
-        "lines": 1761
+        "lines": 1788
       },
       {
         "name": "components/Toolbar.tsx",
-        "lines": 1304
+        "lines": 1353
       }
     ]
   },
@@ -131,49 +131,49 @@
         "pct": 14.28
       },
       {
-        "file": "components/InspectorResizer.tsx",
-        "pct": 56.81
+        "file": "components/start/useLibrary.ts",
+        "pct": 53.48
       },
       {
-        "file": "App.tsx",
-        "pct": 57.51
+        "file": "components/InspectorResizer.tsx",
+        "pct": 56.81
       },
       {
         "file": "io/importDispatch.ts",
         "pct": 59.55
       },
       {
-        "file": "mindmap/flow/Callouts.tsx",
-        "pct": 68.83
+        "file": "App.tsx",
+        "pct": 59.99
       }
     ],
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 203
+        "commits": 204
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 126
+        "commits": 127
       },
       {
         "file": "Panels.tsx",
-        "commits": 84
+        "commits": 85
       },
       {
         "file": "mindmap/contract.ts",
-        "commits": 72
+        "commits": 73
       },
       {
         "file": "mindmap/flow/ops.ts",
-        "commits": 72
+        "commits": 73
       }
     ],
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 57.51,
-        "commits": 203
+        "pct": 59.99,
+        "commits": 204
       }
     ]
   },
@@ -181,37 +181,42 @@
     "todo": 0,
     "fixme": 0,
     "hack": 0,
-    "anyCount": 5,
+    "anyCount": 6,
     "tsIgnore": 0,
     "tsExpectError": 0,
-    "biomeIgnore": 36,
+    "biomeIgnore": 42,
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 311.1,
-    "cssGzipKb": 9.9,
-    "totalGzipKb": 321,
-    "entryGzipKb": 148.9,
+    "jsGzipKb": 320.9,
+    "cssGzipKb": 10.1,
+    "totalGzipKb": 331,
+    "entryGzipKb": 155.6,
     "budgetKb": 150,
-    "withinBudget": true
+    "withinBudget": false
   },
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 37770,
-    "docToCodeRatio": 0.45
+    "appLoc": 40574,
+    "docToCodeRatio": 0.42
   },
   "featureCoverage": {
-    "total": 193,
+    "total": 220,
     "manual": 129,
-    "manualPct": 66.8,
+    "manualPct": 58.6,
     "book": 124,
-    "bookPct": 64.2,
+    "bookPct": 56.4,
     "bookExample": 124,
-    "bookExamplePct": 64.2,
+    "bookExamplePct": 56.4,
     "byArea": {
+      "library": {
+        "total": 21,
+        "manual": 13,
+        "book": 11
+      },
       "navigation": {
-        "total": 40,
+        "total": 52,
         "manual": 24,
         "book": 24
       },
@@ -226,7 +231,7 @@
         "book": 12
       },
       "editing": {
-        "total": 23,
+        "total": 27,
         "manual": 15,
         "book": 14
       },
@@ -235,13 +240,8 @@
         "manual": 17,
         "book": 17
       },
-      "library": {
-        "total": 17,
-        "manual": 13,
-        "book": 11
-      },
       "structure": {
-        "total": 23,
+        "total": 30,
         "manual": 13,
         "book": 12
       },
@@ -273,6 +273,71 @@
     },
     "gaps": {
       "noManual": [
+        {
+          "id": "cross-map-backlinks",
+          "name": "Cross-map backlinks — inspector 'Linked from other maps'",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "cross-map-topic-picker",
+          "name": "Cross-map topic picker — refine a #map= link to a specific topic",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "smart-paste-markdown",
+          "name": "Markdown shorthand on paste — checkboxes, links, and emphasis parse into structure",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "long-press-menu",
+          "name": "Long-press context menu on touch/pen",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "quick-capture-inbox",
+          "name": "Quick-capture inbox — map-independent 'Unfiled' bucket, file onto a map later",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "high-contrast-theme",
+          "name": "High-contrast theme — OS prefers-contrast/forced-colors + in-app toggle",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "multiple-hyperlinks",
+          "name": "Multiple hyperlinks per topic — additional links beyond the primary (inspector-managed)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "slash-command-menu",
+          "name": "Slash / command menu in the topic editor — keyboard insert of child/task/date/boundary/note/marker",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "link-autocomplete",
+          "name": "[[ / @ name-based link autocomplete — pick a topic by name to attach a link",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "trash-undo-delete",
+          "name": "Trash / undo-delete for maps (recoverable soft-delete + Trash view)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cross-tab-clobber-guard",
+          "name": "Cross-tab clobber guard (warn when a map is open in two tabs)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "file-conflict-detection",
+          "name": "External-file conflict detection (prompt before overwriting a disk file that changed)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "open-recent-files",
+          "name": "Open Recent — reopen recently-opened disk files from the File menu",
+          "since": "2026-06-30"
+        },
         {
           "id": "big-map-virtualisation",
           "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
@@ -341,6 +406,76 @@
         {
           "id": "merge-map-as-branch",
           "name": "Insert a library map as a branch under the selected topic",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "search-all-fields",
+          "name": "Find searches every node field (tags, markers, hyperlink, callouts, attachments, resources)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "search-operators",
+          "name": "Scoped / operator search (tag:, marker:, priority:, due:, has:, level:, -exclude, \"phrase\")",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "deep-link-node",
+          "name": "Deep-link to a node (?node= URL + Copy link to this topic)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "nav-back-forward",
+          "name": "Back / forward navigation history (Alt+← / Alt+→)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "search-result-context",
+          "name": "Search-across-maps results show ancestor breadcrumb + note snippet",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "find-results-list",
+          "name": "In-map Find 'List all' — clickable list of every match (vs only next/prev)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "filter-completion",
+          "name": "Power Filter by completion status (Done / In progress / Not done)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "settings-shortcut",
+          "name": "Ctrl/⌘+, opens Settings & preferences",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "reduced-motion",
+          "name": "Reduced-motion support — OS prefers-reduced-motion + in-app toggle (canvas + guided walk)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cross-map-topic-links",
+          "name": "Cross-map topic links — #map=<id>&node=<id> opens another map + focuses a topic",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "in-note-app-links",
+          "name": "In-note in-app links — [text](#node=…/#map=…) jump through the canvas",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "burst-quick-capture",
+          "name": "Multi-line burst quick-capture — a pasted outline becomes a subtree in one step",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "outline-keyboard-reorder",
+          "name": "Keyboard Outline reorder/indent (Shift+Arrows)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "sr-overlay-lists",
+          "name": "Screen-reader lists for boundaries / summaries / callouts",
           "since": "2026-06-30"
         },
         {
@@ -596,6 +731,71 @@
       ],
       "noBook": [
         {
+          "id": "cross-map-backlinks",
+          "name": "Cross-map backlinks — inspector 'Linked from other maps'",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "cross-map-topic-picker",
+          "name": "Cross-map topic picker — refine a #map= link to a specific topic",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "smart-paste-markdown",
+          "name": "Markdown shorthand on paste — checkboxes, links, and emphasis parse into structure",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "long-press-menu",
+          "name": "Long-press context menu on touch/pen",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "quick-capture-inbox",
+          "name": "Quick-capture inbox — map-independent 'Unfiled' bucket, file onto a map later",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "high-contrast-theme",
+          "name": "High-contrast theme — OS prefers-contrast/forced-colors + in-app toggle",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "multiple-hyperlinks",
+          "name": "Multiple hyperlinks per topic — additional links beyond the primary (inspector-managed)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "slash-command-menu",
+          "name": "Slash / command menu in the topic editor — keyboard insert of child/task/date/boundary/note/marker",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "link-autocomplete",
+          "name": "[[ / @ name-based link autocomplete — pick a topic by name to attach a link",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "trash-undo-delete",
+          "name": "Trash / undo-delete for maps (recoverable soft-delete + Trash view)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cross-tab-clobber-guard",
+          "name": "Cross-tab clobber guard (warn when a map is open in two tabs)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "file-conflict-detection",
+          "name": "External-file conflict detection (prompt before overwriting a disk file that changed)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "open-recent-files",
+          "name": "Open Recent — reopen recently-opened disk files from the File menu",
+          "since": "2026-06-30"
+        },
+        {
           "id": "big-map-virtualisation",
           "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
           "since": "2026-06-30"
@@ -663,6 +863,76 @@
         {
           "id": "merge-map-as-branch",
           "name": "Insert a library map as a branch under the selected topic",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "search-all-fields",
+          "name": "Find searches every node field (tags, markers, hyperlink, callouts, attachments, resources)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "search-operators",
+          "name": "Scoped / operator search (tag:, marker:, priority:, due:, has:, level:, -exclude, \"phrase\")",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "deep-link-node",
+          "name": "Deep-link to a node (?node= URL + Copy link to this topic)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "nav-back-forward",
+          "name": "Back / forward navigation history (Alt+← / Alt+→)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "search-result-context",
+          "name": "Search-across-maps results show ancestor breadcrumb + note snippet",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "find-results-list",
+          "name": "In-map Find 'List all' — clickable list of every match (vs only next/prev)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "filter-completion",
+          "name": "Power Filter by completion status (Done / In progress / Not done)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "settings-shortcut",
+          "name": "Ctrl/⌘+, opens Settings & preferences",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "reduced-motion",
+          "name": "Reduced-motion support — OS prefers-reduced-motion + in-app toggle (canvas + guided walk)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "cross-map-topic-links",
+          "name": "Cross-map topic links — #map=<id>&node=<id> opens another map + focuses a topic",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "in-note-app-links",
+          "name": "In-note in-app links — [text](#node=…/#map=…) jump through the canvas",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "burst-quick-capture",
+          "name": "Multi-line burst quick-capture — a pasted outline becomes a subtree in one step",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "outline-keyboard-reorder",
+          "name": "Keyboard Outline reorder/indent (Shift+Arrows)",
+          "since": "2026-06-30"
+        },
+        {
+          "id": "sr-overlay-lists",
+          "name": "Screen-reader lists for boundaries / summaries / callouts",
           "since": "2026-06-30"
         },
         {
@@ -946,16 +1216,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 19,
-    "commits": 1008,
-    "commits7d": 222,
+    "commits": 1010,
+    "commits7d": 224,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 485
+        "count": 486
       },
       {
         "name": "github-actions[bot]",
-        "count": 457
+        "count": 458
       },
       {
         "name": "Claude",
@@ -963,9 +1233,9 @@
       }
     ],
     "churn30d": {
-      "added": 122823,
-      "removed": 37933
+      "added": 128605,
+      "removed": 38312
     },
-    "changelogEntries": 370
+    "changelogEntries": 381
   }
 }

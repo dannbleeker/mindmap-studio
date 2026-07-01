@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 376,
+  "reviewedThroughChangelogBullets": 377,
   "areas": [
     "editing",
     "notes",
@@ -1946,6 +1946,15 @@
       "id": "long-press-menu",
       "name": "Long-press context menu on touch/pen",
       "area": "navigation",
+      "since": "2026-07-01",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "quick-capture-inbox",
+      "name": "Quick-capture inbox — map-independent 'Unfiled' bucket, file onto a map later",
+      "area": "editing",
       "since": "2026-07-01",
       "manual": false,
       "book": false,

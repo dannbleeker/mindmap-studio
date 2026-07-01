@@ -90,7 +90,7 @@ The single richest cluster; mostly offline UI over existing model fields.
 |---|---|---|
 | ~~URL → page title resolution~~ ✅ shipped | paste a link → de-slugged readable title, not the bare URL | `done` |
 | Node slash-commands (`/` menu) | insert icon/marker/link/note/child/boundary/date from the keyboard | `in·high·M·missing` |
-| Quick-capture inbox | jot now into an Unfiled bucket, file onto the map later | `in·med·M·missing` |
+| ~~Quick-capture inbox~~ ✅ shipped | jot now into an Unfiled bucket, file onto the map later | `done` |
 | ~~Markdown shorthand → structure on paste~~ ✅ shipped | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `done` |
 | Rich HTML paste → nodes | preserve inline formatting + split lists/headings into nodes | `in·med·M·partial` |
 | Inline tokens on add (`#tag !priority @resource`) | lift typed tokens onto structured fields | `?·med·M·missing` |

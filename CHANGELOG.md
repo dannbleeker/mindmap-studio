@@ -7,6 +7,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Quick-capture inbox (UI review — gap group 1).** A map-independent "Unfiled" bucket (View ▸
+  Inbox): jot a thought from any map — or none — and file it onto the current map later. Filing adds
+  it as a floating topic (in one undo step) and drops it from the inbox; captures persist across maps
+  and reloads (IndexedDB, under a single `meta` key — no schema bump). Each row can also be discarded,
+  and "→ map" is disabled until a map is open.
+
 - **Deferred-backlog wave 2 — capture & touch (UI review — gap groups 1/10).**
   - **Markdown shorthand on paste** — the paste-to-topics parser reads inline markdown per line:
     `- [ ]`/`- [x]` → a 0%/100% task, a whole-line `[text](url)` → a topic with that hyperlink (safe

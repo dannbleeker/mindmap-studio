@@ -22,6 +22,7 @@ import {
 import { editorConfirm, editorPrompt } from "../components/editorDialogs";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors, motion } from "../design/tokens";
+import { useLongPress } from "../hooks/useLongPress";
 import { MARKER_PALETTE, markerImage } from "../icons";
 import { parseOutline } from "../io/pasteOutline";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
@@ -348,6 +349,14 @@ function FlowInner({
   // Empty-pane right-click menu (add topic / paste branch / fit / reset zoom). Separate from the node
   // menu above; opened from the canvas wrapper's onContextMenu when the bare pane is the target.
   const [paneMenu, setPaneMenu] = useState<{ x: number; y: number } | null>(null);
+  // Touch/pen long-press on the bare canvas → the same pane menu right-click opens (touch has no
+  // right-click). The target guard mirrors onContextMenu so a press on a node/control doesn't fire it.
+  const paneLongPress = useLongPress((e) => {
+    if ((e.target as HTMLElement)?.classList?.contains("react-flow__pane")) {
+      setMenu(null);
+      setPaneMenu({ x: e.clientX, y: e.clientY });
+    }
+  });
   // Right-click menu for overlays (boundary / summary / callout) — recolour / shape / delete. Kept
   // separate from the node `menu` (which is keyed by node id) since it carries the selected overlay.
   const [overlayMenu, setOverlayMenu] = useState<{
@@ -1916,6 +1925,7 @@ function FlowInner({
           tabIndex={-1}
           aria-roledescription="mind map canvas"
           aria-label={`Mind map: ${renderDoc.title?.trim() || "Untitled"}`}
+          {...paneLongPress}
           style={{
             height: "100%",
             width: "100%",

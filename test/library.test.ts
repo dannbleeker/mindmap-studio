@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseLibrary, serializeLibrary, tryParseLibrary } from "../src/io/library";
+import {
+  parseLibrary,
+  parseLibraryFolders,
+  serializeLibrary,
+  tryParseLibrary,
+} from "../src/io/library";
 import type { MindMapDoc } from "../src/model/types";
 
 const map = (id: string, title: string): MindMapDoc => ({
@@ -33,5 +38,20 @@ describe("library backup I/O", () => {
   it("rejects malformed JSON", () => {
     expect(() => parseLibrary("{not json")).toThrow(/Not valid JSON/);
     expect(tryParseLibrary("{not json")).toBeNull();
+  });
+
+  it("round-trips the folder list, and each map's folderId (C2)", () => {
+    const folders = [{ id: "f1", name: "Work", createdAt: 100 }];
+    const m = { ...map("m1", "M1"), meta: { folderId: "f1" } };
+    const text = serializeLibrary([m], folders);
+    expect(parseLibraryFolders(text)).toEqual(folders);
+    expect(parseLibrary(text)[0].meta?.folderId).toBe("f1"); // membership rides in the map
+  });
+
+  it("tolerates an old backup with no folders key", () => {
+    const text = serializeLibrary([map("m1", "M1")]); // no folders arg
+    expect(parseLibraryFolders(text)).toEqual([]);
+    expect(parseLibraryFolders('{"kind":"mindmap-library","maps":[]}')).toEqual([]);
+    expect(parseLibraryFolders("{not json")).toEqual([]);
   });
 });

@@ -275,6 +275,79 @@ export async function saveInbox(items: InboxItem[]): Promise<void> {
   await (await db()).put("meta", JSON.stringify(items), INBOX_KEY);
 }
 
+// --- library folders (C2) --------------------------------------------------
+// Named folders that group maps on the Start screen. A map's membership lives on its own
+// `meta.folderId` (so it rides along in the map + the library backup); the folder LIST (id / name /
+// createdAt) is a small JSON blob under a single `meta` key — the same no-schema-bump pattern as the
+// inbox. A map with no `folderId` (or one pointing at a deleted folder) shows at the top level.
+
+/** A named library folder. */
+export interface Folder {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
+const FOLDERS_KEY = "folders";
+
+/** The folder list, sorted by name. Tolerates a missing/corrupt entry (returns []). */
+export async function getFolders(): Promise<Folder[]> {
+  const raw = await (await db()).get("meta", FOLDERS_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as Folder[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((f): f is Folder => !!f && typeof f.id === "string" && typeof f.name === "string")
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch {
+    return [];
+  }
+}
+
+/** Persist the whole folder list (used by the CRUD helpers + a library restore). */
+export async function saveFolders(folders: Folder[]): Promise<void> {
+  await (await db()).put("meta", JSON.stringify(folders), FOLDERS_KEY);
+}
+
+/** Create a folder and return it (blank/whitespace names are rejected → null). */
+export async function createFolder(name: string): Promise<Folder | null> {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  const folder: Folder = { id: crypto.randomUUID(), name: trimmed, createdAt: Date.now() };
+  await saveFolders([...(await getFolders()), folder]);
+  return folder;
+}
+
+/** Rename a folder (no-op on a blank name or a missing id). */
+export async function renameFolder(id: string, name: string): Promise<void> {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  const folders = await getFolders();
+  await saveFolders(folders.map((f) => (f.id === id ? { ...f, name: trimmed } : f)));
+}
+
+/** Delete a folder; its maps are orphaned back to the top level (their `folderId` is cleared), never
+ *  destroyed. */
+export async function deleteFolder(id: string): Promise<void> {
+  const folders = await getFolders();
+  await saveFolders(folders.filter((f) => f.id !== id));
+  const database = await db();
+  for (const doc of await database.getAll("maps")) {
+    if (doc.meta?.folderId === id) await moveMapToFolder(doc.id, null);
+  }
+}
+
+/** File a map under a folder (or `null` to move it back to the top level). Doesn't bump the map's
+ *  last-edited time — moving isn't a content edit. No-op if the map is missing. */
+export async function moveMapToFolder(mapId: string, folderId: string | null): Promise<void> {
+  const database = await db();
+  const doc = (await database.get("maps", mapId)) ?? null;
+  if (!doc) return;
+  const meta = { ...doc.meta, folderId: folderId ?? undefined };
+  await database.put("maps", { ...doc, meta }, mapId);
+}
+
 // --- version history -------------------------------------------------------
 // Per-map snapshots: the app saves one on a throttle while editing + on demand,
 // capped at MAX_VERSIONS (oldest pruned). Restoring just loads a snapshot's doc.

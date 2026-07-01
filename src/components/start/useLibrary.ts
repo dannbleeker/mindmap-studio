@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllMaps, listTrashedMaps } from "../../store/mapStore";
+import { type Folder, getAllMaps, getFolders, listTrashedMaps } from "../../store/mapStore";
 import type { MapEntry } from "./MapCard";
 import { branchSpokes, docNodeCount } from "./nodeStats";
 
@@ -26,6 +26,7 @@ export function useLibrary(rev: number): MapEntry[] {
               updatedAt: d.meta?.updatedAt,
               branches: branchSpokes(d),
               pinned: d.meta?.pinned ?? false,
+              folderId: d.meta?.folderId,
             })),
         );
       })
@@ -35,6 +36,24 @@ export function useLibrary(rev: number): MapEntry[] {
     };
   }, [rev]);
   return entries;
+}
+
+/** The library folders (C2), re-fetched when `rev` bumps. */
+export function useFolders(rev: number): Folder[] {
+  const [folders, setFolders] = useState<Folder[]>([]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: rev is the re-fetch signal, by design
+  useEffect(() => {
+    let alive = true;
+    getFolders()
+      .then((f) => {
+        if (alive) setFolders(f);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [rev]);
+  return folders;
 }
 
 /** One map in the Trash (soft-deleted), for the Trash view. */

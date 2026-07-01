@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Library folders (C2).** The All-maps screen now organises maps into named **folders**: a
+  **＋ New folder** button, folder cards you click to drill in (with an *All maps / Folder* breadcrumb
+  and rename / delete on the open folder), and a **Move to folder…** action in each map card's ⋯ menu.
+  A map lives in one folder or none; deleting a folder orphans its maps back to the top level (never
+  destroys them). Membership is `meta.folderId` (rides in the map + its `.json`); the folder list is a
+  small JSON blob under a `meta` key (no IndexedDB schema bump). The whole-library backup/restore now
+  carries the folder list too. Additive — a library with no folders reads exactly as before. Verified
+  in-browser end-to-end (create / drill-in / move / delete-orphans); folder CRUD + backup round-trip
+  unit-tested. (The ⌘K map-switcher does not yet group by folder — a minor follow-up.)
+
 - **Visual map in the interactive HTML export (C1).** The self-contained interactive `.html` export now
   opens on the **actual visual map** — the same faithful SVG render as the image/PDF exports, with
   pan/zoom — and a header toggle drops to the **collapsible, searchable text outline** (the previous

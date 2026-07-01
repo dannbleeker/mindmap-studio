@@ -76,7 +76,7 @@ import { downloadBlob } from "./io/download";
 import { isNativeExt, readMapFromHandle } from "./io/fileSystem";
 import { fileToMapImage } from "./io/image";
 import { parseImport } from "./io/importDispatch";
-import { serializeLibrary, tryParseLibrary } from "./io/library";
+import { parseLibraryFolders, serializeLibrary, tryParseLibrary } from "./io/library";
 import { toMarkdown } from "./io/markdown";
 import { mapToTsv } from "./io/tableExport";
 import {
@@ -121,12 +121,14 @@ import {
   clearAllData,
   findMapReferences,
   getAllMaps,
+  getFolders,
   getTabSession,
   listMaps,
   listRecentFiles,
   loadMap,
   loadMapHandle,
   restoreMapFromTrash,
+  saveFolders,
   saveMap,
   setLastOpened,
   softDeleteMap,
@@ -863,7 +865,7 @@ export function App() {
         if (d) docs.push(d);
       }
       downloadBlob(
-        new Blob([serializeLibrary(docs)], { type: "application/json" }),
+        new Blob([serializeLibrary(docs, await getFolders())], { type: "application/json" }),
         "mindmap-library.json",
       );
     } catch (err) {
@@ -882,10 +884,18 @@ export function App() {
     if (files.length === 0) return;
     // A single .json that is a whole-library backup restores every map at once.
     if (files.length === 1 && files[0].name.toLowerCase().endsWith(".json")) {
-      const lib = tryParseLibrary(await files[0].text());
+      const text = await files[0].text();
+      const lib = tryParseLibrary(text);
       if (lib) {
         try {
           for (const m of lib) await saveMap(m);
+          // Restore the folder list too (C2), merged with any existing folders by id (don't clobber).
+          const backupFolders = parseLibraryFolders(text);
+          if (backupFolders.length) {
+            const existing = await getFolders();
+            const seen = new Set(existing.map((f) => f.id));
+            await saveFolders([...existing, ...backupFolders.filter((f) => !seen.has(f.id))]);
+          }
           await refreshMaps();
           load(lib[0] ?? buildTemplate("blank"), [`Restored ${lib.length} maps from backup.`]);
         } catch (err) {

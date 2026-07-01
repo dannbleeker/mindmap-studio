@@ -326,6 +326,9 @@ export interface MindMapDoc {
     /** Soft-delete timestamp (ms epoch): when set, the map is in the Trash — hidden from the normal
      *  library but recoverable (Restore) until permanently deleted. Absent ⇒ live. Additive. */
     trashedAt?: number;
+    /** Library folder this map is filed under (a Folder id from the local `folders` list). Absent ⇒
+     *  top-level ("All maps"). Additive + lossless in .json; carried in the library backup. (C2) */
+    folderId?: string;
   };
 }
 

@@ -512,6 +512,12 @@ underlined. Open a map (from the dropdown, a cross-map link, or **+**) and it ge
 (or middle-click) to close it. The open tabs + the active one are remembered, so a reload reopens your
 whole workspace.
 
+**Folders.** On the **All maps** screen you can group maps into named folders. Click **＋ New folder**,
+then use a map card's **⋯ → Move to folder…** to file it. Folders show as cards at the top of All
+maps; click one to drill in (an **All maps / Folder** breadcrumb takes you back, and you can rename or
+delete the folder there). A map lives in one folder or none; **deleting a folder keeps its maps** —
+they move back to the top level. Folder structure is included in the [library backup](#backup--restore).
+
 ### Copying a branch between maps
 
 Right-click a branch → **Copy branch** to copy it (the whole subtree) to a clipboard kept in your

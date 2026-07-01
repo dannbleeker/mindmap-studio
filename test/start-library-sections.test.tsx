@@ -14,8 +14,18 @@ import type { StartContext } from "../src/components/start/types";
 // hook so the views are tested against fixed entries without driving the store.
 
 let libEntries: MapEntry[] = [];
+let libFolders: { id: string; name: string; createdAt: number }[] = [];
 vi.mock("../src/components/start/useLibrary", () => ({
   useLibrary: () => libEntries,
+  useFolders: () => libFolders,
+}));
+// The folder CRUD is unit-tested in mapStore.test; here we only need the AllMaps UI not to hit the
+// store, so stub the mutators (create/move/rename/delete) the dialogs call on submit.
+vi.mock("../src/store/mapStore", () => ({
+  createFolder: vi.fn(async () => ({ id: "new", name: "New", createdAt: 0 })),
+  deleteFolder: vi.fn(async () => {}),
+  moveMapToFolder: vi.fn(async () => {}),
+  renameFolder: vi.fn(async () => {}),
 }));
 
 const mkCtx = (over: Partial<StartContext> = {}): StartContext => ({
@@ -31,6 +41,7 @@ const u = userEvent.setup();
 
 afterEach(() => {
   libEntries = [];
+  libFolders = [];
 });
 
 describe("MapCard", () => {
@@ -191,6 +202,46 @@ describe("AllMaps section", () => {
     await u.clear(box);
     await u.type(box, "zzznope");
     expect(screen.getByText(/No maps match/i)).toBeTruthy();
+  });
+
+  it("shows folder cards + a folder count, and only the unfiled maps at the top level (C2)", () => {
+    libFolders = [{ id: "wk", name: "Work", createdAt: 1 }];
+    libEntries = [
+      { id: "a", title: "Filed", nodeCount: 1, folderId: "wk" },
+      { id: "b", title: "Loose", nodeCount: 1 },
+    ];
+    render(<AllMaps ctx={mkCtx()} />);
+    expect(screen.getByText(/1 folder/)).toBeTruthy();
+    expect(screen.getByText("Work")).toBeTruthy(); // the folder card
+    expect(screen.getByText("1 map")).toBeTruthy(); // Work holds 1 map
+    // At the top level, only the unfiled map shows.
+    expect(screen.getByText("Loose")).toBeTruthy();
+    expect(screen.queryByText("Filed")).toBeNull();
+  });
+
+  it("drills into a folder and back via the breadcrumb (C2)", async () => {
+    libFolders = [{ id: "wk", name: "Work", createdAt: 1 }];
+    libEntries = [{ id: "a", title: "Filed", nodeCount: 1, folderId: "wk" }];
+    render(<AllMaps ctx={mkCtx()} />);
+    await u.click(screen.getByTitle("Open folder Work"));
+    expect(screen.getByText(/map in this folder/)).toBeTruthy();
+    expect(screen.getByText("Filed")).toBeTruthy(); // the folder's map now shows
+    expect(screen.getByRole("button", { name: "Delete folder" })).toBeTruthy();
+    await u.click(screen.getByRole("button", { name: "All maps" })); // breadcrumb back
+    expect(screen.getByText(/in your library/)).toBeTruthy();
+  });
+
+  it("opens the New-folder prompt and the Move-to-folder picker (C2)", async () => {
+    libFolders = [{ id: "wk", name: "Work", createdAt: 1 }];
+    libEntries = [{ id: "b", title: "Loose", nodeCount: 1 }];
+    render(<AllMaps ctx={mkCtx()} />);
+    await u.click(screen.getByRole("button", { name: /New folder/ }));
+    expect(screen.getByLabelText("Folder name")).toBeTruthy();
+    await u.keyboard("{Escape}");
+    // Move-to-folder from a map card's kebab (the item lives in the always-rendered <details> menu).
+    await u.click(screen.getByRole("button", { name: /Move to folder/ }));
+    expect(screen.getByText(/Move .* to…/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Top level/ })).toBeTruthy();
   });
 });
 

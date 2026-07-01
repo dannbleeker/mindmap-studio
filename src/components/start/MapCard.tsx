@@ -13,12 +13,15 @@ export interface MapEntry {
   branches?: string[];
   /** Pinned to the top of the library lists (curated, recency-independent). */
   pinned?: boolean;
+  /** The library folder this map is filed under (C2); absent = top level. */
+  folderId?: string;
 }
 
 const KEBAB: { key: string; label: string }[] = [
   { key: "open", label: "Open" },
   { key: "rename", label: "Rename" },
   { key: "duplicate", label: "Duplicate" },
+  { key: "move", label: "Move to folder…" },
   { key: "export", label: "Export…" },
   { key: "delete", label: "Delete" },
 ];

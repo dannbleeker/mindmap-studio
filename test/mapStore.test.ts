@@ -3,10 +3,13 @@ import { describe, expect, it } from "vitest";
 import type { MindMapDoc } from "../src/model/types";
 import {
   clearAllData,
+  createFolder,
+  deleteFolder,
   deleteMap,
   emptyTrash,
   findMapReferences,
   getAllMaps,
+  getFolders,
   getInbox,
   getLastOpened,
   latestVersionDoc,
@@ -15,7 +18,9 @@ import {
   listTrashedMaps,
   loadMap,
   loadMapHandle,
+  moveMapToFolder,
   noteRecentFile,
+  renameFolder,
   restoreMapFromTrash,
   saveInbox,
   saveMap,
@@ -305,6 +310,32 @@ describe("mapStore — recent files (Open Recent)", () => {
   it("respects the requested limit", async () => {
     for (let i = 0; i < 12; i++) await noteRecentFile(`lim${i}`, `f${i}.mmst`);
     expect((await listRecentFiles(5)).length).toBe(5);
+  });
+});
+
+describe("mapStore — library folders (C2)", () => {
+  it("creates, renames, files a map, and orphans maps on delete (never destroys them)", async () => {
+    const f = await createFolder("Work");
+    expect(f).not.toBeNull();
+    if (!f) return;
+    expect((await getFolders()).map((x) => x.name)).toContain("Work");
+
+    await saveMap(docOf("fm1", "Filed map"));
+    await moveMapToFolder("fm1", f.id);
+    expect((await loadMap("fm1"))?.meta?.folderId).toBe(f.id);
+
+    await renameFolder(f.id, "Projects");
+    expect((await getFolders()).find((x) => x.id === f.id)?.name).toBe("Projects");
+
+    await deleteFolder(f.id);
+    expect((await getFolders()).some((x) => x.id === f.id)).toBe(false);
+    // The map survives, orphaned back to the top level.
+    expect(await loadMap("fm1")).not.toBeNull();
+    expect((await loadMap("fm1"))?.meta?.folderId).toBeUndefined();
+  });
+
+  it("rejects a blank folder name", async () => {
+    expect(await createFolder("   ")).toBeNull();
   });
 });
 

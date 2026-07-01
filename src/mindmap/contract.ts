@@ -249,6 +249,10 @@ export interface MindMapHandle {
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the
    *  current selection so repeated calls add siblings under the same parent. */
   quickAdd: (text: string) => void;
+  /** Add a detached floating topic carrying `text` (the quick-capture inbox's "file onto the map"):
+   *  it lands unattached on the canvas for the user to position + selected, in one undo step. Blank
+   *  is ignored. */
+  addFloatingTopic: (text: string) => void;
   /** Add an empty child to the selected node and drop straight into editing it (the ⌘K / command
    *  path for "add child"); false if nothing is selected. */
   addChildToSelected: () => boolean;

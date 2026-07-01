@@ -108,6 +108,8 @@ export interface PanelsState {
   setAgendaOpen: React.Dispatch<React.SetStateAction<boolean>>;
   mapsOpen: boolean;
   setMapsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  inboxOpen: boolean;
+  setInboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
   deckEditorOpen: boolean;
   setDeckEditorOpen: React.Dispatch<React.SetStateAction<boolean>>;
   noteEditorOpen: boolean;
@@ -203,6 +205,7 @@ export function usePanels(): UsePanels {
   const [statsOpen, setStatsOpen] = useState(false);
   const [agendaOpen, setAgendaOpen] = useState(false);
   const [mapsOpen, setMapsOpen] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
   const [deckEditorOpen, setDeckEditorOpen] = useState(false);
   const [noteEditorOpen, setNoteEditorOpen] = useState(false);
 
@@ -332,6 +335,8 @@ export function usePanels(): UsePanels {
       setAgendaOpen,
       mapsOpen,
       setMapsOpen,
+      inboxOpen,
+      setInboxOpen,
       deckEditorOpen,
       setDeckEditorOpen,
       noteEditorOpen,

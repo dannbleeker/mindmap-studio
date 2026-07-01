@@ -90,6 +90,8 @@ export interface ToolbarPanels {
   setAgendaOpen: (fn: (v: boolean) => boolean) => void;
   mapsOpen: boolean;
   setMapsOpen: (fn: (v: boolean) => boolean) => void;
+  inboxOpen: boolean;
+  setInboxOpen: (fn: (v: boolean) => boolean) => void;
   deckEditorOpen: boolean;
   setDeckEditorOpen: (fn: (v: boolean) => boolean) => void;
   noteEditorOpen: boolean;
@@ -782,6 +784,13 @@ export function Toolbar({
             checked={panels.agendaOpen}
             trailing={mi("check")}
             onSelect={() => panels.setAgendaOpen((v) => !v)}
+          />
+          <MenuCheckboxItem
+            icon={mi("paste")}
+            label="Inbox (quick capture)"
+            checked={panels.inboxOpen}
+            trailing={mi("check")}
+            onSelect={() => panels.setInboxOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("board")}

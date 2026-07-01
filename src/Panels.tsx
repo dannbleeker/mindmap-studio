@@ -1288,6 +1288,107 @@ export function MapsPanel({
   );
 }
 
+// Quick-capture inbox: a map-independent "Unfiled" bucket. Jot a thought (Enter to capture), then
+// file it onto the current map as a floating topic — or discard it. Captures survive across maps and
+// reloads (persisted in IndexedDB via useInbox). The list is newest-first.
+export function InboxPanel({
+  items,
+  onCapture,
+  onFile,
+  onDiscard,
+  canFile,
+}: {
+  items: readonly { id: string; text: string; ts: number }[];
+  /** Capture a new snippet (already trimmed by the hook; blank is ignored). */
+  onCapture: (text: string) => void;
+  /** File a snippet onto the current map (adds it as a floating topic, then removes it here). */
+  onFile: (id: string, text: string) => void;
+  /** Drop a snippet without filing it. */
+  onDiscard: (id: string) => void;
+  /** Whether a map is open to file onto (the "→ map" button is disabled otherwise). */
+  canFile: boolean;
+}) {
+  const [draft, setDraft] = useState("");
+  const capture = () => {
+    if (!draft.trim()) return;
+    onCapture(draft);
+    setDraft("");
+  };
+  return (
+    <Panel>
+      <div style={panelTitle}>📥 Inbox</div>
+      <div style={{ padding: "0 10px 6px", display: "flex", gap: 6 }}>
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              capture();
+            }
+          }}
+          placeholder="Jot a thought…"
+          aria-label="Capture to inbox"
+          style={{ width: "auto", flex: 1 }}
+        />
+        <Button onClick={capture} disabled={!draft.trim()} style={{ padding: "2px 8px" }}>
+          Add
+        </Button>
+      </div>
+      <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
+        {items.length === 0 ? (
+          <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
+            Nothing unfiled. Jot ideas here, file them onto a map later.
+          </div>
+        ) : (
+          items.map((it) => (
+            <div
+              key={it.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "3px 10px",
+              }}
+            >
+              <span
+                title={it.text}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontSize: fontSize.md,
+                }}
+              >
+                {it.text}
+              </span>
+              <Button
+                onClick={() => onFile(it.id, it.text)}
+                disabled={!canFile}
+                title={canFile ? "File onto the current map" : "Open a map to file onto"}
+                aria-label={`File "${it.text}" onto the map`}
+                style={{ padding: "2px 6px", fontSize: fontSize.sm }}
+              >
+                → map
+              </Button>
+              <Button
+                onClick={() => onDiscard(it.id)}
+                title="Discard"
+                aria-label={`Discard "${it.text}"`}
+                style={{ padding: "2px 6px", fontSize: fontSize.sm }}
+              >
+                ×
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+    </Panel>
+  );
+}
+
 // Custom slide-deck editor (#3): reorder / add / remove the presentation slides and give each a
 // speaker note, overriding the auto walk-through. The deck is seeded from the resolved slides (so it
 // starts as today's auto deck), and every edit commits the full explicit deck via onChange — turning

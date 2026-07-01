@@ -14,6 +14,7 @@ import {
   AgendaPanel,
   FilterPanel,
   HistoryPanel,
+  InboxPanel,
   InfoPanel,
   MapsPanel,
   MarkerTagIndex,
@@ -60,6 +61,7 @@ import { useFocusHotkey } from "./hooks/useFocusHotkey";
 import { useFormatPainter } from "./hooks/useFormatPainter";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
 import { useIdbAutosave } from "./hooks/useIdbAutosave";
+import { useInbox } from "./hooks/useInbox";
 import { useNamedStyles } from "./hooks/useNamedStyles";
 import { useNoteEditor } from "./hooks/useNoteEditor";
 import { useOpenDocuments } from "./hooks/useOpenDocuments";
@@ -321,6 +323,9 @@ export function App() {
   // live in usePanels; App threads `panels` into <Toolbar> and `filter`/`savedFilters` into the
   // FilterPanel. Auto-numbering (`panels.numbered`) draws hierarchical outline numbers on the canvas.
   const { panels, filter, savedFilters } = usePanels();
+  // Quick-capture inbox: a map-independent "Unfiled" bucket (persisted in IndexedDB). Filing an item
+  // adds it to the current map as a floating topic, then drops it from the inbox.
+  const inbox = useInbox();
   const savedViews = useSavedViews(liveDoc.id);
   // Open-document tabs: which maps are open + which is active (persisted). The active map's state
   // still lives in the doc/liveDoc singletons below — this registry just follows it (load() calls
@@ -1646,6 +1651,7 @@ export function App() {
       [panels.statsOpen, "stats"],
       [panels.agendaOpen, "agenda"],
       [panels.mapsOpen, "maps"],
+      [panels.inboxOpen, "inbox"],
       [panels.deckEditorOpen, "deck"],
       [panels.noteEditorOpen, "note"],
       [panels.filterOpen, "filter"],
@@ -1971,6 +1977,24 @@ export function App() {
                   onClose: () => panels.setMapsOpen(false),
                   node: (
                     <MapsPanel maps={maps} currentId={doc.id} onOpen={(id) => void switchMap(id)} />
+                  ),
+                });
+              if (panels.inboxOpen)
+                entries.push({
+                  key: "inbox",
+                  label: "Inbox",
+                  onClose: () => panels.setInboxOpen(false),
+                  node: (
+                    <InboxPanel
+                      items={inbox.items}
+                      canFile={!!liveDoc}
+                      onCapture={inbox.add}
+                      onFile={(id, text) => {
+                        mapRef.current?.addFloatingTopic(text);
+                        inbox.remove(id);
+                      }}
+                      onDiscard={inbox.remove}
+                    />
                   ),
                 });
               if (panels.deckEditorOpen)

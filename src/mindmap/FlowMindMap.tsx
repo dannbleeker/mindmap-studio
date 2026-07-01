@@ -1814,6 +1814,11 @@ function FlowInner({
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
       addStickyNote: () => apply(addStickyNote(docRef.current)),
+      addFloatingTopic: (text) => {
+        const t = text.trim();
+        if (!t) return;
+        apply(addFloatingTopic(docRef.current, t), true);
+      },
       setSelectedRollup: (mapId) =>
         withSelected((id) => apply(setRollup(docRef.current, id, mapId || undefined))),
       quickAdd: (text) => {

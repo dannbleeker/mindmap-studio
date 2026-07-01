@@ -9,6 +9,7 @@ import {
   AgendaPanel,
   FilterPanel,
   HistoryPanel,
+  InboxPanel,
   InfoPanel,
   MapsPanel,
   MarkerTagIndex,
@@ -1278,6 +1279,74 @@ describe("MapsPanel (#18)", () => {
     await userEvent.type(screen.getByLabelText("Filter maps"), "road");
     expect(screen.getByRole("button", { name: "Roadmap" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Launch plan" })).toBeNull();
+  });
+});
+
+describe("InboxPanel (quick capture)", () => {
+  const items = [
+    { id: "a", text: "Call the vendor", ts: 200 },
+    { id: "b", text: "Draft the agenda", ts: 100 },
+  ];
+
+  it("captures a jotted thought on Add and clears the field", async () => {
+    const onCapture = vi.fn();
+    render(
+      <InboxPanel items={[]} canFile={true} onCapture={onCapture} onFile={noop} onDiscard={noop} />,
+    );
+    const field = screen.getByLabelText("Capture to inbox") as HTMLInputElement;
+    await userEvent.type(field, "New idea");
+    await userEvent.click(screen.getByRole("button", { name: "Add" }));
+    expect(onCapture).toHaveBeenCalledWith("New idea");
+    expect(field.value).toBe("");
+  });
+
+  it("captures on Enter", async () => {
+    const onCapture = vi.fn();
+    render(
+      <InboxPanel items={[]} canFile={true} onCapture={onCapture} onFile={noop} onDiscard={noop} />,
+    );
+    await userEvent.type(screen.getByLabelText("Capture to inbox"), "Quick note{Enter}");
+    expect(onCapture).toHaveBeenCalledWith("Quick note");
+  });
+
+  it("files an item onto the map and discards another", async () => {
+    const onFile = vi.fn();
+    const onDiscard = vi.fn();
+    render(
+      <InboxPanel
+        items={items}
+        canFile={true}
+        onCapture={noop}
+        onFile={onFile}
+        onDiscard={onDiscard}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: 'File "Call the vendor" onto the map' }),
+    );
+    expect(onFile).toHaveBeenCalledWith("a", "Call the vendor");
+    await userEvent.click(screen.getByRole("button", { name: 'Discard "Draft the agenda"' }));
+    expect(onDiscard).toHaveBeenCalledWith("b");
+  });
+
+  it("disables filing when no map is open", () => {
+    render(
+      <InboxPanel items={items} canFile={false} onCapture={noop} onFile={noop} onDiscard={noop} />,
+    );
+    expect(
+      (
+        screen.getByRole("button", {
+          name: 'File "Call the vendor" onto the map',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+  });
+
+  it("shows an empty-state hint with no items", () => {
+    render(
+      <InboxPanel items={[]} canFile={true} onCapture={noop} onFile={noop} onDiscard={noop} />,
+    );
+    expect(screen.getByText(/Nothing unfiled/)).toBeTruthy();
   });
 });
 

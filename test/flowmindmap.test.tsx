@@ -282,6 +282,21 @@ describe("FlowMindMap canvas", () => {
     expect(a?.children.at(-1)?.topic).toBe("1. Introduction");
   });
 
+  it("addFloatingTopic files inbox text as a detached floating topic", () => {
+    const { h, onChange } = mount();
+    onChange.mockClear();
+    run(() => h.addFloatingTopic("  Filed from inbox  "));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.floatingTopics?.map((f) => f.topic)).toContain("Filed from inbox"); // trimmed
+  });
+
+  it("addFloatingTopic ignores a blank capture", () => {
+    const { h, onChange } = mount();
+    onChange.mockClear();
+    run(() => h.addFloatingTopic("   "));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("hovers a collapsed +N toggle to peek the first hidden child titles (Phase 10)", () => {
     const collapsedDoc: MindMapDoc = {
       schemaVersion: 1,

@@ -7,6 +7,7 @@ import {
   emptyTrash,
   findMapReferences,
   getAllMaps,
+  getInbox,
   getLastOpened,
   latestVersionDoc,
   listMaps,
@@ -16,6 +17,7 @@ import {
   loadMapHandle,
   noteRecentFile,
   restoreMapFromTrash,
+  saveInbox,
   saveMap,
   saveMapHandle,
   saveVersion,
@@ -45,6 +47,10 @@ describe("mapStore — cold boot", () => {
   it("latestVersionDoc returns null for a map with no snapshots", async () => {
     expect(await latestVersionDoc("never-saved")).toBeNull();
   });
+
+  it("getInbox returns an empty list before anything is captured", async () => {
+    expect(await getInbox()).toEqual([]);
+  });
 });
 
 describe("mapStore", () => {
@@ -64,6 +70,22 @@ describe("mapStore", () => {
 
   it("returns null for an unknown id", async () => {
     expect(await loadMap("nope")).toBeNull();
+  });
+
+  it("round-trips the quick-capture inbox, newest first", async () => {
+    await saveInbox([
+      { id: "a", text: "older", ts: 100 },
+      { id: "b", text: "newer", ts: 200 },
+    ]);
+    const back = await getInbox();
+    expect(back.map((i) => i.text)).toEqual(["newer", "older"]); // getInbox sorts ts desc
+  });
+
+  it("tolerates a non-array inbox payload (returns [])", async () => {
+    await saveInbox([{ id: "x", text: "keep", ts: 1 }]);
+    // A non-array shape under the same meta key must degrade to empty, not throw.
+    await saveInbox(42 as never);
+    expect(await getInbox()).toEqual([]);
   });
 
   it("lists saved maps (sorted by title)", async () => {

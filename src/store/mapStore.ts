@@ -241,6 +241,40 @@ export async function getTabSession(): Promise<TabSession | null> {
   return last ? { openTabIds: [last], activeTabId: last } : null;
 }
 
+// --- quick-capture inbox ---------------------------------------------------
+// A map-independent "Unfiled" bucket: jot a thought now (from any map, or none) and file it onto a
+// map later. Stored as a JSON list under a single `meta` key — no new object store, so no schema
+// bump. Small by nature (short text snippets), so read/write-whole is fine.
+
+/** One unfiled capture: a short note to be turned into a topic later. */
+export interface InboxItem {
+  id: string;
+  text: string;
+  ts: number; // captured-at (ms epoch) — drives newest-first order
+}
+
+const INBOX_KEY = "inbox";
+
+/** The quick-capture inbox, newest first. Tolerates a missing/corrupt entry (returns []). */
+export async function getInbox(): Promise<InboxItem[]> {
+  const raw = await (await db()).get("meta", INBOX_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as InboxItem[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((i): i is InboxItem => !!i && typeof i.id === "string" && typeof i.text === "string")
+      .sort((a, b) => b.ts - a.ts);
+  } catch {
+    return [];
+  }
+}
+
+/** Persist the whole inbox (the hook writes the full list on every change). */
+export async function saveInbox(items: InboxItem[]): Promise<void> {
+  await (await db()).put("meta", JSON.stringify(items), INBOX_KEY);
+}
+
 // --- version history -------------------------------------------------------
 // Per-map snapshots: the app saves one on a throttle while editing + on demand,
 // capped at MAX_VERSIONS (oldest pruned). Restoring just loads a snapshot's doc.

@@ -145,6 +145,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       applyDesign: vi.fn(),
       openMapPanel: vi.fn(),
       drillIn: vi.fn(),
+      exportBranch: vi.fn(),
       startWalk: vi.fn(),
       alignSelection: vi.fn(),
       distributeSelection: vi.fn(),

@@ -150,6 +150,8 @@ export interface ToolbarCanvas {
   openMapPanel: () => void;
   /** Drill in: re-root the canvas view at the selected topic (focus-on-topic). */
   drillIn: () => void;
+  /** Open the "Export this branch…" format picker scoped to a node's subtree (B4). */
+  exportBranch: (id: string) => void;
   /** Start the guided walk (step through every topic in outline order with a spotlight + notes). */
   startWalk: () => void;
   /** Align / distribute the selected free-canvas nodes (freeform mode). */

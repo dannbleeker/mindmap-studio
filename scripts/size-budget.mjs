@@ -13,7 +13,11 @@ import { gzipSync } from "node:zlib";
 // 153 → 158: the knowledge-linking / capture / accessibility packs (cross-map +
 // in-note links, slash-capture, keyboard + SR a11y) add more editor-core UI that
 // likewise can't be lazy-loaded. Headroom for the whole multi-pack effort.
-const BUDGET_KB = 158;
+// 158 → 159: typed relationships (B3) + export-this-branch (B4). The branch-export
+// picker itself is lazy, but its editor-core orchestration (relationship types in
+// the projection / EdgeInspector / rules / filter, the branch-export command +
+// context-menu wiring) lands in the entry and can't be lazy-loaded.
+const BUDGET_KB = 159;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

@@ -1,7 +1,7 @@
 import { MARKER_PALETTE } from "../icons";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind } from "../mindmap";
-import type { SortKey } from "../mindmap/flow/ops";
+import { type SortKey, findAnyNode } from "../mindmap/flow/ops";
 import type { MapNode } from "../model/types";
 import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
 import { SHORTCUT_BINDINGS } from "../shortcuts";
@@ -176,6 +176,18 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     !!sel,
   );
   add("drill-in", "Drill into the selected topic", "view", () => canvas.drillIn(), !!sel);
+  // Export the selected branch (B4) — only for a non-leaf, non-root topic (a lone topic has nothing
+  // to scope; the whole-map export already covers it).
+  const selNode = sel ? findAnyNode(map.liveDoc, sel.id) : null;
+  add(
+    "export-branch",
+    "Export selected branch…",
+    "view",
+    () => {
+      if (sel) canvas.exportBranch(sel.id);
+    },
+    !!selNode && selNode.id !== map.liveDoc.root.id && selNode.children.length > 0,
+  );
   // Arrange (free-canvas only) — needs 2+ selected to align, 3+ to distribute.
   const canAlign = canvas.freeform && canvas.selectedCount >= 2;
   const canDistribute = canvas.freeform && canvas.selectedCount >= 3;

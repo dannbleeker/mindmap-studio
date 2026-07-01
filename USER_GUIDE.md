@@ -702,6 +702,11 @@ Pick a format from the **⬆ Export…** menu:
 Or **⧉ Copy outline** copies the map as a Markdown outline straight to the clipboard — no
 file — for pasting into an email, chat, or doc.
 
+**Export just one branch.** Right-click a topic that has children and choose **Export this branch…**
+(or press ⌘K and pick **Export selected branch…**) to export only that topic and everything under it —
+as PNG, SVG, standalone or interactive HTML, PDF, `.json`, or Markdown. The image / SVG / HTML / PDF
+render just the branch, framed to its own bounds, exactly as it looks on the canvas.
+
 ---
 
 ## Presentation mode

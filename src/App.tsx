@@ -149,7 +149,7 @@ import { useTheme } from "./useTheme";
 declare global {
   interface Window {
     __getLiveDoc?: () => MindMapDoc;
-    __exportSvg?: () => Promise<string> | null;
+    __exportSvg?: (rootId?: string) => Promise<string> | null;
   }
 }
 
@@ -162,6 +162,11 @@ const StartScreen = lazy(() =>
 );
 const Presentation = lazy(() =>
   import("./present/Presentation").then((m) => ({ default: m.Presentation })),
+);
+// On-demand: only mounted (and its chunk fetched) when a branch export is chosen — keeps it out of the
+// entry bundle (B4).
+const BranchExportDialog = lazy(() =>
+  import("./components/BranchExportDialog").then((m) => ({ default: m.BranchExportDialog })),
 );
 
 // How many recently-used document tabs keep their canvas session (viewport + undo/redo) cached for
@@ -1194,6 +1199,10 @@ export function App() {
     showHint,
   );
 
+  // "Export this branch…" (B4): the chosen subtree root drives the lazy format-picker dialog, which owns
+  // its own scoped export plumbing (kept out of the entry bundle).
+  const [branchExportId, setBranchExportId] = useState<string | null>(null);
+
   // Restore the last-opened map on startup straight into the editor. With no prior map (first run /
   // empty library) land on the start screen instead of an editor full of the sample map.
   useEffect(() => {
@@ -1322,7 +1331,7 @@ export function App() {
   useEffect(() => {
     if (import.meta.env.DEV) {
       window.__getLiveDoc = () => liveDocRef.current;
-      window.__exportSvg = () => mapRef.current?.exportSvg()?.text() ?? null;
+      window.__exportSvg = (rootId?: string) => mapRef.current?.exportSvg(rootId)?.text() ?? null;
     }
   }, []);
 
@@ -1509,6 +1518,7 @@ export function App() {
       drillIn: () => {
         if (selected) setDrillId(selected.id);
       },
+      exportBranch: (id: string) => setBranchExportId(id),
       startWalk: guidedWalk.start,
       alignSelection: (mode) => mapRef.current?.alignSelection(mode),
       distributeSelection: (axis) => mapRef.current?.distributeSelection(axis),
@@ -2191,6 +2201,7 @@ export function App() {
                     showHint(err instanceof Error ? err.message : "Could not add that file.");
                   }
                 }}
+                onExportBranch={(id) => setBranchExportId(id)}
                 onHistory={(u, r) => {
                   setCanUndo(u);
                   setCanRedo(r);
@@ -2639,6 +2650,21 @@ export function App() {
 
       {/* Keyboard shortcuts cheat-sheet (#2) — opened from the icon-rail (?) and ⌘K. */}
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+      {/* "Export this branch…" format picker (B4), scoped to the chosen subtree. Lazy: only mounted
+          (and fetched) once a branch export is chosen, so it stays out of the entry bundle. */}
+      {branchExportId != null && (
+        <Suspense fallback={null}>
+          <BranchExportDialog
+            nodeId={branchExportId}
+            mapRef={mapRef}
+            getDoc={() => liveDocRef.current}
+            numbered={() => panels.numbered}
+            showHint={showHint}
+            onClose={() => setBranchExportId(null)}
+          />
+        </Suspense>
+      )}
 
       {/* Host for the imperative themed prompt/confirm (editorPrompt / editorConfirm) used across the
           canvas + panels in place of native window.prompt/confirm. */}

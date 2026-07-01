@@ -65,6 +65,10 @@ export function useMapExports(
   numbered?: () => boolean,
   /** Surface a one-line hint (toast) — used when an image/PDF export has no live canvas to render. */
   onHint?: (msg: string) => void,
+  /** "Export this branch" scope (B4): a node id to render the renderer-backed formats (png/svg/html/
+   *  pdf) scoped to that subtree. Model-backed formats scope via a subtree `getDoc`; this only wires the
+   *  live-canvas SVG render. Returns null/undefined for the whole map. */
+  scopeId?: () => string | null | undefined,
 ): MapExports {
   const baseName = () => getDoc().title || "mindmap";
   // The renderer-backed formats (png/svg/html/pdf) need a live canvas; when there isn't one (e.g. the
@@ -78,7 +82,7 @@ export function useMapExports(
   // render everywhere — opened as a .svg, rasterized to PNG, in a PDF viewer, or placed in
   // Office — not only inline in a browser. null when there is no live map. Shared by png/svg/html/pdf.
   const cleanSvg = async (): Promise<string | null> => {
-    const svg = mapRef.current?.exportSvg();
+    const svg = mapRef.current?.exportSvg(scopeId?.() ?? undefined);
     return svg ? sanitizeSvg(await svg.text()) : null;
   };
 

@@ -174,6 +174,7 @@ import {
   setTopic,
   setTopicRich,
   sortChildren,
+  subtreeExportDoc,
   toggleCollapse,
   toggleIcon,
   toggleLocked,
@@ -292,6 +293,7 @@ function FlowInner({
   onOpenNote,
   onMapLink,
   onDropFilesOnNode,
+  onExportBranch,
   onHistory,
   onDelete,
   onHint,
@@ -455,6 +457,7 @@ function FlowInner({
   const onMapLinkRef = useLatestRef(onMapLink);
   const onOpenNoteRef = useLatestRef(onOpenNote);
   const onDropFilesOnNodeRef = useLatestRef(onDropFilesOnNode);
+  const onExportBranchRef = useLatestRef(onExportBranch);
   const onHistoryRef = useLatestRef(onHistory);
   const onDeleteRef = useLatestRef(onDelete);
   const onHintRef = useLatestRef(onHint);
@@ -1760,9 +1763,17 @@ function FlowInner({
       // Author a clean native-text SVG straight from the model + the live node rects
       // (position + measured size). Flows through useMapExports.cleanSvg() to drive
       // png/svg/html/pdf — and, unlike the old export, carries arrow + boundary labels.
-      exportSvg: () => {
+      exportSvg: (rootId?: string) => {
+        // Scoped ("Export this branch", B4): render a subtree doc rooted at `rootId`, keeping the live
+        // node positions (subtreeExportDoc preserves ids) filtered to that subtree so the branch renders
+        // exactly as on canvas, framed to its own bounds. No rootId → the whole map (unchanged).
+        const exportDoc = rootId
+          ? (subtreeExportDoc(docRef.current, rootId) ?? docRef.current)
+          : docRef.current;
+        const keep = rootId ? new Set(subtreeIds(exportDoc.root)) : null;
         const rects = new Map<string, NodeRect>();
         for (const n of getNodes()) {
+          if (keep && !keep.has(n.id)) continue;
           rects.set(n.id, {
             x: n.position.x,
             y: n.position.y,
@@ -1772,14 +1783,14 @@ function FlowInner({
         }
         const cssVar = (themeRef.current ?? mindManagerTheme).cssVar;
         const svg = buildFlowSvg(
-          docRef.current,
+          exportDoc,
           rects,
           paletteRef.current,
           cssVar,
           numberedRef.current,
           todayISO(),
-          directionRef.current === "brace" ? computeBraces(docRef.current) : undefined,
-          docRef.current.meta?.freeform ? "freeform" : directionRef.current,
+          directionRef.current === "brace" ? computeBraces(exportDoc) : undefined,
+          exportDoc.meta?.freeform ? "freeform" : directionRef.current,
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
@@ -2435,6 +2446,10 @@ function FlowInner({
                     },
                   ],
                 ];
+                // Export this branch (B4): scoped export of the subtree, only for a non-leaf node
+                // (a lone topic has nothing to scope — the whole-map export already covers it).
+                if ((findAnyNode(docRef.current, id)?.children.length ?? 0) > 0)
+                  items.push(["Export this branch…", () => onExportBranchRef.current?.(id)]);
                 // Cross-map paste: show only when the branch clipboard has something (it persists in
                 // localStorage, so branches copied in another map show up here too).
                 const clips = getBranches();

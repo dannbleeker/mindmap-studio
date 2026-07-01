@@ -95,6 +95,7 @@ import {
   setTopic,
   setTopicRich,
   sortChildren,
+  subtreeExportDoc,
   toggleCollapse,
   toggleIcon,
   toggleLocked,
@@ -2060,5 +2061,46 @@ describe("newMapFromBranch", () => {
   it("returns null for the central root or a missing node", () => {
     expect(newMapFromBranch(base(), "r")).toBeNull();
     expect(newMapFromBranch(base(), "nope")).toBeNull();
+  });
+});
+
+describe("subtreeExportDoc (B4)", () => {
+  const d = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "Doc",
+    root: {
+      id: "r",
+      topic: "R",
+      children: [
+        { id: "a", topic: "A", children: [{ id: "a1", topic: "A1", children: [] }] },
+        { id: "b", topic: "B", children: [] },
+      ],
+    },
+    links: [
+      { id: "l1", from: "a", to: "a1" }, // internal to branch a → kept
+      { id: "l2", from: "a", to: "b" }, // crosses out of branch a → dropped
+    ],
+    boundaries: [
+      { id: "bd1", nodeIds: ["a", "a1"] }, // internal → kept intact
+      { id: "bd2", nodeIds: ["a", "b"] }, // partial → filtered to just the in-subtree ids
+    ],
+    meta: { accentColor: "#123456" },
+  });
+
+  it("roots at the subtree keeping ids + meta, dropping links that leave the subtree", () => {
+    const out = subtreeExportDoc(d(), "a");
+    expect(out).not.toBeNull();
+    if (!out) return;
+    expect(out.root.id).toBe("a"); // keeps ids so scoped SVG reuses the live canvas rects
+    expect(out.title).toBe("A");
+    expect(out.links?.map((l) => l.id)).toEqual(["l1"]); // l2 dropped (endpoint b is outside)
+    expect(out.boundaries?.map((bd) => bd.nodeIds)).toEqual([["a", "a1"], ["a"]]);
+    expect(out.meta?.accentColor).toBe("#123456"); // meta carried so styling matches the canvas
+  });
+
+  it("returns null for the central root or a missing node", () => {
+    expect(subtreeExportDoc(d(), "r")).toBeNull();
+    expect(subtreeExportDoc(d(), "nope")).toBeNull();
   });
 });

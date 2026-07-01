@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Export a single branch (B4).** Right-click a topic that has children → **Export this branch…** (or
+  ⌘K → *Export selected branch…*) opens a format picker scoped to that subtree: PNG, SVG, standalone
+  HTML, interactive HTML, PDF, `.json`, or Markdown. Model-backed formats scope via a `subtreeExportDoc`
+  helper (keeps the original ids + map meta so styling matches, drops relationships/boundaries that
+  leave the subtree); the renderer-backed image/SVG/HTML/PDF render just the branch from the live
+  canvas via `exportSvg(rootId)`, framed to its own bounds. Verified: a 4-node branch exports 4 nodes
+  vs 23 for the whole map.
+
 - **Typed relationship categories (B3).** A relationship can now carry an optional semantic **type** —
   `relates-to` (the default), `depends-on`, `causes`, `supports`, or `blocks` — set in the
   EdgeInspector, independent of its free text label. A per-map **Show type labels** toggle draws the

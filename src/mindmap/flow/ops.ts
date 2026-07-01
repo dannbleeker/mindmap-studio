@@ -791,6 +791,38 @@ export function newMapFromBranch(doc: MindMapDoc, id: string): MindMapDoc | null
   };
 }
 
+/** Build a scoped MindMapDoc rooted at a node's subtree for "Export this branch" (B4). Unlike
+ *  newMapFromBranch this KEEPS the original node ids (so a renderer-backed export can reuse the live
+ *  canvas node rects) and carries the branch-internal relationships / boundaries / summaries + the map
+ *  meta (theme / accent / connectors / font) so the exported branch looks like it did on the canvas.
+ *  Cross-links / boundaries / summaries with any endpoint outside the subtree are dropped. Returns null
+ *  for the central root or a missing node. Pure. */
+export function subtreeExportDoc(doc: MindMapDoc, id: string): MindMapDoc | null {
+  if (id === doc.root.id) return null;
+  const node = findAnyNode(doc, id);
+  if (!node) return null;
+  const ids = new Set<string>();
+  const collect = (n: MapNode) => {
+    ids.add(n.id);
+    for (const c of n.children) collect(c);
+  };
+  collect(node);
+  const has = (nid: string) => ids.has(nid);
+  return {
+    schemaVersion: doc.schemaVersion,
+    id: doc.id,
+    title: node.topic || doc.title || "Branch",
+    root: structuredClone(node),
+    links: (doc.links ?? []).filter((l) => has(l.from) && has(l.to)),
+    boundaries: (doc.boundaries ?? [])
+      .map((b) => ({ ...b, nodeIds: b.nodeIds.filter(has) }))
+      .filter((b) => b.nodeIds.length > 0),
+    summaries: (doc.summaries ?? []).filter((s) => s.nodeIds.every(has)),
+    rules: doc.rules,
+    meta: doc.meta,
+  };
+}
+
 /** Paste a copied branch: graft it (re-id'd) under `parentId` when that's a tree node, otherwise
  *  drop it in as a floating topic. Always inserts — the cross-map branch paste. Re-ids so the same
  *  clipboard branch can be pasted repeatedly (and across maps) without id clashes. */

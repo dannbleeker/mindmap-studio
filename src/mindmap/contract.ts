@@ -91,7 +91,9 @@ export interface SelectedOverlay {
 
 /** Imperative API a canvas component exposes via its ref. */
 export interface MindMapHandle {
-  exportSvg: () => Blob | null;
+  /** Render the map to a portable SVG. With `rootId` set, scope the render to that node's subtree
+   *  ("Export this branch", B4) — the branch framed to its own bounds at its live canvas positions. */
+  exportSvg: (rootId?: string) => Blob | null;
   focusNode: (id: string) => void;
   /** Animate the camera to frame a node's whole subtree (zoom + pan) — the cinematic walk's framing. */
   frameBranch: (id: string, opts?: { duration?: number; padding?: number }) => void;
@@ -416,6 +418,9 @@ export interface MindMapProps {
    *  app reads them (an image → the topic's image; anything else → an attachment) via the id-based
    *  setNodeImage / addNodeAttachment handle methods. */
   onDropFilesOnNode?: (id: string, files: File[]) => void;
+  /** Fires when "Export this branch…" is chosen for a node (context menu / ⌘K), with that node's id;
+   *  the app opens the branch-export format picker scoped to that subtree (B4). */
+  onExportBranch?: (nodeId: string) => void;
   /** Fires whenever the undo/redo stack depth changes, so the chrome can live-enable/disable the
    *  Row-1 undo + redo buttons (the depths aren't otherwise observable from outside the canvas). */
   onHistory?: (canUndo: boolean, canRedo: boolean) => void;

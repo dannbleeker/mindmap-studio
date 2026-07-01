@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Slash `/` command menu (UI review — gap group 8).** Type `/` at the start of a topic to open a
+  keyboard-driven insert menu: filter as you type, Arrow keys + Enter/Tab to pick, Escape to close (or
+  click a row). Commands act on the current node — add child / sibling, mark to-do / done, due today,
+  high priority, group in a boundary, add a note, star marker. The `/query` lives only in the editor
+  buffer, so picking a command keeps the node's real topic (a fresh node stays empty; an existing one
+  is never clobbered). Built on a pure, unit-tested command core (`slashCommands.ts`) routed through
+  the extracted editor-key seam so ordinary typing and Enter/Tab editing are unaffected.
+
 - **Multiple hyperlinks per topic (UI review — gap group 3).** A topic can point at more than one
   place. The primary `hyperlink` stays canonical (the canvas 🔗 and every exporter use it); an additive
   `hyperlinks?: string[]` holds the extras, managed in the inspector's Links section ("Additional

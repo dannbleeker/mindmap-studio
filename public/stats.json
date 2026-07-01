@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-01T21:21:18.046Z",
-  "commit": "1e3f6ea",
+  "generatedAt": "2026-07-01T21:50:24.401Z",
+  "commit": "ca7ce05",
   "headline": {
-    "linesTsJs": 71807,
-    "tests": 1996,
+    "linesTsJs": 72447,
+    "tests": 2005,
     "lineCoveragePct": 90.92,
-    "commits": 1029,
+    "commits": 1031,
     "ageDays": 20,
-    "trackedFiles": 482,
+    "trackedFiles": 486,
     "featureManualPct": 58.6,
     "featureBookPct": 56.4,
     "featureExamplePct": 56.4
@@ -15,18 +15,18 @@
   "code": [
     {
       "category": "App code (src)",
-      "files": 222,
-      "lines": 41790
+      "files": 224,
+      "lines": 42250
     },
     {
       "category": "Unit tests",
-      "files": 195,
-      "lines": 28285
+      "files": 197,
+      "lines": 28461
     },
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1732
+      "lines": 1736
     },
     {
       "category": "Styles (CSS)",
@@ -42,54 +42,54 @@
   "coverage": {
     "lines": {
       "pct": 90.92,
-      "covered": 26743,
-      "total": 29413
+      "covered": 27066,
+      "total": 29767
     },
     "statements": {
       "pct": 90.92,
-      "covered": 26743,
-      "total": 29413
+      "covered": 27066,
+      "total": 29767
     },
     "functions": {
-      "pct": 76.6,
-      "covered": 1555,
-      "total": 2030
+      "pct": 76.53,
+      "covered": 1575,
+      "total": 2058
     },
     "branches": {
-      "pct": 86.79,
-      "covered": 8117,
-      "total": 9352
+      "pct": 86.74,
+      "covered": 8176,
+      "total": 9425
     }
   },
   "tests": {
-    "unit": 1996,
+    "unit": 2005,
     "e2e": 0,
-    "durationMs": 91647,
+    "durationMs": 96465,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 26258
+        "ms": 28268
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 23220
-      },
-      {
-        "file": "test/panels.test.tsx",
-        "ms": 8171
+        "ms": 24204
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8076
+        "ms": 9298
+      },
+      {
+        "file": "test/panels.test.tsx",
+        "ms": 8825
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3984
+        "ms": 3965
       }
     ]
   },
   "domain": {
-    "components": 72,
+    "components": 73,
     "hooks": 27,
     "ioModules": 36,
     "canvasThemes": 4,
@@ -111,7 +111,7 @@
       },
       {
         "name": "App.tsx",
-        "lines": 2791
+        "lines": 2810
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -140,7 +140,7 @@
       },
       {
         "file": "App.tsx",
-        "pct": 59.5
+        "pct": 59.44
       },
       {
         "file": "io/importDispatch.ts",
@@ -150,7 +150,7 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 207
+        "commits": 208
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
@@ -172,8 +172,8 @@
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 59.5,
-        "commits": 207
+        "pct": 59.44,
+        "commits": 208
       }
     ]
   },
@@ -184,21 +184,21 @@
     "anyCount": 6,
     "tsIgnore": 0,
     "tsExpectError": 0,
-    "biomeIgnore": 45,
+    "biomeIgnore": 47,
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 326.9,
+    "jsGzipKb": 329.4,
     "cssGzipKb": 10.2,
-    "totalGzipKb": 337.1,
-    "entryGzipKb": 158.4,
+    "totalGzipKb": 339.6,
+    "entryGzipKb": 159.1,
     "budgetKb": 150,
     "withinBudget": false
   },
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 41790,
+    "appLoc": 42250,
     "docToCodeRatio": 0.41
   },
   "featureCoverage": {
@@ -1216,16 +1216,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 20,
-    "commits": 1029,
-    "commits7d": 199,
+    "commits": 1031,
+    "commits7d": 200,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 495
+        "count": 496
       },
       {
         "name": "github-actions[bot]",
-        "count": 467
+        "count": 468
       },
       {
         "name": "Claude",
@@ -1233,9 +1233,9 @@
       }
     ],
     "churn30d": {
-      "added": 131492,
-      "removed": 38982
+      "added": 132211,
+      "removed": 39041
     },
-    "changelogEntries": 391
+    "changelogEntries": 392
   }
 }

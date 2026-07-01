@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Deferred-backlog wave 1 — cross-map linking (UI review — gap group 3).** Completing the link layer:
+  - **Cross-map backlinks** — the inspector's "Linked from other maps" lists topics in other library maps
+    that link here (via `#map=` hyperlinks), click-to-navigate. The scan loads other maps lazily (only
+    while the inspector is open).
+  - **Cross-map topic picker** — when a node links to another map, an "…and a topic" select upgrades the
+    whole-map link to a specific topic there (`#map=X&node=Y`), so cross-map links are authorable to a
+    node, not just a map.
+
 - **Knowledge-linking, capture & accessibility packs (UI review — gap groups 3/1/10).** A slice of each:
   - **Cross-map topic links** (G3) — a node/note link can open another map *and* focus a specific topic
     there (`#map=<id>&node=<id>`); bare `#map=` links are unchanged.

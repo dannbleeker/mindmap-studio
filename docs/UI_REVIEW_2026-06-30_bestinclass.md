@@ -118,11 +118,11 @@ All pure client-side derivations over the in-memory doc.
 The deepest backlog; several items brush the decided-against "no graph" boundary.
 | Gap | What | Tags |
 |---|---|---|
-| ~~Cross-map topic links~~ ✅ shipped | `#map=<id>&node=<id>` opens a map + focuses a topic (runtime; a topic-picker UI still open) | `done` |
+| ~~Cross-map topic links~~ ✅ shipped | `#map=<id>&node=<id>` opens a map + focuses a topic; inspector topic-picker to author it | `done` |
 | ~~Map-wide relationships / links overview panel~~ ✅ shipped | every cross-link + hyperlink, navigable | `done` |
 | ~~Outgoing-links list in the inspector~~ ✅ shipped | mirror of the shipped "Linked from" | `done` |
 | Typed / categorised relationships | depends-on / causes / supports, drivable in style/filter | `?·med·M·partial` |
-| Cross-map backlinks | incoming references from other maps (library-wide index) | `in·med·M·missing` |
+| ~~Cross-map backlinks~~ ✅ shipped | inspector "Linked from other maps" — incoming `#map=` refs, lazy-loaded | `done` |
 | Name-based link autocomplete | `[[`/`@` wiki-link authoring | `in·med·M·partial` |
 | ~~In-note in-app links~~ ✅ shipped | `[text](#node=…/#map=…)` in a note routes through the canvas | `done` |
 | Transclusion / embedded references | live kept-in-sync view of another topic (single-parent-safe) | `?·med·L·missing` |

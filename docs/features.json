@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 374,
+  "reviewedThroughChangelogBullets": 375,
   "areas": [
     "editing",
     "notes",
@@ -1911,6 +1911,24 @@
       "name": "Screen-reader lists for boundaries / summaries / callouts",
       "area": "navigation",
       "since": "2026-06-30",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cross-map-backlinks",
+      "name": "Cross-map backlinks — inspector 'Linked from other maps'",
+      "area": "structure",
+      "since": "2026-07-01",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "cross-map-topic-picker",
+      "name": "Cross-map topic picker — refine a #map= link to a specific topic",
+      "area": "structure",
+      "since": "2026-07-01",
       "manual": false,
       "book": false,
       "bookExample": false

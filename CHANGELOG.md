@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **`[[` / `@` name-based link autocomplete (UI review — gap group 3).** Type `[[` or `@` while editing
+  a topic to open a name picker over the map's topics; pick one to drop its name into the text and
+  attach the link. The first link becomes the node's primary `hyperlink` (the canvas 🔗), further ones
+  its additional `hyperlinks` (composing with multiple-links-per-topic). Built on a pure, unit-tested
+  core (caret-anchored trigger detection — nearest of `[[`/`@` wins, `@` only at a word boundary, no
+  cross-line spans — buffer rewrite, candidate matching) and reuses the slash menu's key routing +
+  popup; the two menus are mutually exclusive (leading `/` vs mid-text `[[`/`@`). This closes the last
+  deferred item from the best-in-class gap review.
+
 - **Slash `/` command menu (UI review — gap group 8).** Type `/` at the start of a topic to open a
   keyboard-driven insert menu: filter as you type, Arrow keys + Enter/Tab to pick, Escape to close (or
   click a row). Commands act on the current node — add child / sibling, mark to-do / done, due today,

@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Multiple hyperlinks per topic (UI review — gap group 3).** A topic can point at more than one
+  place. The primary `hyperlink` stays canonical (the canvas 🔗 and every exporter use it); an additive
+  `hyperlinks?: string[]` holds the extras, managed in the inspector's Links section ("Additional
+  links" — type + Enter to add, per-row open/remove). Extras are picked up everywhere links matter:
+  Find searches them (and they satisfy the has-a-link filter), and all four link scans (in-map
+  backlinks, outgoing links, cross-map backlinks, the map-wide link layer) treat a multi-link topic
+  exactly like a single-link one. Unsafe/blank links are stripped on load and never persist. (v1 shows
+  only the primary 🔗 on the canvas; extras are inspector-managed.)
+
 - **High-contrast theme + OS awareness (UI review — gap group 10).** An accessibility high-contrast
   mode for the chrome: Settings ▸ Appearance ▸ High contrast (System / On / Off). "System" follows the
   OS `prefers-contrast: more` or `forced-colors: active`. When on, the neutral `--ed-*` chrome tokens

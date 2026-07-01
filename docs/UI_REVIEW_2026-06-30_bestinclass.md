@@ -126,7 +126,7 @@ The deepest backlog; several items brush the decided-against "no graph" boundary
 | Name-based link autocomplete | `[[`/`@` wiki-link authoring | `in·med·M·partial` |
 | ~~In-note in-app links~~ ✅ shipped | `[text](#node=…/#map=…)` in a note routes through the canvas | `done` |
 | Transclusion / embedded references | live kept-in-sync view of another topic (single-parent-safe) | `?·med·L·missing` |
-| Multiple hyperlinks per topic | a list of links, not one | `in·low·M·partial` |
+| ~~Multiple hyperlinks per topic~~ ✅ shipped | a list of links, not one | `done` |
 | Tags-as-navigation pane | tag browser with counts → filter/jump | `?·low·S·partial` |
 | Topic aliases / alternate names | resolve links + search under multiple labels | `?·low·S·missing` |
 | Directional / reverse relationship labels | "blocks" forward / "blocked by" reverse | `?·low·S·missing` |

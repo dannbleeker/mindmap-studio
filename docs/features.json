@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 378,
+  "reviewedThroughChangelogBullets": 379,
   "areas": [
     "editing",
     "notes",
@@ -1964,6 +1964,15 @@
       "id": "high-contrast-theme",
       "name": "High-contrast theme — OS prefers-contrast/forced-colors + in-app toggle",
       "area": "navigation",
+      "since": "2026-07-01",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "multiple-hyperlinks",
+      "name": "Multiple hyperlinks per topic — additional links beyond the primary (inspector-managed)",
+      "area": "structure",
       "since": "2026-07-01",
       "manual": false,
       "book": false,

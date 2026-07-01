@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 377,
+  "reviewedThroughChangelogBullets": 378,
   "areas": [
     "editing",
     "notes",
@@ -1955,6 +1955,15 @@
       "id": "quick-capture-inbox",
       "name": "Quick-capture inbox — map-independent 'Unfiled' bucket, file onto a map later",
       "area": "editing",
+      "since": "2026-07-01",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "high-contrast-theme",
+      "name": "High-contrast theme — OS prefers-contrast/forced-colors + in-app toggle",
+      "area": "navigation",
       "since": "2026-07-01",
       "manual": false,
       "book": false,

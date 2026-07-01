@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **High-contrast theme + OS awareness (UI review — gap group 10).** An accessibility high-contrast
+  mode for the chrome: Settings ▸ Appearance ▸ High contrast (System / On / Off). "System" follows the
+  OS `prefers-contrast: more` or `forced-colors: active`. When on, the neutral `--ed-*` chrome tokens
+  go to their extremes — hard black/white borders + dividers, max-contrast text, and a denser accent
+  focus ring — while surfaces stay put so the layout is unchanged. Focus rings become always-on and
+  bold, chrome links gain underlines, and under forced-colors the canvas keeps its per-topic palette
+  (the mind-map colours carry meaning) while focus uses the system `Highlight`.
+
 - **Quick-capture inbox (UI review — gap group 1).** A map-independent "Unfiled" bucket (View ▸
   Inbox): jot a thought from any map — or none — and file it onto the current map later. Filing adds
   it as a floating topic (in one undo step) and drops it from the inbox; captures persist across maps

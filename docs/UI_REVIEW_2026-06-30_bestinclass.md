@@ -227,7 +227,7 @@ A11y is already strong; these are the genuine remaining deltas.
 | Gap | What | Tags |
 |---|---|---|
 | Touch drag-and-drop fallback | outline/board/marker DnD use HTML5 drag → dead on touch | `in·high·M·partial` |
-| High-contrast theme + `prefers-contrast`/`forced-colors` | OS-aware high-contrast | `in·high·M·missing` |
+| ~~High-contrast theme + `prefers-contrast`/`forced-colors`~~ ✅ shipped | OS-aware high-contrast | `done` |
 | ~~Keyboard reorder/indent in the Outline tree~~ ✅ shipped | Shift+↑/↓ reorder, Shift+←/→ outdent/indent | `done` |
 | i18n / localization | UI strings English-only, no locale layer | `?·med·L·missing` |
 | ~~SR exposure of canvas overlays~~ ✅ shipped | CanvasOverlaysSR lists boundaries/summaries/callouts for AT | `done` |

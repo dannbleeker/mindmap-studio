@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Space-bar pan (A1).** Hold the space bar and left-drag to pan the canvas from anywhere — even when
+  the drag starts over a topic (a plain node drag re-parents it in tree mode). While held, topics go
+  pointer-inert (a `.mm-space-pan` class → `pointer-events:none`, beating React Flow's inline style +
+  `nopan`) so the drag falls through to the pane, and the cursor becomes a grab hand. Guarded against
+  the inline editor / any text field so a typed space still types; a window blur clears the mode.
+  Added to the Shortcuts cheat-sheet (View) and the USER_GUIDE.
+
 - **`[[` / `@` name-based link autocomplete (UI review — gap group 3).** Type `[[` or `@` while editing
   a topic to open a name picker over the map's topics; pick one to drop its name into the text and
   attach the link. The first link becomes the node's primary `hyperlink` (the canvas 🔗), further ones

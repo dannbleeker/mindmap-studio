@@ -369,6 +369,11 @@ function FlowInner({
   } | null>(null);
   // While set, the next node click completes a relationship from this node (the "Link to…" gesture).
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
+  // Space-bar pan (A1): while the space bar is held the canvas enters "pan from anywhere" mode. Left
+  // drag already pans the background, but in tree mode a drag that starts *on a topic* re-parents it —
+  // so holding space makes every node pointer-inert (via the `.mm-space-pan` wrapper class), letting the
+  // drag fall through to the pane's pan even over a topic, with a grab cursor. Matches Figma / XMind.
+  const [spacePan, setSpacePan] = useState(false);
   // The corner minimap can be collapsed (it covers dense maps); the choice persists.
   const [minimapOpen, setMinimapOpen] = useState(() => {
     try {
@@ -1579,6 +1584,38 @@ function FlowInner({
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
 
+  // Space-bar pan (A1): hold Space → "pan from anywhere" (see the spacePan state). Guarded against the
+  // inline topic editor / any text field so a typed space still types; preventDefault on keydown stops
+  // the page from scrolling. A window blur resets the flag so the mode can't get stuck held.
+  useEffect(() => {
+    const inField = () => {
+      const el = document.activeElement as HTMLElement | null;
+      return (
+        !!editingRef.current ||
+        !!el?.isContentEditable ||
+        (!!el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))
+      );
+    };
+    const onDown = (e: KeyboardEvent) => {
+      if (e.code !== "Space" && e.key !== " ") return;
+      if (e.repeat || inField()) return;
+      e.preventDefault();
+      setSpacePan(true);
+    };
+    const onUp = (e: KeyboardEvent) => {
+      if (e.code === "Space" || e.key === " ") setSpacePan(false);
+    };
+    const reset = () => setSpacePan(false);
+    document.addEventListener("keydown", onDown);
+    document.addEventListener("keyup", onUp);
+    window.addEventListener("blur", reset);
+    return () => {
+      document.removeEventListener("keydown", onDown);
+      document.removeEventListener("keyup", onUp);
+      window.removeEventListener("blur", reset);
+    };
+  }, []);
+
   const withSelected = useCallback((fn: (id: string) => void): boolean => {
     const id = selectedRef.current;
     if (!id) return false;
@@ -2020,6 +2057,9 @@ function FlowInner({
           // ReactFlow SVG graph is an anonymous box) and the skip-link has a target (#mm-canvas).
           // A <section> with an accessible name is a navigable landmark — better than role on a div.
           id="mm-canvas"
+          // `mm-space-pan` (A1): while the space bar is held, editor.css makes topics pointer-inert and
+          // shows a grab/grabbing cursor so a left drag pans from anywhere, even over a topic.
+          className={spacePan ? "mm-space-pan" : undefined}
           tabIndex={-1}
           aria-roledescription="mind map canvas"
           aria-label={`Mind map: ${renderDoc.title?.trim() || "Untitled"}`}
@@ -2108,7 +2148,10 @@ function FlowInner({
             onEdgesChange={onEdgesChange}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            nodesDraggable
+            // While space-pan is held, nodes are made pointer-inert by the `.mm-space-pan` class on the
+            // wrapper (pointer-events:none in editor.css), so a left drag falls through to the pane and
+            // pans even over a topic; `nodesDraggable={!spacePan}` keeps RF's drag state in agreement. (A1)
+            nodesDraggable={!spacePan}
             // Drag-to-relate: pulling from a topic's hover handle onto another topic draws a cross-link
             // (loose mode lets the drag end anywhere on the target node, not just its anchor handle).
             nodesConnectable

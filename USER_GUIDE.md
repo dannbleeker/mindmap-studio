@@ -365,6 +365,11 @@ lining one up before a screenshot or screen-share. When the overview is in the w
 A slim **status bar** along the bottom shows the topic count, how many topics are selected, and the
 live zoom %.
 
+**Pan the canvas** by dragging any empty space. On a dense map where empty space is scarce, **hold
+the space bar and drag** — the cursor turns into a grab hand and the drag pans from anywhere, even
+when it starts over a topic (without the space bar that same drag would move the topic). Release the
+space bar to go back to normal.
+
 ### Layout
 
 The **Layout** dropdown changes how the whole map is arranged; the choice is remembered and the

@@ -75,6 +75,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
     title: "View",
     items: [
       { keys: "Drag the background", action: "Pan the canvas" },
+      { keys: "Space + drag", action: "Pan the canvas (even over a topic)" },
       { keys: "Scroll / ⌘ + scroll", action: "Zoom in and out" },
       { keys: "Shift + 1", action: "Fit the whole map to view" },
       { keys: "Shift + 2", action: "Fit the selection to view" },

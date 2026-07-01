@@ -1011,6 +1011,21 @@
   pointer-events: none;
 }
 
+/* Space-bar pan (A1): while the space bar is held the canvas wrapper gets `.mm-space-pan`. Topics go
+   pointer-inert so a left drag falls through to React Flow's pane and pans even when it starts over a
+   topic (a plain node drag would re-parent it in tree mode); the pane shows a grab / grabbing cursor.
+   React Flow sets `pointer-events:all` inline on every node and marks it `.nopan`, so `!important` is
+   the only way a class can beat that inline style. */
+.mm-space-pan .react-flow__node {
+  pointer-events: none !important;
+}
+.mm-space-pan .react-flow__pane {
+  cursor: grab;
+}
+.mm-space-pan .react-flow__pane:active {
+  cursor: grabbing;
+}
+
 /* Drag-to-relate grip — hidden until the topic is hovered (or the grip itself is), so it's
    discoverable without cluttering every node. React Flow renders handles inside .react-flow__node. */
 .react-flow__node .mm-relate-handle {

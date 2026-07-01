@@ -18,6 +18,7 @@ import { toPercent } from "../../progress";
 import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
 import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
+import { handleEditorKeyDown } from "./editorKeys";
 import { matchBorderColor } from "./geometry";
 import { showNodeAffordances } from "./nodeChrome";
 import { relateGripTopCss } from "./relateGripGeometry";
@@ -648,24 +649,12 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               className="nodrag nopan"
               style={{ outline: "none", display: "inline-block", minWidth: 16 }}
               onKeyDown={(e) => {
-                // Inline formatting: Ctrl/Cmd + B / I / U (execCommand works in contenteditable).
-                if ((e.ctrlKey || e.metaKey) && /^[biu]$/i.test(e.key)) {
-                  e.preventDefault();
-                  const k = e.key.toLowerCase();
-                  document.execCommand(k === "b" ? "bold" : k === "i" ? "italic" : "underline");
-                  return;
-                }
                 const html = editRef.current?.innerHTML ?? "";
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  editing?.commitAndAdd(id, html, "sibling");
-                } else if (e.key === "Tab") {
-                  e.preventDefault();
-                  editing?.commitAndAdd(id, html, "child");
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  editing?.cancelEdit(html);
-                }
+                handleEditorKeyDown(e, {
+                  format: (cmd) => document.execCommand(cmd),
+                  commitAndAdd: (what) => editing?.commitAndAdd(id, html, what),
+                  cancel: () => editing?.cancelEdit(html),
+                });
               }}
               onBlur={() => editing?.commitEdit(id, editRef.current?.innerHTML ?? "")}
             />

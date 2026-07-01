@@ -91,7 +91,7 @@ The single richest cluster; mostly offline UI over existing model fields.
 | ~~URL → page title resolution~~ ✅ shipped | paste a link → de-slugged readable title, not the bare URL | `done` |
 | Node slash-commands (`/` menu) | insert icon/marker/link/note/child/boundary/date from the keyboard | `in·high·M·missing` |
 | Quick-capture inbox | jot now into an Unfiled bucket, file onto the map later | `in·med·M·missing` |
-| Markdown shorthand → structure on paste | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `in·med·M·partial` |
+| ~~Markdown shorthand → structure on paste~~ ✅ shipped | `[text](url)`/`- [ ]`/`**bold**` populate hyperlink/task/rich-text | `done` |
 | Rich HTML paste → nodes | preserve inline formatting + split lists/headings into nodes | `in·med·M·partial` |
 | Inline tokens on add (`#tag !priority @resource`) | lift typed tokens onto structured fields | `?·med·M·missing` |
 | Natural-language date entry (chrono-node) | "next fri" → ISO date | `?·med·S·missing` |
@@ -232,7 +232,7 @@ A11y is already strong; these are the genuine remaining deltas.
 | i18n / localization | UI strings English-only, no locale layer | `?·med·L·missing` |
 | ~~SR exposure of canvas overlays~~ ✅ shipped | CanvasOverlaysSR lists boundaries/summaries/callouts for AT | `done` |
 | ~~Reduced-motion at JS motion sites~~ ✅ shipped | canvas zoom/fit/centre + guided-walk zoom honour reduced motion | `done` |
-| Long-press context menu on touch | press-and-hold = right-click | `in·med·S·partial` |
+| ~~Long-press context menu on touch~~ ✅ shipped | press-and-hold = right-click | `done` |
 | RTL layout support | `dir=rtl`, logical CSS, right-growing maps | `?·low·L·missing` |
 | ~~In-app motion/animation toggle~~ ✅ shipped | Settings → Reduce motion (System / On / Off) | `done` |
 | Focus trap + return-focus for hand-rolled overlays | Find/Replace, BulkNodeMenu, NodePopover | `in·low·S·partial` |

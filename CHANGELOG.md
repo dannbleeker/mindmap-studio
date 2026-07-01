@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Deferred-backlog wave 2 — capture & touch (UI review — gap groups 1/10).**
+  - **Markdown shorthand on paste** — the paste-to-topics parser reads inline markdown per line:
+    `- [ ]`/`- [x]` → a 0%/100% task, a whole-line `[text](url)` → a topic with that hyperlink (safe
+    schemes only), and `**bold**`/`_italic_`/`` `code` `` capture as plain text. Applies to the Paste
+    dialog and multi-line burst quick-capture.
+  - **Long-press context menu on touch** — a `useLongPress` hook opens the canvas menu on a stationary
+    touch/pen press (a pan cancels), since touch has no right-click.
+
 - **Deferred-backlog wave 1 — cross-map linking (UI review — gap group 3).** Completing the link layer:
   - **Cross-map backlinks** — the inspector's "Linked from other maps" lists topics in other library maps
     that link here (via `#map=` hyperlinks), click-to-navigate. The scan loads other maps lazily (only

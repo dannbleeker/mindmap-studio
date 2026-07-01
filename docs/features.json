@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 375,
+  "reviewedThroughChangelogBullets": 376,
   "areas": [
     "editing",
     "notes",
@@ -1928,6 +1928,24 @@
       "id": "cross-map-topic-picker",
       "name": "Cross-map topic picker — refine a #map= link to a specific topic",
       "area": "structure",
+      "since": "2026-07-01",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "smart-paste-markdown",
+      "name": "Markdown shorthand on paste — checkboxes, links, and emphasis parse into structure",
+      "area": "editing",
+      "since": "2026-07-01",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "long-press-menu",
+      "name": "Long-press context menu on touch/pen",
+      "area": "navigation",
       "since": "2026-07-01",
       "manual": false,
       "book": false,

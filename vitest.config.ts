@@ -62,6 +62,7 @@ export default defineConfig({
       ["test/use-note-editor.test.tsx", "jsdom"],
       ["test/use-disk-file.test.tsx", "jsdom"],
       ["test/use-idb-autosave.test.tsx", "jsdom"],
+      ["test/natural-date-input.test.tsx", "jsdom"],
       ["test/app-integration.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only

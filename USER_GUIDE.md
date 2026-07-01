@@ -186,6 +186,11 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
 - **Dates** — set a **Start** and **Due** date; a **📅 chip** appears on the node and turns **red when
   overdue** (past due and not yet 100%). Clearing a date removes the chip. Dates are carried into
   image exports and saved with the map; the [Power Filter](#power-filter) can filter by due date.
+  - **Type a date in plain language.** Each date field accepts natural language and resolves it when you
+    press **Enter** or **Tab** away: `today`, `tomorrow`, `yesterday`, `+7d` (seven days from now),
+    `next fri`, or a weekday name like `monday`. It also takes an exact `YYYY-MM-DD`. If it can't read
+    what you typed the field turns red and keeps its old value. The **📅 button** beside the field opens
+    the calendar picker as before.
 - **Priority** — set **High / Med / Low**; a small coloured chip shows on the node (✕ clears it).
   Unlike the emoji priority markers, this is a structured value the [Power Filter](#power-filter) can
   filter by.

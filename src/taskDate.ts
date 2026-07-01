@@ -44,6 +44,68 @@ export function addDaysISO(iso: string, n: number): string {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
 }
 
+// Weekday names → index (0=Sun..6=Sat), full + common abbreviations, for natural-language dates.
+const WEEKDAYS: Record<string, number> = {
+  sunday: 0,
+  sun: 0,
+  monday: 1,
+  mon: 1,
+  tuesday: 2,
+  tue: 2,
+  tues: 2,
+  wednesday: 3,
+  wed: 3,
+  weds: 3,
+  thursday: 4,
+  thu: 4,
+  thur: 4,
+  thurs: 4,
+  friday: 5,
+  fri: 5,
+  saturday: 6,
+  sat: 6,
+};
+
+/** The weekday index (0=Sun..6=Sat) of an ISO date, via local-calendar arithmetic. */
+function isoWeekday(iso: string): number {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).getDay();
+}
+
+/**
+ * Resolve a natural-language date expression to an ISO "YYYY-MM-DD" string. Pure — `today` is passed in
+ * as ISO so it stays deterministic + unit-tested (mirrors the rest of this module). Supported,
+ * case-insensitively and trim-tolerant:
+ *   - "" (empty / whitespace) → "" — clears the field
+ *   - a literal ISO date "YYYY-MM-DD" (validated: an impossible date like 2026-02-30 is rejected)
+ *   - "today" / "tomorrow" / "yesterday"
+ *   - "+Nd" / "-Nd" (N days from today; the trailing "d"/"day"/"days" is required)
+ *   - a weekday ("friday", "fri") or "next <weekday>" — BOTH the soonest *future* occurrence of that
+ *     weekday (today counts as passed, so "monday" on a Monday jumps a week)
+ * Returns `null` when the input can't be parsed (the caller leaves the field unchanged + hints).
+ */
+export function parseNaturalDate(input: string, today: string): string | null {
+  const raw = input.trim();
+  if (!raw) return ""; // empty clears the date
+  const s = raw.toLowerCase();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    // Round-trip through the local-calendar arithmetic: a normalised value that differs from the input
+    // (e.g. 2026-02-30 → 2026-03-02) means the input wasn't a real calendar date.
+    return addDaysISO(raw, 0) === raw ? raw : null;
+  }
+  if (s === "today") return today;
+  if (s === "tomorrow") return addDaysISO(today, 1);
+  if (s === "yesterday") return addDaysISO(today, -1);
+  const rel = /^([+-])\s*(\d+)\s*d(?:ays?)?$/.exec(s);
+  if (rel) return addDaysISO(today, (rel[1] === "-" ? -1 : 1) * Number(rel[2]));
+  const wd = /^(?:next\s+)?([a-z]+)$/.exec(s);
+  if (wd && wd[1] in WEEKDAYS) {
+    const delta = (WEEKDAYS[wd[1]] - isoWeekday(today) + 7) % 7 || 7; // strictly future (1..7)
+    return addDaysISO(today, delta);
+  }
+  return null;
+}
+
 /** Past its due date and not finished. Pure (pass `today`). */
 export function isOverdue(
   due: string | undefined,

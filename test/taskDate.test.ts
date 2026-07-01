@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { addDaysISO, formatDateShort, isDueSoon, isOverdue } from "../src/taskDate";
+import {
+  addDaysISO,
+  formatDateShort,
+  isDueSoon,
+  isOverdue,
+  parseNaturalDate,
+} from "../src/taskDate";
 
-const TODAY = "2026-06-14";
+const TODAY = "2026-06-14"; // a Sunday
 
 describe("formatDateShort", () => {
   it("formats an ISO date as 'Mon D'", () => {
@@ -45,5 +51,40 @@ describe("isDueSoon", () => {
   it("honours a custom window (days)", () => {
     expect(isDueSoon("2026-06-17", 0, TODAY, 3)).toBe(true); // within 3 days
     expect(isDueSoon("2026-06-18", 0, TODAY, 3)).toBe(false); // outside 3 days
+  });
+});
+
+describe("parseNaturalDate", () => {
+  it("clears on empty / whitespace", () => {
+    expect(parseNaturalDate("", TODAY)).toBe("");
+    expect(parseNaturalDate("   ", TODAY)).toBe("");
+  });
+  it("passes through a valid ISO date and rejects impossible ones", () => {
+    expect(parseNaturalDate("2026-07-01", TODAY)).toBe("2026-07-01");
+    expect(parseNaturalDate("2026-02-30", TODAY)).toBeNull();
+    expect(parseNaturalDate("2026-13-01", TODAY)).toBeNull();
+  });
+  it("resolves today / tomorrow / yesterday", () => {
+    expect(parseNaturalDate("today", TODAY)).toBe("2026-06-14");
+    expect(parseNaturalDate("Tomorrow", TODAY)).toBe("2026-06-15");
+    expect(parseNaturalDate("  yesterday ", TODAY)).toBe("2026-06-13");
+  });
+  it("resolves +Nd / -Nd offsets", () => {
+    expect(parseNaturalDate("+7d", TODAY)).toBe("2026-06-21");
+    expect(parseNaturalDate("+0d", TODAY)).toBe(TODAY);
+    expect(parseNaturalDate("-2d", TODAY)).toBe("2026-06-12");
+    expect(parseNaturalDate("+10 days", TODAY)).toBe("2026-06-24");
+  });
+  it("resolves weekdays as the soonest future occurrence (today counts as passed)", () => {
+    // 2026-06-14 is a Sunday.
+    expect(parseNaturalDate("monday", TODAY)).toBe("2026-06-15");
+    expect(parseNaturalDate("next Friday", TODAY)).toBe("2026-06-19");
+    expect(parseNaturalDate("fri", TODAY)).toBe("2026-06-19");
+    expect(parseNaturalDate("sunday", TODAY)).toBe("2026-06-21"); // not today — a week ahead
+  });
+  it("returns null for gibberish", () => {
+    expect(parseNaturalDate("someday", TODAY)).toBeNull();
+    expect(parseNaturalDate("next quarter", TODAY)).toBeNull();
+    expect(parseNaturalDate("42", TODAY)).toBeNull();
   });
 });

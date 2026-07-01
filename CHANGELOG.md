@@ -7,6 +7,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Natural-language date entry (A5).** The Start / Due date fields in the inspector now accept plain
+  language — `today`, `tomorrow`, `yesterday`, `+7d`, `next fri`, a weekday name, or an exact ISO date —
+  resolved to `YYYY-MM-DD` on blur / Enter. Unparseable input turns the field red and leaves the value
+  unchanged; the 📅 button still opens the native calendar picker. Parsing is a dependency-free pure
+  `parseNaturalDate(input, today)` (no chrono-node — the offline PWA's tight bundle budget rules out a
+  30 KB date library for six expressions), fully unit-tested, plus a `NaturalDateInput` component test.
+
 - **Drag-to-relate now prompts for a label (B1).** Dragging a topic's relate grip onto another topic
   now opens the same optional-label prompt as the right-click **Link to…** path (previously it created
   an unlabelled relationship silently). One consistent relationship-creation flow across all three

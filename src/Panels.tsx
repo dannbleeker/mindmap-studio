@@ -74,7 +74,7 @@ import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
 import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from "./stickers";
 import { MAX_VERSIONS, type VersionMeta } from "./store/mapStore";
-import { formatDateShort } from "./taskDate";
+import { formatDateShort, parseNaturalDate, todayISO } from "./taskDate";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
 import {
   WRAP_MAX,
@@ -103,6 +103,106 @@ const styleBtn = {
   padding: `${space.xxs}px ${space.md}px`,
   color: "var(--ed-ink)",
 } as const;
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+// A Start/Due date field that also accepts natural language (A5): type "today", "+7d", "next fri",
+// etc. and it resolves to an ISO date on blur / Enter (see parseNaturalDate). Unparseable text is left
+// unchanged with a brief red hint. The native calendar picker stays available via the 📅 button
+// (showPicker on a visually-hidden <input type="date">). Callers key it by node id + mixed flag so the
+// text resets when the selection or bulk mixed-ness changes. Exported for unit testing.
+export function NaturalDateInput({
+  value,
+  mixed = false,
+  onSet,
+  ariaLabel,
+}: {
+  /** The current ISO value ("YYYY-MM-DD"), or "" when unset. */
+  value: string;
+  /** Bulk mode where the selected topics disagree — show empty, don't pre-fill the anchor's date. */
+  mixed?: boolean;
+  /** Commit a resolved ISO date (or "" to clear). */
+  onSet: (iso: string) => void;
+  ariaLabel: string;
+}) {
+  const [text, setText] = useState(mixed ? "" : value);
+  const [err, setErr] = useState(false);
+  const dateRef = useRef<HTMLInputElement>(null);
+
+  const commit = () => {
+    const iso = parseNaturalDate(text, todayISO());
+    if (iso === null) {
+      setErr(true);
+      setText(mixed ? "" : value); // couldn't read it — leave the date unchanged
+      return;
+    }
+    setErr(false);
+    setText(iso);
+    onSet(iso);
+  };
+
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 2, position: "relative" }}>
+      <input
+        type="text"
+        className="mm-prim-input"
+        value={text}
+        placeholder="e.g. next fri, +7d"
+        onChange={(e) => {
+          setText(e.target.value);
+          if (err) setErr(false);
+        }}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          }
+        }}
+        aria-label={ariaLabel}
+        aria-invalid={err || undefined}
+        title={err ? "Couldn't read that date — try “today”, “+7d”, or “next fri”." : undefined}
+        style={{
+          ...inputStyle,
+          width: 104,
+          padding: "2px 4px",
+          // Override the whole `border` shorthand (not just borderColor) so we never mix shorthand +
+          // longhand for the same property across rerenders (React warns on that).
+          ...(err ? { border: "1px solid var(--ed-danger)" } : {}),
+        }}
+      />
+      <button
+        type="button"
+        aria-label={`${ariaLabel}: pick from calendar`}
+        title="Pick from calendar"
+        onClick={() => {
+          try {
+            dateRef.current?.showPicker?.();
+          } catch {
+            // showPicker throws if unsupported / not user-activated — the text field still works.
+          }
+        }}
+        style={{ ...styleBtn, fontSize: fontSize.sm, padding: "2px 4px", lineHeight: 1 }}
+      >
+        📅
+      </button>
+      {/* Visually hidden but rendered (showPicker needs a laid-out element); commits ISO directly. */}
+      <input
+        ref={dateRef}
+        type="date"
+        value={ISO_DATE.test(text) ? text : ""}
+        onChange={(e) => {
+          setText(e.target.value);
+          setErr(false);
+          onSet(e.target.value);
+        }}
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{ position: "absolute", left: 0, bottom: 0, width: 1, height: 1, opacity: 0 }}
+      />
+    </span>
+  );
+}
 
 // A clickable list row inside the rail panels (outline rows, index jump targets, saved-filter +
 // named-style rows): a full-width, left-aligned, single-line-ellipsised transparent button. Callers
@@ -2979,33 +3079,29 @@ export function InfoPanel({
                         color: "var(--ed-muted)",
                       }}
                     >
+                      {/* biome-ignore lint/a11y/noLabelWithoutControl: NaturalDateInput renders a real
+                        <input> inside, so the label associates with it at runtime (biome can't see
+                        through the component); the input also self-labels via ariaLabel. */}
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
                         Start
-                        {/* Native input (not the Input primitive) so it stays nested in its label; the
-                          mm-prim-input class lets the .mm-inspector theme override re-skin it. The key
-                          includes the mixed flag so the uncontrolled input remounts (and clears its
-                          defaultValue) when bulk mixed-ness flips — never pre-filling the anchor's date. */}
-                        <input
+                        <NaturalDateInput
                           key={`${node.id}:start${mixed.start ? ":mixed" : ""}`}
-                          className="mm-prim-input"
-                          type="date"
-                          defaultValue={mixed.start ? "" : (node.task?.start ?? "")}
-                          onChange={(e) => onSetStart(e.target.value)}
-                          aria-label="Start date"
-                          style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+                          value={node.task?.start ?? ""}
+                          mixed={mixed.start}
+                          onSet={onSetStart}
+                          ariaLabel="Start date"
                         />
                         {mixed.start ? mixedHint : null}
                       </label>
+                      {/* biome-ignore lint/a11y/noLabelWithoutControl: see the Start label above. */}
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
                         Due
-                        <input
+                        <NaturalDateInput
                           key={`${node.id}:due${mixed.due ? ":mixed" : ""}`}
-                          className="mm-prim-input"
-                          type="date"
-                          defaultValue={mixed.due ? "" : (node.task?.due ?? "")}
-                          onChange={(e) => onSetDue(e.target.value)}
-                          aria-label="Due date"
-                          style={{ ...inputStyle, width: "auto", padding: "2px 4px" }}
+                          value={node.task?.due ?? ""}
+                          mixed={mixed.due}
+                          onSet={onSetDue}
+                          ariaLabel="Due date"
                         />
                         {mixed.due ? mixedHint : null}
                       </label>

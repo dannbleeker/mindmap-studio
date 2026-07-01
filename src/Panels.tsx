@@ -3,6 +3,7 @@ import {
   type ClipboardEvent as ReactClipboardEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
+  type PointerEvent as ReactPointerEvent,
   useEffect,
   useMemo,
   useRef,
@@ -702,6 +703,70 @@ export function OutlinePanel({
   );
   const dragId = useRef<string | null>(null);
 
+  // Touch drag-reorder (A6): HTML5 drag events don't fire on touch, so on a coarse pointer we run our
+  // own long-press → drag. Press and hold a row (~350ms without moving) to pick it up, then slide over
+  // other rows to reorder (the same before/child/after zones as the mouse path), and lift to drop.
+  // Mouse keeps the native HTML5 `draggable` path above (onPointerDown bails on pointerType "mouse").
+  const touchDrag = useRef<{
+    id: string;
+    pointerId: number;
+    dragging: boolean;
+    drop: { id: string; where: "before" | "child" | "after" } | null;
+  } | null>(null);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelTouchDrag = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+    touchDrag.current = null;
+    setDrop(null);
+  };
+  const onRowPointerDown = (e: ReactPointerEvent<HTMLDivElement>, id: string, canDrag: boolean) => {
+    if (e.pointerType === "mouse" || !canDrag) return; // mouse uses the HTML5 drag path
+    const el = e.currentTarget;
+    const pointerId = e.pointerId;
+    touchDrag.current = { id, pointerId, dragging: false, drop: null };
+    pressTimer.current = setTimeout(() => {
+      const td = touchDrag.current;
+      if (!td) return;
+      td.dragging = true; // long-press held still → we own the gesture now
+      try {
+        el.setPointerCapture(pointerId);
+      } catch {
+        // capture can fail if the pointer already went up; the up handler still cleans up
+      }
+    }, 350);
+  };
+  const onRowPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const td = touchDrag.current;
+    if (!td) return;
+    if (!td.dragging) {
+      // Moved before the long-press fired → it's a scroll, not a drag: let the list scroll.
+      cancelTouchDrag();
+      return;
+    }
+    e.preventDefault(); // captured pointer — suppress the scroll while dragging
+    const row = (document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null)?.closest(
+      "[data-outline-id]",
+    );
+    const targetId = row?.getAttribute("data-outline-id");
+    if (!row || !targetId || targetId === td.id) {
+      td.drop = null;
+      setDrop(null);
+      return;
+    }
+    const r = row.getBoundingClientRect();
+    const next = { id: targetId, where: outlineDropWhere((e.clientY - r.top) / r.height) };
+    td.drop = next;
+    setDrop(next);
+  };
+  const onRowPointerUp = () => {
+    const td = touchDrag.current;
+    if (td?.dragging && td.drop && td.drop.id !== td.id && onMove) {
+      onMove(td.id, td.drop.id, td.drop.where);
+    }
+    cancelTouchDrag();
+  };
+
   const startEdit = (id: string, topic: string) => {
     setEditId(id);
     setDraft(topic);
@@ -874,6 +939,7 @@ export function OutlinePanel({
               aria-expanded={hasChildren(i) ? true : undefined}
               tabIndex={row.id === activeRow ? 0 : -1}
               className="mm-outline-row"
+              data-outline-id={row.id}
               onFocus={() => setActiveId(row.id)}
               style={{
                 display: "flex",
@@ -886,6 +952,12 @@ export function OutlinePanel({
                   dropHere === "after" ? "2px solid var(--ed-accent)" : "2px solid transparent",
               }}
               draggable={canDrag}
+              // Touch drag-reorder (A6) — long-press to pick up, slide, lift to drop (mouse ignores these
+              // and uses the HTML5 handlers below).
+              onPointerDown={(e) => onRowPointerDown(e, row.id, canDrag)}
+              onPointerMove={onRowPointerMove}
+              onPointerUp={onRowPointerUp}
+              onPointerCancel={cancelTouchDrag}
               onDragStart={(e) => {
                 dragId.current = row.id;
                 e.dataTransfer.effectAllowed = "move";

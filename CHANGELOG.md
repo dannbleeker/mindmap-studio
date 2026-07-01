@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Touch drag-to-reorder in the Outline (A6).** HTML5 drag events never fire on touch, so the Outline
+  panel now runs its own long-press → pointer drag on a coarse pointer: press and hold a row for a
+  moment to pick it up, slide over other rows (the same before / child / after drop zones), and lift to
+  drop. Mouse still uses the native HTML5 drag; a move before the hold is treated as a scroll. Backed by
+  a jsdom test that drives the real pointer handlers (mocked layout + fake timers). The marker palette
+  already has a touch path — tapping a marker toggles it on the selected topic(s) — so its drag stays a
+  mouse convenience (documented, not re-implemented cross-surface).
+
 - **Natural-language date entry (A5).** The Start / Due date fields in the inspector now accept plain
   language — `today`, `tomorrow`, `yesterday`, `+7d`, `next fri`, a weekday name, or an exact ISO date —
   resolved to `YYYY-MM-DD` on blur / Enter. Unparseable input turns the field red and leaves the value

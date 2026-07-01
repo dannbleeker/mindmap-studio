@@ -246,7 +246,10 @@ branch without scrolling.
 
 **☰ Outline** opens a live, indented outline of the whole map. Click any row to jump to that
 node on the canvas. The **Filter outline…** box narrows the list to matching topics; 📝 marks
-noted nodes.
+noted nodes. **Drag a row** to reorder or re-nest it (drop on the top/bottom edge to place it
+before/after, or in the middle to nest it as a child); with a keyboard, **Shift + ↑/↓** reorders and
+**Shift + ←/→** promotes/demotes the focused row. **On a touch screen, press and hold a row** for a
+moment to pick it up, then slide and lift to drop.
 
 ### Auto-numbering
 

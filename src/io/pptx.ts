@@ -12,7 +12,7 @@
 // interpolated. Reuses the same slide model the in-app presentation renders.
 
 import type { MapNode, MindMapDoc } from "../model/types";
-import { presentationSlides } from "../present/slides";
+import { resolveSlides } from "../present/slides";
 import { escapeXml, zipOoxml } from "./ooxml";
 
 const A = "http://schemas.openxmlformats.org/drawingml/2006/main";
@@ -25,12 +25,14 @@ const REL_MASTER = `${R}/slideMaster`;
 const REL_LAYOUT = `${R}/slideLayout`;
 const REL_SLIDE = `${R}/slide`;
 const REL_THEME = `${R}/theme`;
+const REL_NOTESSLIDE = `${R}/notesSlide`;
 
 const CT_PRESENTATION =
   "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml";
 const CT_MASTER = "application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml";
 const CT_LAYOUT = "application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml";
 const CT_SLIDE = "application/vnd.openxmlformats-officedocument.presentationml.slide+xml";
+const CT_NOTES = "application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml";
 const CT_THEME = "application/vnd.openxmlformats-officedocument.theme+xml";
 
 // Geometry in EMU (914400 per inch). 16:9 slide.
@@ -99,6 +101,28 @@ function slideXml(title: string, body: BodyLine[]): string {
   return `${XML_DECL}<p:sld xmlns:a="${A}" xmlns:r="${R}" xmlns:p="${P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${titleSp}${bodySp}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
 }
 
+// Speaker-notes slide (B5). PowerPoint stores notes as separate parts referenced from the slide. Notes
+// are plain text in PresentationML, so a Markdown note is emitted line-by-line (each non-blank line a
+// paragraph) rather than rendered — the text content is preserved, formatting is not.
+function notesParas(note: string): string {
+  const lines = note.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length === 0) return "<a:p/>";
+  return lines
+    .map((line) => `<a:p><a:r><a:rPr lang="en-US"/><a:t>${escapeXml(line)}</a:t></a:r></a:p>`)
+    .join("");
+}
+
+function notesSlideXml(note: string): string {
+  // A body placeholder (type="body" idx="1") holds the notes text — the minimal shape PowerPoint reads.
+  const body = `<p:sp><p:nvSpPr><p:cNvPr id="2" name="Notes Placeholder"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>${notesParas(note)}</p:txBody></p:sp>`;
+  return `${XML_DECL}<p:notes xmlns:a="${A}" xmlns:r="${R}" xmlns:p="${P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${body}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:notes>`;
+}
+
+// A notes slide's rels point back at its parent slide.
+function notesSlideRels(slideIndex: number): string {
+  return `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_SLIDE}" Target="../slides/slide${slideIndex}.xml"/></Relationships>`;
+}
+
 const THEME = `${XML_DECL}<a:theme xmlns:a="${A}" name="Office Theme"><a:themeElements><a:clrScheme name="Office"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="44546A"/></a:dk2><a:lt2><a:srgbClr val="E7E6E6"/></a:lt2><a:accent1><a:srgbClr val="4472C4"/></a:accent1><a:accent2><a:srgbClr val="ED7D31"/></a:accent2><a:accent3><a:srgbClr val="A5A5A5"/></a:accent3><a:accent4><a:srgbClr val="FFC000"/></a:accent4><a:accent5><a:srgbClr val="5B9BD5"/></a:accent5><a:accent6><a:srgbClr val="70AD47"/></a:accent6><a:hlink><a:srgbClr val="0563C1"/></a:hlink><a:folHlink><a:srgbClr val="954F72"/></a:folHlink></a:clrScheme><a:fontScheme name="Office"><a:majorFont><a:latin typeface="Calibri Light"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont><a:minorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont></a:fontScheme><a:fmtScheme name="Office"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst><a:lnStyleLst><a:ln w="6350" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="12700" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="19050" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements></a:theme>`;
 
 const EMPTY_SPTREE = `<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree>`;
@@ -113,14 +137,26 @@ const MASTER_RELS = `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="
 
 const LAYOUT_RELS = `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_MASTER}" Target="../slideMasters/slideMaster1.xml"/></Relationships>`;
 
-const SLIDE_RELS = `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_LAYOUT}" Target="../slideLayouts/slideLayout1.xml"/></Relationships>`;
+// A slide's rels: always the layout; plus its notes slide when it has one (B5). rId2 → notesSlideN.
+function slideRelsXml(slideIndex: number, hasNotes: boolean): string {
+  const notes = hasNotes
+    ? `<Relationship Id="rId2" Type="${REL_NOTESSLIDE}" Target="../notesSlides/notesSlide${slideIndex}.xml"/>`
+    : "";
+  return `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_LAYOUT}" Target="../slideLayouts/slideLayout1.xml"/>${notes}</Relationships>`;
+}
 
-function contentTypesXml(slideCount: number): string {
+// `notesIndices` are the 1-based slide indices that carry a notes slide (so their parts get declared).
+function contentTypesXml(slideCount: number, notesIndices: number[]): string {
   const slides = Array.from(
     { length: slideCount },
     (_, i) => `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="${CT_SLIDE}"/>`,
   ).join("");
-  return `${XML_DECL}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/ppt/presentation.xml" ContentType="${CT_PRESENTATION}"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="${CT_MASTER}"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="${CT_LAYOUT}"/><Override PartName="/ppt/theme/theme1.xml" ContentType="${CT_THEME}"/>${slides}</Types>`;
+  const notes = notesIndices
+    .map(
+      (i) => `<Override PartName="/ppt/notesSlides/notesSlide${i}.xml" ContentType="${CT_NOTES}"/>`,
+    )
+    .join("");
+  return `${XML_DECL}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/ppt/presentation.xml" ContentType="${CT_PRESENTATION}"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="${CT_MASTER}"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="${CT_LAYOUT}"/><Override PartName="/ppt/theme/theme1.xml" ContentType="${CT_THEME}"/>${slides}${notes}</Types>`;
 }
 
 function presentationXml(slideCount: number): string {
@@ -141,9 +177,13 @@ function presentationRelsXml(slideCount: number): string {
 }
 
 export function buildPptx(doc: MindMapDoc): Uint8Array {
-  const slides = presentationSlides(doc);
+  // resolveSlides (not presentationSlides) so a custom deck AND its per-slide speaker notes carry over,
+  // matching the HTML deck + presenter view. Each slide's note = the SlideRef override, else the node's.
+  const slides = resolveSlides(doc);
+  const notes = slides.map((s) => (s.note ?? s.node.note ?? "").trim());
+  const notesIndices = notes.map((n, i) => (n ? i + 1 : 0)).filter((i) => i > 0);
   const parts: Record<string, string> = {
-    "[Content_Types].xml": contentTypesXml(slides.length),
+    "[Content_Types].xml": contentTypesXml(slides.length, notesIndices),
     "_rels/.rels": ROOT_RELS,
     "ppt/presentation.xml": presentationXml(slides.length),
     "ppt/_rels/presentation.xml.rels": presentationRelsXml(slides.length),
@@ -154,8 +194,14 @@ export function buildPptx(doc: MindMapDoc): Uint8Array {
     "ppt/slideLayouts/_rels/slideLayout1.xml.rels": LAYOUT_RELS,
   };
   slides.forEach((slide, i) => {
-    parts[`ppt/slides/slide${i + 1}.xml`] = slideXml(slide.heading, collectBody(slide, doc));
-    parts[`ppt/slides/_rels/slide${i + 1}.xml.rels`] = SLIDE_RELS;
+    const n = i + 1;
+    const hasNote = notes[i].length > 0;
+    parts[`ppt/slides/slide${n}.xml`] = slideXml(slide.heading, collectBody(slide, doc));
+    parts[`ppt/slides/_rels/slide${n}.xml.rels`] = slideRelsXml(n, hasNote);
+    if (hasNote) {
+      parts[`ppt/notesSlides/notesSlide${n}.xml`] = notesSlideXml(notes[i]);
+      parts[`ppt/notesSlides/_rels/notesSlide${n}.xml.rels`] = notesSlideRels(n);
+    }
   });
   return zipOoxml(parts);
 }

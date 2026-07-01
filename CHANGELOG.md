@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Speaker notes in the exported slide deck + PowerPoint (B5).** The standalone HTML slide-deck export
+  now embeds each slide's speaker note (the topic's note, or a per-slide custom-deck override — same
+  resolution as the presenter view), rendered from Markdown and **hidden by default**; press **N** or
+  the footer **Notes** button to toggle them. The `.pptx` export now emits real PowerPoint **notes
+  slides** (their own parts + content-types + rels) for slides that have a note, and switched to the
+  custom-deck-aware `resolveSlides` so decks + notes match the HTML export. Verified with python-pptx:
+  the notes open correctly in PowerPoint (overview + branch notes present, multi-line preserved).
+
 - **Export a single branch (B4).** Right-click a topic that has children → **Export this branch…** (or
   ⌘K → *Export selected branch…*) opens a format picker scoped to that subtree: PNG, SVG, standalone
   HTML, interactive HTML, PDF, `.json`, or Markdown. Model-backed formats scope via a `subtreeExportDoc`

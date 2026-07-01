@@ -693,9 +693,9 @@ Pick a format from the **⬆ Export…** menu:
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
 | `.html` (interactive) | A single self-contained HTML file — the map as a **collapsible, searchable** outline: fold branches, filter topics, zoom/pan (no app, no backend, offline) |
-| `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline) |
+| `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline). **Speaker notes** are included, hidden by default — press **N** or the footer **Notes** button to show them |
 | `.docx` | A Word document — the map as an editable, indented outline (opens in Word, LibreOffice, Pages, Google Docs) |
-| `.pptx` | A PowerPoint deck — an overview slide, then one per branch (opens in PowerPoint, Keynote, LibreOffice, Google Slides) |
+| `.pptx` | A PowerPoint deck — an overview slide, then one per branch, **with each topic's note carried into the slide's speaker notes** (opens in PowerPoint, Keynote, LibreOffice, Google Slides) |
 | `.xlsx` | An Excel worksheet — the map as an indented outline (a column per depth) with a Notes column (opens in Excel, LibreOffice Calc, Numbers, Google Sheets) |
 | `.pdf` | Opens your browser's print dialog → "Save as PDF" (landscape) |
 

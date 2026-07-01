@@ -66,4 +66,39 @@ describe("buildDeckHtml", () => {
     expect(html).not.toContain("<img src=x");
     expect(html).toContain("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
   });
+
+  it("embeds hidden speaker notes (rendered Markdown) with an N-key toggle (B5)", () => {
+    const withNotes: MindMapDoc = {
+      ...doc,
+      root: {
+        ...doc.root,
+        children: [
+          { id: "a", topic: "Alpha", note: "**Bold** point to make", children: [] },
+          { id: "b", topic: "Beta", children: [] }, // no note
+        ],
+      },
+    };
+    const html = buildDeckHtml(withNotes);
+    expect(html).toContain('class="speaker-notes"');
+    expect(html).toContain("<strong>Bold</strong> point to make"); // Markdown rendered
+    expect(html).toContain('id="notes-toggle"');
+    expect(html).toContain("notes-on"); // the toggle class the N key / button flips
+    expect(html).toMatch(/toggleNotes/);
+    // Exactly one slide carries notes (Alpha); the overview + Beta have none.
+    expect(html.match(/class="speaker-notes"/g)?.length).toBe(1);
+  });
+
+  it("prefers a per-slide SlideRef note over the topic's own note (B5)", () => {
+    const custom: MindMapDoc = {
+      ...doc,
+      root: {
+        ...doc.root,
+        children: [{ id: "a", topic: "Alpha", note: "topic note", children: [] }],
+      },
+      meta: { slides: [{ nodeId: "a", note: "override note" }] },
+    };
+    const html = buildDeckHtml(custom);
+    expect(html).toContain("override note");
+    expect(html).not.toContain("topic note");
+  });
 });

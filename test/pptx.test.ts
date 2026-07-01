@@ -111,4 +111,47 @@ describe("buildPptx", () => {
   it("is deterministic — the same map produces identical bytes", () => {
     expect(Buffer.from(buildPptx(doc)).equals(Buffer.from(buildPptx(doc)))).toBe(true);
   });
+
+  it("emits a notes slide with the speaker note only for slides that have one (B5)", () => {
+    const withNotes: MindMapDoc = {
+      ...doc,
+      root: {
+        ...doc.root,
+        children: [
+          { id: "a", topic: "Alpha", note: "Say hello\nSecond line", children: [] },
+          { id: "b", topic: "Beta", children: [] }, // no note
+        ],
+      },
+    };
+    // Slides: overview(1), Alpha(2), Beta(3). Only Alpha carries a note → notesSlide2.
+    const { names, text } = open(withNotes);
+    expect(names).toContain("ppt/notesSlides/notesSlide2.xml");
+    expect(names).not.toContain("ppt/notesSlides/notesSlide1.xml"); // overview has no note
+    expect(names).not.toContain("ppt/notesSlides/notesSlide3.xml"); // Beta has no note
+
+    const notesXml = text("ppt/notesSlides/notesSlide2.xml");
+    expect(XMLValidator.validate(notesXml)).toBe(true);
+    expect(notesXml).toContain("Say hello");
+    expect(notesXml).toContain("Second line"); // multi-line note → one paragraph per line
+
+    // The part is declared + the slide's rels point at it + its rels point back.
+    expect(text("[Content_Types].xml")).toContain("/ppt/notesSlides/notesSlide2.xml");
+    expect(text("ppt/slides/_rels/slide2.xml.rels")).toContain("notesSlides/notesSlide2.xml");
+    expect(text("ppt/notesSlides/_rels/notesSlide2.xml.rels")).toContain("slides/slide2.xml");
+  });
+
+  it("uses a custom deck's per-slide note override in the PPTX notes (B5)", () => {
+    const custom: MindMapDoc = {
+      ...doc,
+      root: {
+        ...doc.root,
+        children: [{ id: "a", topic: "Alpha", note: "topic note", children: [] }],
+      },
+      meta: { slides: [{ nodeId: "a", note: "override note" }] },
+    };
+    // A custom deck of one slide (Alpha) → notesSlide1.
+    const notesXml = open(custom).text("ppt/notesSlides/notesSlide1.xml");
+    expect(notesXml).toContain("override note");
+    expect(notesXml).not.toContain("topic note");
+  });
 });

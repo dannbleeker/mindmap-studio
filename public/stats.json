@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-01T07:27:01.989Z",
-  "commit": "175c17a",
+  "generatedAt": "2026-07-01T18:12:16.688Z",
+  "commit": "8d7c1f5",
   "headline": {
     "linesTsJs": 69923,
     "tests": 1957,
     "lineCoveragePct": 91.08,
-    "commits": 1010,
+    "commits": 1012,
     "ageDays": 19,
     "trackedFiles": 478,
     "featureManualPct": 58.6,
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 15,
-      "lines": 2301
+      "lines": 2221
     }
   ],
   "coverage": {
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 86.84,
-      "covered": 7879,
-      "total": 9072
+      "covered": 7878,
+      "total": 9071
     }
   },
   "tests": {
     "unit": 1957,
     "e2e": 0,
-    "durationMs": 91717,
+    "durationMs": 95726,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 27400
+        "ms": 30349
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 23827
-      },
-      {
-        "file": "test/panels.test.tsx",
-        "ms": 9267
+        "ms": 25082
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8475
+        "ms": 9358
+      },
+      {
+        "file": "test/panels.test.tsx",
+        "ms": 8957
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4071
+        "ms": 4025
       }
     ]
   },
@@ -1216,8 +1216,8 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 19,
-    "commits": 1010,
-    "commits7d": 224,
+    "commits": 1012,
+    "commits7d": 203,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
@@ -1225,16 +1225,16 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 458
+        "count": 459
       },
       {
         "name": "Claude",
-        "count": 54
+        "count": 55
       }
     ],
     "churn30d": {
-      "added": 128605,
-      "removed": 38312
+      "added": 129002,
+      "removed": 38508
     },
     "changelogEntries": 381
   }

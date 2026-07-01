@@ -1455,6 +1455,48 @@ describe("InfoPanel (interaction)", () => {
     await userEvent.click(minBtn);
     expect(onMinimize).toHaveBeenCalled();
   });
+
+  it("upgrades a whole-map link to a topic via the cross-map refine select", async () => {
+    const onSetHyperlink = vi.fn();
+    const linkedNode: MapNode = { ...sampleRoot().children[0], hyperlink: "#map=other" };
+    render(
+      <InfoPanel
+        selected={{ id: "a", topic: "Research", note: "" }}
+        width={300}
+        onResize={noop}
+        node={linkedNode}
+        noteDraft=""
+        onNoteChange={noop}
+        onNoteBlur={noop}
+        markers={["⭐"]}
+        onToggleMarker={noop}
+        onPickSticker={noop}
+        onStyle={noop}
+        onAddTag={noop}
+        onRemoveTag={noop}
+        onSetProgress={noop}
+        onSetDue={noop}
+        onSetStart={noop}
+        onSetPriority={noop}
+        onAddAttachment={noop}
+        onRemoveAttachment={noop}
+        onSetHyperlink={onSetHyperlink}
+        maps={[{ id: "other", title: "Other map" }]}
+        onLinkMap={noop}
+        jumpTargets={[]}
+        onJump={noop}
+        crossLinkMapId="other"
+        crossLinkTopics={[{ id: "x", topic: "Topic X", depth: 0 }]}
+        backlinks={[]}
+        outgoingLinks={[]}
+        onFollowBacklink={noop}
+        onMinimize={noop}
+      />,
+    );
+    const select = await screen.findByLabelText("Focus a topic in the linked map");
+    await userEvent.selectOptions(select, "x");
+    expect(onSetHyperlink).toHaveBeenCalledWith("#map=other&node=x");
+  });
 });
 
 describe("StylesPanel (interaction)", () => {

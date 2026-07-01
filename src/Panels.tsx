@@ -40,6 +40,7 @@ import {
   type MarkerTagSummary,
   type SelectedNode,
   type SelectionFields,
+  buildMapLink,
 } from "./mindmap";
 import { shapeOverlayPath, shapePath } from "./mindmap/flow/shapes";
 import type {
@@ -2283,6 +2284,8 @@ export function InfoPanel({
   onLinkMap,
   jumpTargets,
   onJump,
+  crossLinkMapId,
+  crossLinkTopics,
   backlinks,
   outgoingLinks,
   onFollowBacklink,
@@ -2352,6 +2355,10 @@ export function InfoPanel({
   onLinkMap: (mapId: string) => void;
   jumpTargets: { id: string; topic: string; depth: number }[];
   onJump: (id: string) => void;
+  /** When the node's link points at another map, that map's id + its topics — for the cross-map
+   *  "…and a topic" refine select (upgrades a whole-map link to `#map=X&node=Y`). */
+  crossLinkMapId?: string | null;
+  crossLinkTopics?: { id: string; topic: string; depth: number }[];
   /** Topics that point AT the selected node (incoming #node= links + relationship edges). */
   backlinks: Backlink[];
   /** Topics the selected node points at (its #node= hyperlink target + relationship edges from it). */
@@ -3065,6 +3072,25 @@ export function InfoPanel({
                             </option>
                           ))}
                         </Select>
+                        {crossLinkMapId && crossLinkTopics && crossLinkTopics.length > 0 && (
+                          <Select
+                            value=""
+                            onChange={(e) =>
+                              onSetHyperlink(
+                                buildMapLink(crossLinkMapId, e.target.value || undefined),
+                              )
+                            }
+                            aria-label="Focus a topic in the linked map"
+                            style={{ width: "auto", margin: "0 10px 4px" }}
+                          >
+                            <option value="">🗺 …and a topic (whole map)</option>
+                            {crossLinkTopics.map((row) => (
+                              <option key={row.id} value={row.id}>
+                                {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+                              </option>
+                            ))}
+                          </Select>
+                        )}
                         {link && (
                           <Button
                             onClick={() => onSetHyperlink("")}

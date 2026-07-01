@@ -408,6 +408,32 @@ export function App() {
     () => (selected ? crossMapBacklinksFor(crossMapDocs, doc.id) : []),
     [selected, crossMapDocs, doc.id],
   );
+  // When the selected node's link points at another map (#map=X), load THAT map's topics so the
+  // inspector can offer a "…and a topic" refine select — turning a whole-map link into #map=X&node=Y.
+  const selectedMapLink = selectedNode?.hyperlink ? classifyLink(selectedNode.hyperlink) : null;
+  const crossLinkMapId = selectedMapLink?.kind === "map" ? selectedMapLink.id : null;
+  const [crossLinkTopics, setCrossLinkTopics] = useState<
+    { id: string; topic: string; depth: number }[]
+  >([]);
+  useEffect(() => {
+    if (!crossLinkMapId) {
+      setCrossLinkTopics([]);
+      return;
+    }
+    let live = true;
+    void loadMap(crossLinkMapId)
+      .then((d) => {
+        if (live && d)
+          setCrossLinkTopics(
+            outlineRows(d.root).map((r) => ({ id: r.id, topic: r.topic, depth: r.depth })),
+          );
+        else if (live) setCrossLinkTopics([]);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [crossLinkMapId]);
   // Every tag already used in the map — drives the inspector's Add-a-tag autocomplete.
   const allTags = useMemo(
     () => markerTagIndex(liveDoc.root, liveDoc.floatingTopics).tags.map((e) => e.key),
@@ -2356,6 +2382,8 @@ export function App() {
                   .filter((r) => r.id !== selected?.id)
                   .map((r) => ({ id: r.id, topic: r.topic, depth: r.depth }))}
                 onJump={(id) => mapRef.current?.setSelectedHyperlink(`${NODE_LINK_PREFIX}${id}`)}
+                crossLinkMapId={crossLinkMapId}
+                crossLinkTopics={crossLinkTopics}
                 backlinks={backlinks}
                 outgoingLinks={outgoingLinks}
                 onFollowBacklink={(id) => mapRef.current?.focusNode(id)}

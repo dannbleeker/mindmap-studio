@@ -261,6 +261,10 @@ export interface MindMapHandle {
   /** Add an empty child to the selected node and drop straight into editing it (the ⌘K / command
    *  path for "add child"); false if nothing is selected. */
   addChildToSelected: () => boolean;
+  /** Start drawing a relationship from the selected node (the ⌘K / command mirror of the keyboard
+   *  Ctrl/⌘+Shift+L gesture): arms linking mode so the next click on another topic completes the
+   *  relationship (with the optional-label prompt). False if nothing is selected. */
+  startLinkFromSelected: () => boolean;
   /** Delete the selected node and its subtree (shared by ⌘K and the keyboard); false if none
    *  selected. Reversible — undo / the delete toast restores it. */
   deleteSelected: () => boolean;

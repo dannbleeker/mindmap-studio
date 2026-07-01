@@ -99,4 +99,5 @@ export const SHORTCUT_BINDINGS: Record<string, string> = {
   "nav-back": "Alt + ←",
   "nav-forward": "Alt + →",
   settings: "Ctrl/⌘ + ,",
+  "start-relationship": "Ctrl/⌘ + Shift + L",
 };

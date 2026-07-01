@@ -270,6 +270,13 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     () => m()?.addChildToSelected(),
     !!sel,
   );
+  add(
+    "start-relationship",
+    "Start a relationship from selected topic",
+    "node",
+    () => m()?.startLinkFromSelected(),
+    !!sel,
+  );
   add("node-delete", "Delete selected topic", "node", () => m()?.deleteSelected(), !!sel);
   for (const marker of MARKER_PALETTE)
     add(

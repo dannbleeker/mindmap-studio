@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Drag-to-relate now prompts for a label (B1).** Dragging a topic's relate grip onto another topic
+  now opens the same optional-label prompt as the right-click **Link to…** path (previously it created
+  an unlabelled relationship silently). One consistent relationship-creation flow across all three
+  entry points (drag / menu / keyboard).
+
+- **⌘K entry for the relationship shortcut (A4).** The keyboard **Ctrl/⌘+Shift+L** "start a
+  relationship" gesture (shipped in UI-5d, in the cheat-sheet) is now also a command-palette entry —
+  *Start a relationship from selected topic* — via a new `startLinkFromSelected` handle method, so it's
+  discoverable through ⌘K with its key hint (previously keyboard-only).
+
 - **Space-bar pan (A1).** Hold the space bar and left-drag to pan the canvas from anywhere — even when
   the drag starts over a topic (a plain node drag re-parents it in tree mode). While held, topics go
   pointer-inert (a `.mm-space-pan` class → `pointer-events:none`, beating React Flow's inline style +

@@ -439,7 +439,10 @@ backdrop you see on the canvas. The second **✕** removes the image.
 ## Relationships, boundaries & callouts
 
 - **Relationships** — draw a labelled, **directional** arrow between two nodes: right-click the first
-  node → **Link to…**, then click the target (you'll be prompted for an optional label). **Click a
+  node → **Link to…**, then click the target (you'll be prompted for an optional label). You can also
+  **drag the small round grip** on a topic's right edge (it appears on hover) straight onto another
+  topic — same result, same optional-label prompt — or press **Ctrl/⌘ + Shift + L** to start the link
+  from the keyboard (also in ⌘K as *Start a relationship from selected topic*). **Click a
   relationship to select it** and the inspector becomes a connector editor — change its **label**,
   **direction / arrowheads** (target, source, both, or none), **colour**, **width**, and **line
   style** (dashed / solid / dotted), or **delete** it (right-click still deletes as a shortcut). The

@@ -1965,6 +1965,10 @@ function FlowInner({
         apply({ doc: res.doc });
       },
       addChildToSelected: () => withSelected((id) => apply(addChild(docRef.current, id), true)),
+      // Start drawing a relationship FROM the selected topic (the ⌘K / command path for the keyboard
+      // Ctrl/⌘+Shift+L gesture): arm linking mode, then the next click on another topic completes it
+      // (with the label prompt). False if nothing is selected.
+      startLinkFromSelected: () => withSelected((id) => setLinkingFrom(id)),
       deleteSelected: () => deleteSelectionWithUndo(),
       undo: undoAction,
       redo: redoAction,
@@ -2157,8 +2161,13 @@ function FlowInner({
             nodesConnectable
             connectionMode={ConnectionMode.Loose}
             onConnect={(c) => {
+              // Drag-to-relate drops onto a target node: prompt for an optional label, same as the
+              // right-click "Link to…" path (B1) — cancel still creates the (unlabelled) relationship.
               if (c.source && c.target && c.source !== c.target) {
-                apply(addLink(docRef.current, c.source, c.target));
+                const { source, target } = c;
+                void editorPrompt({ title: "Relationship label", placeholder: "Optional" }).then(
+                  (label) => apply(addLink(docRef.current, source, target, label ?? "")),
+                );
               }
             }}
             deleteKeyCode={null}

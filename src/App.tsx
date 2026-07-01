@@ -170,6 +170,10 @@ const Presentation = lazy(() =>
 const BranchExportDialog = lazy(() =>
   import("./components/BranchExportDialog").then((m) => ({ default: m.BranchExportDialog })),
 );
+// On-demand: the theme designer only loads when opened, keeping its editor UI out of the entry (C3).
+const ThemeDesignerDialog = lazy(() =>
+  import("./components/ThemeDesignerDialog").then((m) => ({ default: m.ThemeDesignerDialog })),
+);
 
 // How many recently-used document tabs keep their canvas session (viewport + undo/redo) cached for
 // lossless switching; beyond this the least-recently-used session is dropped (that tab reopens fresh).
@@ -237,7 +241,9 @@ export function App() {
   const [presentDoc, setPresentDoc] = useState<MindMapDoc | null>(null);
   // Transient toast: a message + an optional action button (e.g. "Refresh now") — owned by useToast.
   const { toast, showToast, showHint, dismiss: dismissToast } = useToast();
-  const { theme, setThemeId } = useTheme();
+  const { theme, setThemeId, customThemes, reloadCustomThemes } = useTheme();
+  // The custom-theme designer (C3), opened from the Map panel's Theme dropdown ("Manage themes…").
+  const [themeDesignerOpen, setThemeDesignerOpen] = useState(false);
   // App-wide chrome appearance (Phase 8) — independent of the canvas theme. Resolves to a single
   // light/dark for all chrome surfaces; a dark canvas theme also darkens the chrome under "system".
   const { appearance, setAppearance, prefersDark } = useAppearance();
@@ -2461,6 +2467,8 @@ export function App() {
                 doc={liveDoc}
                 theme={theme}
                 setThemeId={setThemeId}
+                customThemes={customThemes}
+                onManageThemes={() => setThemeDesignerOpen(true)}
                 layout={layout}
                 changeLayout={changeLayout}
                 freeform={liveDoc.meta?.freeform}
@@ -2676,6 +2684,16 @@ export function App() {
         </Suspense>
       )}
 
+      {/* Custom theme designer (C3) — lazy; refreshes the theme list on save/delete/import. */}
+      {themeDesignerOpen && (
+        <Suspense fallback={null}>
+          <ThemeDesignerDialog
+            onClose={() => setThemeDesignerOpen(false)}
+            onChange={reloadCustomThemes}
+          />
+        </Suspense>
+      )}
+
       {/* Host for the imperative themed prompt/confirm (editorPrompt / editorConfirm) used across the
           canvas + panels in place of native window.prompt/confirm. */}
       <DialogHost />
@@ -2691,6 +2709,7 @@ export function App() {
         setContrastPref={setContrastPref}
         theme={theme}
         setThemeId={setThemeId}
+        customThemes={customThemes}
         onReShowGettingStarted={reShowFirstRun}
         onClearRecents={() => {
           clearRecents();

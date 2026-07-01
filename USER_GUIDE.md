@@ -421,6 +421,14 @@ map re-flows into the new shape without losing any edits:
 The **Theme** dropdown restyles the whole canvas — **Light**, **Dark**, **Ocean**, **Sunset** —
 live, without losing edits. Image exports inherit the theme, so a dark map exports dark.
 
+**Custom themes.** Pick **Manage themes…** at the bottom of the Theme dropdown (in the Map panel or
+Settings) to open the **theme designer** — give a theme a name, a six-colour branch palette, a
+background and node-fill colour, a font, and a branch weight, with a live preview. Saved themes appear
+in the dropdown under *Custom* alongside the built-ins; choosing one applies its palette and colours
+(with readable text and light/dark mode picked from the background) plus its font and branch weight.
+**Download** a theme as a `.json` to reuse it on another map or machine, and **Import** one back in.
+The four built-in themes can't be changed.
+
 ### App appearance (dark mode)
 
 Separately from the canvas theme, **Settings → Appearance → App theme** controls the *chrome* — the

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../design/primitives";
 import type { CanvasTheme } from "../mindmap/theme";
 import { canvasThemes } from "../mindmap/theme";
+import type { CustomTheme } from "../store/customThemes";
 import type { Appearance } from "../useAppearance";
 import type { ContrastPref } from "../useHighContrast";
 import type { MotionPref } from "../useReducedMotion";
@@ -27,6 +28,8 @@ export interface SettingsDialogProps {
   setContrastPref: (p: ContrastPref) => void;
   theme: CanvasTheme;
   setThemeId: (id: string) => void;
+  /** The user's saved custom themes (C3), shown after the built-ins. */
+  customThemes?: CustomTheme[];
   /** Re-show the first-run "3 things to try" card. */
   onReShowGettingStarted: () => void;
   /** Clear the ⌘K most-recently-used list. */
@@ -63,6 +66,7 @@ export function SettingsDialog({
   setContrastPref,
   theme,
   setThemeId,
+  customThemes = [],
   onReShowGettingStarted,
   onClearRecents,
   onClearBranchClipboard,
@@ -126,6 +130,15 @@ export function SettingsDialog({
                 {t.name}
               </option>
             ))}
+            {customThemes.length > 0 ? (
+              <optgroup label="Custom">
+                {customThemes.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </optgroup>
+            ) : null}
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>

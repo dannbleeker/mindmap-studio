@@ -10,6 +10,7 @@ export const LOCAL_PREF_KEYS = [
   "mindmap-panels",
   "mindmap-saved-filters",
   "mindmap-theme",
+  "mindmap-custom-themes",
   "mindmap-appearance",
   "mindmap-named-styles",
   "mindmap-install-dismissed",

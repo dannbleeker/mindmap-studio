@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Custom theme designer (C3).** Beyond the four built-in canvas themes, you can now define your own:
+  the **Theme** dropdown (Map panel + Settings) gains a **Manage themes…** entry that opens a designer
+  — a name, a **6-colour branch palette**, a **background** and **node-fill** colour, a **font**, and a
+  **branch weight**, with a **live preview**. Saved themes appear in the dropdown (under *Custom*) after
+  the built-ins; selecting one applies its palette + colours (readable ink + light/dark mode derived
+  from the background luminance) and its font + branch weight. Themes **export / import** as `.json` to
+  share a palette across maps or machines. Stored in localStorage, separate from map data. The four
+  built-in themes are untouched. Verified in-browser end-to-end (design → save → apply → the canvas
+  background + palette-derived root/ink change); the derivation + storage are unit-tested.
+
 - **Library folders (C2).** The All-maps screen now organises maps into named **folders**: a
   **＋ New folder** button, folder cards you click to drill in (with an *All maps / Folder* breadcrumb
   and rename / delete on the open folder), and a **Move to folder…** action in each map card's ⋯ menu.

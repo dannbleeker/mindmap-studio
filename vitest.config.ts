@@ -65,6 +65,8 @@ export default defineConfig({
       ["test/natural-date-input.test.tsx", "jsdom"],
       ["test/outline-touch-drag.test.tsx", "jsdom"],
       ["test/branch-export-dialog.test.tsx", "jsdom"],
+      ["test/custom-themes.test.ts", "jsdom"],
+      ["test/theme-designer-dialog.test.tsx", "jsdom"],
       ["test/app-integration.test.tsx", "jsdom"],
     ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only

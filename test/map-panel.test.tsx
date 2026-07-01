@@ -54,6 +54,7 @@ function setup(d: MindMapDoc = planDoc, over: Partial<React.ComponentProps<typeo
     onSetBranchGrowth: vi.fn(),
     onSetFontFamily: vi.fn(),
     onSetFontScale: vi.fn(),
+    onManageThemes: vi.fn(),
     ...over,
   };
   render(<MapPanel {...props} />);
@@ -117,6 +118,38 @@ describe("MapPanel", () => {
     expect((screen.getByLabelText(/Line jumps/) as HTMLInputElement).checked).toBe(true);
     await userEvent.click(screen.getByLabelText(/Line jumps/));
     expect(onToggleLineJumps).toHaveBeenCalled();
+  });
+
+  it("lists custom themes and applies their font + growth when picked (C3)", async () => {
+    const custom = {
+      id: "custom-forest",
+      name: "Forest",
+      palette: ["#2f6b3f", "#3d8b52", "#5aa172", "#7fbf95", "#a7d8b6", "#cdeed7"] as [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ],
+      background: "#0a2b1a",
+      nodeFill: "#123922",
+      fontFamily: "Georgia, serif",
+      branchGrowth: "bold" as const,
+    };
+    const { setThemeId, onSetFontFamily, onSetBranchGrowth, onManageThemes } = setup(planDoc, {
+      customThemes: [custom],
+    });
+
+    // Picking a custom theme applies its id AND its bundled font + branch weight.
+    await userEvent.selectOptions(screen.getByLabelText("Canvas theme"), "custom-forest");
+    expect(setThemeId).toHaveBeenCalledWith("custom-forest");
+    expect(onSetFontFamily).toHaveBeenCalledWith("Georgia, serif");
+    expect(onSetBranchGrowth).toHaveBeenCalledWith("bold");
+
+    // The "Manage themes…" sentinel opens the designer instead of setting a theme.
+    await userEvent.selectOptions(screen.getByLabelText("Canvas theme"), "__manage__");
+    expect(onManageThemes).toHaveBeenCalled();
   });
 
   it("collapses the low-frequency controls behind 'More styling' and reveals them on expand", async () => {

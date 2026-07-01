@@ -17,7 +17,11 @@ import { gzipSync } from "node:zlib";
 // picker itself is lazy, but its editor-core orchestration (relationship types in
 // the projection / EdgeInspector / rules / filter, the branch-export command +
 // context-menu wiring) lands in the entry and can't be lazy-loaded.
-const BUDGET_KB = 159;
+// 159 → 160: custom theme designer (C3). The designer UI is lazy, but useTheme must
+// resolve a persisted custom theme synchronously on first paint (else the canvas
+// flashes the wrong theme), so the store read + luminance-derived cssVar mapping
+// (getCustomThemes / customToCanvasTheme) land in the entry and can't be lazy-loaded.
+const BUDGET_KB = 160;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

@@ -3,6 +3,7 @@ import { CollapsibleSection } from "../Panels";
 import type { LayoutKind } from "../mindmap";
 import { type CanvasTheme, canvasThemes } from "../mindmap/theme";
 import type { BackdropKind, BranchGrowth, MapNode, MindMapDoc } from "../model/types";
+import type { CustomTheme } from "../store/customThemes";
 import { InspectorResizer } from "./InspectorResizer";
 
 type ConnectorStyle = "organic" | "curved" | "elbow" | "straight";
@@ -42,6 +43,8 @@ export function MapPanel({
   doc,
   theme,
   setThemeId,
+  customThemes = [],
+  onManageThemes = () => {},
   layout,
   changeLayout,
   freeform,
@@ -70,6 +73,10 @@ export function MapPanel({
   doc: MindMapDoc;
   theme: CanvasTheme;
   setThemeId: (id: string) => void;
+  /** The user's saved custom themes (C3), shown after the built-ins in the Theme dropdown. */
+  customThemes?: CustomTheme[];
+  /** Open the theme designer (the dropdown's "Manage themes…" entry). */
+  onManageThemes?: () => void;
   layout: LayoutKind;
   changeLayout: (v: LayoutKind) => void;
   freeform?: boolean;
@@ -168,7 +175,20 @@ export function MapPanel({
             <select
               className="mm-map-control"
               value={theme.id}
-              onChange={(e) => setThemeId(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "__manage__") {
+                  onManageThemes();
+                  return;
+                }
+                setThemeId(v);
+                // A custom theme also carries a font + branch weight — apply them like a Design (C3).
+                const ct = customThemes.find((c) => c.id === v);
+                if (ct) {
+                  onSetFontFamily(ct.fontFamily);
+                  onSetBranchGrowth(ct.branchGrowth);
+                }
+              }}
               aria-label="Canvas theme"
             >
               {canvasThemes.map((t) => (
@@ -176,6 +196,16 @@ export function MapPanel({
                   {t.name}
                 </option>
               ))}
+              {customThemes.length > 0 ? (
+                <optgroup label="Custom">
+                  {customThemes.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : null}
+              <option value="__manage__">Manage themes…</option>
             </select>
           </label>
           <label className="mm-map-field">

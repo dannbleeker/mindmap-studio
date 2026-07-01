@@ -72,6 +72,7 @@ import {
 } from "./flow/history";
 import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
+import type { LinkCandidate } from "./flow/linkAutocomplete";
 import { LinkEditContext } from "./flow/linkEdit";
 import { countDescendants, subtreeIds } from "./flow/nodeWalk";
 import {
@@ -1064,6 +1065,29 @@ function FlowInner({
           default:
             break; // unknown id: nothing to do (the "/query" buffer is discarded on unmount)
         }
+      },
+      // `[[`/`@` link autocomplete: every named topic in this map (tree + floating), minus the one being
+      // edited (no self-link). The picker inserts the label into the text + attaches the link.
+      linkCandidates: (excludeId: string) => {
+        const out: LinkCandidate[] = [];
+        const walk = (n: MapNode) => {
+          if (n.id !== excludeId && n.topic.trim())
+            out.push({ id: n.id, label: n.topic, link: `#node=${n.id}`, kind: "node" });
+          for (const c of n.children) walk(c);
+        };
+        walk(docRef.current.root);
+        for (const f of docRef.current.floatingTopics ?? []) walk(f);
+        return out;
+      },
+      // Attach an autocompleted link: the first link becomes the visible primary hyperlink (canvas 🔗),
+      // any further ones its additional hyperlinks. Edit stays open — the user keeps typing the topic.
+      addNodeLink: (id: string, link: string) => {
+        const n = findNode(docRef.current, id);
+        apply(
+          n?.hyperlink
+            ? addHyperlink(docRef.current, id, link)
+            : setHyperlink(docRef.current, id, link),
+        );
       },
       // Native browser spell-check on the topic editors (view setting; off by default).
       spellcheck,

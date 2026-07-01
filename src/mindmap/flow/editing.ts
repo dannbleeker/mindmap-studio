@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { LinkCandidate } from "./linkAutocomplete";
 
 // Inline-edit coordination between FlowInner (owner of the doc) and the TopicNode being
 // edited. Passed via context so a node can enter edit mode + commit without threading
@@ -44,6 +45,12 @@ export interface EditingApi {
   /** Run a slash-menu command on a node (the `/` command menu): clears the `/query` text, then applies
    *  the command's effect (add child/sibling, task/priority/date, boundary, note, marker). */
   runSlashCommand: (id: string, commandId: string) => void;
+  /** Candidate topics for the `[[`/`@` link autocomplete — every named topic in this map except the one
+   *  being edited (you can't wiki-link a topic to itself). */
+  linkCandidates: (excludeId: string) => LinkCandidate[];
+  /** Attach a name-based link chosen from the autocomplete to a node: the first link becomes the
+   *  node's primary `hyperlink`, further ones its additional `hyperlinks`. */
+  addNodeLink: (id: string, link: string) => void;
 }
 
 export const EditingContext = createContext<EditingApi | null>(null);

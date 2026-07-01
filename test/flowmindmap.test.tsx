@@ -422,6 +422,53 @@ describe("FlowMindMap canvas", () => {
     expect(b?.task?.due).toBeTruthy(); // a due date was stamped
   });
 
+  // Set the editor text and drop the caret at its end (mirrors the user having just typed it).
+  const typeInEditor = (editable: HTMLElement, text: string) => {
+    editable.textContent = text;
+    const range = document.createRange();
+    range.selectNodeContents(editable);
+    range.collapse(false); // caret to the end
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    run(() => fireEvent.input(editable));
+  };
+
+  it("link autocomplete: typing [[ opens a topic picker; selecting inserts the name + attaches the link", () => {
+    const { container, h, onChange } = mount(); // root > [a "Alpha" (→ a1 "Alpha 1"), b "Beta"]
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" })); // enter edit on Beta
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    // Author a wiki link.
+    typeInEditor(editable, "[[Al");
+    // Both "Alpha" and "Alpha 1" match "Al"; the menu is open with ≥2 candidates.
+    expect(container.querySelectorAll(".mm-slash-item").length).toBeGreaterThanOrEqual(2);
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" })); // pick the first (Alpha, id "a")
+    expect(editable.textContent).toBe("Alpha"); // the "[[Al" token was replaced by the topic name
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(doc.root.children.find((n) => n.id === "b")?.hyperlink).toBe("#node=a"); // linked to Alpha
+  });
+
+  it("link autocomplete: a second link on the same node lands in the extras (hyperlinks[])", () => {
+    const { container, h, onChange } = mount();
+    // b already has a primary link, so the autocomplete should add to the extras.
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "F2" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    typeInEditor(editable, "[[Alpha");
+    run(() => fireEvent.keyDown(editable, { key: "Enter" })); // → primary #node=a
+    // Author another link to "Alpha 1".
+    typeInEditor(editable, "[[Alpha 1");
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" }));
+    const b = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).root.children.find(
+      (n) => n.id === "b",
+    );
+    expect(b?.hyperlink).toBe("#node=a"); // primary unchanged
+    expect(b?.hyperlinks).toEqual(["#node=a1"]); // the second link is an extra
+  });
+
   it("Delete removes a node with children immediately (no modal) + reports it for the undo toast (#9)", () => {
     const { h, onChange, onDelete } = mount();
     run(() => h.focusNode("a")); // "a" (Alpha) has child a1

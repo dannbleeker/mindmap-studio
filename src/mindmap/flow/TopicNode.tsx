@@ -21,6 +21,13 @@ import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
 import { handleEditorKeyDown } from "./editorKeys";
 import { matchBorderColor } from "./geometry";
+import {
+  type LinkCandidate,
+  type LinkTrigger,
+  applyLinkSelection,
+  linkTriggerAt,
+  matchLinkCandidates,
+} from "./linkAutocomplete";
 import { showNodeAffordances } from "./nodeChrome";
 import { relateGripTopCss } from "./relateGripGeometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
@@ -75,6 +82,35 @@ function markRelateHintSeen() {
   } catch {
     // best-effort
   }
+}
+
+// Plain-text caret offset within a contentEditable (how many characters precede the caret). Used to
+// locate the `[[`/`@` link-autocomplete trigger. Returns the end of the text when there's no selection.
+function caretOffset(el: HTMLElement): number {
+  const sel = typeof window !== "undefined" ? window.getSelection() : null;
+  const end = el.textContent?.length ?? 0;
+  if (!sel || sel.rangeCount === 0) return end;
+  const range = sel.getRangeAt(0);
+  // A selection left over from before an imperative text reset points at a detached node — treat a
+  // caret outside this editor as "at the end" (the common case just after typing).
+  if (!el.contains(range.endContainer)) return end;
+  const pre = range.cloneRange();
+  pre.selectNodeContents(el);
+  pre.setEnd(range.endContainer, range.endOffset);
+  return pre.toString().length;
+}
+
+// Place the caret at a plain-text offset in a contentEditable whose content was just reset to one text
+// node (the link-autocomplete rewrite path). Clamps to the text length.
+function placeCaret(el: HTMLElement, offset: number): void {
+  const node = el.firstChild ?? el;
+  const len = node.textContent?.length ?? 0;
+  const range = document.createRange();
+  range.setStart(node, Math.min(offset, len));
+  range.collapse(true);
+  const sel = window.getSelection();
+  sel?.removeAllRanges();
+  sel?.addRange(range);
 }
 
 const HANDLE: CSSProperties = {
@@ -317,13 +353,49 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const [slashItems, setSlashItems] = useState<SlashCommand[]>([]);
   const [slashIndex, setSlashIndex] = useState(0);
   const slashOpen = isEditing && slashItems.length > 0;
-  // Recompute the menu from the editor's current plain text (called on input + on entering edit).
-  const syncSlashMenu = useCallback(() => {
-    const q = slashQuery(editRef.current?.textContent ?? "");
-    const items = q === null ? [] : matchSlashCommands(q);
-    setSlashItems(items);
-    setSlashIndex(0);
-  }, []);
+  // `[[`/`@` link autocomplete: a mid-text trigger at the caret opens a topic picker.
+  const [linkItems, setLinkItems] = useState<LinkCandidate[]>([]);
+  const [linkIndex, setLinkIndex] = useState(0);
+  const [linkTrigger, setLinkTrigger] = useState<LinkTrigger | null>(null);
+  const linkOpen = isEditing && linkTrigger !== null && linkItems.length > 0;
+  // Recompute both menus from the editor's current text (+ caret for the link one). Slash wins: a
+  // leading "/" and a mid-text "[["/"@" can't sensibly coexist, so only one menu is ever open.
+  const syncMenus = useCallback(() => {
+    const el = editRef.current;
+    const text = el?.textContent ?? "";
+    const slash = slashQuery(text);
+    if (slash !== null) {
+      const items = matchSlashCommands(slash);
+      setSlashItems(items);
+      setSlashIndex(0);
+      setLinkTrigger(null);
+      setLinkItems([]);
+      return;
+    }
+    setSlashItems([]);
+    const trigger = el ? linkTriggerAt(text, caretOffset(el)) : null;
+    const items =
+      trigger && editing ? matchLinkCandidates(editing.linkCandidates(id), trigger.query) : [];
+    setLinkTrigger(items.length ? trigger : null);
+    setLinkItems(items);
+    setLinkIndex(0);
+  }, [editing, id]);
+
+  // Pick a link-autocomplete candidate: rewrite the buffer (replace the `[[`/`@` token with the topic
+  // name), restore the caret after it, attach the link to the node, and close the menu. Edit stays open.
+  const selectLink = useCallback(
+    (cand: LinkCandidate) => {
+      const el = editRef.current;
+      if (!el || !linkTrigger) return;
+      const { text, caret } = applyLinkSelection(el.textContent ?? "", linkTrigger, cand.label);
+      el.textContent = text;
+      placeCaret(el, caret);
+      editing?.addNodeLink(id, cand.link);
+      setLinkTrigger(null);
+      setLinkItems([]);
+    },
+    [editing, id, linkTrigger],
+  );
 
   // On entering edit mode: seed the text, focus, and select all (uncontrolled — React must
   // not re-render over the user's keystrokes, so the text is set imperatively, once).
@@ -358,18 +430,21 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       }
     };
     place();
-    // Type-to-edit could seed a leading "/" (open the menu immediately); otherwise this closes it.
-    syncSlashMenu();
+    // Type-to-edit could seed a leading "/" (open the slash menu immediately); otherwise this closes it.
+    syncMenus();
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isEditing, topic, richHtml, seed, syncSlashMenu]);
+  }, [isEditing, topic, richHtml, seed, syncMenus]);
 
-  // Leaving edit mode tears the menu down so it can't linger with stale items on the next edit.
+  // Leaving edit mode tears both menus down so they can't linger with stale items on the next edit.
   useEffect(() => {
     if (!isEditing) {
       setSlashItems([]);
       setSlashIndex(0);
+      setLinkItems([]);
+      setLinkTrigger(null);
+      setLinkIndex(0);
     }
   }, [isEditing]);
 
@@ -673,10 +748,14 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 spellCheck={editing?.spellcheck ?? false}
                 className="nodrag nopan"
                 style={{ outline: "none", display: "inline-block", minWidth: 16 }}
-                onInput={syncSlashMenu}
+                // Also re-sync on keyup/click so the link menu tracks caret moves (arrow keys, clicks),
+                // not just text changes — onInput alone misses a caret that moves without editing.
+                onInput={syncMenus}
+                onKeyUp={syncMenus}
+                onClick={syncMenus}
                 onKeyDown={(e) => {
-                  // While the slash menu is open it owns Arrow/Enter/Tab/Escape; anything else falls
-                  // through to normal typing (and re-filters via onInput).
+                  // An open menu owns Arrow/Enter/Tab/Escape; anything else falls through to normal
+                  // typing (and re-filters via onInput/onKeyUp). Slash and link menus never co-exist.
                   if (slashOpen) {
                     const r = slashMenuKey(e.key, slashIndex, slashItems.length);
                     if (r.action !== "passthrough") {
@@ -685,6 +764,15 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                       else if (r.action === "close") setSlashItems([]);
                       else if (r.action === "select")
                         editing?.runSlashCommand(id, slashItems[slashIndex].id);
+                      return;
+                    }
+                  } else if (linkOpen) {
+                    const r = slashMenuKey(e.key, linkIndex, linkItems.length);
+                    if (r.action !== "passthrough") {
+                      e.preventDefault();
+                      if (r.action === "move") setLinkIndex(r.index);
+                      else if (r.action === "close") setLinkTrigger(null);
+                      else if (r.action === "select") selectLink(linkItems[linkIndex]);
                       return;
                     }
                   }
@@ -717,6 +805,25 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                     >
                       <span>{cmd.label}</span>
                       {cmd.hint ? <span className="mm-slash-hint">{cmd.hint}</span> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {linkOpen ? (
+                <div className="nodrag nopan mm-slash-menu" aria-label="Link to a topic">
+                  {linkItems.map((cand, i) => (
+                    <button
+                      key={cand.id}
+                      type="button"
+                      aria-pressed={i === linkIndex}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseEnter={() => setLinkIndex(i)}
+                      onClick={() => selectLink(cand)}
+                      data-active={i === linkIndex || undefined}
+                      className="mm-slash-item"
+                    >
+                      <span>{cand.label}</span>
+                      <span className="mm-slash-hint">🔗</span>
                     </button>
                   ))}
                 </div>

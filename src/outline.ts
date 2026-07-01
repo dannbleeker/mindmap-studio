@@ -175,6 +175,47 @@ export function outgoingLinksFor(doc: MindMapDoc, sourceId: string): OutgoingLin
   return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
 }
 
+/** An incoming reference from ANOTHER map's topic (via a `#map=` / `#map=&node=` hyperlink). */
+export interface CrossMapBacklink {
+  sourceMapId: string;
+  sourceMapTitle: string;
+  /** The linking node in the source map. */
+  id: string;
+  topic: string;
+  /** The specific node targeted (when the link was `#map=X&node=Y`); absent for a whole-map link. */
+  targetNodeId?: string;
+}
+
+// Scan every OTHER map in the library for hyperlinks pointing at `targetMapId` (a whole-map `#map=`
+// link or a node-specific `#map=X&node=Y` one), returning incoming references with their source map so
+// the inspector can show "Linked from other maps" and navigate there. Pure + deterministic (sorted by
+// source map title, then topic). The current map is skipped — same-map jumps are `backlinksFor`.
+export function crossMapBacklinksFor(docs: MindMapDoc[], targetMapId: string): CrossMapBacklink[] {
+  const out: CrossMapBacklink[] = [];
+  for (const doc of docs) {
+    if (doc.id === targetMapId) continue;
+    const walk = (n: MapNode) => {
+      if (n.hyperlink) {
+        const link = classifyLink(n.hyperlink);
+        if (link.kind === "map" && link.id === targetMapId)
+          out.push({
+            sourceMapId: doc.id,
+            sourceMapTitle: doc.title,
+            id: n.id,
+            topic: n.topic,
+            targetNodeId: link.nodeId,
+          });
+      }
+      for (const c of n.children) walk(c);
+    };
+    walk(doc.root);
+    for (const f of doc.floatingTopics ?? []) walk(f);
+  }
+  return out.sort(
+    (a, b) => a.sourceMapTitle.localeCompare(b.sourceMapTitle) || a.topic.localeCompare(b.topic),
+  );
+}
+
 /** One row of the map-wide link layer: a relationship edge or a `#node=` hyperlink, both ends resolved. */
 export interface MapLink {
   fromId: string;

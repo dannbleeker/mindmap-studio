@@ -54,6 +54,7 @@ import type {
 import { htmlToNote, renderNote } from "./noteFormat";
 import {
   type Backlink,
+  type CrossMapBacklink,
   type IndexEntry,
   type IndexHit,
   type MapLink,
@@ -2285,6 +2286,8 @@ export function InfoPanel({
   backlinks,
   outgoingLinks,
   onFollowBacklink,
+  crossMapBacklinks,
+  onFollowCrossMapBacklink,
   onMinimize,
   onSetFillImage,
   onClearFillImage,
@@ -2356,6 +2359,10 @@ export function InfoPanel({
   /** Navigate to a backlink's source node (focus + select it) — distinct from onJump, which creates
    *  an outgoing link. Reused for outgoing-link jumps (both just focus a node by id). */
   onFollowBacklink: (id: string) => void;
+  /** Topics in OTHER maps that link to this map (incoming #map= references). */
+  crossMapBacklinks?: CrossMapBacklink[];
+  /** Open the source map + focus the linking node for a cross-map backlink. */
+  onFollowCrossMapBacklink?: (mapId: string, nodeId: string) => void;
   onMinimize: () => void;
   /** Set / clear the topic's fill image (covers the whole card). */
   onSetFillImage?: (file: File) => void;
@@ -3170,6 +3177,54 @@ export function InfoPanel({
                                 {b.label ? (
                                   <span style={{ color: "var(--ed-faint)" }}> — {b.label}</span>
                                 ) : null}
+                              </button>
+                            ))}
+                          </div>
+                        </CollapsibleSection>
+                      )}
+
+                      {crossMapBacklinks && crossMapBacklinks.length > 0 && (
+                        <CollapsibleSection
+                          key={`xmap:${node.id}`}
+                          label="Linked from other maps"
+                          count={crossMapBacklinks.length}
+                        >
+                          <div
+                            style={{
+                              padding: "0 10px 6px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            {crossMapBacklinks.map((b) => (
+                              <button
+                                key={`${b.sourceMapId}:${b.id}`}
+                                type="button"
+                                onClick={() => onFollowCrossMapBacklink?.(b.sourceMapId, b.id)}
+                                title={`Go to "${b.topic || "(untitled)"}" in ${b.sourceMapTitle}`}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  textAlign: "left",
+                                  border: "none",
+                                  background: "transparent",
+                                  cursor: "pointer",
+                                  fontSize: fontSize.sm,
+                                  color: "var(--ed-ink)",
+                                  padding: "2px 4px",
+                                  borderRadius: radius.md,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                <span style={{ color: "var(--ed-faint)" }}>🗺 </span>
+                                {b.topic || "(untitled)"}
+                                <span style={{ color: "var(--ed-faint)" }}>
+                                  {" "}
+                                  — {b.sourceMapTitle}
+                                </span>
                               </button>
                             ))}
                           </div>

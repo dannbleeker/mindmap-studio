@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 import {
   backlinksFor,
+  crossMapBacklinksFor,
   dropWhereInBox,
   mapLinks,
   markerTagIndex,
@@ -195,6 +196,58 @@ describe("backlinksFor", () => {
     expect(backlinksFor(linkDoc(), "a")).toEqual([
       { id: "b", topic: "Beta", kind: "relationship" },
     ]);
+  });
+});
+
+describe("crossMapBacklinksFor", () => {
+  const docs = (): MindMapDoc[] => [
+    {
+      schemaVersion: 1,
+      id: "target",
+      title: "Target",
+      root: { id: "tr", topic: "Target root", children: [] },
+    },
+    {
+      schemaVersion: 1,
+      id: "src1",
+      title: "Roadmap",
+      root: {
+        id: "s1",
+        topic: "Roadmap",
+        children: [
+          { id: "n1", topic: "See target", hyperlink: "#map=target", children: [] }, // whole-map
+          { id: "n2", topic: "See topic", hyperlink: "#map=target&node=tx", children: [] }, // node
+          { id: "n3", topic: "Other", hyperlink: "#map=elsewhere", children: [] }, // other map
+        ],
+      },
+      floatingTopics: [{ id: "n4", topic: "Float ref", hyperlink: "#map=target", children: [] }],
+    },
+    {
+      schemaVersion: 1,
+      id: "src2",
+      title: "Archive",
+      root: {
+        id: "s2",
+        topic: "Archive",
+        children: [{ id: "m1", topic: "Old ref", hyperlink: "#map=target", children: [] }],
+      },
+    },
+  ];
+
+  it("collects every other map's #map= reference to the target (whole-map + node-specific)", () => {
+    const hits = crossMapBacklinksFor(docs(), "target");
+    // Sorted by source map title (Archive < Roadmap), then topic.
+    expect(hits.map((h) => [h.sourceMapTitle, h.topic, h.targetNodeId])).toEqual([
+      ["Archive", "Old ref", undefined],
+      ["Roadmap", "Float ref", undefined],
+      ["Roadmap", "See target", undefined],
+      ["Roadmap", "See topic", "tx"],
+    ]);
+  });
+
+  it("skips the target map itself and returns [] when nothing links in", () => {
+    expect(crossMapBacklinksFor(docs(), "elsewhere").map((h) => h.topic)).toEqual(["Other"]);
+    expect(crossMapBacklinksFor([docs()[0]], "target")).toEqual([]); // only the target present
   });
 });
 

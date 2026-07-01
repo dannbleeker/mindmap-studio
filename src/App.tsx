@@ -98,6 +98,7 @@ import type { MapNode, MindMapDoc } from "./model/types";
 import { NavHistory, type NavPoint } from "./navHistory";
 import {
   backlinksFor,
+  crossMapBacklinksFor,
   markerTagIndex,
   outgoingLinksFor,
   outlineNumbers,
@@ -385,6 +386,27 @@ export function App() {
   const outgoingLinks = useMemo(
     () => (selected ? outgoingLinksFor(liveDoc, selected.id) : []),
     [selected, liveDoc],
+  );
+  // Cross-map backlinks: other maps whose topics link to THIS map (via #map= hyperlinks). The scan
+  // needs every other map's doc, loaded lazily only while the inspector is open (and refreshed when
+  // the library or current map changes) so we don't pull the whole library into memory on boot.
+  const [crossMapDocs, setCrossMapDocs] = useState<MindMapDoc[]>([]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reload on library (maps) / current-map change; `selected` only gates the first load.
+  useEffect(() => {
+    if (!panels.infoOpen || !selected) return;
+    let live = true;
+    void getAllMaps()
+      .then((all) => {
+        if (live) setCrossMapDocs(all);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [panels.infoOpen, maps, doc.id]);
+  const crossMapBacklinks = useMemo(
+    () => (selected ? crossMapBacklinksFor(crossMapDocs, doc.id) : []),
+    [selected, crossMapDocs, doc.id],
   );
   // Every tag already used in the map — drives the inspector's Add-a-tag autocomplete.
   const allTags = useMemo(
@@ -2337,6 +2359,11 @@ export function App() {
                 backlinks={backlinks}
                 outgoingLinks={outgoingLinks}
                 onFollowBacklink={(id) => mapRef.current?.focusNode(id)}
+                crossMapBacklinks={crossMapBacklinks}
+                onFollowCrossMapBacklink={(mapId, nodeId) => {
+                  pendingFocus.current = nodeId;
+                  void switchMap(mapId);
+                }}
                 onMinimize={() => {
                   panels.setInfoOpen(false);
                   panels.setInfoMinimized(true);

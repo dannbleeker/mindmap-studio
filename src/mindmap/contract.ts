@@ -164,6 +164,11 @@ export interface MindMapHandle {
   toggleLocked: (id: string) => void;
   /** Set the hyperlink on the selected node ("" clears); false if nothing is selected. */
   setSelectedHyperlink: (url: string) => boolean;
+  /** Append an ADDITIONAL hyperlink to the selected node (beyond its primary `hyperlink`); no-op for a
+   *  blank/dangerous/duplicate URL. False if nothing is selected. */
+  addSelectedHyperlink: (url: string) => boolean;
+  /** Remove the additional hyperlink at `index` from the selected node's extras. False if none selected. */
+  removeSelectedHyperlink: (index: number) => boolean;
   /** Group the node and its subtree in a filled boundary box; false if it isn't found. */
   groupBranch: (id: string) => boolean;
   /** Reorder a node's direct children by topic / priority / due / progress; false if it isn't found. */

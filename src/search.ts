@@ -13,6 +13,7 @@ export const searchableText = (node: MapNode): string =>
     ...(node.tags ?? []),
     ...(node.icons ?? []),
     node.hyperlink ?? "",
+    ...(node.hyperlinks ?? []),
     ...(node.callouts?.map((c) => c.text) ?? []),
     ...(node.attachments?.map((a) => a.name) ?? []),
     ...(node.task?.resources ?? []),
@@ -70,7 +71,7 @@ const hasField = (n: MapNode, f: HasField): boolean => {
     case "attachment":
       return !!n.attachments?.length;
     case "link":
-      return !!n.hyperlink;
+      return !!n.hyperlink || !!n.hyperlinks?.length;
     case "task":
       return !!n.task;
     case "image":

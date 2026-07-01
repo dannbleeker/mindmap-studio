@@ -80,6 +80,7 @@ import {
   addCallout,
   addChild,
   addFloatingTopic,
+  addHyperlink,
   addLink,
   addSibling,
   addStickyNote,
@@ -117,6 +118,7 @@ import {
   outdent,
   pasteBranch,
   removeAttachment,
+  removeHyperlink,
   renameTag,
   reparent,
   replaceTopics,
@@ -1735,6 +1737,10 @@ function FlowInner({
       toggleLocked: (id) => apply(toggleLocked(docRef.current, id)),
       setSelectedHyperlink: (url) =>
         withSelected((id) => apply(setHyperlink(docRef.current, id, url))),
+      addSelectedHyperlink: (url) =>
+        withSelected((id) => apply(addHyperlink(docRef.current, id, url))),
+      removeSelectedHyperlink: (index) =>
+        withSelected((id) => apply(removeHyperlink(docRef.current, id, index))),
       groupBranch: (id) => {
         apply(groupBranch(docRef.current, id));
         return Boolean(findAnyNode(docRef.current, id));

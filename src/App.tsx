@@ -2398,6 +2398,11 @@ export function App() {
                   const ok = mapRef.current?.setSelectedHyperlink(url);
                   if (!ok) showHint("Select a node first, then add a link.");
                 }}
+                onAddHyperlink={(url) => {
+                  const ok = mapRef.current?.addSelectedHyperlink(url);
+                  if (!ok) showHint("Select a node first, then add a link.");
+                }}
+                onRemoveHyperlink={(i) => mapRef.current?.removeSelectedHyperlink(i)}
                 maps={maps
                   .filter((mm) => mm.id !== doc.id)
                   .map((mm) => ({ id: mm.id, title: mm.title }))}

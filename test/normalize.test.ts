@@ -111,6 +111,46 @@ describe("normalizeDoc", () => {
     expect(a.attachments?.map((x) => x.name)).toEqual(["ok"]); // only the data: attachment kept
   });
 
+  it("filters unsafe / blank extras from a node's hyperlinks, dropping the array when empty", () => {
+    const doc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          {
+            id: "a",
+            topic: "A",
+            hyperlinks: ["https://ok.test", " ", "javascript:alert(1)"],
+            children: [],
+          },
+          { id: "b", topic: "B", hyperlinks: ["vbscript:x", ""], children: [] },
+        ],
+      },
+    } as unknown as MindMapDoc;
+    const [a, b] = normalizeDoc(doc).root.children;
+    expect(a.hyperlinks).toEqual(["https://ok.test"]); // blank + javascript: dropped
+    expect(b.hyperlinks).toBeUndefined(); // nothing safe left → array removed
+  });
+
+  it("leaves a clean hyperlinks array value-identical (lossless)", () => {
+    const good = {
+      schemaVersion: 1,
+      id: "d",
+      title: "T",
+      root: {
+        id: "r",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", hyperlinks: ["https://a.test", "#node=b"], children: [] },
+        ],
+      },
+    } as unknown as MindMapDoc;
+    expect(normalizeDoc(good)).toEqual(good);
+  });
+
   it("drops the attachments array entirely when nothing safe remains (stays lossless)", () => {
     const allUnsafe = {
       schemaVersion: 1,

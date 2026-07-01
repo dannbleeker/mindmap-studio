@@ -526,6 +526,8 @@ describe("InfoPanel", () => {
         onAddAttachment={noop}
         onRemoveAttachment={noop}
         onSetHyperlink={noop}
+        onAddHyperlink={noop}
+        onRemoveHyperlink={noop}
         maps={[]}
         onLinkMap={noop}
         jumpTargets={[]}
@@ -1505,6 +1507,8 @@ describe("InfoPanel (interaction)", () => {
         onAddAttachment={noop}
         onRemoveAttachment={noop}
         onSetHyperlink={noop}
+        onAddHyperlink={noop}
+        onRemoveHyperlink={noop}
         maps={[]}
         onLinkMap={noop}
         jumpTargets={[]}
@@ -1550,6 +1554,8 @@ describe("InfoPanel (interaction)", () => {
         onAddAttachment={noop}
         onRemoveAttachment={noop}
         onSetHyperlink={onSetHyperlink}
+        onAddHyperlink={noop}
+        onRemoveHyperlink={noop}
         maps={[{ id: "other", title: "Other map" }]}
         onLinkMap={noop}
         jumpTargets={[]}
@@ -1565,6 +1571,60 @@ describe("InfoPanel (interaction)", () => {
     const select = await screen.findByLabelText("Focus a topic in the linked map");
     await userEvent.selectOptions(select, "x");
     expect(onSetHyperlink).toHaveBeenCalledWith("#map=other&node=x");
+  });
+
+  it("adds and removes additional hyperlinks (multiple links per topic)", async () => {
+    const onAddHyperlink = vi.fn();
+    const onRemoveHyperlink = vi.fn();
+    const node: MapNode = {
+      ...sampleRoot().children[0],
+      hyperlink: "https://primary.test",
+      hyperlinks: ["https://extra-one.test", "https://extra-two.test"],
+    };
+    render(
+      <InfoPanel
+        selected={{ id: "a", topic: "Research", note: "" }}
+        width={300}
+        onResize={noop}
+        node={node}
+        noteDraft=""
+        onNoteChange={noop}
+        onNoteBlur={noop}
+        markers={["⭐"]}
+        onToggleMarker={noop}
+        onPickSticker={noop}
+        onStyle={noop}
+        onAddTag={noop}
+        onRemoveTag={noop}
+        onSetProgress={noop}
+        onSetDue={noop}
+        onSetStart={noop}
+        onSetPriority={noop}
+        onAddAttachment={noop}
+        onRemoveAttachment={noop}
+        onSetHyperlink={noop}
+        onAddHyperlink={onAddHyperlink}
+        onRemoveHyperlink={onRemoveHyperlink}
+        maps={[]}
+        onLinkMap={noop}
+        jumpTargets={[]}
+        onJump={noop}
+        backlinks={[]}
+        outgoingLinks={[]}
+        onFollowBacklink={noop}
+        onMinimize={noop}
+      />,
+    );
+    // Both extras render with remove buttons.
+    expect(screen.getByText("https://extra-one.test")).toBeTruthy();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove additional link https://extra-two.test" }),
+    );
+    expect(onRemoveHyperlink).toHaveBeenCalledWith(1);
+    // Typing a new link + Enter appends it.
+    const add = screen.getByLabelText("Add another link");
+    await userEvent.type(add, "https://new-link.test{Enter}");
+    expect(onAddHyperlink).toHaveBeenCalledWith("https://new-link.test");
   });
 });
 

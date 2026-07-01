@@ -293,3 +293,51 @@ describe("mapLinks", () => {
     expect(mapLinks(doc).map((l) => `${l.fromId}->${l.toId}`)).toEqual(["a->b", "f->b"]);
   });
 });
+
+// A topic's `hyperlinks` extras participate in every link scan exactly like the primary `hyperlink`.
+describe("multiple hyperlinks per topic", () => {
+  // Alpha carries a primary #node=b PLUS extras: another #node=c and a #map=other&node=x.
+  const multiDoc = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "Root",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        {
+          id: "a",
+          topic: "Alpha",
+          hyperlink: "#node=b",
+          hyperlinks: ["#node=c", "#map=other&node=x"],
+          children: [],
+        },
+        { id: "b", topic: "Beta", children: [] },
+        { id: "c", topic: "Gamma", children: [] },
+      ],
+    },
+  });
+
+  it("backlinksFor sees a target reached only via an extra link", () => {
+    expect(backlinksFor(multiDoc(), "c")).toEqual([{ id: "a", topic: "Alpha", kind: "hyperlink" }]);
+  });
+
+  it("outgoingLinksFor lists every distinct #node= target (primary + extras)", () => {
+    expect(outgoingLinksFor(multiDoc(), "a")).toEqual([
+      { id: "b", topic: "Beta", kind: "hyperlink" },
+      { id: "c", topic: "Gamma", kind: "hyperlink" },
+    ]);
+  });
+
+  it("mapLinks flattens both the primary and the extra in-map jump", () => {
+    expect(mapLinks(multiDoc()).map((l) => `${l.fromId}->${l.toId}`)).toEqual(["a->b", "a->c"]);
+  });
+
+  it("crossMapBacklinksFor picks up a #map= reference carried in an extra", () => {
+    const hits = crossMapBacklinksFor(
+      [multiDoc(), { ...multiDoc(), id: "other", title: "Other" }],
+      "other",
+    );
+    expect(hits.map((h) => [h.topic, h.targetNodeId])).toEqual([["Alpha", "x"]]);
+  });
+});

@@ -100,6 +100,13 @@ export interface MapNode {
   topicRich?: string;
   note?: string;
   hyperlink?: string;
+  /**
+   * Additional hyperlinks beyond the primary `hyperlink` (a topic can point at more than one place).
+   * The primary stays canonical — the canvas 🔗, exporters, and single-link consumers use it — while
+   * these extras are managed in the inspector and picked up by search + the cross-map/in-map backlink
+   * scans. Additive + optional: a clean node omits it; absent ⇒ no extras.
+   */
+  hyperlinks?: string[];
   image?: MapImage;
   /** Marker / icon ids (priority, progress, flags, ...). */
   icons?: string[];

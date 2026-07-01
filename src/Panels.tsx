@@ -2381,6 +2381,8 @@ export function InfoPanel({
   onAddAttachment,
   onRemoveAttachment,
   onSetHyperlink,
+  onAddHyperlink,
+  onRemoveHyperlink,
   maps,
   onLinkMap,
   jumpTargets,
@@ -2452,6 +2454,10 @@ export function InfoPanel({
   onAddAttachment: (file: File) => void;
   onRemoveAttachment: (index: number) => void;
   onSetHyperlink: (url: string) => void;
+  /** Append an additional link (beyond the primary hyperlink) to the selected node. */
+  onAddHyperlink: (url: string) => void;
+  /** Remove the additional link at `index` from the selected node's extras. */
+  onRemoveHyperlink: (index: number) => void;
   maps: { id: string; title: string }[];
   onLinkMap: (mapId: string) => void;
   jumpTargets: { id: string; topic: string; depth: number }[];
@@ -3130,7 +3136,7 @@ export function InfoPanel({
                       <CollapsibleSection
                         key={`links:${node.id}`}
                         label="Links"
-                        count={link ? 1 : 0}
+                        count={(link ? 1 : 0) + (node.hyperlinks?.length ?? 0)}
                       >
                         <Input
                           key={`${node.id}:url`}
@@ -3210,6 +3216,92 @@ export function InfoPanel({
                             )
                           </Button>
                         )}
+                        {/* Additional links beyond the primary — a topic can point at more than one
+                            place. The primary above stays canonical (canvas 🔗 + exporters); these are
+                            managed here and picked up by search + the backlink scans. */}
+                        <div
+                          style={{
+                            margin: "2px 10px 0",
+                            paddingTop: 6,
+                            borderTop: "1px solid var(--ed-divider, #efece4)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: fontSize.sm,
+                              color: colors.faint,
+                              marginBottom: 4,
+                            }}
+                          >
+                            Additional links
+                          </div>
+                          {(node.hyperlinks ?? []).map((h, i) => (
+                            <div
+                              key={h}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                marginBottom: 4,
+                              }}
+                            >
+                              {onOpenLink ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenLink(h)}
+                                  title={`Open ${h}`}
+                                  style={{
+                                    ...listRow,
+                                    padding: 0,
+                                    color: colors.accent,
+                                    textDecoration: "underline",
+                                  }}
+                                >
+                                  {h}
+                                </button>
+                              ) : (
+                                <span
+                                  title={h}
+                                  style={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    fontSize: fontSize.md,
+                                  }}
+                                >
+                                  {h}
+                                </span>
+                              )}
+                              <Button
+                                onClick={() => onRemoveHyperlink(i)}
+                                title="Remove this link"
+                                aria-label={`Remove additional link ${h}`}
+                                style={{ padding: "0 6px", fontSize: fontSize.sm }}
+                              >
+                                ✕
+                              </Button>
+                            </div>
+                          ))}
+                          <Input
+                            key={`${node.id}:addlink`}
+                            defaultValue=""
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                const el = e.target as HTMLInputElement;
+                                const v = el.value.trim();
+                                if (v) {
+                                  onAddHyperlink(v);
+                                  el.value = "";
+                                }
+                              }
+                            }}
+                            placeholder="Add another link + Enter"
+                            aria-label="Add another link"
+                            style={{ width: "auto", marginBottom: 6 }}
+                          />
+                        </div>
                       </CollapsibleSection>
 
                       {backlinks.length > 0 && (

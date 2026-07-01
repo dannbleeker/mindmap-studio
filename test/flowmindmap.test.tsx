@@ -204,6 +204,7 @@ describe("FlowMindMap canvas", () => {
     run(() => h.toggleSelectedIcon("⭐"));
     run(() => h.setSelectedStyle({ shape: "diamond" }));
     run(() => h.setSelectedHyperlink("https://example.com"));
+    run(() => h.addSelectedHyperlink("https://extra.example.com"));
     run(() => h.setSelectedTags(["tag"]));
     run(() => h.setSelectedProgress(0.5));
     run(() => h.setSelectedDue("2026-06-20"));
@@ -213,6 +214,7 @@ describe("FlowMindMap canvas", () => {
       h.addSelectedAttachment({ name: "f.txt", dataUrl: "data:text/plain;base64,AA", size: 3 }),
     );
     run(() => h.removeSelectedAttachment(0));
+    run(() => h.removeSelectedHyperlink(0));
     run(() => h.addSubtreeToSelected([{ id: "x", topic: "Grafted", children: [] }]));
     run(() => h.setSelectedRollup("m99"));
     run(() => h.groupBranch("a"));

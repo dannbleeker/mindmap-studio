@@ -47,6 +47,13 @@ describe("findMatches", () => {
         { id: "mark", topic: "n2", icons: ["flag-red"], children: [] },
         { id: "link", topic: "n3", hyperlink: "https://example.com/spec", children: [] },
         {
+          id: "extra",
+          topic: "n3b",
+          hyperlink: "https://primary.test",
+          hyperlinks: ["https://secondary.example.org/deep"],
+          children: [],
+        },
+        {
           id: "call",
           topic: "n4",
           callouts: [{ id: "c", text: "remember the budget", dx: 0, dy: 0 }],
@@ -64,6 +71,7 @@ describe("findMatches", () => {
     expect(findMatches(rich, "urgent")).toEqual(["tag"]);
     expect(findMatches(rich, "flag-red")).toEqual(["mark"]);
     expect(findMatches(rich, "example.com")).toEqual(["link"]);
+    expect(findMatches(rich, "secondary.example.org")).toEqual(["extra"]); // an additional hyperlink
     expect(findMatches(rich, "budget")).toEqual(["call"]);
     expect(findMatches(rich, "contract.pdf")).toEqual(["att"]);
     expect(findMatches(rich, "alice")).toEqual(["res"]);

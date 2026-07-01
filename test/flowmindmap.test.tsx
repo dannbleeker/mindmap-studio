@@ -389,6 +389,39 @@ describe("FlowMindMap canvas", () => {
     expect(container.querySelector('[contenteditable="true"]')).toBeNull();
   });
 
+  it("slash menu: typing / opens the command menu; Enter runs a command and preserves the topic", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("b")); // Beta, no children
+    // Type-to-edit with "/" seeds the editor and opens the slash menu (all commands, index 0 = child).
+    run(() => fireEvent.keyDown(document, { key: "/" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    expect(editable).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Add child topic/ })).toBeTruthy();
+    onChange.mockClear();
+    // Enter selects the highlighted command (Add child topic).
+    run(() => fireEvent.keyDown(editable, { key: "Enter" }));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    const b = doc.root.children.find((n) => n.id === "b");
+    expect(b?.children).toHaveLength(1); // a child was added under Beta
+    expect(b?.topic).toBe("Beta"); // the "/query" buffer was discarded — the real topic stands
+  });
+
+  it("slash menu: filtering to a command and Enter applies its effect (Due today)", () => {
+    const { container, h, onChange } = mount();
+    run(() => h.focusNode("b"));
+    run(() => fireEvent.keyDown(document, { key: "/" }));
+    const editable = container.querySelector('[contenteditable="true"]') as HTMLElement;
+    // Narrow to the Due-today command by setting the editor text + firing input.
+    editable.textContent = "/due";
+    run(() => fireEvent.input(editable));
+    expect(screen.getByRole("button", { name: /Due today/ })).toBeTruthy();
+    onChange.mockClear();
+    run(() => fireEvent.keyDown(editable, { key: "Enter" }));
+    const doc = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    const b = doc.root.children.find((n) => n.id === "b");
+    expect(b?.task?.due).toBeTruthy(); // a due date was stamped
+  });
+
   it("Delete removes a node with children immediately (no modal) + reports it for the undo toast (#9)", () => {
     const { h, onChange, onDelete } = mount();
     run(() => h.focusNode("a")); // "a" (Alpha) has child a1

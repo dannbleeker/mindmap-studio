@@ -3,6 +3,7 @@ import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   memo,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -23,6 +24,7 @@ import { matchBorderColor } from "./geometry";
 import { showNodeAffordances } from "./nodeChrome";
 import { relateGripTopCss } from "./relateGripGeometry";
 import { isGeometric, shapeInset, shapeOverlayPath, shapePath } from "./shapes";
+import { type SlashCommand, matchSlashCommands, slashMenuKey, slashQuery } from "./slashCommands";
 import {
   TOPIC_SHADOW_CSS,
   levelFontSize,
@@ -310,6 +312,18 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const [markerDragOver, setMarkerDragOver] = useState(false);
   // Re-sanitise on render too (defence-in-depth: a topicRich could arrive via an imported .json).
   const richHtml = useMemo(() => (topicRich ? sanitizeRich(topicRich) : null), [topicRich]);
+  // Slash `/` command menu: opens when the editor text starts with "/", filtered by what follows.
+  // `items` empty ⇒ closed. `index` is the highlighted row (Arrow keys move it, Enter/Tab selects).
+  const [slashItems, setSlashItems] = useState<SlashCommand[]>([]);
+  const [slashIndex, setSlashIndex] = useState(0);
+  const slashOpen = isEditing && slashItems.length > 0;
+  // Recompute the menu from the editor's current plain text (called on input + on entering edit).
+  const syncSlashMenu = useCallback(() => {
+    const q = slashQuery(editRef.current?.textContent ?? "");
+    const items = q === null ? [] : matchSlashCommands(q);
+    setSlashItems(items);
+    setSlashIndex(0);
+  }, []);
 
   // On entering edit mode: seed the text, focus, and select all (uncontrolled — React must
   // not re-render over the user's keystrokes, so the text is set imperatively, once).
@@ -344,10 +358,20 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       }
     };
     place();
+    // Type-to-edit could seed a leading "/" (open the menu immediately); otherwise this closes it.
+    syncSlashMenu();
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isEditing, topic, richHtml, seed]);
+  }, [isEditing, topic, richHtml, seed, syncSlashMenu]);
+
+  // Leaving edit mode tears the menu down so it can't linger with stale items on the next edit.
+  useEffect(() => {
+    if (!isEditing) {
+      setSlashItems([]);
+      setSlashIndex(0);
+    }
+  }, [isEditing]);
 
   // The first real edit retires the "double-click to edit" microcopy for good.
   useEffect(() => {
@@ -639,25 +663,65 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           ) : null}
           {isEditing ? <RichEditToolbar /> : null}
           {isEditing ? (
-            <span
-              ref={editRef}
-              contentEditable
-              suppressContentEditableWarning
-              // contentEditable already exposes an implicit textbox role + focusability; just name it.
-              aria-label={`Edit topic${topic ? `: ${topic}` : ""}`}
-              spellCheck={editing?.spellcheck ?? false}
-              className="nodrag nopan"
-              style={{ outline: "none", display: "inline-block", minWidth: 16 }}
-              onKeyDown={(e) => {
-                const html = editRef.current?.innerHTML ?? "";
-                handleEditorKeyDown(e, {
-                  format: (cmd) => document.execCommand(cmd),
-                  commitAndAdd: (what) => editing?.commitAndAdd(id, html, what),
-                  cancel: () => editing?.cancelEdit(html),
-                });
-              }}
-              onBlur={() => editing?.commitEdit(id, editRef.current?.innerHTML ?? "")}
-            />
+            <span style={{ position: "relative", display: "inline-block" }}>
+              <span
+                ref={editRef}
+                contentEditable
+                suppressContentEditableWarning
+                // contentEditable already exposes an implicit textbox role + focusability; just name it.
+                aria-label={`Edit topic${topic ? `: ${topic}` : ""}`}
+                spellCheck={editing?.spellcheck ?? false}
+                className="nodrag nopan"
+                style={{ outline: "none", display: "inline-block", minWidth: 16 }}
+                onInput={syncSlashMenu}
+                onKeyDown={(e) => {
+                  // While the slash menu is open it owns Arrow/Enter/Tab/Escape; anything else falls
+                  // through to normal typing (and re-filters via onInput).
+                  if (slashOpen) {
+                    const r = slashMenuKey(e.key, slashIndex, slashItems.length);
+                    if (r.action !== "passthrough") {
+                      e.preventDefault();
+                      if (r.action === "move") setSlashIndex(r.index);
+                      else if (r.action === "close") setSlashItems([]);
+                      else if (r.action === "select")
+                        editing?.runSlashCommand(id, slashItems[slashIndex].id);
+                      return;
+                    }
+                  }
+                  const html = editRef.current?.innerHTML ?? "";
+                  handleEditorKeyDown(e, {
+                    format: (cmd) => document.execCommand(cmd),
+                    commitAndAdd: (what) => editing?.commitAndAdd(id, html, what),
+                    cancel: () => editing?.cancelEdit(html),
+                  });
+                }}
+                onBlur={() => editing?.commitEdit(id, editRef.current?.innerHTML ?? "")}
+              />
+              {slashOpen ? (
+                // Plain buttons (not an ARIA listbox): keyboard focus stays in the editor — the menu is
+                // driven by the editor's keydown + aria-pressed reflects the highlighted row — so a
+                // focusable listbox would fight the contentEditable. Buttons are natively interactive.
+                <div className="nodrag nopan mm-slash-menu" aria-label="Insert command">
+                  {slashItems.map((cmd, i) => (
+                    <button
+                      key={cmd.id}
+                      type="button"
+                      aria-pressed={i === slashIndex}
+                      // Keep focus in the editor (a blur would commit/discard the node before the
+                      // command runs); the click still fires.
+                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseEnter={() => setSlashIndex(i)}
+                      onClick={() => editing?.runSlashCommand(id, cmd.id)}
+                      data-active={i === slashIndex || undefined}
+                      className="mm-slash-item"
+                    >
+                      <span>{cmd.label}</span>
+                      {cmd.hint ? <span className="mm-slash-hint">{cmd.hint}</span> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </span>
           ) : richHtml ? (
             // biome-ignore lint/security/noDangerouslySetInnerHtml: richHtml is sanitised in io/richText
             <span dangerouslySetInnerHTML={{ __html: richHtml }} />

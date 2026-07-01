@@ -41,6 +41,9 @@ export interface EditingApi {
   spellcheck: boolean;
   /** Apply a marker dragged from the palette onto this node (drag-and-drop marker application). */
   dropMarker: (id: string, marker: string) => void;
+  /** Run a slash-menu command on a node (the `/` command menu): clears the `/query` text, then applies
+   *  the command's effect (add child/sibling, task/priority/date, boundary, note, marker). */
+  runSlashCommand: (id: string, commandId: string) => void;
 }
 
 export const EditingContext = createContext<EditingApi | null>(null);

@@ -438,6 +438,10 @@ function FlowInner({
   // The id of the node just created via an add-and-edit (Tab/Enter/＋), so leaving it empty (Escape or
   // click-away) can discard it instead of stranding a blank node — MindManager-style. Cleared on commit.
   const justAddedRef = useRef<string | null>(null);
+  // Set to a node id by runSlashCommand: the editor is about to unmount and its blur would otherwise
+  // commit/discard the "/query" buffer, clobbering the command's effect. This makes the next
+  // commit/cancel for that id a no-op. Self-clears when consumed; also reset on entering a fresh edit.
+  const suppressCommitRef = useRef<string | null>(null);
   const linkingFromRef = useLatestRef(linkingFrom);
   const onChangeRef = useLatestRef(onChange);
   const onSelectRef = useLatestRef(onSelect);
@@ -676,6 +680,7 @@ function FlowInner({
   // Enter inline edit for a node; `seed` is the character to start typing with (type-to-edit),
   // or null for a normal edit (seed the existing topic + select all).
   const startEdit = useCallback((id: string, seed: string | null = null) => {
+    suppressCommitRef.current = null; // a fresh edit is never a leftover slash-command suppression
     setEditSeed(seed);
     setEditingId(id);
   }, []);
@@ -923,6 +928,12 @@ function FlowInner({
         const id = editingRef.current;
         setEditingId(null);
         setEditSeed(null);
+        // A slash command already handled this node (and its "/query" buffer); don't discard/revert it.
+        if (id && suppressCommitRef.current === id) {
+          suppressCommitRef.current = null;
+          justAddedRef.current = null;
+          return;
+        }
         const wasJustAdded = !!id && id === justAddedRef.current;
         justAddedRef.current = null;
         if (!id || !wasJustAdded) return; // existing node → plain cancel (its committed text stands)
@@ -937,6 +948,13 @@ function FlowInner({
       commitEdit: (id: string, html: string) => {
         setEditingId(null);
         setEditSeed(null);
+        // The editor unmounting after a slash command fires this blur with the stale "/query" buffer —
+        // ignore it so the command's effect (and the node's real topic) stands.
+        if (suppressCommitRef.current === id) {
+          suppressCommitRef.current = null;
+          justAddedRef.current = null;
+          return;
+        }
         const { rich, plain } = parse(html);
         // Click-away (blur) that leaves a just-created node empty discards it (same as Escape).
         const wasJustAdded = id === justAddedRef.current;
@@ -1002,6 +1020,51 @@ function FlowInner({
       },
       // Drop a marker dragged from the palette onto a node — toggles it on that topic.
       dropMarker: (id: string, marker: string) => apply(toggleIcon(docRef.current, id, marker)),
+      // Slash `/` command menu: the "/query" lives only in the uncommitted editor buffer, so leave edit
+      // mode WITHOUT committing (the node keeps its real committed topic — empty for a fresh node) and
+      // suppress the unmount blur, then apply the picked command's effect in one undo step. Add-commands
+      // re-enter edit on the new node (apply select=true); the rest just stamp the attribute.
+      runSlashCommand: (id: string, commandId: string) => {
+        const d = docRef.current;
+        suppressCommitRef.current = id;
+        setEditingId(null);
+        setEditSeed(null);
+        justAddedRef.current = null;
+        switch (commandId) {
+          case "child":
+            apply(addChild(d, id), true);
+            return;
+          case "sibling":
+            apply(addSibling(d, id), true);
+            return;
+          case "todo":
+            apply(setProgress(d, id, 0));
+            return;
+          case "done":
+            apply(setProgress(d, id, 100));
+            return;
+          case "due-today":
+            apply(setDue(d, id, todayISO()));
+            return;
+          case "priority-high":
+            apply(setPriority(d, id, PRIORITY_LEVELS[0]));
+            return;
+          case "boundary":
+            apply(groupBranch(d, id));
+            return;
+          case "marker-star":
+            apply(toggleIcon(d, id, "⭐"));
+            return;
+          case "note":
+            // No doc mutation — just select the node and open the inspector's Notes tab.
+            selectOnly(id);
+            fireSelect(id);
+            onOpenNoteRef.current?.();
+            return;
+          default:
+            break; // unknown id: nothing to do (the "/query" buffer is discarded on unmount)
+        }
+      },
       // Native browser spell-check on the topic editors (view setting; off by default).
       spellcheck,
     };

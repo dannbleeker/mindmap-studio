@@ -7,6 +7,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Visual map in the interactive HTML export (C1).** The self-contained interactive `.html` export now
+  opens on the **actual visual map** — the same faithful SVG render as the image/PDF exports, with
+  pan/zoom — and a header toggle drops to the **collapsible, searchable text outline** (the previous
+  output, kept as the accessible fallback and the no-canvas path). Searching from the visual view
+  auto-switches to the outline so hits are visible. Still one offline, self-contained file with no
+  external assets. Verified in a real browser: the SVG renders, the toggle flips modes, and search
+  highlights matches.
+
 - **Speaker notes in the exported slide deck + PowerPoint (B5).** The standalone HTML slide-deck export
   now embeds each slide's speaker note (the topic's note, or a per-slide custom-deck override — same
   resolution as the presenter view), rendered from Markdown and **hidden by default**; press **N** or

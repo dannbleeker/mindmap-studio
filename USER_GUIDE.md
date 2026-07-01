@@ -692,7 +692,7 @@ Pick a format from the **⬆ Export…** menu:
 | `.mmap` | MindManager — topic tree, notes, hyperlinks, icons, relationships, and the two-sided side; the mirror of the `.mmap` importer (round-trips back into Studio for these fields) |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
-| `.html` (interactive) | A single self-contained HTML file — the map as a **collapsible, searchable** outline: fold branches, filter topics, zoom/pan (no app, no backend, offline) |
+| `.html` (interactive) | A single self-contained HTML file that opens on the **visual map** (the real coloured render, pan/zoom) with a toggle to a **collapsible, searchable** outline: fold branches, filter topics (no app, no backend, offline) |
 | `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline). **Speaker notes** are included, hidden by default — press **N** or the footer **Notes** button to show them |
 | `.docx` | A Word document — the map as an editable, indented outline (opens in Word, LibreOffice, Pages, Google Docs) |
 | `.pptx` | A PowerPoint deck — an overview slide, then one per branch, **with each topic's note carried into the slide's speaker notes** (opens in PowerPoint, Keynote, LibreOffice, Google Slides) |

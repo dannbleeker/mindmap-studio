@@ -133,4 +133,23 @@ describe("buildInteractiveHtml", () => {
     };
     expect(buildInteractiveHtml(untitled)).toContain("<title>Rooted</title>");
   });
+
+  it("stays outline-only (no visual layer / toggle) when no SVG is supplied (C1)", () => {
+    const html = buildInteractiveHtml(doc);
+    expect(html).toContain('class="mode-outline"');
+    expect(html).not.toContain('id="visual"');
+    expect(html).not.toContain('id="mode"');
+  });
+
+  it("embeds the visual map + a Visual/Outline toggle when an SVG is supplied (C1)", () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg"><text>Plan</text></svg>';
+    const html = buildInteractiveHtml(doc, svg);
+    expect(html).toContain('class="mode-visual"'); // opens on the visual map
+    expect(html).toContain('<div id="visual">');
+    expect(html).toContain(svg); // the SVG is embedded verbatim (caller sanitises it)
+    expect(html).toContain('id="mode"'); // the Visual/Outline toggle
+    // The outline is still present (the other mode / fallback).
+    expect(html).toContain('id="tree"');
+    expect(html).toMatch(/setMode/); // the runtime toggle logic
+  });
 });

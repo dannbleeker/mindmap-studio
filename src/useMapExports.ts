@@ -201,8 +201,11 @@ export function useMapExports(
     // lazy-loaded so the template + runtime stay out of the entry chunk.
     async exportInteractiveHtml() {
       const { buildInteractiveHtml } = await import("./io/interactiveHtml");
+      // Embed the faithful visual map (C1) when a live canvas is present; without one it degrades to the
+      // collapsible/searchable text outline (the historical, accessible, no-canvas output).
+      const svg = await cleanSvg();
       downloadBlob(
-        new Blob([buildInteractiveHtml(getDoc())], { type: "text/html" }),
+        new Blob([buildInteractiveHtml(getDoc(), svg ?? undefined)], { type: "text/html" }),
         `${baseName()}-interactive.html`,
       );
     },

@@ -1,8 +1,9 @@
 // Interactive, self-contained HTML export: the map as a single offline `.html`
-// file you can email or open locally — no app, no network, no CDN. Unlike the
-// static HTML export (an embedded SVG picture) this renders the topic tree as a
-// collapsible, searchable outline with a small inlined vanilla-JS runtime, so
-// the recipient can fold branches and filter topics without any tooling.
+// file you can email or open locally — no app, no network, no CDN. When exported
+// with a live canvas it opens on the **visual map** (the faithful SVG render,
+// pan/zoom) with a toggle to a **collapsible, searchable text outline** — the
+// historical output, and the accessible / no-canvas fallback (C1). All driven by
+// a small inlined vanilla-JS runtime, so the recipient needs no tooling.
 //
 // Pure + deterministic so it's unit-testable. Two safety rules govern what is
 // interpolated into the document:
@@ -108,6 +109,16 @@ const CSS = `
   li.hidden { display: none; }
   footer { padding: 8px 18px; font-size: 11px; color: var(--muted);
     border-top: 1px solid var(--line); }
+  /* Visual map layer (C1): the faithful SVG render, shown/hidden by the body mode class. The outline
+     (#tree) is the other mode; only one shows at a time inside the shared pan/zoom #pan. */
+  #visual { display: none; }
+  #visual svg { display: block; max-width: none; height: auto; }
+  .mode-visual #visual { display: block; }
+  .mode-visual #tree { display: none; }
+  /* Expand/collapse only act on the outline — hide them in visual mode. Search stays (it switches
+     to the outline so hits are visible). */
+  .mode-visual #expand, .mode-visual #collapse { display: none; }
+  button.ctl[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
 `;
 
 // Static runtime — no map content is interpolated here, so there is no XSS surface.
@@ -122,6 +133,22 @@ const SCRIPT = `
   var q = document.getElementById('q');
   var count = document.getElementById('count');
   var nodes = [].slice.call(root.querySelectorAll('li.node'));
+
+  // Visual/Outline toggle (C1): flip the body mode class + the button label. Only wired when the file
+  // was exported with a visual map (the #mode button is otherwise absent).
+  var body = document.body;
+  var modeBtn = document.getElementById('mode');
+  function setMode(visual) {
+    body.classList.toggle('mode-visual', visual);
+    body.classList.toggle('mode-outline', !visual);
+    if (modeBtn) {
+      modeBtn.textContent = visual ? 'Outline view' : 'Visual map';
+      modeBtn.setAttribute('aria-pressed', visual ? 'false' : 'true');
+    }
+  }
+  if (modeBtn) modeBtn.addEventListener('click', function () {
+    setMode(body.classList.contains('mode-outline'));
+  });
 
   function setCollapsed(li, on) { li.classList.toggle('collapsed', on); }
 
@@ -162,6 +189,8 @@ const SCRIPT = `
 
   function runSearch() {
     var needle = q.value.trim().toLowerCase();
+    // Search operates on the outline; if we're on the visual map, switch so the hits are visible (C1).
+    if (needle && body.classList.contains('mode-visual')) setMode(false);
     nodes.forEach(function (li) {
       li.classList.remove('hidden', 'dim');
       clearMarks(li.querySelector(':scope > .row > .topic'));
@@ -211,9 +240,23 @@ const SCRIPT = `
 })();
 `;
 
-export function buildInteractiveHtml(doc: MindMapDoc): string {
+/**
+ * The interactive, self-contained HTML export. When `svg` is supplied (the canvas's faithful SVG
+ * render — the caller passes it already sanitised) the output opens on a **Visual map** view (the
+ * actual coloured map, pan/zoom) with a toggle to the **Outline** (the collapsible, searchable text
+ * tree — the historical output, and the accessible / no-canvas fallback). Without `svg` (no live
+ * canvas) it's the outline only, exactly as before. C1.
+ */
+export function buildInteractiveHtml(doc: MindMapDoc, svg?: string): string {
   const title = doc.title || doc.root.topic || "Mind map";
   const tree = `<ul id="tree" class="root">${nodeHtml(doc.root)}</ul>`;
+  const hasVisual = !!svg?.trim();
+  // The SVG is embedded verbatim — the caller sanitises it (io/svgSanitize) and the exporter emits only
+  // native <text> (no scripts / handlers / foreignObject), so it carries no scripting surface.
+  const visual = hasVisual ? `<div id="visual">${svg}</div>` : "";
+  const modeToggle = hasVisual
+    ? `<button type="button" class="ctl" id="mode" aria-pressed="false" title="Switch between the visual map and the text outline">Outline view</button>`
+    : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -222,10 +265,11 @@ export function buildInteractiveHtml(doc: MindMapDoc): string {
 <title>${escapeHtml(title)}</title>
 <style>${CSS}</style>
 </head>
-<body>
+<body class="${hasVisual ? "mode-visual" : "mode-outline"}">
 <header>
 <h1>${escapeHtml(title)}</h1>
 <span class="spacer"></span>
+${modeToggle}
 <input id="q" type="search" placeholder="Filter topics…" aria-label="Filter topics" autocomplete="off" />
 <span id="count" aria-live="polite"></span>
 <button type="button" class="ctl" id="expand">Expand all</button>
@@ -234,10 +278,11 @@ export function buildInteractiveHtml(doc: MindMapDoc): string {
 </header>
 <div id="scroll">
 <div id="pan">
+${visual}
 ${tree}
 </div>
 </div>
-<footer>Interactive map — click a topic to fold, filter to search · Ctrl/⌘ + scroll to zoom, drag to pan · self-contained, offline</footer>
+<footer>Interactive map — ${hasVisual ? "Visual map + " : ""}collapsible outline · filter to search · Ctrl/⌘ + scroll to zoom, drag to pan · self-contained, offline</footer>
 <script type="application/json" id="map-data">${embedJson(doc)}</script>
 <script>${SCRIPT}</script>
 </body>

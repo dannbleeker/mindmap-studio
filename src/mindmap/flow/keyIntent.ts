@@ -24,6 +24,9 @@ export type KeyIntent =
   | { kind: "completeLink"; id: string }
   | { kind: "nudge"; id: string; dir: "up" | "down" | "left" | "right" }
   | { kind: "setPriority"; id: string; level: number }
+  | { kind: "zoomIn" }
+  | { kind: "zoomOut" }
+  | { kind: "zoomReset" }
   | null;
 
 export interface KeyState {
@@ -66,6 +69,14 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z")
     return e.shiftKey ? { kind: "redo" } : { kind: "undo" };
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") return { kind: "redo" };
+  // Keyboard zoom (Ctrl/⌘ + / − / 0) — selection-free, like undo/redo. Claims the browser's own
+  // page-zoom bindings while the canvas has focus (the dispatcher preventDefaults). "=" is the
+  // unshifted plus key on most layouts, so accept it (and the shifted "+") for zoom-in.
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "+" || e.key === "="))
+    return { kind: "zoomIn" };
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key === "-") return { kind: "zoomOut" };
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === "0")
+    return { kind: "zoomReset" };
   const id = state.selectedId;
   if (!id) return null;
   // While drawing a relationship, Enter links the source to the currently-selected target (Esc cancels,
@@ -113,7 +124,9 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
     return e.ctrlKey || e.metaKey ? { kind: "addChild", id } : { kind: "addSibling", id };
   if (e.key === "Tab" && !e.shiftKey) return { kind: "addChild", id };
   if (e.key === "Tab" && e.shiftKey) return { kind: "outdent", id };
-  if (e.key === "Delete") return { kind: "delete", id };
+  // Backspace = Delete (Mac keyboards lack forward-Delete; overlays already accept both). Safe from
+  // the type-to-edit branch below — its guard only catches single-character keys.
+  if (e.key === "Delete" || e.key === "Backspace") return { kind: "delete", id };
   // Ctrl/⌘+T → open the selected topic's note. Only in the installed PWA: a normal browser tab
   // reserves Ctrl+T for "new tab" (the page can't intercept it), so we don't claim it there.
   if (state.pwa && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "t")

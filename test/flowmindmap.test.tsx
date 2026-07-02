@@ -952,15 +952,24 @@ describe("FlowMindMap canvas", () => {
     expect(screen.queryByText("Start your map")).toBeNull();
   });
 
-  it("draws a relationship via the Link to… gesture", async () => {
+  it("draws a relationship via the Link to… gesture — silently, then inline-labels it", async () => {
     const { container, onChange } = mount();
     run(() => fireEvent.contextMenu(nodeEl(container, "a")));
     run(() => fireEvent.click(within(openMenu() as HTMLElement).getByText("Link to…")));
     expect(screen.getByText(/Click a target node/)).toBeTruthy();
-    run(() => fireEvent.click(nodeEl(container, "b"))); // completes the link (label prompt → "Label")
-    // The relationship label prompt resolves asynchronously now (themed dialog; here the no-host
-    // fallback resolves from the mocked window.prompt in a microtask), so await the resulting edit.
+    // Completing the link creates it IMMEDIATELY (no modal) …
+    run(() => fireEvent.click(nodeEl(container, "b")));
     await waitFor(() => expect(onChange).toHaveBeenCalled());
+    const link = (onChange.mock.calls.at(-1)?.[0] as MindMapDoc).links?.[0];
+    expect(link).toMatchObject({ from: "a", to: "b" });
+    expect(link?.label).toBeUndefined(); // unlabelled until the user types
+    // … and opens the label for inline editing right on the line.
+    const input = (await screen.findByLabelText("Relationship label")) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "depends" } });
+    run(() => fireEvent.keyDown(input, { key: "Enter" }));
+    await waitFor(() =>
+      expect((onChange.mock.calls.at(-1)?.[0] as MindMapDoc).links?.[0]?.label).toBe("depends"),
+    );
   });
 
   it("commits inline edits and runs the node affordances (link / progress / collapse)", () => {
@@ -1255,6 +1264,93 @@ describe("FlowMindMap canvas", () => {
     run(() => h.deleteOverlay());
     expect(lastDoc().summaries).toBeUndefined();
     expect(onSelectOverlay).toHaveBeenLastCalledWith(null);
+  });
+
+  it("renames a summary IN PLACE (double-click the chip; empty commit deletes; Escape cancels)", async () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "sumr",
+      title: "SumRename",
+      root: {
+        id: "root",
+        topic: "R",
+        children: [{ id: "a", topic: "A", children: [] }],
+      },
+      summaries: [{ id: "s1", nodeIds: ["a"], label: "Sum" }],
+    };
+    const { onChange } = mount(doc);
+    const lastDoc = () => onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+
+    // Double-click the label chip → an inline input replaces it (no modal).
+    run(() => fireEvent.doubleClick(screen.getByText("Sum")));
+    const input = (await screen.findByLabelText("Summary label")) as HTMLInputElement;
+    expect(input.value).toBe("Sum");
+    fireEvent.change(input, { target: { value: "Phase 1" } });
+    run(() => fireEvent.keyDown(input, { key: "Enter" }));
+    await waitFor(() => expect(lastDoc().summaries?.[0]?.label).toBe("Phase 1"));
+
+    // Escape cancels without committing.
+    run(() => fireEvent.doubleClick(screen.getByText("Phase 1")));
+    const input2 = (await screen.findByLabelText("Summary label")) as HTMLInputElement;
+    fireEvent.change(input2, { target: { value: "discarded" } });
+    run(() => fireEvent.keyDown(input2, { key: "Escape" }));
+    expect(lastDoc().summaries?.[0]?.label).toBe("Phase 1");
+
+    // Committing an empty label removes the summary (the old prompt's semantics, kept).
+    run(() => fireEvent.doubleClick(screen.getByText("Phase 1")));
+    const input3 = (await screen.findByLabelText("Summary label")) as HTMLInputElement;
+    fireEvent.change(input3, { target: { value: "" } });
+    run(() => fireEvent.keyDown(input3, { key: "Enter" }));
+    await waitFor(() => expect(lastDoc().summaries).toBeUndefined());
+  });
+
+  it("edge right-click opens a relationship menu (label / arrows / line / type / delete)", async () => {
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "edgemenu",
+      title: "EdgeMenu",
+      root: {
+        id: "root",
+        topic: "R",
+        children: [
+          { id: "a", topic: "A", children: [] },
+          { id: "b", topic: "B", children: [] },
+        ],
+      },
+      links: [{ id: "l1", from: "a", to: "b", label: "rel" }],
+    };
+    const onSelectEdge = vi.fn();
+    const { container, onChange } = mount(doc, { onSelectEdge });
+    const lastDoc = () => onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    const edgeHit = () =>
+      (container.querySelector(".react-flow__edge-interaction") ??
+        container.querySelector(".react-flow__edge-path")) as Element;
+
+    // Right-click selects the edge (inspector follows) and opens the menu — no delete confirm.
+    run(() => fireEvent.contextMenu(edgeHit()));
+    expect(onSelectEdge).toHaveBeenLastCalledWith(expect.objectContaining({ id: "l1" }));
+    const menu = await screen.findByRole("menu", { name: "Relationship actions" });
+    expect(within(menu).getByText("Edit label")).toBeTruthy();
+
+    // The style chips write through: flip the arrowheads to ↔ and the line to solid.
+    run(() => fireEvent.click(within(menu).getByRole("button", { name: "Arrowheads: both" })));
+    expect(lastDoc().links?.[0]?.arrow).toBe("both");
+    run(() => fireEvent.click(within(menu).getByRole("button", { name: "Line style: solid" })));
+    expect(lastDoc().links?.[0]?.dash).toBe("solid");
+    run(() =>
+      fireEvent.click(within(menu).getByRole("button", { name: "Relationship type: blocks" })),
+    );
+    expect(lastDoc().links?.[0]?.type).toBe("blocks");
+
+    // "Edit label" hands off to the inline editor on the line.
+    run(() => fireEvent.click(within(menu).getByText("Edit label")));
+    expect(await screen.findByLabelText("Relationship label")).toBeTruthy();
+
+    // Reopen and delete — one click, undoable, no confirm dialog.
+    run(() => fireEvent.contextMenu(edgeHit()));
+    const menu2 = await screen.findByRole("menu", { name: "Relationship actions" });
+    run(() => fireEvent.click(within(menu2).getByText("Delete relationship")));
+    expect(lastDoc().links).toBeUndefined();
   });
 
   it("deletes the selected overlay with the Delete key", () => {

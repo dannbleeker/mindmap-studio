@@ -140,6 +140,29 @@ describe("keyIntent", () => {
     ).toBeNull();
   });
 
+  it("maps Ctrl/⌘ +/−/0 to zoom intents, selection-free (like undo/redo)", () => {
+    const noSel = st({ selectedId: null });
+    // "=" is the unshifted plus key on most layouts; both it and shifted "+" zoom in.
+    expect(keyIntent(ev({ key: "=", ctrlKey: true }), noSel)).toEqual({ kind: "zoomIn" });
+    expect(keyIntent(ev({ key: "+", ctrlKey: true, shiftKey: true }), noSel)).toEqual({
+      kind: "zoomIn",
+    });
+    expect(keyIntent(ev({ key: "-", metaKey: true }), noSel)).toEqual({ kind: "zoomOut" });
+    expect(keyIntent(ev({ key: "0", ctrlKey: true }), noSel)).toEqual({ kind: "zoomReset" });
+    // Ctrl+Shift+0 stays unbound (the digit row with Shift belongs to nothing here).
+    expect(keyIntent(ev({ key: "0", ctrlKey: true, shiftKey: true }), noSel)).toBeNull();
+    // Without a modifier the keys are ordinary typing (type-to-edit with a selection).
+    expect(keyIntent(ev({ key: "-" }), st())).toEqual({ kind: "typeEdit", id: "n1", seed: "-" });
+  });
+
+  it("maps Backspace to delete, same as Delete (Mac keyboards lack forward-Delete)", () => {
+    expect(keyIntent(ev({ key: "Backspace" }), st())).toEqual({ kind: "delete", id: "n1" });
+    expect(keyIntent(ev({ key: "Delete" }), st())).toEqual({ kind: "delete", id: "n1" });
+    // No selection → nothing to delete; while editing the guard already swallows it.
+    expect(keyIntent(ev({ key: "Backspace" }), st({ selectedId: null }))).toBeNull();
+    expect(keyIntent(ev({ key: "Backspace" }), st({ editing: true }))).toBeNull();
+  });
+
   it("ignores keys while inline-editing or when a form field / link is focused", () => {
     expect(keyIntent(ev({ key: "Enter" }), st({ editing: true }))).toBeNull();
     for (const tagName of ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]) {

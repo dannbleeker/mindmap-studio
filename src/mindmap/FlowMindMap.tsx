@@ -19,7 +19,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { editorConfirm, editorPrompt } from "../components/editorDialogs";
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors, motion } from "../design/tokens";
 import { useLongPress } from "../hooks/useLongPress";
@@ -354,6 +353,9 @@ function FlowInner({
   // (caret at end); null for a normal edit (double-click / F2 / new node → seed topic, select all).
   const [editSeed, setEditSeed] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null);
+  // Relationship right-click menu (edit label / arrow / line / type / delete) — the edge counterpart
+  // of the node menu, replacing the old jump-straight-to-delete confirm.
+  const [edgeMenu, setEdgeMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   // Empty-pane right-click menu (add topic / paste branch / fit / reset zoom). Separate from the node
   // menu above; opened from the canvas wrapper's onContextMenu when the bare pane is the target.
   const [paneMenu, setPaneMenu] = useState<{ x: number; y: number } | null>(null);
@@ -411,8 +413,17 @@ function FlowInner({
   const [guides, setGuides] = useState<GuideLine[]>([]);
   // The cross-link whose label is being inline-edited on the canvas (double-click), or null.
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
-  const { fitView, getNodes, setCenter, getViewport, setViewport, screenToFlowPosition, zoomTo } =
-    useReactFlow();
+  const {
+    fitView,
+    getNodes,
+    setCenter,
+    getViewport,
+    setViewport,
+    screenToFlowPosition,
+    zoomTo,
+    zoomIn,
+    zoomOut,
+  } = useReactFlow();
   const initialized = useNodesInitialized();
 
   // Refs so the stable callbacks below always read the latest values.
@@ -833,7 +844,11 @@ function FlowInner({
   // Drag a node onto another to re-parent it; an invalid/empty drop snaps it back. In free-canvas
   // mode a drag instead persists the node's new (alignment-snapped) position (no re-parenting).
   const handleDragStop = useCallback(
-    (dragId: string, dropPos: { x: number; y: number }) => {
+    (
+      dragId: string,
+      dropPos: { x: number; y: number },
+      mods?: { shift?: boolean; ctrl?: boolean },
+    ) => {
       setDropTargetId(null);
       setInsertEdge(null);
       if (docRef.current.meta?.freeform) {
@@ -863,7 +878,25 @@ function FlowInner({
       // Tree mode: nest as a child (centre) or reorder as a sibling before/after the target (edges).
       const t = findDropTarget(dragId, dropPos);
       if (!t) {
+        // Shift+drop on empty canvas DETACHES the branch to a floating topic (MindManager's
+        // drag-out-to-detach) instead of snapping back; a plain empty drop still snaps back.
+        if (mods?.shift && dragId !== docRef.current.root.id) {
+          const d = detachBranch(docRef.current, dragId);
+          if (d.doc !== docRef.current) {
+            apply(d);
+            return;
+          }
+        }
         sync(docRef.current); // no valid target → snap back to the computed layout
+        return;
+      }
+      // Ctrl/⌘+drop COPIES the branch (fresh ids) as a child of the target instead of moving it —
+      // the original stays put (the re-layout after apply snaps it back to its computed position).
+      if (mods?.ctrl && dragId !== docRef.current.root.id) {
+        const node = findAnyNode(docRef.current, dragId);
+        const c = node ? addSubtree(docRef.current, t.id, [node]) : { doc: docRef.current };
+        if (c.doc !== docRef.current) apply(c);
+        else sync(docRef.current);
         return;
       }
       // Group drag: when the grabbed node is part of a multi-selection, move every selected branch to
@@ -1169,15 +1202,10 @@ function FlowInner({
 
   // Stable overlay callbacks (deps: the stable `apply`) so the memoised Summaries/Callouts aren't
   // re-rendered by a fresh inline closure every render. Each reads docRef.current for live state.
-  const handleRenameSummary = useCallback(
-    async (sid: string) => {
-      const current = (docRef.current.summaries ?? []).find((s) => s.id === sid);
-      const next = await editorPrompt({
-        title: "Summary label",
-        placeholder: "Leave empty to remove",
-        defaultValue: current?.label ?? "",
-      });
-      if (next === null) return; // cancelled
+  // Summary labels edit IN PLACE on the canvas (Summaries owns the input; this just commits) — an
+  // empty committed label removes the summary, same semantics as the old prompt.
+  const handleCommitSummaryLabel = useCallback(
+    (sid: string, next: string) => {
       apply(
         next.trim()
           ? setSummaryLabel(docRef.current, sid, next)
@@ -1460,7 +1488,18 @@ function FlowInner({
           break;
         case "completeLink": {
           const from = linkingFromRef.current;
-          if (from && from !== intent.id) apply(addLink(docRef.current, from, intent.id));
+          if (from && from !== intent.id) {
+            // Same silent-create + inline-label flow as the mouse paths: draw the relationship,
+            // then open its label editor on the line (type to label, Escape keeps it unlabelled).
+            const r = addLink(docRef.current, from, intent.id);
+            if (r.doc !== docRef.current) {
+              apply(r);
+              const created = (r.doc.links ?? []).find(
+                (l) => l.from === from && l.to === intent.id,
+              );
+              if (created) setEditingLinkId(created.id);
+            }
+          }
           setLinkingFrom(null);
           break;
         }
@@ -1481,6 +1520,15 @@ function FlowInner({
         }
         case "setPriority":
           apply(setPriority(docRef.current, intent.id, intent.level));
+          break;
+        case "zoomIn":
+          void zoomIn({ duration: reducedMotionRef.current ? 0 : motion.dur.viewport });
+          break;
+        case "zoomOut":
+          void zoomOut({ duration: reducedMotionRef.current ? 0 : motion.dur.viewport });
+          break;
+        case "zoomReset":
+          void zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport });
           break;
         case "clearDropTarget":
           setDropTargetId(null); // clear a stray drag-reparent indicator
@@ -1593,6 +1641,9 @@ function FlowInner({
     editingApi,
     fitView,
     getNodes,
+    zoomIn,
+    zoomOut,
+    zoomTo,
   ]);
 
   // (The context menu's own outside-pointerdown + Escape close lives in the ContextMenu primitive.)
@@ -2189,13 +2240,18 @@ function FlowInner({
             nodesConnectable
             connectionMode={ConnectionMode.Loose}
             onConnect={(c) => {
-              // Drag-to-relate drops onto a target node: prompt for an optional label, same as the
-              // right-click "Link to…" path (B1) — cancel still creates the (unlabelled) relationship.
+              // Drag-to-relate drops onto a target node: draw the relationship immediately (no modal)
+              // and open its label for INLINE editing on the line — type to label it, Escape/click-away
+              // keeps it unlabelled. MindManager's frictionless-linking behaviour.
               if (c.source && c.target && c.source !== c.target) {
-                const { source, target } = c;
-                void editorPrompt({ title: "Relationship label", placeholder: "Optional" }).then(
-                  (label) => apply(addLink(docRef.current, source, target, label ?? "")),
-                );
+                const r = addLink(docRef.current, c.source, c.target, "");
+                if (r.doc !== docRef.current) {
+                  apply(r);
+                  const created = (r.doc.links ?? []).find(
+                    (l) => l.from === c.source && l.to === c.target,
+                  );
+                  if (created) setEditingLinkId(created.id);
+                }
               }
             }}
             deleteKeyCode={null}
@@ -2230,13 +2286,19 @@ function FlowInner({
             multiSelectionKeyCode={["Shift", "Meta", "Control"]}
             onSelectionChange={onSelectionChange}
             onNodeClick={(ev, node) => {
-              // In "Link to…" mode, the next click on a *different* node completes the relationship.
+              // In "Link to…" mode, the next click on a *different* node completes the relationship —
+              // silently (no modal), then opens the new line's label for inline editing.
               if (linkingFrom && node.id !== linkingFrom) {
                 const from = linkingFrom;
                 setLinkingFrom(null);
-                void editorPrompt({ title: "Relationship label", placeholder: "Optional" }).then(
-                  (label) => apply(addLink(docRef.current, from, node.id, label ?? "")),
-                );
+                const r = addLink(docRef.current, from, node.id, "");
+                if (r.doc !== docRef.current) {
+                  apply(r);
+                  const created = (r.doc.links ?? []).find(
+                    (l) => l.from === from && l.to === node.id,
+                  );
+                  if (created) setEditingLinkId(created.id);
+                }
                 return;
               }
               setLinkingFrom(null);
@@ -2288,17 +2350,25 @@ function FlowInner({
               setMenu({ x: e.clientX, y: e.clientY, id: node.id });
             }}
             onNodeDrag={(_, node) => handleDrag(node.id, node.position)}
-            onNodeDragStop={(_, node) => handleDragStop(node.id, node.position)}
+            onNodeDragStop={(e, node) =>
+              handleDragStop(node.id, node.position, {
+                shift: e.shiftKey,
+                ctrl: e.ctrlKey || e.metaKey,
+              })
+            }
             onEdgeContextMenu={(e, edge) => {
               e.preventDefault();
               if (edge.type !== "crosslink") return;
-              void editorConfirm({
-                title: "Delete this relationship?",
-                confirmText: "Delete",
-                danger: true,
-              }).then((ok) => {
-                if (ok) apply(deleteLink(docRef.current, edge.id));
-              });
+              // Select the edge (so the EdgeInspector reflects it, mirroring onEdgeClick) and open
+              // the relationship context menu — no more jump-straight-to-delete confirm.
+              setMenu(null);
+              setLinkingFrom(null);
+              selectOnly(null);
+              fireSelect(null);
+              clearOverlaySelection();
+              setSelectedEdgeId(edge.id);
+              fireSelectEdge(edge.id);
+              setEdgeMenu({ x: e.clientX, y: e.clientY, id: edge.id });
             }}
           >
             <BackgroundImage url={renderDoc.meta?.backgroundImage} />
@@ -2313,7 +2383,7 @@ function FlowInner({
             />
             <Summaries
               summaries={summaries}
-              onRename={handleRenameSummary}
+              onCommitLabel={handleCommitSummaryLabel}
               selectedId={selectedOverlay?.kind === "summary" ? selectedOverlay.id : null}
               onSelect={handleSelectSummaryOverlay}
               onContextMenu={(e, id) => openOverlayMenu(e, { kind: "summary", id })}
@@ -2411,6 +2481,100 @@ function FlowInner({
             />
             <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
           </ReactFlow>
+          {edgeMenu ? (
+            <ContextMenu
+              x={edgeMenu.x}
+              y={edgeMenu.y}
+              onClose={() => setEdgeMenu(null)}
+              menuAriaLabel="Relationship actions"
+              sheet={isMobile}
+            >
+              {(() => {
+                const id = edgeMenu.id;
+                const link = (docRef.current.links ?? []).find((l) => l.id === id);
+                const patch = (p: Parameters<typeof setLinkStyle>[2]) =>
+                  apply(setLinkStyle(docRef.current, id, p));
+                return (
+                  <>
+                    <MenuItem
+                      label="Edit label"
+                      onSelect={() => {
+                        setEditingLinkId(id);
+                        setEdgeMenu(null);
+                      }}
+                    />
+                    <MenuSeparator />
+                    <MenuLabel>Arrowheads</MenuLabel>
+                    <div className="mm-menu-row">
+                      {(
+                        [
+                          ["to", "→"],
+                          ["from", "←"],
+                          ["both", "↔"],
+                          ["none", "—"],
+                        ] as const
+                      ).map(([arrow, glyph]) => (
+                        <button
+                          key={arrow}
+                          type="button"
+                          className="mm-menu-chip"
+                          aria-label={`Arrowheads: ${arrow}`}
+                          aria-pressed={(link?.arrow ?? "to") === arrow}
+                          data-on={(link?.arrow ?? "to") === arrow || undefined}
+                          onClick={() => patch({ arrow })}
+                        >
+                          {glyph}
+                        </button>
+                      ))}
+                    </div>
+                    <MenuLabel>Line</MenuLabel>
+                    <div className="mm-menu-row">
+                      {(["dashed", "solid", "dotted"] as const).map((dash) => (
+                        <button
+                          key={dash}
+                          type="button"
+                          className="mm-menu-chip"
+                          aria-label={`Line style: ${dash}`}
+                          aria-pressed={(link?.dash ?? "dashed") === dash}
+                          data-on={(link?.dash ?? "dashed") === dash || undefined}
+                          onClick={() => patch({ dash })}
+                        >
+                          {dash}
+                        </button>
+                      ))}
+                    </div>
+                    <MenuLabel>Type</MenuLabel>
+                    <div className="mm-menu-row">
+                      {(["relates-to", "depends-on", "causes", "supports", "blocks"] as const).map(
+                        (t) => (
+                          <button
+                            key={t}
+                            type="button"
+                            className="mm-menu-chip"
+                            aria-label={`Relationship type: ${t}`}
+                            aria-pressed={(link?.type ?? "relates-to") === t}
+                            data-on={(link?.type ?? "relates-to") === t || undefined}
+                            onClick={() => patch({ type: t })}
+                          >
+                            {t}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                    <MenuSeparator />
+                    <MenuItem
+                      label="Delete relationship"
+                      danger
+                      onSelect={() => {
+                        apply(deleteLink(docRef.current, id));
+                        setEdgeMenu(null);
+                      }}
+                    />
+                  </>
+                );
+              })()}
+            </ContextMenu>
+          ) : null}
           {menu ? (
             <ContextMenu
               x={menu.x}

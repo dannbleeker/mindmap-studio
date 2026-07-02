@@ -658,12 +658,16 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               topicFill?.text ??
               (filledMain ? readableTextOn(branchColor) : "var(--mm-color, #23211c)")),
           textShadow: style?.fillImage ? "0 1px 3px rgba(0,0,0,0.85)" : undefined,
-          // Underline leaves carry only a bottom rule — set border-bottom alone (no `border`
-          // shorthand) so React doesn't warn about mixing shorthand + longhand.
-          border:
-            style?.border ??
-            (underlineLeaf ? undefined : filledMain ? "none" : `1.5px solid ${branchColor}`),
-          borderBottom: !style?.border && underlineLeaf ? `2px solid ${branchColor}` : undefined,
+          // Underline leaves carry only a bottom rule. Setting `border` to undefined (rather than
+          // omitting the key) still leaves it as an own property, so React's shorthand/longhand
+          // diffing sees both `border` and `borderBottom` on the object across renders and warns
+          // when a node toggles between the two states. Spreading in exactly one of the two keys
+          // keeps them from ever coexisting on the object at all.
+          ...(style?.border
+            ? { border: style.border }
+            : underlineLeaf
+              ? { borderBottom: `2px solid ${branchColor}` }
+              : { border: filledMain ? "none" : `1.5px solid ${branchColor}` }),
           borderRadius: style?.borderRadius ?? (underlineLeaf ? 0 : "11px"),
           padding: underlineLeaf ? "3px 8px 4px" : "6px 12px",
           // Per-topic wrap width enables mid-word breaking when a width is set; the width cap itself is

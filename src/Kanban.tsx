@@ -1,31 +1,81 @@
 import { useState } from "react";
 import { DateChip } from "./Badge";
 import { ProgressPie } from "./ProgressPie";
-import { type BoardColumn, CARD_DND_TYPE, UNTAGGED, boardColumns } from "./board";
+import {
+  type BoardColumn,
+  type BoardSource,
+  CARD_DND_TYPE,
+  bucketDueDate,
+  buildBoard,
+  reMarkForMove,
+  retagForMove,
+} from "./board";
+import { MARKER_GROUPS } from "./icons";
 import type { MindMapDoc } from "./model/types";
 import { isOverdue, todayISO } from "./taskDate";
 import { controlStyle } from "./ui";
 
-// A Kanban board: the map's topics grouped into columns by tag. Click a card to jump to that topic on
-// the canvas; DRAG a card to another column to re-tag the topic (drop the source tag, add the target
-// one — one undoable edit). Rendered in place of the canvas while the board is open; themed via --ed-*
-// so it follows the app appearance.
+// A Kanban board: the map's topics grouped into columns by a chosen SOURCE — tags, a single-select
+// marker group (Priority/Status/Mood/Vote), or a schedule of date buckets. Click a card to jump to
+// that topic on the canvas; DRAG a card between columns to re-tag / re-mark / re-schedule the topic
+// (one undoable edit). Rendered in place of the canvas while open; themed via --ed-*.
+
+/** The column-source options shown in the header selector. */
+const SOURCES: { value: string; label: string; source: BoardSource }[] = [
+  { value: "tag", label: "Tags", source: { kind: "tag" } },
+  ...MARKER_GROUPS.map((g) => ({
+    value: `marker:${g.id}`,
+    label: g.name,
+    source: { kind: "marker" as const, group: g.id },
+  })),
+  { value: "schedule", label: "Schedule (dates)", source: { kind: "schedule" } },
+];
+
+/** A card's payload carried on the drag (its full tag/marker set, so the drop can compute the change). */
+interface DragPayload {
+  id: string;
+  tags: string[];
+  icons: string[];
+}
 
 export function Kanban({
   doc,
   onPick,
   onRetag,
+  onSetMarkers,
+  onSetDue,
   onClose,
 }: {
   doc: MindMapDoc;
   /** Focus a topic on the canvas (and close the board). */
   onPick: (id: string) => void;
-  /** Re-tag a topic when its card is dropped on another column (id, source tag, target tag). */
-  onRetag: (id: string, fromTag: string, toTag: string) => void;
+  /** Replace a topic's tags (tag board drop). */
+  onRetag: (id: string, tags: string[]) => void;
+  /** Replace a topic's markers (marker board drop). */
+  onSetMarkers: (id: string, icons: string[]) => void;
+  /** Set / clear a topic's due date (schedule board drop). */
+  onSetDue: (id: string, due: string | undefined) => void;
   onClose: () => void;
 }) {
-  const columns = boardColumns(doc);
+  const [sourceValue, setSourceValue] = useState("tag");
+  const source = SOURCES.find((s) => s.value === sourceValue)?.source ?? { kind: "tag" };
   const today = todayISO();
+  const columns = buildBoard(doc, source, today);
+
+  // Resolve a drop on `col` into the right model change for the active source.
+  const onDrop = (payload: DragPayload, col: BoardColumn) => {
+    if (source.kind === "tag") {
+      // `col.key` is the target tag; the source tag is whichever of the card's tags this came from —
+      // but retagForMove only needs the target set, so recompute from the card's current tags.
+      const from = payload.tags.length === 0 ? "" : (payload.tags.find(() => true) ?? "");
+      onRetag(payload.id, retagForMove(payload.tags, from, col.key));
+    } else if (source.kind === "marker") {
+      onSetMarkers(payload.id, reMarkForMove(payload.icons, source.group, col.key));
+    } else {
+      onSetDue(payload.id, bucketDueDate(col.key, today));
+    }
+  };
+
   return (
     <div
       style={{
@@ -41,30 +91,44 @@ export function Kanban({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 10,
           padding: "8px 14px",
           borderBottom: "1px solid var(--ed-border)",
         }}
       >
-        <strong style={{ color: "var(--ed-ink)" }}>▦ Board — topics by tag</strong>
+        <strong style={{ color: "var(--ed-ink)" }}>▦ Board</strong>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, marginRight: "auto" }}>
+          <span style={{ color: "var(--ed-muted)", fontSize: 12 }}>Group by</span>
+          <select
+            className="mm-select"
+            value={sourceValue}
+            onChange={(e) => setSourceValue(e.target.value)}
+            aria-label="Group the board by"
+          >
+            {SOURCES.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <button type="button" onClick={onClose} style={controlStyle}>
           ✕ Close board
         </button>
       </div>
       {columns.length === 0 ? (
-        <div style={{ padding: 24, color: "var(--ed-muted)", fontSize: 14 }}>
-          No topics yet. Add tags to topics (in the ℹ Info panel) to group them into columns here.
-        </div>
+        <div style={{ padding: 24, color: "var(--ed-muted)", fontSize: 14 }}>No topics yet.</div>
       ) : (
         <div
           style={{ flex: 1, minHeight: 0, overflow: "auto", display: "flex", gap: 12, padding: 14 }}
         >
           {columns.map((col) => (
             <Column
-              key={col.tag || "__untagged"}
+              key={col.key || "__none"}
               col={col}
               today={today}
               onPick={onPick}
-              onRetag={onRetag}
+              onDrop={onDrop}
             />
           ))}
         </div>
@@ -77,12 +141,12 @@ function Column({
   col,
   today,
   onPick,
-  onRetag,
+  onDrop,
 }: {
   col: BoardColumn;
   today: string;
   onPick: (id: string) => void;
-  onRetag: (id: string, fromTag: string, toTag: string) => void;
+  onDrop: (payload: DragPayload, col: BoardColumn) => void;
 }) {
   const [dragOver, setDragOver] = useState(false);
   return (
@@ -111,8 +175,7 @@ function Column({
         const raw = e.dataTransfer.getData(CARD_DND_TYPE);
         if (!raw) return;
         e.preventDefault();
-        const { id, from } = JSON.parse(raw) as { id: string; from: string };
-        if (from !== col.tag) onRetag(id, from, col.tag);
+        onDrop(JSON.parse(raw) as DragPayload, col);
       }}
     >
       <div
@@ -124,7 +187,7 @@ function Column({
           borderBottom: "1px solid var(--ed-border)",
         }}
       >
-        {col.tag === UNTAGGED ? "Untagged" : `#${col.tag}`}{" "}
+        {col.label}{" "}
         <span style={{ color: "var(--ed-muted)", fontWeight: 400 }}>· {col.cards.length}</span>
       </div>
       <div
@@ -144,12 +207,12 @@ function Column({
               onDragStart={(e) => {
                 e.dataTransfer.setData(
                   CARD_DND_TYPE,
-                  JSON.stringify({ id: card.id, from: col.tag }),
+                  JSON.stringify({ id: card.id, tags: card.tags, icons: card.icons }),
                 );
                 e.dataTransfer.effectAllowed = "move";
               }}
               onClick={() => onPick(card.id)}
-              title="Drag to another column to re-tag · click to jump to this topic"
+              title="Drag to another column to re-file · click to jump to this topic"
               style={{
                 textAlign: "left",
                 background: "var(--ed-card)",

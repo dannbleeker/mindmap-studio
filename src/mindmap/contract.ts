@@ -236,6 +236,12 @@ export interface MindMapHandle {
   /** Replace the tags on a SPECIFIC node by id (the Kanban drag-to-retag path) — targets that node
    *  directly, not the selection; false if the id isn't found. One undoable edit. */
   setNodeTags: (id: string, tags: string[]) => boolean;
+  /** Replace the markers on a SPECIFIC node by id (the marker-column board's drag-to-set-marker drop);
+   *  false if the id isn't found. One undoable edit. */
+  setNodeMarkers: (id: string, icons: string[]) => boolean;
+  /** Set / clear the due date on a SPECIFIC node by id (the schedule board's drag-to-date drop); false
+   *  if the id isn't found. One undoable edit. */
+  setNodeDue: (id: string, due: string | undefined) => boolean;
   /** Rename a tag map-wide (central tree + floating topics); renaming to an existing tag MERGES them.
    *  The tag manager's rename/merge. No-op on a blank target or when nothing carries the tag. */
   renameTag: (from: string, to: string) => void;

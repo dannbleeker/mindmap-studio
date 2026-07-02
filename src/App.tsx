@@ -27,7 +27,6 @@ import {
   StylesPanel,
   WalkBar,
 } from "./Panels";
-import { retagForMove } from "./board";
 import { Breadcrumb, type Crumb } from "./components/Breadcrumb";
 import { CommandPalette, clearRecents } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
@@ -2275,10 +2274,9 @@ export function App() {
                       panels.setBoardOpen(false);
                       mapRef.current?.focusNode(id);
                     }}
-                    onRetag={(id, from, to) => {
-                      const n = findAnyNode(liveDocRef.current, id);
-                      if (n) mapRef.current?.setNodeTags(id, retagForMove(n.tags ?? [], from, to));
-                    }}
+                    onRetag={(id, tags) => mapRef.current?.setNodeTags(id, tags)}
+                    onSetMarkers={(id, icons) => mapRef.current?.setNodeMarkers(id, icons)}
+                    onSetDue={(id, due) => mapRef.current?.setNodeDue(id, due)}
                     onClose={() => panels.setBoardOpen(false)}
                   />
                 </div>

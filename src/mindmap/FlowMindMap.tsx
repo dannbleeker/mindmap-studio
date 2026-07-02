@@ -147,6 +147,7 @@ import {
   setFontScale,
   setFreeform,
   setHyperlink,
+  setIcons,
   setImage,
   setLegend,
   setLineDash,
@@ -2026,6 +2027,16 @@ function FlowInner({
       setNodeTags: (id, tags) => {
         if (!findAnyNode(docRef.current, id)) return false;
         apply(setTags(docRef.current, id, tags));
+        return true;
+      },
+      setNodeMarkers: (id, icons) => {
+        if (!findAnyNode(docRef.current, id)) return false;
+        apply(setIcons(docRef.current, id, icons));
+        return true;
+      },
+      setNodeDue: (id, due) => {
+        if (!findAnyNode(docRef.current, id)) return false;
+        apply(setDue(docRef.current, id, due));
         return true;
       },
       renameTag: (from, to) => apply(renameTag(docRef.current, from, to)),

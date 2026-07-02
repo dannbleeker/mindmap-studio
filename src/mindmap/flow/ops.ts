@@ -927,6 +927,16 @@ export function setTags(doc: MindMapDoc, id: string, tags: string[]): OpResult {
   return { doc: next };
 }
 
+/** Replace a node's markers/icons (an empty array clears them) — the board's drag-to-set-marker drop. */
+export function setIcons(doc: MindMapDoc, id: string, icons: string[]): OpResult {
+  const next = structuredClone(doc);
+  const node = findAnyNode(next, id);
+  if (!node) return { doc };
+  node.icons = icons.length > 0 ? icons : undefined;
+  touch(node, opsClock());
+  return { doc: next };
+}
+
 /** Rename a tag everywhere it appears (central tree + floating topics). Renaming to a name a node
  *  ALREADY carries merges the two (deduped) — that's how the tag manager merges tags. A blank target
  *  or a rename-to-self is a no-op; the same doc is returned when nothing carried the tag. */

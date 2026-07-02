@@ -625,17 +625,12 @@ export function MenuSub({
       closeTimer.current = null;
     }
   };
-  const openNow = () => {
-    clearCloseTimer();
-    setOpen(true);
-  };
-  // A short grace delay so the pointer can travel diagonally from the row into the flyout without it
-  // closing mid-move (the standard menu-hover pattern).
-  const closeSoon = () => {
-    clearCloseTimer();
-    closeTimer.current = window.setTimeout(() => setOpen(false), 150);
-  };
 
+  // Anchor beside the trigger row, then clamp into the viewport (mirrors Menu's own reposition).
+  // The FIRST call (from openNow, below, before the flyout div exists) necessarily guesses with
+  // sw=0/sh=0 — no overflow clamp yet, since there's nothing to measure. The layout effect below
+  // re-invokes this once the (now-mounted, guessed-position) div is real and measurable, correcting
+  // the guess in a second pass — the same two-pass pattern Menu uses for its own popover.
   const reposition = useCallback(() => {
     const row = rowRef.current;
     if (!row) return;
@@ -652,6 +647,21 @@ export function MenuSub({
     setPos({ top, left });
   }, []);
 
+  const openNow = () => {
+    clearCloseTimer();
+    reposition(); // synchronous first-pass guess, so `pos` is already set when `open` flips true
+    setOpen(true);
+  };
+  // A short grace delay so the pointer can travel diagonally from the row into the flyout without it
+  // closing mid-move (the standard menu-hover pattern).
+  const closeSoon = () => {
+    clearCloseTimer();
+    closeTimer.current = window.setTimeout(() => setOpen(false), 150);
+  };
+
+  // Second pass: now that `open` (and the first-guess `pos`) let the flyout div actually mount, this
+  // runs AFTER that commit — subRef is populated with its real measured size, so reposition() can
+  // correct the guess (clamp into the viewport) instead of the sw=0/sh=0 first pass.
   useLayoutEffect(() => {
     if (open) reposition();
   }, [open, reposition]);

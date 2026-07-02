@@ -337,6 +337,29 @@ describe("mapStore — library folders (C2)", () => {
   it("rejects a blank folder name", async () => {
     expect(await createFolder("   ")).toBeNull();
   });
+
+  it("listMaps resolves each map's folderName, and treats an orphaned folderId as top-level", async () => {
+    const f = await createFolder("Marketing");
+    expect(f).not.toBeNull();
+    if (!f) return;
+    await saveMap(docOf("lm-filed", "Campaign plan"));
+    await saveMap(docOf("lm-loose", "Loose map"));
+    await moveMapToFolder("lm-filed", f.id);
+
+    const byId = new Map((await listMaps()).map((m) => [m.id, m]));
+    // A filed map carries its folder id + resolved name…
+    expect(byId.get("lm-filed")?.folderId).toBe(f.id);
+    expect(byId.get("lm-filed")?.folderName).toBe("Marketing");
+    // …a top-level map carries neither.
+    expect(byId.get("lm-loose")?.folderId).toBeUndefined();
+    expect(byId.get("lm-loose")?.folderName).toBeUndefined();
+
+    // Delete the folder → the (now-orphaned) map reads as top-level again, no dangling folderName.
+    await deleteFolder(f.id);
+    const orphaned = (await listMaps()).find((m) => m.id === "lm-filed");
+    expect(orphaned?.folderName).toBeUndefined();
+    expect(orphaned?.folderId).toBeUndefined();
+  });
 });
 
 // MUST stay last — it deletes the shared database this file's other tests populate.

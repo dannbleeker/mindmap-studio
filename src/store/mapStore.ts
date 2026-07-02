@@ -64,6 +64,11 @@ function db(): Promise<IDBPDatabase<MindMapDB>> {
 export interface MapSummary {
   id: string;
   title: string;
+  /** The library folder this map belongs to (C2), resolved by `listMaps`. Absent for a top-level map
+   *  or one whose `folderId` points at a deleted folder. Lets consumers (e.g. the ⌘K switcher) group
+   *  by folder without re-reading the folder list. */
+  folderId?: string;
+  folderName?: string;
 }
 
 export async function saveMap(doc: MindMapDoc): Promise<void> {
@@ -162,9 +167,19 @@ async function deleteRecentFile(id: string): Promise<void> {
 
 export async function listMaps(): Promise<MapSummary[]> {
   const docs = await (await db()).getAll("maps");
+  // Resolve each map's folder name once so consumers can group by folder without a second read. An
+  // orphaned folderId (its folder was deleted) resolves to undefined → the map reads as top-level,
+  // matching the Start screen's rule.
+  const folderNames = new Map((await getFolders()).map((f) => [f.id, f.name] as const));
   return docs
     .filter((doc) => !doc.meta?.trashedAt) // trashed maps are hidden from the library
-    .map((doc) => ({ id: doc.id, title: doc.title }))
+    .map((doc) => {
+      const folderId = doc.meta?.folderId;
+      const folderName = folderId ? folderNames.get(folderId) : undefined;
+      return folderName
+        ? { id: doc.id, title: doc.title, folderId, folderName }
+        : { id: doc.id, title: doc.title };
+    })
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 

@@ -25,7 +25,8 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   small JSON blob under a `meta` key (no IndexedDB schema bump). The whole-library backup/restore now
   carries the folder list too. Additive — a library with no folders reads exactly as before. Verified
   in-browser end-to-end (create / drill-in / move / delete-orphans); folder CRUD + backup round-trip
-  unit-tested. (The ⌘K map-switcher does not yet group by folder — a minor follow-up.)
+  unit-tested. The **⌘K quick-switcher groups by folder** too: its *Switch to map* / *Insert map as
+  branch* rows sort by folder, read `<folder> / <map>`, and match a search for the folder name.
 
 - **Visual map in the interactive HTML export (C1).** The self-contained interactive `.html` export now
   opens on the **actual visual map** — the same faithful SVG render as the image/PDF exports, with

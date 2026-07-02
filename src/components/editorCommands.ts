@@ -360,22 +360,34 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
 
   // Switch to another library map from the keyboard (the cross-map half of the quick switcher; the
   // in-map "Go to" rows above cover topics within the active map). Skips the map already open. The
-  // same other-maps list also powers "Insert map as branch" (merge), gated on a selection.
-  for (const summary of map.maps)
-    if (summary.id !== map.liveDoc.id) {
-      const title = topicLabel(summary.title || "(untitled)");
-      add(`map-switch:${summary.id}`, `Switch to map: ${title}`, "map", () =>
-        map.switchMap(summary.id),
-      );
-      add(
-        `merge-map:${summary.id}`,
-        `Insert map as branch: ${title}`,
-        "map",
-        () => map.mergeMap(summary.id),
-        !!sel,
-        { keywords: "merge insert graft subtree under" },
-      );
-    }
+  // same other-maps list also powers "Insert map as branch" (merge), gated on a selection. Grouped by
+  // library folder (C2): rows sort by folder name then title so a folder's maps cluster, a foldered map
+  // reads "<folder> / <map>", and the folder name is folded into the keywords so ⌘K finds a whole
+  // folder by name. Top-level maps (no folder) sort first.
+  const otherMaps = map.maps
+    .filter((summary) => summary.id !== map.liveDoc.id)
+    .slice()
+    .sort(
+      (a, b) =>
+        (a.folderName ?? "").localeCompare(b.folderName ?? "") ||
+        (a.title || "").localeCompare(b.title || ""),
+    );
+  for (const summary of otherMaps) {
+    const title = topicLabel(summary.title || "(untitled)");
+    const label = summary.folderName ? `${summary.folderName} / ${title}` : title;
+    const folderKw = summary.folderName ? `folder ${summary.folderName}` : "";
+    add(`map-switch:${summary.id}`, `Switch to map: ${label}`, "map", () => map.switchMap(summary.id), true, {
+      keywords: folderKw,
+    });
+    add(
+      `merge-map:${summary.id}`,
+      `Insert map as branch: ${label}`,
+      "map",
+      () => map.mergeMap(summary.id),
+      !!sel,
+      { keywords: `merge insert graft subtree under ${folderKw}` },
+    );
+  }
 
   // Layout
   for (const l of LAYOUTS)

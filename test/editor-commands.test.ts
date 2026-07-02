@@ -286,6 +286,33 @@ describe("buildEditorCommands", () => {
     expect(props.map.switchMap).toHaveBeenCalledWith("m2");
   });
 
+  it("groups the ⌘K switch/merge rows by folder — labelled, sorted, and searchable by folder (C2)", () => {
+    const props = mkProps();
+    // Library: two foldered maps + one loose, plus the open map (filtered out).
+    props.map.maps = [
+      { id: "m1", title: "Map" }, // the open map (liveDoc.id === "m1")
+      { id: "loose", title: "Loose plan" },
+      { id: "mkt-b", title: "Budget", folderId: "f1", folderName: "Marketing" },
+      { id: "mkt-a", title: "Ads", folderId: "f1", folderName: "Marketing" },
+    ];
+    const cmds = buildEditorCommands(props);
+    const switches = cmds.filter((c) => c.id.startsWith("map-switch:"));
+
+    // Order: top-level first (empty folder sorts first), then by folder name, then by title.
+    expect(switches.map((c) => c.id)).toEqual(["map-switch:loose", "map-switch:mkt-a", "map-switch:mkt-b"]);
+    // A foldered map reads "<folder> / <map>"; a loose one is bare.
+    const byId = new Map(cmds.map((c) => [c.id, c]));
+    expect(byId.get("map-switch:loose")?.label).toBe("Switch to map: Loose plan");
+    expect(byId.get("map-switch:mkt-a")?.label).toBe("Switch to map: Marketing / Ads");
+    expect(byId.get("merge-map:mkt-a")?.label).toBe("Insert map as branch: Marketing / Ads");
+    // The folder name is folded into keywords so ⌘K surfaces a whole folder by name.
+    expect(byId.get("map-switch:mkt-a")?.keywords).toContain("Marketing");
+    expect(byId.get("merge-map:mkt-b")?.keywords).toContain("Marketing");
+    // Running still defers to the right handler.
+    byId.get("map-switch:mkt-a")?.run();
+    expect(props.map.switchMap).toHaveBeenCalledWith("mkt-a");
+  });
+
   it("promotes a branch (selection-gated) and merges other maps as a branch", () => {
     // Promote needs a selection.
     expect(byId(mkProps(null)).get("promote-branch")?.enabled).toBe(false);

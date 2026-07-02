@@ -170,7 +170,6 @@ import {
   setRules,
   setShapeColor,
   setShapeKind,
-  setShapePos,
   setShapeRect,
   setShowLinkTypes,
   setSlides,
@@ -196,6 +195,7 @@ import {
   resolveSelectedNode,
   resolveSelectedOverlay,
 } from "./flow/selectionResolve";
+import { moveShapeAndCapture } from "./flow/shapeCapture";
 import { type GuideLine, computeSnap } from "./flow/snap";
 import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { useLatestRef } from "./flow/useLatestRef";
@@ -2467,7 +2467,17 @@ function FlowInner({
               shapes={renderDoc.shapes ?? EMPTY_SHAPES}
               selectedId={selectedShapeId}
               onSelect={selectShape}
-              onMove={(id, x, y) => apply(setShapePos(docRef.current, id, x, y))}
+              onMove={(id, x, y) => {
+                // A container carries the topics inside it; a plain shape just moves. One undo step.
+                const rects = getNodes().map((n) => ({
+                  id: n.id,
+                  x: n.position.x,
+                  y: n.position.y,
+                  w: n.measured?.width ?? 0,
+                  h: n.measured?.height ?? 0,
+                }));
+                apply(moveShapeAndCapture(docRef.current, id, x, y, rects));
+              }}
               onResize={(id, x, y, w, h) => apply(setShapeRect(docRef.current, id, x, y, w, h))}
               onColor={(id, c) => apply(setShapeColor(docRef.current, id, c))}
               onKind={(id, k) => apply(setShapeKind(docRef.current, id, k))}

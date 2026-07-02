@@ -101,6 +101,29 @@ function chevronPath(x: number, y: number, w: number, h: number): string {
   return `M${p(x, y)} L${p(x + w * 0.6, y)} L${p(x + w, y + h / 2)} L${p(x + w * 0.6, y + h)} L${p(x, y + h)} L${p(x + w * 0.4, y + h / 2)} Z`;
 }
 
+/** A topic's on-canvas box (freeform positions), the input to container capture. */
+export interface NodeRectLite {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** The ids of the topics whose CENTRE falls inside a shape's box (axis-aligned) — a smart container's
+ *  captured members (item 22). Pure; the drag handler feeds it the live node rects. */
+export function nodesInside(shape: CanvasShape, rects: NodeRectLite[]): string[] {
+  const { x, y } = shape.pos;
+  const { w, h } = shape.size;
+  return rects
+    .filter((r) => {
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h / 2;
+      return cx >= x && cx <= x + w && cy >= y && cy <= y + h;
+    })
+    .map((r) => r.id);
+}
+
 /** The number of lanes/rows for a container (clamped to a sane range; defaults 3 / 2). */
 export function containerLanes(s: CanvasShape): number {
   return Math.max(1, Math.min(12, s.lanes ?? 3));

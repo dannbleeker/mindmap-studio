@@ -4,6 +4,7 @@ import {
   containerLanes,
   dragBox,
   isContainer,
+  nodesInside,
   resolveShapeStyle,
 } from "../src/mindmap/flow/canvasShapes";
 import { buildFlowSvg } from "../src/mindmap/flow/exportSvg";
@@ -16,6 +17,7 @@ import {
   setShapePos,
   setShapeSize,
 } from "../src/mindmap/flow/ops";
+import { moveShapeAndCapture } from "../src/mindmap/flow/shapeCapture";
 import type { CanvasShape, MindMapDoc } from "../src/model/types";
 
 const shape = (over: Partial<CanvasShape> = {}): CanvasShape => ({
@@ -174,6 +176,62 @@ describe("shape ops (item 23)", () => {
     const d0 = docWith([shape()]);
     expect(setShapePos(d0, "ghost", 0, 0).doc).toBe(d0);
     expect(deleteShape(d0, "ghost").doc).toBe(d0);
+  });
+});
+
+describe("smart containers — capture + move (item 22)", () => {
+  const container = shape({ kind: "swimlane", pos: { x: 0, y: 0 }, size: { w: 200, h: 200 } });
+  // Topic A's centre (100,100) is inside the container; B's centre (500,500) is outside.
+  const rects = [
+    { id: "a", x: 80, y: 80, w: 40, h: 40 },
+    { id: "b", x: 480, y: 480, w: 40, h: 40 },
+  ];
+
+  it("nodesInside captures topics whose centre falls inside the box", () => {
+    expect(nodesInside(container, rects)).toEqual(["a"]);
+    // A topic exactly on the edge counts; well outside does not.
+    expect(nodesInside(container, [{ id: "e", x: 180, y: 180, w: 40, h: 40 }])).toEqual(["e"]); // centre (200,200) on corner
+    expect(nodesInside(container, [{ id: "o", x: 201, y: 0, w: 40, h: 40 }])).toEqual([]);
+  });
+
+  const docWithNodes = (): MindMapDoc => ({
+    schemaVersion: 1,
+    id: "d",
+    title: "T",
+    root: {
+      id: "r",
+      topic: "Root",
+      children: [
+        { id: "a", topic: "A", pos: { x: 80, y: 80 }, children: [] },
+        { id: "b", topic: "B", pos: { x: 480, y: 480 }, children: [] },
+      ],
+    },
+    shapes: [container],
+  });
+
+  it("dragging a container carries its captured topics by the same delta (one step)", () => {
+    // Move the container from (0,0) to (50,60): delta (+50,+60). Only A (inside) should follow.
+    const { doc } = moveShapeAndCapture(docWithNodes(), "s1", 50, 60, rects);
+    expect(doc.shapes?.[0].pos).toEqual({ x: 50, y: 60 });
+    const a = doc.root.children.find((n) => n.id === "a");
+    const b = doc.root.children.find((n) => n.id === "b");
+    expect(a?.pos).toEqual({ x: 80 + 50, y: 80 + 60 }); // captured → moved
+    expect(b?.pos).toEqual({ x: 480, y: 480 }); // outside → untouched
+  });
+
+  it("a plain (non-container) shape moves alone, capturing nothing", () => {
+    const withRect: MindMapDoc = {
+      ...docWithNodes(),
+      shapes: [shape({ kind: "rect", pos: { x: 0, y: 0 }, size: { w: 200, h: 200 } })],
+    };
+    const { doc } = moveShapeAndCapture(withRect, "s1", 50, 60, rects);
+    expect(doc.shapes?.[0].pos).toEqual({ x: 50, y: 60 });
+    expect(doc.root.children.find((n) => n.id === "a")?.pos).toEqual({ x: 80, y: 80 }); // unmoved
+  });
+
+  it("a missing shape id is a no-op", () => {
+    const d0 = docWithNodes();
+    expect(moveShapeAndCapture(d0, "ghost", 5, 5, rects).doc).toBe(d0);
   });
 });
 

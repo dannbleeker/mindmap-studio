@@ -1,37 +1,37 @@
 {
-  "generatedAt": "2026-07-02T10:03:02.362Z",
-  "commit": "804a4c9",
+  "generatedAt": "2026-07-02T11:41:39.237Z",
+  "commit": "bf88aa0",
   "headline": {
-    "linesTsJs": 72757,
-    "tests": 2010,
-    "lineCoveragePct": 90.88,
-    "commits": 1045,
+    "linesTsJs": 73805,
+    "tests": 2039,
+    "lineCoveragePct": 90.85,
+    "commits": 1047,
     "ageDays": 20,
-    "trackedFiles": 488,
-    "featureManualPct": 60.5,
-    "featureBookPct": 54.4,
-    "featureExamplePct": 54.4
+    "trackedFiles": 490,
+    "featureManualPct": 58.5,
+    "featureBookPct": 52.5,
+    "featureExamplePct": 52.5
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 225,
-      "lines": 42463
+      "files": 226,
+      "lines": 43114
     },
     {
       "category": "Unit tests",
-      "files": 198,
-      "lines": 28558
+      "files": 199,
+      "lines": 28948
     },
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1736
+      "lines": 1743
     },
     {
       "category": "Styles (CSS)",
       "files": 4,
-      "lines": 2635
+      "lines": 2655
     },
     {
       "category": "Docs (Markdown)",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 90.88,
-      "covered": 27171,
-      "total": 29896
+      "pct": 90.85,
+      "covered": 27592,
+      "total": 30370
     },
     "statements": {
-      "pct": 90.88,
-      "covered": 27171,
-      "total": 29896
+      "pct": 90.85,
+      "covered": 27592,
+      "total": 30370
     },
     "functions": {
-      "pct": 76.36,
-      "covered": 1577,
-      "total": 2065
+      "pct": 76.48,
+      "covered": 1594,
+      "total": 2084
     },
     "branches": {
-      "pct": 86.79,
-      "covered": 8208,
-      "total": 9457
+      "pct": 86.82,
+      "covered": 8339,
+      "total": 9604
     }
   },
   "tests": {
-    "unit": 2010,
+    "unit": 2039,
     "e2e": 0,
-    "durationMs": 98009,
+    "durationMs": 101930,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 27884
+        "ms": 28984
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 24811
+        "ms": 27613
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 9727
+        "ms": 9718
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 9033
+        "ms": 8568
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3988
+        "ms": 3992
       }
     ]
   },
@@ -103,15 +103,15 @@
     "biggestFiles": [
       {
         "name": "Panels.tsx",
-        "lines": 4232
+        "lines": 4348
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 2878
+        "lines": 2885
       },
       {
         "name": "App.tsx",
-        "lines": 2812
+        "lines": 2822
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -119,7 +119,7 @@
       },
       {
         "name": "components/Toolbar.tsx",
-        "lines": 1355
+        "lines": 1328
       }
     ]
   },
@@ -144,25 +144,25 @@
       },
       {
         "file": "App.tsx",
-        "pct": 59.79
+        "pct": 59.71
       }
     ],
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 209
+        "commits": 210
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 133
+        "commits": 134
       },
       {
         "file": "Panels.tsx",
-        "commits": 88
+        "commits": 89
       },
       {
         "file": "mindmap/contract.ts",
-        "commits": 76
+        "commits": 77
       },
       {
         "file": "mindmap/flow/ops.ts",
@@ -172,8 +172,8 @@
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 59.79,
-        "commits": 209
+        "pct": 59.71,
+        "commits": 210
       }
     ]
   },
@@ -184,34 +184,34 @@
     "anyCount": 6,
     "tsIgnore": 0,
     "tsExpectError": 0,
-    "biomeIgnore": 47,
+    "biomeIgnore": 48,
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 330.1,
-    "cssGzipKb": 10.2,
-    "totalGzipKb": 340.4,
-    "entryGzipKb": 159.2,
+    "jsGzipKb": 332.3,
+    "cssGzipKb": 10.3,
+    "totalGzipKb": 342.6,
+    "entryGzipKb": 161.1,
     "budgetKb": 150,
     "withinBudget": false
   },
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 42463,
+    "appLoc": 43114,
     "docToCodeRatio": 0.4
   },
   "featureCoverage": {
-    "total": 228,
+    "total": 236,
     "manual": 138,
-    "manualPct": 60.5,
+    "manualPct": 58.5,
     "book": 124,
-    "bookPct": 54.4,
+    "bookPct": 52.5,
     "bookExample": 124,
-    "bookExamplePct": 54.4,
+    "bookExamplePct": 52.5,
     "byArea": {
       "styling": {
-        "total": 23,
+        "total": 27,
         "manual": 14,
         "book": 12
       },
@@ -231,12 +231,12 @@
         "book": 17
       },
       "editing": {
-        "total": 29,
+        "total": 31,
         "manual": 17,
         "book": 14
       },
       "navigation": {
-        "total": 53,
+        "total": 54,
         "manual": 25,
         "book": 24
       },
@@ -251,7 +251,7 @@
         "book": 3
       },
       "markers": {
-        "total": 12,
+        "total": 13,
         "manual": 7,
         "book": 7
       },
@@ -273,6 +273,46 @@
     },
     "gaps": {
       "noManual": [
+        {
+          "id": "rules-and-not-conditions",
+          "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "rules-due-soon-trigger",
+          "name": "Conditional rules: a \"due soon\" trigger kind (reuses the filter/search due-soon window)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "priority-full-range",
+          "name": "Full 1-9 task priority in every picker, Power Filter, and Ctrl/Cmd+Shift+1-9 shortcuts",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "insert-menu-submenus",
+          "name": "Insert menu fly-out submenus (Map parts / Templates) via a reusable MenuSub primitive",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "layout-gallery",
+          "name": "Visual Layout gallery (SVG thumbnails) in the Map panel, replacing the text-only layout select",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "design-gallery-map-panel",
+          "name": "Design presets gallery consolidated into the Map panel (moved from the Toolbar Canvas menu)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "side-aware-grips",
+          "name": "Relate + wrap-width grips mirror to a left-growing branch's outward edge",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "status-bar-view-switcher",
+          "name": "Status-bar Map / Outline / Board view switcher (one-click peer projections)",
+          "since": "2026-07-02"
+        },
         {
           "id": "cross-map-backlinks",
           "name": "Cross-map backlinks — inspector 'Linked from other maps'",
@@ -725,6 +765,46 @@
         }
       ],
       "noBook": [
+        {
+          "id": "rules-and-not-conditions",
+          "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "rules-due-soon-trigger",
+          "name": "Conditional rules: a \"due soon\" trigger kind (reuses the filter/search due-soon window)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "priority-full-range",
+          "name": "Full 1-9 task priority in every picker, Power Filter, and Ctrl/Cmd+Shift+1-9 shortcuts",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "insert-menu-submenus",
+          "name": "Insert menu fly-out submenus (Map parts / Templates) via a reusable MenuSub primitive",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "layout-gallery",
+          "name": "Visual Layout gallery (SVG thumbnails) in the Map panel, replacing the text-only layout select",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "design-gallery-map-panel",
+          "name": "Design presets gallery consolidated into the Map panel (moved from the Toolbar Canvas menu)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "side-aware-grips",
+          "name": "Relate + wrap-width grips mirror to a left-growing branch's outward edge",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "status-bar-view-switcher",
+          "name": "Status-bar Map / Outline / Board view switcher (one-click peer projections)",
+          "since": "2026-07-02"
+        },
         {
           "id": "custom-theme-designer",
           "name": "Custom theme designer (build / save / import-export your own canvas themes)",
@@ -1251,16 +1331,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 20,
-    "commits": 1045,
+    "commits": 1047,
     "commits7d": 200,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 503
+        "count": 504
       },
       {
         "name": "github-actions[bot]",
-        "count": 475
+        "count": 476
       },
       {
         "name": "Claude",
@@ -1268,9 +1348,9 @@
       }
     ],
     "churn30d": {
-      "added": 133388,
-      "removed": 39615
+      "added": 134996,
+      "removed": 40073
     },
-    "changelogEntries": 397
+    "changelogEntries": 405
   }
 }

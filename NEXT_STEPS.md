@@ -33,165 +33,17 @@ backlog item below was **verified against the code** — evidence paths are as o
 review candidates were rejected as already shipped (user-savable map parts, instant task filters,
 active-filter indicator) — don't re-propose them.
 
-**Tier 3 (all 7 items) shipped the same day**, along with a cross-cutting `border`/`borderColor`
-shorthand-conflict sweep found while verifying it — see `CHANGELOG.md` for the per-item detail.
+**Tiers 1, 2 and 3 — all 27 items — shipped on 2026-07-02** (batches A–G; see `CHANGELOG.md` for the
+per-item detail), along with a cross-cutting `border`/`borderColor` shorthand-conflict sweep found
+while verifying Tier 3. Only the **Tier 4 big bets** and **Tier 5 housekeeping** items below remain open.
 
 Anything deliberately **not** built is recorded under *Deferred / blocked* or *Out of scope* below,
 so the decisions don't get re-litigated.
 
-## Backlog — 2026-07-02 MindManager review (execute later, order = suggested priority)
+## Backlog — 2026-07-02 MindManager review (remaining: Tier 4 big bets + Tier 5 housekeeping)
 
-Sizes: **S** = hours, **M** = days, **L** = a week+. Each item: what + why → *Now* (verified current
-state) → *Scope* (the exact delta).
-
-### Tier 1 — top picks
-
-1. **Live-map slides: custom deck frames the real canvas (L).** The biggest presentation gap vs
-   MindManager. Studio's deck exports render topics as *text bullets* — node images, markers, styles,
-   boundaries all vanish. MindManager's Slides view frames the actual map per slide (own collapse
-   state + pan/zoom framing) and presents by animating the map.
-   *Now:* `src/present/slides.ts` + `deckEdit.ts` (custom deck, per-slide notes) render bullets;
-   `src/io/deck.ts` + `pptx.ts` export text only. The **cinematic guided walk**
-   (`src/hooks/useGuidedWalk.ts`) already animates zoom frames on the real canvas.
-   *Scope:* let the custom deck drive the cinematic camera (per-slide framing + collapse state), and
-   render per-branch map images (via `exportSvg` per branch) into the PPTX/HTML deck exports instead
-   of bullets. Canvas==export invariant applies — go through the shared resolvers.
-
-2. **Create relationships silently, label inline (S).** Every relationship creation (drag-connect
-   *and* linking mode) pops a modal label prompt, and cancel *still creates* the unlabelled link —
-   friction for rapid linking. MindManager types labels directly on the line.
-   *Now:* `FlowMindMap.tsx:2186-2195` + `2229-2233` call `editorPrompt` on both creation paths (a
-   comment confirms cancel-still-creates). Inline label editing already shipped (feature
-   `inline-link-label`, double-click the line; `linkEdit.ts`).
-   *Scope:* remove `editorPrompt` from both paths; auto-open the existing inline label editor on the
-   new edge.
-
-3. **Relationship right-click context menu (S).** Right-clicking an edge jumps straight to a delete
-   confirm — the only surface without a context menu. MindManager's edge menu offers flip/format/
-   label/shape.
-   *Now:* `FlowMindMap.tsx:2287` `onEdgeContextMenu` only fires the delete confirm. Label edit, type,
-   style presets, arrow direction all exist on other surfaces (EdgeInspector, inline editor).
-   *Scope:* replace the confirm with a context menu wiring those existing actions + delete.
-
-4. **Marker/priority board columns — MindManager Icon View (M).** The Kanban board is tags-only;
-   MindManager's Icon View keys columns to an icon group (default: priority) and drag reassigns the
-   marker.
-   *Now:* `src/board.ts` + `Kanban.tsx` key columns by tag and drag re-tags (`retagForMove`);
-   single-select marker groups (Priority/Status/Mood/Vote) already exist in the model.
-   *Scope:* a board column-source selector (tags vs a single-select marker group incl. task
-   priority); dragging a card between marker columns reassigns that marker — a new keying mode in
-   `board.ts`/`Kanban.tsx` reusing the retag-on-move logic.
-
-5. **Schedule board: drag tasks onto date columns (M).** The Agenda panel is read-only date buckets;
-   MindManager's Schedule view has an Unscheduled column + date columns where dropping a task assigns
-   its date — the personal triage surface.
-   *Now:* `src/agenda.ts` + `AgendaPanel` (`Panels.tsx:1345`) are read-only; `taskDate.ts` has
-   `isOverdue`/`addDaysISO` helpers ready; Kanban drag plumbing exists.
-   *Scope:* a drag-target board (Unscheduled + date columns) writing `task.due`. Cheapest angles:
-   make AgendaPanel buckets drop targets, or add a date-mode to the Kanban column engine.
-
-6. **PNG export: scale factor + transparent background (S).** PNG is fixed 1× on white — matters for
-   pasting into decks/print.
-   *Now:* `svgToPng` in `src/useMapExports.ts:16-34` rasterises at 1× (canvas = naturalWidth) and
-   hard-fills `#ffffff`.
-   *Scope:* a scale multiplier (2×/4× via `canvas.width = naturalWidth*scale` + `ctx.scale`) and a
-   transparent-background toggle (skip the white fillRect), wired to both `exportPng` and `copyPng`;
-   branch export (`BranchExportDialog`) inherits for free.
-
-7. **Direct PDF file export (M).** The PDF path is print-dialog-only (page-size/multi-page control
-   left to the user); MindManager exports real PDFs with page control.
-   *Now:* feature `export-pdf` = "Print to PDF"; `src/useMapExports.ts:221-235` opens browser print
-   via a hidden iframe. **pdf-lib is already a dependency** (used only by
-   `scripts/build-book-pdf.mjs`).
-   *Scope:* a client-side SVG→PDF exporter (pdf-lib + the shared `exportSvg.ts` renderer) with
-   page-size/orientation options, alongside the existing print path. Keep it lazy-loaded (size
-   budget).
-
-8. **`.mmap` export fidelity: tags, task info, images (M).** The writer drops data **our own
-   importer reads** — the highest-value item for real-MindManager migration credibility.
-   *Now:* `src/io/mmap.ts` header (lines 28-30) documents dropping images/tags/task data; the
-   importer's `extractTags`/`extractTask`/`extractImage` (`src/import/mmap.ts`) define the target
-   schema exactly.
-   *Scope:* write `TextLabels` (tags), `Task@StartDate`/`DeadlineDate`/`TaskPriority`/
-   `TaskPercentage`/`Resources`, and `OneImage` + `bin/` image embedding. Stays clear of the
-   deferred theme-styling/summary-bracket work. Determinism rules in the writer are load-bearing
-   (FNV OId, fixed mtime) — keep them.
-
-### Tier 2 — quick wins (S each)
-
-9. **Inline summary rename.** Summaries alone open a modal prompt; callouts and edge labels edit
-   inline. *Now:* `FlowMindMap.tsx:1170-1186` `handleRenameSummary` uses `editorPrompt`; callouts
-   commit inline via `setCalloutText`. *Scope:* reuse the callout inline-edit pattern on the summary
-   label chip (`Summaries.tsx`); keep empty-label-deletes semantics + OverlayInspector editing.
-
-10. **Keyboard zoom: Ctrl/⌘ +/−/0.** Zoom needs wheel/controls/status-bar today; +/−/0 is universal
-    muscle memory. *Now:* no bindings (`shortcuts.ts` lists only Scroll / Cmd+scroll). *Scope:* bind
-    in the canvas keydown in `FlowMindMap.tsx` (`zoomIn`/`zoomOut`/`zoomTo(1)`, `preventDefault` to
-    override browser zoom, respect reduced motion), add rows to the SHORTCUTS cheat sheet; guard
-    against firing while editing text.
-
-11. **Backspace deletes topics.** Only Delete is handled for topics; overlays accept both; Mac
-    keyboards lack forward-Delete. *Now:* `keyIntent.ts:112` maps `e.key === "Delete"` only;
-    overlays accept both (`FlowMindMap.tsx:1698`). *Scope:* add Backspace at `keyIntent.ts:112`
-    (safe — the type-to-edit branch at line 119 only catches `key.length === 1`), update
-    `shortcuts.ts` label + keyIntent tests.
-
-12. **Quick Filter from any marker or tag.** The Markers & tags index is jump-only; MindManager's
-    right-click Quick Filter shows/hides all topics with a marker from wherever you see it.
-    *Now:* `MarkerTagIndex` (`Panels.tsx:1061`) is a "read-only navigation aid" (onPick only); the
-    Power Filter pipeline + hide mode already exist. *Scope:* a filter/hide action on index rows
-    (and on-node marker chips) that pre-fills the existing `FilterCriteria` — thin UI wiring, no new
-    pipeline.
-
-13. **Smart Ctrl+V routing.** Ctrl+V is image-only; branches need Ctrl+Shift+V; text needs the paste
-    dialog — asymmetric with Ctrl+C. *Now:* `useClipboardImagePaste.ts` (images),
-    `keyIntent.ts:87` (branch on Ctrl+Shift+V), `usePasteOutline.ts` (text dialog). *Scope:* one
-    Ctrl+V dispatcher — internal branch clipboard → `pasteBranch`; image item → image pipeline; else
-    route text through `parsePaste` (URL → linked topic, outline → subtree) without the dialog.
-
-14. **"Move project": shift all dates ±N days.** Replanning a slipped plan means editing every date
-    by hand; MindManager's Move Project shifts a whole set preserving offsets. *Now:* nothing like
-    it exists (verified). *Scope:* a pure helper over the ISO `startDate`/`dueDate` in
-    `src/taskDate.ts` + a bulk op in `src/mindmap/flow/ops.ts`, scoped to selected branch or whole
-    map, ±N days, **one undo step**. No dependencies/Gantt — stays clear of the out-of-scope PM
-    engine.
-
-15. **Drag modifiers: Shift+drag detach, Ctrl+drag copy.** No drag-out-to-detach in tree mode
-    (empty-canvas drop snaps back); duplicate is menu-only. *Now:* `detachBranch` op and
-    duplicate/copy-branch exist; `handleDragStop` (`FlowMindMap.tsx:831-836`) ignores modifier keys.
-    *Scope:* read `shiftKey` (empty-canvas drop → `detachBranch` instead of snap-back) and `ctrlKey`
-    (drop → copy subtree instead of re-parent) in `handleDragStop`.
-
-16. **Inline `#tag` accelerator while typing.** Keyboard-only tagging during capture — MindManager's
-    text accelerators pop the tag picker on `#`. *Now:* tag autocomplete exists only in the
-    inspector's Add-a-tag field (datalist, `Panels.tsx:2673`); the editor has `[[`/`@` link
-    autocomplete (`src/mindmap/flow/linkAutocomplete.ts`) and slash commands, no `#` trigger.
-    *Scope:* a `#` mid-text trigger in the topic editor reusing the `[[`/`@` picker machinery to
-    assign an existing/new tag.
-
-17. **Sticky-note colour set + preferred-style memory.** Sticky insert is single-amber; MindManager
-    23.2 offers 9 colours + persistable preferred styles. *Now:* `addStickyNote`
-    (`src/mindmap/flow/ops.ts`) hardcodes `STICKY_NOTE_STYLE`; recolouring after insert already
-    works via the StyleBar fill picker. *Scope:* a small colour-variant palette at insert time + a
-    persisted preferred default. Only the insert-time UX is new.
-
-18. **Find & replace: search history.** MindManager remembers the last 10 searches.
-    *Now:* replace-in-notes with topics/notes/both scoping **already shipped** (features
-    `find-replace`, `replace-scope`; `src/components/FindReplaceOverlay.tsx`) — only the history is
-    missing. *Scope:* a last-~10-queries dropdown, localStorage-backed.
-
-19. **Command palette: visible trigger + panel parity.** The editor palette is hotkey-only (mobile
-    users locked out) and misses panel toggles. *Now:* `useCommandPaletteHotkey.ts` is the only
-    opener (`setCmdkOpen` never called from a button); `editorCommands.ts` `panel-*` list lacks
-    agenda/maps/inbox though App has `agendaOpen`/`mapsOpen`/`inboxOpen`. *Scope:* a visible
-    toolbar/IconRail ⌘K trigger + register `panel-agenda`/`panel-maps`/`panel-inbox`. (Deck is an
-    export and already registered — not part of this.)
-
-20. **Shared panel-name constants.** Dock tabs and the Panels menu use different vocabularies
-    ("Markers & tags" vs "Markers & tags index", "Deck" vs "Slide deck (custom)"). *Now:* labels are
-    inline literals (`App.tsx:1931-2127` vs `Toolbar.tsx:708-806`); the menu's parenthetical hints
-    are deliberate. *Scope:* one shared base-name constant per panel — dock tab = base name, menu =
-    base name + optional parenthetical hint.
+Tiers 1–3 shipped (see `CHANGELOG.md`). Sizes: **S** = hours, **M** = days, **L** = a week+. Each
+item: what + why → *Now* (verified current state) → *Scope* (the exact delta).
 
 ### Tier 4 — big bets (L)
 
@@ -218,9 +70,9 @@ state) → *Scope* (the exact delta).
 
 ### Tier 5 — housekeeping / hygiene (no MindManager angle, found during the review)
 
-24. **USER_GUIDE catch-up sweep: 91 of 228 catalogue entries are `manual:false`** — everything
-    shipped since ~2026-06-19 (book/bookExample are 100%, the guide lags). A dedicated docs session:
-    write the missing USER_GUIDE sections, flip flags as they land.
+24. **USER_GUIDE catch-up sweep: 112 of 250 catalogue entries are `manual:false`** — everything
+    shipped since ~2026-06-19 (including the 2026-07-02 Tier 1–3 batch; book/bookExample lag too now).
+    A dedicated docs session: write the missing USER_GUIDE sections, flip flags as they land.
 
 25. **Rich-text editing rides deprecated `document.execCommand`** (bold/italic/underline/colour in
     the topic editor). Works today; needs a migration plan before browsers pull it.

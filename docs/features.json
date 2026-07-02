@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 405,
+  "reviewedThroughChangelogBullets": 424,
   "areas": [
     "editing",
     "notes",
@@ -16,6 +16,132 @@
     "pwa"
   ],
   "features": [
+    {
+      "id": "deck-live-map-slides",
+      "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
+      "area": "export",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "board-group-source",
+      "name": "Board grouping by marker group or schedule dates (drag a card to re-mark or re-schedule the topic)",
+      "area": "navigation",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "png-export-options",
+      "name": "PNG export options: 2×/4× scale factor and transparent background",
+      "area": "export",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "export-pdf-file",
+      "name": "Direct PDF file export with page-size (fit / A4 / Letter) and orientation (distinct from print-to-PDF)",
+      "area": "export",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "mmap-export-fidelity",
+      "name": "MindManager .mmap export fidelity: writes topic tags, task metadata and embedded images",
+      "area": "export",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "smart-paste-v",
+      "name": "Smart Ctrl+V routing (image / outline / URL / internal branch clipboard handled automatically)",
+      "area": "editing",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "shift-project-dates",
+      "name": "Move project: shift all task start/due dates ±N days (branch or whole map) in one undo step",
+      "area": "markers",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "drag-detach-copy",
+      "name": "Drag modifiers: Shift-drag detaches a topic to floating, Ctrl-drag copies the subtree",
+      "area": "structure",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "relationship-context-menu",
+      "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
+      "area": "structure",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "keyboard-zoom",
+      "name": "Keyboard zoom shortcuts: Ctrl/⌘ + / − / 0 (zoom in / out / reset)",
+      "area": "navigation",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "tag-accelerator",
+      "name": "Inline #tag accelerator: typing # mid-topic pops the tag picker to assign an existing or new tag",
+      "area": "markers",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "quick-filter-from-marker",
+      "name": "Quick Filter from any marker or tag row in the Markers & tags index (pre-fills the Power Filter)",
+      "area": "navigation",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "search-history",
+      "name": "Find & Replace search history (recalls the last ~10 queries)",
+      "area": "navigation",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "sticky-note-colours",
+      "name": "Sticky-note colour set at insert time with a remembered preferred default",
+      "area": "structure",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
     {
       "id": "custom-theme-designer",
       "name": "Custom theme designer (build / save / import-export your own canvas themes)",

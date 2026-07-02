@@ -7,6 +7,101 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+<!-- 2026-07-02 MindManager review — Tier 1 + Tier 2 (items 1–20), landed as batches A–G. -->
+
+- **Live-map slides: the deck exports the real map, not bullets (T1-1).** The biggest presentation gap
+  vs MindManager. The standalone HTML slide deck and the PowerPoint (`.pptx`) export now render **each
+  slide's branch as its actual map image** — the same faithful SVG render as the image/PDF exports,
+  framed to that branch's bounds — instead of a text bullet outline. The overview slide shows the whole
+  map; each branch slide its subtree. For `.pptx` the branch SVGs are rasterised to PNG and embedded as
+  real picture shapes, aspect-fitted into the slide body. Both degrade gracefully to the classic bullet
+  deck when there's no live canvas (or per-slide, if a branch can't be captured). The in-app cinematic
+  guided walk already framed branches on the canvas; this brings that fidelity to the shareable exports.
+  Verified end-to-end in a real browser (7 slides, 7 embedded branch SVGs) and with python-pptx (every
+  embedded image relationship resolves; portrait/landscape branches are aspect-fitted, not stretched).
+
+- **`.mmap` export fidelity: tags, task info & embedded images (T1-8).** The MindManager writer used to
+  drop data our own importer reads. It now round-trips **topic tags** (`TextLabels`), **task metadata**
+  (priority 1–9, percent-complete, start/deadline dates, resources), and **embedded images** (PNG/JPEG
+  packed into `bin/` parts referenced by an `mmarch://` URI) — the highest-value fidelity items for
+  real-MindManager migration. The zip stays byte-deterministic (pinned mtime, FNV-hashed part names).
+  Verified by a tags/task/image round-trip through our importer.
+
+- **Board grouping: markers & schedule, not just tags (T1-4, T1-5).** The Kanban board gains a **Group
+  by** selector. Beyond tag columns you can now lay the map out by a **marker group** (Priority / Status
+  / Mood / Vote — one column per member plus *None*, MindManager's Icon View) or by a **Schedule** of
+  date buckets (*Overdue / Today / This week / Later / Unscheduled*, MindManager's Schedule view).
+  Dragging a card between columns re-marks or re-schedules the topic (sets `task.due`) as one undoable
+  edit, mirroring the existing drag-to-retag. Verified in-browser across all three modes + unit-tested.
+
+- **PNG export: scale factor + transparent background (T2-6).** PNG export was fixed at 1× on white.
+  You can now export at **2× / 4×** for crisp print/retina/slide use and toggle a **transparent
+  background** (paste onto any colour). Wired to both *Download PNG* and *Copy image*, and the filename
+  is tagged (`@2x`, `-transparent`); the branch export inherits it. Unit-tested (raster seam + filename).
+
+- **Direct PDF file export (T2-7).** Alongside the existing print-to-PDF path, a new **Download PDF**
+  renders the map to a high-resolution image and embeds it in a real `.pdf` (via pdf-lib) with
+  **page-size** (fit-to-map / A4 / Letter) and **orientation** options — no browser print dialog.
+  Lazy-loaded to stay within the bundle budget. Unit-tested (page geometry + embed).
+
+- **Smart Ctrl+V routing (T2-13).** One paste shortcut now does the right thing by content: an **image**
+  on the clipboard drops in as a node image; an **outline or URL** as text is routed through the paste
+  parser (URL → linked topic, indented text → subtree) without the dialog; internal branch clips still
+  paste as branches. Previously Ctrl+V was image-only and text needed a separate dialog.
+
+- **"Move project": shift all dates ±N days (T2-14).** Replanning a slipped plan no longer means editing
+  every date by hand — a bulk helper shifts every `startDate`/`dueDate` (scoped to a branch or the whole
+  map) by ±N days in **one undo step**, preserving offsets. Pure date logic, unit-tested; no Gantt/PM
+  engine (stays clear of the out-of-scope work).
+
+- **Drag modifiers: Shift-drag detaches, Ctrl-drag copies (T2-15).** In tree mode, **Shift**-dropping a
+  topic on empty canvas now **detaches** it into a floating topic (instead of snapping back), and
+  **Ctrl**-dropping **copies** the subtree instead of re-parenting it. Both reuse existing ops.
+
+- **Silent relationship creation + inline label (T1-2).** Creating a relationship (drag-connect or
+  linking mode) no longer pops a modal label prompt (which created an unlabelled link even on cancel).
+  The link is created immediately and its **inline label editor opens on the new edge** — type the
+  label directly on the line, MindManager-style, or press Escape to leave it unlabelled.
+
+- **Relationship right-click menu (T1-3).** Right-clicking a relationship edge used to jump straight to
+  a delete confirm — the only surface without a context menu. It now opens a proper menu wiring the
+  actions that already existed elsewhere: **edit label, arrowheads/direction, line style, semantic
+  type**, and delete.
+
+- **Inline summary rename (T2-9).** Renaming a summary opened a modal prompt while callouts and edge
+  labels edited inline. The summary label now **edits inline** on the chip (empty commit deletes it,
+  Escape cancels), matching the callout pattern.
+
+- **Keyboard zoom: Ctrl/⌘ +/−/0 (T2-10).** Universal zoom muscle-memory now works on the canvas —
+  **Ctrl/⌘ +** zoom in, **−** out, **0** reset — overriding the browser's own zoom and respecting
+  reduced motion. Added to the shortcuts cheat sheet.
+
+- **Backspace deletes topics (T2-11).** Topic deletion accepted only forward-**Delete**; **Backspace**
+  now deletes too (Mac keyboards lack forward-Delete), matching the overlays. Type-to-edit is unaffected.
+
+- **Inline `#tag` accelerator while typing (T2-16).** Typing **`#`** mid-topic now pops the tag picker
+  (reusing the `[[`/`@` link-autocomplete machinery) to assign an existing or new tag without leaving
+  the keyboard — MindManager's text accelerators.
+
+- **Sticky-note colour set + preferred style (T2-17).** Inserting a sticky note offers a **6-colour
+  palette** at insert time (amber / lime / sky / rose / violet / slate) and remembers your **preferred
+  default**, instead of always starting amber.
+
+- **Quick Filter from any marker or tag (T2-12).** The Markers & tags index was jump-only; each group
+  row now has a **filter button** that pre-fills the existing Power Filter to show just the topics
+  carrying that marker or tag — MindManager's right-click Quick Filter, from wherever you see it.
+
+- **Find & replace: search history (T2-18).** The Find & Replace overlay now remembers your **last ~10
+  searches** in a dropdown (localStorage-backed).
+
+- **Command palette: visible trigger + panel parity (T2-19).** The editor command palette was
+  hotkey-only (locking out touch users); a **⌘K button** now lives on the icon rail, and the palette
+  registers the previously-missing **Agenda / Maps / Inbox** panel toggles.
+
+- **Shared panel-name constants (T2-20).** Dock tabs and the Panels menu drew panel names from separate
+  inline literals that had drifted ("Markers & tags" vs "…index", "Deck" vs "Slide deck (custom)"); a
+  single shared constant per panel now backs both (dock = base name, menu = base name + optional hint).
+
 - **Design gallery moved into the Map panel (T3-25).** The one-click Design presets (theme + connector
   style + branch weight + accent, previously in the Toolbar's Canvas menu) now live in the Map panel as
   a **Design** field — a **Choose a preset…** gallery with the same SVG thumbnails, right above Theme

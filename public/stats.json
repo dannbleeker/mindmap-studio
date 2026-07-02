@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-07-02T06:41:58.688Z",
-  "commit": "227ce09",
+  "generatedAt": "2026-07-02T06:50:53.282Z",
+  "commit": "fa89755",
   "headline": {
-    "linesTsJs": 72524,
+    "linesTsJs": 72535,
     "tests": 2007,
-    "lineCoveragePct": 90.96,
-    "commits": 1035,
+    "lineCoveragePct": 90.93,
+    "commits": 1037,
     "ageDays": 20,
     "trackedFiles": 486,
-    "featureManualPct": 58.6,
-    "featureBookPct": 56.4,
-    "featureExamplePct": 56.4
+    "featureManualPct": 60.1,
+    "featureBookPct": 54.4,
+    "featureExamplePct": 54.4
   },
   "code": [
     {
       "category": "App code (src)",
       "files": 224,
-      "lines": 42277
+      "lines": 42284
     },
     {
       "category": "Unit tests",
       "files": 197,
-      "lines": 28511
+      "lines": 28515
     },
     {
       "category": "Build scripts",
@@ -41,14 +41,14 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 90.96,
-      "covered": 27092,
-      "total": 29783
+      "pct": 90.93,
+      "covered": 27089,
+      "total": 29790
     },
     "statements": {
-      "pct": 90.96,
-      "covered": 27092,
-      "total": 29783
+      "pct": 90.93,
+      "covered": 27089,
+      "total": 29790
     },
     "functions": {
       "pct": 76.54,
@@ -56,35 +56,35 @@
       "total": 2059
     },
     "branches": {
-      "pct": 86.79,
+      "pct": 86.77,
       "covered": 8195,
-      "total": 9442
+      "total": 9444
     }
   },
   "tests": {
     "unit": 2007,
     "e2e": 0,
-    "durationMs": 106475,
+    "durationMs": 102159,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 28573
+        "ms": 27848
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 27815
+        "ms": 24014
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 9015
+        "ms": 9174
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 9011
+        "ms": 9157
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4659
+        "ms": 4186
       }
     ]
   },
@@ -139,12 +139,12 @@
         "pct": 56.81
       },
       {
-        "file": "io/importDispatch.ts",
-        "pct": 59.55
+        "file": "App.tsx",
+        "pct": 59.44
       },
       {
-        "file": "App.tsx",
-        "pct": 59.76
+        "file": "io/importDispatch.ts",
+        "pct": 59.55
       }
     ],
     "churnHotspots": [
@@ -172,7 +172,7 @@
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 59.76,
+        "pct": 59.44,
         "commits": 208
       }
     ]
@@ -198,52 +198,52 @@
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 42277,
+    "appLoc": 42284,
     "docToCodeRatio": 0.41
   },
   "featureCoverage": {
-    "total": 220,
-    "manual": 129,
-    "manualPct": 58.6,
+    "total": 228,
+    "manual": 137,
+    "manualPct": 60.1,
     "book": 124,
-    "bookPct": 56.4,
+    "bookPct": 54.4,
     "bookExample": 124,
-    "bookExamplePct": 56.4,
+    "bookExamplePct": 54.4,
     "byArea": {
+      "styling": {
+        "total": 23,
+        "manual": 14,
+        "book": 12
+      },
       "library": {
-        "total": 21,
-        "manual": 13,
+        "total": 22,
+        "manual": 14,
         "book": 11
       },
+      "structure": {
+        "total": 31,
+        "manual": 14,
+        "book": 12
+      },
+      "export": {
+        "total": 22,
+        "manual": 19,
+        "book": 17
+      },
+      "editing": {
+        "total": 29,
+        "manual": 17,
+        "book": 14
+      },
       "navigation": {
-        "total": 52,
-        "manual": 24,
+        "total": 53,
+        "manual": 25,
         "book": 24
       },
       "presentation": {
         "total": 5,
         "manual": 2,
         "book": 2
-      },
-      "styling": {
-        "total": 22,
-        "manual": 13,
-        "book": 12
-      },
-      "editing": {
-        "total": 27,
-        "manual": 15,
-        "book": 14
-      },
-      "export": {
-        "total": 20,
-        "manual": 17,
-        "book": 17
-      },
-      "structure": {
-        "total": 30,
-        "manual": 13,
-        "book": 12
       },
       "notes": {
         "total": 6,
@@ -731,6 +731,46 @@
       ],
       "noBook": [
         {
+          "id": "custom-theme-designer",
+          "name": "Custom theme designer (build / save / import-export your own canvas themes)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "library-folders",
+          "name": "Library folders / workspaces (group maps into named folders; ⌘K switcher groups by folder)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "relationship-types",
+          "name": "Typed relationship categories (relates-to / depends-on / causes / supports / blocks, with labels + filtering)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "export-branch",
+          "name": "Export a single branch / subtree (\"Export this branch…\" from the node menu, any format)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "deck-speaker-notes",
+          "name": "Speaker notes in the exported HTML slide deck + PowerPoint (per-slide notes; N to toggle / notes slides)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "natural-language-dates",
+          "name": "Natural-language date entry (type \"tomorrow\", \"next monday\", \"+3d\" in date fields)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "touch-outline-reorder",
+          "name": "Touch drag-to-reorder in the Outline (long-press a row and drag on touch devices)",
+          "since": "2026-07-01"
+        },
+        {
+          "id": "space-pan-mode",
+          "name": "Space-bar pan mode (hold Space + drag to pan from anywhere, even over a topic)",
+          "since": "2026-07-01"
+        },
+        {
           "id": "cross-map-backlinks",
           "name": "Cross-map backlinks — inspector 'Linked from other maps'",
           "since": "2026-07-01"
@@ -1216,16 +1256,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 20,
-    "commits": 1035,
-    "commits7d": 204,
+    "commits": 1037,
+    "commits7d": 206,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 498
+        "count": 499
       },
       {
         "name": "github-actions[bot]",
-        "count": 470
+        "count": 471
       },
       {
         "name": "Claude",
@@ -1233,8 +1273,8 @@
       }
     ],
     "churn30d": {
-      "added": 132390,
-      "removed": 39132
+      "added": 132531,
+      "removed": 39179
     },
     "changelogEntries": 392
   }

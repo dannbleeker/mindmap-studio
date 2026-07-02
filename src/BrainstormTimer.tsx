@@ -61,7 +61,7 @@ export function BrainstormTimer() {
             ? {
                 background: "var(--ed-toast-error-bg)",
                 color: "var(--ed-toast-error-ink)",
-                borderColor: "var(--ed-toast-error-border)",
+                border: "1px solid var(--ed-toast-error-border)",
               }
             : running
               ? { background: "var(--ed-toast-success-bg)" }

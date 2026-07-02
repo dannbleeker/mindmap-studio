@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 397,
+  "reviewedThroughChangelogBullets": 405,
   "areas": [
     "editing",
     "notes",
@@ -2064,6 +2064,78 @@
       "name": "[[ / @ name-based link autocomplete — pick a topic by name to attach a link",
       "area": "structure",
       "since": "2026-07-01",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "rules-and-not-conditions",
+      "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
+      "area": "styling",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "rules-due-soon-trigger",
+      "name": "Conditional rules: a \"due soon\" trigger kind (reuses the filter/search due-soon window)",
+      "area": "styling",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "priority-full-range",
+      "name": "Full 1-9 task priority in every picker, Power Filter, and Ctrl/Cmd+Shift+1-9 shortcuts",
+      "area": "markers",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "insert-menu-submenus",
+      "name": "Insert menu fly-out submenus (Map parts / Templates) via a reusable MenuSub primitive",
+      "area": "editing",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "layout-gallery",
+      "name": "Visual Layout gallery (SVG thumbnails) in the Map panel, replacing the text-only layout select",
+      "area": "styling",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "design-gallery-map-panel",
+      "name": "Design presets gallery consolidated into the Map panel (moved from the Toolbar Canvas menu)",
+      "area": "styling",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "side-aware-grips",
+      "name": "Relate + wrap-width grips mirror to a left-growing branch's outward edge",
+      "area": "editing",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "status-bar-view-switcher",
+      "name": "Status-bar Map / Outline / Board view switcher (one-click peer projections)",
+      "area": "navigation",
+      "since": "2026-07-02",
       "manual": false,
       "book": false,
       "bookExample": false

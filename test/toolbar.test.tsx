@@ -126,7 +126,6 @@ function setup(
     pasteFormat: vi.fn(),
     canPasteFormat: false,
     shuffleBranchColors: vi.fn(),
-    applyDesign: vi.fn(),
     openMapPanel: vi.fn(),
     drillIn: vi.fn(),
     exportBranch: vi.fn(),
@@ -456,18 +455,34 @@ describe("Toolbar — row 2 (view/edit/canvas)", () => {
     expect(t.handle.groupBranch).toHaveBeenCalledWith("n1");
   });
 
-  it("Canvas menu: design preset, free layout, and opens the Map panel for styling (T5)", async () => {
-    // Persistent styling (theme/background/connectors/fonts/backdrop) moved to the Map panel; the
-    // Canvas menu now keeps only one-shot Design presets + Free layout, and a link to the panel.
+  it("Insert: Map parts + Templates are fly-out submenus, not a flat inline list", async () => {
+    const t = setup({ selected: { id: "n1", topic: "N", note: "" } });
+    await u.click(screen.getByRole("button", { name: /^insert/i }));
+    // Collapsed: the submenu trigger rows are present, but their contents aren't in the DOM yet.
+    const mapPartsRow = screen.getByRole("menuitem", { name: /^map parts/i });
+    expect(screen.getByRole("menuitem", { name: /^templates/i })).toBeTruthy();
+    expect(mapPartsRow.getAttribute("aria-haspopup")).toBe("menu");
+    expect(screen.queryByRole("menuitem", { name: /^swot/i })).toBeNull();
+    // Opening "Map parts" reveals its items; selecting one inserts that part under the selection.
+    await u.click(mapPartsRow);
+    await u.click(screen.getByRole("menuitem", { name: /^swot/i }));
+    expect(t.handle.addSubtreeToSelected).toHaveBeenCalledTimes(1);
+    // Opening "Templates" reveals its items; selecting one builds + inserts that template's subtree.
+    await u.click(screen.getByRole("button", { name: /^insert/i }));
+    await u.click(screen.getByRole("menuitem", { name: /^templates/i }));
+    await u.click(screen.getByRole("menuitem", { name: /^swot/i })); // Templates also has a SWOT entry
+    expect(t.handle.addSubtreeToSelected).toHaveBeenCalledTimes(2);
+  });
+
+  it("Canvas menu: free layout + opens the Map panel for styling (T5, T3-25)", async () => {
+    // Persistent styling — theme/layout/design presets/background/connectors/fonts/backdrop — all
+    // live in the Map panel now; the Canvas menu keeps only Free layout + a link to the panel.
     const t = setup();
-    await u.click(screen.getByRole("button", { name: /^canvas/i }));
-    await u.click(screen.getAllByRole("menuitem")[0]); // first Design preset
-    expect(t.canvas.applyDesign).toHaveBeenCalled();
     await u.click(screen.getByRole("button", { name: /^canvas/i }));
     await u.click(screen.getByRole("menuitemcheckbox", { name: /free layout/i }));
     expect(t.handle.setFreeform).toHaveBeenCalled();
     // The Free-layout checkbox keeps the menu open, so the styling link is reachable directly.
-    await u.click(screen.getByRole("menuitem", { name: /theme, colours, fonts/i }));
+    await u.click(screen.getByRole("menuitem", { name: /theme, design presets/i }));
     expect(t.canvas.openMapPanel).toHaveBeenCalled();
   });
 

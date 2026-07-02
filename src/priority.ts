@@ -1,20 +1,29 @@
-// Task priority — a small, sortable/filterable level stored on TaskInfo.priority (1 = High .. 3 = Low).
-// Distinct from the emoji priority markers in that it's a structured value the Power Filter can match.
-// Pure constants shared by the node badge, the Info panel, the exporter, and the filter.
+// Task priority — a small, sortable/filterable level stored on TaskInfo.priority, the full 1..9 range
+// MindManager uses (1 = highest .. 9 = lowest). Distinct from the emoji priority markers in that it's a
+// structured value the Power Filter can match. Pure constants shared by the node badge, the Info panel,
+// the exporter, and the filter.
 
-export const PRIORITY_LEVELS = [1, 2, 3] as const;
+export const PRIORITY_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
+// Only 1–3 carry a named label (High/Med/Low, this app's own convention) — MindManager itself just
+// numbers priority 1–9, so 4–9 read as their number (priorityLabel's fallback), matching that norm.
 export const PRIORITY_LABEL: Record<number, string> = { 1: "High", 2: "Med", 3: "Low" };
 
+// A red→grey urgency gradient across all 9 levels. 1–3 are the original High/Med/Low colours
+// (unchanged, so existing maps don't visually shift); 4–9 continue the gradient down to the neutral
+// grey this app used for imported-only 4–9 values before the picker covered the full range.
 export const PRIORITY_COLOR: Record<number, string> = {
   1: "#e23b3b",
   2: "#d98a17",
   3: "#3b8bd4",
+  4: "#4f9bd4",
+  5: "#3fa796",
+  6: "#4caf7d",
+  7: "#7cb342",
+  8: "#9e9e42",
+  9: "#6b7280",
 };
 
-// The picker offers the 1–3 High/Med/Low scheme, but TaskInfo.priority is modelled 1..9 (MindManager's
-// range, 1 = highest) so an imported map can carry 4–9. Render those as their number on a neutral badge
-// rather than a meaningless "?" / grey #888. Used by the node badge, the exporter, and the filter label.
 export function priorityLabel(p: number): string {
   return PRIORITY_LABEL[p] ?? String(p);
 }
@@ -23,11 +32,10 @@ export function priorityColor(p: number): string {
   return PRIORITY_COLOR[p] ?? "#6b7280";
 }
 
-/** The next priority when clicking the on-canvas chip: cycle through the picker's High/Med/Low
- *  scheme then clear — undefined → 1 → 2 → 3 → undefined. Any imported 4–9 value clears (drops back
- *  onto the 1–3 scale on the next click). Pure (drives the click-to-cycle priority chip). */
+/** The next priority when clicking the on-canvas chip: cycle through the full 1–9 range then clear —
+ *  undefined → 1 → 2 → … → 9 → undefined. Pure (drives the click-to-cycle priority chip). */
 export function cyclePriority(current: number | undefined): number | undefined {
   if (current === undefined) return 1;
-  if (current >= 1 && current < 3) return current + 1;
+  if (current >= 1 && current < 9) return current + 1;
   return undefined;
 }

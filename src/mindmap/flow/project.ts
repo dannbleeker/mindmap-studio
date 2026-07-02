@@ -92,9 +92,12 @@ export function project(
   for (const f of doc.floatingTopics ?? []) for (const [k, v] of progressMap(f)) progress.set(k, v);
   // Conditional formatting: a view-only style layered *under* each node's own style.
   const rules = doc.rules ?? [];
-  // Per-node relationship-type sets, so a "relationshipType" rule can match endpoints. Built once (the
-  // whole map's links) rather than per node. Empty when no rule needs it — cheap either way.
-  const relTypes = rules.some((r) => r.kind === "relationshipType")
+  // Per-node relationship-type sets, so a "relationshipType" rule can match endpoints — whether it's
+  // a rule's primary condition or one of its AND-ed `also` clauses. Built once (the whole map's links)
+  // rather than per node. Empty when no rule needs it — cheap either way.
+  const relTypes = rules.some(
+    (r) => r.kind === "relationshipType" || r.also?.some((c) => c.kind === "relationshipType"),
+  )
     ? relationshipTypeIndex(doc.links)
     : undefined;
 

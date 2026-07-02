@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 import { Button } from "../design/primitives";
-import type { CanvasTheme } from "../mindmap/theme";
-import { canvasThemes } from "../mindmap/theme";
-import type { CustomTheme } from "../store/customThemes";
 import type { Appearance } from "../useAppearance";
 import type { ContrastPref } from "../useHighContrast";
 import type { MotionPref } from "../useReducedMotion";
@@ -26,10 +23,6 @@ export interface SettingsDialogProps {
   /** High-contrast preference — System (follow the OS) / High / Normal. */
   contrastPref: ContrastPref;
   setContrastPref: (p: ContrastPref) => void;
-  theme: CanvasTheme;
-  setThemeId: (id: string) => void;
-  /** The user's saved custom themes (C3), shown after the built-ins. */
-  customThemes?: CustomTheme[];
   /** Re-show the first-run "3 things to try" card. */
   onReShowGettingStarted: () => void;
   /** Clear the ⌘K most-recently-used list. */
@@ -64,9 +57,6 @@ export function SettingsDialog({
   setMotionPref,
   contrastPref,
   setContrastPref,
-  theme,
-  setThemeId,
-  customThemes = [],
   onReShowGettingStarted,
   onClearRecents,
   onClearBranchClipboard,
@@ -117,33 +107,10 @@ export function SettingsDialog({
             <option value="dark">Dark</option>
           </select>
         </label>
-        <label className="mm-map-field">
-          <span>Canvas theme</span>
-          <select
-            className="mm-map-control"
-            value={theme.id}
-            onChange={(e) => setThemeId(e.target.value)}
-            aria-label="Canvas theme"
-          >
-            {canvasThemes.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-            {customThemes.length > 0 ? (
-              <optgroup label="Custom">
-                {customThemes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </optgroup>
-            ) : null}
-          </select>
-        </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
-          App theme colours the chrome (toolbar, panels, dialogs); canvas theme colours the topics.
-          A dark canvas always darkens the chrome too.
+          App theme colours the chrome (toolbar, panels, dialogs). The canvas theme (which colours
+          the topics) lives in the Map panel, alongside layout and the rest of the map's look — a
+          dark canvas always darkens the chrome too.
         </p>
         <label className="mm-map-field">
           <span>Reduce motion</span>
@@ -204,7 +171,7 @@ export function SettingsDialog({
             alignSelf: "flex-start",
             marginTop: 4,
             color: "var(--ed-danger)",
-            borderColor: "var(--ed-danger)",
+            border: "1px solid var(--ed-danger)",
           }}
         >
           Clear all local data…

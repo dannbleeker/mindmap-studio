@@ -110,7 +110,9 @@ describe("App (integration)", () => {
     await flush();
     await openEditor(user, container);
     await user.click(screen.getByRole("button", { name: /Panels/ }));
-    const ol = await screen.findByText("Outline", { exact: true });
+    // menuitemcheckbox, not plain text — the status-bar Map/Outline/Board switcher (T3-27) also
+    // renders an "Outline" button, so a bare text query would now match both.
+    const ol = await screen.findByRole("menuitemcheckbox", { name: "Outline" });
     // The 12 toggles are grouped under three section labels (Phase 11c).
     const menu = ol.closest(".mm-menu");
     expect(menu?.textContent).toContain("Structure");
@@ -187,9 +189,9 @@ describe("App (integration)", () => {
     await openMenu("View");
     await clickIfPresent(/Collapse all/i);
 
-    // Canvas menu — change layout + apply a design (executes applyDesign / changeLayout handlers).
+    // Canvas menu — toggle Free layout if present (design presets + layout now live in the Map panel).
     await openMenu("Canvas");
-    await clickIfPresent(/Timeline|Org chart|Radial/i);
+    await clickIfPresent(/Free layout/i);
 
     // Layout select (always visible in the toolbar row).
     const layoutSel = screen.queryByLabelText(/layout/i) as HTMLSelectElement | null;

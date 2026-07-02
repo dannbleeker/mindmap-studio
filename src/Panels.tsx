@@ -52,6 +52,8 @@ import type {
   NodeShape,
   NodeStyle,
   NumberStyle,
+  RuleCondition,
+  RuleConditionKind,
   SlideRef,
 } from "./model/types";
 import { htmlToNote, renderNote } from "./noteFormat";
@@ -70,7 +72,7 @@ import {
 } from "./outline";
 import { addSlide, removeSlide, reorderSlides, setSlideNote } from "./present/deckEdit";
 import { OVERVIEW_SLIDE_ID } from "./present/slides";
-import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS } from "./priority";
+import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS, priorityLabel } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
@@ -1786,7 +1788,7 @@ export function FilterPanel({
           <option value={0}>Any</option>
           {PRIORITY_LEVELS.map((p) => (
             <option key={p} value={p}>
-              {PRIORITY_LABEL[p]}
+              {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]}` : String(p)}
             </option>
           ))}
         </Select>
@@ -2300,18 +2302,25 @@ export function StylesPanel({
   onDeleteStyle: (id: string) => void;
 }) {
   const [styleName, setStyleName] = useState("");
-  const [kind, setKind] = useState<ConditionalRule["kind"]>("tag");
+  const [kind, setKind] = useState<RuleConditionKind>("tag");
   const [value, setValue] = useState("");
+  const [negate, setNegate] = useState(false);
+  // Extra AND-ed clauses (each independently negatable); "+ AND condition" appends a blank row. Each
+  // carries a client-only `_key` (stripped before onAddRule) so React keys survive reordering/removal
+  // without relying on the array index.
+  const [also, setAlso] = useState<(RuleCondition & { _key: string })[]>([]);
   const [fill, setFill] = useState("");
   const [border, setBorder] = useState("");
   // Actions (in addition to a style): a marker to auto-apply + a branch colour for the subtree.
   const [actionIcon, setActionIcon] = useState("");
   const [actionColor, setActionColor] = useState("");
-  // tag / marker / priority / textContains carry a value; completed / overdue / hasAttachment don't.
-  const needsValue =
-    kind === "tag" || kind === "marker" || kind === "priority" || kind === "textContains";
+  // tag / marker / priority / textContains carry a value; completed / overdue / dueSoon / hasAttachment don't.
+  const conditionNeedsValue = (k: RuleConditionKind) =>
+    k === "tag" || k === "marker" || k === "priority" || k === "textContains";
+  const needsValue = conditionNeedsValue(kind);
   const add = () => {
     if (needsValue && !value.trim()) return;
+    if (also.some((c) => conditionNeedsValue(c.kind) && !c.value?.trim())) return;
     // A rule needs at least one effect — a style swatch OR an action (marker / branch colour).
     if (!fill && !border && !actionIcon && !actionColor) return;
     const style: NodeStyle = {};
@@ -2321,16 +2330,118 @@ export function StylesPanel({
       id: crypto.randomUUID(),
       kind,
       value: needsValue ? value.trim() : undefined,
+      negate: negate || undefined,
+      also: also.length
+        ? also.map((c) => ({
+            kind: c.kind,
+            value: conditionNeedsValue(c.kind) ? c.value?.trim() : undefined,
+            negate: c.negate || undefined,
+          }))
+        : undefined,
       style,
       icons: actionIcon ? [actionIcon] : undefined,
       branchColor: actionColor || undefined,
     });
     setValue("");
+    setNegate(false);
+    setAlso([]);
     setFill("");
     setBorder("");
     setActionIcon("");
     setActionColor("");
   };
+  const updateAlso = (i: number, patch: Partial<RuleCondition>) =>
+    setAlso((rows) => rows.map((r, ri) => (ri === i ? { ...r, ...patch } : r)));
+  // One condition's kind-dependent value input, reused for the primary condition and every AND row.
+  const conditionValueField = (
+    k: RuleConditionKind,
+    v: string,
+    onChange: (v: string) => void,
+    label: string,
+  ) => {
+    if (k === "tag")
+      return (
+        <Input
+          value={v}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="tag name"
+          aria-label={label}
+          style={{ width: "auto", margin: "0 10px 4px" }}
+        />
+      );
+    if (k === "marker")
+      return (
+        <Select
+          value={v}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+          style={{ width: "auto", margin: "0 10px 4px" }}
+        >
+          <option value="">Pick a marker…</option>
+          {markers.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </Select>
+      );
+    if (k === "priority")
+      return (
+        <Select
+          value={v}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+          style={{ width: "auto", margin: "0 10px 4px" }}
+        >
+          <option value="">Pick a priority…</option>
+          {PRIORITY_LEVELS.map((p) => (
+            <option key={p} value={p}>
+              {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]} & up` : `${p} & up`}
+            </option>
+          ))}
+        </Select>
+      );
+    if (k === "textContains")
+      return (
+        <Input
+          value={v}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="topic contains…"
+          aria-label={label}
+          style={{ width: "auto", margin: "0 10px 4px" }}
+        />
+      );
+    if (k === "relationshipType")
+      return (
+        <Select
+          value={v}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+          style={{ width: "auto", margin: "0 10px 4px" }}
+        >
+          <option value="">any relationship</option>
+          <option value="relates-to">relates-to</option>
+          <option value="depends-on">depends-on</option>
+          <option value="causes">causes</option>
+          <option value="supports">supports</option>
+          <option value="blocks">blocks</option>
+        </Select>
+      );
+    return null; // completed / overdue / dueSoon / hasAttachment need no value
+  };
+  const conditionKindOptions = (
+    <>
+      <option value="tag">has tag</option>
+      <option value="marker">has marker</option>
+      <option value="completed">is completed</option>
+      <option value="overdue">is overdue</option>
+      <option value="dueSoon">is due soon</option>
+      <option value="priority">priority ≤</option>
+      <option value="textContains">text contains</option>
+      <option value="hasAttachment">has attachment</option>
+      <option value="relationshipType">has relationship</option>
+    </>
+  );
   const swatchRow = (
     swatches: readonly string[],
     selected: string,
@@ -2401,79 +2512,84 @@ export function StylesPanel({
         />
         <div style={{ display: "flex", gap: 4, padding: "0 10px 4px", alignItems: "center" }}>
           <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>When</span>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              fontSize: fontSize.sm,
+              color: colors.muted,
+            }}
+            title="Invert this condition"
+          >
+            <input type="checkbox" checked={negate} onChange={(e) => setNegate(e.target.checked)} />
+            NOT
+          </label>
           <Select
             value={kind}
-            onChange={(e) => setKind(e.target.value as ConditionalRule["kind"])}
+            onChange={(e) => setKind(e.target.value as RuleConditionKind)}
             aria-label="Rule condition"
             style={{ width: "auto", flex: 1 }}
           >
-            <option value="tag">has tag</option>
-            <option value="marker">has marker</option>
-            <option value="completed">is completed</option>
-            <option value="overdue">is overdue</option>
-            <option value="priority">priority ≤</option>
-            <option value="textContains">text contains</option>
-            <option value="hasAttachment">has attachment</option>
-            <option value="relationshipType">has relationship</option>
+            {conditionKindOptions}
           </Select>
         </div>
-        {kind === "tag" ? (
-          <Input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="tag name"
-            aria-label="Rule tag"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          />
-        ) : kind === "marker" ? (
-          <Select
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            aria-label="Rule marker"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          >
-            <option value="">Pick a marker…</option>
-            {markers.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </Select>
-        ) : kind === "priority" ? (
-          <Select
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            aria-label="Rule priority"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          >
-            <option value="">Pick a priority…</option>
-            <option value="1">1 — High</option>
-            <option value="2">2 — Medium &amp; up</option>
-            <option value="3">3 — Low &amp; up</option>
-          </Select>
-        ) : kind === "textContains" ? (
-          <Input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="topic contains…"
-            aria-label="Rule text"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          />
-        ) : kind === "relationshipType" ? (
-          <Select
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            aria-label="Rule relationship type"
-            style={{ width: "auto", margin: "0 10px 4px" }}
-          >
-            <option value="">any relationship</option>
-            <option value="relates-to">relates-to</option>
-            <option value="depends-on">depends-on</option>
-            <option value="causes">causes</option>
-            <option value="supports">supports</option>
-            <option value="blocks">blocks</option>
-          </Select>
-        ) : null}
+        {conditionValueField(kind, value, setValue, "Rule value")}
+        {also.map((c, i) => (
+          <div key={c._key}>
+            <div style={{ display: "flex", gap: 4, padding: "0 10px 4px", alignItems: "center" }}>
+              <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>AND</span>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                  fontSize: fontSize.sm,
+                  color: colors.muted,
+                }}
+                title="Invert this condition"
+              >
+                <input
+                  type="checkbox"
+                  checked={!!c.negate}
+                  onChange={(e) => updateAlso(i, { negate: e.target.checked })}
+                />
+                NOT
+              </label>
+              <Select
+                value={c.kind}
+                onChange={(e) =>
+                  updateAlso(i, { kind: e.target.value as RuleConditionKind, value: "" })
+                }
+                aria-label="AND condition"
+                style={{ width: "auto", flex: 1 }}
+              >
+                {conditionKindOptions}
+              </Select>
+              <Button
+                onClick={() => setAlso((rows) => rows.filter((_, ri) => ri !== i))}
+                title="Remove this AND condition"
+                style={{ padding: "0 6px", fontSize: fontSize.sm }}
+              >
+                ✕
+              </Button>
+            </div>
+            {conditionValueField(
+              c.kind,
+              c.value ?? "",
+              (v) => updateAlso(i, { value: v }),
+              "AND condition value",
+            )}
+          </div>
+        ))}
+        <Button
+          onClick={() =>
+            setAlso((rows) => [...rows, { kind: "tag", value: "", _key: crypto.randomUUID() }])
+          }
+          style={{ margin: "0 10px 4px", fontSize: fontSize.sm }}
+        >
+          + AND condition
+        </Button>
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}
         <div style={{ display: "flex", gap: 4, padding: "2px 10px 4px", alignItems: "center" }}>
@@ -3250,7 +3366,7 @@ export function InfoPanel({
                             key={p}
                             className="mm-keep-color"
                             onClick={() => onSetPriority(p)}
-                            title={`${PRIORITY_LABEL[p]} priority`}
+                            title={`${priorityLabel(p)} priority`}
                             style={{
                               padding: "1px 8px",
                               fontSize: fontSize.sm,
@@ -3259,10 +3375,10 @@ export function InfoPanel({
                               // of the inspector's accent re-theme via mm-keep-color).
                               background: active ? PRIORITY_COLOR[p] : "var(--ed-card)",
                               color: active ? "#fff" : PRIORITY_COLOR[p],
-                              borderColor: PRIORITY_COLOR[p],
+                              border: `1px solid ${PRIORITY_COLOR[p]}`,
                             }}
                           >
-                            {PRIORITY_LABEL[p]}
+                            {priorityLabel(p)}
                           </Button>
                         );
                       })}

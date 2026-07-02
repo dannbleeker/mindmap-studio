@@ -42,8 +42,9 @@ export function DropLabel({ dropTargetId, doc }: { dropTargetId: string | null; 
   );
 }
 
-/** A slim bottom status bar — visible topic count, current selection size, and live zoom % (read from
- *  the React Flow store, so it tracks pan/zoom). Canvas-only, like the minimap. */
+/** A slim bottom status bar — visible topic count, current selection size, live zoom % (read from the
+ *  React Flow store, so it tracks pan/zoom), and the Map/Outline/Board view switcher. Canvas-only,
+ *  like the minimap. */
 // A text-as-button inside the status bar (the clickable zoom % / selection-count) — no chrome, just a
 // pointer cursor so the read-out doubles as an action.
 const statBtn: CSSProperties = {
@@ -55,14 +56,75 @@ const statBtn: CSSProperties = {
   padding: 0,
 };
 
+const VIEWS: { id: "map" | "outline" | "board"; label: string }[] = [
+  { id: "map", label: "Map" },
+  { id: "outline", label: "Outline" },
+  { id: "board", label: "Board" },
+];
+
+/** The Map/Outline/Board segmented control — MindManager's status-bar view buttons make these three
+ *  shipped projections one-click peers instead of leaving Board buried in the Panels menu. */
+function ViewSwitcher({
+  active,
+  onSet,
+}: {
+  active: "map" | "outline" | "board";
+  onSet: (view: "map" | "outline" | "board") => void;
+}) {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: a toolbar-style button group, not a form <fieldset>.
+    <div
+      role="group"
+      aria-label="Switch view"
+      style={{
+        display: "flex",
+        gap: 2,
+        border: `1px solid ${colors.menu.border}`,
+        borderRadius: 4,
+      }}
+    >
+      {VIEWS.map((v) => {
+        const isActive = active === v.id;
+        return (
+          <button
+            key={v.id}
+            type="button"
+            aria-pressed={isActive}
+            title={`Switch to ${v.label} view`}
+            onClick={() => onSet(v.id)}
+            style={{
+              border: "none",
+              borderRadius: 3,
+              cursor: "pointer",
+              font: "inherit",
+              fontWeight: isActive ? 600 : 400,
+              padding: "1px 6px",
+              background: isActive ? "var(--mm-color, #23211c)" : "transparent",
+              color: isActive ? "var(--mm-node-bg, #fff)" : "inherit",
+            }}
+          >
+            {v.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function StatusBar({
   topics,
   selected,
+  activeView,
+  onSetView,
   onResetZoom,
   onFitSelection,
 }: {
   topics: number;
   selected: number;
+  /** The active Map/Outline/Board projection; the switcher renders only when both this and
+   *  `onSetView` are given (a caller can opt out of the switcher entirely). */
+  activeView?: "map" | "outline" | "board";
+  onSetView?: (view: "map" | "outline" | "board") => void;
   /** Click the zoom % → reset to 100%. */
   onResetZoom?: () => void;
   /** Click the selection count → zoom to fit the selection. */
@@ -75,6 +137,7 @@ export function StatusBar({
         className="nodrag nopan"
         style={{
           display: "flex",
+          alignItems: "center",
           gap: 12,
           font: "11px system-ui, sans-serif",
           padding: "2px 10px",
@@ -86,6 +149,7 @@ export function StatusBar({
           boxShadow: "0 1px 3px #0002",
         }}
       >
+        {onSetView && activeView ? <ViewSwitcher active={activeView} onSet={onSetView} /> : null}
         <span>
           {topics} topic{topics === 1 ? "" : "s"}
         </span>

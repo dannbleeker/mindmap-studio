@@ -107,7 +107,9 @@ describe("MapPanel", () => {
 
     await userEvent.selectOptions(screen.getByLabelText("Canvas theme"), "dark");
     expect(setThemeId).toHaveBeenCalledWith("dark");
-    await userEvent.selectOptions(screen.getByLabelText("Layout"), "grid");
+    // Layout is a visual gallery (Menu), not a native select (10c) — open it and pick a row.
+    await userEvent.click(screen.getByLabelText("Layout"));
+    await userEvent.click(screen.getByRole("menuitem", { name: /grid \/ matrix/i }));
     expect(changeLayout).toHaveBeenCalledWith("grid");
     await userEvent.click(screen.getByRole("button", { name: "Reset" }));
     expect(onSetBackground).toHaveBeenCalledWith("");
@@ -186,11 +188,36 @@ describe("MapPanel", () => {
     expect(screen.queryByRole("button", { name: "Reset" })).toBeNull(); // nothing to reset
   });
 
-  it("disables the layout select in free-canvas mode", () => {
+  it("disables the layout gallery trigger in free-canvas mode", () => {
     setup(doc("F", { id: "root", topic: "F", children: [] }, { freeform: true }), {
       freeform: true,
     });
-    expect((screen.getByLabelText("Layout") as HTMLSelectElement).disabled).toBe(true);
+    expect((screen.getByLabelText("Layout") as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("the layout gallery trigger shows the current layout's name and groups every row (10c)", async () => {
+    setup(doc("M", { id: "root", topic: "M", children: [] }), { layout: "radial" });
+    expect(screen.getByLabelText("Layout").textContent).toContain("Radial / hub");
+    await userEvent.click(screen.getByLabelText("Layout"));
+    const menu = screen.getByRole("menu", { name: "Choose a layout" });
+    for (const group of ["Radial", "Tree", "Diagram"]) expect(menu.textContent).toContain(group);
+    for (const row of ["Both sides", "Org chart ↓", "Timeline", "Brace map"])
+      expect(screen.getByRole("menuitem", { name: row })).toBeTruthy();
+  });
+
+  it("hides the Design gallery when onApplyDesign is absent (opt-in, T3-25)", () => {
+    setup();
+    expect(screen.queryByLabelText("Apply a design preset")).toBeNull();
+  });
+
+  it("the Design gallery lists every preset and applies one on selection (T3-25)", async () => {
+    const onApplyDesign = vi.fn();
+    setup(planDoc, { onApplyDesign });
+    await userEvent.click(screen.getByLabelText("Apply a design preset"));
+    const menu = screen.getByRole("menu", { name: "Design presets" });
+    expect(menu.textContent).toContain("Classic");
+    await userEvent.click(screen.getByRole("menuitem", { name: "Classic" }));
+    expect(onApplyDesign).toHaveBeenCalledWith("classic");
   });
 
   it("shows backdrop ring + remove controls only when the map has a backdrop", () => {

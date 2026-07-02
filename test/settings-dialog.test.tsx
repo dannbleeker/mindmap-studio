@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { SettingsDialog } from "../src/components/SettingsDialog";
-import { themeById } from "../src/mindmap/theme";
 
 // SettingsDialog renders inside the shared native-<dialog> wrapper; guard-stub the modal methods
 // (jsdom may lack them) the same way the other dialog tests do.
@@ -30,8 +29,6 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
     setMotionPref: vi.fn(),
     contrastPref: "system" as const,
     setContrastPref: vi.fn(),
-    theme: themeById("light"),
-    setThemeId: vi.fn(),
     onReShowGettingStarted: vi.fn(),
     onClearRecents: vi.fn(),
     onClearBranchClipboard: vi.fn(),
@@ -43,13 +40,20 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
 }
 
 describe("SettingsDialog", () => {
-  it("renders the sections and drives the theme select", async () => {
-    const p = setup();
+  it("renders the sections", () => {
+    setup();
     expect(screen.getByText("Settings")).toBeTruthy();
     expect(screen.getByText("Appearance")).toBeTruthy();
     expect(screen.getByText("Local data")).toBeTruthy();
-    await userEvent.selectOptions(screen.getByLabelText("Canvas theme"), "dark");
-    expect(p.setThemeId).toHaveBeenCalledWith("dark");
+  });
+
+  // Design-surface consolidation (T3-25): the canvas-theme select used to live here too, duplicating
+  // the Map panel's. Removed — this guards against it silently reappearing, and that the copy still
+  // points users to where it now lives (the one home for the map's look).
+  it("no longer duplicates the canvas-theme picker (moved to the Map panel)", () => {
+    setup();
+    expect(screen.queryByLabelText("Canvas theme")).toBeNull();
+    expect(screen.getByText(/canvas theme.*lives in the map panel/i)).toBeTruthy();
   });
 
   it("drives the app-appearance select (System / Light / Dark)", async () => {

@@ -1,10 +1,116 @@
 import type { ChangeEvent } from "react";
 import { CollapsibleSection } from "../Panels";
+import { Menu, MenuItem, MenuLabel } from "../design/primitives";
+import { designPreviewModel } from "../designPreview";
+import { DESIGNS } from "../designs";
+import { LAYOUT_PREVIEW_NODE_R, LAYOUT_PREVIEW_ROOT_R, layoutPreviewModel } from "../layoutPreview";
 import type { LayoutKind } from "../mindmap";
 import { type CanvasTheme, canvasThemes } from "../mindmap/theme";
 import type { BackdropKind, BranchGrowth, MapNode, MindMapDoc } from "../model/types";
 import type { CustomTheme } from "../store/customThemes";
 import { InspectorResizer } from "./InspectorResizer";
+
+/** A tiny themed thumbnail for a design in the gallery: the design's background, a root dot, and
+ *  three palette branches drawn with its connector style — so designs are told apart at a glance
+ *  instead of by an identical palette icon. Model is the pure designPreviewModel. Moved here from the
+ *  Toolbar's Canvas menu (T3-25) so the map's look has one home. */
+function DesignPreview({ design }: { design: (typeof DESIGNS)[number] }) {
+  const m = designPreviewModel(design);
+  return (
+    <svg
+      width={m.w}
+      height={m.h}
+      viewBox={`0 0 ${m.w} ${m.h}`}
+      aria-hidden="true"
+      style={{ flexShrink: 0, borderRadius: 3 }}
+    >
+      <rect width={m.w} height={m.h} rx={3} fill={m.bg} stroke="rgba(0,0,0,0.15)" />
+      {m.branches.map((b) => (
+        <g key={b.ty}>
+          <path d={b.d} fill="none" stroke={b.color} strokeWidth={1.5} />
+          <circle cx={b.tx} cy={b.ty} r={2.5} fill={b.color} />
+        </g>
+      ))}
+      <circle cx={m.root.cx} cy={m.root.cy} r={m.root.r} fill={m.rootBg} />
+    </svg>
+  );
+}
+
+/** A layout's schematic thumbnail (10c) — a tiny SVG built from the pure layoutPreviewModel, coloured
+ *  via the chrome's design tokens so it re-themes (unlike DESIGNS' theme-specific hex swatches, a
+ *  layout icon has no "theme" of its own). Used as the gallery's per-row icon + the trigger preview. */
+function LayoutPreview({ kind }: { kind: LayoutKind }) {
+  const m = layoutPreviewModel(kind);
+  return (
+    <svg
+      width={m.w}
+      height={m.h}
+      viewBox={`0 0 ${m.w} ${m.h}`}
+      aria-hidden="true"
+      style={{ flexShrink: 0 }}
+    >
+      {m.paths?.map((d) => (
+        <path key={d} d={d} fill="none" stroke="var(--ed-faint)" strokeWidth={1.3} />
+      ))}
+      {m.lines.map((l) => (
+        <line
+          key={`${l.x1},${l.y1}-${l.x2},${l.y2}`}
+          x1={l.x1}
+          y1={l.y1}
+          x2={l.x2}
+          y2={l.y2}
+          stroke="var(--ed-faint)"
+          strokeWidth={1.3}
+        />
+      ))}
+      {m.nodes.map((n) => (
+        <circle
+          key={`${n.cx},${n.cy}`}
+          cx={n.cx}
+          cy={n.cy}
+          r={LAYOUT_PREVIEW_NODE_R}
+          fill="var(--ed-muted)"
+        />
+      ))}
+      {m.root ? (
+        <circle cx={m.root.cx} cy={m.root.cy} r={LAYOUT_PREVIEW_ROOT_R} fill="var(--ed-accent)" />
+      ) : null}
+    </svg>
+  );
+}
+
+/** Layout gallery rows, grouped exactly like the native select's optgroups (Radial / Tree / Diagram). */
+const LAYOUT_GROUPS: { label: string; kinds: { kind: LayoutKind; name: string }[] }[] = [
+  {
+    label: "Radial",
+    kinds: [
+      { kind: "side", name: "Both sides" },
+      { kind: "right", name: "Right" },
+      { kind: "left", name: "Left" },
+      { kind: "radial", name: "Radial / hub" },
+    ],
+  },
+  {
+    label: "Tree",
+    kinds: [
+      { kind: "org-down", name: "Org chart ↓" },
+      { kind: "org-up", name: "Org chart ↑" },
+    ],
+  },
+  {
+    label: "Diagram",
+    kinds: [
+      { kind: "timeline", name: "Timeline" },
+      { kind: "fishbone", name: "Fishbone" },
+      { kind: "grid", name: "Grid / matrix" },
+      { kind: "swimlane", name: "Swimlane" },
+      { kind: "brace", name: "Brace map" },
+    ],
+  },
+];
+const LAYOUT_NAME: Record<string, string> = Object.fromEntries(
+  LAYOUT_GROUPS.flatMap((g) => g.kinds.map(({ kind, name }) => [kind, name])),
+);
 
 type ConnectorStyle = "organic" | "curved" | "elbow" | "straight";
 type FontScale = "compact" | "comfortable" | "large";
@@ -45,6 +151,7 @@ export function MapPanel({
   setThemeId,
   customThemes = [],
   onManageThemes = () => {},
+  onApplyDesign,
   layout,
   changeLayout,
   freeform,
@@ -77,6 +184,9 @@ export function MapPanel({
   customThemes?: CustomTheme[];
   /** Open the theme designer (the dropdown's "Manage themes…" entry). */
   onManageThemes?: () => void;
+  /** Apply a whole Design preset (theme + connector style + branch weight + accent) in one shot
+   *  (T3-25 — moved here from the Toolbar's Canvas menu). Absent → the Design gallery is hidden. */
+  onApplyDesign?: (id: string) => void;
   layout: LayoutKind;
   changeLayout: (v: LayoutKind) => void;
   freeform?: boolean;
@@ -170,6 +280,30 @@ export function MapPanel({
         {/* Map settings — all wired to existing app state / handle methods. */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div className="mm-map-section-title">Map</div>
+          {onApplyDesign ? (
+            <div className="mm-map-field">
+              <span>Design</span>
+              {/* One-shot preset: sets theme + connector style + branch weight + accent together
+                  (T3-25 — moved here from the Toolbar's Canvas menu so the map's look has one home). */}
+              <Menu
+                trigger={<>Choose a preset…</>}
+                triggerClassName="mm-map-control mm-layout-trigger"
+                triggerAriaLabel="Apply a design preset"
+                triggerTitle="Apply a design preset (theme + connectors + branch weight + accent)"
+                menuAriaLabel="Design presets"
+              >
+                {DESIGNS.map((d) => (
+                  <MenuItem
+                    key={d.id}
+                    icon={<DesignPreview design={d} />}
+                    label={d.name}
+                    title={d.note}
+                    onSelect={() => onApplyDesign(d.id)}
+                  />
+                ))}
+              </Menu>
+            </div>
+          ) : null}
           <label className="mm-map-field">
             <span>Theme</span>
             <select
@@ -208,35 +342,41 @@ export function MapPanel({
               <option value="__manage__">Manage themes…</option>
             </select>
           </label>
-          <label className="mm-map-field">
+          {/* A plain div, not <label> — the Menu trigger below carries its own aria-label (like the
+              Background/Accent fields), so wrapping it in a <label> would be a redundant, unlinked
+              association (the trigger isn't a native form control the label can associate with). */}
+          <div className="mm-map-field">
             <span>Layout</span>
-            <select
-              className="mm-map-control"
-              value={layout}
-              onChange={(e) => changeLayout(e.target.value as LayoutKind)}
-              aria-label="Layout"
+            {/* A visual gallery (SVG thumbnails, 10c) instead of a text-only select — layout is
+                inherently spatial, so seeing the shape beats reading its name. */}
+            <Menu
+              trigger={
+                <>
+                  <LayoutPreview kind={layout} />
+                  {LAYOUT_NAME[layout] ?? layout}
+                </>
+              }
+              triggerClassName="mm-map-control mm-layout-trigger"
+              triggerAriaLabel="Layout"
               disabled={!!freeform}
-              title={freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
+              triggerTitle={freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
+              menuAriaLabel="Choose a layout"
             >
-              <optgroup label="Radial">
-                <option value="side">Both sides</option>
-                <option value="right">Right</option>
-                <option value="left">Left</option>
-                <option value="radial">Radial / hub</option>
-              </optgroup>
-              <optgroup label="Tree">
-                <option value="org-down">Org chart ↓</option>
-                <option value="org-up">Org chart ↑</option>
-              </optgroup>
-              <optgroup label="Diagram">
-                <option value="timeline">Timeline</option>
-                <option value="fishbone">Fishbone</option>
-                <option value="grid">Grid / matrix</option>
-                <option value="swimlane">Swimlane</option>
-                <option value="brace">Brace map</option>
-              </optgroup>
-            </select>
-          </label>
+              {LAYOUT_GROUPS.map((g) => (
+                <div key={g.label}>
+                  <MenuLabel>{g.label}</MenuLabel>
+                  {g.kinds.map(({ kind, name }) => (
+                    <MenuItem
+                      key={kind}
+                      icon={<LayoutPreview kind={kind} />}
+                      label={name}
+                      onSelect={() => changeLayout(kind)}
+                    />
+                  ))}
+                </div>
+              ))}
+            </Menu>
+          </div>
           <div className="mm-map-field">
             <span>Background</span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>

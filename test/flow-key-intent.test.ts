@@ -117,6 +117,29 @@ describe("keyIntent", () => {
     });
   });
 
+  it("maps Ctrl/⌘+Shift+1..9 to setPriority (MindManager's priority shortcuts)", () => {
+    for (let level = 1; level <= 9; level++) {
+      expect(keyIntent(ev({ key: String(level), ctrlKey: true, shiftKey: true }), st())).toEqual({
+        kind: "setPriority",
+        id: "n1",
+        level,
+      });
+      expect(keyIntent(ev({ key: String(level), metaKey: true, shiftKey: true }), st())).toEqual({
+        kind: "setPriority",
+        id: "n1",
+        level,
+      });
+    }
+    // Ctrl+Shift+0 isn't a priority level — falls through (no selection-gated binding claims it).
+    expect(keyIntent(ev({ key: "0", ctrlKey: true, shiftKey: true }), st())).toBeNull();
+    // Without Shift, a bare Ctrl+digit is unbound.
+    expect(keyIntent(ev({ key: "5", ctrlKey: true }), st())).toBeNull();
+    // No selection → nothing to set priority on.
+    expect(
+      keyIntent(ev({ key: "1", ctrlKey: true, shiftKey: true }), st({ selectedId: null })),
+    ).toBeNull();
+  });
+
   it("ignores keys while inline-editing or when a form field / link is focused", () => {
     expect(keyIntent(ev({ key: "Enter" }), st({ editing: true }))).toBeNull();
     for (const tagName of ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]) {

@@ -1,8 +1,13 @@
 import { type ChangeEvent, type FormEvent, type ReactNode, type RefObject, useRef } from "react";
 import { BrainstormTimer } from "../BrainstormTimer";
-import { Menu, MenuCheckboxItem, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
-import { designPreviewModel } from "../designPreview";
-import { DESIGNS } from "../designs";
+import {
+  Menu,
+  MenuCheckboxItem,
+  MenuItem,
+  MenuLabel,
+  MenuSeparator,
+  MenuSub,
+} from "../design/primitives";
 import { buildExample, examples } from "../examples";
 import type { SaveState } from "../hooks/useIdbAutosave";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
@@ -33,31 +38,6 @@ function saveLastExport(label: string) {
   } catch {
     // best-effort — the recency row just won't persist
   }
-}
-
-// A tiny themed thumbnail for a design in the gallery (#5): the design's background, a root dot, and
-// three palette branches drawn with its connector style — so designs are told apart at a glance
-// instead of by an identical palette icon. Model is the pure designPreviewModel.
-function DesignPreview({ design }: { design: (typeof DESIGNS)[number] }) {
-  const m = designPreviewModel(design);
-  return (
-    <svg
-      width={m.w}
-      height={m.h}
-      viewBox={`0 0 ${m.w} ${m.h}`}
-      aria-hidden="true"
-      style={{ flexShrink: 0, borderRadius: 3 }}
-    >
-      <rect width={m.w} height={m.h} rx={3} fill={m.bg} stroke="rgba(0,0,0,0.15)" />
-      {m.branches.map((b) => (
-        <g key={b.ty}>
-          <path d={b.d} fill="none" stroke={b.color} strokeWidth={1.5} />
-          <circle cx={b.tx} cy={b.ty} r={2.5} fill={b.color} />
-        </g>
-      ))}
-      <circle cx={m.root.cx} cy={m.root.cy} r={m.root.r} fill={m.rootBg} />
-    </svg>
-  );
 }
 
 // The redesigned editor top bar — a two-row chrome in the warm-cream + emerald language (see
@@ -144,8 +124,6 @@ export interface ToolbarCanvas {
   canPasteFormat: boolean;
   /** Auto-colour the top branches from the theme palette. */
   shuffleBranchColors: () => void;
-  /** Apply a design preset (theme + connector style) from the gallery. */
-  applyDesign: (id: string) => void;
   /** Open the Map panel (the no-selection inspector) where persistent styling now lives. */
   openMapPanel: () => void;
   /** Drill in: re-root the canvas view at the selected topic (focus-on-topic). */
@@ -1090,36 +1068,45 @@ export function Toolbar({
                   style={{ display: "none" }}
                 />
                 <MenuSeparator />
-                <MenuLabel>Map part (insert under selected)</MenuLabel>
-                {MAP_PARTS.map((p) => (
-                  <MenuItem
-                    key={p.id}
-                    icon={mi("plus")}
-                    label={p.name}
-                    disabled={!canvas.selected}
-                    title={canvas.selected ? undefined : "Select a topic first to insert under it"}
-                    onSelect={() => {
-                      const part = buildMapPart(p.id);
-                      const ok = part ? m()?.addSubtreeToSelected(part) : false;
-                      showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");
-                    }}
-                  />
-                ))}
-                <MenuSeparator />
-                <MenuLabel>Template (insert structure under selected)</MenuLabel>
-                {insertableTemplates.map((t) => (
-                  <MenuItem
-                    key={t.id}
-                    icon={mi("plus")}
-                    label={t.name}
-                    disabled={!canvas.selected}
-                    title={canvas.selected ? undefined : "Select a topic first to insert under it"}
-                    onSelect={() => {
-                      const ok = m()?.addSubtreeToSelected(templateSubtree(t.id)) ?? false;
-                      showHint(ok ? `Inserted the ${t.name} structure.` : "Select a topic first.");
-                    }}
-                  />
-                ))}
+                <MenuSub icon={mi("plus")} label="Map parts">
+                  <MenuLabel>Map part (insert under selected)</MenuLabel>
+                  {MAP_PARTS.map((p) => (
+                    <MenuItem
+                      key={p.id}
+                      icon={mi("plus")}
+                      label={p.name}
+                      disabled={!canvas.selected}
+                      title={
+                        canvas.selected ? undefined : "Select a topic first to insert under it"
+                      }
+                      onSelect={() => {
+                        const part = buildMapPart(p.id);
+                        const ok = part ? m()?.addSubtreeToSelected(part) : false;
+                        showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");
+                      }}
+                    />
+                  ))}
+                </MenuSub>
+                <MenuSub icon={mi("plus")} label="Templates">
+                  <MenuLabel>Template (insert structure under selected)</MenuLabel>
+                  {insertableTemplates.map((t) => (
+                    <MenuItem
+                      key={t.id}
+                      icon={mi("plus")}
+                      label={t.name}
+                      disabled={!canvas.selected}
+                      title={
+                        canvas.selected ? undefined : "Select a topic first to insert under it"
+                      }
+                      onSelect={() => {
+                        const ok = m()?.addSubtreeToSelected(templateSubtree(t.id)) ?? false;
+                        showHint(
+                          ok ? `Inserted the ${t.name} structure.` : "Select a topic first.",
+                        );
+                      }}
+                    />
+                  ))}
+                </MenuSub>
                 <MenuSeparator />
                 <MenuLabel>Roll-up (mirror another map)</MenuLabel>
                 <div style={{ padding: "2px 6px" }}>
@@ -1171,20 +1158,6 @@ export function Toolbar({
           >
             {(close) => (
               <>
-                <MenuLabel>Design presets</MenuLabel>
-                {DESIGNS.map((d) => (
-                  <MenuItem
-                    key={d.id}
-                    icon={<DesignPreview design={d} />}
-                    label={d.name}
-                    title={d.note}
-                    onSelect={() => {
-                      canvas.applyDesign(d.id);
-                      close();
-                    }}
-                  />
-                ))}
-                <MenuSeparator />
                 <MenuCheckboxItem
                   icon={mi("hand")}
                   label="Free layout (whiteboard)"
@@ -1193,13 +1166,13 @@ export function Toolbar({
                   onSelect={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
                 />
                 <MenuSeparator />
-                {/* Persistent styling (theme · background · connectors · branch weight · fonts ·
-                    backdrop) now lives in the Map panel so the map's look has one home instead of
-                    being split between this menu and the panel (T5). This opens it. */}
+                {/* Persistent styling (theme · layout · design presets · background · connectors ·
+                    branch weight · fonts · backdrop) all live in the Map panel — one home instead of
+                    being split across this menu, Settings, and the panel (T5, T3-25). This opens it. */}
                 <MenuItem
                   icon={mi("palette")}
-                  label="Theme, colours, fonts & backdrop…"
-                  title="Open the Map panel to change theme, background, connectors, fonts and backdrop"
+                  label="Theme, design presets & backdrop…"
+                  title="Open the Map panel to change theme, layout, design presets, background, connectors, fonts and backdrop"
                   onSelect={() => {
                     canvas.openMapPanel();
                     close();

@@ -1,7 +1,7 @@
 import { MenuItem, MenuLabel, MenuSeparator } from "../../design/primitives";
 import { MARKER_PALETTE, markerImage } from "../../icons";
 import type { MindMapDoc } from "../../model/types";
-import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../../priority";
+import { PRIORITY_LEVELS, priorityLabel } from "../../priority";
 import {
   type OpResult,
   applyAcrossIds,
@@ -64,10 +64,10 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
             key={p}
             type="button"
             className="mm-menu-chip"
-            aria-label={`Set priority ${PRIORITY_LABEL[p]} on the selection`}
+            aria-label={`Set priority ${priorityLabel(p)} on the selection`}
             onClick={() => across((d, i) => setPriority(d, i, p))}
           >
-            {PRIORITY_LABEL[p]}
+            {priorityLabel(p)}
           </button>
         ))}
         <button

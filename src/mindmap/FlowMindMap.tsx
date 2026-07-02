@@ -28,7 +28,7 @@ import { parseOutline } from "../io/pasteOutline";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
 import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
-import { PRIORITY_LABEL, PRIORITY_LEVELS, cyclePriority } from "../priority";
+import { PRIORITY_LEVELS, cyclePriority, priorityLabel } from "../priority";
 import { cycleTaskProgress, nextProgressLevel } from "../progress";
 import { isStandalonePwa } from "../pwa/standalone";
 import { getBranches, setBranches } from "../store/branchClipboard";
@@ -300,6 +300,8 @@ function FlowInner({
   initialSession,
   libraryMaps = [],
   reducedMotion = false,
+  activeView = "map",
+  onSetView,
   ref,
 }: MindMapProps) {
   const palette = (theme ?? mindManagerTheme).palette;
@@ -1477,6 +1479,9 @@ function FlowInner({
           }
           break;
         }
+        case "setPriority":
+          apply(setPriority(docRef.current, intent.id, intent.level));
+          break;
         case "clearDropTarget":
           setDropTargetId(null); // clear a stray drag-reparent indicator
           break;
@@ -2390,6 +2395,8 @@ function FlowInner({
             <StatusBar
               topics={nodes.length}
               selected={selectedIds.size}
+              activeView={activeView}
+              onSetView={onSetView}
               onResetZoom={() =>
                 zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport })
               }
@@ -2544,7 +2551,7 @@ function FlowInner({
                             )
                           }
                         >
-                          {PRIORITY_LABEL[p]}
+                          {priorityLabel(p)}
                         </button>
                       ))}
                       <button

@@ -35,7 +35,12 @@ export function buildLegend(doc: MindMapDoc): LegendEntry[] {
     entries.push({
       kind: "rule",
       label: describeRule(r),
-      color: r.style.background || borderColor(r.style.border) || undefined,
+      color:
+        r.style.background ||
+        borderColor(r.style.border) ||
+        r.style.color ||
+        r.branchColor ||
+        undefined,
     });
   return entries;
 }

@@ -87,6 +87,54 @@ describe("matchesRule", () => {
     expect(matchesRule(withFile, rule({ kind: "hasAttachment", value: undefined }))).toBe(true);
     expect(matchesRule(node(), rule({ kind: "hasAttachment", value: undefined }))).toBe(false);
   });
+
+  it("matches 'dueSoon' (due within the window, unfinished) against the given today", () => {
+    const r = rule({ kind: "dueSoon", value: undefined });
+    const soon = node({ task: { due: "2026-06-25", progress: 0.5 } });
+    expect(matchesRule(soon, r, 0.5, "2026-06-21")).toBe(true);
+    // already overdue, already finished, or too far out → not "due soon"
+    expect(matchesRule(node({ task: { due: "2026-01-01" } }), r, 0, "2026-06-21")).toBe(false);
+    expect(
+      matchesRule(node({ task: { due: "2026-06-25", progress: 1 } }), r, 1, "2026-06-21"),
+    ).toBe(false);
+    expect(matchesRule(node({ task: { due: "2026-12-31" } }), r, 0, "2026-06-21")).toBe(false);
+  });
+
+  it("negate inverts the primary condition", () => {
+    const r = rule({ kind: "tag", value: "risk", negate: true });
+    expect(matchesRule(node({ tags: ["risk"] }), r)).toBe(false);
+    expect(matchesRule(node({ tags: ["ok"] }), r)).toBe(true);
+    expect(matchesRule(node(), r)).toBe(true);
+  });
+
+  it("also AND-combines extra conditions, each independently negatable", () => {
+    const r = rule({
+      kind: "tag",
+      value: "risk",
+      also: [{ kind: "priority", value: "1" }],
+    });
+    // tag matches AND priority 1 matches → true
+    expect(matchesRule(node({ tags: ["risk"], task: { priority: 1 } }), r)).toBe(true);
+    // tag matches but priority doesn't → false
+    expect(matchesRule(node({ tags: ["risk"], task: { priority: 3 } }), r)).toBe(false);
+    // tag doesn't match at all → false regardless of the AND clause
+    expect(matchesRule(node({ tags: ["ok"], task: { priority: 1 } }), r)).toBe(false);
+
+    const withNegatedAlso = rule({
+      kind: "tag",
+      value: "risk",
+      also: [{ kind: "hasAttachment", negate: true }],
+    });
+    // tag matches AND NOT hasAttachment → true
+    expect(matchesRule(node({ tags: ["risk"] }), withNegatedAlso)).toBe(true);
+    // tag matches but DOES have an attachment → false (negated clause fails)
+    expect(
+      matchesRule(
+        node({ tags: ["risk"], attachments: [{ name: "a", dataUrl: "data:,", size: 1 }] }),
+        withNegatedAlso,
+      ),
+    ).toBe(false);
+  });
 });
 
 describe("conditionalStyle", () => {
@@ -181,6 +229,28 @@ describe("describeRule", () => {
     expect(describeRule(rule({ kind: "relationshipType", value: undefined }))).toBe(
       "has a relationship",
     );
+    expect(describeRule(rule({ kind: "dueSoon", value: undefined }))).toBe("due soon");
+  });
+
+  it("prefixes a negated primary condition with 'NOT'", () => {
+    expect(describeRule(rule({ kind: "overdue", value: undefined, negate: true }))).toBe(
+      "NOT overdue",
+    );
+  });
+
+  it("AND-joins 'also' clauses, each independently negated", () => {
+    expect(
+      describeRule(
+        rule({
+          kind: "tag",
+          value: "risk",
+          also: [
+            { kind: "priority", value: "1" },
+            { kind: "hasAttachment", negate: true },
+          ],
+        }),
+      ),
+    ).toBe("tag risk AND priority ≤ 1 (1=High) AND NOT has attachment");
   });
 });
 

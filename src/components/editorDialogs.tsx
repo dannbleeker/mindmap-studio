@@ -123,7 +123,11 @@ export function DialogHost() {
           <Button onClick={() => close(null)}>Cancel</Button>
           <Button
             onClick={() => close(inputRef.current?.value ?? "")}
-            style={{ background: colors.accent, color: colors.white, borderColor: colors.accent }}
+            style={{
+              background: colors.accent,
+              color: colors.white,
+              border: `1px solid ${colors.accent}`,
+            }}
           >
             {opts.confirmText ?? "OK"}
           </Button>
@@ -149,8 +153,16 @@ export function DialogHost() {
           onClick={() => close(true)}
           style={
             opts.danger
-              ? { background: colors.danger, color: colors.white, borderColor: colors.danger }
-              : { background: colors.accent, color: colors.white, borderColor: colors.accent }
+              ? {
+                  background: colors.danger,
+                  color: colors.white,
+                  border: `1px solid ${colors.danger}`,
+                }
+              : {
+                  background: colors.accent,
+                  color: colors.white,
+                  border: `1px solid ${colors.accent}`,
+                }
           }
         >
           {opts.confirmText ?? "OK"}

@@ -1143,6 +1143,27 @@ describe("FlowMindMap canvas", () => {
     expect((onChange.mock.calls.at(-1)?.[0] as MindMapDoc).links).toBeUndefined();
   });
 
+  it("status-bar view switcher reports the picked view; hidden without activeView/onSetView", () => {
+    // Absent altogether when the caller opts out (no activeView/onSetView) — the default `mount()`.
+    const { container } = mount();
+    expect(container.querySelector('[aria-label="Switch view"]')).toBeNull();
+
+    const onSetView = vi.fn();
+    render(<FlowMindMap doc={baseDoc()} activeView="outline" onSetView={onSetView} />);
+    const group = screen.getByRole("group", { name: "Switch view" });
+    const mapBtn = within(group).getByRole("button", { name: "Map" });
+    const outlineBtn = within(group).getByRole("button", { name: "Outline" });
+    const boardBtn = within(group).getByRole("button", { name: "Board" });
+    // The active view is pressed; the other two aren't.
+    expect(outlineBtn.getAttribute("aria-pressed")).toBe("true");
+    expect(mapBtn.getAttribute("aria-pressed")).toBe("false");
+    expect(boardBtn.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(boardBtn);
+    expect(onSetView).toHaveBeenCalledWith("board");
+    fireEvent.click(mapBtn);
+    expect(onSetView).toHaveBeenCalledWith("map");
+  });
+
   it("re-syncs on live direction / numbering / filter prop changes", () => {
     const doc = baseDoc();
     const { rerender, ref } = mount(doc);

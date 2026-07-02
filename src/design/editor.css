@@ -482,6 +482,16 @@
 .mm-menu-item:hover {
   background: var(--ed-page);
 }
+/* A fly-out submenu row's trailing ▸ (MenuSub) — muted so it reads as a disclosure hint, not content. */
+.mm-menu-sub-caret {
+  margin-left: auto;
+  color: var(--ed-faint);
+}
+/* The fly-out popup itself is a plain .mm-menu, just anchored beside its trigger row instead of below
+   the toolbar button (MenuSub supplies top/left inline, same viewport-fixed positioning as .mm-menu). */
+.mm-menu-sub {
+  min-width: 180px;
+}
 /* Keyboard focus ring for the primitive control button (controlStyle carries none) — the toolbar /
  * dialog / inspector buttons all render .mm-prim-btn, so keyboard users get a visible focus indicator.
  * :focus-visible → shown only for keyboard nav, never on mouse click. Matches the menu-chip idiom. */
@@ -795,6 +805,16 @@
 .mm-map-control:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+/* The Layout gallery's trigger (a Menu button standing in for a <select>) needs the icon+label row
+   layout a native <select> gets for free. */
+.mm-layout-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 
 /* Re-theme the Topic-info inspector's shared primitives onto --ed-*, scoped under .mm-inspector so

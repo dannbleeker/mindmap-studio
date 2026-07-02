@@ -34,6 +34,10 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: "Ctrl/⌘ + Z", action: "Undo" },
       { keys: "Ctrl/⌘ + Shift + Z", action: "Redo" },
       { keys: "Ctrl/⌘ + Y", action: "Redo (alternative)" },
+      {
+        keys: "Ctrl/⌘ + Shift + 1…9",
+        action: "Set the selected topic's priority (1 = highest, 9 = lowest)",
+      },
     ],
   },
   {

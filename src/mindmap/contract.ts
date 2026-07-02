@@ -459,5 +459,11 @@ export interface MindMapProps {
   /** When true, viewport animations (fit / centre / set) run instantly — honours the user's
    *  reduced-motion preference (OS or the in-app toggle). Absent → animated. */
   reducedMotion?: boolean;
+  /** Which of the three peer projections (MindManager-style "model once, view many ways") is active —
+   *  drives the status-bar Map/Outline/Board segmented control. "map" (the plain canvas) when absent. */
+  activeView?: "map" | "outline" | "board";
+  /** Fires when the status-bar view switcher picks a different projection. The app owns the actual
+   *  outline-dock/board-overlay state (this canvas only renders the switcher + reports the choice). */
+  onSetView?: (view: "map" | "outline" | "board") => void;
   ref?: Ref<MindMapHandle>;
 }

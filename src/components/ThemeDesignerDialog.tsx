@@ -105,7 +105,7 @@ export function ThemeDesignerDialog({
                 key={t.id}
                 onClick={() => setDraft(t)}
                 aria-pressed={t.id === draft.id}
-                style={{ borderColor: t.id === draft.id ? "var(--ed-accent)" : undefined }}
+                style={{ border: t.id === draft.id ? "1px solid var(--ed-accent)" : undefined }}
               >
                 {t.name}
               </Button>

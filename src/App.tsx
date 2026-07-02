@@ -1470,6 +1470,19 @@ export function App() {
     ? maps
     : [{ id: doc.id, title: doc.title }, ...maps];
 
+  // Apply a whole Design preset (theme + connector style + branch weight + accent) in one shot — the
+  // Map panel's Design gallery (T3-25; used to also live in the Toolbar's Canvas menu before the
+  // design-surface consolidation gave the map's look a single home).
+  const applyDesign = (id: string) => {
+    const design = designById(id);
+    if (!design) return;
+    setThemeId(design.themeId); // canvas theme (React state)
+    mapRef.current?.setConnectorStyle(design.connectorStyle); // map-wide connector (undoable)
+    mapRef.current?.setBranchGrowth(design.branchGrowth); // map-wide branch weight (undoable)
+    mapRef.current?.setAccentColor(design.accentColor); // relationship + boundary accent (undoable)
+    showHint(`Applied the ${design.name} design.`);
+  };
+
   // The toolbar prop groups, built once and shared with both <Toolbar> and the ⌘K command registry
   // (buildEditorCommands) so the two surfaces can't drift — one source of truth for editor actions.
   const toolbarProps: ToolbarProps = {
@@ -1517,15 +1530,6 @@ export function App() {
       pasteFormat,
       canPasteFormat,
       shuffleBranchColors: () => mapRef.current?.shuffleBranchColors(),
-      applyDesign: (id: string) => {
-        const design = designById(id);
-        if (!design) return;
-        setThemeId(design.themeId); // canvas theme (React state)
-        mapRef.current?.setConnectorStyle(design.connectorStyle); // map-wide connector (undoable)
-        mapRef.current?.setBranchGrowth(design.branchGrowth); // map-wide branch weight (undoable)
-        mapRef.current?.setAccentColor(design.accentColor); // relationship + boundary accent (undoable)
-        showHint(`Applied the ${design.name} design.`);
-      },
       // Open the right-hand inspector, where the Map panel (shown when no node is selected) now hosts
       // theme / background / connectors / fonts / backdrop. Deselect a node to see those map settings.
       openMapPanel: () => {
@@ -2169,6 +2173,14 @@ export function App() {
                 drillId={playback ? null : drillId}
                 libraryMaps={maps.map((m) => ({ id: m.id, title: m.title }))}
                 reducedMotion={reducedMotion}
+                activeView={panels.boardOpen ? "board" : panels.outlineOpen ? "outline" : "map"}
+                onSetView={(view) => {
+                  // A one-click peer switch (MindManager's status-bar view buttons): each choice is
+                  // exclusive of the other two — Board is a full-canvas overlay, so it and the Outline
+                  // dock never show at once, and picking Map clears both back to the plain canvas.
+                  panels.setBoardOpen(view === "board");
+                  panels.setOutlineOpen(view === "outline");
+                }}
                 onChange={(d) => {
                   if (playback) return; // read-only while reviewing history
                   liveDocRef.current = d;
@@ -2471,6 +2483,7 @@ export function App() {
                 setThemeId={setThemeId}
                 customThemes={customThemes}
                 onManageThemes={() => setThemeDesignerOpen(true)}
+                onApplyDesign={applyDesign}
                 layout={layout}
                 changeLayout={changeLayout}
                 freeform={liveDoc.meta?.freeform}
@@ -2709,9 +2722,6 @@ export function App() {
         setMotionPref={setMotionPref}
         contrastPref={contrastPref}
         setContrastPref={setContrastPref}
-        theme={theme}
-        setThemeId={setThemeId}
-        customThemes={customThemes}
         onReShowGettingStarted={reShowFirstRun}
         onClearRecents={() => {
           clearRecents();

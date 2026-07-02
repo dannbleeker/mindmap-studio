@@ -142,7 +142,6 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       pasteFormat: vi.fn(),
       canPasteFormat: false,
       shuffleBranchColors: vi.fn(),
-      applyDesign: vi.fn(),
       openMapPanel: vi.fn(),
       drillIn: vi.fn(),
       exportBranch: vi.fn(),

@@ -43,7 +43,11 @@ const ctrlStyle = {
 
 // The presenter-view toggle when it is ON — a brighter, "pressed" variant so the
 // presenter can tell at a glance that the sidebar chrome is showing.
-const ctrlOnStyle = { ...ctrlStyle, background: "#5a52c0", borderColor: "#7d75e0" } as const;
+const ctrlOnStyle = {
+  ...ctrlStyle,
+  background: "#5a52c0",
+  border: "1px solid #7d75e0",
+} as const;
 
 // Presenter sidebar section heading — small, muted, uppercase label.
 const sectionLabelStyle = {

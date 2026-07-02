@@ -23,6 +23,7 @@ export type KeyIntent =
   | { kind: "startLinking"; id: string }
   | { kind: "completeLink"; id: string }
   | { kind: "nudge"; id: string; dir: "up" | "down" | "left" | "right" }
+  | { kind: "setPriority"; id: string; level: number }
   | null;
 
 export interface KeyState {
@@ -90,6 +91,9 @@ export function keyIntent(e: KeyEventLike, state: KeyState): KeyIntent {
   // menu + drag grip. Ctrl/⌘+Shift+L, then arrow to a target and Enter to complete (Esc cancels).
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "l")
     return { kind: "startLinking", id };
+  // Set the selected topic's priority (MindManager's Ctrl+Shift+1..9 — 1 = highest, 9 = lowest).
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && /^[1-9]$/.test(e.key))
+    return { kind: "setPriority", id, level: Number(e.key) };
   // Free-canvas mode: Ctrl/⌘+arrow nudges the selected node's position by a step (a keyboard / non-drag
   // alternative to drag-positioning — WCAG 2.5.7). Only in freeform; the auto-layouts ignore node.pos.
   if (state.freeform && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {

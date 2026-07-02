@@ -760,7 +760,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         <Handle
           type="source"
           id="relate"
-          position={Position.Right}
+          // Mirrors the branch's outward edge (left for a left-growing branch) — same side as the
+          // add-child ＋ and collapse toggle, matching the tip-side affordance cluster (C4/tipLeft).
+          position={tipLeft ? Position.Left : Position.Right}
           className="mm-relate-handle nodrag"
           title="Drag onto another topic to link them"
           // Grabbing the grip retires its one-time coach hint (C7).
@@ -769,11 +771,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             // 16px (was 11) so "drag to link" is a reliable target, not a fiddly dot.
             width: 16,
             height: 16,
-            right: -8,
+            ...(tipLeft ? { left: -8 } : { right: -8 }),
             // Sit below the vertically-centred add-child ＋ (C4) — but when a collapse toggle shares the
-            // right edge (a right-growing node with children), clamp the grip to ride just above it so
-            // the two never overlap on a short node (relateGripGeometry).
-            top: relateGripTopCss(hasChildren && !tipLeft),
+            // same edge (a node with children), clamp the grip to ride just above it so the two never
+            // overlap on a short node (relateGripGeometry). Grip + toggle always mirror together.
+            top: relateGripTopCss(hasChildren),
             transform: "translateY(-50%)",
             border: "2px solid #fff",
             background: branchColor,
@@ -781,11 +783,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           }}
         />
       )}
-      {/* On-canvas wrap-width grip (10b Layer 2): a slim vertical bar on the TOP-right edge — clear of
-          the centred ＋/relate cluster + the bottom-right collapse toggle — shown only on a single-
-          selected node with the height to clear them (wrapHandleGeometry). Drag (or arrow-key) to set
-          the text-wrap width; the inspector Wrap slider still works on any topic. Desktop only (the
-          .mm-wrap-handle @media rule hides it on touch, which keeps the slider). */}
+      {/* On-canvas wrap-width grip (10b Layer 2): a slim vertical bar on the TOP outward edge — clear of
+          the centred ＋/relate cluster + the collapse toggle at the tip corner — shown only on a single-
+          selected node with the height to clear them (wrapHandleGeometry, side-agnostic). Drag (or
+          arrow-key) to set the text-wrap width; the inspector Wrap slider still works on any topic.
+          Desktop only (the .mm-wrap-handle @media rule hides it on touch, which keeps the slider). */}
       {showWrapHandle ? (
         <button
           type="button"
@@ -799,7 +801,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           style={{
             position: "absolute",
             top: WRAP_HANDLE_TOP,
-            right: -3,
+            ...(tipLeft ? { left: -3 } : { right: -3 }),
             width: WRAP_HANDLE_W,
             height: WRAP_HANDLE_H,
             background: ringColor,

@@ -45,4 +45,25 @@ describe("buildLegend", () => {
       }),
     ).toEqual([]);
   });
+
+  it("falls back to font colour, then branch colour, when neither background nor border is set", () => {
+    const ruleOf = (d: MindMapDoc) => buildLegend(d).find((e) => e.kind === "rule");
+    const withFontColor = ruleOf({
+      ...doc,
+      rules: [{ id: "z", kind: "completed", style: { color: "#123456" } }],
+    });
+    expect(withFontColor).toMatchObject({ color: "#123456" });
+
+    const withBranchColor = ruleOf({
+      ...doc,
+      rules: [{ id: "z", kind: "completed", style: {}, branchColor: "#abcdef" }],
+    });
+    expect(withBranchColor).toMatchObject({ color: "#abcdef" });
+
+    const withNone = ruleOf({
+      ...doc,
+      rules: [{ id: "z", kind: "completed", style: {} }],
+    });
+    expect(withNone?.color).toBeUndefined();
+  });
 });

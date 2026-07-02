@@ -12,6 +12,7 @@ import {
   MenuItem,
   MenuLabel,
   MenuSeparator,
+  MenuSub,
 } from "../src/design/primitives";
 
 const u = userEvent.setup();
@@ -108,6 +109,18 @@ describe("Menu primitive", () => {
     expect(screen.queryByRole("menu")).toBeNull();
   });
 
+  it("a disabled Menu's trigger is a native disabled button that never opens", async () => {
+    render(
+      <Menu trigger="Tools" triggerTitle="Tools" disabled>
+        <MenuItem label="Alpha" onSelect={() => {}} />
+      </Menu>,
+    );
+    const trigger = screen.getByRole("button", { name: "Tools" }) as HTMLButtonElement;
+    expect(trigger.disabled).toBe(true);
+    await u.click(trigger);
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
   it("ArrowDown on the closed trigger opens the menu and focuses the first item", async () => {
     render(<Fixture />);
     const trigger = screen.getByRole("button", { name: "Tools" });
@@ -180,6 +193,77 @@ describe("ContextMenu viewport clamping", () => {
     const menu = screen.getByRole("menu");
     expect(menu.style.left).toBe("50px");
     expect(menu.style.top).toBe("60px");
+  });
+});
+
+describe("MenuSub (fly-out)", () => {
+  function SubFixture({ onLeaf = () => {} }: { onLeaf?: () => void }) {
+    return (
+      <Menu trigger="Insert" triggerTitle="Insert">
+        <MenuItem label="Sticky note" onSelect={() => {}} />
+        <MenuSub label="Map parts">
+          <MenuItem label="SWOT" onSelect={onLeaf} />
+          <MenuItem label="Pros & cons" onSelect={() => {}} />
+        </MenuSub>
+      </Menu>
+    );
+  }
+
+  it("is closed by default, with aria-haspopup + aria-expanded=false", async () => {
+    render(<SubFixture />);
+    await u.click(screen.getByRole("button", { name: "Insert" }));
+    const row = screen.getByRole("menuitem", { name: /Map parts/ });
+    expect(row.getAttribute("aria-haspopup")).toBe("menu");
+    expect(row.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByRole("menuitem", { name: "SWOT" })).toBeNull();
+  });
+
+  it("click opens the fly-out and exposes its items", async () => {
+    render(<SubFixture />);
+    await u.click(screen.getByRole("button", { name: "Insert" }));
+    const row = screen.getByRole("menuitem", { name: /Map parts/ });
+    await u.click(row);
+    expect(row.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("menuitem", { name: "SWOT" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Pros & cons" })).toBeTruthy();
+  });
+
+  it("selecting a leaf item inside the fly-out closes the WHOLE menu (reuses the parent's close)", async () => {
+    const onLeaf = vi.fn();
+    render(<SubFixture onLeaf={onLeaf} />);
+    const trigger = screen.getByRole("button", { name: "Insert" });
+    await u.click(trigger);
+    await u.click(screen.getByRole("menuitem", { name: /Map parts/ }));
+    await u.click(screen.getByRole("menuitem", { name: "SWOT" }));
+    expect(onLeaf).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("menu")).toBeNull(); // both the fly-out and the root menu are gone
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("Escape closes the whole menu (one Escape backs out of every nesting level)", async () => {
+    render(<SubFixture />);
+    const trigger = screen.getByRole("button", { name: "Insert" });
+    await u.click(trigger);
+    await u.click(screen.getByRole("menuitem", { name: /Map parts/ }));
+    expect(screen.getByRole("menuitem", { name: "SWOT" })).toBeTruthy();
+    await u.keyboard("{Escape}");
+    expect(screen.queryByRole("menu")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("a disabled MenuSub doesn't open on click", async () => {
+    render(
+      <Menu trigger="Insert" triggerTitle="Insert">
+        <MenuSub label="Map parts" disabled>
+          <MenuItem label="SWOT" onSelect={() => {}} />
+        </MenuSub>
+      </Menu>,
+    );
+    await u.click(screen.getByRole("button", { name: "Insert" }));
+    const row = screen.getByRole("menuitem", { name: /Map parts/ }) as HTMLButtonElement;
+    expect(row.disabled).toBe(true);
+    await u.click(row);
+    expect(screen.queryByRole("menuitem", { name: "SWOT" })).toBeNull();
   });
 });
 

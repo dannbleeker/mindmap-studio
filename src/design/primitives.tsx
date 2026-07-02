@@ -50,7 +50,7 @@ export const inputStyle = {
 const ACTIVE_CONTROL: CSSProperties = {
   background: colors.text,
   color: colors.white,
-  borderColor: colors.text,
+  border: `1px solid ${colors.text}`,
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -366,6 +366,7 @@ export function Menu({
   align = "left",
   menuAriaLabel,
   sheet = false,
+  disabled = false,
   children,
 }: {
   /** Inner content of the trigger button (icon + label + chevron). */
@@ -377,6 +378,10 @@ export function Menu({
   menuAriaLabel?: string;
   /** Phone layout: open as a full-width bottom sheet instead of an anchored popover. */
   sheet?: boolean;
+  /** Disables the trigger button (native `disabled` — a disabled button never fires click/keydown, so
+   *  the menu simply can't open). Matches a disabled native `<select>`'s behaviour for a Menu-based
+   *  replacement. */
+  disabled?: boolean;
   /** Popup content, or a render-prop given `close` for leaf controls that close imperatively. */
   children: ReactNode | ((close: () => void) => ReactNode);
 }) {
@@ -466,6 +471,7 @@ export function Menu({
         aria-expanded={open}
         title={triggerTitle}
         aria-label={triggerAriaLabel}
+        disabled={disabled}
         onClick={() => {
           if (!open) reposition();
           setOpen((o) => !o);
@@ -587,6 +593,124 @@ export function MenuLabel({ children }: { children: ReactNode }) {
 /** A horizontal rule between menu groups (decorative, matching the original `.mm-menu-sep` div). */
 export function MenuSeparator() {
   return <div className="mm-menu-sep" />;
+}
+
+/** A fly-out submenu row inside an open Menu/ContextMenu — e.g. "Map parts ▸" — so a long flat list can
+ *  group related items behind one row instead of listing them all inline. Opens on hover or click/Enter/
+ *  ArrowRight, closes on mouse-leave (a short grace delay to cross the gap), Escape, or an outside click
+ *  (the enclosing Menu's own outside-click already covers "click elsewhere entirely"). Selecting a leaf
+ *  `MenuItem` inside still closes the WHOLE chain — it reuses the parent's `MenuCtx`, only this row's own
+ *  open/closed flyout state is local. Position is viewport-fixed (matches `.mm-menu`), flipping to the
+ *  trigger's left edge when the flyout would overflow the right. */
+export function MenuSub({
+  icon,
+  label,
+  disabled,
+  children,
+}: {
+  icon?: ReactNode;
+  label: string;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const rowRef = useRef<HTMLButtonElement>(null);
+  const subRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<number | null>(null);
+
+  const clearCloseTimer = () => {
+    if (closeTimer.current != null) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+  const openNow = () => {
+    clearCloseTimer();
+    setOpen(true);
+  };
+  // A short grace delay so the pointer can travel diagonally from the row into the flyout without it
+  // closing mid-move (the standard menu-hover pattern).
+  const closeSoon = () => {
+    clearCloseTimer();
+    closeTimer.current = window.setTimeout(() => setOpen(false), 150);
+  };
+
+  const reposition = useCallback(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const tr = row.getBoundingClientRect();
+    const sr = subRef.current?.getBoundingClientRect();
+    const sw = sr?.width ?? 0;
+    const sh = sr?.height ?? 0;
+    const margin = 4;
+    let left = tr.right + margin;
+    if (sw && left + sw > window.innerWidth) left = Math.max(margin, tr.left - sw - margin);
+    let top = tr.top;
+    if (sh && top + sh > window.innerHeight)
+      top = Math.max(margin, window.innerHeight - sh - margin);
+    setPos({ top, left });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (open) reposition();
+  }, [open, reposition]);
+
+  // No submenu-local Escape handling: the enclosing Menu/ContextMenu already closes the WHOLE popover
+  // stack on Escape (its own document-capture listener runs first, having been registered when it
+  // opened) — one Escape backs all the way out, which is simple and predictable rather than requiring
+  // one Escape per nesting level.
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current != null) window.clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  return (
+    <div
+      onMouseEnter={disabled ? undefined : openNow}
+      onMouseLeave={disabled ? undefined : closeSoon}
+    >
+      <button
+        ref={rowRef}
+        type="button"
+        role="menuitem"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        disabled={disabled}
+        className="mm-menu-item"
+        // Opens (not toggles) — a real pointer click also fires onMouseEnter first, which already
+        // opened it; toggling here would immediately flip it back closed.
+        onClick={() => (disabled ? undefined : openNow())}
+        onKeyDown={(e) => {
+          if (disabled) return;
+          if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openNow();
+          }
+        }}
+      >
+        {icon}
+        {label}
+        <span className="mm-menu-sub-caret" aria-hidden="true">
+          ▸
+        </span>
+      </button>
+      {open && pos ? (
+        <div
+          className="mm-menu mm-menu-sub"
+          role="menu"
+          aria-label={label}
+          ref={subRef}
+          style={{ top: pos.top, left: pos.left }}
+          onMouseEnter={openNow}
+          onMouseLeave={closeSoon}
+        >
+          {children}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 // ── ContextMenu (point-anchored) ──────────────────────────────────────────────

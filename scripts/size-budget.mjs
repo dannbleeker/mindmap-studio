@@ -21,7 +21,14 @@ import { gzipSync } from "node:zlib";
 // resolve a persisted custom theme synchronously on first paint (else the canvas
 // flashes the wrong theme), so the store read + luminance-derived cssVar mapping
 // (getCustomThemes / customToCanvasTheme) land in the entry and can't be lazy-loaded.
-const BUDGET_KB = 160;
+// 160 → 163: the 2026-07-02 Tier 3 batch (MindManager review) — the MenuSub fly-out
+// submenu primitive (used by the always-mounted Insert menu + Map panel), the visual
+// Layout gallery (layoutPreview.ts + its SVG renderer, replacing a native <select> in
+// the always-mounted Map panel), the Design gallery's move from the lazy Canvas menu
+// into the always-mounted Map panel, and the AND/NOT rules + full 1-9 priority
+// expansions. All of it is core editor-chrome/canvas code the Map panel or canvas
+// keydown handler needs synchronously, so none of it can be meaningfully lazy-loaded.
+const BUDGET_KB = 163;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

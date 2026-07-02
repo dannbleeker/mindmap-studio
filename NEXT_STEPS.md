@@ -7,10 +7,11 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 Phase 1 (Brainstorming MVP) complete; canvas engine is **@xyflow/react**. MindMap Studio is
 **feature-complete for its scope** (local-first, offline, single-user, free) — the competitive
 gap-closing effort is **concluded by decision (2026-06-16)**; remaining gaps are surveyed, not
-pursued (see Reference). The handbook documents every feature with a worked example (`book` +
-`bookExample` **100%**). The **editor/UX redesign** (2026-06-17) and the **MindManager canvas-fidelity
-pass** (2026-06-19) are both complete. Deployed to GitHub Pages on every push to `main` — live at
-<https://mindmap-studio.struktureretsundfornuft.dk/>.
+pursued (see Reference). `book`/`bookExample` were **100% as of 2026-06-19**; every feature shipped
+since (including the 2026-07-02 batch below) is catalogued but not yet written up — see Tier 4/5
+item **24** (USER_GUIDE catch-up sweep). The **editor/UX redesign** (2026-06-17) and the **MindManager
+canvas-fidelity pass** (2026-06-19) are both complete. Deployed to GitHub Pages on every push to
+`main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
 **All prior remediation programmes are shipped** — see `CHANGELOG.md` for the per-item detail:
 
@@ -31,6 +32,9 @@ Breadcrumb/BrainstormTimer theme tokens, reduced-motion reset-zoom, stale `files
 backlog item below was **verified against the code** — evidence paths are as of that date. Three
 review candidates were rejected as already shipped (user-savable map parts, instant task filters,
 active-filter indicator) — don't re-propose them.
+
+**Tier 3 (all 7 items) shipped the same day**, along with a cross-cutting `border`/`borderColor`
+shorthand-conflict sweep found while verifying it — see `CHANGELOG.md` for the per-item detail.
 
 Anything deliberately **not** built is recorded under *Deferred / blocked* or *Out of scope* below,
 so the decisions don't get re-litigated.
@@ -189,71 +193,16 @@ state) → *Scope* (the exact delta).
     are deliberate. *Scope:* one shared base-name constant per panel — dock tab = base name, menu =
     base name + optional parenthetical hint.
 
-### Tier 3 — medium projects (M unless noted)
-
-21. **Conditional rules: AND/NOT + due-soon trigger.** Rules are single-condition (multiple rules
-    merge OR-style) and lack due-soon despite filter/search supporting it. *Now:* `src/rules.ts`
-    `matchesRule` is single-condition, 8 trigger kinds; `isDueSoon()` in `taskDate.ts` is
-    unit-tested and used by `filter.ts`/`search.ts`. *Scope:* per-rule AND conjunction, NOT
-    negation, and a `due-soon` trigger kind. Also fix in passing: the Legend rule swatch derives
-    only from background/border hex — rules acting via font colour or branchColor show no swatch.
-
-22. **Full 1–9 priority in picker, filter, shortcuts (S, ⚠ reverses a conscious design).** The model
-    holds 1–9 (imported values render as a neutral badge) but pickers and Power Filter stop at 3 —
-    imported MindManager priorities 4–9 are unreachable; MindManager also has Ctrl+Shift+1–9.
-    *Now:* `src/priority.ts` `PRIORITY_LEVELS=[1,2,3]`; comments show the 1–3 picker was a
-    **conscious design choice** (no formal deferral); `cyclePriority` drops 4–9; all pickers
-    (Panels, BulkNodeMenu, editorCommands, FlowMindMap) iterate 1–3; `filter.ts` matches any number
-    but the UI offers 1–3. *Scope:* pickers/filter to 1–9, Ctrl+Shift+1–9 shortcuts, cycle through
-    4–9. **Dann decides** whether to reverse the 1–3 simplification.
-
-23. **Insert-menu fly-out submenus.** Insert is one long flat list mixing actions, map parts,
-    templates, and a roll-up select — it visibly shows two "SWOT" entries (map part vs template)
-    with no fly-out grouping. *Now:* `Toolbar.tsx:1092-1124` already groups via
-    `MenuLabel`+`MenuSeparator`; `src/design/primitives.tsx` has no submenu primitive. *Scope:* a
-    fly-out submenu primitive (keyboard/hover, mobile-sheet-aware) + collapse the Map parts /
-    Templates sections into "Map parts ▸" / "Templates ▸".
-
-24. **Visual layout gallery + themed pickers.** Native `<select>`s clash with the custom Menu
-    chrome; MindManager's layout/theme galleries use live previews. *Now:* native selects at
-    `Toolbar.tsx:432,454,1126,1271,1304` (open map, new, roll-up, layout); the design gallery
-    already renders SVG thumbnails. *Scope:* a visual Layout gallery menu (SVG thumbnail per layout,
-    reusing the design-gallery pattern) + themed Menu replacements for Open-map and +New; the
-    roll-up select is low-value, optional.
-
-25. **Consolidate the map-look Design surface.** Map styling spans StyleBar, Canvas menu, MapPanel,
-    Settings; MindManager centralises on one Design tab. *Now:* MapPanel already consolidates
-    theme/layout/background/accent; two deltas remain — the Design gallery lives in the Toolbar
-    Canvas menu (`Toolbar.tsx:1175`) and `SettingsDialog.tsx:121` duplicates the canvas-theme
-    picker. *Scope:* move/mirror the gallery (with previews) into MapPanel; remove the duplicate
-    dropdown from Settings (keep the App-chrome theme there).
-
-26. **Side-aware grip placement on left-growing branches.** Relate + wrap grips pin to the right
-    edge even on left branches — crossing drags over the map. MindManager mirrors handles to the
-    growth side. *Now:* `TopicNode.tsx:760-808` pins relate (`Position.Right`, `right:-8`) and wrap
-    (`right:-3`) unconditionally; `tipLeft` is already computed for the add-child ＋/toggle (lines
-    1203, 1226). *Scope:* mirror both grips via `tipLeft`; extend `relateGripGeometry` clearance for
-    the left-edge toggle case; add a clearance test (visual-verify rule applies — screenshot or DOM
-    measurements, plus a permanent geometry test).
-
-27. **Status-bar document-view switcher (Map / Outline / Board).** MindManager's status-bar view
-    buttons make the projections one-click peers ("model once, view many ways"); Board hides under
-    Panels despite rendering as a full-canvas view, Outline is a dock tab. *Now:* StatusBar
-    (`src/mindmap/flow/CanvasOverlays.tsx:58`) shows topics/selection/zoom only; Board toggles via a
-    Panels-menu checkbox (`Toolbar.tsx:800`). *Scope:* a Map/Outline/Board segmented control on the
-    StatusBar wired to `panels.boardOpen` + the Outline dock state in `usePanels` — pure
-    re-surfacing, no new projections.
-
 ### Tier 4 — big bets (L)
 
-28. **StyleBar redesign: reflect state, group, enlarge targets.** ~35 write-only 18 px controls with
+21. **StyleBar redesign: reflect state, group, enlarge targets.** ~35 write-only 18 px controls with
     tooltip-only labels; MindManager 24's context toolbar shows only relevant commands and always
     reflects current values. *Now:* `Panels.tsx:333-404` — colour pickers already open on the live
     value and the Wrap slider reflects selection; the rest is write-only. *Scope:* active-shape/
     border indication on the button grid, grouped/labelled sections, touch-sized controls. (The gap
     is narrower than it first looks — don't rebuild the pickers.)
 
-29. **Smart containers: lanes/grids that capture and move topics (M–L, ⚠ adjacent to a
+22. **Smart containers: lanes/grids that capture and move topics (M–L, ⚠ adjacent to a
     deprioritised decision).** MindManager Smart Shapes (swim lanes, matrices) capture floating
     topics — moving the container moves contents. *Now:* backdrops are pure geometry fixed at the
     origin (`src/mindmap/flow/backdrop.ts`) — no containment, no drag-moves-contents. *Scope:*
@@ -261,7 +210,7 @@ state) → *Scope* (the exact delta).
     **Flag before starting:** the "infinite Miro-style object canvas" is recorded as
     feasible-but-deprioritised in Reference — this walks toward it.
 
-30. **Free shapes on the canvas (L).** MindManager background objects (rect/oval/block arrow/
+23. **Free shapes on the canvas (L).** MindManager background objects (rect/oval/block arrow/
     chevron) enable ad-hoc SWOT/Venn/risk-grid composition. *Now:* `BackdropKind =
     onion|funnel|venn2|venn3` only (`src/model/types.ts:240`); text boxes are largely covered by
     sticky-note/floating topics — scope shapes only. *Scope:* a general background-shape layer
@@ -269,11 +218,11 @@ state) → *Scope* (the exact delta).
 
 ### Tier 5 — housekeeping / hygiene (no MindManager angle, found during the review)
 
-31. **USER_GUIDE catch-up sweep: 91 of 228 catalogue entries are `manual:false`** — everything
+24. **USER_GUIDE catch-up sweep: 91 of 228 catalogue entries are `manual:false`** — everything
     shipped since ~2026-06-19 (book/bookExample are 100%, the guide lags). A dedicated docs session:
     write the missing USER_GUIDE sections, flip flags as they land.
 
-32. **Rich-text editing rides deprecated `document.execCommand`** (bold/italic/underline/colour in
+25. **Rich-text editing rides deprecated `document.execCommand`** (bold/italic/underline/colour in
     the topic editor). Works today; needs a migration plan before browsers pull it.
 
 33. **Saved views + saved filters live in localStorage** — they don't travel with `.json` export or

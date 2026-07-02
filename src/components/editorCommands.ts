@@ -3,7 +3,7 @@ import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind } from "../mindmap";
 import { type SortKey, findAnyNode } from "../mindmap/flow/ops";
 import type { MapNode } from "../model/types";
-import { PRIORITY_LABEL, PRIORITY_LEVELS } from "../priority";
+import { PRIORITY_LEVELS, priorityLabel } from "../priority";
 import { SHORTCUT_BINDINGS } from "../shortcuts";
 import type { Command } from "./CommandPalette";
 import type { ToolbarProps } from "./Toolbar";
@@ -302,7 +302,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   for (const p of PRIORITY_LEVELS)
     add(
       `node-priority:${p}`,
-      `Priority: ${PRIORITY_LABEL[p]} on selected topic`,
+      `Priority: ${priorityLabel(p)} on selected topic`,
       "priority",
       () => m()?.setSelectedPriority(p),
       !!sel,

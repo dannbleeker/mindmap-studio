@@ -7,6 +7,61 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Design gallery moved into the Map panel (T3-25).** The one-click Design presets (theme + connector
+  style + branch weight + accent, previously in the Toolbar's Canvas menu) now live in the Map panel as
+  a **Design** field — a **Choose a preset…** gallery with the same SVG thumbnails, right above Theme
+  (applying a design also sets it). The Canvas menu keeps just Free layout + a link to the panel, and
+  the Settings dialog's duplicate **Canvas theme** dropdown is gone — the canvas theme has one home now.
+  Verified in-browser + unit-tested (gallery hidden when the callback is absent, lists every preset,
+  applies on selection).
+
+- **Visual Layout gallery (10c).** The Map panel's **Layout** field is now an SVG-thumbnail gallery
+  (reusing the Design gallery's pattern) instead of a text-only `<select>` — each of the 11 layouts
+  (Both sides / Right / Left / Radial / Org chart ↓↑ / Timeline / Fishbone / Grid / Swimlane / Brace)
+  gets a small schematic diagram showing its shape, grouped exactly like the old dropdown (Radial / Tree
+  / Diagram). Disabled (matching the old select) while Free layout is on. The `Menu` primitive gained a
+  `disabled` prop to support this. Verified in-browser + unit-tested (the geometry model, and the panel
+  wiring).
+
+- **Insert-menu fly-out submenus.** The Insert menu's **Map parts** and **Templates** sections — each a
+  long inline list, including a duplicate "SWOT" entry between them — now collapse into **"Map parts ▸"**
+  and **"Templates ▸"** fly-out rows, opened by hover, click, or Enter/→ (Escape or selecting a leaf item
+  closes the whole menu). A new `MenuSub` primitive (`src/design/primitives.tsx`) provides the fly-out,
+  reusable anywhere a `Menu`/`ContextMenu` needs one. Verified in-browser + unit-tested (18 new primitive
+  tests + a Toolbar integration test).
+
+- **Status-bar Map / Outline / Board view switcher.** MindManager's "model once, view many ways" status
+  bar buttons: the canvas status bar now shows a **Map / Outline / Board** segmented control, so Board
+  (previously buried in the Panels menu despite being a full-canvas overlay) is a one-click peer of the
+  plain canvas and the Outline dock. Picking one is mutually exclusive with the other two. Verified
+  in-browser (each button switches correctly, Board opens/closes the Kanban overlay, Outline opens/closes
+  the dock) + unit-tested.
+
+- **Side-aware relate + wrap grips.** The drag-to-relate grip and the on-canvas wrap-width grip used to
+  pin to a topic's right edge even on left-growing branches, forcing crossing drags across the map. Both
+  now mirror to the topic's outward edge (left for a left-growing branch), matching the add-child ＋ and
+  collapse toggle that already did. The clearance geometry (`relateGripGeometry.ts`) is unchanged in
+  substance — it was already side-agnostic, just always called for the right edge. Verified in-browser
+  (both layouts) + unit-tested.
+
+- **Conditional rules: AND/NOT + a "due soon" trigger.** Rules could only match a single condition; you
+  can now add one or more **AND**-ed clauses (each independently **NOT**-negatable) to a rule, e.g. "has
+  tag risk AND NOT has attachment". A new **is due soon** trigger kind reuses the existing due-soon window
+  from filter/search. The rules-panel builder grew a NOT checkbox on the primary condition and a
+  **+ AND condition** button; `describeRule` reads the whole chain back (e.g. "NOT overdue AND has
+  attachment"). Also fixed in passing: the Legend's rule swatch now falls back to font colour, then
+  branch colour, when a rule sets neither background nor border (previously showed no swatch at all).
+  Verified in-browser end-to-end + unit-tested.
+
+- **Full 1–9 task priority.** Priority pickers and the Power Filter used to stop at 1–3 (High/Med/Low)
+  even though the model always held MindManager's full 1–9 range — an imported priority of 4–9 rendered
+  but couldn't be set, filtered, or cycled to. Every picker (topic inspector, bulk-selection menu, ⌘K
+  commands, right-click quick-setter, Power Filter) now offers the full range, each level with its own
+  colour (1–3 keep their existing colours; 4–9 continue a red→grey urgency gradient), and **Ctrl/⌘+Shift+
+  1…9** sets priority directly from the keyboard (MindManager's own binding). `cyclePriority` now cycles
+  through all 9 levels instead of resetting after 3. Verified in-browser (shortcut + picker + clear) +
+  unit-tested.
+
 - **On-canvas wrap-width drag handle (10b Layer 2).** Beyond the Style-tab **Wrap** slider (which still
   works on any topic), a **taller selected topic** now shows a slim grip on its **right edge**: drag it
   to set the text-wrap width right on the canvas (snapping to Narrow / Medium / Wide, far end = None), or
@@ -17,7 +72,7 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   a tall node, drag re-wraps + one-step undo, hidden on a short node) and the geometry is unit-tested.
 
 - **Custom theme designer (C3).** Beyond the four built-in canvas themes, you can now define your own:
-  the **Theme** dropdown (Map panel + Settings) gains a **Manage themes…** entry that opens a designer
+  the Map panel's **Theme** dropdown gains a **Manage themes…** entry that opens a designer
   — a name, a **6-colour branch palette**, a **background** and **node-fill** colour, a **font**, and a
   **branch weight**, with a **live preview**. Saved themes appear in the dropdown (under *Custom*) after
   the built-ins; selecting one applies its palette + colours (readable ink + light/dark mode derived
@@ -270,6 +325,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 - **Reset zoom respects reduced motion.** The status-bar *100%* button and the minimap menu's *Reset
   zoom* hardcoded a 200 ms animation, ignoring the reduced-motion preference every fit/viewport path
   honours; both now use the shared motion token and skip the animation under reduced motion.
+
+- **Mixed shorthand/longhand `border` styles across the chrome.** Several controls set the `Button`
+  primitive's `border` shorthand in one state and only `borderColor` in another (the primitive's active
+  state, the brainstorm timer's finished state, dialog confirm/danger buttons, the theme designer's
+  selected-theme ring, a Presentation-mode toggle) — React warns on this pattern and it can silently drop
+  the border on a state change. Every site found now sets a full `border` shorthand in both states.
 
 ### Added
 

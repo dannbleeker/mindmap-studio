@@ -203,30 +203,50 @@ export interface Summary {
   color?: string;
 }
 
-/** A conditional-formatting rule: topics matching `kind`/`value` get `style` applied (view-only). */
+/** What a single condition (the rule's primary kind/value, or an `also` clause) matches:
+ *  - `tag` / `marker` — the node carries `value`
+ *  - `completed` — task rolled up to 100%
+ *  - `overdue` — a task past its due date and not finished
+ *  - `dueSoon` — a task due within the filter/search "soon" window, not finished
+ *  - `priority` — task priority at or above `value` (1=High; matches priority ≤ value)
+ *  - `textContains` — the topic text includes `value` (case-insensitive)
+ *  - `hasAttachment` — the node has at least one attached file
+ *  - `relationshipType` — the node is an endpoint (source or target) of a relationship whose
+ *    `type` equals `value` (a `RelationshipType`; blank `value` = any typed or plain relationship) */
+export type RuleConditionKind =
+  | "tag"
+  | "marker"
+  | "completed"
+  | "overdue"
+  | "dueSoon"
+  | "priority"
+  | "textContains"
+  | "hasAttachment"
+  | "relationshipType";
+
+/** One extra AND-ed clause in a rule's `also` list (see `ConditionalRule`). */
+export interface RuleCondition {
+  kind: RuleConditionKind;
+  /** The tag/marker/text to match, the priority threshold, or the relationship type (unused for
+   *  completed/overdue/dueSoon/hasAttachment). */
+  value?: string;
+  /** Invert this clause's match. */
+  negate?: boolean;
+}
+
+/** A conditional-formatting rule: topics matching `kind`/`value` (AND every clause in `also`, each
+ *  optionally negated) get `style` applied (view-only). */
 export interface ConditionalRule {
   id: string;
-  /** What to match:
-   *  - `tag` / `marker` — the node carries `value`
-   *  - `completed` — task rolled up to 100%
-   *  - `overdue` — a task past its due date and not finished
-   *  - `priority` — task priority at or above `value` (1=High; matches priority ≤ value)
-   *  - `textContains` — the topic text includes `value` (case-insensitive)
-   *  - `hasAttachment` — the node has at least one attached file
-   *  - `relationshipType` — the node is an endpoint (source or target) of a relationship whose
-   *    `type` equals `value` (a `RelationshipType`; blank `value` = any typed or plain relationship) */
-  kind:
-    | "tag"
-    | "marker"
-    | "completed"
-    | "overdue"
-    | "priority"
-    | "textContains"
-    | "hasAttachment"
-    | "relationshipType";
+  kind: RuleConditionKind;
   /** The tag/marker/text to match, the priority threshold, or the relationship type (unused for
-   *  completed/overdue/hasAttachment). */
+   *  completed/overdue/dueSoon/hasAttachment). */
   value?: string;
+  /** Invert the primary `kind`/`value` match. */
+  negate?: boolean;
+  /** Extra conditions AND-ed with the primary one (each independently negatable). Absent/empty =
+   *  the primary condition alone, unchanged from before this field existed. */
+  also?: RuleCondition[];
   /** View-only style layered onto a matching node (under its own explicit style). */
   style: NodeStyle;
   /** Action: markers auto-applied to a matching node (view-only, unioned with the node's own). */

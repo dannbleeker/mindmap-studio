@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-02T07:40:07.540Z",
-  "commit": "a3a34ec",
+  "generatedAt": "2026-07-02T08:04:38.649Z",
+  "commit": "7ec8521",
   "headline": {
     "linesTsJs": 72722,
     "tests": 2010,
-    "lineCoveragePct": 90.88,
-    "commits": 1039,
+    "lineCoveragePct": 90.84,
+    "commits": 1041,
     "ageDays": 20,
     "trackedFiles": 488,
     "featureManualPct": 60.1,
@@ -41,13 +41,13 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 90.88,
-      "covered": 27153,
+      "pct": 90.84,
+      "covered": 27143,
       "total": 29877
     },
     "statements": {
-      "pct": 90.88,
-      "covered": 27153,
+      "pct": 90.84,
+      "covered": 27143,
       "total": 29877
     },
     "functions": {
@@ -56,35 +56,35 @@
       "total": 2065
     },
     "branches": {
-      "pct": 86.81,
-      "covered": 8214,
-      "total": 9462
+      "pct": 86.78,
+      "covered": 8208,
+      "total": 9458
     }
   },
   "tests": {
     "unit": 2010,
     "e2e": 0,
-    "durationMs": 105883,
+    "durationMs": 102354,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 29015
+        "ms": 27182
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 26278
+        "ms": 25182
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 8779
+        "ms": 8511
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 7957
+        "ms": 8484
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4651
+        "ms": 5024
       }
     ]
   },
@@ -139,12 +139,12 @@
         "pct": 56.81
       },
       {
-        "file": "io/importDispatch.ts",
-        "pct": 59.55
+        "file": "App.tsx",
+        "pct": 59.44
       },
       {
-        "file": "App.tsx",
-        "pct": 59.76
+        "file": "io/importDispatch.ts",
+        "pct": 59.55
       }
     ],
     "churnHotspots": [
@@ -172,7 +172,7 @@
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 59.76,
+        "pct": 59.44,
         "commits": 208
       }
     ]
@@ -1256,16 +1256,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 20,
-    "commits": 1039,
-    "commits7d": 208,
+    "commits": 1041,
+    "commits7d": 210,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 500
+        "count": 501
       },
       {
         "name": "github-actions[bot]",
-        "count": 472
+        "count": 473
       },
       {
         "name": "Claude",
@@ -1273,8 +1273,8 @@
       }
     ],
     "churn30d": {
-      "added": 132880,
-      "removed": 39256
+      "added": 132953,
+      "removed": 39507
     },
     "changelogEntries": 393
   }

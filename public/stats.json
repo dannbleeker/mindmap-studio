@@ -1,32 +1,32 @@
 {
-  "generatedAt": "2026-07-02T13:32:17.936Z",
-  "commit": "1129fef",
+  "generatedAt": "2026-07-02T18:49:25.969Z",
+  "commit": "ce5b807",
   "headline": {
-    "linesTsJs": 75562,
-    "tests": 2081,
-    "lineCoveragePct": 90.55,
-    "commits": 1058,
-    "ageDays": 20,
+    "linesTsJs": 75865,
+    "tests": 2095,
+    "lineCoveragePct": 90.61,
+    "commits": 1061,
+    "ageDays": 21,
     "trackedFiles": 496,
-    "featureManualPct": 58.5,
-    "featureBookPct": 52.5,
-    "featureExamplePct": 52.5
+    "featureManualPct": 55.2,
+    "featureBookPct": 49.6,
+    "featureExamplePct": 49.6
   },
   "code": [
     {
       "category": "App code (src)",
       "files": 229,
-      "lines": 44280
+      "lines": 44397
     },
     {
       "category": "Unit tests",
       "files": 202,
-      "lines": 29539
+      "lines": 29719
     },
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1743
+      "lines": 1749
     },
     {
       "category": "Styles (CSS)",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 90.55,
-      "covered": 28249,
-      "total": 31194
+      "pct": 90.61,
+      "covered": 28321,
+      "total": 31255
     },
     "statements": {
-      "pct": 90.55,
-      "covered": 28249,
-      "total": 31194
+      "pct": 90.61,
+      "covered": 28321,
+      "total": 31255
     },
     "functions": {
-      "pct": 76.42,
-      "covered": 1644,
-      "total": 2151
+      "pct": 76.53,
+      "covered": 1650,
+      "total": 2156
     },
     "branches": {
       "pct": 86.72,
-      "covered": 8597,
-      "total": 9913
+      "covered": 8634,
+      "total": 9956
     }
   },
   "tests": {
-    "unit": 2081,
+    "unit": 2095,
     "e2e": 0,
-    "durationMs": 106723,
+    "durationMs": 109492,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 28329
+        "ms": 31183
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 26608
+        "ms": 26970
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 9355
+        "ms": 10891
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8367
+        "ms": 9089
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4785
+        "ms": 4638
       }
     ]
   },
@@ -188,28 +188,53 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 508.3,
+    "jsGzipKb": 509.1,
     "cssGzipKb": 10.3,
-    "totalGzipKb": 518.6,
-    "entryGzipKb": 162.9,
+    "totalGzipKb": 519.3,
+    "entryGzipKb": 163.1,
     "budgetKb": 150,
     "withinBudget": false
   },
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 44280,
+    "appLoc": 44397,
     "docToCodeRatio": 0.39
   },
   "featureCoverage": {
-    "total": 236,
+    "total": 250,
     "manual": 138,
-    "manualPct": 58.5,
+    "manualPct": 55.2,
     "book": 124,
-    "bookPct": 52.5,
+    "bookPct": 49.6,
     "bookExample": 124,
-    "bookExamplePct": 52.5,
+    "bookExamplePct": 49.6,
     "byArea": {
+      "export": {
+        "total": 26,
+        "manual": 19,
+        "book": 17
+      },
+      "navigation": {
+        "total": 58,
+        "manual": 25,
+        "book": 24
+      },
+      "editing": {
+        "total": 32,
+        "manual": 17,
+        "book": 14
+      },
+      "markers": {
+        "total": 15,
+        "manual": 7,
+        "book": 7
+      },
+      "structure": {
+        "total": 34,
+        "manual": 14,
+        "book": 12
+      },
       "styling": {
         "total": 27,
         "manual": 14,
@@ -220,26 +245,6 @@
         "manual": 15,
         "book": 11
       },
-      "structure": {
-        "total": 31,
-        "manual": 14,
-        "book": 12
-      },
-      "export": {
-        "total": 22,
-        "manual": 19,
-        "book": 17
-      },
-      "editing": {
-        "total": 31,
-        "manual": 17,
-        "book": 14
-      },
-      "navigation": {
-        "total": 54,
-        "manual": 25,
-        "book": 24
-      },
       "presentation": {
         "total": 5,
         "manual": 2,
@@ -249,11 +254,6 @@
         "total": 6,
         "manual": 3,
         "book": 3
-      },
-      "markers": {
-        "total": 13,
-        "manual": 7,
-        "book": 7
       },
       "images": {
         "total": 3,
@@ -273,6 +273,76 @@
     },
     "gaps": {
       "noManual": [
+        {
+          "id": "deck-live-map-slides",
+          "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "board-group-source",
+          "name": "Board grouping by marker group or schedule dates (drag a card to re-mark or re-schedule the topic)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "png-export-options",
+          "name": "PNG export options: 2×/4× scale factor and transparent background",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "export-pdf-file",
+          "name": "Direct PDF file export with page-size (fit / A4 / Letter) and orientation (distinct from print-to-PDF)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "mmap-export-fidelity",
+          "name": "MindManager .mmap export fidelity: writes topic tags, task metadata and embedded images",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "smart-paste-v",
+          "name": "Smart Ctrl+V routing (image / outline / URL / internal branch clipboard handled automatically)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "shift-project-dates",
+          "name": "Move project: shift all task start/due dates ±N days (branch or whole map) in one undo step",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "drag-detach-copy",
+          "name": "Drag modifiers: Shift-drag detaches a topic to floating, Ctrl-drag copies the subtree",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "relationship-context-menu",
+          "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "keyboard-zoom",
+          "name": "Keyboard zoom shortcuts: Ctrl/⌘ + / − / 0 (zoom in / out / reset)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "tag-accelerator",
+          "name": "Inline #tag accelerator: typing # mid-topic pops the tag picker to assign an existing or new tag",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "quick-filter-from-marker",
+          "name": "Quick Filter from any marker or tag row in the Markers & tags index (pre-fills the Power Filter)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "search-history",
+          "name": "Find & Replace search history (recalls the last ~10 queries)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "sticky-note-colours",
+          "name": "Sticky-note colour set at insert time with a remembered preferred default",
+          "since": "2026-07-02"
+        },
         {
           "id": "rules-and-not-conditions",
           "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
@@ -765,6 +835,76 @@
         }
       ],
       "noBook": [
+        {
+          "id": "deck-live-map-slides",
+          "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "board-group-source",
+          "name": "Board grouping by marker group or schedule dates (drag a card to re-mark or re-schedule the topic)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "png-export-options",
+          "name": "PNG export options: 2×/4× scale factor and transparent background",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "export-pdf-file",
+          "name": "Direct PDF file export with page-size (fit / A4 / Letter) and orientation (distinct from print-to-PDF)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "mmap-export-fidelity",
+          "name": "MindManager .mmap export fidelity: writes topic tags, task metadata and embedded images",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "smart-paste-v",
+          "name": "Smart Ctrl+V routing (image / outline / URL / internal branch clipboard handled automatically)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "shift-project-dates",
+          "name": "Move project: shift all task start/due dates ±N days (branch or whole map) in one undo step",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "drag-detach-copy",
+          "name": "Drag modifiers: Shift-drag detaches a topic to floating, Ctrl-drag copies the subtree",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "relationship-context-menu",
+          "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "keyboard-zoom",
+          "name": "Keyboard zoom shortcuts: Ctrl/⌘ + / − / 0 (zoom in / out / reset)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "tag-accelerator",
+          "name": "Inline #tag accelerator: typing # mid-topic pops the tag picker to assign an existing or new tag",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "quick-filter-from-marker",
+          "name": "Quick Filter from any marker or tag row in the Markers & tags index (pre-fills the Power Filter)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "search-history",
+          "name": "Find & Replace search history (recalls the last ~10 queries)",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "sticky-note-colours",
+          "name": "Sticky-note colour set at insert time with a remembered preferred default",
+          "since": "2026-07-02"
+        },
         {
           "id": "rules-and-not-conditions",
           "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
@@ -1330,17 +1470,17 @@
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
-    "ageDays": 20,
-    "commits": 1058,
-    "commits7d": 205,
+    "ageDays": 21,
+    "commits": 1061,
+    "commits7d": 208,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 510
+        "count": 512
       },
       {
         "name": "github-actions[bot]",
-        "count": 481
+        "count": 482
       },
       {
         "name": "Claude",
@@ -1348,9 +1488,9 @@
       }
     ],
     "churn30d": {
-      "added": 137343,
-      "removed": 40575
+      "added": 137965,
+      "removed": 40821
     },
-    "changelogEntries": 405
+    "changelogEntries": 424
   }
 }

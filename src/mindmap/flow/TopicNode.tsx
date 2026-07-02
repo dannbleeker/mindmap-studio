@@ -1,10 +1,13 @@
-import { Handle, type NodeProps, Position, useStore } from "@xyflow/react";
+import { Handle, type NodeProps, Position, useStore, useStoreApi } from "@xyflow/react";
 import {
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -17,6 +20,14 @@ import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
 import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
+import {
+  WRAP_MAX,
+  WRAP_MIN,
+  snapWrapWidth,
+  styleToWrapWidth,
+  wrapWidthLabel,
+  wrapWidthToStyle,
+} from "../../wrapWidth";
 import { MARKER_DND_TYPE } from "../contract";
 import { useEditing } from "./editing";
 import { handleEditorKeyDown } from "./editorKeys";
@@ -40,6 +51,12 @@ import {
   resolveTopicFill,
 } from "./style";
 import type { TopicNode as TopicNodeT } from "./types";
+import {
+  WRAP_HANDLE_H,
+  WRAP_HANDLE_TOP,
+  WRAP_HANDLE_W,
+  wrapHandleFits,
+} from "./wrapHandleGeometry";
 
 // Custom topic node: a rounded box honouring the model's NodeStyle, with marker emoji, the
 // topic text (inline-editable via contenteditable), an optional image, note/link affordances,
@@ -373,6 +390,76 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
     }
     return false;
   });
+  // On-canvas wrap-width grip (10b Layer 2). It lives on the node box's right edge, so measure the box
+  // to decide whether there's clearance for it (wrapHandleGeometry) — only when this node is the sole
+  // selection (the grip is single-select only). `useStoreApi` reads the live zoom imperatively at
+  // drag-start WITHOUT subscribing every node to viewport changes (which would re-render the whole map
+  // on pan/zoom).
+  const storeApi = useStoreApi();
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [boxHeight, setBoxHeight] = useState(0);
+  const [wrapDragging, setWrapDragging] = useState(false);
+  const wrapDrag = useRef<{ startX: number; startPx: number; zoom: number; last: number } | null>(
+    null,
+  );
+  const singleSelected = selected && !multiSelected && !isEditing;
+  // Measure the box HEIGHT while this node is the sole selection, and keep it current via a
+  // ResizeObserver — so the clearance gate re-evaluates whenever the content that affects height
+  // (text, wrap cap, font) changes, without listing those as effect deps (biome) and without a static
+  // dependency the effect body doesn't read. jsdom has no ResizeObserver + zero layout, so the guard
+  // keeps tests happy (the grip is a canvas affordance, verified in-browser).
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!singleSelected || !el) return;
+    setBoxHeight(el.offsetHeight);
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setBoxHeight(el.offsetHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [singleSelected]);
+  // Shown on a single-selected node tall enough to clear the centre ＋/relate cluster; kept visible for
+  // the whole drag even if the live re-wrap changes the height (so pointer-capture isn't dropped).
+  const showWrapHandle = (singleSelected && wrapHandleFits(boxHeight)) || wrapDragging;
+  const onWrapPointerDown = (e: ReactPointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const zoom = storeApi.getState().transform[2] || 1;
+    // Start from the node's rendered width (clamped) so the edge tracks the pointer 1:1; fall back to
+    // the stored cap if the box hasn't measured yet.
+    const rendered = boxRef.current?.offsetWidth ?? styleToWrapWidth(ownStyle?.maxWidth);
+    const startPx = Math.min(WRAP_MAX, Math.max(WRAP_MIN, rendered));
+    wrapDrag.current = { startX: e.clientX, startPx, zoom, last: startPx };
+    setWrapDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onWrapPointerMove = (e: ReactPointerEvent) => {
+    const d = wrapDrag.current;
+    if (!d) return;
+    // Screen-space pointer delta → flow-space px (divide by zoom); snap to presets/None near the ticks.
+    const px = snapWrapWidth(d.startPx + (e.clientX - d.startX) / d.zoom);
+    if (px !== d.last) {
+      d.last = px;
+      editing?.setWrapWidth(id, wrapWidthToStyle(px));
+    }
+  };
+  const onWrapPointerUp = (e: ReactPointerEvent) => {
+    wrapDrag.current = null;
+    setWrapDragging(false);
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
+  };
+  // Keyboard parity (the grip is a real button): arrows nudge ±20px, Home = None, End = narrowest.
+  const onWrapKeyDown = (e: ReactKeyboardEvent) => {
+    const cur = styleToWrapWidth(ownStyle?.maxWidth);
+    let next: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") next = cur + 20;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = cur - 20;
+    else if (e.key === "Home") next = WRAP_MAX;
+    else if (e.key === "End") next = WRAP_MIN;
+    if (next === null) return;
+    e.preventDefault();
+    e.stopPropagation();
+    editing?.setWrapWidth(id, wrapWidthToStyle(snapWrapWidth(next)));
+  };
   // Hover-peek: show the note's text in a small card when the 📝 indicator is hovered (read it
   // without opening the inspector). Canvas-only.
   const [peekNote, setPeekNote] = useState(false);
@@ -599,6 +686,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
 
   return (
     <div
+      ref={boxRef}
       style={{
         ...box,
         position: "relative",
@@ -693,6 +781,31 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           }}
         />
       )}
+      {/* On-canvas wrap-width grip (10b Layer 2): a slim vertical bar on the TOP-right edge — clear of
+          the centred ＋/relate cluster + the bottom-right collapse toggle — shown only on a single-
+          selected node with the height to clear them (wrapHandleGeometry). Drag (or arrow-key) to set
+          the text-wrap width; the inspector Wrap slider still works on any topic. Desktop only (the
+          .mm-wrap-handle @media rule hides it on touch, which keeps the slider). */}
+      {showWrapHandle ? (
+        <button
+          type="button"
+          className="mm-wrap-handle nodrag nopan"
+          aria-label={`Wrap width: ${wrapWidthLabel(styleToWrapWidth(ownStyle?.maxWidth))}. Drag or use arrow keys to change.`}
+          title="Drag to set the topic's text-wrap width"
+          onPointerDown={onWrapPointerDown}
+          onPointerMove={onWrapPointerMove}
+          onPointerUp={onWrapPointerUp}
+          onKeyDown={onWrapKeyDown}
+          style={{
+            position: "absolute",
+            top: WRAP_HANDLE_TOP,
+            right: -3,
+            width: WRAP_HANDLE_W,
+            height: WRAP_HANDLE_H,
+            background: ringColor,
+          }}
+        />
+      ) : null}
       {/* Quick task toggle — a hover checkbox on the left edge: cycle not-a-task → to-do → done.
           Hidden on the root and on aggregate (rolled-up) progress; the pie handles fine steps. */}
       {!isRoot && !progress?.derived && (

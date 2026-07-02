@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **On-canvas wrap-width drag handle (10b Layer 2).** Beyond the Style-tab **Wrap** slider (which still
+  works on any topic), a **taller selected topic** now shows a slim grip on its **right edge**: drag it
+  to set the text-wrap width right on the canvas (snapping to Narrow / Medium / Wide, far end = None), or
+  nudge it with the **arrow keys** — the node re-wraps live and the whole drag is one undo step. The grip
+  is placed in the clear top-right zone and only appears when the node is tall enough to keep it off the
+  add-child ＋ / relate grip / collapse toggle (a unit-tested clearance rule); shorter topics keep the
+  slider. Desktop-only — on touch the slider stays the wrap control. Verified in-browser (grip appears on
+  a tall node, drag re-wraps + one-step undo, hidden on a short node) and the geometry is unit-tested.
+
 - **Custom theme designer (C3).** Beyond the four built-in canvas themes, you can now define your own:
   the **Theme** dropdown (Map panel + Settings) gains a **Manage themes…** entry that opens a designer
   — a name, a **6-colour branch palette**, a **background** and **node-fill** colour, a **font**, and a

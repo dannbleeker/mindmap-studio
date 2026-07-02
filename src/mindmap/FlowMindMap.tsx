@@ -981,6 +981,10 @@ function FlowInner({
         apply(what === "child" ? addChild(d, id) : addSibling(d, id), true);
       },
       toggleCollapse: (id: string) => apply(toggleCollapse(docRef.current, id), false, true),
+      // On-canvas wrap-width grip (10b Layer 2): merge a maxWidth onto the node's style. Coalesced by
+      // node id so an entire drag collapses into ONE undo step (like a slider spree, S4).
+      setWrapWidth: (id: string, maxWidth: string) =>
+        apply(mergeStyle(docRef.current, id, { maxWidth }), false, false, `wrap:${id}`),
       // Follow a node's hyperlink: jump within the map (#node=), open another map (#map=), or
       // open an external URL in a new tab. Dangerous schemes are refused (the app-wide XSS guard).
       openLink: (url: string) => {

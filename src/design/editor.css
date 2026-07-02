@@ -1058,6 +1058,34 @@
   }
 }
 
+/* On-canvas wrap-width resize grip (10b Layer 2) — a slim vertical bar on a node's TOP-right edge.
+   Position/size/background are set inline (driven by wrapHandleGeometry + the node's ring colour); this
+   carries the look + interaction affordances. Desktop only: on a coarse pointer the inspector Wrap
+   slider is the wrap control, so the grip is hidden (matching the relate grip). */
+.mm-wrap-handle {
+  padding: 0;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  opacity: 0.55;
+  cursor: ew-resize;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(40, 30, 16, 0.32);
+  transition: opacity var(--ed-dur-fast) var(--ed-ease);
+}
+.mm-wrap-handle:hover,
+.mm-wrap-handle:focus-visible {
+  opacity: 1;
+}
+.mm-wrap-handle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+@media (pointer: coarse) {
+  .mm-wrap-handle {
+    display: none;
+  }
+}
+
 /* Quick task toggle — a hover checkbox on a topic's left edge (mirrors the relate grip on the right).
    Hidden until the topic is hovered (or the box itself), so it stays out of the way. A checked box
    (☑, set by aria-pressed) stays visible so completed tasks read at a glance. */

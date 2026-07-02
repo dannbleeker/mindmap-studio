@@ -129,6 +129,13 @@ and a facts line — outline number, depth, child count, and note size — plus,
 created or edited, a **created / last-edited** line. (Those times are saved in the map's `.json` but
 never drawn on the canvas or in image / PDF exports.)
 
+**Text-wrap width.** The **Style** tab's **Wrap** slider sets how wide a topic grows before its text
+wraps — drag for any width; it snaps to **Narrow / Medium / Wide**, and the far end means *no cap*. On a
+**taller selected topic** you can also grab the **slim grip on its right edge** and drag to set the width
+straight on the canvas (or nudge it with the **←/→** arrow keys) — it's the same setting, so slider and
+grip always agree. On short topics — where the right edge is busy with the add-child ＋ and relate grip —
+the grip is hidden, so use the slider. (The grip is desktop-only; on touch the slider is the wrap control.)
+
 **Edit several topics at once.** Select multiple topics — **Shift/Ctrl/⌘-click** to add to the
 selection, or **drag a box** across the empty canvas — and the inspector switches to bulk mode (an
 "N topics selected" banner). Changes to **shape, fill, border, font/bold, progress, dates and

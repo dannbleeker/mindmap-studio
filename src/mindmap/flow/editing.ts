@@ -28,6 +28,10 @@ export interface EditingApi {
   cancelEdit: (html?: string) => void;
   /** Collapse/expand a node from its toggle. */
   toggleCollapse: (id: string) => void;
+  /** Set a topic's text-wrap width from the on-canvas right-edge drag grip (10b Layer 2). `maxWidth` is
+   *  a CSS length ("220px") or "" for None — the same string the inspector's Wrap slider writes. The
+   *  whole drag coalesces into a single undo step. */
+  setWrapWidth: (id: string, maxWidth: string) => void;
   /** Follow a node's hyperlink: jump to a topic (#node=), open a map (#map=), or open a URL. */
   openLink: (url: string) => void;
   /** Advance a node's task completion one quarter-step (clicking its on-canvas pie), looping at 100%. */

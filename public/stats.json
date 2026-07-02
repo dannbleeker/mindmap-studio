@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-07-02T20:23:58.592Z",
-  "commit": "c9630bf",
+  "generatedAt": "2026-07-02T20:31:43.926Z",
+  "commit": "78c8411",
   "headline": {
     "linesTsJs": 77101,
     "tests": 2124,
     "lineCoveragePct": 89.82,
-    "commits": 1067,
+    "commits": 1069,
     "ageDays": 21,
     "trackedFiles": 500,
-    "featureManualPct": 55.2,
-    "featureBookPct": 49.6,
-    "featureExamplePct": 49.6
+    "featureManualPct": 54.5,
+    "featureBookPct": 49,
+    "featureExamplePct": 49
   },
   "code": [
     {
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 86.88,
-      "covered": 8758,
-      "total": 10080
+      "covered": 8756,
+      "total": 10078
     }
   },
   "tests": {
     "unit": 2124,
     "e2e": 0,
-    "durationMs": 82250,
+    "durationMs": 106884,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 22454
+        "ms": 28547
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 20074
+        "ms": 26323
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7460
+        "ms": 9913
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 6096
+        "ms": 8241
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3300
+        "ms": 4514
       }
     ]
   },
@@ -202,14 +202,24 @@
     "docToCodeRatio": 0.38
   },
   "featureCoverage": {
-    "total": 250,
+    "total": 253,
     "manual": 138,
-    "manualPct": 55.2,
+    "manualPct": 54.5,
     "book": 124,
-    "bookPct": 49.6,
+    "bookPct": 49,
     "bookExample": 124,
-    "bookExamplePct": 49.6,
+    "bookExamplePct": 49,
     "byArea": {
+      "structure": {
+        "total": 36,
+        "manual": 14,
+        "book": 12
+      },
+      "styling": {
+        "total": 28,
+        "manual": 14,
+        "book": 12
+      },
       "export": {
         "total": 26,
         "manual": 19,
@@ -229,16 +239,6 @@
         "total": 15,
         "manual": 7,
         "book": 7
-      },
-      "structure": {
-        "total": 34,
-        "manual": 14,
-        "book": 12
-      },
-      "styling": {
-        "total": 27,
-        "manual": 14,
-        "book": 12
       },
       "library": {
         "total": 22,
@@ -273,6 +273,21 @@
     },
     "gaps": {
       "noManual": [
+        {
+          "id": "canvas-shapes",
+          "name": "Free background shapes (rectangle / ellipse / block arrow / chevron) — a positioned, resizable canvas-object layer for SWOT/Venn/risk composition",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "smart-containers",
+          "name": "Smart containers (swimlane / matrix) that capture and move their contained topics when dragged",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "stylebar-reflects-state",
+          "name": "StyleBar reflects the selection's active style (shape / fill / border / bold / shadow / font) with touch-sized, grouped controls",
+          "since": "2026-07-02"
+        },
         {
           "id": "deck-live-map-slides",
           "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
@@ -835,6 +850,21 @@
         }
       ],
       "noBook": [
+        {
+          "id": "canvas-shapes",
+          "name": "Free background shapes (rectangle / ellipse / block arrow / chevron) — a positioned, resizable canvas-object layer for SWOT/Venn/risk composition",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "smart-containers",
+          "name": "Smart containers (swimlane / matrix) that capture and move their contained topics when dragged",
+          "since": "2026-07-02"
+        },
+        {
+          "id": "stylebar-reflects-state",
+          "name": "StyleBar reflects the selection's active style (shape / fill / border / bold / shadow / font) with touch-sized, grouped controls",
+          "since": "2026-07-02"
+        },
         {
           "id": "deck-live-map-slides",
           "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
@@ -1471,16 +1501,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 21,
-    "commits": 1067,
-    "commits7d": 214,
+    "commits": 1069,
+    "commits7d": 216,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 515
+        "count": 516
       },
       {
         "name": "github-actions[bot]",
-        "count": 485
+        "count": 486
       },
       {
         "name": "Claude",
@@ -1488,9 +1518,9 @@
       }
     ],
     "churn30d": {
-      "added": 139560,
-      "removed": 41033
+      "added": 139666,
+      "removed": 41107
     },
-    "changelogEntries": 424
+    "changelogEntries": 427
   }
 }

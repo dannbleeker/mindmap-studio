@@ -17,6 +17,7 @@ import type {
   SlideRef,
   TaskInfo,
 } from "../../model/types";
+import { addDaysISO } from "../../taskDate";
 import type { SelectionFields } from "../contract";
 import { walkTree } from "./nodeWalk";
 
@@ -855,25 +856,40 @@ export function addFloatingTopic(doc: MindMapDoc, topic: string, hyperlink?: str
   return { doc: next, selectId: node.id };
 }
 
-/** The look of a sticky note — an amber card with square corners. A sticky note is just a floating
- *  topic carrying this style, so it renders + exports through the normal per-topic style path. */
-const STICKY_NOTE_STYLE: NodeStyle = {
-  background: "#fef3c7",
-  border: "1px solid #fcd34d",
-  color: "#713f12",
-  borderRadius: "2px",
-};
+/** The sticky-note colour set (name → {fill, border, ink}) — a small palette so notes are visually
+ *  sortable, like MindManager's 9 sticky colours. `amber` is the historical default (unchanged look).
+ *  A sticky note is just a floating topic carrying one of these as its per-topic style, so it renders +
+ *  exports through the normal style path. Insertion order defines the palette order in the UI. */
+export const STICKY_NOTE_COLORS = {
+  amber: { background: "#fef3c7", border: "1px solid #fcd34d", color: "#713f12" },
+  lime: { background: "#ecfccb", border: "1px solid #bef264", color: "#3f6212" },
+  sky: { background: "#e0f2fe", border: "1px solid #7dd3fc", color: "#075985" },
+  rose: { background: "#ffe4e6", border: "1px solid #fda4af", color: "#9f1239" },
+  violet: { background: "#ede9fe", border: "1px solid #c4b5fd", color: "#5b21b6" },
+  slate: { background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#334155" },
+} as const;
+export type StickyNoteColor = keyof typeof STICKY_NOTE_COLORS;
 
-/** Add a sticky note: a free-floating topic styled as an amber note card. New notes stagger so
- *  they don't stack exactly (the offset matters only in free-canvas mode; auto-layouts ignore it). */
-export function addStickyNote(doc: MindMapDoc, text = "Note"): OpResult {
+const stickyStyle = (color: StickyNoteColor): NodeStyle => ({
+  ...STICKY_NOTE_COLORS[color],
+  borderRadius: "2px",
+});
+
+/** Add a sticky note: a free-floating topic styled as a coloured note card (default amber). New
+ *  notes stagger so they don't stack exactly (the offset matters only in free-canvas mode; auto-
+ *  layouts ignore it). */
+export function addStickyNote(
+  doc: MindMapDoc,
+  text = "Note",
+  color: StickyNoteColor = "amber",
+): OpResult {
   const next = structuredClone(doc);
   const n = (next.floatingTopics ?? []).length;
   const node: MapNode = {
     id: makeId(),
     topic: text,
     children: [],
-    style: { ...STICKY_NOTE_STYLE },
+    style: stickyStyle(color),
     pos: { x: 40 + n * 24, y: 40 + n * 24 },
   };
   birth(node, opsClock());
@@ -986,6 +1002,34 @@ export function setStart(doc: MindMapDoc, id: string, start: string | undefined)
 /** Set a node's task priority (1 = High .. 3 = Low), or clear it with undefined. */
 export function setPriority(doc: MindMapDoc, id: string, priority: number | undefined): OpResult {
   return patchTask(doc, id, { priority });
+}
+
+/** Shift every task start/due date in a scope by `days` (±), preserving relative offsets — the
+ *  "Move project" reschedule (MindManager). `scopeId` limits it to that node's subtree (root's own id
+ *  = the whole map). Only dated tasks change; nodes without start/due are untouched. One undo step;
+ *  a no-op (nothing dated, or `days === 0`) returns the original doc so it doesn't churn history. */
+export function shiftDates(doc: MindMapDoc, days: number, scopeId?: string): OpResult {
+  if (days === 0) return { doc };
+  const scope = scopeId ? findAnyNode(doc, scopeId) : doc.root;
+  if (!scope) return { doc };
+  const next = structuredClone(doc);
+  const scopeNode = scopeId ? findAnyNode(next, scopeId) : next.root;
+  if (!scopeNode) return { doc };
+  let changed = 0;
+  const shift = (n: MapNode) => {
+    if (n.task && (n.task.start || n.task.due)) {
+      if (n.task.start) n.task.start = addDaysISO(n.task.start, days);
+      if (n.task.due) n.task.due = addDaysISO(n.task.due, days);
+      touch(n, opsClock());
+      changed += 1;
+    }
+  };
+  // The scope's whole subtree; if the scope is the central root, also sweep floating topics (they're
+  // part of "the project" too — the whole-map case).
+  walkTree(scopeNode, shift);
+  if (!scopeId || scopeId === next.root.id)
+    for (const f of next.floatingTopics ?? []) walkTree(f, shift);
+  return changed > 0 ? { doc: next } : { doc };
 }
 
 /** Replace the map's conditional-formatting rules (an empty array clears them). */

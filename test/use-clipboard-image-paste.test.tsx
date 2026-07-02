@@ -17,7 +17,16 @@ const flush = () => act(() => new Promise((r) => setTimeout(r, 0)));
 function pasteImage() {
   const file = new File(["x"], "p.png", { type: "image/png" });
   const e = new Event("paste") as Event & { clipboardData: unknown };
-  e.clipboardData = { items: [{ type: "image/png", getAsFile: () => file }] };
+  e.clipboardData = { items: [{ type: "image/png", getAsFile: () => file }], getData: () => "" };
+  act(() => {
+    window.dispatchEvent(e);
+  });
+}
+
+/** Dispatch a window 'paste' carrying plain text (no image item). */
+function pasteText(text: string) {
+  const e = new Event("paste") as Event & { clipboardData: unknown };
+  e.clipboardData = { items: [], getData: (t: string) => (t === "text/plain" ? text : "") };
   act(() => {
     window.dispatchEvent(e);
   });
@@ -73,5 +82,47 @@ describe("useClipboardImagePaste", () => {
     pasteImage();
     await flush();
     expect(image.fileToMapImage).not.toHaveBeenCalled();
+  });
+
+  it("routes pasted text into topics under the selection (no dialog) — item 13", async () => {
+    const addSubtreeToSelected = vi.fn((_nodes: unknown) => true);
+    const { showHint } = setup(true, { addSubtreeToSelected });
+    pasteText("Parent\n\tChild A\n\tChild B");
+    await flush();
+    // parsePaste turns the outline into a forest; the hook grafts it under the selection.
+    expect(addSubtreeToSelected).toHaveBeenCalledOnce();
+    const forest = addSubtreeToSelected.mock.calls[0][0] as unknown as { topic: string }[];
+    expect(forest[0].topic).toBe("Parent");
+    expect(showHint).toHaveBeenCalledWith("Pasted 3 topics under the selection.");
+  });
+
+  it("turns a single pasted URL into one linked topic", async () => {
+    const addSubtreeToSelected = vi.fn((_nodes: unknown) => true);
+    setup(true, { addSubtreeToSelected });
+    pasteText("https://example.com/blog/my-great-post");
+    await flush();
+    const forest = addSubtreeToSelected.mock.calls[0][0] as unknown as {
+      topic: string;
+      hyperlink?: string;
+    }[];
+    expect(forest).toHaveLength(1);
+    expect(forest[0].hyperlink).toBe("https://example.com/blog/my-great-post");
+  });
+
+  it("hints to select a topic first when text paste has no selection", async () => {
+    const { showHint } = setup(true, { addSubtreeToSelected: (_nodes: unknown) => false });
+    pasteText("Some topic");
+    await flush();
+    expect(showHint).toHaveBeenCalledWith(
+      "Select a topic first to paste text under it (or use Paste text → map).",
+    );
+  });
+
+  it("ignores empty/whitespace text (nothing pasted)", async () => {
+    const addSubtreeToSelected = vi.fn((_nodes: unknown) => true);
+    setup(true, { addSubtreeToSelected });
+    pasteText("   \n  ");
+    await flush();
+    expect(addSubtreeToSelected).not.toHaveBeenCalled();
   });
 });

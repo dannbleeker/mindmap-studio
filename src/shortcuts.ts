@@ -29,6 +29,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: "Delete / Backspace", action: "Delete the topic + its branch (undoable)" },
       { keys: "Ctrl/⌘ + C", action: "Copy the selected branch" },
       { keys: "Ctrl/⌘ + D", action: "Duplicate the selected branch (as a sibling)" },
+      { keys: "Ctrl/⌘ + V", action: "Paste an image, or text (as topics), onto the selection" },
       { keys: "Ctrl/⌘ + Shift + V", action: "Paste a copied branch under the selection" },
       { keys: "Ctrl/⌘ + B / I / U", action: "Bold / italic / underline (while editing)" },
       { keys: "Ctrl/⌘ + Z", action: "Undo" },

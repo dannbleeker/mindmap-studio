@@ -10,24 +10,51 @@ import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
 import { outlineNumbers } from "./outline";
 
+/** PNG raster options (item 6): a resolution multiplier and whether to keep a transparent background. */
+export interface PngOptions {
+  /** Pixel-density multiplier: 1 (default), 2, 4 — for sharp print / retina / slide use. */
+  scale?: number;
+  /** Skip the white background fill so the PNG has transparency (paste onto any colour). */
+  transparent?: boolean;
+}
+
 // Rasterise an SVG string to a PNG via an offscreen canvas. Safe because the exporter emits
 // native <text> (no foreignObject) — a foreignObject SVG would taint the canvas, which is
-// exactly why an HTML-in-SVG export path produces a blank/broken image.
-async function svgToPng(svg: string): Promise<Blob | null> {
+// exactly why an HTML-in-SVG export path produces a blank/broken image. `scale` multiplies the
+// output resolution; `transparent` skips the white fill (a transparent PNG).
+async function svgToPng(svg: string, opts: PngOptions = {}): Promise<Blob | null> {
+  const scale = Math.max(1, Math.min(8, opts.scale ?? 1));
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   try {
     const img = new Image();
     img.src = url;
     await img.decode();
     const canvas = document.createElement("canvas");
-    canvas.width = img.naturalWidth || 1;
-    canvas.height = img.naturalHeight || 1;
+    canvas.width = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+    canvas.height = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (!opts.transparent) {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    // Scale the drawing so the vector re-rasterises crisply at the higher resolution (not upscaled).
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.drawImage(img, 0, 0);
     return await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+/** Decode a PNG blob's pixel dimensions (for the PDF page fit). */
+async function pngPixelSize(blob: Blob): Promise<{ width: number; height: number }> {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    return { width: img.naturalWidth || 1, height: img.naturalHeight || 1 };
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -42,14 +69,17 @@ export interface MapExports {
   exportXmind: () => Promise<void>;
   exportSmmx: () => Promise<void>;
   exportMmap: () => Promise<void>;
-  exportPng: () => Promise<void>;
+  exportPng: (opts?: PngOptions) => Promise<void>;
   /** Copy the rendered map to the system clipboard as a PNG image (no file download). */
-  copyPng: () => Promise<void>;
+  copyPng: (opts?: PngOptions) => Promise<void>;
   exportSvg: () => Promise<void>;
   exportHtml: () => Promise<void>;
   exportInteractiveHtml: () => Promise<void>;
   exportDeck: () => Promise<void>;
+  /** Print-to-PDF via the browser dialog (the historical path). */
   exportPdf: () => Promise<void>;
+  /** Direct PDF file download (item 7): the map rendered + embedded, with page size / orientation. */
+  exportPdfFile: (opts?: import("./io/pdf").MapPdfOptions) => Promise<void>;
   exportDocx: () => Promise<void>;
   exportPptx: () => Promise<void>;
   exportXlsx: () => Promise<void>;
@@ -144,25 +174,30 @@ export function useMapExports(
       );
     },
     // png/svg/html/pdf all embed the rendered SVG via cleanSvg() (sanitize + native-text).
-    async exportPng() {
+    async exportPng(opts) {
       const clean = await cleanSvg();
       if (!clean) {
         noCanvas();
         return;
       }
-      const blob = await svgToPng(clean);
-      if (blob) downloadBlob(blob, `${baseName()}.png`);
+      const blob = await svgToPng(clean, opts);
+      if (blob) {
+        const tag = `${opts?.scale && opts.scale > 1 ? `@${opts.scale}x` : ""}${
+          opts?.transparent ? "-transparent" : ""
+        }`;
+        downloadBlob(blob, `${baseName()}${tag}.png`);
+      }
     },
     // Copy the rendered map to the clipboard as a PNG — the fastest map→paste path (into chat, email,
     // a slide) with no file round-trip. Same SVG→PNG raster as exportPng; writes via the async Clipboard
     // API, which needs a user gesture + a secure context (https/localhost) and is caught when blocked.
-    async copyPng() {
+    async copyPng(opts) {
       const clean = await cleanSvg();
       if (!clean) {
         noCanvas();
         return;
       }
-      const blob = await svgToPng(clean);
+      const blob = await svgToPng(clean, opts);
       if (!blob) {
         onHint?.("Couldn't render the map to an image.");
         return;
@@ -236,6 +271,27 @@ export function useMapExports(
         setTimeout(() => iframe.remove(), 1000);
       };
       document.body.appendChild(iframe);
+    },
+    // Direct PDF file (item 7): render the map to a high-res PNG, embed it in a real .pdf via pdf-lib,
+    // and download it — no browser print dialog. Page size / orientation are chosen by the caller.
+    // Lazy-loaded (pdf.ts pulls pdf-lib, already a dep for the book build) so it stays out of the entry.
+    async exportPdfFile(opts) {
+      const clean = await cleanSvg();
+      if (!clean) {
+        noCanvas();
+        return;
+      }
+      // Render at 2× for a crisp embed; keep the page-size/orientation for pdf-lib.
+      const png = await svgToPng(clean, { scale: 2 });
+      if (!png) {
+        onHint?.("Couldn't render the map to an image for the PDF.");
+        return;
+      }
+      const { buildMapPdf } = await import("./io/pdf");
+      const bytes = new Uint8Array(await png.arrayBuffer());
+      const dims = await pngPixelSize(png);
+      const pdf = await buildMapPdf(bytes, opts, dims.width, dims.height);
+      downloadBlob(new Blob([pdf as BlobPart], { type: "application/pdf" }), `${baseName()}.pdf`);
     },
     // Word .docx — the outline as an editable document. Model-backed, lazy-loaded
     // (docx.ts pulls fflate for the OPC zip), kept out of the entry bundle.

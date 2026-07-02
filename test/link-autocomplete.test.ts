@@ -4,6 +4,8 @@ import {
   applyLinkSelection,
   linkTriggerAt,
   matchLinkCandidates,
+  matchTagCandidates,
+  tagTriggerAt,
 } from "../src/mindmap/flow/linkAutocomplete";
 
 describe("linkTriggerAt", () => {
@@ -78,5 +80,42 @@ describe("matchLinkCandidates", () => {
     expect(matchLinkCandidates(cands, "").map((c) => c.id)).toEqual(["n1", "n2", "m1"]);
     expect(matchLinkCandidates(cands, "zzz")).toEqual([]);
     expect(matchLinkCandidates(cands, "", 2)).toHaveLength(2); // cap respected
+  });
+});
+
+describe("tagTriggerAt (#tag accelerator)", () => {
+  it("detects a `#tag` token at a word boundary up to the caret", () => {
+    expect(tagTriggerAt("plan #ris", 9)).toEqual({ query: "ris", start: 5, end: 9 });
+    expect(tagTriggerAt("#q3", 3)).toEqual({ query: "q3", start: 0, end: 3 }); // line start
+    // Bare `#` (no chars yet) still triggers with an empty query (list all existing tags).
+    expect(tagTriggerAt("plan #", 6)).toEqual({ query: "", start: 5, end: 6 });
+  });
+
+  it("ignores a `#` that isn't at a word boundary, or a run with a space/newline", () => {
+    expect(tagTriggerAt("a1#b", 4)).toBeNull(); // mid-word (# not preceded by whitespace/start)
+    expect(tagTriggerAt("#tag more", 9)).toBeNull(); // the run past the # contains a space
+    expect(tagTriggerAt("no hash here", 12)).toBeNull();
+    expect(tagTriggerAt("#a\n#b", 5)).toEqual({ query: "b", start: 3, end: 5 }); // nearest # wins
+  });
+});
+
+describe("matchTagCandidates", () => {
+  const existing = ["risk", "roadmap", "q3"];
+
+  it("filters existing tags case-insensitively, with the typed query offered first to create", () => {
+    // "ro" isn't an existing tag, so it's offered as a create row before the matching "roadmap".
+    expect(matchTagCandidates(existing, "ro")).toEqual(["ro", "roadmap"]);
+    expect(matchTagCandidates(existing, "R")).toEqual(["R", "risk", "roadmap"]);
+  });
+
+  it("offers a create row (first) for a new tag not already present", () => {
+    expect(matchTagCandidates(existing, "new")).toEqual(["new"]);
+    // A query matching an existing tag exactly doesn't double it up as a create row.
+    expect(matchTagCandidates(existing, "risk")).toEqual(["risk"]);
+  });
+
+  it("lists all existing for an empty query (no create row)", () => {
+    expect(matchTagCandidates(existing, "")).toEqual(["risk", "roadmap", "q3"]);
+    expect(matchTagCandidates(existing, "", 2)).toHaveLength(2); // cap respected
   });
 });

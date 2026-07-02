@@ -55,6 +55,10 @@ export interface EditingApi {
   /** Attach a name-based link chosen from the autocomplete to a node: the first link becomes the
    *  node's primary `hyperlink`, further ones its additional `hyperlinks`. */
   addNodeLink: (id: string, link: string) => void;
+  /** Every tag used anywhere in the map — feeds the inline `#tag` accelerator's suggestion list. */
+  tagCandidates: () => string[];
+  /** Add a tag to a node (deduped) — the inline `#tag` accelerator's commit. */
+  addNodeTag: (id: string, tag: string) => void;
 }
 
 export const EditingContext = createContext<EditingApi | null>(null);

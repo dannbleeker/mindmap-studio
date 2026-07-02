@@ -35,9 +35,12 @@ import { matchBorderColor } from "./geometry";
 import {
   type LinkCandidate,
   type LinkTrigger,
+  type TagTrigger,
   applyLinkSelection,
   linkTriggerAt,
   matchLinkCandidates,
+  matchTagCandidates,
+  tagTriggerAt,
 } from "./linkAutocomplete";
 import { showNodeAffordances } from "./nodeChrome";
 import { relateGripTopCss } from "./relateGripGeometry";
@@ -481,6 +484,11 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   const [linkIndex, setLinkIndex] = useState(0);
   const [linkTrigger, setLinkTrigger] = useState<LinkTrigger | null>(null);
   const linkOpen = isEditing && linkTrigger !== null && linkItems.length > 0;
+  // `#tag` accelerator: a mid-text `#word` trigger opens a tag picker.
+  const [tagItems, setTagItems] = useState<string[]>([]);
+  const [tagIndex, setTagIndex] = useState(0);
+  const [tagTrigger, setTagTrigger] = useState<TagTrigger | null>(null);
+  const tagOpen = isEditing && tagTrigger !== null && tagItems.length > 0;
   // The editor text at which the user pressed Escape to dismiss a menu — syncMenus keeps the menu shut
   // while the text is unchanged, so the keyup/caret-move re-sync doesn't immediately reopen it. Cleared
   // once the text changes (they typed something) or on leaving edit.
@@ -496,6 +504,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         setSlashItems([]);
         setLinkTrigger(null);
         setLinkItems([]);
+        setTagTrigger(null);
+        setTagItems([]);
         return;
       }
       dismissedRef.current = null;
@@ -507,15 +517,25 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       setSlashIndex(0);
       setLinkTrigger(null);
       setLinkItems([]);
+      setTagTrigger(null);
+      setTagItems([]);
       return;
     }
     setSlashItems([]);
-    const trigger = el ? linkTriggerAt(text, caretOffset(el)) : null;
+    const caret = el ? caretOffset(el) : 0;
+    const trigger = el ? linkTriggerAt(text, caret) : null;
     const items =
       trigger && editing ? matchLinkCandidates(editing.linkCandidates(id), trigger.query) : [];
     setLinkTrigger(items.length ? trigger : null);
     setLinkItems(items);
     setLinkIndex(0);
+    // `#tag` picker — only when the link picker isn't claiming the caret (they can't both be at the
+    // same token: `[[`/`@`/`#` are distinct trigger chars).
+    const tt = !items.length && el ? tagTriggerAt(text, caret) : null;
+    const tags = tt && editing ? matchTagCandidates(editing.tagCandidates(), tt.query) : [];
+    setTagTrigger(tags.length ? tt : null);
+    setTagItems(tags);
+    setTagIndex(0);
   }, [editing, id]);
 
   // Pick a link-autocomplete candidate: rewrite the buffer (replace the `[[`/`@` token with the topic
@@ -538,6 +558,26 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       setLinkItems([]);
     },
     [editing, id, linkTrigger],
+  );
+
+  // Pick a #tag candidate: strip the `#query` token from the title (a tag is metadata, not text),
+  // restore the caret, assign the tag, and close the menu. Edit stays open.
+  const selectTag = useCallback(
+    (tag: string) => {
+      const el = editRef.current;
+      if (!el || !tagTrigger) return;
+      if (el.children.length === 0) {
+        const { text, caret } = applyLinkSelection(el.textContent ?? "", tagTrigger, "");
+        el.textContent = text;
+        placeCaret(el, caret);
+      } else {
+        replaceTokenRange(el, tagTrigger.start, tagTrigger.end, "");
+      }
+      editing?.addNodeTag(id, tag);
+      setTagTrigger(null);
+      setTagItems([]);
+    },
+    [editing, id, tagTrigger],
   );
 
   // On entering edit mode: seed the text, focus, and select all (uncontrolled — React must
@@ -956,6 +996,17 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                       } else if (r.action === "select") selectLink(linkItems[linkIndex]);
                       return;
                     }
+                  } else if (tagOpen) {
+                    const r = slashMenuKey(e.key, tagIndex, tagItems.length);
+                    if (r.action !== "passthrough") {
+                      e.preventDefault();
+                      if (r.action === "move") setTagIndex(r.index);
+                      else if (r.action === "close") {
+                        setTagTrigger(null);
+                        dismissedRef.current = editRef.current?.textContent ?? "";
+                      } else if (r.action === "select") selectTag(tagItems[tagIndex]);
+                      return;
+                    }
                   }
                   const html = editRef.current?.innerHTML ?? "";
                   handleEditorKeyDown(e, {
@@ -1007,6 +1058,36 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                       <span className="mm-slash-hint">🔗</span>
                     </button>
                   ))}
+                </div>
+              ) : null}
+              {tagOpen ? (
+                <div className="nodrag nopan mm-slash-menu" aria-label="Add a tag">
+                  {tagItems.map((tag, i) => {
+                    // The first row for a brand-new (not-yet-existing) tag reads as "create".
+                    const isNew =
+                      i === 0 &&
+                      tag.trim().length > 0 &&
+                      !(editing?.tagCandidates() ?? []).some(
+                        (t) => t.toLowerCase() === tag.toLowerCase(),
+                      );
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        aria-pressed={i === tagIndex}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onMouseEnter={() => setTagIndex(i)}
+                        onClick={() => selectTag(tag)}
+                        data-active={i === tagIndex || undefined}
+                        className="mm-slash-item"
+                      >
+                        <span>
+                          {isNew ? "New tag: " : ""}#{tag}
+                        </span>
+                        <span className="mm-slash-hint">🏷️</span>
+                      </button>
+                    );
+                  })}
                 </div>
               ) : null}
             </span>

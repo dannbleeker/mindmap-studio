@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { loadHistory, recordSearch } from "../io/searchHistory";
 import { SearchResults } from "./SearchResults";
 import type { ToolbarFind } from "./Toolbar";
 
@@ -12,12 +13,20 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
   const queryRef = useRef<HTMLInputElement>(null);
   // The "all matches" list is a disclosure: collapsed by default to keep the panel compact.
   const [showList, setShowList] = useState(false);
+  // Recent searches (item 18): offered as a datalist on the Find box; a search commits the query.
+  const [history, setHistory] = useState<string[]>(() => loadHistory());
 
   // Focus the Find box on open so you can type immediately.
   useEffect(() => {
     queryRef.current?.focus();
     queryRef.current?.select();
   }, []);
+
+  // Run a search AND remember the query in the recent-searches history.
+  const runAndRecord = (e: React.FormEvent) => {
+    setHistory(recordSearch(find.query));
+    find.runSearch(e);
+  };
 
   return (
     // A non-modal, labelled find panel (not a native <dialog>: it must not trap focus or dim the
@@ -44,11 +53,12 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
           ×
         </button>
       </div>
-      <form onSubmit={find.runSearch} className="mm-find-body">
+      <form onSubmit={runAndRecord} className="mm-find-body">
         <input
           ref={queryRef}
           className="mm-input"
           value={find.query}
+          list="mm-search-history"
           onChange={(e) => find.setQuery(e.target.value)}
           onKeyDown={(e) => {
             // Enter (form submit) goes to the next match; Shift+Enter to the previous one.
@@ -64,6 +74,11 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
             'tag:foo  marker:flag-red  priority:1  due:overdue  has:note  level:>=2  -exclude  "exact phrase"'
           }
         />
+        <datalist id="mm-search-history">
+          {history.map((h) => (
+            <option key={h} value={h} />
+          ))}
+        </datalist>
         <input
           className="mm-input"
           value={find.replaceWith}

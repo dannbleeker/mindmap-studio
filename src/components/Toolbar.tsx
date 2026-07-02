@@ -12,8 +12,10 @@ import { buildExample, examples } from "../examples";
 import type { SaveState } from "../hooks/useIdbAutosave";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
+import { STICKY_NOTE_COLORS, type StickyNoteColor } from "../mindmap/flow/ops";
 import type { CanvasTheme } from "../mindmap/theme";
 import type { MindMapDoc } from "../model/types";
+import { PANEL_LABELS } from "../panelLabels";
 import type { NodeHit } from "../search";
 import { SHORTCUT_BINDINGS } from "../shortcuts";
 import type { MapSummary } from "../store/mapStore";
@@ -37,6 +39,26 @@ function saveLastExport(label: string) {
     localStorage.setItem(LAST_EXPORT_KEY, label);
   } catch {
     // best-effort — the recency row just won't persist
+  }
+}
+
+// The preferred sticky-note colour (item 17): the last colour the user picked becomes the default for
+// the plain "Sticky note" item. Best-effort localStorage, validated against the palette on read.
+const STICKY_COLOR_KEY = "mindmap-sticky-color";
+function loadStickyColor(): StickyNoteColor {
+  try {
+    const v = localStorage.getItem(STICKY_COLOR_KEY);
+    if (v && v in STICKY_NOTE_COLORS) return v as StickyNoteColor;
+  } catch {
+    // ignore — fall through to the default
+  }
+  return "amber";
+}
+function saveStickyColor(color: StickyNoteColor) {
+  try {
+    localStorage.setItem(STICKY_COLOR_KEY, color);
+  } catch {
+    // best-effort — the preference just won't persist
   }
 }
 
@@ -176,12 +198,18 @@ export interface ToolbarIo {
   exportMmap: () => void;
   exportOpml: () => void;
   exportFreemind: () => void;
-  exportPng: () => void;
+  /** Export the map as a PNG; opts pick a resolution scale (2×/4×) and/or a transparent background. */
+  exportPng: (opts?: { scale?: number; transparent?: boolean }) => void;
   exportSvg: () => void;
   exportHtml: () => void;
   exportInteractiveHtml: () => void;
   exportDeck: () => void;
   exportPdf: () => void;
+  /** Direct PDF file download (item 7): map rendered + embedded, with page size / orientation. */
+  exportPdfFile: (opts?: {
+    pageSize?: "fit" | "a4" | "letter";
+    orientation?: "portrait" | "landscape";
+  }) => void;
   exportDocx: () => void;
   exportPptx: () => void;
   exportXlsx: () => void;
@@ -190,8 +218,8 @@ export interface ToolbarIo {
   copyTable: () => void;
   /** Copy a shareable deep-link (?map=…&node=…) to the selected topic to the clipboard. */
   copyDeepLink: () => void;
-  /** Copy the rendered map to the clipboard as a PNG image (no file). */
-  copyPng: () => void;
+  /** Copy the rendered map to the clipboard as a PNG image (no file); opts as for exportPng. */
+  copyPng: (opts?: { scale?: number; transparent?: boolean }) => void;
   handleFile: (event: ChangeEvent<HTMLInputElement>) => void;
   /** Native disk-file actions (File System Access API, with a download/upload fallback). */
   openFile: () => void;
@@ -358,8 +386,11 @@ export function Toolbar({
     {
       group: "Image",
       items: [
-        [".png (image)", io.exportPng],
-        ["Copy image to clipboard", io.copyPng],
+        [".png (image)", () => io.exportPng()],
+        [".png @2× (sharp)", () => io.exportPng({ scale: 2 })],
+        [".png @4× (print)", () => io.exportPng({ scale: 4 })],
+        [".png (transparent)", () => io.exportPng({ transparent: true })],
+        ["Copy image to clipboard", () => io.copyPng()],
         [".svg (vector)", io.exportSvg],
       ],
     },
@@ -368,7 +399,13 @@ export function Toolbar({
       items: [
         [".html (standalone)", io.exportHtml],
         [".html (interactive)", io.exportInteractiveHtml],
-        [".pdf (print)", io.exportPdf],
+        [".pdf (fit to map)", () => io.exportPdfFile({ pageSize: "fit" })],
+        [
+          ".pdf (A4 landscape)",
+          () => io.exportPdfFile({ pageSize: "a4", orientation: "landscape" }),
+        ],
+        [".pdf (Letter portrait)", () => io.exportPdfFile({ pageSize: "letter" })],
+        [".pdf (via print dialog)", io.exportPdf],
         [".docx (Word)", io.exportDocx],
         [".xlsx (Excel)", io.exportXlsx],
       ],
@@ -683,21 +720,21 @@ export function Toolbar({
           <MenuLabel>Structure</MenuLabel>
           <MenuCheckboxItem
             icon={mi("text")}
-            label="Outline"
+            label={PANEL_LABELS.outline.menu}
             checked={panels.outlineOpen}
             trailing={mi("check")}
             onSelect={() => panels.setOutlineOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("layers")}
-            label="Maps (all maps)"
+            label={PANEL_LABELS.maps.menu}
             checked={panels.mapsOpen}
             trailing={mi("check")}
             onSelect={() => panels.setMapsOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("settings")}
-            label="Topic info / inspector"
+            label={PANEL_LABELS.info.menu}
             checked={panels.infoOpen || panels.infoMinimized}
             trailing={mi("check")}
             onSelect={() => {
@@ -709,7 +746,7 @@ export function Toolbar({
           />
           <MenuCheckboxItem
             icon={mi("note")}
-            label="Note editor (dockable)"
+            label={PANEL_LABELS.note.menu}
             checked={panels.noteEditorOpen}
             trailing={mi("check")}
             onSelect={() => panels.setNoteEditorOpen((v) => !v)}
@@ -717,35 +754,35 @@ export function Toolbar({
           <MenuLabel>Analysis</MenuLabel>
           <MenuCheckboxItem
             icon={mi("star")}
-            label="Markers & tags index"
+            label={PANEL_LABELS.index.menu}
             checked={panels.indexOpen}
             trailing={mi("check")}
             onSelect={() => panels.setIndexOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("filter")}
-            label="Power Filter"
+            label={PANEL_LABELS.filter.menu}
             checked={panels.filterOpen}
             trailing={mi("check")}
             onSelect={panels.toggleFilter}
           />
           <MenuCheckboxItem
             icon={mi("palette")}
-            label="Conditional styles"
+            label={PANEL_LABELS.styles.menu}
             checked={panels.stylesOpen}
             trailing={mi("check")}
             onSelect={() => panels.setStylesOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("link")}
-            label="Relationships"
+            label={PANEL_LABELS.relationships.menu}
             checked={panels.relationshipsOpen}
             trailing={mi("check")}
             onSelect={() => panels.setRelationshipsOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("grid")}
-            label="Map statistics"
+            label={PANEL_LABELS.stats.menu}
             checked={panels.statsOpen}
             trailing={mi("check")}
             onSelect={() => panels.setStatsOpen((v) => !v)}
@@ -753,21 +790,21 @@ export function Toolbar({
           <MenuLabel>Workflow</MenuLabel>
           <MenuCheckboxItem
             icon={mi("history")}
-            label="Version history"
+            label={PANEL_LABELS.history.menu}
             checked={panels.historyOpen}
             trailing={mi("check")}
             onSelect={() => panels.setHistoryOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("calendar")}
-            label="Agenda (due tasks)"
+            label={PANEL_LABELS.agenda.menu}
             checked={panels.agendaOpen}
             trailing={mi("check")}
             onSelect={() => panels.setAgendaOpen((v) => !v)}
           />
           <MenuCheckboxItem
             icon={mi("paste")}
-            label="Inbox (quick capture)"
+            label={PANEL_LABELS.inbox.menu}
             checked={panels.inboxOpen}
             trailing={mi("check")}
             onSelect={() => panels.setInboxOpen((v) => !v)}
@@ -781,7 +818,7 @@ export function Toolbar({
           />
           <MenuCheckboxItem
             icon={mi("present")}
-            label="Slide deck (custom)"
+            label={PANEL_LABELS.deck.menu}
             checked={panels.deckEditorOpen}
             trailing={mi("check")}
             onSelect={() => panels.setDeckEditorOpen((v) => !v)}
@@ -995,10 +1032,42 @@ export function Toolbar({
                   icon={mi("note")}
                   label="Sticky note"
                   onSelect={() => {
-                    m()?.addStickyNote();
+                    m()?.addStickyNote(loadStickyColor());
                     showHint("Sticky note added — drag it anywhere.");
                   }}
                 />
+                {/* Colour set (item 17): pick a colour to add a note of that colour AND remember it as
+                    the default for the plain "Sticky note" item above. */}
+                <div className="mm-menu-row" style={{ padding: "2px 10px 4px" }}>
+                  {(
+                    Object.entries(STICKY_NOTE_COLORS) as [
+                      keyof typeof STICKY_NOTE_COLORS,
+                      { background: string; border: string },
+                    ][]
+                  ).map(([name, sw]) => (
+                    <button
+                      key={name}
+                      type="button"
+                      className="mm-menu-chip"
+                      aria-label={`Sticky note: ${name}`}
+                      title={`Add a ${name} sticky note (and make it the default)`}
+                      onClick={() => {
+                        saveStickyColor(name);
+                        m()?.addStickyNote(name);
+                        showHint(`${name[0].toUpperCase()}${name.slice(1)} sticky note added.`);
+                        close();
+                      }}
+                      style={{
+                        width: 18,
+                        height: 18,
+                        padding: 0,
+                        borderRadius: 4,
+                        background: sw.background,
+                        border: sw.border,
+                      }}
+                    />
+                  ))}
+                </div>
                 <MenuItem
                   icon={mi("layers")}
                   label="Group branch (boundary)"

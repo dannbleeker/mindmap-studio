@@ -73,7 +73,7 @@ import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import type { LinkCandidate } from "./flow/linkAutocomplete";
 import { LinkEditContext } from "./flow/linkEdit";
-import { countDescendants, subtreeIds } from "./flow/nodeWalk";
+import { countDescendants, subtreeIds, walkTree as walkNodeTree } from "./flow/nodeWalk";
 import {
   type OpResult,
   addAttachment,
@@ -172,6 +172,7 @@ import {
   setTags,
   setTopic,
   setTopicRich,
+  shiftDates,
   sortChildren,
   subtreeExportDoc,
   toggleCollapse,
@@ -1137,6 +1138,26 @@ function FlowInner({
             : setHyperlink(docRef.current, id, link),
         );
       },
+      // Inline #tag accelerator: every tag used anywhere in the map (deduped), for the suggestion list.
+      tagCandidates: () => {
+        const seen = new Set<string>();
+        const walk = (n: MapNode) => {
+          for (const t of n.tags ?? []) seen.add(t);
+          for (const c of n.children) walk(c);
+        };
+        walk(docRef.current.root);
+        for (const f of docRef.current.floatingTopics ?? []) walk(f);
+        return [...seen];
+      },
+      // Commit an inline-picked tag: add it to the node's tags (setTags dedupes). Edit stays open.
+      addNodeTag: (id: string, tag: string) => {
+        const t = tag.trim();
+        if (!t) return;
+        const n = findAnyNode(docRef.current, id);
+        const tags = n?.tags ?? [];
+        if (tags.some((x) => x.toLowerCase() === t.toLowerCase())) return; // already tagged
+        apply(setTags(docRef.current, id, [...tags, t]));
+      },
       // Native browser spell-check on the topic editors (view setting; off by default).
       spellcheck,
     };
@@ -2015,13 +2036,23 @@ function FlowInner({
       setSelectedStart: (start) => withSelectedAll((doc, id) => setStart(doc, id, start)),
       setSelectedPriority: (priority) =>
         withSelectedAll((doc, id) => setPriority(doc, id, priority)),
+      shiftDates: (days, scope) => {
+        // "map" → whole map (root scope); "branch" → the selected node's subtree (needs a selection).
+        const scopeId =
+          scope === "map" ? docRef.current.root.id : (selectedRef.current ?? undefined);
+        if (scope === "branch" && !scopeId) return false;
+        const r = shiftDates(docRef.current, days, scopeId);
+        if (r.doc === docRef.current) return false; // nothing dated in scope → no-op, report false
+        apply(r);
+        return true;
+      },
       addSelectedAttachment: (attachment) =>
         withSelected((id) => apply(addAttachment(docRef.current, id, attachment))),
       removeSelectedAttachment: (index) =>
         withSelected((id) => apply(removeAttachment(docRef.current, id, index))),
       addSubtreeToSelected: (nodes) =>
         withSelected((id) => apply(addSubtree(docRef.current, id, nodes))),
-      addStickyNote: () => apply(addStickyNote(docRef.current)),
+      addStickyNote: (color) => apply(addStickyNote(docRef.current, undefined, color)),
       addFloatingTopic: (text) => {
         const t = text.trim();
         if (!t) return;
@@ -2728,6 +2759,44 @@ function FlowInner({
                         None
                       </button>
                     </div>
+                    {/* "Move project" (item 14): shift every task date in THIS branch by a preset,
+                        preserving relative offsets. Shown only when the branch actually has dated
+                        tasks. The shiftDates op is a no-op when nothing's dated, so this stays honest. */}
+                    {(() => {
+                      let hasDated = false;
+                      const scope = findAnyNode(docRef.current, id);
+                      if (scope)
+                        walkNodeTree(scope, (n) => {
+                          if (n.task?.start || n.task?.due) hasDated = true;
+                        });
+                      if (!hasDated) return null;
+                      return (
+                        <>
+                          <MenuLabel>Shift task dates (this branch)</MenuLabel>
+                          <div className="mm-menu-row">
+                            {(
+                              [
+                                ["−1w", -7],
+                                ["−1d", -1],
+                                ["+1d", 1],
+                                ["+1w", 7],
+                                ["+1mo", 30],
+                              ] as const
+                            ).map(([label, days]) => (
+                              <button
+                                key={label}
+                                type="button"
+                                className="mm-menu-chip"
+                                aria-label={`Shift this branch's task dates by ${days} days`}
+                                onClick={() => apply(shiftDates(docRef.current, days, id))}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      );
+                    })()}
                     <MenuSeparator />
                     <label
                       className="mm-menu-label"

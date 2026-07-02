@@ -49,6 +49,7 @@ import { ToastBar } from "./components/ToastBar";
 import { Toolbar, type ToolbarProps } from "./components/Toolbar";
 import { buildEditorCommands } from "./components/editorCommands";
 import { DialogHost, editorConfirm, editorPrompt } from "./components/editorDialogs";
+import { PANEL_LABELS } from "./panelLabels";
 import "./design/editor.css";
 import { editorThemeVars } from "./design/tokens";
 import { designById } from "./designs";
@@ -1206,6 +1207,7 @@ export function App() {
     exportInteractiveHtml,
     exportDeck,
     exportPdf,
+    exportPdfFile,
     exportDocx,
     exportPptx,
     exportXlsx,
@@ -1582,6 +1584,7 @@ export function App() {
       exportInteractiveHtml,
       exportDeck,
       exportPdf,
+      exportPdfFile,
       exportDocx,
       exportPptx,
       exportXlsx,
@@ -1753,6 +1756,7 @@ export function App() {
         onShortcuts={() => setShortcutsOpen(true)}
         onSettings={() => setSettingsOpen(true)}
         onGettingStarted={reShowFirstRun}
+        onCommandPalette={() => setCmdkOpen(true)}
       />
       <div className="mm-editor-main">
         <Toolbar {...toolbarProps} />
@@ -1934,7 +1938,7 @@ export function App() {
               if (panels.outlineOpen)
                 entries.push({
                   key: "outline",
-                  label: "Outline",
+                  label: PANEL_LABELS.outline.tab,
                   onClose: () => panels.setOutlineOpen(false),
                   node: (
                     <OutlinePanel
@@ -1958,7 +1962,7 @@ export function App() {
               if (panels.indexOpen)
                 entries.push({
                   key: "index",
-                  label: "Markers & tags",
+                  label: PANEL_LABELS.index.tab,
                   onClose: () => panels.setIndexOpen(false),
                   node: (
                     <MarkerTagIndex
@@ -1971,13 +1975,21 @@ export function App() {
                       onSetTagColor={(t, color) =>
                         mapRef.current?.setRules(setTagColor(liveDoc.rules, t, color))
                       }
+                      onFilterBy={(kind, key) => {
+                        // Quick Filter (item 12): add this marker/tag to the Power Filter and open it,
+                        // reusing the existing filter pipeline (no new matching logic).
+                        if (kind === "marker") filter.toggleMarker(key);
+                        else filter.toggleTag(key);
+                        if (!panels.filterOpen) panels.toggleFilter();
+                        showHint(`Filtering by ${kind} “${key}”.`);
+                      }}
                     />
                   ),
                 });
               if (panels.relationshipsOpen)
                 entries.push({
                   key: "relationships",
-                  label: "Relationships",
+                  label: PANEL_LABELS.relationships.tab,
                   onClose: () => panels.setRelationshipsOpen(false),
                   node: (
                     <RelationshipsPanel
@@ -1989,14 +2001,14 @@ export function App() {
               if (panels.statsOpen)
                 entries.push({
                   key: "stats",
-                  label: "Stats",
+                  label: PANEL_LABELS.stats.tab,
                   onClose: () => panels.setStatsOpen(false),
                   node: <StatsPanel doc={liveDoc} />,
                 });
               if (panels.agendaOpen)
                 entries.push({
                   key: "agenda",
-                  label: "Agenda",
+                  label: PANEL_LABELS.agenda.tab,
                   onClose: () => panels.setAgendaOpen(false),
                   node: (
                     <AgendaPanel
@@ -2009,7 +2021,7 @@ export function App() {
               if (panels.mapsOpen)
                 entries.push({
                   key: "maps",
-                  label: "Maps",
+                  label: PANEL_LABELS.maps.tab,
                   onClose: () => panels.setMapsOpen(false),
                   node: (
                     <MapsPanel maps={maps} currentId={doc.id} onOpen={(id) => void switchMap(id)} />
@@ -2018,7 +2030,7 @@ export function App() {
               if (panels.inboxOpen)
                 entries.push({
                   key: "inbox",
-                  label: "Inbox",
+                  label: PANEL_LABELS.inbox.tab,
                   onClose: () => panels.setInboxOpen(false),
                   node: (
                     <InboxPanel
@@ -2036,7 +2048,7 @@ export function App() {
               if (panels.deckEditorOpen)
                 entries.push({
                   key: "deck",
-                  label: "Deck",
+                  label: PANEL_LABELS.deck.tab,
                   onClose: () => panels.setDeckEditorOpen(false),
                   node: (
                     <SlideDeckEditorPanel
@@ -2051,7 +2063,7 @@ export function App() {
               if (panels.noteEditorOpen)
                 entries.push({
                   key: "note",
-                  label: "Note",
+                  label: PANEL_LABELS.note.tab,
                   onClose: () => panels.setNoteEditorOpen(false),
                   node: (
                     <NoteEditorPanel
@@ -2068,7 +2080,7 @@ export function App() {
               if (panels.filterOpen)
                 entries.push({
                   key: "filter",
-                  label: "Filter",
+                  label: PANEL_LABELS.filter.tab,
                   onClose: () => panels.toggleFilter(),
                   node: (
                     <FilterPanel
@@ -2105,7 +2117,7 @@ export function App() {
               if (panels.stylesOpen)
                 entries.push({
                   key: "styles",
-                  label: "Styles",
+                  label: PANEL_LABELS.styles.tab,
                   onClose: () => panels.setStylesOpen(false),
                   node: (
                     <StylesPanel
@@ -2130,7 +2142,7 @@ export function App() {
               if (panels.historyOpen)
                 entries.push({
                   key: "history",
-                  label: "History",
+                  label: PANEL_LABELS.history.tab,
                   onClose: () => panels.setHistoryOpen(false),
                   node: (
                     <HistoryPanel

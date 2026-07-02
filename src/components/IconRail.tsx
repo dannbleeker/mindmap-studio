@@ -14,6 +14,9 @@ export interface IconRailProps {
   onSettings: () => void;
   /** Re-show the first-run "getting started" tips (also in Settings + ⌘K). */
   onGettingStarted: () => void;
+  /** Open the ⌘K command palette — a visible trigger so it's reachable without the hotkey (item 19,
+   *  matters most on touch, where there's no keyboard). */
+  onCommandPalette: () => void;
 }
 
 function RailBtn({
@@ -45,6 +48,7 @@ export function IconRail({
   onShortcuts,
   onSettings,
   onGettingStarted,
+  onCommandPalette,
 }: IconRailProps) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   return (
@@ -80,6 +84,7 @@ export function IconRail({
         style={{ display: "none" }}
       />
       <RailBtn icon="paste" label="Paste text → topics" onClick={onPaste} />
+      <RailBtn icon="search" label="Command palette (Ctrl/⌘+K)" onClick={onCommandPalette} />
       <div className="mm-rail-spacer">
         <RailBtn icon="star" label="Getting started tips" onClick={onGettingStarted} />
         <RailBtn icon="settings" label="Settings" onClick={onSettings} />

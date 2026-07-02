@@ -94,6 +94,7 @@ import {
   setTags,
   setTopic,
   setTopicRich,
+  shiftDates,
   sortChildren,
   subtreeExportDoc,
   toggleCollapse,
@@ -733,6 +734,29 @@ describe("flow ops — content", () => {
     expect(findNode(setPriority(base(), "a", 1).doc, "a")?.task?.priority).toBe(1);
     const set = setPriority(base(), "a", 2).doc;
     expect(findNode(setPriority(set, "a", undefined).doc, "a")?.task).toBeUndefined();
+  });
+
+  it("shiftDates moves every dated task in scope by ±N days, preserving offsets (item 14)", () => {
+    // Seed dates: a starts 06-10/due 06-20; a1 due 06-15; b has no dates.
+    let d = setDue(setStart(base(), "a", "2026-06-10").doc, "a", "2026-06-20").doc;
+    d = setDue(d, "a1", "2026-06-15").doc;
+
+    // Branch scope "a": a + a1 shift; b (outside) and undated nodes untouched.
+    const branch = shiftDates(d, 7, "a").doc;
+    expect(findNode(branch, "a")?.task?.start).toBe("2026-06-17");
+    expect(findNode(branch, "a")?.task?.due).toBe("2026-06-27");
+    expect(findNode(branch, "a1")?.task?.due).toBe("2026-06-22");
+
+    // Whole-map scope (root id): same two dated tasks move; a negative shift goes back.
+    const back = shiftDates(d, -10, "r").doc;
+    expect(findNode(back, "a")?.task?.due).toBe("2026-06-10");
+    expect(findNode(back, "a1")?.task?.due).toBe("2026-06-05");
+
+    // No-ops return the ORIGINAL doc reference (so undo history doesn't churn): days=0, and a scope
+    // with nothing dated.
+    expect(shiftDates(d, 0, "r").doc).toBe(d);
+    const undated = base();
+    expect(shiftDates(undated, 5, "r").doc).toBe(undated);
   });
 
   it("groupSummary brackets a node's subtree, labelled, and setSummaryLabel / deleteSummary edit it", () => {

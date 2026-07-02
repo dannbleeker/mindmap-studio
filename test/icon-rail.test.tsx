@@ -14,6 +14,7 @@ function setup(over: Partial<Parameters<typeof IconRail>[0]> = {}) {
     onShortcuts: vi.fn(),
     onSettings: vi.fn(),
     onGettingStarted: vi.fn(),
+    onCommandPalette: vi.fn(),
     ...over,
   };
   render(<IconRail {...props} />);
@@ -45,6 +46,12 @@ describe("IconRail", () => {
     const p = setup();
     await userEvent.click(screen.getByRole("button", { name: /getting started/i }));
     expect(p.onGettingStarted).toHaveBeenCalledTimes(1);
+  });
+
+  it("fires onCommandPalette from the visible ⌘K trigger (item 19)", async () => {
+    const p = setup();
+    await userEvent.click(screen.getByRole("button", { name: /command palette/i }));
+    expect(p.onCommandPalette).toHaveBeenCalledTimes(1);
   });
 
   it("exposes an image file picker wired to onImage", async () => {

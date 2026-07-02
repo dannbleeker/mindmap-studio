@@ -13,7 +13,7 @@ import type {
   RelationshipType,
   SlideRef,
 } from "../model/types";
-import type { SortKey } from "./flow/ops";
+import type { SortKey, StickyNoteColor } from "./flow/ops";
 import type { MindMapTheme } from "./theme";
 
 // The contract between the app and the canvas. The React Flow engine implements this surface,
@@ -249,6 +249,10 @@ export interface MindMapHandle {
   setSelectedStart: (start: string) => boolean;
   /** Set the selected node's task priority (1=High..3=Low), or clear with undefined; false if none. */
   setSelectedPriority: (priority: number | undefined) => boolean;
+  /** "Move project" — shift every task start/due date by `days` (±), preserving relative offsets.
+   *  `scope: "branch"` limits it to the selected node's subtree; "map" reschedules the whole map.
+   *  Returns false when the scope has no dated tasks (or "branch" with nothing selected). One undo. */
+  shiftDates: (days: number, scope: "map" | "branch") => boolean;
   /** Attach a file to the selected node; false if nothing is selected. */
   addSelectedAttachment: (attachment: MapAttachment) => boolean;
   /** Remove the attachment at `index` from the selected node; false if nothing is selected. */
@@ -256,7 +260,8 @@ export interface MindMapHandle {
   /** Graft a forest of nodes (e.g. parsed from pasted text) under the selected node; false if none. */
   addSubtreeToSelected: (nodes: MapNode[]) => boolean;
   /** Add a sticky note — a free-floating topic styled as an amber note card. */
-  addStickyNote: () => void;
+  /** Add a sticky note (default amber, or a named colour from the sticky palette). */
+  addStickyNote: (color?: StickyNoteColor) => void;
   /** Bind the selected node to mirror another map (a roll-up source); "" unbinds. False if none selected. */
   setSelectedRollup: (mapId: string) => boolean;
   /** Quick capture: add a named child under the selected node (or the root if none), keeping the

@@ -1002,6 +1002,19 @@ describe("MarkerTagIndex (interaction)", () => {
     expect(screen.queryByRole("button", { name: "Delete tag risk" })).toBeNull();
   });
 
+  it("Quick Filter: a per-marker/tag filter button fires onFilterBy with the kind + key (item 12)", async () => {
+    const onFilterBy = vi.fn();
+    render(<MarkerTagIndex root={sampleRoot()} onPick={noop} onFilterBy={onFilterBy} />);
+    // The sample tree carries the "risk" tag → a "Filter by tag risk" control.
+    await userEvent.click(screen.getByRole("button", { name: "Filter by tag risk" }));
+    expect(onFilterBy).toHaveBeenCalledWith("tag", "risk");
+  });
+
+  it("omits the Quick Filter buttons when onFilterBy is absent", () => {
+    render(<MarkerTagIndex root={sampleRoot()} onPick={noop} />);
+    expect(screen.queryByRole("button", { name: /^Filter by / })).toBeNull();
+  });
+
   it("renames/merges a tag map-wide via the ✎ control", async () => {
     const onRenameTag = vi.fn();
     render(

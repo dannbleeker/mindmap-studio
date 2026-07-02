@@ -190,6 +190,7 @@ describe("useMapExports — PNG raster seam", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       fillRect: () => {},
       drawImage: () => {},
+      setTransform: () => {},
       fillStyle: "",
     } as unknown as CanvasRenderingContext2D);
   });
@@ -207,6 +208,19 @@ describe("useMapExports — PNG raster seam", () => {
     expect(downloads).toHaveLength(1);
     expect(downloads[0].name).toBe("Demo Map.png");
     expect(downloads[0].blob.type).toBe("image/png");
+  });
+
+  it("tags the filename with the scale + transparency options (item 6)", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb: BlobCallback) => {
+      cb(new Blob(["PNG"], { type: "image/png" }));
+    });
+    const ex = useMapExports(handleRef(SVG), () => docOf("Demo Map"));
+    await ex.exportPng({ scale: 2 });
+    expect(downloads.at(-1)?.name).toBe("Demo Map@2x.png");
+    await ex.exportPng({ transparent: true });
+    expect(downloads.at(-1)?.name).toBe("Demo Map-transparent.png");
+    await ex.exportPng({ scale: 4, transparent: true });
+    expect(downloads.at(-1)?.name).toBe("Demo Map@4x-transparent.png");
   });
 
   it("exportPng skips the download when rasterisation yields no blob", async () => {
@@ -254,6 +268,7 @@ describe("useMapExports — copy image to clipboard", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       fillRect: () => {},
       drawImage: () => {},
+      setTransform: () => {},
       fillStyle: "",
     } as unknown as CanvasRenderingContext2D);
     vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb: BlobCallback) => {

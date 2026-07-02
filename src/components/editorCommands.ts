@@ -49,11 +49,20 @@ const EXPORTS = (io: ToolbarProps["io"]): [string, string, () => void][] => [
   ["xmind", ".xmind (XMind)", io.exportXmind],
   ["smmx", ".smmx (SimpleMind)", io.exportSmmx],
   ["mmap", ".mmap (MindManager)", io.exportMmap],
-  ["png", ".png (image)", io.exportPng],
+  ["png", ".png (image)", () => io.exportPng()],
+  ["png2x", ".png @2× (sharp)", () => io.exportPng({ scale: 2 })],
+  ["png4x", ".png @4× (print)", () => io.exportPng({ scale: 4 })],
+  ["png-transparent", ".png (transparent)", () => io.exportPng({ transparent: true })],
   ["svg", ".svg (vector)", io.exportSvg],
   ["html", ".html (standalone)", io.exportHtml],
   ["ihtml", ".html (interactive)", io.exportInteractiveHtml],
-  ["pdf", ".pdf (print)", io.exportPdf],
+  ["pdf-fit", ".pdf (fit to map)", () => io.exportPdfFile({ pageSize: "fit" })],
+  [
+    "pdf-a4",
+    ".pdf (A4 landscape)",
+    () => io.exportPdfFile({ pageSize: "a4", orientation: "landscape" }),
+  ],
+  ["pdf-print", ".pdf (via print dialog)", io.exportPdf],
   ["docx", ".docx (Word)", io.exportDocx],
   ["xlsx", ".xlsx (Excel)", io.exportXlsx],
   ["deck", ".html (slide deck)", io.exportDeck],
@@ -240,6 +249,13 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     panels.setInfoMinimized(() => false);
     panels.setInfoOpen(() => !shown);
   });
+  // Parity with the Panels menu (item 19): these four were reachable only from the menu, not ⌘K.
+  add("panel-agenda", "Toggle Agenda (due tasks)", "panel", () => panels.setAgendaOpen((v) => !v));
+  add("panel-maps", "Toggle Maps (all maps)", "panel", () => panels.setMapsOpen((v) => !v));
+  add("panel-inbox", "Toggle Inbox (quick capture)", "panel", () => panels.setInboxOpen((v) => !v));
+  add("panel-deck", "Toggle Slide deck (custom)", "panel", () =>
+    panels.setDeckEditorOpen((v) => !v),
+  );
 
   // Insert
   add("insert-sticky", "Insert sticky note", "insert", () => {

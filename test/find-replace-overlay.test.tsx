@@ -43,6 +43,20 @@ describe("FindReplaceOverlay", () => {
     expect(find.runReplace).toHaveBeenCalled();
   });
 
+  it("records the query into a recent-searches datalist on submit (item 18)", () => {
+    localStorage.clear();
+    const find = makeFind({ query: "budget" });
+    render(<FindReplaceOverlay find={find} onClose={vi.fn()} />);
+    const input = screen.getByLabelText("Find node");
+    // The input offers a history datalist, empty until a search runs.
+    expect(input.getAttribute("list")).toBe("mm-search-history");
+    fireEvent.submit(input.closest("form") as HTMLFormElement);
+    expect(find.runSearch).toHaveBeenCalled();
+    // The submitted query is now persisted and rendered as a datalist option.
+    expect(localStorage.getItem("mindmap-search-history")).toContain("budget");
+    expect(document.querySelector('#mm-search-history option[value="budget"]')).not.toBeNull();
+  });
+
   it("toggles match-case and regex", async () => {
     const u = userEvent.setup();
     const find = makeFind();

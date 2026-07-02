@@ -48,6 +48,7 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
       "exportInteractiveHtml",
       "exportDeck",
       "exportPdf",
+      "exportPdfFile",
       "exportDocx",
       "exportPptx",
       "exportXlsx",
@@ -188,21 +189,30 @@ describe("buildEditorCommands", () => {
     expect(cmds.length).toBeGreaterThan(40);
   });
 
-  it("covers every export format (17) and each defers to its io handler", () => {
+  it("covers every export format (22) and each defers to its io handler", () => {
     const props = mkProps();
     const cmds = buildEditorCommands(props);
     const exports = cmds.filter((c) => c.kind === "export");
-    expect(exports).toHaveLength(17);
+    // 17 original + png @2×/@4×/transparent + pdf fit/A4 (the print PDF replaced the old single .pdf).
+    expect(exports).toHaveLength(22);
     byId(props).get("export:json")?.run();
     expect(props.io.exportJson).toHaveBeenCalled();
     byId(props).get("export:pptx")?.run();
     expect(props.io.exportPptx).toHaveBeenCalled();
+    // The PNG-scale + direct-PDF variants defer to the right io calls (items 6, 7).
+    byId(props).get("export:png2x")?.run();
+    expect(props.io.exportPng).toHaveBeenCalledWith({ scale: 2 });
+    byId(props).get("export:pdf-fit")?.run();
+    expect(props.io.exportPdfFile).toHaveBeenCalledWith({ pageSize: "fit" });
   });
 
-  it("covers all 10 side-panel toggles and all 11 layouts", () => {
+  it("covers all 14 side-panel toggles and all 11 layouts", () => {
     const cmds = buildEditorCommands(mkProps());
-    expect(cmds.filter((c) => c.kind === "panel")).toHaveLength(10);
+    // 10 original + agenda/maps/inbox/deck (item 19 — Panels-menu parity in ⌘K).
+    expect(cmds.filter((c) => c.kind === "panel")).toHaveLength(14);
     expect(cmds.filter((c) => c.kind === "layout")).toHaveLength(11);
+    for (const id of ["panel-agenda", "panel-maps", "panel-inbox", "panel-deck"])
+      expect(cmds.some((c) => c.id === id)).toBe(true);
   });
 
   it("view + map commands defer to the handle / handlers", () => {

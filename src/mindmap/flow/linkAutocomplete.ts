@@ -53,10 +53,11 @@ export function linkTriggerAt(text: string, caret: number): LinkTrigger | null {
 }
 
 /** Rewrite the buffer for a selected candidate: replace the trigger token `[start, end)` with `label`.
- *  Returns the new text and the caret position (just after the inserted label). */
+ *  Returns the new text and the caret position (just after the inserted label). Takes any trigger with
+ *  a `{start,end}` range (a LinkTrigger or a TagTrigger — the latter passes "" to strip its token). */
 export function applyLinkSelection(
   text: string,
-  trigger: LinkTrigger,
+  trigger: { start: number; end: number },
   label: string,
 ): { text: string; caret: number } {
   const next = text.slice(0, trigger.start) + label + text.slice(trigger.end);
@@ -73,4 +74,49 @@ export function matchLinkCandidates(
   const q = query.trim().toLowerCase();
   const pool = q ? candidates.filter((c) => c.label.toLowerCase().includes(q)) : candidates;
   return pool.slice(0, limit);
+}
+
+// ── Inline #tag accelerator ──────────────────────────────────────────────────
+// Typing `#word` in the topic editor pops a tag picker; choosing (or Enter-ing) assigns the tag as
+// metadata and strips the `#word` token from the title. Same pure-detection / DOM-in-TopicNode split
+// as the link autocomplete above.
+
+/** A live `#query` token ending at the caret — `start`/`end` bracket the `#…` to strip on select. */
+export interface TagTrigger {
+  query: string;
+  start: number;
+  end: number;
+}
+
+/** Detect a `#tag` token ending at `caret`: a `#` at a word boundary (line start or after whitespace)
+ *  followed by tag chars (letters, digits, `-`, `_`) up to the caret. Returns null when there's no `#`
+ *  at the caret's word, or the run has a space / newline (a tag is a single word). */
+export function tagTriggerAt(text: string, caret: number): TagTrigger | null {
+  const before = text.slice(0, Math.max(0, Math.min(caret, text.length)));
+  const hashPos = before.lastIndexOf("#");
+  if (hashPos === -1) return null;
+  const prev = hashPos === 0 ? "" : before[hashPos - 1];
+  if (!(hashPos === 0 || /\s/.test(prev))) return null; // `#` must start a word (not mid-word like a1#b)
+  const seg = before.slice(hashPos + 1);
+  if (!/^[\w-]*$/.test(seg)) return null; // only tag chars between the `#` and the caret
+  return { query: seg, start: hashPos, end: before.length };
+}
+
+/** Tag suggestions for `query`: existing tags matching (case-insensitive substring), plus — when the
+ *  trimmed query is a non-empty new tag not already listed — a "create" row for it (prefixed with `+`
+ *  so the caller can show it as "add new"). Capped at `limit`. */
+export function matchTagCandidates(existing: string[], query: string, limit = 8): string[] {
+  const q = query.trim().toLowerCase();
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const t of existing) {
+    if (out.length >= limit) break;
+    if (q && !t.toLowerCase().includes(q)) continue;
+    if (seen.has(t.toLowerCase())) continue;
+    seen.add(t.toLowerCase());
+    out.push(t);
+  }
+  const trimmed = query.trim();
+  if (trimmed && !seen.has(trimmed.toLowerCase())) out.unshift(trimmed); // offer to create the typed tag
+  return out.slice(0, limit);
 }

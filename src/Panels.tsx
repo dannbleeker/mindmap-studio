@@ -1071,10 +1071,14 @@ export function MarkerTagIndex({
   onDeleteTag,
   tagColorOf,
   onSetTagColor,
+  onFilterBy,
 }: {
   root: MapNode;
   floatingTopics?: MapNode[];
   onPick: (id: string) => void;
+  /** Quick Filter (item 12): show/hide all topics carrying this marker/tag, from the index row. When
+   *  omitted, the index stays a pure navigation aid (no filter buttons). */
+  onFilterBy?: (kind: "marker" | "tag", key: string) => void;
   /** Tag manager: rename a tag map-wide (rename to an existing name MERGES). When omitted, the Tags
    *  section stays read-only navigation. */
   onRenameTag?: (from: string, to: string) => void;
@@ -1107,7 +1111,7 @@ export function MarkerTagIndex({
     setEditTag(null);
   };
 
-  const group = (label: string, entries: IndexEntry[], manage = false) => {
+  const group = (label: string, entries: IndexEntry[], kind: "marker" | "tag", manage = false) => {
     if (entries.length === 0) return null;
     return (
       <div key={label}>
@@ -1146,6 +1150,17 @@ export function MarkerTagIndex({
                     ({hits.length})
                   </span>
                 </span>
+                {onFilterBy ? (
+                  <button
+                    type="button"
+                    onClick={() => onFilterBy(kind, key)}
+                    title={`Filter the map to topics with ${kind === "marker" ? "marker" : "tag"} "${key}"`}
+                    aria-label={`Filter by ${kind} ${key}`}
+                    style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
+                  >
+                    ⧩
+                  </button>
+                ) : null}
                 {manage ? (
                   <>
                     {onSetTagColor ? (
@@ -1219,8 +1234,8 @@ export function MarkerTagIndex({
             No markers or tags in this map yet.
           </div>
         ) : null}
-        {group("Markers", markers)}
-        {group("Tags", tags, manageTags)}
+        {group("Markers", markers, "marker")}
+        {group("Tags", tags, "tag", manageTags)}
       </div>
     </Panel>
   );

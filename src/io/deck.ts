@@ -7,7 +7,7 @@
 
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
-import { resolveSlides } from "../present/slides";
+import { resolveSlides, slideKey } from "../present/slides";
 // Quote-safe (attr-level): deck text lands in element content here, but escaping quotes too keeps it
 // safe if it is ever moved into an attribute, and costs nothing.
 import { escapeHtmlAttr as escapeHtml } from "./htmlEscape";
@@ -39,6 +39,10 @@ const DECK_CSS = `
     min-height: 100%; max-width: 1000px; margin: 0 auto; width: 100%;
     padding: 48px clamp(24px, 8vw, 120px); }
   .slide h1 { font-size: clamp(28px, 5vw, 48px); margin: 0 0 0.4em; color: #fff; }
+  /* Live-map slide (item 1): the branch rendered as its own SVG fills the slide body, framed to its
+     bounds. Falls back to the bullet outline when no canvas image was captured at export time. */
+  .slide figure.map { margin: 0; display: flex; align-items: center; justify-content: center; }
+  .slide figure.map svg { max-width: 100%; max-height: 66vh; width: auto; height: auto; }
   .slide ul { line-height: 1.7; color: #e8e6f7; }
   .slide ul.overview { font-size: clamp(16px, 2.4vw, 24px); color: #cecbf6; line-height: 1.9; }
   .slide ul ul { font-size: 0.92em; color: #cecbf6; }
@@ -98,15 +102,27 @@ const DECK_SCRIPT = `
   })();
 `;
 
-export function buildDeckHtml(doc: MindMapDoc): string {
+/**
+ * The standalone HTML slide deck. When `branchSvgs` is supplied (item 1) — a map from each slide's
+ * `slideKey` to its already-sanitised, self-contained SVG rendered from the live canvas — each slide
+ * shows that branch's map image instead of the bullet outline, so the deck reads as a walk over the
+ * actual map (MindManager-style live-map slides). Absent (no live canvas at export time) ⇒ the classic
+ * bullet deck, unchanged and fully deterministic. A slide with no entry in the map also falls back to
+ * bullets, so a partial capture degrades gracefully per slide.
+ */
+export function buildDeckHtml(doc: MindMapDoc, branchSvgs?: Map<string, string>): string {
   const slides = resolveSlides(doc);
   const sections = slides
     .map((slide) => {
-      const body = slide.isOverview
-        ? `<ul class="overview">${doc.root.children
-            .map((child) => `<li>${escapeHtml(child.topic)}</li>`)
-            .join("")}</ul>`
-        : bulletsHtml(slide.node);
+      const svg = branchSvgs?.get(slideKey(slide));
+      // SVG is already sanitised (sanitizeSvg strips scripts/handlers) upstream — safe to inline.
+      const body = svg
+        ? `<figure class="map">${svg}</figure>`
+        : slide.isOverview
+          ? `<ul class="overview">${doc.root.children
+              .map((child) => `<li>${escapeHtml(child.topic)}</li>`)
+              .join("")}</ul>`
+          : bulletsHtml(slide.node);
       // A per-slide SlideRef note (custom deck) overrides the topic's own note — same resolution as the
       // presenter view. Markdown → sanitised HTML via renderNote.
       const noteMd = (slide.note ?? slide.node.note ?? "").trim();

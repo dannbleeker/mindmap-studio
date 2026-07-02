@@ -12,8 +12,16 @@
 // interpolated. Reuses the same slide model the in-app presentation renders.
 
 import type { MapNode, MindMapDoc } from "../model/types";
-import { resolveSlides } from "../present/slides";
+import { resolveSlides, slideKey } from "../present/slides";
 import { escapeXml, zipOoxml } from "./ooxml";
+
+/** A rendered branch image for a live-map slide (item 1): the PNG bytes plus its natural pixel size,
+ *  used to place the picture aspect-fitted inside the slide body region. */
+export interface BranchImage {
+  bytes: Uint8Array;
+  width: number;
+  height: number;
+}
 
 const A = "http://schemas.openxmlformats.org/drawingml/2006/main";
 const P = "http://schemas.openxmlformats.org/presentationml/2006/main";
@@ -26,6 +34,7 @@ const REL_LAYOUT = `${R}/slideLayout`;
 const REL_SLIDE = `${R}/slide`;
 const REL_THEME = `${R}/theme`;
 const REL_NOTESSLIDE = `${R}/notesSlide`;
+const REL_IMAGE = `${R}/image`;
 
 const CT_PRESENTATION =
   "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml";
@@ -93,12 +102,38 @@ function textBox(
   return `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${name}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody>${bodyPr}<a:lstStyle/>${paras}</p:txBody></p:sp>`;
 }
 
-function slideXml(title: string, body: BodyLine[]): string {
+// Aspect-fit an image of natural size (imgW×imgH px) inside the slide body region, centred. Returns
+// the DrawingML xfrm in EMU. Guards against a zero/undefined natural size (fills the box).
+function fitBody(imgW: number, imgH: number): { x: number; y: number; cx: number; cy: number } {
+  const w = imgW > 0 ? imgW : CONTENT_W;
+  const h = imgH > 0 ? imgH : BODY_H;
+  const scale = Math.min(CONTENT_W / w, BODY_H / h);
+  const cx = Math.round(w * scale);
+  const cy = Math.round(h * scale);
+  return {
+    x: MARGIN + Math.round((CONTENT_W - cx) / 2),
+    y: BODY_Y + Math.round((BODY_H - cy) / 2),
+    cx,
+    cy,
+  };
+}
+
+// A picture shape filling the body region with the branch's rendered map (item 1). `embed` is the
+// slide-rels relationship id (rId3) pointing at the media part; aspect ratio is locked.
+function pictureSp(embed: string, img: BranchImage): string {
+  const { x, y, cx, cy } = fitBody(img.width, img.height);
+  return `<p:pic><p:nvPicPr><p:cNvPr id="3" name="Branch map"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${embed}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`;
+}
+
+// A slide: the title text box plus EITHER a branch map picture (live-map slide) or the bullet outline.
+function slideXml(title: string, body: BodyLine[], img?: BranchImage): string {
   const titleSp = textBox(2, "Title", MARGIN, TITLE_Y, CONTENT_W, TITLE_H, titlePara(title));
-  const bodySp = body.length
-    ? textBox(3, "Content", MARGIN, BODY_Y, CONTENT_W, BODY_H, body.map(bodyPara).join(""), true)
-    : "";
-  return `${XML_DECL}<p:sld xmlns:a="${A}" xmlns:r="${R}" xmlns:p="${P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${titleSp}${bodySp}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+  const content = img
+    ? pictureSp("rId3", img)
+    : body.length
+      ? textBox(3, "Content", MARGIN, BODY_Y, CONTENT_W, BODY_H, body.map(bodyPara).join(""), true)
+      : "";
+  return `${XML_DECL}<p:sld xmlns:a="${A}" xmlns:r="${R}" xmlns:p="${P}"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${titleSp}${content}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
 }
 
 // Speaker-notes slide (B5). PowerPoint stores notes as separate parts referenced from the slide. Notes
@@ -137,16 +172,22 @@ const MASTER_RELS = `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="
 
 const LAYOUT_RELS = `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_MASTER}" Target="../slideMasters/slideMaster1.xml"/></Relationships>`;
 
-// A slide's rels: always the layout; plus its notes slide when it has one (B5). rId2 → notesSlideN.
-function slideRelsXml(slideIndex: number, hasNotes: boolean): string {
+// A slide's rels: always the layout (rId1); its notes slide when it has one (rId2, B5); and its branch
+// map image when it's a live-map slide (rId3 → media/imageN.png, item 1). rIds are fixed by role so the
+// slide XML can reference the picture embed (rId3) without threading the id through.
+function slideRelsXml(slideIndex: number, hasNotes: boolean, hasImage: boolean): string {
   const notes = hasNotes
     ? `<Relationship Id="rId2" Type="${REL_NOTESSLIDE}" Target="../notesSlides/notesSlide${slideIndex}.xml"/>`
     : "";
-  return `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_LAYOUT}" Target="../slideLayouts/slideLayout1.xml"/>${notes}</Relationships>`;
+  const image = hasImage
+    ? `<Relationship Id="rId3" Type="${REL_IMAGE}" Target="../media/image${slideIndex}.png"/>`
+    : "";
+  return `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_LAYOUT}" Target="../slideLayouts/slideLayout1.xml"/>${notes}${image}</Relationships>`;
 }
 
 // `notesIndices` are the 1-based slide indices that carry a notes slide (so their parts get declared).
-function contentTypesXml(slideCount: number, notesIndices: number[]): string {
+// `hasImages` adds the PNG default content type so embedded branch-map media resolve (item 1).
+function contentTypesXml(slideCount: number, notesIndices: number[], hasImages: boolean): string {
   const slides = Array.from(
     { length: slideCount },
     (_, i) => `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="${CT_SLIDE}"/>`,
@@ -156,7 +197,8 @@ function contentTypesXml(slideCount: number, notesIndices: number[]): string {
       (i) => `<Override PartName="/ppt/notesSlides/notesSlide${i}.xml" ContentType="${CT_NOTES}"/>`,
     )
     .join("");
-  return `${XML_DECL}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/ppt/presentation.xml" ContentType="${CT_PRESENTATION}"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="${CT_MASTER}"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="${CT_LAYOUT}"/><Override PartName="/ppt/theme/theme1.xml" ContentType="${CT_THEME}"/>${slides}${notes}</Types>`;
+  const png = hasImages ? `<Default Extension="png" ContentType="image/png"/>` : "";
+  return `${XML_DECL}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${png}<Override PartName="/ppt/presentation.xml" ContentType="${CT_PRESENTATION}"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="${CT_MASTER}"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="${CT_LAYOUT}"/><Override PartName="/ppt/theme/theme1.xml" ContentType="${CT_THEME}"/>${slides}${notes}</Types>`;
 }
 
 function presentationXml(slideCount: number): string {
@@ -176,14 +218,22 @@ function presentationRelsXml(slideCount: number): string {
   return `${XML_DECL}<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL_MASTER}" Target="slideMasters/slideMaster1.xml"/>${slides}</Relationships>`;
 }
 
-export function buildPptx(doc: MindMapDoc): Uint8Array {
+/**
+ * The PowerPoint deck. When `branchImages` is supplied (item 1) — a map from each slide's `slideKey`
+ * to its rendered branch map PNG (bytes + natural size) — those slides show the map picture instead of
+ * the bullet outline, matching the HTML deck's live-map slides. Absent (no live canvas at export time)
+ * ⇒ the classic bullet deck, unchanged and deterministic. A slide with no entry falls back to bullets.
+ */
+export function buildPptx(doc: MindMapDoc, branchImages?: Map<string, BranchImage>): Uint8Array {
   // resolveSlides (not presentationSlides) so a custom deck AND its per-slide speaker notes carry over,
   // matching the HTML deck + presenter view. Each slide's note = the SlideRef override, else the node's.
   const slides = resolveSlides(doc);
   const notes = slides.map((s) => (s.note ?? s.node.note ?? "").trim());
   const notesIndices = notes.map((n, i) => (n ? i + 1 : 0)).filter((i) => i > 0);
-  const parts: Record<string, string> = {
-    "[Content_Types].xml": contentTypesXml(slides.length, notesIndices),
+  const images = slides.map((s) => branchImages?.get(slideKey(s)));
+  const hasImages = images.some(Boolean);
+  const parts: Record<string, string | Uint8Array> = {
+    "[Content_Types].xml": contentTypesXml(slides.length, notesIndices, hasImages),
     "_rels/.rels": ROOT_RELS,
     "ppt/presentation.xml": presentationXml(slides.length),
     "ppt/_rels/presentation.xml.rels": presentationRelsXml(slides.length),
@@ -196,12 +246,14 @@ export function buildPptx(doc: MindMapDoc): Uint8Array {
   slides.forEach((slide, i) => {
     const n = i + 1;
     const hasNote = notes[i].length > 0;
-    parts[`ppt/slides/slide${n}.xml`] = slideXml(slide.heading, collectBody(slide, doc));
-    parts[`ppt/slides/_rels/slide${n}.xml.rels`] = slideRelsXml(n, hasNote);
+    const img = images[i];
+    parts[`ppt/slides/slide${n}.xml`] = slideXml(slide.heading, collectBody(slide, doc), img);
+    parts[`ppt/slides/_rels/slide${n}.xml.rels`] = slideRelsXml(n, hasNote, !!img);
     if (hasNote) {
       parts[`ppt/notesSlides/notesSlide${n}.xml`] = notesSlideXml(notes[i]);
       parts[`ppt/notesSlides/_rels/notesSlide${n}.xml.rels`] = notesSlideRels(n);
     }
+    if (img) parts[`ppt/media/image${n}.png`] = img.bytes;
   });
   return zipOoxml(parts);
 }

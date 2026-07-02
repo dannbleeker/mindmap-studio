@@ -28,7 +28,13 @@ import { gzipSync } from "node:zlib";
 // into the always-mounted Map panel, and the AND/NOT rules + full 1-9 priority
 // expansions. All of it is core editor-chrome/canvas code the Map panel or canvas
 // keydown handler needs synchronously, so none of it can be meaningfully lazy-loaded.
-const BUDGET_KB = 163;
+// 163 → 165: the 2026-07-02 Tier 1/2 batch — most of it (boards, exports, .mmap writer,
+// #tag/paste/date ops) is lazy or self-contained, but the live-map-slides deck renderer
+// (useMapExports' renderDeckSvgs/renderDeckImages + the resolveSlides/slideKey imports)
+// rides in the eagerly-imported export hook, nudging the entry ~0.2 kB over the old
+// razor-thin 163 ceiling. The 2 kB headroom also stops the near-flush margin from
+// flaking the gate under concurrent CI/Deploy/Stats runners.
+const BUDGET_KB = 165;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

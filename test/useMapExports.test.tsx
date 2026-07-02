@@ -240,6 +240,54 @@ describe("useMapExports — PNG raster seam", () => {
   });
 });
 
+describe("useMapExports — PPTX live-map slides (item 1)", () => {
+  // exportPptx renders each deck slide's branch to SVG (via the map ref) then rasterises to PNG for the
+  // embed — the same SVG→PNG seam as exportPng, so stub the browser bits jsdom lacks.
+  beforeEach(() => {
+    class FakeImage {
+      naturalWidth = 20;
+      naturalHeight = 12;
+      src = "";
+      decode() {
+        return Promise.resolve();
+      }
+    }
+    vi.stubGlobal("Image", FakeImage);
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      fillRect: () => {},
+      drawImage: () => {},
+      setTransform: () => {},
+      fillStyle: "",
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb: BlobCallback) => {
+      cb(new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], { type: "image/png" }));
+    });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("embeds a branch-map PNG per slide when a live canvas is present", async () => {
+    const { unzipSync } = await import("fflate");
+    const ex = useMapExports(handleRef(SVG), () => docOf("Demo Map"));
+    await ex.exportPptx();
+    expect(downloads).toHaveLength(1);
+    expect(downloads[0].name).toBe("Demo Map.pptx");
+    const zip = unzipSync(new Uint8Array(await downloads[0].blob.arrayBuffer()));
+    // overview + Alpha + Beta each rendered → three embedded media parts.
+    const media = Object.keys(zip).filter((n) => /^ppt\/media\/image\d+\.png$/.test(n));
+    expect(media.length).toBe(3);
+  });
+
+  it("still exports a (bullet) PPTX when there is no live canvas", async () => {
+    const ex = useMapExports(handleRef(null), () => docOf("Demo Map"));
+    await ex.exportPptx();
+    expect(downloads).toHaveLength(1);
+    expect(downloads[0].name).toBe("Demo Map.pptx");
+    const { unzipSync } = await import("fflate");
+    const zip = unzipSync(new Uint8Array(await downloads[0].blob.arrayBuffer()));
+    expect(Object.keys(zip).some((n) => n.startsWith("ppt/media/"))).toBe(false);
+  });
+});
+
 describe("useMapExports — PDF print path", () => {
   it("appends a hidden print iframe with the rendered SVG instead of downloading", async () => {
     const append = vi.spyOn(document.body, "appendChild");

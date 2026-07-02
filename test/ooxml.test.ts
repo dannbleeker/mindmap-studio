@@ -36,4 +36,12 @@ describe("zipOoxml", () => {
   it("is deterministic — identical input yields byte-identical output (pinned mtime)", () => {
     expect(zipOoxml(parts)).toEqual(zipOoxml(parts));
   });
+
+  it("stores binary parts (embedded media) verbatim alongside XML parts (item 1)", () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+    const zip = zipOoxml({ "[Content_Types].xml": "<types/>", "ppt/media/image1.png": png });
+    const back = unzipSync(zip);
+    expect(strFromU8(back["[Content_Types].xml"])).toBe("<types/>");
+    expect(back["ppt/media/image1.png"]).toEqual(png); // bytes not UTF-8 mangled
+  });
 });

@@ -16,6 +16,13 @@ export interface Slide {
 /** The sentinel `nodeId` selecting the root overview slide in a custom deck. */
 export const OVERVIEW_SLIDE_ID = "overview";
 
+/** The stable key identifying a slide's branch for per-slide image maps (item 1): the `"overview"`
+ *  sentinel for the root overview slide, else the branch node's id. Shared by the deck/PPTX image
+ *  exporters and the renderer that produces one map image per slide. Pure. */
+export function slideKey(slide: Slide): string {
+  return slide.isOverview ? OVERVIEW_SLIDE_ID : slide.node.id;
+}
+
 export function presentationSlides(doc: MindMapDoc): Slide[] {
   const overview: Slide = { heading: doc.root.topic, node: doc.root, isOverview: true };
   const branches: Slide[] = doc.root.children.map((child) => ({

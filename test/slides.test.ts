@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { MindMapDoc } from "../src/model/types";
-import { deckRows, hasCustomDeck, presentationSlides, resolveSlides } from "../src/present/slides";
+import {
+  OVERVIEW_SLIDE_ID,
+  deckRows,
+  hasCustomDeck,
+  presentationSlides,
+  resolveSlides,
+  slideKey,
+} from "../src/present/slides";
 
 const doc: MindMapDoc = {
   schemaVersion: 1,
@@ -68,6 +75,14 @@ describe("resolveSlides (#3)", () => {
 
     const allStale: MindMapDoc = { ...doc, meta: { slides: [{ nodeId: "ghost" }] } };
     expect(resolveSlides(allStale).map((s) => s.heading)).toEqual(["Plan", "Alpha", "Beta"]);
+  });
+});
+
+describe("slideKey (item 1)", () => {
+  it("keys the overview slide by the sentinel and a branch slide by its node id", () => {
+    const [overview, alpha] = presentationSlides(doc);
+    expect(slideKey(overview)).toBe(OVERVIEW_SLIDE_ID);
+    expect(slideKey(alpha)).toBe("a");
   });
 });
 

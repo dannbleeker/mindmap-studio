@@ -5,10 +5,12 @@ import { serializeDoc } from "./io/json";
 import { toMarkdown } from "./io/markdown";
 import { toMermaid } from "./io/mermaid";
 import { buildNotesAppendix } from "./io/notesAppendix";
+import type { BranchImage } from "./io/pptx";
 import { sanitizeSvg } from "./io/svgSanitize";
 import type { MindMapHandle } from "./mindmap";
 import type { MindMapDoc } from "./model/types";
 import { outlineNumbers } from "./outline";
+import { resolveSlides, slideKey } from "./present/slides";
 
 /** PNG raster options (item 6): a resolution multiplier and whether to keep a transparent background. */
 export interface PngOptions {
@@ -114,6 +116,41 @@ export function useMapExports(
   const cleanSvg = async (): Promise<string | null> => {
     const svg = mapRef.current?.exportSvg(scopeId?.() ?? undefined);
     return svg ? sanitizeSvg(await svg.text()) : null;
+  };
+
+  // Live-map slides (item 1): render each deck slide's branch to its own clean SVG from the live canvas
+  // — the overview slide is the whole map, each branch slide its subtree framed to its bounds — keyed by
+  // slideKey so the deck/PPTX builders can match a slide to its image. Returns undefined when there's no
+  // live canvas (no map open, or the Board overlay is up), so the exports degrade to the bullet deck.
+  const renderDeckSvgs = async (): Promise<Map<string, string> | undefined> => {
+    if (!mapRef.current) return undefined;
+    const slides = resolveSlides(getDoc());
+    const out = new Map<string, string>();
+    for (const slide of slides) {
+      const raw = mapRef.current.exportSvg(slide.isOverview ? undefined : slide.node.id);
+      if (raw) out.set(slideKey(slide), sanitizeSvg(await raw.text()));
+    }
+    return out.size > 0 ? out : undefined;
+  };
+
+  // The same per-slide branch renders rasterised to PNG (+ natural size) for the .pptx embed, which
+  // can't inline SVG. 2× for a crisp slide. Undefined when there's no live canvas (⇒ bullet deck).
+  const renderDeckImages = async (): Promise<Map<string, BranchImage> | undefined> => {
+    const svgs = await renderDeckSvgs();
+    if (!svgs) return undefined;
+    const out = new Map<string, BranchImage>();
+    for (const [key, svg] of svgs) {
+      try {
+        const png = await svgToPng(svg, { scale: 2 });
+        if (!png) continue;
+        const { width, height } = await pngPixelSize(png);
+        out.set(key, { bytes: new Uint8Array(await png.arrayBuffer()), width, height });
+      } catch {
+        // A slide that fails to rasterise (an unusual browser image pipeline) falls back to its bullet
+        // outline rather than aborting the whole PPTX export.
+      }
+    }
+    return out.size > 0 ? out : undefined;
   };
 
   return {
@@ -244,12 +281,14 @@ export function useMapExports(
         `${baseName()}-interactive.html`,
       );
     },
-    // Standalone slide deck — the Walk-Through as a shareable, offline .html file.
-    // Model-backed (no SVG), lazy-loaded to keep the deck template out of the entry chunk.
+    // Standalone slide deck — the Walk-Through as a shareable, offline .html file. Each slide shows its
+    // branch rendered from the live canvas (item 1, live-map slides); with no live canvas it degrades to
+    // the bullet outline. Lazy-loaded to keep the deck template out of the entry chunk.
     async exportDeck() {
       const { buildDeckHtml } = await import("./io/deck");
+      const svgs = await renderDeckSvgs();
       downloadBlob(
-        new Blob([buildDeckHtml(getDoc())], { type: "text/html" }),
+        new Blob([buildDeckHtml(getDoc(), svgs)], { type: "text/html" }),
         `${baseName()}-slides.html`,
       );
     },
@@ -308,11 +347,13 @@ export function useMapExports(
         `${baseName()}.docx`,
       );
     },
-    // PowerPoint .pptx — the Walk-Through as a real slide deck. Model-backed,
-    // lazy-loaded (pptx.ts pulls fflate for the OPC zip).
+    // PowerPoint .pptx — the Walk-Through as a real slide deck, each slide carrying its branch rendered
+    // from the live canvas as an embedded PNG (item 1); without a live canvas it degrades to the bullet
+    // outline. Lazy-loaded (pptx.ts pulls fflate for the OPC zip).
     async exportPptx() {
       const { buildPptx } = await import("./io/pptx");
-      const bytes = buildPptx(getDoc()) as BlobPart;
+      const images = await renderDeckImages();
+      const bytes = buildPptx(getDoc(), images) as BlobPart;
       downloadBlob(
         new Blob([bytes], {
           type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",

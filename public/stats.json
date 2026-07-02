@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-02T08:04:38.649Z",
-  "commit": "7ec8521",
+  "generatedAt": "2026-07-02T09:30:58.980Z",
+  "commit": "918a1eb",
   "headline": {
-    "linesTsJs": 72722,
+    "linesTsJs": 72757,
     "tests": 2010,
-    "lineCoveragePct": 90.84,
-    "commits": 1041,
+    "lineCoveragePct": 90.88,
+    "commits": 1043,
     "ageDays": 20,
     "trackedFiles": 488,
-    "featureManualPct": 60.1,
+    "featureManualPct": 60.5,
     "featureBookPct": 54.4,
     "featureExamplePct": 54.4
   },
@@ -16,12 +16,12 @@
     {
       "category": "App code (src)",
       "files": 225,
-      "lines": 42436
+      "lines": 42463
     },
     {
       "category": "Unit tests",
       "files": 198,
-      "lines": 28550
+      "lines": 28558
     },
     {
       "category": "Build scripts",
@@ -41,14 +41,14 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 90.84,
-      "covered": 27143,
-      "total": 29877
+      "pct": 90.88,
+      "covered": 27171,
+      "total": 29896
     },
     "statements": {
-      "pct": 90.84,
-      "covered": 27143,
-      "total": 29877
+      "pct": 90.88,
+      "covered": 27171,
+      "total": 29896
     },
     "functions": {
       "pct": 76.36,
@@ -56,35 +56,35 @@
       "total": 2065
     },
     "branches": {
-      "pct": 86.78,
-      "covered": 8208,
+      "pct": 86.79,
+      "covered": 8209,
       "total": 9458
     }
   },
   "tests": {
     "unit": 2010,
     "e2e": 0,
-    "durationMs": 102354,
+    "durationMs": 99557,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 27182
+        "ms": 27923
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 25182
+        "ms": 24410
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 8511
+        "ms": 8876
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8484
+        "ms": 7627
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 5024
+        "ms": 4086
       }
     ]
   },
@@ -107,11 +107,11 @@
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 2871
+        "lines": 2878
       },
       {
         "name": "App.tsx",
-        "lines": 2810
+        "lines": 2812
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -139,22 +139,22 @@
         "pct": 56.81
       },
       {
-        "file": "App.tsx",
-        "pct": 59.44
-      },
-      {
         "file": "io/importDispatch.ts",
         "pct": 59.55
+      },
+      {
+        "file": "App.tsx",
+        "pct": 59.79
       }
     ],
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 208
+        "commits": 209
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 132
+        "commits": 133
       },
       {
         "file": "Panels.tsx",
@@ -172,8 +172,8 @@
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 59.44,
-        "commits": 208
+        "pct": 59.79,
+        "commits": 209
       }
     ]
   },
@@ -190,7 +190,7 @@
   "bundle": {
     "jsGzipKb": 330.1,
     "cssGzipKb": 10.2,
-    "totalGzipKb": 340.3,
+    "totalGzipKb": 340.4,
     "entryGzipKb": 159.2,
     "budgetKb": 150,
     "withinBudget": false
@@ -198,13 +198,13 @@
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 42436,
+    "appLoc": 42463,
     "docToCodeRatio": 0.4
   },
   "featureCoverage": {
     "total": 228,
-    "manual": 137,
-    "manualPct": 60.1,
+    "manual": 138,
+    "manualPct": 60.5,
     "book": 124,
     "bookPct": 54.4,
     "bookExample": 124,
@@ -217,7 +217,7 @@
       },
       "library": {
         "total": 22,
-        "manual": 14,
+        "manual": 15,
         "book": 11
       },
       "structure": {
@@ -717,11 +717,6 @@
           "id": "find-highlight-all",
           "name": "Find highlights every match on the canvas",
           "since": "2026-06-20"
-        },
-        {
-          "id": "files-mmst",
-          "name": "Work with maps as files on disk (.mmst): Open / Save / autosave + Windows file association",
-          "since": "2026-06-19"
         },
         {
           "id": "gtd-areas-example",
@@ -1256,16 +1251,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 20,
-    "commits": 1041,
-    "commits7d": 210,
+    "commits": 1043,
+    "commits7d": 202,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 501
+        "count": 502
       },
       {
         "name": "github-actions[bot]",
-        "count": 473
+        "count": 474
       },
       {
         "name": "Claude",
@@ -1273,9 +1268,9 @@
       }
     ],
     "churn30d": {
-      "added": 132953,
-      "removed": 39507
+      "added": 133050,
+      "removed": 39551
     },
-    "changelogEntries": 393
+    "changelogEntries": 397
   }
 }

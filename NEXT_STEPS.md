@@ -8,7 +8,7 @@ Phase 1 (Brainstorming MVP) complete; canvas engine is **@xyflow/react**. MindMa
 **feature-complete for its scope** (local-first, offline, single-user, free) — the competitive
 gap-closing effort is **concluded by decision (2026-06-16)**; remaining gaps are surveyed, not
 pursued (see Reference). `book`/`bookExample` were **100% as of 2026-06-19**; every feature shipped
-since (including the 2026-07-02 batch below) is catalogued but not yet written up — see Tier 4/5
+since (including the 2026-07-02 batch below) is catalogued but not yet written up — see Tier 5
 item **24** (USER_GUIDE catch-up sweep). The **editor/UX redesign** (2026-06-17) and the **MindManager
 canvas-fidelity pass** (2026-06-19) are both complete. Deployed to GitHub Pages on every push to
 `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
@@ -103,7 +103,7 @@ MindManager access (backlog item 8 raises its value — re-test after shipping i
   MindManager `StyleGroup` theme (we don't resolve it), and summary spans are positional/implicit in
   the schema; both are low-ROI, left lossy by design.
 - **LaTeX / math** — deferred by decision (heavy KaTeX + ~1 MB offline fonts; not native to MindManager).
-- **True simultaneous multi-map / split view** — the sheet tab strip already covers tabbed
+- **True simultaneous multi-map / split view** — the multi-doc tab strip already covers tabbed
   switching; side-by-side comparison is a large change (selection/notes/style all assume one active
   `docRef`), deferred unless needed.
 

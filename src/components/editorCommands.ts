@@ -36,6 +36,7 @@ const LAYOUTS: { id: LayoutKind; label: string }[] = [
   { id: "timeline", label: "Timeline" },
   { id: "fishbone", label: "Fishbone" },
   { id: "grid", label: "Grid / matrix" },
+  { id: "swimlane", label: "Swimlane" },
   { id: "brace", label: "Brace map" },
 ];
 

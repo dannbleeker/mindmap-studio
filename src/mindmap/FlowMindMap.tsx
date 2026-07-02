@@ -2390,7 +2390,9 @@ function FlowInner({
             <StatusBar
               topics={nodes.length}
               selected={selectedIds.size}
-              onResetZoom={() => zoomTo(1, { duration: 200 })}
+              onResetZoom={() =>
+                zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport })
+              }
               onFitSelection={() => {
                 const ids = [...selectedIds];
                 if (ids.length)
@@ -2735,7 +2737,12 @@ function FlowInner({
                   fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit })
                 }
               />
-              <MenuItem label="Reset zoom (100%)" onSelect={() => zoomTo(1, { duration: 200 })} />
+              <MenuItem
+                label="Reset zoom (100%)"
+                onSelect={() =>
+                  zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport })
+                }
+              />
             </ContextMenu>
           ) : null}
           {/* Right-click menu for a boundary / summary / callout overlay (recolour · shape · delete).

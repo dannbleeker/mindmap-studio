@@ -13,12 +13,16 @@ export type MobileSheetPanels = Pick<
   | "setOutlineOpen"
   | "indexOpen"
   | "setIndexOpen"
+  | "relationshipsOpen"
+  | "setRelationshipsOpen"
   | "statsOpen"
   | "setStatsOpen"
   | "agendaOpen"
   | "setAgendaOpen"
   | "mapsOpen"
   | "setMapsOpen"
+  | "inboxOpen"
+  | "setInboxOpen"
   | "deckEditorOpen"
   | "setDeckEditorOpen"
   | "noteEditorOpen"
@@ -40,9 +44,11 @@ export function anyMobileSheetOpen(p: MobileSheetPanels): boolean {
   return (
     p.outlineOpen ||
     p.indexOpen ||
+    p.relationshipsOpen ||
     p.statsOpen ||
     p.agendaOpen ||
     p.mapsOpen ||
+    p.inboxOpen ||
     p.deckEditorOpen ||
     p.noteEditorOpen ||
     p.filterOpen ||
@@ -56,9 +62,11 @@ export function anyMobileSheetOpen(p: MobileSheetPanels): boolean {
 export function closeMobileSheets(p: MobileSheetPanels): void {
   p.setOutlineOpen(() => false);
   p.setIndexOpen(() => false);
+  p.setRelationshipsOpen(() => false);
   p.setStatsOpen(() => false);
   p.setAgendaOpen(() => false);
   p.setMapsOpen(() => false);
+  p.setInboxOpen(() => false);
   p.setDeckEditorOpen(() => false);
   p.setNoteEditorOpen(() => false);
   p.setStylesOpen(() => false);

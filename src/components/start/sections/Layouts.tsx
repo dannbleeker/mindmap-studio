@@ -15,6 +15,7 @@ const LAYOUTS: { kind: string; label: string }[] = [
   { kind: "timeline", label: "Timeline" },
   { kind: "fishbone", label: "Fishbone" },
   { kind: "grid", label: "Grid / matrix" },
+  { kind: "swimlane", label: "Swimlane" },
   { kind: "brace", label: "Brace map" },
 ];
 

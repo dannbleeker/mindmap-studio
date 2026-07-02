@@ -55,9 +55,17 @@ export function BrainstormTimer() {
         style={{
           ...controlStyle,
           fontVariantNumeric: "tabular-nums",
-          background: finished ? "#fde2e2" : running ? "#e2fbe8" : "#fff",
-          color: finished ? "#b42318" : "#26215c",
-          borderColor: finished ? "#b42318" : undefined,
+          // Idle keeps the themed controlStyle colours; running/finished tint via the toast tokens
+          // so the states stay readable under dark chrome and high contrast.
+          ...(finished
+            ? {
+                background: "var(--ed-toast-error-bg)",
+                color: "var(--ed-toast-error-ink)",
+                borderColor: "var(--ed-toast-error-border)",
+              }
+            : running
+              ? { background: "var(--ed-toast-success-bg)" }
+              : undefined),
         }}
       >
         {label}
@@ -69,8 +77,8 @@ export function BrainstormTimer() {
             top: "calc(100% + 4px)",
             left: 0,
             zIndex: 20,
-            background: "#fff",
-            border: "1px solid #cecbf6",
+            background: "var(--ed-card)",
+            border: "1px solid var(--ed-border)",
             borderRadius: 8,
             boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
             padding: 8,

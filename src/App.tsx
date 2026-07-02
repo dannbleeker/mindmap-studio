@@ -268,6 +268,7 @@ export function App() {
       "timeline",
       "fishbone",
       "grid",
+      "swimlane",
       "brace",
     ];
     try {
@@ -1678,6 +1679,7 @@ export function App() {
     [
       [panels.outlineOpen, "outline"],
       [panels.indexOpen, "index"],
+      [panels.relationshipsOpen, "relationships"],
       [panels.statsOpen, "stats"],
       [panels.agendaOpen, "agenda"],
       [panels.mapsOpen, "maps"],

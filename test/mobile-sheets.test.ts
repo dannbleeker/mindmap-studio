@@ -7,12 +7,16 @@ function panels(over: Partial<MobileSheetPanels> = {}): MobileSheetPanels {
     setOutlineOpen: vi.fn(),
     indexOpen: false,
     setIndexOpen: vi.fn(),
+    relationshipsOpen: false,
+    setRelationshipsOpen: vi.fn(),
     statsOpen: false,
     setStatsOpen: vi.fn(),
     agendaOpen: false,
     setAgendaOpen: vi.fn(),
     mapsOpen: false,
     setMapsOpen: vi.fn(),
+    inboxOpen: false,
+    setInboxOpen: vi.fn(),
     deckEditorOpen: false,
     setDeckEditorOpen: vi.fn(),
     noteEditorOpen: false,
@@ -41,6 +45,8 @@ describe("anyMobileSheetOpen", () => {
     expect(anyMobileSheetOpen(panels({ historyOpen: true }))).toBe(true);
     expect(anyMobileSheetOpen(panels({ filterOpen: true }))).toBe(true);
     expect(anyMobileSheetOpen(panels({ agendaOpen: true }))).toBe(true);
+    expect(anyMobileSheetOpen(panels({ relationshipsOpen: true }))).toBe(true);
+    expect(anyMobileSheetOpen(panels({ inboxOpen: true }))).toBe(true);
   });
 
   it("is true for the open inspector but false once it's minimized", () => {
@@ -56,6 +62,8 @@ describe("closeMobileSheets", () => {
     expect(p.setOutlineOpen).toHaveBeenCalled();
     expect(p.setHistoryOpen).toHaveBeenCalled();
     expect(p.setStylesOpen).toHaveBeenCalled();
+    expect(p.setRelationshipsOpen).toHaveBeenCalled();
+    expect(p.setInboxOpen).toHaveBeenCalled();
     expect(p.toggleFilter).toHaveBeenCalledTimes(1); // open filter → toggled off (also clears it)
     expect(p.setInfoMinimized).toHaveBeenCalled();
     expect(p.setInfoOpen).toHaveBeenCalled();

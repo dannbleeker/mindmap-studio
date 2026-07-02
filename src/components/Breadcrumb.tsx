@@ -19,10 +19,10 @@ export function Breadcrumb({ crumbs, onPick }: { crumbs: Crumb[]; onPick: (id: s
         flexWrap: "wrap",
         gap: 2,
         padding: "3px 12px",
-        background: "#f6f5fb",
-        borderBottom: "1px solid #e4e1f3",
+        background: "var(--ed-card)",
+        borderBottom: "1px solid var(--ed-border)",
         fontSize: 12,
-        color: "#52606d",
+        color: "var(--ed-ink2)",
       }}
     >
       {crumbs.map((c, i) => {
@@ -46,7 +46,7 @@ export function Breadcrumb({ crumbs, onPick }: { crumbs: Crumb[]; onPick: (id: s
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
                 fontWeight: last ? 700 : 400,
-                color: last ? "#26215c" : "#52606d",
+                color: last ? "var(--ed-ink)" : "var(--ed-ink2)",
                 cursor: "pointer",
               }}
             >

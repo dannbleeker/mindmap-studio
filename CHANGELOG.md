@@ -253,6 +253,24 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   modal styles into a co-located `CommandPalette.css` imported by the component, so they ship in the main
   bundle and load wherever the palette renders.
 
+- **Swimlane layout no longer reverts on reload.** The Toolbar and Map panel offered **Swimlane**, but the
+  layout whitelist that vets the persisted choice (and `?layout=` links) didn't include it, so a swimlane
+  map silently reopened as *Both sides*. Also registered it in the ⌘K layout commands and the Start
+  screen's Layouts gallery, which had the same omission.
+
+- **Relationships & Inbox panels behave on phones; Relationships dock tab activates.** The mobile
+  bottom-sheet registry omitted the Relationships and Inbox panels — opening them on a phone showed no
+  tap-out scrim and *tap outside to dismiss* didn't close them. The dock's auto-activate list also
+  omitted Relationships, so opening that panel never brought its tab to the front.
+
+- **Breadcrumb bar and brainstorm timer follow the chrome theme.** Both hardcoded light-mode colours,
+  staying white-on-light under dark chrome and ignoring high contrast. They now use the shared `--ed-*`
+  design tokens (the timer's running/finished tints reuse the toast success/error tokens).
+
+- **Reset zoom respects reduced motion.** The status-bar *100%* button and the minimap menu's *Reset
+  zoom* hardcoded a 200 ms animation, ignoring the reduced-motion preference every fit/viewport path
+  honours; both now use the shared motion token and skip the animation under reduced motion.
+
 ### Added
 
 - **UI token-scale + a11y tails (UI research — UI-2 / UI-5 tails).** A `motion` scale (`--ed-dur-*` /

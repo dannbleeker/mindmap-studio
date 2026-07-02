@@ -200,10 +200,10 @@ describe("buildEditorCommands", () => {
     expect(props.io.exportPptx).toHaveBeenCalled();
   });
 
-  it("covers all 9 side-panel toggles and all 10 layouts", () => {
+  it("covers all 10 side-panel toggles and all 11 layouts", () => {
     const cmds = buildEditorCommands(mkProps());
     expect(cmds.filter((c) => c.kind === "panel")).toHaveLength(10);
-    expect(cmds.filter((c) => c.kind === "layout")).toHaveLength(10);
+    expect(cmds.filter((c) => c.kind === "layout")).toHaveLength(11);
   });
 
   it("view + map commands defer to the handle / handlers", () => {

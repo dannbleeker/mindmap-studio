@@ -857,6 +857,39 @@ describe("StyleBar", () => {
     expect(onStyle).toHaveBeenCalledWith({ shadow: undefined });
   });
 
+  it("reflects the selection's active style — shape / bold / fill / font (item 21)", () => {
+    render(
+      <StyleBar
+        onStyle={noop}
+        style={{ shape: "diamond", fontWeight: "bold", background: "#e2ecfd", fontFamily: "serif" }}
+      />,
+    );
+    // The matching controls announce themselves pressed.
+    expect(screen.getByRole("button", { name: /Diamond/ }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "B" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Fill #e2ecfd" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+    // The font select opens on the live value (no longer resets to "Font…").
+    expect((screen.getByTitle("Topic font family") as HTMLSelectElement).value).toBe("serif");
+  });
+
+  it("toggles bold off when the topic is already bold (item 21)", async () => {
+    const onStyle = vi.fn();
+    render(<StyleBar onStyle={onStyle} style={{ fontWeight: "bold" }} />);
+    await userEvent.click(screen.getByRole("button", { name: "B" }));
+    expect(onStyle).toHaveBeenCalledWith({ fontWeight: "" });
+  });
+
+  it("shows no active control for a bulk/mixed selection (style undefined) (item 21)", () => {
+    render(<StyleBar onStyle={noop} />); // no style prop → bulk mode
+    for (const b of screen.getAllByRole("button")) {
+      expect(b.getAttribute("aria-pressed")).not.toBe("true");
+    }
+  });
+
   it("wrap width is a slider that snaps to presets and re-wraps live (10b layer 1)", () => {
     const onStyle = vi.fn();
     render(<StyleBar onStyle={onStyle} wrapWidth="220px" />);

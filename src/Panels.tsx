@@ -340,6 +340,7 @@ export function StyleBar({
   textColor,
   fillColor,
   branchColor,
+  style,
 }: {
   onStyle: (patch: Partial<NodeStyle>) => void;
   /** Set the per-node branch/connector colour (separate from NodeStyle); enables the Branch picker. */
@@ -352,26 +353,58 @@ export function StyleBar({
   textColor?: string;
   fillColor?: string;
   branchColor?: string;
+  /** The selected node's full style (single-select only) — the bar highlights the controls that match it,
+   *  so it reflects current values (MindManager's context toolbar) instead of being write-only. Undefined
+   *  in bulk mode (a mixed selection has no single "active" state to show). */
+  style?: NodeStyle;
 }) {
   // The Wrap slider is the one StyleBar control that reflects current state (the rest are write-only); seed
   // it from the selection and re-seed when the selected node changes.
   const [wrapPx, setWrapPx] = useState(() => styleToWrapWidth(wrapWidth));
   useEffect(() => setWrapPx(styleToWrapWidth(wrapWidth)), [wrapWidth]);
-  const swatch = (color: string, onClick: () => void, title: string) => (
+  // Coarse pointers (touch) get larger tap targets than the 18px desktop icons.
+  const coarse = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
+  const swSize = coarse ? 26 : 18;
+  const touchPad: CSSProperties | null = coarse
+    ? { padding: `${space.xs}px ${space.lg}px`, fontSize: fontSize.xl }
+    : null;
+  // Active-control look (mirrors the design system's ACTIVE_CONTROL): the ink fills the button, the label
+  // inverts. Themes drive both vars, so it inverts cleanly in light + dark mode.
+  const ACTIVE: CSSProperties = {
+    background: "var(--ed-ink)",
+    color: "var(--ed-page)",
+    borderColor: "var(--ed-ink)",
+  };
+  const btn = (active: boolean): CSSProperties => ({
+    ...styleBtn,
+    ...touchPad,
+    ...(active ? ACTIVE : null),
+  });
+  // Reflect current values only for a single selection; a bulk/mixed selection shows no active state.
+  const reflect = !!style;
+  const swatch = (color: string, onClick: () => void, title: string, active = false) => (
     <button
       key={title}
       type="button"
       onClick={onClick}
       title={title}
+      aria-pressed={active}
       style={{
-        width: 18,
-        height: 18,
+        width: swSize,
+        height: swSize,
         borderRadius: radius.xs,
         border: `1px solid ${colors.controlBorder}`,
         background: color,
         cursor: "pointer",
         padding: 0,
+        ...(active ? { outline: "2px solid var(--ed-ink)", outlineOffset: 1 } : null),
       }}
+    />
+  );
+  const divider = (
+    <span
+      aria-hidden="true"
+      style={{ width: 1, alignSelf: "stretch", background: "var(--ed-divider)", margin: "0 4px" }}
     />
   );
   const label = (text: string) => (
@@ -439,12 +472,27 @@ export function StyleBar({
     { shape: "star", title: "Star (highlight)" },
     { shape: "cloud", title: "Cloud (idea / external system)" },
   ];
+  // Which controls match the current single selection (so the bar reflects state, not just writes it).
+  const s = style;
+  const isBox = reflect && !s?.shape && s?.borderRadius === "4px";
+  const isRounded = reflect && !s?.shape && s?.borderRadius === "14px";
+  const isPill = reflect && !s?.shape && s?.borderRadius === "999px";
+  const noFill = reflect && !s?.background && !s?.fill;
+  const isTint = reflect && s?.fill === "tint";
+  const isGradient = reflect && s?.fill === "gradient";
+  const noBorder = reflect && !s?.border;
+  const isBold = reflect && s?.fontWeight === "bold";
+  const isRaised = reflect && s?.shadow === true;
+  const isFlat = reflect && !s?.shadow;
+  const fillEq = (c: string) => reflect && (s?.background ?? "").toLowerCase() === c.toLowerCase();
+  const borderEq = (c: string) => reflect && s?.border === `2px solid ${c}`;
   return (
     <div style={barRow}>
       {label("Shape")}
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isBox)}
+        aria-pressed={isBox}
         title="Box"
         onClick={() => onStyle({ borderRadius: "4px", shape: undefined })}
       >
@@ -452,7 +500,8 @@ export function StyleBar({
       </button>
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isRounded)}
+        aria-pressed={isRounded}
         title="Rounded"
         onClick={() => onStyle({ borderRadius: "14px", shape: undefined })}
       >
@@ -460,7 +509,8 @@ export function StyleBar({
       </button>
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isPill)}
+        aria-pressed={isPill}
         title="Pill"
         onClick={() => onStyle({ borderRadius: "999px", shape: undefined })}
       >
@@ -470,18 +520,23 @@ export function StyleBar({
         <button
           key={shape}
           type="button"
-          style={{ ...styleBtn, padding: "3px 5px" }}
+          style={{ ...btn(reflect && s?.shape === shape), padding: coarse ? "5px 7px" : "3px 5px" }}
+          aria-pressed={reflect && s?.shape === shape}
           title={title}
           onClick={() => onStyle({ shape })}
         >
           {shapeIcon(shape)}
         </button>
       ))}
+      {divider}
       {label("Fill")}
-      {FILL_SWATCHES.map((c) => swatch(c, () => onStyle({ background: c }), `Fill ${c}`))}
+      {FILL_SWATCHES.map((c) =>
+        swatch(c, () => onStyle({ background: c }), `Fill ${c}`, fillEq(c)),
+      )}
       <button
         type="button"
-        style={styleBtn}
+        style={btn(noFill)}
+        aria-pressed={noFill}
         title="No fill"
         onClick={() => onStyle({ background: "", fill: undefined })}
       >
@@ -489,7 +544,8 @@ export function StyleBar({
       </button>
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isTint)}
+        aria-pressed={isTint}
         title="Branch-colour tint"
         onClick={() => onStyle({ fill: "tint" })}
       >
@@ -497,24 +553,28 @@ export function StyleBar({
       </button>
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isGradient)}
+        aria-pressed={isGradient}
         title="Gradient fill"
         onClick={() => onStyle({ fill: "gradient" })}
       >
         ◨
       </button>
+      {divider}
       {label("Border")}
       {BORDER_SWATCHES.map((c) =>
-        swatch(c, () => onStyle({ border: `2px solid ${c}` }), `Border ${c}`),
+        swatch(c, () => onStyle({ border: `2px solid ${c}` }), `Border ${c}`, borderEq(c)),
       )}
       <button
         type="button"
-        style={styleBtn}
+        style={btn(noBorder)}
+        aria-pressed={noBorder}
         title="No border"
         onClick={() => onStyle({ border: "" })}
       >
         ✕
       </button>
+      {divider}
       {label("Colour")}
       {colorCtl(textColor, "#2b2a26", (c) => onStyle({ color: c }), "Text colour", "Text colour")}
       {colorCtl(
@@ -535,15 +595,17 @@ export function StyleBar({
         : null}
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isBold)}
+        aria-pressed={isBold}
         title="Bold"
-        onClick={() => onStyle({ fontWeight: "bold" })}
+        onClick={() => onStyle({ fontWeight: isBold ? "" : "bold" })}
       >
         <b>B</b>
       </button>
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isRaised)}
+        aria-pressed={isRaised}
         title="Raised (drop shadow)"
         onClick={() => onStyle({ shadow: true })}
       >
@@ -551,26 +613,29 @@ export function StyleBar({
       </button>
       <button
         type="button"
-        style={styleBtn}
+        style={btn(isFlat)}
+        aria-pressed={isFlat}
         title="Flat (no shadow)"
         onClick={() => onStyle({ shadow: undefined })}
       >
         ◳
       </button>
+      {divider}
       {label("Font")}
       <select
-        value=""
+        value={s?.fontFamily ?? ""}
         onChange={(e) => {
           if (e.target.value) onStyle({ fontFamily: e.target.value });
         }}
         title="Topic font family"
-        style={{ ...styleBtn, padding: "2px 4px", fontSize: 12 }}
+        style={{ ...btn(false), padding: coarse ? "4px 6px" : "2px 4px", fontSize: 12 }}
       >
         <option value="">Font…</option>
         <option value="sans-serif">Sans</option>
         <option value="serif">Serif</option>
         <option value="monospace">Mono</option>
       </select>
+      {divider}
       {label("Wrap")}
       {/* Continuous wrap width (10b layer 1): drag for any width, snapping to the Narrow/Medium/Wide ticks;
           the far end = None (no cap). Reflects + re-wraps the selection live via onStyle({ maxWidth }). */}
@@ -3062,6 +3127,7 @@ export function InfoPanel({
                     textColor={node?.style?.color}
                     fillColor={node?.style?.background}
                     branchColor={node?.branchColor}
+                    style={multi ? undefined : node?.style}
                   />
                   {!multi && (
                     // Markers lead the Details tab in single + bulk; Style keeps the per-item sticker

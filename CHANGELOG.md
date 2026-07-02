@@ -7,6 +7,33 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+<!-- 2026-07-02 MindManager review — Tier 4 big-bets (items 21–23). -->
+
+- **Free background shapes (T4-23).** A new canvas-object layer for ad-hoc composition — **rectangle,
+  ellipse, block arrow, chevron** — drawn behind the topics (SWOT quadrants, Venn frames, flow arrows).
+  Insert them from **Insert → Shapes ▸** (which switches on free-canvas mode); each shape is its own
+  positioned + sized object (distinct from the single diagram backdrop). **Click** to select, **drag**
+  the body to move, **drag a corner grip** to resize (the whole gesture is one undo step), and a small
+  inline toolbar recolours it, changes its kind, or deletes it. Shapes render behind the topics on the
+  canvas and in every image/PDF/HTML export (the same shared geometry — canvas == export). Verified
+  in-browser end-to-end + unit-tested (geometry per kind, the corner-resize math, ops, export); a 4-lens
+  adversarial review's findings (edge-menu mutual exclusion, a resize-anchor drift) are fixed.
+
+- **Smart containers: swimlanes & matrices that carry their topics (T4-22).** Two of the new shapes are
+  **containers** — a **Swimlane** (lanes) and a **Matrix** (grid) — that behave like MindManager Smart
+  Shapes: **dragging the container moves every topic sitting inside it** by the same amount, in one undo
+  step ("move the lane, its cards follow"). Membership is by position (a topic is *in* a container when
+  its centre is inside), so there's nothing extra to wire up — drop topics onto a lane and drag it.
+  Verified in-browser (drag a swimlane → all contained topics follow) + unit-tested (centre-based
+  capture, outside topics untouched, one undo step).
+
+- **The StyleBar reflects the selection (T4-21).** The per-topic style bar was a write-only row of ~35
+  icons; it now **shows the current values** (MindManager's context toolbar): the active shape, fill
+  swatch, border swatch, tint/gradient, bold, raised/flat and font-family controls **highlight** when
+  they match the selected topic, the font selector opens on the live value, and Bold toggles off when
+  already bold. Controls are grouped with dividers and enlarge on touch. Reflection is single-select
+  only. Verified in-browser + unit-tested.
+
 <!-- 2026-07-02 MindManager review — Tier 1 + Tier 2 (items 1–20), landed as batches A–G. -->
 
 - **Live-map slides: the deck exports the real map, not bullets (T1-1).** The biggest presentation gap

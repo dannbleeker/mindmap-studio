@@ -33,45 +33,23 @@ backlog item below was **verified against the code** — evidence paths are as o
 review candidates were rejected as already shipped (user-savable map parts, instant task filters,
 active-filter indicator) — don't re-propose them.
 
-**Tiers 1, 2 and 3 — all 27 items — shipped on 2026-07-02** (batches A–G; see `CHANGELOG.md` for the
-per-item detail), along with a cross-cutting `border`/`borderColor` shorthand-conflict sweep found
-while verifying Tier 3. Only the **Tier 4 big bets** and **Tier 5 housekeeping** items below remain open.
+**Tiers 1–4 — all 30 items — shipped on 2026-07-02** (batches A–G, then the Tier-4 blocks; see
+`CHANGELOG.md` for the per-item detail), along with a cross-cutting `border`/`borderColor`
+shorthand-conflict sweep found while verifying Tier 3. Only the **Tier 5 housekeeping** items below
+remain open.
 
 Anything deliberately **not** built is recorded under *Deferred / blocked* or *Out of scope* below,
 so the decisions don't get re-litigated.
 
-## Backlog — 2026-07-02 MindManager review (remaining: Tier 4 big bets + Tier 5 housekeeping)
+## Backlog — 2026-07-02 MindManager review (remaining: Tier 5 housekeeping)
 
-Tiers 1–3 shipped (see `CHANGELOG.md`). Sizes: **S** = hours, **M** = days, **L** = a week+. Each
+Tiers 1–4 shipped (see `CHANGELOG.md`). Sizes: **S** = hours, **M** = days, **L** = a week+. Each
 item: what + why → *Now* (verified current state) → *Scope* (the exact delta).
-
-### Tier 4 — big bets (L)
-
-21. **StyleBar redesign: reflect state, group, enlarge targets.** ~35 write-only 18 px controls with
-    tooltip-only labels; MindManager 24's context toolbar shows only relevant commands and always
-    reflects current values. *Now:* `Panels.tsx:333-404` — colour pickers already open on the live
-    value and the Wrap slider reflects selection; the rest is write-only. *Scope:* active-shape/
-    border indication on the button grid, grouped/labelled sections, touch-sized controls. (The gap
-    is narrower than it first looks — don't rebuild the pickers.)
-
-22. **Smart containers: lanes/grids that capture and move topics (M–L, ⚠ adjacent to a
-    deprioritised decision).** MindManager Smart Shapes (swim lanes, matrices) capture floating
-    topics — moving the container moves contents. *Now:* backdrops are pure geometry fixed at the
-    origin (`src/mindmap/flow/backdrop.ts`) — no containment, no drag-moves-contents. *Scope:*
-    draggable swimlane/matrix backdrop kinds with region-membership capture in freeform mode.
-    **Flag before starting:** the "infinite Miro-style object canvas" is recorded as
-    feasible-but-deprioritised in Reference — this walks toward it.
-
-23. **Free shapes on the canvas (L).** MindManager background objects (rect/oval/block arrow/
-    chevron) enable ad-hoc SWOT/Venn/risk-grid composition. *Now:* `BackdropKind =
-    onion|funnel|venn2|venn3` only (`src/model/types.ts:240`); text boxes are largely covered by
-    sticky-note/floating topics — scope shapes only. *Scope:* a general background-shape layer
-    reusing the Backdrop render/export seam (canvas==export invariant — shared resolver).
 
 ### Tier 5 — housekeeping / hygiene (no MindManager angle, found during the review)
 
-24. **USER_GUIDE catch-up sweep: 112 of 250 catalogue entries are `manual:false`** — everything
-    shipped since ~2026-06-19 (including the 2026-07-02 Tier 1–3 batch; book/bookExample lag too now).
+24. **USER_GUIDE catch-up sweep: 115 of 253 catalogue entries are `manual:false`** — everything
+    shipped since ~2026-06-19 (including the 2026-07-02 Tier 1–4 batch; book/bookExample lag too now).
     A dedicated docs session: write the missing USER_GUIDE sections, flip flags as they land.
 
 25. **Rich-text editing rides deprecated `document.execCommand`** (bold/italic/underline/colour in

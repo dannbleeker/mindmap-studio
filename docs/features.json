@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 424,
+  "reviewedThroughChangelogBullets": 427,
   "areas": [
     "editing",
     "notes",
@@ -16,6 +16,33 @@
     "pwa"
   ],
   "features": [
+    {
+      "id": "canvas-shapes",
+      "name": "Free background shapes (rectangle / ellipse / block arrow / chevron) — a positioned, resizable canvas-object layer for SWOT/Venn/risk composition",
+      "area": "structure",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "smart-containers",
+      "name": "Smart containers (swimlane / matrix) that capture and move their contained topics when dragged",
+      "area": "structure",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "stylebar-reflects-state",
+      "name": "StyleBar reflects the selection's active style (shape / fill / border / bold / shadow / font) with touch-sized, grouped controls",
+      "area": "styling",
+      "since": "2026-07-02",
+      "manual": false,
+      "book": false,
+      "bookExample": false
+    },
     {
       "id": "deck-live-map-slides",
       "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",

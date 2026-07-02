@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-02T13:16:22.313Z",
-  "commit": "42916f1",
+  "generatedAt": "2026-07-02T13:32:17.936Z",
+  "commit": "1129fef",
   "headline": {
-    "linesTsJs": 75071,
-    "tests": 2072,
-    "lineCoveragePct": 90.57,
-    "commits": 1055,
+    "linesTsJs": 75562,
+    "tests": 2081,
+    "lineCoveragePct": 90.55,
+    "commits": 1058,
     "ageDays": 20,
     "trackedFiles": 496,
     "featureManualPct": 58.5,
@@ -16,12 +16,12 @@
     {
       "category": "App code (src)",
       "files": 229,
-      "lines": 43958
+      "lines": 44280
     },
     {
       "category": "Unit tests",
       "files": 202,
-      "lines": 29370
+      "lines": 29539
     },
     {
       "category": "Build scripts",
@@ -41,50 +41,50 @@
   ],
   "coverage": {
     "lines": {
-      "pct": 90.57,
-      "covered": 28060,
-      "total": 30979
+      "pct": 90.55,
+      "covered": 28249,
+      "total": 31194
     },
     "statements": {
-      "pct": 90.57,
-      "covered": 28060,
-      "total": 30979
+      "pct": 90.55,
+      "covered": 28249,
+      "total": 31194
     },
     "functions": {
-      "pct": 76.46,
-      "covered": 1628,
-      "total": 2129
+      "pct": 76.42,
+      "covered": 1644,
+      "total": 2151
     },
     "branches": {
-      "pct": 86.83,
-      "covered": 8522,
-      "total": 9814
+      "pct": 86.72,
+      "covered": 8597,
+      "total": 9913
     }
   },
   "tests": {
-    "unit": 2072,
+    "unit": 2081,
     "e2e": 0,
-    "durationMs": 100643,
+    "durationMs": 106723,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 29397
+        "ms": 28329
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 26563
+        "ms": 26608
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 10177
+        "ms": 9355
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 9326
+        "ms": 8367
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4020
+        "ms": 4785
       }
     ]
   },
@@ -107,15 +107,15 @@
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 3118
+        "lines": 3129
       },
       {
         "name": "App.tsx",
-        "lines": 2834
+        "lines": 2832
       },
       {
         "name": "mindmap/flow/ops.ts",
-        "lines": 1877
+        "lines": 1887
       },
       {
         "name": "mindmap/flow/TopicNode.tsx",
@@ -140,7 +140,7 @@
       },
       {
         "file": "App.tsx",
-        "pct": 59.29
+        "pct": 59.32
       },
       {
         "file": "io/importDispatch.ts",
@@ -150,11 +150,11 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 211
+        "commits": 212
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 136
+        "commits": 137
       },
       {
         "file": "Panels.tsx",
@@ -162,18 +162,18 @@
       },
       {
         "file": "mindmap/contract.ts",
-        "commits": 78
+        "commits": 79
       },
       {
         "file": "mindmap/flow/ops.ts",
-        "commits": 76
+        "commits": 77
       }
     ],
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 59.29,
-        "commits": 211
+        "pct": 59.32,
+        "commits": 212
       }
     ]
   },
@@ -188,17 +188,17 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 507,
+    "jsGzipKb": 508.3,
     "cssGzipKb": 10.3,
-    "totalGzipKb": 517.3,
-    "entryGzipKb": 162.4,
+    "totalGzipKb": 518.6,
+    "entryGzipKb": 162.9,
     "budgetKb": 150,
     "withinBudget": false
   },
   "docs": {
     "bookWords": 17172,
     "chapters": 11,
-    "appLoc": 43958,
+    "appLoc": 44280,
     "docToCodeRatio": 0.39
   },
   "featureCoverage": {
@@ -1331,16 +1331,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 20,
-    "commits": 1055,
-    "commits7d": 204,
+    "commits": 1058,
+    "commits7d": 205,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 508
+        "count": 510
       },
       {
         "name": "github-actions[bot]",
-        "count": 480
+        "count": 481
       },
       {
         "name": "Claude",
@@ -1348,8 +1348,8 @@
       }
     ],
     "churn30d": {
-      "added": 136705,
-      "removed": 40428
+      "added": 137343,
+      "removed": 40575
     },
     "changelogEntries": 405
   }

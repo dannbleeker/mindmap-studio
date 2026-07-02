@@ -8,6 +8,7 @@ import type { LayoutKind } from "../contract";
 import { arrowHeadPath } from "./arrowhead";
 import { backdropGeometry } from "./backdrop";
 import { type BraceGroup, braceGeometry, bracePath } from "./brace";
+import { canvasShapeGeometry } from "./canvasShapes";
 import {
   type AttachSide,
   type Box,
@@ -273,6 +274,37 @@ function emitBackdrop(bd: ReturnType<typeof backdropGeometry>): string[] {
   );
 }
 
+/** SVG for the free background shapes + smart containers (items 23 + 22), behind the topics. Shares the
+ *  canvasShapes geometry the on-canvas overlay uses, so the export matches the screen (canvas == export). */
+function emitShapes(doc: MindMapDoc): string[] {
+  const out: string[] = [];
+  for (const shape of doc.shapes ?? []) {
+    for (const p of canvasShapeGeometry(shape).prims) {
+      if (p.t === "rect")
+        out.push(
+          `<rect x="${r2(p.x)}" y="${r2(p.y)}" width="${r2(p.w)}" height="${r2(p.h)}" rx="${p.rx}" fill="${esc(p.fill)}" stroke="${esc(p.stroke)}" stroke-width="2"/>`,
+        );
+      else if (p.t === "ellipse")
+        out.push(
+          `<ellipse cx="${r2(p.cx)}" cy="${r2(p.cy)}" rx="${r2(p.rx)}" ry="${r2(p.ry)}" fill="${esc(p.fill)}" stroke="${esc(p.stroke)}" stroke-width="2"/>`,
+        );
+      else if (p.t === "path")
+        out.push(
+          `<path d="${p.d}" fill="${esc(p.fill)}" stroke="${esc(p.stroke)}" stroke-width="2"/>`,
+        );
+      else if (p.t === "line")
+        out.push(
+          `<line x1="${r2(p.x1)}" y1="${r2(p.y1)}" x2="${r2(p.x2)}" y2="${r2(p.y2)}" stroke="${esc(p.stroke)}" stroke-width="1.5"/>`,
+        );
+      else
+        out.push(
+          `<text x="${r2(p.x)}" y="${r2(p.y)}" font-family="sans-serif" font-size="14" font-weight="600" fill="${esc(p.fill)}" text-anchor="${p.anchor}">${esc(p.s)}</text>`,
+        );
+    }
+  }
+  return out;
+}
+
 /** SVG for the anchored callout bubbles (dashed connector + sticky-note bubble + wrapped text),
  *  drawn on top — the same per-callout resolver the canvas uses (canvas == export). */
 function emitCallouts(callouts: CalloutBox[]): string[] {
@@ -333,6 +365,12 @@ export function buildFlowSvg(
     maxX = Math.max(maxX, bd.bbox.x + bd.bbox.w);
     maxY = Math.max(maxY, bd.bbox.y + bd.bbox.h);
   }
+  for (const shape of doc.shapes ?? []) {
+    minX = Math.min(minX, shape.pos.x);
+    minY = Math.min(minY, shape.pos.y);
+    maxX = Math.max(maxX, shape.pos.x + shape.size.w);
+    maxY = Math.max(maxY, shape.pos.y + shape.size.h);
+  }
   if (!Number.isFinite(minX)) {
     minX = 0;
     minY = 0;
@@ -348,6 +386,9 @@ export function buildFlowSvg(
 
   // Dedicated diagram backdrop (onion / funnel / Venn frame), behind everything else.
   if (bd) parts.push(...emitBackdrop(bd));
+
+  // Free background shapes + smart containers, above the backdrop but behind boundaries + topics.
+  parts.push(...emitShapes(doc));
 
   // Boundaries (behind everything), then summary brackets — extracted emitters; the same geometry +
   // resolvers the canvas overlays use, so the bytes are identical (canvas == export).

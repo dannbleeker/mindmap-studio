@@ -26,7 +26,7 @@ import { MARKER_PALETTE, markerImage } from "../icons";
 import { parseOutline } from "../io/pasteOutline";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
-import type { Boundary, MapNode, MindMapDoc, Summary } from "../model/types";
+import type { Boundary, CanvasShape, MapNode, MindMapDoc, Summary } from "../model/types";
 import { PRIORITY_LEVELS, cyclePriority, priorityLabel } from "../priority";
 import { cycleTaskProgress, nextProgressLevel } from "../progress";
 import { isStandalonePwa } from "../pwa/standalone";
@@ -53,6 +53,7 @@ import { CanvasRelationshipsSR } from "./flow/CanvasRelationshipsSR";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
 import { DiagramBackdrop } from "./flow/DiagramBackdrop";
 import { NodePopover } from "./flow/NodePopover";
+import { ShapeLayer } from "./flow/ShapeLayer";
 import { Summaries } from "./flow/Summaries";
 import { TopicNode } from "./flow/TopicNode";
 import { LAYOUT_ANIM_MS, easeInOutCubic, lerp, prefersReducedMotion } from "./flow/animateLayout";
@@ -82,6 +83,7 @@ import {
   addFloatingTopic,
   addHyperlink,
   addLink,
+  addShape,
   addSibling,
   addStickyNote,
   addSubtree,
@@ -97,6 +99,7 @@ import {
   deleteLink,
   deleteNode,
   deleteNodes,
+  deleteShape,
   deleteSummary,
   deleteTag,
   detachBranch,
@@ -165,6 +168,10 @@ import {
   setProgress,
   setRollup,
   setRules,
+  setShapeColor,
+  setShapeKind,
+  setShapePos,
+  setShapeRect,
   setShowLinkTypes,
   setSlides,
   setStart,
@@ -249,6 +256,7 @@ const OVERLAY_OPS: Record<
 // (a fresh `[]` each render would defeat their React.memo). Frozen to flag them as never-mutated.
 const EMPTY_BOUNDARIES: readonly Boundary[] = Object.freeze([]);
 const EMPTY_SUMMARIES: readonly Summary[] = Object.freeze([]);
+const EMPTY_SHAPES: CanvasShape[] = [];
 
 // Keyboard hints shown right-aligned on the matching right-click menu rows (#2) — kept in step with
 // the canvas keydown handler + the cheat-sheet (src/shortcuts.ts).
@@ -350,6 +358,9 @@ function FlowInner({
   // The selected overlay object (boundary / summary / callout), if any. The 4th selection channel —
   // mutually exclusive with node + edge; drives the OverlayInspector + the overlay halo.
   const [selectedOverlay, setSelectedOverlay] = useState<SelectedOverlay | null>(null);
+  // The selected free background shape / container (Tier 4 items 23 + 22), if any. A peer selection
+  // channel — mutually exclusive with node / edge / overlay; drives the shape halo + inline toolbar.
+  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   // When edit was started by typing on a selected node, the character to seed the editor with
   // (caret at end); null for a normal edit (double-click / F2 / new node → seed topic, select all).
@@ -616,6 +627,7 @@ function FlowInner({
     const resolved = resolveSelectedOverlay(docRef.current, sel);
     if (!resolved) return; // the overlay is gone — leave the current selection unchanged
     setSelectedOverlay(resolved);
+    setSelectedShapeId(null); // overlay selection clears the shape channel
     onSelectOverlayRef.current?.(resolved);
   }, []);
 
@@ -633,6 +645,21 @@ function FlowInner({
     setSelectedIds(id ? new Set([id]) : new Set());
   }, []);
 
+  // Select a free background shape / container (Tier 4 items 23 + 22): clear the node / edge / overlay
+  // channels (mutual exclusion) and set the shape as the active object.
+  const selectShape = useCallback(
+    (id: string) => {
+      setMenu(null);
+      setLinkingFrom(null);
+      selectOnly(null);
+      fireSelect(null);
+      clearEdgeSelection();
+      clearOverlaySelection();
+      setSelectedShapeId(id);
+    },
+    [selectOnly, fireSelect, clearEdgeSelection, clearOverlaySelection],
+  );
+
   // Mirror React Flow's own selection (marquee drag-select + Shift/Ctrl-click) into our set. Guarded
   // by a set-equality check so the round-trip with the selection-flag effect can't loop: once the
   // flags match the set, RF re-fires this with the same ids and we bail.
@@ -642,9 +669,10 @@ function FlowInner({
       const cur = selectedIdsRef.current;
       if (ids.size === cur.size && [...ids].every((x) => cur.has(x))) return;
       if (ids.size > 0) {
-        // node selection is mutually exclusive with edge + overlay
+        // node selection is mutually exclusive with edge + overlay + shape
         clearEdgeSelection();
         clearOverlaySelection();
+        setSelectedShapeId(null);
       }
       setSelectedIds(ids);
       // Keep the anchor if it's still selected, else adopt the most-recently-selected node.
@@ -1940,6 +1968,20 @@ function FlowInner({
       },
       setBackdropRings: (delta) => apply(setBackdropRings(docRef.current, delta)),
       clearBackdrop: () => apply(clearBackdrop(docRef.current)),
+      addShape: (kind) => {
+        // Drop the shape at the viewport centre + switch to free-canvas mode (preserving node
+        // positions), in one undo step, then select it so its inline toolbar shows.
+        const pane = document.querySelector(".react-flow__pane");
+        const rect = pane?.getBoundingClientRect();
+        const centre = rect
+          ? screenToFlowPosition({ x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 })
+          : { x: 0, y: 0 };
+        const positions = new Map<string, { x: number; y: number }>();
+        for (const n of getNodes()) positions.set(n.id, { x: n.position.x, y: n.position.y });
+        const res = addShape(docRef.current, kind, centre);
+        apply({ doc: setFreeform(res.doc, true, positions).doc });
+        if (res.selectId) selectShape(res.selectId);
+      },
       setSelectedStyle: (patch) => withSelectedAll((doc, id) => mergeStyle(doc, id, patch)),
       setSelectedBranchColor: (color) =>
         withSelectedAll((doc, id) => setBranchColor(doc, id, color)),
@@ -2136,6 +2178,7 @@ function FlowInner({
       getNodes,
       getViewport,
       setViewport,
+      screenToFlowPosition,
       apply,
       withSelected,
       withSelectedAll,
@@ -2147,6 +2190,7 @@ function FlowInner({
       fireSelectOverlay,
       focusNodeById,
       frameBranch,
+      selectShape,
       deleteSelectionWithUndo,
       undoAction,
       redoAction,
@@ -2362,6 +2406,7 @@ function FlowInner({
               selectOnly(null);
               fireSelect(null);
               clearOverlaySelection();
+              setSelectedShapeId(null);
               setSelectedEdgeId(edge.id);
               fireSelectEdge(edge.id);
             }}
@@ -2375,12 +2420,14 @@ function FlowInner({
               fireSelect(null);
               clearEdgeSelection();
               clearOverlaySelection();
+              setSelectedShapeId(null);
               setMenu(null);
             }}
             onNodeContextMenu={(e, node) => {
               e.preventDefault();
               clearEdgeSelection();
               clearOverlaySelection();
+              setSelectedShapeId(null);
               // Keep an existing multi-selection when right-clicking one of its members — so the menu
               // can offer bulk actions instead of collapsing to a single node (the natural mouse path
               // for batch work). Otherwise select just this node.
@@ -2408,6 +2455,7 @@ function FlowInner({
               selectOnly(null);
               fireSelect(null);
               clearOverlaySelection();
+              setSelectedShapeId(null);
               setSelectedEdgeId(edge.id);
               fireSelectEdge(edge.id);
               setEdgeMenu({ x: e.clientX, y: e.clientY, id: edge.id });
@@ -2415,6 +2463,19 @@ function FlowInner({
           >
             <BackgroundImage url={renderDoc.meta?.backgroundImage} />
             <DiagramBackdrop backdrop={renderDoc.backdrop} />
+            <ShapeLayer
+              shapes={renderDoc.shapes ?? EMPTY_SHAPES}
+              selectedId={selectedShapeId}
+              onSelect={selectShape}
+              onMove={(id, x, y) => apply(setShapePos(docRef.current, id, x, y))}
+              onResize={(id, x, y, w, h) => apply(setShapeRect(docRef.current, id, x, y, w, h))}
+              onColor={(id, c) => apply(setShapeColor(docRef.current, id, c))}
+              onKind={(id, k) => apply(setShapeKind(docRef.current, id, k))}
+              onDelete={(id) => {
+                apply(deleteShape(docRef.current, id));
+                setSelectedShapeId(null);
+              }}
+            />
             <BraceConnectors braces={braces} />
             <Boundaries
               boundaries={boundaries}

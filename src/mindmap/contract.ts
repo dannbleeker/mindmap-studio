@@ -2,6 +2,7 @@ import type { Ref } from "react";
 import type {
   BackdropKind,
   BranchGrowth,
+  CanvasShapeKind,
   ConditionalRule,
   FontScale,
   MapAttachment,
@@ -147,6 +148,9 @@ export interface MindMapHandle {
   /** Add a dedicated diagram backdrop (onion / funnel / Venn) and switch to free-canvas mode so
    *  topics can be dragged into its regions. */
   setBackdrop: (kind: BackdropKind) => void;
+  /** Add a free background shape / smart container (rect / ellipse / arrow / chevron / swimlane /
+   *  matrix) at the viewport centre, switch to free-canvas mode, and select it (Tier 4 items 23 + 22). */
+  addShape: (kind: CanvasShapeKind) => void;
   /** Add/remove a ring or stage on the current onion/funnel backdrop (no-op for venn). */
   setBackdropRings: (delta: number) => void;
   /** Remove the map's diagram backdrop. */

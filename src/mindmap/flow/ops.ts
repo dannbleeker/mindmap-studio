@@ -5,6 +5,8 @@ import type {
   Boundary,
   BranchGrowth,
   Callout,
+  CanvasShape,
+  CanvasShapeKind,
   ConditionalRule,
   CrossLink,
   FontScale,
@@ -1781,6 +1783,108 @@ export function setBackdropColor(doc: MindMapDoc, color: string): OpResult {
   if (!doc.backdrop) return { doc };
   const next = structuredClone(doc);
   if (next.backdrop) next.backdrop.color = color || undefined;
+  return { doc: next };
+}
+
+// --- free background shapes + smart containers (items 23 + 22) --------------
+
+/** Default size (flow units) per shape kind — containers are larger to hold topics. */
+const SHAPE_DEFAULTS: Record<CanvasShapeKind, { w: number; h: number }> = {
+  rect: { w: 260, h: 170 },
+  ellipse: { w: 240, h: 170 },
+  blockArrow: { w: 240, h: 120 },
+  chevron: { w: 220, h: 120 },
+  swimlane: { w: 540, h: 360 },
+  matrix: { w: 420, h: 320 },
+};
+
+/** Add a free shape / container, centred on `pos` (default: the origin). Selects the new shape. */
+export function addShape(
+  doc: MindMapDoc,
+  kind: CanvasShapeKind,
+  pos?: { x: number; y: number },
+): OpResult {
+  const next = structuredClone(doc);
+  const size = SHAPE_DEFAULTS[kind];
+  const centre = pos ?? { x: 0, y: 0 };
+  const shape: CanvasShape = {
+    id: makeId(),
+    kind,
+    pos: { x: centre.x - size.w / 2, y: centre.y - size.h / 2 },
+    size: { ...size },
+    ...(kind === "swimlane" ? { lanes: 3 } : {}),
+    ...(kind === "matrix" ? { lanes: 2, rows: 2 } : {}),
+  };
+  next.shapes = [...(next.shapes ?? []), shape];
+  return { doc: next, selectId: shape.id };
+}
+
+/** Mutate one shape by id (a no-op returning the same doc if the id isn't found). */
+function mutateShape(doc: MindMapDoc, id: string, fn: (s: CanvasShape) => void): OpResult {
+  const idx = (doc.shapes ?? []).findIndex((s) => s.id === id);
+  if (idx < 0) return { doc };
+  const next = structuredClone(doc);
+  const s = next.shapes?.[idx];
+  if (s) fn(s);
+  return { doc: next };
+}
+
+/** Move a shape's top-left corner (freeform drag). */
+export function setShapePos(doc: MindMapDoc, id: string, x: number, y: number): OpResult {
+  return mutateShape(doc, id, (s) => {
+    s.pos = { x, y };
+  });
+}
+
+/** Resize a shape (clamped to a small minimum so it stays grabbable). */
+export function setShapeSize(doc: MindMapDoc, id: string, w: number, h: number): OpResult {
+  return mutateShape(doc, id, (s) => {
+    s.size = { w: Math.max(40, w), h: Math.max(30, h) };
+  });
+}
+
+/** Set a shape's whole box (pos + size) in one step — the corner-resize commit, where dragging a top/
+ *  left grip moves the origin too. Size is min-clamped. */
+export function setShapeRect(
+  doc: MindMapDoc,
+  id: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): OpResult {
+  return mutateShape(doc, id, (s) => {
+    s.pos = { x, y };
+    s.size = { w: Math.max(40, w), h: Math.max(30, h) };
+  });
+}
+
+/** Set (or clear, with "") a shape's colour override. */
+export function setShapeColor(doc: MindMapDoc, id: string, color: string): OpResult {
+  return mutateShape(doc, id, (s) => {
+    s.color = color || undefined;
+  });
+}
+
+/** Change a shape's kind (rect ↔ ellipse ↔ arrow ↔ chevron ↔ container). */
+export function setShapeKind(doc: MindMapDoc, id: string, kind: CanvasShapeKind): OpResult {
+  return mutateShape(doc, id, (s) => {
+    s.kind = kind;
+  });
+}
+
+/** Set (or clear, with "") a shape's centred label. */
+export function setShapeLabel(doc: MindMapDoc, id: string, label: string): OpResult {
+  return mutateShape(doc, id, (s) => {
+    s.label = label || undefined;
+  });
+}
+
+/** Remove a shape by id. */
+export function deleteShape(doc: MindMapDoc, id: string): OpResult {
+  if (!(doc.shapes ?? []).some((s) => s.id === id)) return { doc };
+  const next = structuredClone(doc);
+  next.shapes = (next.shapes ?? []).filter((s) => s.id !== id);
   return { doc: next };
 }
 

@@ -266,6 +266,29 @@ export interface Backdrop {
   color?: string;
 }
 
+/** A free background shape drawn behind the topics for ad-hoc composition — SWOT quadrants, Venn
+ *  frames, block arrows, chevrons (Tier 4 item 23). Unlike the singleton `backdrop`, shapes are
+ *  multi-instance and freely positioned + sized. Adding one flips free-canvas mode on, but rendering is
+ *  ungated (a shape shows whenever present). Lossless in .json, ignored by flat exporters, carried into
+ *  the image/PDF/HTML export (canvas == export). */
+export type CanvasShapeKind = "rect" | "ellipse" | "blockArrow" | "chevron" | "swimlane" | "matrix";
+export interface CanvasShape {
+  id: string;
+  kind: CanvasShapeKind;
+  /** Top-left corner in flow coords. */
+  pos: { x: number; y: number };
+  /** Width/height in flow units. */
+  size: { w: number; h: number };
+  /** Stroke/fill accent (`#rrggbb`); absent = the default shape accent. */
+  color?: string;
+  /** Optional label centred in the shape (a shape caption; lane/cell headers for containers). */
+  label?: string;
+  /** Lane count (swimlane) or column count (matrix); ignored by plain shapes. Container kinds only. */
+  lanes?: number;
+  /** Row count (matrix only). */
+  rows?: number;
+}
+
 export interface MindMapDoc {
   schemaVersion: 1;
   id: string;
@@ -279,6 +302,8 @@ export interface MindMapDoc {
   summaries?: Summary[];
   /** A dedicated diagram backdrop (onion / funnel / Venn) drawn behind freely-positioned topics. */
   backdrop?: Backdrop;
+  /** Free background shapes + smart containers drawn behind the topics (Tier 4 items 23 + 22). */
+  shapes?: CanvasShape[];
   /** Top-level topics not attached to the central hierarchy (legends, notes). */
   floatingTopics?: MapNode[];
   theme?: string;

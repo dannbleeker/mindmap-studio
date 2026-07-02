@@ -14,7 +14,7 @@ import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind, MindMapHandle, SelectedNode } from "../mindmap";
 import { STICKY_NOTE_COLORS, type StickyNoteColor } from "../mindmap/flow/ops";
 import type { CanvasTheme } from "../mindmap/theme";
-import type { MindMapDoc } from "../model/types";
+import type { CanvasShapeKind, MindMapDoc } from "../model/types";
 import { PANEL_LABELS } from "../panelLabels";
 import type { NodeHit } from "../search";
 import { SHORTCUT_BINDINGS } from "../shortcuts";
@@ -26,6 +26,17 @@ import { EditorIcon, type EditorIconName } from "./EditorIcons";
 // one-click "Last used" row at the top — the common case is re-exporting the same format. Best-effort
 // localStorage, mirroring the ⌘K recents.
 const LAST_EXPORT_KEY = "mindmap-last-export";
+
+/** Background shapes + smart containers offered in the Insert → Shapes fly-out (Tier 4 items 23 + 22). */
+const SHAPE_ITEMS: { kind: CanvasShapeKind; name: string }[] = [
+  { kind: "rect", name: "Rectangle" },
+  { kind: "ellipse", name: "Ellipse" },
+  { kind: "blockArrow", name: "Block arrow" },
+  { kind: "chevron", name: "Chevron" },
+  { kind: "swimlane", name: "Swimlane (container)" },
+  { kind: "matrix", name: "Matrix (container)" },
+];
+
 function loadLastExport(): string | null {
   try {
     const v = localStorage.getItem(LAST_EXPORT_KEY);
@@ -1171,6 +1182,22 @@ export function Toolbar({
                         const ok = m()?.addSubtreeToSelected(templateSubtree(t.id)) ?? false;
                         showHint(
                           ok ? `Inserted the ${t.name} structure.` : "Select a topic first.",
+                        );
+                      }}
+                    />
+                  ))}
+                </MenuSub>
+                <MenuSub icon={mi("plus")} label="Shapes">
+                  <MenuLabel>Background shape (free-canvas)</MenuLabel>
+                  {SHAPE_ITEMS.map((s) => (
+                    <MenuItem
+                      key={s.kind}
+                      icon={mi("plus")}
+                      label={s.name}
+                      onSelect={() => {
+                        m()?.addShape(s.kind);
+                        showHint(
+                          `Added a ${s.name.toLowerCase()} — drag to move, drag a corner to resize.`,
                         );
                       }}
                     />

@@ -25,9 +25,12 @@ import { escapeXmlAttr } from "./xml";
 // depth-1 main + the root's SubTopicsShape LeftAndRight), relationships
 // (Relationships>Relationship>2x ObjectReference@OIdRef), boundaries (Topic>OneBoundary, only when a
 // boundary's node set equals a topic's full subtree — else dropped), and floating topics.
+// Now also round-trips (Phase 8, item 8): tags (Topic>TextLabels), task info (Task@TaskPriority /
+// TaskPercentage / StartDate / DeadlineDate / Resources), and embedded PNG/JPEG images (Topic>OneImage
+// + a bin/ archive entry) — each matched to the importer's own extractor.
 // Write-only (emitted but the importer doesn't read back): collapsed state. Dropped: rich text,
-// images, tags, attachments, per-node style, callouts, freeform pos, per-branch layout, task/PM
-// data, summaries, conditional rules, backdrop, theme — none have a round-trip path today.
+// attachments, per-node style, callouts, freeform pos, per-branch layout, summaries, conditional
+// rules, backdrop, theme — none have a round-trip path today.
 
 // Pinned so the ZIP is byte-reproducible (same pattern as src/io/ooxml.ts).
 const FIXED_MTIME = Date.parse("1980-01-01T00:00:00Z");
@@ -122,6 +125,62 @@ function oidFor(id: string): string {
   return base64Of(bytes);
 }
 
+// --- image binaries (Phase 8: writer fidelity) -----------------------------------------------------
+
+// Reverse of base64Of — decode a standard-alphabet base64 string to bytes (no btoa/atob: DOM-only,
+// absent on the node/vitest path). Ignores whitespace + trailing '='.
+const B64_INV = (() => {
+  const inv = new Int16Array(128).fill(-1);
+  for (let i = 0; i < B64.length; i++) inv[B64.charCodeAt(i)] = i;
+  return inv;
+})();
+function base64Decode(b64: string): Uint8Array {
+  const clean = b64.replace(/[^A-Za-z0-9+/]/g, "");
+  const n = Math.floor((clean.length * 3) / 4);
+  const out = new Uint8Array(n);
+  let o = 0;
+  for (let i = 0; i < clean.length; i += 4) {
+    const c0 = B64_INV[clean.charCodeAt(i)] ?? 0;
+    const c1 = B64_INV[clean.charCodeAt(i + 1)] ?? 0;
+    const c2 = i + 2 < clean.length ? (B64_INV[clean.charCodeAt(i + 2)] ?? 0) : 0;
+    const c3 = i + 3 < clean.length ? (B64_INV[clean.charCodeAt(i + 3)] ?? 0) : 0;
+    if (o < n) out[o++] = (c0 << 2) | (c1 >> 4);
+    if (o < n) out[o++] = ((c1 & 15) << 4) | (c2 >> 2);
+    if (o < n) out[o++] = ((c2 & 3) << 6) | c3;
+  }
+  return out;
+}
+
+/** Parse a `data:<mime>;base64,<payload>` URL into its mime + bytes, or null if not a base64 data URL. */
+function parseDataUrl(url: string): { mime: string; bytes: Uint8Array } | null {
+  const m = url.match(/^data:([^;,]+);base64,(.*)$/s);
+  if (!m) return null;
+  try {
+    return { mime: m[1], bytes: base64Decode(m[2]) };
+  } catch {
+    return null;
+  }
+}
+
+/** MindManager's ImageType for a data-URL mime — png/jpeg round-trip through the importer; others are
+ *  skipped (the importer only renders these), keeping the export lossless-or-absent. */
+function imageTypeFor(mime: string): string | null {
+  if (mime === "image/png") return "PngImage";
+  if (mime === "image/jpeg" || mime === "image/jpg") return "JpegImage";
+  return null;
+}
+
+/** Deterministic archive filename for a node's embedded image (a hex FNV-1a of the node id) — so the
+ *  export stays byte-stable and the Uri matches the bin entry. */
+function binNameFor(id: string): string {
+  let h = 0x811c9dc5 >>> 0;
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return `bin/img-${(h >>> 0).toString(16).padStart(8, "0")}.bin`;
+}
+
 // --- tree helpers ----------------------------------------------------------------------------------
 
 function collectIds(node: MapNode, into: Set<string>): void {
@@ -153,12 +212,22 @@ function findSubtreeMatch(roots: MapNode[], target: Set<string>): NodeId | null 
 
 // --- XML emit --------------------------------------------------------------------------------------
 
+/** A node's embedded image, resolved to its archive entry (the bin bytes live in `bins`). */
+interface ImageEntry {
+  binName: string;
+  imageType: string;
+  /** Display size in mm (from the model's px at 96dpi), or 0 when unspecified. */
+  widthMm: number;
+  heightMm: number;
+}
+
 function topicXml(
   node: MapNode,
   depth: number,
   oid: (id: string) => string,
   boundaryHeads: Set<NodeId>,
   central: boolean,
+  imageInfo: Map<string, ImageEntry>,
 ): string {
   const parts = [`<ap:Topic ${META} OId="${oid(node.id)}">`];
   parts.push(
@@ -180,6 +249,36 @@ function topicXml(
     const icons = iconTypes.map((t) => `<ap:Icon IconType="urn:mindjet:${t}"/>`).join("");
     parts.push(`<ap:IconsGroup><ap:Icons>${icons}</ap:Icons></ap:IconsGroup>`);
   }
+  // Tags → TextLabels (round-trips through the importer's extractTags).
+  if (node.tags?.length) {
+    const labels = node.tags.map((t) => `<ap:TextLabel TextLabelName="${esc(t)}"/>`).join("");
+    parts.push(`<ap:TextLabels>${labels}</ap:TextLabels>`);
+  }
+  // Task info → the Task attrs the importer reads: priority (Prio1..9), % complete, start / deadline
+  // (ISO local dateTime), resources (comma-joined). Only present fields are written.
+  if (node.task) {
+    const t = node.task;
+    const attrs: string[] = [];
+    if (t.priority !== undefined) attrs.push(`TaskPriority="urn:mindjet:Prio${t.priority}"`);
+    if (t.progress !== undefined)
+      attrs.push(`TaskPercentage="${Math.round(Math.max(0, Math.min(1, t.progress)) * 100)}"`);
+    if (t.start) attrs.push(`StartDate="${t.start}T00:00:00"`);
+    if (t.due) attrs.push(`DeadlineDate="${t.due}T00:00:00"`);
+    if (t.resources?.length) attrs.push(`Resources="${esc(t.resources.join(","))}"`);
+    if (attrs.length) parts.push(`<ap:Task ${attrs.join(" ")}/>`);
+  }
+  // Embedded image → OneImage referencing the bin entry (bytes added to the zip by the caller). The
+  // ImageSize (mm) lets MindManager + our importer restore the display size.
+  const img = imageInfo.get(node.id);
+  if (img) {
+    const size =
+      img.widthMm > 0 && img.heightMm > 0
+        ? `<ap:ImageSize Width="${img.widthMm.toFixed(2)}" Height="${img.heightMm.toFixed(2)}"/>`
+        : "";
+    parts.push(
+      `<ap:OneImage><ap:Image><ap:ImageData ImageType="urn:mindjet:${img.imageType}"><cor:Uri>mmarch://${img.binName}</cor:Uri></ap:ImageData>${size}</ap:Image></ap:OneImage>`,
+    );
+  }
   // Two-sided side marker — central main branches only (depth 1). MindManager records the half as the
   // sign of the horizontal offset; the magnitude is just a nudge. `side` is meaningless on a floating
   // subtree (no central axis), so it's gated to the central tree.
@@ -191,7 +290,7 @@ function topicXml(
   if (boundaryHeads.has(node.id)) parts.push("<ap:OneBoundary><ap:Boundary/></ap:OneBoundary>");
   if (node.children.length > 0) {
     const kids = node.children
-      .map((c) => topicXml(c, depth + 1, oid, boundaryHeads, central))
+      .map((c) => topicXml(c, depth + 1, oid, boundaryHeads, central, imageInfo))
       .join("");
     parts.push(`<ap:SubTopics>${kids}</ap:SubTopics>`);
   }
@@ -239,7 +338,31 @@ export function toMmap(doc: MindMapDoc): Uint8Array {
     if (head) boundaryHeads.add(head);
   }
 
-  const rootXml = topicXml(doc.root, 0, oid, boundaryHeads, true);
+  // Embedded images: decode each node's data-URL picture to bin bytes (deterministic filename), and
+  // record the OneImage element info for topicXml. px→mm at 96dpi (the inverse of the importer's
+  // mm→px). Non-png/jpeg images are skipped (the importer can't render them anyway).
+  const imageInfo = new Map<string, ImageEntry>();
+  const bins: Record<string, [Uint8Array, { mtime: number }]> = {};
+  const collectImages = (n: MapNode) => {
+    if (n.image?.url) {
+      const parsed = parseDataUrl(n.image.url);
+      const type = parsed && imageTypeFor(parsed.mime);
+      if (parsed && type) {
+        const binName = binNameFor(n.id);
+        bins[binName] = [parsed.bytes, { mtime: FIXED_MTIME }];
+        imageInfo.set(n.id, {
+          binName,
+          imageType: type,
+          widthMm: n.image.width ? (n.image.width * 25.4) / 96 : 0,
+          heightMm: n.image.height ? (n.image.height * 25.4) / 96 : 0,
+        });
+      }
+    }
+    for (const c of n.children) collectImages(c);
+  };
+  for (const r of allRoots) collectImages(r);
+
+  const rootXml = topicXml(doc.root, 0, oid, boundaryHeads, true, imageInfo);
 
   // Relationships — only links whose endpoints both exist (mirror the importer's >=2-ref rule).
   const ids = new Set<string>();
@@ -253,7 +376,7 @@ export function toMmap(doc: MindMapDoc): Uint8Array {
   const floats = doc.floatingTopics ?? [];
   const floatXml =
     floats.length > 0
-      ? `<ap:FloatingTopics>${floats.map((f) => topicXml(f, 0, oid, boundaryHeads, false)).join("")}</ap:FloatingTopics>`
+      ? `<ap:FloatingTopics>${floats.map((f) => topicXml(f, 0, oid, boundaryHeads, false, imageInfo)).join("")}</ap:FloatingTopics>`
       : "";
 
   // The map element's own OId is seeded from a space-prefixed sentinel (no node id realistically
@@ -263,5 +386,5 @@ export function toMmap(doc: MindMapDoc): Uint8Array {
   const mapOpen = `<ap:Map ${META} OId="${mapOid}" ${MAP_NS}>`;
   const xml = `${XML_DECL}${XML_CLIENT}${mapOpen}<ap:OneTopic>${rootXml}</ap:OneTopic>${STYLE_GROUP}${relXml}${floatXml}</ap:Map>`;
 
-  return zipSync({ "Document.xml": [strToU8(xml), { mtime: FIXED_MTIME }] }, { level: 6 });
+  return zipSync({ "Document.xml": [strToU8(xml), { mtime: FIXED_MTIME }], ...bins }, { level: 6 });
 }

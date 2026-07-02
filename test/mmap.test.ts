@@ -648,11 +648,75 @@ describe("toMmap → parseMmap round-trip", () => {
     expect(doc.links?.[0].label).toBe("rel");
     expect(doc.floatingTopics?.map((f) => f.topic)).toEqual(["Floater"]);
   });
+
+  it("round-trips tags, task info, and an embedded PNG image (writer fidelity — item 8)", () => {
+    // A 1×1 transparent PNG data URL (valid bytes).
+    const PNG =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
+    const doc: MindMapDoc = {
+      schemaVersion: 1,
+      id: "d",
+      title: "Root",
+      root: {
+        id: "r",
+        topic: "Root",
+        children: [
+          {
+            id: "a",
+            topic: "Task node",
+            tags: ["Marketing", "Q3"],
+            task: {
+              priority: 7,
+              progress: 0.4,
+              start: "2026-06-10",
+              due: "2026-06-20",
+              resources: ["Ada", "Grace"],
+            },
+            image: { url: PNG, width: 120, height: 90 },
+            children: [],
+          },
+        ],
+      },
+    };
+    const { doc: back } = parseMmap(toMmap(doc));
+    const node = findByTopic(back.root, "Task node") as MapNode;
+    // Tags
+    expect(node.tags).toEqual(["Marketing", "Q3"]);
+    // Task info (priority 1–9, progress 0..1, dates as YYYY-MM-DD, resources)
+    expect(node.task?.priority).toBe(7);
+    expect(node.task?.progress).toBeCloseTo(0.4, 5);
+    expect(node.task?.start).toBe("2026-06-10");
+    expect(node.task?.due).toBe("2026-06-20");
+    expect(node.task?.resources).toEqual(["Ada", "Grace"]);
+    // Image: the bin entry resolves back to a data URL, dimensions restored via ImageSize.
+    expect(node.image?.url).toMatch(/^data:image\/png;base64,/);
+    expect(node.image?.width).toBe(120);
+    expect(node.image?.height).toBe(90);
+  });
 });
 
 describe("toMmap", () => {
   it("is byte-deterministic (no time/randomness)", () => {
     expect(toMmap(richDoc())).toEqual(toMmap(richDoc()));
+  });
+
+  it("stays byte-deterministic with tags / task / image (bin entries + mtime pinned)", () => {
+    const PNG =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
+    const build = (): MindMapDoc => ({
+      schemaVersion: 1,
+      id: "d",
+      title: "R",
+      root: {
+        id: "r",
+        topic: "R",
+        tags: ["x"],
+        task: { due: "2026-01-01" },
+        image: { url: PNG, width: 10, height: 10 },
+        children: [],
+      },
+    });
+    expect(toMmap(build())).toEqual(toMmap(build()));
   });
 
   it("escapes user text and drops dangerous hyperlinks", () => {

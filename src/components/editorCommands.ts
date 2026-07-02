@@ -376,9 +376,16 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     const title = topicLabel(summary.title || "(untitled)");
     const label = summary.folderName ? `${summary.folderName} / ${title}` : title;
     const folderKw = summary.folderName ? `folder ${summary.folderName}` : "";
-    add(`map-switch:${summary.id}`, `Switch to map: ${label}`, "map", () => map.switchMap(summary.id), true, {
-      keywords: folderKw,
-    });
+    add(
+      `map-switch:${summary.id}`,
+      `Switch to map: ${label}`,
+      "map",
+      () => map.switchMap(summary.id),
+      true,
+      {
+        keywords: folderKw,
+      },
+    );
     add(
       `merge-map:${summary.id}`,
       `Insert map as branch: ${label}`,

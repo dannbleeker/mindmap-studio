@@ -299,7 +299,11 @@ describe("buildEditorCommands", () => {
     const switches = cmds.filter((c) => c.id.startsWith("map-switch:"));
 
     // Order: top-level first (empty folder sorts first), then by folder name, then by title.
-    expect(switches.map((c) => c.id)).toEqual(["map-switch:loose", "map-switch:mkt-a", "map-switch:mkt-b"]);
+    expect(switches.map((c) => c.id)).toEqual([
+      "map-switch:loose",
+      "map-switch:mkt-a",
+      "map-switch:mkt-b",
+    ]);
     // A foldered map reads "<folder> / <map>"; a loose one is bare.
     const byId = new Map(cmds.map((c) => [c.id, c]));
     expect(byId.get("map-switch:loose")?.label).toBe("Switch to map: Loose plan");

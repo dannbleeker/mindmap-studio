@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 381,
+  "reviewedThroughChangelogBullets": 392,
   "areas": [
     "editing",
     "notes",
@@ -16,6 +16,78 @@
     "pwa"
   ],
   "features": [
+    {
+      "id": "custom-theme-designer",
+      "name": "Custom theme designer (build / save / import-export your own canvas themes)",
+      "area": "styling",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "library-folders",
+      "name": "Library folders / workspaces (group maps into named folders; ⌘K switcher groups by folder)",
+      "area": "library",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "relationship-types",
+      "name": "Typed relationship categories (relates-to / depends-on / causes / supports / blocks, with labels + filtering)",
+      "area": "structure",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "export-branch",
+      "name": "Export a single branch / subtree (\"Export this branch…\" from the node menu, any format)",
+      "area": "export",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "deck-speaker-notes",
+      "name": "Speaker notes in the exported HTML slide deck + PowerPoint (per-slide notes; N to toggle / notes slides)",
+      "area": "export",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "natural-language-dates",
+      "name": "Natural-language date entry (type \"tomorrow\", \"next monday\", \"+3d\" in date fields)",
+      "area": "editing",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "touch-outline-reorder",
+      "name": "Touch drag-to-reorder in the Outline (long-press a row and drag on touch devices)",
+      "area": "editing",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
+    {
+      "id": "space-pan-mode",
+      "name": "Space-bar pan mode (hold Space + drag to pan from anywhere, even over a topic)",
+      "area": "navigation",
+      "since": "2026-07-01",
+      "manual": true,
+      "book": false,
+      "bookExample": false
+    },
     {
       "id": "trash-undo-delete",
       "name": "Trash / undo-delete for maps (recoverable soft-delete + Trash view)",

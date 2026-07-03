@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 427,
+  "reviewedThroughChangelogBullets": 428,
   "areas": [
     "editing",
     "notes",
@@ -57,7 +57,7 @@
       "name": "Board grouping by marker group or schedule dates (drag a card to re-mark or re-schedule the topic)",
       "area": "navigation",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -84,7 +84,7 @@
       "name": "MindManager .mmap export fidelity: writes topic tags, task metadata and embedded images",
       "area": "export",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -120,7 +120,7 @@
       "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
       "area": "structure",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -786,7 +786,7 @@
       "name": "Detach a branch to a floating topic (and re-attach)",
       "area": "structure",
       "since": "2026-06-22",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -894,7 +894,7 @@
       "name": "Replace scope: topics, notes, or both",
       "area": "navigation",
       "since": "2026-06-22",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1008,7 +1008,7 @@
     },
     {
       "id": "example-gallery",
-      "name": "Pre-built example maps (13 worked examples)",
+      "name": "Pre-built example maps (20 worked examples)",
       "area": "library",
       "since": "2026-06-13",
       "manual": true,
@@ -1614,7 +1614,7 @@
       "name": "GTD Areas of Focus worked example",
       "area": "library",
       "since": "2026-06-19",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1623,7 +1623,7 @@
       "name": "Detail levels — expand the map to a chosen depth",
       "area": "structure",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1632,7 +1632,7 @@
       "name": "Format painter — copy a topic's style and paste it across the selection",
       "area": "styling",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1641,7 +1641,7 @@
       "name": "Auto-colour branches from the theme palette",
       "area": "styling",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1650,7 +1650,7 @@
       "name": "Inline rich-text mini-toolbar (bold / italic / underline / colour) while editing",
       "area": "notes",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1659,7 +1659,7 @@
       "name": "Hover-peek for notes & attachments",
       "area": "notes",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1668,7 +1668,7 @@
       "name": "Drag markers from the inspector onto topics",
       "area": "markers",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1677,7 +1677,7 @@
       "name": "Canvas breadcrumb bar — click an ancestor to centre it",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1686,7 +1686,7 @@
       "name": "Drill in (focus on topic) — re-root the view at a topic's subtree",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1695,7 +1695,7 @@
       "name": "Canvas status bar — visible topic count, selection size, live zoom",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1704,7 +1704,7 @@
       "name": "Align & distribute selected topics (free-canvas mode)",
       "area": "structure",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1722,7 +1722,7 @@
       "name": "Keyboard restructuring — move topics up/down, promote/demote",
       "area": "editing",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1731,7 +1731,7 @@
       "name": "Paste an image from the clipboard onto a topic",
       "area": "images",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1740,7 +1740,7 @@
       "name": "Find highlights every match on the canvas",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1866,7 +1866,7 @@
       "name": "Drag-to-relate — draw a cross-link by dragging from a topic's grip",
       "area": "editing",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1929,7 +1929,7 @@
       "name": "Dockable note editor — full-height note editing in the rail",
       "area": "notes",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1983,7 +1983,7 @@
       "name": "Per-topic wrap width (long topics wrap instead of stretching)",
       "area": "styling",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2127,7 +2127,7 @@
       "name": "Keyboard Outline reorder/indent (Shift+Arrows)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2199,7 +2199,7 @@
       "name": "Multiple hyperlinks per topic — additional links beyond the primary (inspector-managed)",
       "area": "structure",
       "since": "2026-07-01",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2244,7 +2244,7 @@
       "name": "Full 1-9 task priority in every picker, Power Filter, and Ctrl/Cmd+Shift+1-9 shortcuts",
       "area": "markers",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },

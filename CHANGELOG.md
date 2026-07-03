@@ -424,6 +424,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **User-guide coverage review: stale statements corrected, catalogue flags trued up.** A review of
+  `USER_GUIDE.md` against the shipped app found five statements the code had outgrown — priority is the
+  full **1–9** range (not High/Med/Low), the **Board view writes back** (drag re-tags / re-marks /
+  re-schedules; groups by tag, marker group, or schedule), a topic can hold **additional links** beyond
+  the primary 🔗, right-clicking a **relationship opens the full quick menu** (not just delete), the
+  `.mmap` export carries tags / task info / images, and there are **20** worked examples (not 14) — all
+  fixed, plus the book's Chapter 1 "there is no Save button" line now acknowledges `.mmst` files. The
+  same review found 25 features flagged `manual: false` in `docs/features.json` that the guide already
+  documents (breadcrumb bar, drill-in, format painter, detail levels, wrap width, keyboard
+  restructuring, …) — flags corrected, so manual coverage reads **64.4%** (was 54.5%); the book flags
+  were verified accurate as-is.
+
 - **⌘K command palette was unstyled in the editor.** The palette's `.st-cmdk*` CSS lived in `start.css`,
   which is imported only by the lazily-loaded Start screen — so opening a map straight into the editor
   (the default view) left the palette as an unstyled, full-viewport list of every command. Moved the

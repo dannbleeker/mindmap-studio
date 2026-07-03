@@ -59,8 +59,10 @@ One more canvas gesture earns its keep: **double-click an empty patch** of backg
 
 MindMap Studio saves continuously to your browser's local storage (IndexedDB) as you
 type. Close the tab, reopen it tomorrow, and the map you were working on is exactly
-where you left it. There is no Save button because there is nothing to save -- it has
-already happened. There is also no server: the map never leaves your machine unless
+where you left it. You never *have* to press Save -- it has already happened. (If you
+prefer a map to live as a file on disk -- in a synced folder, say -- you can link it to
+a `.mmst` file and the same autosave writes through to it; the user guide covers
+working with files.) There is also no server: the map never leaves your machine unless
 you explicitly export it, which is Chapter 6.
 
 ## Undo is your safety net

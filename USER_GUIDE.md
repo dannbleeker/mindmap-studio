@@ -198,9 +198,10 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
     `next fri`, or a weekday name like `monday`. It also takes an exact `YYYY-MM-DD`. If it can't read
     what you typed the field turns red and keeps its old value. The **📅 button** beside the field opens
     the calendar picker as before.
-- **Priority** — set **High / Med / Low**; a small coloured chip shows on the node (✕ clears it).
-  Unlike the emoji priority markers, this is a structured value the [Power Filter](#power-filter) can
-  filter by.
+- **Priority** — set a priority **1–9** (MindManager's full range: 1 = High, 2 = Med, 3 = Low, 4–9
+  read as their number), or press **Ctrl/⌘ + Shift + 1…9** with the topic selected; a small coloured
+  chip shows on the node (✕ clears it). Unlike the emoji priority markers, this is a structured value
+  the [Power Filter](#power-filter) can filter by.
 - **Attachments** — attach any file (**+ Attach file**); a **📎** count shows on the node and the
   panel lists each file with its size, a click-to-**download** link, and a ✕ to remove it. Files are
   stored inline in the map (capped at 5 MB each), so they stay offline and travel with a `.json`
@@ -214,7 +215,9 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
   identically on the canvas and in image exports.
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in
   your library), or **Jump to a topic** (an in-map jump). Click the 🔗 on the node to follow it;
-  **✕ Remove link** clears it. A node holds one link at a time.
+  **✕ Remove link** clears it. The 🔗 carries one **primary** link; the Details tab's **Additional
+  links** list holds any further URLs on the same topic — they're picked up by search and the
+  backlink scans.
 - **Linked from** — the reverse view: every topic that points *at* this one, via a topic-jump link
   (`↪`) or an incoming relationship arrow (`↬`, with its label). Each row is a one-click jump that
   selects and centres that source topic. The section appears only when something links in.
@@ -281,8 +284,8 @@ palette: the palette *applies* markers to a node, the index *finds* every node t
 **🎚 Filter** opens a read-only filter that **dims** every topic except the ones that match your
 criteria — and the branches leading to them, so each match keeps its context. Combine a free-text
 search (matches topic **and** note) with toggle chips for any marker or tag in the map, plus a
-**Due date** option (*Has a date · Overdue · Due ≤ 7 days*) and a **Priority** option (High / Med /
-Low); criteria are combined with AND (a topic must satisfy each category you've set). A live count
+**Due date** option (*Has a date · Overdue · Due ≤ 7 days*) and a **Priority** option (a level 1–9,
+matching that priority or higher); criteria are combined with AND (a topic must satisfy each category you've set). A live count
 shows how many topics matched. It changes nothing in the map — **Clear** or closing the panel restores
 everything — so it's a safe way to focus a crowded map on, say, every urgent (❗) item mentioning
 "budget". (This differs from **Find**, which steps you through matches one at a time, and the
@@ -336,12 +339,13 @@ into a connected knowledge base.
 
 ### Board view (Kanban)
 
-**▦ Board** shows the map's topics as cards grouped into **columns by tag** — one column per tag,
-with everything else gathered in an **Untagged** column. Each card shows its rolled-up
-[progress](#topic-info-panel) and [due date](#topic-info-panel) (red when overdue). It's a
-**read-only** view of the same map — cards don't move and nothing is written back — so it's a quick
-status wall, not a task tracker. **Click a card** to jump to that topic on the canvas. Tag your
-topics (in the **ℹ Info** panel) to give the board its columns.
+**▦ Board** shows the map's topics as cards grouped into **columns** — pick the grouping source in
+the board's header: **Tags** (one column per tag, the rest in **Untagged**), a single-select
+**marker group** (Priority / Status / Mood / Vote), or **Schedule** (due-date buckets: Overdue /
+Today / This week / Later). Each card shows its rolled-up [progress](#topic-info-panel) and
+[due date](#topic-info-panel) (red when overdue). The board writes back: **drag a card to another
+column** to re-tag, re-mark, or re-schedule that topic on the map. **Click a card** to jump to it on
+the canvas. Tag your topics (in the **ℹ Info** panel) to give the tag board its columns.
 
 ### Conditional formatting
 
@@ -468,7 +472,8 @@ backdrop you see on the canvas. The second **✕** removes the image.
   from the keyboard (also in ⌘K as *Start a relationship from selected topic*). **Click a
   relationship to select it** and the inspector becomes a connector editor — change its **label**,
   **direction / arrowheads** (target, source, both, or none), **colour**, **width**, and **line
-  style** (dashed / solid / dotted), or **delete** it (right-click still deletes as a shortcut). The
+  style** (dashed / solid / dotted), or **delete** it. **Right-click a relationship** for the same
+  options as a quick menu (label, arrowheads / direction, line style, type, delete). The
   selected relationship gets a highlight halo. Styling is lossless in `.json` and carries into every
   image / PDF / HTML export; drawn and imported (`.mmap`) relationships both persist.
   - **Relationship types** — give a relationship a semantic **type** in the inspector: *relates-to*
@@ -561,11 +566,12 @@ children are replaced on each refresh, so edit the **source** map, not the pulle
 
 ### Examples
 
-The same **+ New…** menu has an **Examples** group: 14 *complete*, worked maps to open and
+The same **+ New…** menu has an **Examples** group: 20 *complete*, worked maps to open and
 adapt — Product launch plan, Meeting notes, Decision log, Quarterly OKRs, Team retrospective,
-a worked SWOT, Incident runbook, GTD natural planning, GTD Areas of Focus (the 20,000-ft
-"horizon" of standing responsibilities), Talk/content outline, Personal knowledge map,
-Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
+a worked SWOT, a Flowchart (shapes + flow), a Concept map (linked ideas), a Whiteboard (free
+layout), Onion / Funnel / Venn diagrams, Incident runbook, GTD natural planning, GTD Areas of
+Focus (the 20,000-ft "horizon" of standing responsibilities), Talk/content outline, Personal
+knowledge map, Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
 templates (empty frames), examples are filled in — the quickest way to see a finished map and
 learn a feature by reading one that uses it. Opening one creates a fresh, editable copy.
 
@@ -710,7 +716,7 @@ Pick a format from the **⬆ Export…** menu:
 | `.mmd` | Mermaid `mindmap` text — paste into Markdown, GitHub, or docs that render Mermaid |
 | `.xmind` | XMind (2020+) — topic tree, notes, links, tags, plus floating topics + relationships |
 | `.smmx` | SimpleMind — topic tree, notes, web links, relations, plus floating topics |
-| `.mmap` | MindManager — topic tree, notes, hyperlinks, icons, relationships, and the two-sided side; the mirror of the `.mmap` importer (round-trips back into Studio for these fields) |
+| `.mmap` | MindManager — topic tree, notes, hyperlinks, icons, tags, task info (dates / priority / progress), embedded images, relationships, and the two-sided side; the mirror of the `.mmap` importer (round-trips back into Studio for these fields) |
 | `.png` / `.svg` | Image of the map (inherits the current theme) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
 | `.html` (interactive) | A single self-contained HTML file that opens on the **visual map** (the real coloured render, pan/zoom) with a toggle to a **collapsible, searchable** outline: fold branches, filter topics (no app, no backend, offline) |

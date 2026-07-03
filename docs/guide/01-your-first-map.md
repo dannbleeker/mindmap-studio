@@ -3,9 +3,9 @@
 ### From a blank canvas to a real structure in five minutes
 
 Open [MindMap Studio](https://mindmap-studio.struktureretsundfornuft.dk/). The first
-time, you land on a sample map -- *Q3 Retail Plan* -- showing off notes, markers, a
-relationship arrow and a boundary. Click around it to get a feel for the canvas, then
-start your own: press **+ New...** in the toolbar and pick **Blank**.
+time, you land on the **Start screen** -- a capture box up top, templates and worked
+examples below it. You could type a topic into the capture box and be on a fresh map in
+one keystroke, but for this chapter take the deliberate route: pick **Blank**.
 
 You now have a single node that says *Untitled map*. That node is the **root** -- the
 one idea everything else hangs off. Double-click it (or just start typing) and give it
@@ -28,9 +28,10 @@ Press **Enter**, type `Programme`. Press **Enter**, type `Budget`. You have thre
 branches. Select `Venue`, press **Tab**, and add `Shortlist`, `Site visit`,
 `Contract` as its children. Within a minute you have a small tree.
 
-> A fourth key is worth learning early: **Ctrl+Enter** inserts a line break *inside*
-> a node, for when a label genuinely needs two lines. Use it sparingly -- short labels
-> keep a map readable.
+> A fourth key is worth learning early: **Shift+Tab** outdents -- it promotes the
+> selected node one level back toward the root, the undo for an over-eager Tab. (And
+> **Ctrl+Enter** adds a child of the selected node without leaving the keyboard's
+> home row -- the same move as Tab, from inside an edit.)
 
 The keys are the fast path, but the canvas reaches back. Hover a node (or select it) and a small **+** appears on its right edge -- click it to add a child -- and a second **+** below it to add a sibling. Either way you land straight in the new node, ready to type, so a hand on the mouse never has to find the keyboard. The root only offers the child **+**: nothing sits beside the centre of a map.
 

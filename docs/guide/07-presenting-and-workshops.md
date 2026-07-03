@@ -15,6 +15,15 @@ done with. Because each map is independent and locally stored, the library is yo
 cabinet -- one map per project, per meeting, per idea -- with cross-map links (Chapter 5)
 tying related ones together.
 
+As the cabinet fills, the Start screen's **All maps** view keeps it navigable: a **search box**
+filters by title, **pinned** maps float to the top of every list (star the handful you live in),
+and named **folders** group the rest -- a map lives in one folder or none, and deleting a folder
+releases its maps rather than taking them down with it. Deleting a *map* is just as forgiving:
+it's a soft delete into the **Trash**, where it waits until you restore it or empty the trash for
+good. Two commands keep the maps themselves well-factored: **New map from this topic** promotes
+an overgrown branch into its own map, and **Insert map as branch** grafts a small map back into a
+bigger one.
+
 ## Templates: a running start
 
 A blank canvas is the right start for a freeform brainstorm. For everything else, **+
@@ -24,16 +33,21 @@ New...** offers templates:
 - **Brainstorm** -- the central idea with the six question-branches from Chapter 2.
 - **SWOT** -- Strengths, Weaknesses, Opportunities, Threats, ready to fill in.
 - **Project plan** -- Goals, Scope, Milestones, Risks, Team.
+- **5 Whys** -- a nested root-cause chain; **Decision** -- pros and cons side by side;
+  **Retrospective** -- Start / Stop / Continue; **Meeting notes**; and **Pre-mortem** --
+  "it failed: why?"
 
 A template is just a starting structure you then make your own; its value is saving you
 the first thirty seconds of "what were the boxes again?" and nudging you toward a
-complete frame.
+complete frame. (Mid-map, the same frames are available as **map parts** -- **Insert -> Map
+parts** drops a SWOT, a pros-and-cons pair, a 5W1H, or a meeting agenda *under the selected
+topic*, so a framework can be a branch, not only a map.)
 
 Where a template is an *empty* frame, the **Examples** group in the same **+ New…** menu
-gives you *complete*, worked maps -- a filled launch plan, a sprint retro, a worked SWOT, a
-trip itinerary, a study map -- to open and adapt rather than build from scratch. They're the
-fastest way to see what a finished map looks like, and to learn a feature by reading one that
-uses it.
+gives you twenty *complete*, worked maps -- a filled launch plan, a sprint retro, a worked SWOT,
+a flowchart, a whiteboard, a trip itinerary, a study map -- to open and adapt rather than build
+from scratch. They're the fastest way to see what a finished map looks like, and to learn a
+feature by reading one that uses it.
 
 ## Time-boxing a brainstorm
 
@@ -56,6 +70,22 @@ Presenting from the map itself -- rather than a deck exported from it -- keeps t
 single source of truth live. A question sends you to a different branch; an idea from the
 room becomes a node on the spot. The map is the slides *and* the working document.
 
+Two stagecraft keys are worth knowing before the lights come up: **B** drops a black curtain
+over everything and **W** a white one -- the classic "eyes on me, not the screen" move -- and any
+key or click lifts it.
+
+### The guided walk: touring the live canvas
+
+Present turns the map into slides; the **guided walk** keeps you *on the canvas*. Start it
+(**Guided walk** in the menu, or from the command palette) and a small bar appears: each step
+spotlights one topic in reading order, dimming the rest, with that topic's **note** shown as your
+talking points and the arrow keys stepping forward and back. Because it's the live canvas, you
+can stop mid-walk, edit the node under discussion, and walk on. A **cinematic** toggle on the bar
+swaps the flat step for an animated zoom that frames each branch as it arrives -- the difference
+between a laser pointer and a camera move; the app remembers which you prefer. Reach for the walk
+in working sessions, where the map must stay editable; reach for Present when the room expects
+slides.
+
 ### Presenter view: what only you see
 
 A slide is for the room. But you, the presenter, usually want more in front of you: the
@@ -63,11 +93,15 @@ point you meant to make, where you are in the running order, and what's coming n
 **P** (or click **Presenter view** in the control bar) and a sidebar opens beside the slide
 with exactly that -- visible to you, invisible to the audience, who still see only the slide.
 
-Three things live in that sidebar. Your **speaker notes** come first: whatever you wrote in
+Four things live in that sidebar. Your **speaker notes** come first: whatever you wrote in
 the current branch's note (Chapter 4) shows here, formatted, so your talking points travel
 with the map instead of on a separate sheet -- and if a slide has no note, it simply says so.
 Below that, **Next up** names the slide you're about to advance to, so you can set up the
-transition before you make it -- or see "End of map" and know to land the close. Last is the
+transition before you make it -- or see "End of map" and know to land the close. A **Timer**
+keeps you honest: an elapsed clock runs in the footer for the room, and here you can give the
+talk a **budget** in five-minute steps -- the clock stays green while you're comfortably inside
+it, turns amber in the final stretch, and red once you're over, with a "-2:30 left" readout that
+makes pacing a glance rather than arithmetic. Last is the
 **Agenda**: the map of your whole talk, every slide in order with the current one lit and a
 "3 / 8" marker for your place in it. It's not just a readout -- click any line to jump
 straight there, which is how you handle the question that belongs three branches away and the
@@ -138,6 +172,12 @@ to flip on the **presenter view** -- your speaker notes, the next slide, and the
 of the screen only, the room still seeing just the slide. When you're done, run a **library backup** -- one file holding every map, the belt to local
 storage's braces -- and, if you haven't already, **install** the app to your desktop so it's
 one click away and runs with no network.
+
+Before you leave the stage, try the other one. Start a **guided walk** and step the spotlight
+through your SWOT with the arrow keys -- edit a node mid-walk to feel that the map stays live --
+then flip the **cinematic** toggle and watch the step become a camera move. Back in **Present**,
+open presenter view and give yourself a ten-minute **budget**: the clock runs green, amber, red
+as you talk, and **B** blanks the screen when you want the room's eyes on you.
 
 Prefer a running start over a blank SWOT? Open an **Example** instead (**+ New… → Examples**)
 -- a filled launch plan, a retro, a trip, a worked SWOT -- and adapt it. Same skills, less

@@ -29,6 +29,19 @@ Pick a small vocabulary and stick to it. "Red flag means blocked, tick means don
 question mark means undecided" is a convention a whole team can read at a glance; fifteen
 different icons used once each is just clutter.
 
+The palette shows a curated starter set; a **search box** above it reaches the full library of
+forty-five by name ("done", "warning", "idea"). Four of the sets are **single-select groups** --
+Priority (1-9), Status (coloured dots), Mood, and Vote -- so applying one member clears any other
+from the same group and a topic never carries two priorities at once. And the app makes small
+suggestions of its own: a **Suggested** row under the palette offers markers inferred from the
+topic's text -- write "urgent" and the ❗ is one click away. The suggestions never apply
+themselves; the vocabulary stays yours.
+
+Tags get housekeeping to match. The tag field **autocompletes** from every tag already in the
+map, and the **Markers &amp; tags** index panel can **rename** a tag everywhere, **merge** two by
+renaming one onto the other, **delete** one from every topic, or give it a **colour** that tints
+every topic carrying it -- a view-only wash that a node's own styling still overrides.
+
 > Markers imported from a MindManager `.mmap` file are mapped to the closest emoji, so a
 > map you bring in from elsewhere keeps its visual cues rather than arriving as bare text.
 
@@ -38,7 +51,10 @@ When you select several nodes at once, the Markers palette switches to **bulk** 
 
 A marker says *this is urgent*; a **task** says *this is work, and here's where it stands*.
 Open the **ℹ Info** panel and a node can carry three task fields: a **progress** slider (0 to
-100%), a **priority** (high, medium, low), and **start** and **due** dates. Together they turn a
+100%), a **priority** (the full 1-9 ladder MindManager uses -- 1 reads as High, 2 as Med, 3 as
+Low, and 4-9 as their number), and **start** and **due** dates -- fields that understand plain
+language, so `tomorrow`, `next fri`, or `+7d` resolve to real dates as you leave the field.
+Together they turn a
 branch of a plan into something you can actually track.
 
 Progress **rolls up**: set the leaves and a parent shows the average of its children, so the top
@@ -98,9 +114,19 @@ on follows you across the whole library.
 **Conditional formatting** goes further and styles nodes *by what they are*. Write a rule --
 "anything tagged `risk` gets a red border", "anything 100% complete goes grey", "every node with a
 ❗ marker turns amber" -- and the map applies it everywhere, live, and keeps applying it as you
-edit. Where a named style is a look you *apply*, a conditional rule is a look that *follows the
-data*: tag a new node `risk` and it goes red without your touching the Style bar. On a big, changing
-map that's the difference between formatting you maintain and formatting that maintains itself.
+edit. The triggers reach well past tags: a rule can fire on a marker, on completion, on being
+**overdue** or **due soon**, on a **priority** threshold, on the topic's **text**, on carrying an
+**attachment**, or on having a **relationship** of a given type -- and conditions can be chained
+with **AND** and inverted with **NOT** ("tagged `q3` and *not* completed"). A rule can also apply
+a **marker** or a **branch colour**, not just a fill. Where a named style is a look you *apply*, a
+conditional rule is a look that *follows the data*: tag a new node `risk` and it goes red without
+your touching the Style bar. On a big, changing map that's the difference between formatting you
+maintain and formatting that maintains itself.
+
+Two smaller tools round out the systematic kit. The **Format painter** copies one topic's look
+and pastes it onto any selection -- reuse without the ceremony of naming a style. And
+**Auto-colour branches** repaints every top-level branch a distinct colour from the current
+theme's palette in one click, the fastest way to give a grown map a legible colour structure.
 
 ## Rich text: emphasis inside a topic
 
@@ -127,7 +153,12 @@ Where per-node styling is a scalpel, a **theme** is a coat of paint for the enti
 The theme gallery offers a few presets -- **Light**, **Dark**, **Ocean**, **Sunset** --
 each a coordinated palette for the background, branches and text. Dark themes read well
 on a projector in a dim room; light themes print cleanly. Switching theme never touches
-your content, so try a few and keep whichever helps you see the map.
+your content, so try a few and keep whichever helps you see the map. When the presets
+aren't yours, **Manage themes...** opens a small designer: name a theme, pick its
+six-colour branch palette, background, font and branch weight, and it joins the gallery --
+exportable as a file, so a house style travels between machines. (The canvas theme is
+separate from the *app's* chrome, which follows your operating system's light/dark setting
+-- or force it in Settings.)
 
 The **Canvas** colour control sits one notch below a theme: it overrides just the background of
 *this one map*, leaving the theme's branch and text palette intact. It's a quiet but useful signal
@@ -184,9 +215,9 @@ rule** (tag a node `risk`, have the rule paint it red), and add that tag to a se
 red on its own. That's the chapter in miniature -- a node that tracks its own status, and
 formatting that follows the data instead of waiting for your hand.
 
-Two more passes turn a handsome map into a working one. Give a topic a **priority** -- High,
-Medium, or Low -- then switch on the priority filter and watch everything but the High items
-fade; that is triage in two clicks. Pick a font that suits the map's register -- the Styles bar
+Two more passes turn a handsome map into a working one. Give a topic a **priority** -- 1 for
+High, down to 9 for the barely-urgent -- then switch on the priority filter and watch
+everything below your cut-off fade; that is triage in two clicks. Pick a font that suits the map's register -- the Styles bar
 offers **Sans, Serif, or Mono** per topic -- and, once a node looks exactly right, **save its look
 as a named style** and drop that style onto its siblings so the set moves as one. Hang a real
 **file** off a topic -- a spec, a slide deck -- and it travels inside the map, downloadable

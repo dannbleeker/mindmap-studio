@@ -18,11 +18,18 @@ What goes in, what comes out, and what survives the trip. For the day-to-day gui
   topics, and relationships.
 - **SimpleMind (`.smmx`)** -- the native SimpleMind format: topic tree, notes, web links,
   relations, and floating topics.
-- **PNG** -- a raster image of the canvas, for slides and chat.
+- **MindManager (`.mmap`)** -- topic tree, notes, hyperlinks, stock icons, tags, task info
+  (dates, priority, progress), embedded images, relationships, boundaries, and the two-sided
+  arrangement; the mirror of the importer below.
+- **PNG** -- a raster image of the canvas, for slides and chat; plain, @2x, @4x, and
+  transparent variants.
 - **SVG** -- a vector image: crisp at any zoom, ideal for high-resolution use.
 - **HTML** -- a single self-contained page, openable in any browser.
+- **Interactive HTML** -- the same single file, but navigable: the visual map with pan/zoom
+  plus a collapsible, searchable outline.
 - **HTML slide deck** -- the walk-through as a standalone, navigable presentation in one
-  self-contained file (an overview slide, then one per branch).
+  self-contained file (an overview slide, then one per branch as its live map image, with
+  speaker notes).
 - **PowerPoint (`.pptx`)** -- a real, editable slide deck (an overview slide, then one per
   branch with its subtree as bullets); a minimal PresentationML package that opens in
   PowerPoint, Keynote, LibreOffice, and Google Slides.
@@ -32,7 +39,10 @@ What goes in, what comes out, and what survives the trip. For the day-to-day gui
 - **Word (`.docx`)** -- the map as an editable outline document (title, indented bulleted
   topics, notes as italic lines); a minimal Open-XML package that opens in Word,
   LibreOffice, Pages, and Google Docs.
-- **PDF** -- via the browser's print path; a fixed-layout document for sending or printing.
+- **PDF** -- written directly as a real file (fit-to-map, A4, or Letter), or via the browser's
+  print path when you want its options.
+- **`.mmst`** -- not an export but the native *file* format (the lossless JSON under the app's
+  own extension), for keeping a map on disk with autosave writing through to it (Chapter 6).
 
 ## Import formats
 
@@ -58,18 +68,21 @@ The MindManager importer was built from MindManager's published XML schema, not 
 at. From a `.mmap` file it recovers:
 
 - the **topic tree** and all topic text;
-- **notes** (the plain-text preview MindManager stores);
+- **notes** (the full body), **tags**, and **rich text** (bold / italic / underline, colour);
 - **stock icons**, mapped to the closest **emoji** marker;
-- **hyperlinks** on nodes;
-- **relationships**, as cross-links between nodes;
-- **boundaries** drawn over a subtree;
+- **hyperlinks**, **embedded images**, and **attachments**;
+- **relationships** and **boundaries**, with their styling; **callouts**;
+- **task info** -- start and due dates, priority, progress;
+- the two-sided arrangement, the **map background**, and explicit per-topic colours, fonts,
+  and shapes;
 - **floating topics**.
 
 ## What it deliberately leaves behind
 
-MindManager carries data MindMap Studio doesn't model -- chiefly **task and project
-information**: schedules, durations, resource assignments, Gantt data. The importer
-**warns** you about what it skipped rather than dropping it silently, and it does a
+A few MindManager-only things still don't cross: theme-*inherited* (non-explicit) styling,
+summary brackets, vector (EMF/WMF) images with no raster fallback, and the project-management
+layer beyond basic task info -- schedules, durations, resource assignments, Gantt data. The
+importer **warns** you about what it skipped rather than dropping it silently, and it does a
 left-behind check for any topic it couldn't reach. Treat the import as a migration --
 a clean start in a new tool -- not as a two-way sync.
 

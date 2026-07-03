@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-07-02T20:40:48.791Z",
-  "commit": "bda9486",
+  "generatedAt": "2026-07-03T05:00:58.236Z",
+  "commit": "6e2172d",
   "headline": {
     "linesTsJs": 77101,
     "tests": 2124,
     "lineCoveragePct": 89.82,
-    "commits": 1071,
+    "commits": 1075,
     "ageDays": 21,
     "trackedFiles": 500,
-    "featureManualPct": 54.5,
-    "featureBookPct": 49,
-    "featureExamplePct": 49
+    "featureManualPct": 100,
+    "featureBookPct": 75.5,
+    "featureExamplePct": 51.8
   },
   "code": [
     {
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 15,
-      "lines": 2221
+      "lines": 2448
     }
   ],
   "coverage": {
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 86.88,
-      "covered": 8756,
-      "total": 10078
+      "covered": 8757,
+      "total": 10079
     }
   },
   "tests": {
     "unit": 2124,
     "e2e": 0,
-    "durationMs": 101766,
+    "durationMs": 105300,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 27352
+        "ms": 28279
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 24533
+        "ms": 25057
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 9148
+        "ms": 9591
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8336
+        "ms": 7854
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3903
+        "ms": 5092
       }
     ]
   },
@@ -196,73 +196,73 @@
     "withinBudget": false
   },
   "docs": {
-    "bookWords": 17172,
+    "bookWords": 20023,
     "chapters": 11,
     "appLoc": 45351,
-    "docToCodeRatio": 0.38
+    "docToCodeRatio": 0.44
   },
   "featureCoverage": {
     "total": 253,
-    "manual": 138,
-    "manualPct": 54.5,
-    "book": 124,
-    "bookPct": 49,
-    "bookExample": 124,
-    "bookExamplePct": 49,
+    "manual": 253,
+    "manualPct": 100,
+    "book": 191,
+    "bookPct": 75.5,
+    "bookExample": 131,
+    "bookExamplePct": 51.8,
     "byArea": {
       "structure": {
         "total": 36,
-        "manual": 14,
-        "book": 12
+        "manual": 36,
+        "book": 25
       },
       "styling": {
         "total": 28,
-        "manual": 14,
-        "book": 12
+        "manual": 28,
+        "book": 21
       },
       "export": {
         "total": 26,
-        "manual": 19,
-        "book": 17
+        "manual": 26,
+        "book": 24
       },
       "navigation": {
         "total": 58,
-        "manual": 25,
-        "book": 24
+        "manual": 58,
+        "book": 39
       },
       "editing": {
         "total": 32,
-        "manual": 17,
-        "book": 14
+        "manual": 32,
+        "book": 19
       },
       "markers": {
         "total": 15,
-        "manual": 7,
-        "book": 7
+        "manual": 15,
+        "book": 12
       },
       "library": {
         "total": 22,
-        "manual": 15,
-        "book": 11
+        "manual": 22,
+        "book": 21
       },
       "presentation": {
         "total": 5,
-        "manual": 2,
-        "book": 2
+        "manual": 5,
+        "book": 5
       },
       "notes": {
         "total": 6,
-        "manual": 3,
+        "manual": 6,
         "book": 3
       },
       "images": {
         "total": 3,
-        "manual": 1,
+        "manual": 3,
         "book": 1
       },
       "import": {
         "total": 18,
-        "manual": 17,
+        "manual": 18,
         "book": 17
       },
       "pwa": {
@@ -272,627 +272,11 @@
       }
     },
     "gaps": {
-      "noManual": [
-        {
-          "id": "canvas-shapes",
-          "name": "Free background shapes (rectangle / ellipse / block arrow / chevron) — a positioned, resizable canvas-object layer for SWOT/Venn/risk composition",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "smart-containers",
-          "name": "Smart containers (swimlane / matrix) that capture and move their contained topics when dragged",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "stylebar-reflects-state",
-          "name": "StyleBar reflects the selection's active style (shape / fill / border / bold / shadow / font) with touch-sized, grouped controls",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "deck-live-map-slides",
-          "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "board-group-source",
-          "name": "Board grouping by marker group or schedule dates (drag a card to re-mark or re-schedule the topic)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "png-export-options",
-          "name": "PNG export options: 2×/4× scale factor and transparent background",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "export-pdf-file",
-          "name": "Direct PDF file export with page-size (fit / A4 / Letter) and orientation (distinct from print-to-PDF)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "mmap-export-fidelity",
-          "name": "MindManager .mmap export fidelity: writes topic tags, task metadata and embedded images",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "smart-paste-v",
-          "name": "Smart Ctrl+V routing (image / outline / URL / internal branch clipboard handled automatically)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "shift-project-dates",
-          "name": "Move project: shift all task start/due dates ±N days (branch or whole map) in one undo step",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "drag-detach-copy",
-          "name": "Drag modifiers: Shift-drag detaches a topic to floating, Ctrl-drag copies the subtree",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "relationship-context-menu",
-          "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "keyboard-zoom",
-          "name": "Keyboard zoom shortcuts: Ctrl/⌘ + / − / 0 (zoom in / out / reset)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "tag-accelerator",
-          "name": "Inline #tag accelerator: typing # mid-topic pops the tag picker to assign an existing or new tag",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "quick-filter-from-marker",
-          "name": "Quick Filter from any marker or tag row in the Markers & tags index (pre-fills the Power Filter)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "search-history",
-          "name": "Find & Replace search history (recalls the last ~10 queries)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "sticky-note-colours",
-          "name": "Sticky-note colour set at insert time with a remembered preferred default",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "rules-and-not-conditions",
-          "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "rules-due-soon-trigger",
-          "name": "Conditional rules: a \"due soon\" trigger kind (reuses the filter/search due-soon window)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "priority-full-range",
-          "name": "Full 1-9 task priority in every picker, Power Filter, and Ctrl/Cmd+Shift+1-9 shortcuts",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "insert-menu-submenus",
-          "name": "Insert menu fly-out submenus (Map parts / Templates) via a reusable MenuSub primitive",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "layout-gallery",
-          "name": "Visual Layout gallery (SVG thumbnails) in the Map panel, replacing the text-only layout select",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "design-gallery-map-panel",
-          "name": "Design presets gallery consolidated into the Map panel (moved from the Toolbar Canvas menu)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "side-aware-grips",
-          "name": "Relate + wrap-width grips mirror to a left-growing branch's outward edge",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "status-bar-view-switcher",
-          "name": "Status-bar Map / Outline / Board view switcher (one-click peer projections)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "cross-map-backlinks",
-          "name": "Cross-map backlinks — inspector 'Linked from other maps'",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "cross-map-topic-picker",
-          "name": "Cross-map topic picker — refine a #map= link to a specific topic",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "smart-paste-markdown",
-          "name": "Markdown shorthand on paste — checkboxes, links, and emphasis parse into structure",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "long-press-menu",
-          "name": "Long-press context menu on touch/pen",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "quick-capture-inbox",
-          "name": "Quick-capture inbox — map-independent 'Unfiled' bucket, file onto a map later",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "high-contrast-theme",
-          "name": "High-contrast theme — OS prefers-contrast/forced-colors + in-app toggle",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "multiple-hyperlinks",
-          "name": "Multiple hyperlinks per topic — additional links beyond the primary (inspector-managed)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "slash-command-menu",
-          "name": "Slash / command menu in the topic editor — keyboard insert of child/task/date/boundary/note/marker",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "link-autocomplete",
-          "name": "[[ / @ name-based link autocomplete — pick a topic by name to attach a link",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "trash-undo-delete",
-          "name": "Trash / undo-delete for maps (recoverable soft-delete + Trash view)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cross-tab-clobber-guard",
-          "name": "Cross-tab clobber guard (warn when a map is open in two tabs)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "file-conflict-detection",
-          "name": "External-file conflict detection (prompt before overwriting a disk file that changed)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "open-recent-files",
-          "name": "Open Recent — reopen recently-opened disk files from the File menu",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "big-map-virtualisation",
-          "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cinematic-walkthrough",
-          "name": "Cinematic visual-map walkthrough (guided walk frames each branch with animated zoom)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "free-colour-pickers",
-          "name": "Free colour pickers for node text / fill / branch (StyleBar)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "paste-url-title",
-          "name": "Paste a URL → a node titled from the URL (offline)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "copy-map-image",
-          "name": "Copy the map to the clipboard as a PNG image",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "presenter-timer",
-          "name": "Presenter pacing timer + budget colour + B/W blackout",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cross-map-switcher",
-          "name": "Switch to another library map from the ⌘K palette",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "reveal-in-outline",
-          "name": "Selecting a node scrolls its row into view in the Outline",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "sort-children",
-          "name": "Sort a topic's children by name / priority / due date / progress",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "multi-branch-clipboard",
-          "name": "Copy + paste multiple selected branches at once (cross-map)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "outgoing-links-inspector",
-          "name": "\"Links to\" inspector section (outgoing links + relationships)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "relationships-panel",
-          "name": "Map-wide Relationships panel (every link + relationship, click-to-jump)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "promote-branch-to-map",
-          "name": "New map from this topic (promote a branch to its own library map)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "merge-map-as-branch",
-          "name": "Insert a library map as a branch under the selected topic",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "search-all-fields",
-          "name": "Find searches every node field (tags, markers, hyperlink, callouts, attachments, resources)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "search-operators",
-          "name": "Scoped / operator search (tag:, marker:, priority:, due:, has:, level:, -exclude, \"phrase\")",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "deep-link-node",
-          "name": "Deep-link to a node (?node= URL + Copy link to this topic)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "nav-back-forward",
-          "name": "Back / forward navigation history (Alt+← / Alt+→)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "search-result-context",
-          "name": "Search-across-maps results show ancestor breadcrumb + note snippet",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "find-results-list",
-          "name": "In-map Find 'List all' — clickable list of every match (vs only next/prev)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "filter-completion",
-          "name": "Power Filter by completion status (Done / In progress / Not done)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "settings-shortcut",
-          "name": "Ctrl/⌘+, opens Settings & preferences",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "reduced-motion",
-          "name": "Reduced-motion support — OS prefers-reduced-motion + in-app toggle (canvas + guided walk)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cross-map-topic-links",
-          "name": "Cross-map topic links — #map=<id>&node=<id> opens another map + focuses a topic",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "in-note-app-links",
-          "name": "In-note in-app links — [text](#node=…/#map=…) jump through the canvas",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "burst-quick-capture",
-          "name": "Multi-line burst quick-capture — a pasted outline becomes a subtree in one step",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "outline-keyboard-reorder",
-          "name": "Keyboard Outline reorder/indent (Shift+Arrows)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "sr-overlay-lists",
-          "name": "Screen-reader lists for boundaries / summaries / callouts",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "map-typography",
-          "name": "Per-map typography (base font family + size scale; canvas == export)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "relationship-presets",
-          "name": "Relationship style presets (one-click dash/width/curve/arrowhead looks)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "detach-branch",
-          "name": "Detach a branch to a floating topic (and re-attach)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "replace-scope",
-          "name": "Replace scope: topics, notes, or both",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "arrow-nav",
-          "name": "Arrow-key topic navigation (←parent / →child / ↑↓ siblings)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "tag-colour",
-          "name": "Tag → colour mapping (swatch per tag tints matching topics)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "lock-position",
-          "name": "Lock a topic's position (pin in place; un-draggable, align/distribute skip it)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "marker-library",
-          "name": "Searchable marker library",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "marker-groups",
-          "name": "Marker groups (single-select sets: Priority / Status / Mood / Vote)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "tag-manager",
-          "name": "Tag autocomplete + map-wide tag manager (rename / merge / delete)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "topic-fills",
-          "name": "Branch-colour topic fills (tint & gradient)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "image-fill",
-          "name": "Image fill for topics (a picture covering the whole card)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "design-gallery",
-          "name": "Design gallery — one-click theme + connector looks",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "smartrules",
-          "name": "Conditional-format triggers: overdue / priority / text-contains / has-attachment",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "editable-outline",
-          "name": "Editable outline panel — rename, promote/demote, drag-reorder",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "numbering-schemes",
-          "name": "Outline numbering schemes (decimal / legal outline)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "map-statistics",
-          "name": "Map statistics panel (+ word count & reading time)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "filter-hide-extract",
-          "name": "Power Filter hide mode + extract matches to a new map",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "map-legend",
-          "name": "On-canvas map legend (markers / tags / rules), carried into exports",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "paste-table",
-          "name": "Paste a spreadsheet selection as topics (row → topic, columns → note / tags)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "drag-relate",
-          "name": "Drag-to-relate — draw a cross-link by dragging from a topic's grip",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "guided-walk",
-          "name": "Guided walk — step through topics with a spotlight + speaker notes",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "copy-table",
-          "name": "Copy map as a table (TSV) — Topic / Depth / Note / Tags to the clipboard",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "map-parts",
-          "name": "Map parts — insert a ready-made mini-structure (SWOT / pros-cons / 5W1H / agenda)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "task-checkbox",
-          "name": "Quick task toggle — a hover checkbox to cycle not-a-task / to-do / done",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "group-selection",
-          "name": "Group a multi-selection of topics in one boundary box",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "marker-suggestions",
-          "name": "Auto-marker suggestions from a topic's text",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "note-editor-dock",
-          "name": "Dockable note editor — full-height note editing in the rail",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "saved-views",
-          "name": "Saved views — bookmark pan/zoom + drill + filter and jump back",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "align-guides",
-          "name": "Smart alignment guides + snapping (free-canvas drag)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "isolate-branch",
-          "name": "Isolate branch — collapse other top branches and reveal the path to a topic",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "spellcheck-toggle",
-          "name": "Spell-check toggle for the topic + note editors",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "numbered-export",
-          "name": "Bake outline numbers into the copied outline / Markdown export",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "topic-wrap-width",
-          "name": "Per-topic wrap width (long topics wrap instead of stretching)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "inline-link-label",
-          "name": "Inline relationship label editing (double-click the line)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "detail-levels",
-          "name": "Detail levels — expand the map to a chosen depth",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "format-painter",
-          "name": "Format painter — copy a topic's style and paste it across the selection",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "auto-colour-branches",
-          "name": "Auto-colour branches from the theme palette",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "rich-text-toolbar",
-          "name": "Inline rich-text mini-toolbar (bold / italic / underline / colour) while editing",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "hover-peek",
-          "name": "Hover-peek for notes & attachments",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "drag-markers",
-          "name": "Drag markers from the inspector onto topics",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "canvas-breadcrumb",
-          "name": "Canvas breadcrumb bar — click an ancestor to centre it",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "drill-in",
-          "name": "Drill in (focus on topic) — re-root the view at a topic's subtree",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "status-bar",
-          "name": "Canvas status bar — visible topic count, selection size, live zoom",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "align-distribute",
-          "name": "Align & distribute selected topics (free-canvas mode)",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "keyboard-restructure",
-          "name": "Keyboard restructuring — move topics up/down, promote/demote",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "paste-image",
-          "name": "Paste an image from the clipboard onto a topic",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "find-highlight-all",
-          "name": "Find highlights every match on the canvas",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "gtd-areas-example",
-          "name": "GTD Areas of Focus worked example",
-          "since": "2026-06-19"
-        }
-      ],
+      "noManual": [],
       "noBook": [
         {
-          "id": "canvas-shapes",
-          "name": "Free background shapes (rectangle / ellipse / block arrow / chevron) — a positioned, resizable canvas-object layer for SWOT/Venn/risk composition",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "smart-containers",
-          "name": "Smart containers (swimlane / matrix) that capture and move their contained topics when dragged",
-          "since": "2026-07-02"
-        },
-        {
           "id": "stylebar-reflects-state",
           "name": "StyleBar reflects the selection's active style (shape / fill / border / bold / shadow / font) with touch-sized, grouped controls",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "deck-live-map-slides",
-          "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "board-group-source",
-          "name": "Board grouping by marker group or schedule dates (drag a card to re-mark or re-schedule the topic)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "png-export-options",
-          "name": "PNG export options: 2×/4× scale factor and transparent background",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "export-pdf-file",
-          "name": "Direct PDF file export with page-size (fit / A4 / Letter) and orientation (distinct from print-to-PDF)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "mmap-export-fidelity",
-          "name": "MindManager .mmap export fidelity: writes topic tags, task metadata and embedded images",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "smart-paste-v",
-          "name": "Smart Ctrl+V routing (image / outline / URL / internal branch clipboard handled automatically)",
           "since": "2026-07-02"
         },
         {
@@ -901,18 +285,8 @@
           "since": "2026-07-02"
         },
         {
-          "id": "drag-detach-copy",
-          "name": "Drag modifiers: Shift-drag detaches a topic to floating, Ctrl-drag copies the subtree",
-          "since": "2026-07-02"
-        },
-        {
           "id": "relationship-context-menu",
           "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "keyboard-zoom",
-          "name": "Keyboard zoom shortcuts: Ctrl/⌘ + / − / 0 (zoom in / out / reset)",
           "since": "2026-07-02"
         },
         {
@@ -936,28 +310,8 @@
           "since": "2026-07-02"
         },
         {
-          "id": "rules-and-not-conditions",
-          "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "rules-due-soon-trigger",
-          "name": "Conditional rules: a \"due soon\" trigger kind (reuses the filter/search due-soon window)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "priority-full-range",
-          "name": "Full 1-9 task priority in every picker, Power Filter, and Ctrl/Cmd+Shift+1-9 shortcuts",
-          "since": "2026-07-02"
-        },
-        {
           "id": "insert-menu-submenus",
           "name": "Insert menu fly-out submenus (Map parts / Templates) via a reusable MenuSub primitive",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "layout-gallery",
-          "name": "Visual Layout gallery (SVG thumbnails) in the Map panel, replacing the text-only layout select",
           "since": "2026-07-02"
         },
         {
@@ -974,36 +328,6 @@
           "id": "status-bar-view-switcher",
           "name": "Status-bar Map / Outline / Board view switcher (one-click peer projections)",
           "since": "2026-07-02"
-        },
-        {
-          "id": "custom-theme-designer",
-          "name": "Custom theme designer (build / save / import-export your own canvas themes)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "library-folders",
-          "name": "Library folders / workspaces (group maps into named folders; ⌘K switcher groups by folder)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "relationship-types",
-          "name": "Typed relationship categories (relates-to / depends-on / causes / supports / blocks, with labels + filtering)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "export-branch",
-          "name": "Export a single branch / subtree (\"Export this branch…\" from the node menu, any format)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "deck-speaker-notes",
-          "name": "Speaker notes in the exported HTML slide deck + PowerPoint (per-slide notes; N to toggle / notes slides)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "natural-language-dates",
-          "name": "Natural-language date entry (type \"tomorrow\", \"next monday\", \"+3d\" in date fields)",
-          "since": "2026-07-01"
         },
         {
           "id": "touch-outline-reorder",
@@ -1011,21 +335,6 @@
           "since": "2026-07-01"
         },
         {
-          "id": "space-pan-mode",
-          "name": "Space-bar pan mode (hold Space + drag to pan from anywhere, even over a topic)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "cross-map-backlinks",
-          "name": "Cross-map backlinks — inspector 'Linked from other maps'",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "cross-map-topic-picker",
-          "name": "Cross-map topic picker — refine a #map= link to a specific topic",
-          "since": "2026-07-01"
-        },
-        {
           "id": "smart-paste-markdown",
           "name": "Markdown shorthand on paste — checkboxes, links, and emphasis parse into structure",
           "since": "2026-07-01"
@@ -1046,48 +355,13 @@
           "since": "2026-07-01"
         },
         {
-          "id": "multiple-hyperlinks",
-          "name": "Multiple hyperlinks per topic — additional links beyond the primary (inspector-managed)",
-          "since": "2026-07-01"
-        },
-        {
           "id": "slash-command-menu",
           "name": "Slash / command menu in the topic editor — keyboard insert of child/task/date/boundary/note/marker",
           "since": "2026-07-01"
         },
         {
-          "id": "link-autocomplete",
-          "name": "[[ / @ name-based link autocomplete — pick a topic by name to attach a link",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "trash-undo-delete",
-          "name": "Trash / undo-delete for maps (recoverable soft-delete + Trash view)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cross-tab-clobber-guard",
-          "name": "Cross-tab clobber guard (warn when a map is open in two tabs)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "file-conflict-detection",
-          "name": "External-file conflict detection (prompt before overwriting a disk file that changed)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "open-recent-files",
-          "name": "Open Recent — reopen recently-opened disk files from the File menu",
-          "since": "2026-06-30"
-        },
-        {
           "id": "big-map-virtualisation",
           "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cinematic-walkthrough",
-          "name": "Cinematic visual-map walkthrough (guided walk frames each branch with animated zoom)",
           "since": "2026-06-30"
         },
         {
@@ -1101,21 +375,6 @@
           "since": "2026-06-30"
         },
         {
-          "id": "copy-map-image",
-          "name": "Copy the map to the clipboard as a PNG image",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "presenter-timer",
-          "name": "Presenter pacing timer + budget colour + B/W blackout",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cross-map-switcher",
-          "name": "Switch to another library map from the ⌘K palette",
-          "since": "2026-06-30"
-        },
-        {
           "id": "reveal-in-outline",
           "name": "Selecting a node scrolls its row into view in the Outline",
           "since": "2026-06-30"
@@ -1123,11 +382,6 @@
         {
           "id": "sort-children",
           "name": "Sort a topic's children by name / priority / due date / progress",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "multi-branch-clipboard",
-          "name": "Copy + paste multiple selected branches at once (cross-map)",
           "since": "2026-06-30"
         },
         {
@@ -1141,53 +395,13 @@
           "since": "2026-06-30"
         },
         {
-          "id": "promote-branch-to-map",
-          "name": "New map from this topic (promote a branch to its own library map)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "merge-map-as-branch",
-          "name": "Insert a library map as a branch under the selected topic",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "search-all-fields",
-          "name": "Find searches every node field (tags, markers, hyperlink, callouts, attachments, resources)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "search-operators",
-          "name": "Scoped / operator search (tag:, marker:, priority:, due:, has:, level:, -exclude, \"phrase\")",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "deep-link-node",
-          "name": "Deep-link to a node (?node= URL + Copy link to this topic)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "nav-back-forward",
-          "name": "Back / forward navigation history (Alt+← / Alt+→)",
-          "since": "2026-06-30"
-        },
-        {
           "id": "search-result-context",
           "name": "Search-across-maps results show ancestor breadcrumb + note snippet",
           "since": "2026-06-30"
         },
         {
-          "id": "find-results-list",
-          "name": "In-map Find 'List all' — clickable list of every match (vs only next/prev)",
-          "since": "2026-06-30"
-        },
-        {
           "id": "filter-completion",
           "name": "Power Filter by completion status (Done / In progress / Not done)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "settings-shortcut",
-          "name": "Ctrl/⌘+, opens Settings & preferences",
           "since": "2026-06-30"
         },
         {
@@ -1219,16 +433,6 @@
           "id": "sr-overlay-lists",
           "name": "Screen-reader lists for boundaries / summaries / callouts",
           "since": "2026-06-30"
-        },
-        {
-          "id": "library-filter",
-          "name": "Filter your maps by title (All maps search box)",
-          "since": "2026-06-29"
-        },
-        {
-          "id": "pin-map",
-          "name": "Pin a map to the top of the library",
-          "since": "2026-06-29"
         },
         {
           "id": "overlay-context-menu",
@@ -1241,18 +445,8 @@
           "since": "2026-06-28"
         },
         {
-          "id": "app-dark-mode",
-          "name": "App-wide dark mode (System / Light / Dark chrome, honours prefers-color-scheme)",
-          "since": "2026-06-28"
-        },
-        {
           "id": "map-typography",
           "name": "Per-map typography (base font family + size scale; canvas == export)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "relationship-presets",
-          "name": "Relationship style presets (one-click dash/width/curve/arrowhead looks)",
           "since": "2026-06-22"
         },
         {
@@ -1264,36 +458,6 @@
           "id": "replace-scope",
           "name": "Replace scope: topics, notes, or both",
           "since": "2026-06-22"
-        },
-        {
-          "id": "arrow-nav",
-          "name": "Arrow-key topic navigation (←parent / →child / ↑↓ siblings)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "tag-colour",
-          "name": "Tag → colour mapping (swatch per tag tints matching topics)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "lock-position",
-          "name": "Lock a topic's position (pin in place; un-draggable, align/distribute skip it)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "marker-library",
-          "name": "Searchable marker library",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "marker-groups",
-          "name": "Marker groups (single-select sets: Priority / Status / Mood / Vote)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "tag-manager",
-          "name": "Tag autocomplete + map-wide tag manager (rename / merge / delete)",
-          "since": "2026-06-21"
         },
         {
           "id": "topic-fills",
@@ -1308,11 +472,6 @@
         {
           "id": "design-gallery",
           "name": "Design gallery — one-click theme + connector looks",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "smartrules",
-          "name": "Conditional-format triggers: overdue / priority / text-contains / has-attachment",
           "since": "2026-06-21"
         },
         {
@@ -1351,18 +510,8 @@
           "since": "2026-06-21"
         },
         {
-          "id": "guided-walk",
-          "name": "Guided walk — step through topics with a spotlight + speaker notes",
-          "since": "2026-06-21"
-        },
-        {
           "id": "copy-table",
           "name": "Copy map as a table (TSV) — Topic / Depth / Note / Tags to the clipboard",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "map-parts",
-          "name": "Map parts — insert a ready-made mini-structure (SWOT / pros-cons / 5W1H / agenda)",
           "since": "2026-06-21"
         },
         {
@@ -1376,28 +525,8 @@
           "since": "2026-06-21"
         },
         {
-          "id": "marker-suggestions",
-          "name": "Auto-marker suggestions from a topic's text",
-          "since": "2026-06-21"
-        },
-        {
           "id": "note-editor-dock",
           "name": "Dockable note editor — full-height note editing in the rail",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "saved-views",
-          "name": "Saved views — bookmark pan/zoom + drill + filter and jump back",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "align-guides",
-          "name": "Smart alignment guides + snapping (free-canvas drag)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "isolate-branch",
-          "name": "Isolate branch — collapse other top branches and reveal the path to a topic",
           "since": "2026-06-21"
         },
         {
@@ -1421,21 +550,6 @@
           "since": "2026-06-21"
         },
         {
-          "id": "detail-levels",
-          "name": "Detail levels — expand the map to a chosen depth",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "format-painter",
-          "name": "Format painter — copy a topic's style and paste it across the selection",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "auto-colour-branches",
-          "name": "Auto-colour branches from the theme palette",
-          "since": "2026-06-20"
-        },
-        {
           "id": "rich-text-toolbar",
           "name": "Inline rich-text mini-toolbar (bold / italic / underline / colour) while editing",
           "since": "2026-06-20"
@@ -1451,28 +565,8 @@
           "since": "2026-06-20"
         },
         {
-          "id": "canvas-breadcrumb",
-          "name": "Canvas breadcrumb bar — click an ancestor to centre it",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "drill-in",
-          "name": "Drill in (focus on topic) — re-root the view at a topic's subtree",
-          "since": "2026-06-20"
-        },
-        {
           "id": "status-bar",
           "name": "Canvas status bar — visible topic count, selection size, live zoom",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "align-distribute",
-          "name": "Align & distribute selected topics (free-canvas mode)",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "keyboard-restructure",
-          "name": "Keyboard restructuring — move topics up/down, promote/demote",
           "since": "2026-06-20"
         },
         {
@@ -1486,11 +580,6 @@
           "since": "2026-06-20"
         },
         {
-          "id": "files-mmst",
-          "name": "Work with maps as files on disk (.mmst): Open / Save / autosave + Windows file association",
-          "since": "2026-06-19"
-        },
-        {
           "id": "gtd-areas-example",
           "name": "GTD Areas of Focus worked example",
           "since": "2026-06-19"
@@ -1501,8 +590,8 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 21,
-    "commits": 1071,
-    "commits7d": 218,
+    "commits": 1075,
+    "commits7d": 220,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
@@ -1510,17 +599,17 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 487
+        "count": 488
       },
       {
         "name": "Claude",
-        "count": 55
+        "count": 57
       }
     ],
     "churn30d": {
-      "added": 139736,
-      "removed": 41147
+      "added": 140680,
+      "removed": 41529
     },
-    "changelogEntries": 427
+    "changelogEntries": 429
   }
 }

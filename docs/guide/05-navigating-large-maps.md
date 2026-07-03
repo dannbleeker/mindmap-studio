@@ -15,6 +15,15 @@ working in. The toolbar's **collapse all** and **expand all** controls do it to 
 whole map at once -- collapse-all then open one branch is the fastest way to present a
 large map without overwhelming the room.
 
+Three refinements make altitude precise. **Detail levels** ("Show level 1", "level 2", ...)
+expand the map to an exact depth in one command -- the step-wise version of collapse-all.
+**Isolate branch** collapses every *other* top branch and opens the path to the topic you're on:
+"fold everything else away" as a single, undoable move. And **Drill in** goes further than
+folding -- it *re-roots* the view at the selected topic so its subtree fills the screen; you keep
+editing as usual (it's just a view), and a bar or **Esc** brings the whole map back. While you're
+deep in a branch, a **breadcrumb** above the canvas shows the path from the root -- click any
+ancestor to climb back up without scrolling.
+
 ## Fit
 
 Lost? The **Fit** button reframes the entire map to the viewport in one click. It's the
@@ -46,6 +55,14 @@ depends on what the map *is*:
 - A **timeline** lays the first level out as a left-to-right sequence -- a roadmap, a process, the steps of an argument.
 - A **fishbone** (the Ishikawa diagram) angles branches into a spine, the classic shape for cause-and-effect analysis.
 - **Radial** fans every branch evenly around the root when you want the pure, balanced bloom.
+- A **grid / matrix** tiles the top branches into cells -- four branches make a 2x2, the natural
+  shape of a SWOT or an Eisenhower box.
+- A **swimlane** runs the top branches as parallel lanes -- a process split by owner or stage.
+- A **brace map** joins each parent to its children with a `{` fork -- the part-whole diagram,
+  read left to right.
+
+The picker itself is a **gallery**: each layout shows as a small schematic thumbnail in the Map
+panel, so you choose by shape, not by name.
 
 Switching layout never changes your content -- only its geometry -- so it costs nothing to try
 a few and keep the one that makes the structure obvious. A backlog that felt tangled as a radial
@@ -128,25 +145,33 @@ you mean, and the filter when you're asking the map a question across all of the
 ## Board view: the map as columns
 
 A map is a tree; sometimes the question you have is a *board* question -- "what's in each bucket?"
-The **▦ Board** button answers it without changing your map. It reads every topic's **tags** and
-lays the map out as **Kanban columns**, one per tag, each card showing the topic with its
-rolled-up completion and due date. Tag your nodes `todo` / `doing` / `done` (or `backlog` / `now`
-/ `next`) and the very map you think in re-reads as a status wall you can scan.
+The **▦ Board** button answers it without duplicating your map. It lays the topics out as
+**Kanban columns**, grouped by whichever source you pick in its header: **tags** (one column per
+tag -- `todo` / `doing` / `done`, or `backlog` / `now` / `next`), a single-select **marker group**
+(Priority, Status, Mood, Vote), or the **schedule** (Overdue / Today / This week / Later). Each
+card shows the topic with its rolled-up completion and due date.
 
-It's **read-only** -- a lens, not a second copy. The board reads the tags; it doesn't move cards or
-rewrite the tree, and closing it leaves the map exactly as it was. Like the filter and the index,
-it's the same data asked a different question: the tree is how the work is *organised*, the board
-is how it's *progressing*.
+The board is a *lens on the same map*, and it writes back through the lens: **drag a card to
+another column** and the topic itself is re-tagged, re-marked, or re-scheduled -- the tree is
+updated, not a copy. Click a card and the canvas jumps to that topic. Like the filter and the
+index, it's the same data asked a different question: the tree is how the work is *organised*,
+the board is how it's *progressing* -- except here the answer is also a control.
 
 ## Find and replace
 
-Press **/** anywhere to jump straight to **Find**. It searches both topics *and* notes,
-so a term you only mentioned in a note is still findable. Matches are highlighted and you
-can step between them. Find is also **forgiving**: if what you typed matches nothing exactly, it
-quietly falls back to a typo-tolerant pass, so a half-remembered spelling -- *recieve* for
-*receive* -- still lands you on the node instead of an empty result. **Replace** turns find into a
-tidy-up tool: rename a project that got called three slightly different things, fix a term you
-decided to change, all in one pass.
+Press **/** anywhere to jump straight to **Find**. It searches everything a topic carries --
+its text, its note, its tags and markers, even attachment names and links -- so a term you only
+mentioned in a note is still findable. Matches are highlighted and you can step between them, or
+open **List all** for a clickable list with each match's breadcrumb. Find is also **forgiving**:
+if what you typed matches nothing exactly, it quietly falls back to a typo-tolerant pass, so a
+half-remembered spelling -- *recieve* for *receive* -- still lands you on the node instead of an
+empty result. **Replace** turns find into a tidy-up tool: rename a project that got called three
+slightly different things, fix a term you decided to change, all in one pass.
+
+When the question is sharper than a word, the same box speaks **operators**: `tag:q3`,
+`marker:flag-red`, `priority:1`, `due:overdue`, `due:soon`, `has:note`, `has:attachment`,
+`level:>=2`, `-exclude`, `"exact phrase"` -- combinable, and understood by the across-maps search
+too. "Every overdue topic tagged `q3` that has a note" stops being a scan and becomes a query.
 
 > The `/`-to-find shortcut is the single most useful key on a big map. When you can't
 > remember where something is, don't hunt -- press `/` and type.
@@ -159,7 +184,7 @@ The palette is selection-aware. Select a node first and a band of commands appea
 
 ## Jump to any topic from the palette
 
-The same **Ctrl/Cmd + K** box is also the fastest way to *travel*. Alongside the actions, every topic in the map sits in the list as **Go to: <topic>**; type part of its text, press Enter, and the canvas selects and centres that node. The trick that makes it worth the keystroke is what it searches: each topic's row quietly folds in its **note text** as well, so a term you only wrote in a note -- never in a topic title -- still surfaces the right node. It is the `/`-to-Find idea widened to the whole map at once: one box that finds both the thing you want to *do* and the place you want to *be*.
+The same **Ctrl/Cmd + K** box is also the fastest way to *travel*. Alongside the actions, every topic in the map sits in the list as **Go to: <topic>**; type part of its text, press Enter, and the canvas selects and centres that node. The trick that makes it worth the keystroke is what it searches: each topic's row quietly folds in its **note text** as well, so a term you only wrote in a note -- never in a topic title -- still surfaces the right node. It is the `/`-to-Find idea widened to the whole map at once: one box that finds both the thing you want to *do* and the place you want to *be*. The list even reaches past the current map: every other map in your library sits there as a **Switch to map:** row, so changing documents is a few keystrokes, not a trip to the dropdown.
 
 ## The keyboard shortcuts cheat-sheet
 
@@ -173,17 +198,21 @@ None of this assumes a mouse. The toolbar's dropdown menus and a node's right-cl
 
 A radial map is a tree, but real subjects aren't: the risk you noted on one branch is the
 same risk that constrains a plan three branches away. Drawing a relationship line between
-them is one answer (Chapter 4); a **link** is the lighter one. Give a node a link and it
+them is one answer (Chapter 3); a **link** is the lighter one. Give a node a link and it
 grows a small **🔗** -- click it and you travel.
 
 A link can point three ways, all set from the **ℹ Info** panel. **Jump to a topic** points it at
 another *topic in the same map*, so "see also: Budget" becomes one click instead of a hunt -- the
 canvas leaps to that topic and selects it, no line cluttering the picture. **Link to a map** points
 it at *another map* in your
-library (Chapter 7): a node in your *Strategy* map can open your *Q3 Plan* map, which is how
+library (Chapter 7): a node in your *Strategy* map can open your *Q3 Plan* map -- and, with the
+topic picker that appears once a map link is set, land on a *specific topic* inside it. That's how
 you build a small **atlas** instead of one unreadable continent -- a high-level map whose nodes
-are doorways into the detailed maps beneath them. And a plain web URL points it at a page, which
-opens in a new tab. A node holds one link at a time, and the 🔗 follows whichever you set.
+are doorways into the detailed maps beneath them, with a **Linked from other maps** section in the
+inspector showing the doorways that point back. And a plain web URL points it at a page, which
+opens in a new tab. The 🔗 carries one primary link; further URLs live in an **Additional links**
+list on the same topic. Fastest of all, while *typing* a topic: `[[` or `@` autocompletes any
+topic or map by name and attaches the link as you pick it.
 
 ## Search every map
 
@@ -208,6 +237,18 @@ genuine **dashboard map** -- one overview whose branches are the current state o
 detail maps -- and keep it current with a click rather than re-copying by hand. Treat a roll-up
 node as a window onto the source, not a place to edit: the mirrored branches are refreshed
 wholesale, so do the editing in the source map and roll it up again.
+
+## Retracing your steps, and views worth keeping
+
+Every jump in this chapter -- a Find hit, an outline click, a link -- adds to a browser-style
+**history**: **Alt+←** goes back to the topic you came from, **Alt+→** forward again, across maps.
+It's the antidote to "where was I before I chased that link?"
+
+And when a *view* itself is the asset -- zoomed to one corner, drilled into a branch, a filter
+applied -- save it: **View -> Save current view...** names the exact combination of pan, zoom,
+drill and filter, and re-applies it from the same menu in one click. A weekly review can open on
+precisely the view you triage from. Need to point someone else at a spot instead? **Copy link to
+this topic** puts a URL on the clipboard that opens the app on that map with that topic focused.
 
 ## A working rhythm for big maps
 
@@ -263,5 +304,12 @@ the palette -- see the band of actions that act on just that node, and watch the
 nothing is selected. Then click the **?** button (or run **Keyboard shortcuts** from the palette)
 and skim the cheat-sheet once. If you have a phone handy, open the same map there and toggle the
 **Outline** panel -- it rises as a bottom sheet over a full-width canvas instead of squeezing the map.
+
+Two altitude moves to feel before you go: run **Show level 1** and step the map open one level
+at a time, then **drill in** to a single branch, edit a node while you're inside, and press
+**Esc** -- the whole continent comes back with your edit in place. Ask a sharper question while
+you're at it: type `due:overdue tag:q3` into Find and watch a scan become a query. And when you've
+set up a view you'll want again -- a drill plus a filter -- **save it** from the View menu and
+re-apply it in one click.
 
 Part 3 turns outward: getting the map off your screen and in front of other people.

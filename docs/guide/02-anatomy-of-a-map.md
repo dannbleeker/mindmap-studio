@@ -35,18 +35,21 @@ children. There is no special "task" type or "milestone" type -- MindMap Studio 
 the model deliberately small. That smallness is why import, export and undo all behave
 predictably: there are fewer kinds of thing to get wrong.
 
-## Two things that aren't nodes
+## The things that aren't nodes
 
-Two features draw on the canvas without being part of the tree:
+A small family of features draws on the canvas without being part of the tree:
 
 - A **boundary** is a soft, shaded box drawn around a node and everything beneath it,
   grouping a branch visually ("everything in here is Phase 1").
 - A **relationship** is an arrow drawn from one node to another, expressing a link
   that the tree structure can't -- a dependency, an influence, a "see also" across
   branches.
+- A **summary** bracket, a **callout** bubble, and the free **background shapes** are
+  the rest of the family -- annotations and frames you'll meet in Chapters 3 and 4.
 
-Both are covered in Chapter 3. The point for now: the tree carries the *hierarchy*,
-and these two carry the *exceptions* to it.
+The first two carry most of the weight and are covered in Chapter 3. The point for
+now: the tree carries the *hierarchy*, and everything else carries the *exceptions*
+and *commentary* around it.
 
 ## The canonical model
 
@@ -63,8 +66,9 @@ Markdown, JSON, OPML and more -- losslessly, in the case of JSON.
 
 ## Now you try
 
-Open the sample *Q3 Retail Plan* map and name the parts out loud: which node is the **root**,
-which are **branches**, where's the **boundary**, where's the **relationship** arrow. Then prove
+Open a worked example (**+ New... -> Examples** -- the *SWOT (worked)* or *Product launch
+plan* both qualify) and name the parts out loud: which node is the **root**, which are
+**branches**, where's the **boundary**, where's the **relationship** arrow. Then prove
 the "one model, many views" idea to yourself -- open the **Outline** panel (Chapter 5) and watch
 the same tree appear as an indented list, or export to **Markdown** (Chapter 6) and read your map
 as plain text. Same data, three faces. Now **rename a node on the canvas** and look again: the

@@ -15,6 +15,11 @@ travels with it, re-coloured to match its new branch. There is no cut-and-paste 
 the drag *is* the move. Because the underlying model updates atomically, **Ctrl+Z**
 puts it back if you misjudged the drop.
 
+Two modifier keys change what a drag means. **Shift-drag onto empty canvas** *detaches*
+the branch -- it becomes a floating topic instead of snapping back home. **Ctrl-drag onto
+another topic** drops a *copy* of the branch there, leaving the original where it was --
+the quick way to fork a checklist you're about to adapt.
+
 A good habit: build fast and loose first -- get every idea onto the canvas as a node,
 wherever -- then spend a second pass dragging things into the structure that emerges.
 Trying to get the hierarchy right while you're still generating ideas slows both down.
@@ -67,6 +72,12 @@ information on the page.
 > are really on different branches, or whether one should simply be re-parented under
 > the other. An arrow is the right answer for genuine cross-links; it's the wrong answer
 > for a hierarchy you just haven't tidied yet.
+
+An arrow can also say *what kind* of link it is. Select a relationship and the inspector
+offers a semantic **type** -- *depends-on*, *causes*, *supports*, *blocks*, or the plain
+*relates-to* -- separate from its text label, plus one-click style **presets** (dashed,
+dotted, thick, curved, double-headed) when the line itself should signal something. Types
+pay off later: the Power Filter and conditional rules can both ask "what blocks what?"
 
 Once you have a few of these arrows, some of them will inevitably cross. Where two lines
 overlap, the eye can't tell whether they pass over each other or join -- and a false junction
@@ -152,6 +163,29 @@ of what it means. Switch Free layout off again and the tree snaps back to its au
 every hand-placed position still remembered for when you turn it back on. It's the escape hatch
 from the grid, not a replacement for it: most maps want the auto-layout, and the handful that
 don't want it badly.
+
+Free placement comes with drafting aids. As you drag, **alignment guides** flash when a node
+lines up with a neighbour's edge or centre and the node snaps to them, so a hand-built layout
+still reads straight; **Align** and **Distribute** commands tidy a whole selection in one step.
+And a node you've placed deliberately can be pinned: right-click it and choose **Lock
+position** -- it gets a small lock badge, stops being draggable, and the tidy-up commands leave
+it alone.
+
+## Background shapes and smart containers
+
+Sometimes the structure needs *scenery*: the four quadrants behind a SWOT, an arrow sweeping
+under a flow, lanes that split a plan by owner. **Insert -> Shapes** drops a free background
+shape behind your topics -- a **rectangle**, an **ellipse**, a **block arrow**, or a **chevron**
+-- sized and placed by hand (adding one switches the map to Free layout). Click a shape to move
+it, resize it from a corner, recolour it, or delete it from its small floating toolbar. Shapes
+are pure scenery: they sit behind the nodes, carry no children, and export exactly as drawn.
+
+Two of the shapes are smarter. A **Swimlane** (a header band over vertical lanes) and a
+**Matrix** (a grid) are **containers**: any topic whose centre sits inside one belongs to it,
+and dragging the container **carries its topics along** in a single move -- slide the lane, its
+cards follow. There's nothing to enrol; membership is simply position. Between them, shapes and
+containers are how a mind-mapping canvas doubles as a whiteboard for the frameworks that are
+really *pictures* -- quadrants, pipelines, lanes.
 
 ## Diagram backdrops: onion, funnel, Venn
 

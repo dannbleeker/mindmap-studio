@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 427,
+  "reviewedThroughChangelogBullets": 429,
   "areas": [
     "editing",
     "notes",
@@ -21,8 +21,8 @@
       "name": "Free background shapes (rectangle / ellipse / block arrow / chevron) — a positioned, resizable canvas-object layer for SWOT/Venn/risk composition",
       "area": "structure",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -30,8 +30,8 @@
       "name": "Smart containers (swimlane / matrix) that capture and move their contained topics when dragged",
       "area": "structure",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -39,7 +39,7 @@
       "name": "StyleBar reflects the selection's active style (shape / fill / border / bold / shadow / font) with touch-sized, grouped controls",
       "area": "styling",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -48,8 +48,8 @@
       "name": "Live-map slides (HTML & PowerPoint deck exports render each branch as its actual map image, not bullets)",
       "area": "export",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -57,8 +57,8 @@
       "name": "Board grouping by marker group or schedule dates (drag a card to re-mark or re-schedule the topic)",
       "area": "navigation",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -66,8 +66,8 @@
       "name": "PNG export options: 2×/4× scale factor and transparent background",
       "area": "export",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -75,8 +75,8 @@
       "name": "Direct PDF file export with page-size (fit / A4 / Letter) and orientation (distinct from print-to-PDF)",
       "area": "export",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -84,8 +84,8 @@
       "name": "MindManager .mmap export fidelity: writes topic tags, task metadata and embedded images",
       "area": "export",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -93,8 +93,8 @@
       "name": "Smart Ctrl+V routing (image / outline / URL / internal branch clipboard handled automatically)",
       "area": "editing",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -102,7 +102,7 @@
       "name": "Move project: shift all task start/due dates ±N days (branch or whole map) in one undo step",
       "area": "markers",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -111,8 +111,8 @@
       "name": "Drag modifiers: Shift-drag detaches a topic to floating, Ctrl-drag copies the subtree",
       "area": "structure",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -120,7 +120,7 @@
       "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
       "area": "structure",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -129,8 +129,8 @@
       "name": "Keyboard zoom shortcuts: Ctrl/⌘ + / − / 0 (zoom in / out / reset)",
       "area": "navigation",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -138,7 +138,7 @@
       "name": "Inline #tag accelerator: typing # mid-topic pops the tag picker to assign an existing or new tag",
       "area": "markers",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -147,7 +147,7 @@
       "name": "Quick Filter from any marker or tag row in the Markers & tags index (pre-fills the Power Filter)",
       "area": "navigation",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -156,7 +156,7 @@
       "name": "Find & Replace search history (recalls the last ~10 queries)",
       "area": "navigation",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -165,7 +165,7 @@
       "name": "Sticky-note colour set at insert time with a remembered preferred default",
       "area": "structure",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -175,7 +175,7 @@
       "area": "styling",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -184,7 +184,7 @@
       "area": "library",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -193,7 +193,7 @@
       "area": "structure",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -202,7 +202,7 @@
       "area": "export",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -211,7 +211,7 @@
       "area": "export",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -220,7 +220,7 @@
       "area": "editing",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -238,7 +238,7 @@
       "area": "navigation",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -246,8 +246,8 @@
       "name": "Trash / undo-delete for maps (recoverable soft-delete + Trash view)",
       "area": "library",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -255,8 +255,8 @@
       "name": "Cross-tab clobber guard (warn when a map is open in two tabs)",
       "area": "library",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -264,8 +264,8 @@
       "name": "External-file conflict detection (prompt before overwriting a disk file that changed)",
       "area": "library",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -273,8 +273,8 @@
       "name": "Open Recent — reopen recently-opened disk files from the File menu",
       "area": "library",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -282,7 +282,7 @@
       "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -291,16 +291,16 @@
       "name": "Cinematic visual-map walkthrough (guided walk frames each branch with animated zoom)",
       "area": "presentation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
-      "bookExample": false
+      "manual": true,
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "free-colour-pickers",
       "name": "Free colour pickers for node text / fill / branch (StyleBar)",
       "area": "styling",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -309,7 +309,7 @@
       "name": "Paste a URL → a node titled from the URL (offline)",
       "area": "editing",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -318,8 +318,8 @@
       "name": "Copy the map to the clipboard as a PNG image",
       "area": "export",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -327,17 +327,17 @@
       "name": "Presenter pacing timer + budget colour + B/W blackout",
       "area": "presentation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
-      "bookExample": false
+      "manual": true,
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "cross-map-switcher",
       "name": "Switch to another library map from the ⌘K palette",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -345,7 +345,7 @@
       "name": "Selecting a node scrolls its row into view in the Outline",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -354,7 +354,7 @@
       "name": "Sort a topic's children by name / priority / due date / progress",
       "area": "editing",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -363,8 +363,8 @@
       "name": "Copy + paste multiple selected branches at once (cross-map)",
       "area": "editing",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -372,7 +372,7 @@
       "name": "\"Links to\" inspector section (outgoing links + relationships)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -381,7 +381,7 @@
       "name": "Map-wide Relationships panel (every link + relationship, click-to-jump)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -390,8 +390,8 @@
       "name": "New map from this topic (promote a branch to its own library map)",
       "area": "library",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -399,8 +399,8 @@
       "name": "Insert a library map as a branch under the selected topic",
       "area": "library",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -634,7 +634,7 @@
       "area": "styling",
       "since": "2026-06-28",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -678,7 +678,7 @@
       "name": "Per-map typography (base font family + size scale; canvas == export)",
       "area": "styling",
       "since": "2026-06-22",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -759,8 +759,8 @@
       "name": "Relationship style presets (one-click dash/width/curve/arrowhead looks)",
       "area": "structure",
       "since": "2026-06-22",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -786,7 +786,7 @@
       "name": "Detach a branch to a floating topic (and re-attach)",
       "area": "structure",
       "since": "2026-06-22",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -894,7 +894,7 @@
       "name": "Replace scope: topics, notes, or both",
       "area": "navigation",
       "since": "2026-06-22",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -921,8 +921,8 @@
       "name": "Arrow-key topic navigation (←parent / →child / ↑↓ siblings)",
       "area": "navigation",
       "since": "2026-06-22",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1008,7 +1008,7 @@
     },
     {
       "id": "example-gallery",
-      "name": "Pre-built example maps (13 worked examples)",
+      "name": "Pre-built example maps (20 worked examples)",
       "area": "library",
       "since": "2026-06-13",
       "manual": true,
@@ -1137,8 +1137,8 @@
       "name": "Tag → colour mapping (swatch per tag tints matching topics)",
       "area": "styling",
       "since": "2026-06-22",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1606,7 +1606,7 @@
       "area": "library",
       "since": "2026-06-19",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1614,7 +1614,7 @@
       "name": "GTD Areas of Focus worked example",
       "area": "library",
       "since": "2026-06-19",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1623,17 +1623,17 @@
       "name": "Detail levels — expand the map to a chosen depth",
       "area": "structure",
       "since": "2026-06-20",
-      "manual": false,
-      "book": false,
-      "bookExample": false
+      "manual": true,
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "format-painter",
       "name": "Format painter — copy a topic's style and paste it across the selection",
       "area": "styling",
       "since": "2026-06-20",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1641,8 +1641,8 @@
       "name": "Auto-colour branches from the theme palette",
       "area": "styling",
       "since": "2026-06-20",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1650,7 +1650,7 @@
       "name": "Inline rich-text mini-toolbar (bold / italic / underline / colour) while editing",
       "area": "notes",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1659,7 +1659,7 @@
       "name": "Hover-peek for notes & attachments",
       "area": "notes",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1668,7 +1668,7 @@
       "name": "Drag markers from the inspector onto topics",
       "area": "markers",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1677,8 +1677,8 @@
       "name": "Canvas breadcrumb bar — click an ancestor to centre it",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1686,16 +1686,16 @@
       "name": "Drill in (focus on topic) — re-root the view at a topic's subtree",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
-      "book": false,
-      "bookExample": false
+      "manual": true,
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "status-bar",
       "name": "Canvas status bar — visible topic count, selection size, live zoom",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1704,8 +1704,8 @@
       "name": "Align & distribute selected topics (free-canvas mode)",
       "area": "structure",
       "since": "2026-06-20",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1713,8 +1713,8 @@
       "name": "Lock a topic's position (pin in place; un-draggable, align/distribute skip it)",
       "area": "structure",
       "since": "2026-06-22",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1722,8 +1722,8 @@
       "name": "Keyboard restructuring — move topics up/down, promote/demote",
       "area": "editing",
       "since": "2026-06-20",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1731,7 +1731,7 @@
       "name": "Paste an image from the clipboard onto a topic",
       "area": "images",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1740,7 +1740,7 @@
       "name": "Find highlights every match on the canvas",
       "area": "navigation",
       "since": "2026-06-20",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1749,8 +1749,8 @@
       "name": "Searchable marker library",
       "area": "markers",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1758,8 +1758,8 @@
       "name": "Marker groups (single-select sets: Priority / Status / Mood / Vote)",
       "area": "markers",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1767,8 +1767,8 @@
       "name": "Tag autocomplete + map-wide tag manager (rename / merge / delete)",
       "area": "markers",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1776,7 +1776,7 @@
       "name": "Branch-colour topic fills (tint & gradient)",
       "area": "styling",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1785,7 +1785,7 @@
       "name": "Image fill for topics (a picture covering the whole card)",
       "area": "images",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1794,7 +1794,7 @@
       "name": "Design gallery — one-click theme + connector looks",
       "area": "styling",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1803,8 +1803,8 @@
       "name": "Conditional-format triggers: overdue / priority / text-contains / has-attachment",
       "area": "styling",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1812,7 +1812,7 @@
       "name": "Editable outline panel — rename, promote/demote, drag-reorder",
       "area": "structure",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1821,7 +1821,7 @@
       "name": "Outline numbering schemes (decimal / legal outline)",
       "area": "structure",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1830,7 +1830,7 @@
       "name": "Map statistics panel (+ word count & reading time)",
       "area": "navigation",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1839,7 +1839,7 @@
       "name": "Power Filter hide mode + extract matches to a new map",
       "area": "navigation",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1848,7 +1848,7 @@
       "name": "On-canvas map legend (markers / tags / rules), carried into exports",
       "area": "navigation",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1857,7 +1857,7 @@
       "name": "Paste a spreadsheet selection as topics (row → topic, columns → note / tags)",
       "area": "import",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1866,7 +1866,7 @@
       "name": "Drag-to-relate — draw a cross-link by dragging from a topic's grip",
       "area": "editing",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1875,16 +1875,16 @@
       "name": "Guided walk — step through topics with a spotlight + speaker notes",
       "area": "presentation",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
-      "bookExample": false
+      "manual": true,
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "copy-table",
       "name": "Copy map as a table (TSV) — Topic / Depth / Note / Tags to the clipboard",
       "area": "export",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1893,8 +1893,8 @@
       "name": "Map parts — insert a ready-made mini-structure (SWOT / pros-cons / 5W1H / agenda)",
       "area": "editing",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1902,7 +1902,7 @@
       "name": "Quick task toggle — a hover checkbox to cycle not-a-task / to-do / done",
       "area": "editing",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1911,7 +1911,7 @@
       "name": "Group a multi-selection of topics in one boundary box",
       "area": "structure",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1920,8 +1920,8 @@
       "name": "Auto-marker suggestions from a topic's text",
       "area": "markers",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1929,7 +1929,7 @@
       "name": "Dockable note editor — full-height note editing in the rail",
       "area": "notes",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1938,17 +1938,17 @@
       "name": "Saved views — bookmark pan/zoom + drill + filter and jump back",
       "area": "navigation",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
-      "bookExample": false
+      "manual": true,
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "align-guides",
       "name": "Smart alignment guides + snapping (free-canvas drag)",
       "area": "structure",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1956,8 +1956,8 @@
       "name": "Isolate branch — collapse other top branches and reveal the path to a topic",
       "area": "navigation",
       "since": "2026-06-21",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1965,7 +1965,7 @@
       "name": "Spell-check toggle for the topic + note editors",
       "area": "editing",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1974,7 +1974,7 @@
       "name": "Bake outline numbers into the copied outline / Markdown export",
       "area": "export",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1983,7 +1983,7 @@
       "name": "Per-topic wrap width (long topics wrap instead of stretching)",
       "area": "styling",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -1992,7 +1992,7 @@
       "name": "Inline relationship label editing (double-click the line)",
       "area": "structure",
       "since": "2026-06-21",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2002,7 +2002,7 @@
       "area": "library",
       "since": "2026-06-29",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2011,7 +2011,7 @@
       "area": "library",
       "since": "2026-06-29",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2019,8 +2019,8 @@
       "name": "Find searches every node field (tags, markers, hyperlink, callouts, attachments, resources)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2028,17 +2028,17 @@
       "name": "Scoped / operator search (tag:, marker:, priority:, due:, has:, level:, -exclude, \"phrase\")",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
-      "bookExample": false
+      "manual": true,
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "deep-link-node",
       "name": "Deep-link to a node (?node= URL + Copy link to this topic)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2046,8 +2046,8 @@
       "name": "Back / forward navigation history (Alt+← / Alt+→)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2055,7 +2055,7 @@
       "name": "Search-across-maps results show ancestor breadcrumb + note snippet",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2064,8 +2064,8 @@
       "name": "In-map Find 'List all' — clickable list of every match (vs only next/prev)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2073,7 +2073,7 @@
       "name": "Power Filter by completion status (Done / In progress / Not done)",
       "area": "structure",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2082,8 +2082,8 @@
       "name": "Ctrl/⌘+, opens Settings & preferences",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2091,7 +2091,7 @@
       "name": "Reduced-motion support — OS prefers-reduced-motion + in-app toggle (canvas + guided walk)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2100,7 +2100,7 @@
       "name": "Cross-map topic links — #map=<id>&node=<id> opens another map + focuses a topic",
       "area": "structure",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2109,7 +2109,7 @@
       "name": "In-note in-app links — [text](#node=…/#map=…) jump through the canvas",
       "area": "structure",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2118,7 +2118,7 @@
       "name": "Multi-line burst quick-capture — a pasted outline becomes a subtree in one step",
       "area": "editing",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2127,7 +2127,7 @@
       "name": "Keyboard Outline reorder/indent (Shift+Arrows)",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2136,7 +2136,7 @@
       "name": "Screen-reader lists for boundaries / summaries / callouts",
       "area": "navigation",
       "since": "2026-06-30",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2145,8 +2145,8 @@
       "name": "Cross-map backlinks — inspector 'Linked from other maps'",
       "area": "structure",
       "since": "2026-07-01",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2154,8 +2154,8 @@
       "name": "Cross-map topic picker — refine a #map= link to a specific topic",
       "area": "structure",
       "since": "2026-07-01",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2163,7 +2163,7 @@
       "name": "Markdown shorthand on paste — checkboxes, links, and emphasis parse into structure",
       "area": "editing",
       "since": "2026-07-01",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2172,7 +2172,7 @@
       "name": "Long-press context menu on touch/pen",
       "area": "navigation",
       "since": "2026-07-01",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2181,7 +2181,7 @@
       "name": "Quick-capture inbox — map-independent 'Unfiled' bucket, file onto a map later",
       "area": "editing",
       "since": "2026-07-01",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2190,7 +2190,7 @@
       "name": "High-contrast theme — OS prefers-contrast/forced-colors + in-app toggle",
       "area": "navigation",
       "since": "2026-07-01",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2199,8 +2199,8 @@
       "name": "Multiple hyperlinks per topic — additional links beyond the primary (inspector-managed)",
       "area": "structure",
       "since": "2026-07-01",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2208,7 +2208,7 @@
       "name": "Slash / command menu in the topic editor — keyboard insert of child/task/date/boundary/note/marker",
       "area": "editing",
       "since": "2026-07-01",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2217,8 +2217,8 @@
       "name": "[[ / @ name-based link autocomplete — pick a topic by name to attach a link",
       "area": "structure",
       "since": "2026-07-01",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2226,8 +2226,8 @@
       "name": "Conditional rules: AND-ed extra conditions, each independently NOT-negatable",
       "area": "styling",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2235,8 +2235,8 @@
       "name": "Conditional rules: a \"due soon\" trigger kind (reuses the filter/search due-soon window)",
       "area": "styling",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2244,8 +2244,8 @@
       "name": "Full 1-9 task priority in every picker, Power Filter, and Ctrl/Cmd+Shift+1-9 shortcuts",
       "area": "markers",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2253,7 +2253,7 @@
       "name": "Insert menu fly-out submenus (Map parts / Templates) via a reusable MenuSub primitive",
       "area": "editing",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2262,8 +2262,8 @@
       "name": "Visual Layout gallery (SVG thumbnails) in the Map panel, replacing the text-only layout select",
       "area": "styling",
       "since": "2026-07-02",
-      "manual": false,
-      "book": false,
+      "manual": true,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2271,7 +2271,7 @@
       "name": "Design presets gallery consolidated into the Map panel (moved from the Toolbar Canvas menu)",
       "area": "styling",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2280,7 +2280,7 @@
       "name": "Relate + wrap-width grips mirror to a left-growing branch's outward edge",
       "area": "editing",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     },
@@ -2289,7 +2289,7 @@
       "name": "Status-bar Map / Outline / Board view switcher (one-click peer projections)",
       "area": "navigation",
       "since": "2026-07-02",
-      "manual": false,
+      "manual": true,
       "book": false,
       "bookExample": false
     }

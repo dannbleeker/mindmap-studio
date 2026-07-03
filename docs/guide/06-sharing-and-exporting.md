@@ -34,8 +34,10 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
 - **MindManager (`.mmap`)** -- MindManager's own format. Writes the topic tree, notes,
   hyperlinks, stock icons, relationships, and the two-sided left/right arrangement -- the
   mirror of the `.mmap` importer, so a map you started here can go back to a MindManager user.
-- **PNG** and **SVG** -- the map as a picture. PNG for slides and chat; SVG when you want
-  a crisp, scalable image that survives zooming.
+- **PNG** and **SVG** -- the map as a picture. PNG for slides and chat -- in plain, sharp
+  **@2x**, print-grade **@4x**, and **transparent** variants -- and SVG when you want a crisp,
+  scalable image that survives zooming. There's also **Copy image to clipboard**, which skips the
+  file entirely and pastes straight into a chat or a deck.
 - **HTML** -- a self-contained web page of the map, openable in any browser with nothing
   installed.
 - **Interactive HTML** -- the same one-file, opens-anywhere idea, but *navigable* instead of a
@@ -45,23 +47,30 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
   one file with the data, styling, and a tiny script inlined -- no app, no server, no internet --
   so it's the format for handing a *big* map to someone who needs to explore it, not just look at it.
 - **HTML slide deck** -- the walk-through (Chapter 7) as a standalone, navigable
-  presentation in a single file: an overview slide, then one per branch, advanced with the
-  arrow keys or a click. Hand someone the file and they can present your map with nothing
+  presentation in a single file: an overview slide, then one per branch -- each drawn as its
+  **actual map image**, not a bullet list -- advanced with the arrow keys or a click, speaker
+  notes a keypress away. Hand someone the file and they can present your map with nothing
   installed.
 - **PowerPoint (`.pptx`)** -- a real, editable slide deck: an overview slide, then one per
-  branch with its points as bullets. For when the deck has to live in PowerPoint -- a house
-  template to apply, or a room to run from the corporate machine.
+  branch rendered as its **live map image**, with each topic's note carried into the slide's
+  speaker notes. For when the deck has to live in PowerPoint -- a house template to apply, or a
+  room to run from the corporate machine.
 - **Word (`.docx`)** -- the map as an editable outline document: a title, indented bulleted
   topics, and notes as italic lines. For when the next step lives in a word processor --
   minutes, a brief, a hand-off to someone who doesn't use the app.
 - **Excel (`.xlsx`)** -- the map as an indented outline worksheet: each topic in the column
   matching its depth, with a Notes column. For when you want to sort, filter, or count the
   outline as a spreadsheet.
-- **PDF** (via print) -- a fixed-layout document for sending and printing.
+- **PDF** -- a real `.pdf` file, written directly (sized to the map, or **A4** / **Letter**), or
+  the classic route through the browser's print dialog when you want its options.
 
 A rule of thumb: **JSON to keep it, Markdown to discuss it, PNG/SVG/HTML to show it,
 interactive HTML to let someone explore it, the slide deck or PowerPoint to present it, Word or
 PDF to send it, Excel to crunch it.**
+
+And the scope is yours: **right-click any topic -> Export this branch...** exports just that
+subtree, in any of the picture/document formats, framed to its own bounds -- for the one branch
+that needs to travel without the map around it.
 
 A worked tour of the interchange exports, one file each. Take a project map and pick **Export -> OPML**; open the `.opml` in your outliner and the topics arrive as nested headings, ready to keep editing as an outline. **Export -> FreeMind (`.mm`)** and double-click the file: it opens in FreeMind, Freeplane, or XMind with the tree, the folded branches, the links, and the notes intact -- the one bridge almost every mind-mapper reads. **Export -> Mermaid (`.mmd`)** gives you a `mindmap` block you paste straight into a README on GitHub, where it renders as a diagram in the rendered Markdown. **Export -> XMind (`.xmind`)** opens natively in XMind 2020+ -- tree, notes, links, tags, floating topics, and relationships -- with no `.mm` detour. **Export -> SimpleMind (`.smmx`)** opens natively in SimpleMind on desktop or phone, carrying notes, web links, and relations. And **Export -> HTML** hands someone a single self-contained page that opens in any browser with nothing installed -- one file, no app, no server. Same map, six more doors, and every one is a file on *your* disk.
 
@@ -114,8 +123,9 @@ relationships, boundaries, and floating topics. It was built against MindManager
 published schema rather than guessed at, so the common cases come through faithfully.
 
 There is now also an **off-ramp**: **Export -> MindManager (`.mmap`)** writes the same parts
-back out -- tree, notes, hyperlinks, icons, relationships, and the two-sided left/right
-arrangement -- so a map you built here can land on a MindManager user's desk. It is the
+back out -- tree, notes, hyperlinks, icons, tags, task info (dates, priority, progress),
+embedded images, relationships, and the two-sided left/right arrangement -- so a map you built
+here can land on a MindManager user's desk. It is the
 mirror of the importer, and a map round-trips back into MindMap Studio with those fields
 intact. MindManager is strict about its format, so confirm an exported file opens in your
 MindManager version before relying on it.
@@ -146,6 +156,20 @@ in order and *watch* the map grow on the canvas -- step frame by frame, drag the
 point, or let it auto-play. It's read-only while you watch, so nothing changes until you pick a
 frame and hit **Restore this** (or **Exit**, or Esc, to drop back to the live map). On a map you've
 been building for weeks, it's a quietly satisfying way to see how the thinking took shape.
+
+## A map as a file on disk
+
+Between "lives in the browser" and "exported once" there's a third way to keep a map: link it to
+a **file on disk**. MindMap Studio's native file is **`.mmst`** (the lossless JSON format under a
+distinct extension). **Open file...** (Ctrl+O) opens one; **Save to file** (Ctrl+S) and **Save
+as...** write one; an **Open recent** list brings back the files you use often. Once a map is
+linked to its file, the same continuous autosave **writes through to disk** as you edit -- so a
+map kept in a synced folder (Dropbox, OneDrive, a git repo) stays current without a Save
+ritual. The app is careful at the edges: if the file changes on disk underneath you -- edited
+elsewhere, or synced in -- background saving pauses and an explicit Save asks before
+overwriting, and if the same map is open in two tabs, you're warned before the autosaves can
+fight. (Save-in-place needs a Chromium desktop browser; elsewhere, Save downloads the file and
+your work still autosaves to the browser.)
 
 ## Where your data lives
 

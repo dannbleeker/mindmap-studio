@@ -424,6 +424,34 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Docs: the user guide now covers every shipped feature (100% manual coverage), and the book
+  caught up with the app.** `USER_GUIDE.md` gains the ~90 features that had shipped undocumented —
+  smart Ctrl+V paste routing, the `/` `#` `[[` editor accelerators, the search operators
+  (`tag:`/`due:`/`has:`/`level:`…), background shapes & smart containers, the marker library /
+  groups / suggestions, tag manager + tag colours, the full conditional-rule trigger set with
+  AND/NOT, saved views, back/forward history, deep links, the Inbox, Trash + file-conflict
+  safeguards, PNG/PDF export options, live-map slides, the guided walk + cinematic mode, the
+  presenter timer, Settings (reduced motion / high contrast), and more. The book (*Thinking in
+  Maps*) was reviewed structurally: chapter 1 no longer opens on the retired sample-map first-run
+  (it's the Start screen) and no longer teaches a Ctrl+Enter line break that doesn't exist;
+  chapter 2's exercise uses a worked example; chapters 3–7 fold in the shipped features that serve
+  their narratives (shapes/containers, systematic styling, altitude tools, operator search, files
+  on disk, library organisation, guided walk + pacing timer); appendix A is rebuilt as the real
+  keyboard card and appendix B matches the actual import/export fidelity. Catalogue: manual
+  54.5% → **100%**, book 49% → **75.5%** — flags flipped only for what's genuinely covered.
+
+- **User-guide coverage review: stale statements corrected, catalogue flags trued up.** A review of
+  `USER_GUIDE.md` against the shipped app found five statements the code had outgrown — priority is the
+  full **1–9** range (not High/Med/Low), the **Board view writes back** (drag re-tags / re-marks /
+  re-schedules; groups by tag, marker group, or schedule), a topic can hold **additional links** beyond
+  the primary 🔗, right-clicking a **relationship opens the full quick menu** (not just delete), the
+  `.mmap` export carries tags / task info / images, and there are **20** worked examples (not 14) — all
+  fixed, plus the book's Chapter 1 "there is no Save button" line now acknowledges `.mmst` files. The
+  same review found 25 features flagged `manual: false` in `docs/features.json` that the guide already
+  documents (breadcrumb bar, drill-in, format painter, detail levels, wrap width, keyboard
+  restructuring, …) — flags corrected, so manual coverage reads **64.4%** (was 54.5%); the book flags
+  were verified accurate as-is.
+
 - **⌘K command palette was unstyled in the editor.** The palette's `.st-cmdk*` CSS lived in `start.css`,
   which is imported only by the lazily-loaded Start screen — so opening a map straight into the editor
   (the default view) left the palette as an unstyled, full-viewport list of every command. Moved the

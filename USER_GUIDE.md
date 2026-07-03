@@ -73,7 +73,7 @@ Left to right:
 | **1. Numbering** | Toggle [outline numbering](#auto-numbering) (1, 1.2, …) on every topic |
 | **⌒ Line jumps** | Toggle [line-jumps](#relationships-boundaries--callouts) — a hop where two relationship arrows cross |
 | **◎ Focus** | [Focus the selected branch](#focus-a-branch) — dim everything else (Esc exits) |
-| **Canvas** | [Per-map look](#canvas-background): background colour + image, theme, **connector style**, **branch growth**, and **type** (base font + size) |
+| **Canvas** | **Free layout (whiteboard)** toggle + **Theme, design presets & backdrop…** — which opens the [Map panel](#topic-info-panel), where the whole per-map look lives (theme, background, design presets, connectors, typography) |
 | **ℹ Info** | Toggle the [topic info panel](#topic-info-panel) — note, markers, tags, style, links for the selected node |
 | **🔍 Find** | Open [Find & Replace](#find--replace) — a top-right overlay to search and replace topics & notes (`Ctrl/⌘+F` or `/`) |
 | **Layout** | [Layout direction](#layout): Both sides / Right / Left |
@@ -86,7 +86,9 @@ menu is fully **keyboard-navigable** — open with the mouse or **↓**, move wi
 with **Enter**, and close with **Esc** (focus returns where it was). On phones the menus open as a
 full-width **bottom sheet**. And anywhere in the editor, press **⌘K** (Ctrl-K) for a **command
 palette** — fuzzy-search and run any toolbar action (present, export, toggle a panel, switch layout,
-group a branch, …) without reaching for the menus.
+group a branch, …) without reaching for the menus. The palette also lists every other library map as
+**Switch to map: …** (foldered maps read *folder / map*), so changing documents is a keystroke, not
+a trip to the dropdown.
 
 ---
 
@@ -102,13 +104,36 @@ Keyboard-first, just like MindManager:
 - **Double-click** a node, or press **F2** with it selected — edit its text inline (starting from the existing text, all selected)
 - **Ctrl + B / I / U** — while editing a topic: bold / italic / underline the selection
 - **⌘K / Ctrl-K** — open the [command palette](#the-toolbar) to search and run any action
-- **Drag** a node onto another — re-parent it
+- **← / → / ↑ / ↓** — walk the selection through the tree (← parent, → child, ↑↓ siblings); in
+  **🧲 Free layout**, **Ctrl/⌘ + arrows** instead nudge the topic 10 px
+- **Drag** a node onto another — re-parent it (drop on the top/bottom edge to reorder it
+  before/after instead of nesting)
+- **Shift-drag onto empty canvas** — detach the branch to a floating topic; **Ctrl/⌘-drag onto a
+  topic** — drop a *copy* of the branch there, original untouched
+- **Ctrl/⌘ + C** — copy the selected branch (a multi-selection copies every selected branch);
+  **Ctrl/⌘ + Shift + V** — paste them under the selection, re-numbered, in one undo step. The
+  branch clipboard persists across maps and reloads, so this is also cross-map copy/paste.
+  **Ctrl/⌘ + D** duplicates the branch as a sibling
 - **Ctrl/⌘ + Shift + ↑ / ↓** — move the topic up / down among its siblings
 - **Alt + Shift + ← / →** — promote (outdent) / demote (indent) the topic
-- **Ctrl/⌘ + V** (with a topic selected, not typing) — paste a clipboard image onto the topic
+- **Ctrl/⌘ + Shift + 1…9** — set the topic's task priority (see [Priority](#topic-info-panel))
+- **Ctrl/⌘ + V** (with a topic selected, not typing) — [smart paste](#smart-paste): an image, an
+  outline, a URL, or a spreadsheet selection, routed automatically
+- **Ctrl/⌘ + + / − / 0** — zoom in / out / reset to 100%; **Shift + 1 / Shift + 2** — fit the whole
+  map / fit the selection
+- **Alt + ← / →** — back / forward through the topics you've visited (browser-style history,
+  across maps)
 - **Ctrl + Z / Ctrl + Shift + Z** (or Ctrl + Y) — **undo / redo** (kept in sync with what's saved)
-- Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down) —
-  or, on the selected node, use the **More…** button on its quick-action popover to open the same menu
+- Right-click a node for the full context menu (add/remove, summary, link, focus mode, move up/down,
+  lock position) — or, on the selected node, use the **More…** button on its quick-action popover to
+  open the same menu. When the branch contains dated tasks, the menu also offers **Shift task dates
+  (this branch)** — chips for **−1w / −1d / +1d / +1w / +1mo** move every start *and* due date in
+  the subtree by that amount, offsets preserved, in one undo step ("the project slipped a week" is
+  one click)
+- **Sort children** (⌘K) — reorder the selected topic's direct children **A → Z**, by **priority**,
+  **due date**, or **progress**; ties keep their order and topics without the field sort last
+- On touch or pen, **long-press the canvas** for the pane menu (add topic, paste branch, fit,
+  reset zoom)
 
 Edits you make on the canvas — adding, renaming, moving, restyling — are captured into the map's
 underlying model, so the outline, every export, and the autosave always reflect your latest changes.
@@ -153,8 +178,16 @@ left-drag, pan with the middle or right mouse button; scroll still zooms.)*
 
 **Map properties.** With nothing selected, the panel shows the **Map** — rename the map inline and
 set its **theme**, **layout**, **background colour / image**, **accent colour**, and **line-jumps**
-there (the same settings as the toolbar's Canvas menu), above a quick **overview** (topics, branches,
-task progress). The **accent** is the default tint for relationship lines and boundary boxes — pick any
+there, above a quick **overview** (topics, branches, task progress). The **Layout** field is a
+visual **gallery**: its menu shows a schematic thumbnail per layout, grouped **Radial** (Both sides /
+Right / Left / Radial hub), **Tree** (Org chart ↓ / ↑), and **Diagram** (Timeline / Fishbone /
+Grid / **Swimlane** / Brace map). A **Design** field applies a one-click **preset** — **Classic**,
+**Blueprint**, **Midnight**, **Sunrise**, or **Diagram** — each bundling a theme, connector style,
+branch weight, and accent colour in one step. And a collapsed **More styling** section holds the
+rest of the per-map look: **Connectors** (Organic / Curved / Elbow / Straight), **Branch weight**
+(Fine / Regular / Bold), and the map **typography** — a base **Font** (Default / Sans / Serif /
+Mono) and a **Text size** scale (Compact 0.85× / Comfortable 1× / Large 1.2×), which any per-topic
+font setting still overrides. The **accent** is the default tint for relationship lines and boundary boxes — pick any
 colour (or **Reset** to the theme default) without touching the rest of the style.
 When the map has a **diagram backdrop** (onion / funnel / Venn), a **Backdrop** section lets you
 add / remove a ring or stage, set its **colour**, and remove the backdrop. Clicking a **relationship**
@@ -171,20 +204,36 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
   so it stays portable across every export. Nodes with a note show a 📝 — in the
   [outline](#outline-panel) and on the topic itself; **hover the topic's 📝 to peek** at the note in a
   small card, or **click it to jump straight to the note** (selecting the topic and opening this panel
-  on the Notes tab). A topic's 📎 chip lists its attached file names on hover.
+  on the Notes tab). A topic's 📎 chip lists its attached file names on hover. A **Spell-check**
+  toggle (View menu, off by default) turns the browser's spell-checker on in both the topic and
+  note editors.
 - **Markers** — click a marker (✅ ❗ ⭐ 🚩 priority numbers, …) to toggle it on the selected topic(s);
   active markers are highlighted. You can also **drag a marker chip onto any topic** on the canvas to
   apply it there (the topic highlights as you hover). Imported MindManager icons map to these glyphs
-  automatically.
+  automatically. The palette shows a curated starter set; the **Find a marker…** box searches the full
+  **library of 45** by name or keyword ("done" → ✅, "warning" → ⚠️). Four **marker groups** are
+  single-select sets — **Priority** (1️⃣–9️⃣), **Status** (coloured dots), **Mood** (🙂 😐 🙁), and
+  **Vote** (👍 👎) — applying one member automatically clears any other from the same group, so a
+  topic never carries two priorities at once. Below the bar, a **Suggested:** row offers markers
+  inferred from the topic's own text ("urgent" suggests ❗, "risk" suggests 🚩, "idea" suggests 💡…) —
+  click a dashed chip to apply it.
 - **Stickers** — click a sticker in the grid (star, heart, check / cross badge, flag, idea, warning,
   info, speech bubble, thumbs up / down, target, rocket, lock, key, clock, pin, fire, question, arrow)
   to drop a built-in illustration on the node — no file needed. A sticker becomes the node's
   [image](#images), so it shows on the canvas and carries into every export. To swap or remove it,
   pick another image/sticker (a sticker replaces the node's current picture).
-- **Tags** — type a tag and press **Enter** to add it; click a chip's ✕ to remove it. Tags feed
-  Find, the [marker & tag index](#marker--tag-index), and the [Power Filter](#power-filter).
+- **Tags** — type a tag and press **Enter** to add it (the field **autocompletes** from every tag
+  already in the map); click a chip's ✕ to remove it. Tags feed Find, the
+  [marker & tag index](#marker--tag-index), and the [Power Filter](#power-filter). Map-wide tag
+  housekeeping lives in the **Markers & tags** panel: each tag row has a **✎ rename** (type an
+  *existing* tag's name to **merge** the two), a **✕ delete** (removes the tag from every topic),
+  and a **colour swatch** that **tints every topic carrying that tag** (⊘ clears the tint — it's a
+  view-only wash, so a topic's own fill still wins).
 - **Progress** — set a task's completion with the **0 / 25 / 50 / 75 / 100** buttons (✕ clears it,
-  so it stops being a task — the pie disappears). A small **completion pie** (MindManager-style: empty
+  so it stops being a task — the pie disappears). Hovering a topic also reveals a small **checkbox
+  on its left edge** that cycles **not-a-task → to-do (0%) → done (100%) → not-a-task** — the
+  quickest way to run a checklist (a partially-done task jumps straight to done; the checkbox hides
+  on the root and on parents whose progress is rolled up). A small **completion pie** (MindManager-style: empty
   at 0%, a wedge in between, a full disc with a **✓** at 100%) appears on the node. **Click the pie on
   the node to step its completion** (0 → 25 → 50 → 75 → 100 → 0) without opening this panel. **Parents
   roll up automatically**: a branch with sub-tasks shows their average plus a *done / total* count
@@ -198,9 +247,10 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
     `next fri`, or a weekday name like `monday`. It also takes an exact `YYYY-MM-DD`. If it can't read
     what you typed the field turns red and keeps its old value. The **📅 button** beside the field opens
     the calendar picker as before.
-- **Priority** — set **High / Med / Low**; a small coloured chip shows on the node (✕ clears it).
-  Unlike the emoji priority markers, this is a structured value the [Power Filter](#power-filter) can
-  filter by.
+- **Priority** — set a priority **1–9** (MindManager's full range: 1 = High, 2 = Med, 3 = Low, 4–9
+  read as their number), or press **Ctrl/⌘ + Shift + 1…9** with the topic selected; a small coloured
+  chip shows on the node (✕ clears it). Unlike the emoji priority markers, this is a structured value
+  the [Power Filter](#power-filter) can filter by.
 - **Attachments** — attach any file (**+ Attach file**); a **📎** count shows on the node and the
   panel lists each file with its size, a click-to-**download** link, and a ✕ to remove it. Files are
   stored inline in the map (capped at 5 MB each), so they stay offline and travel with a `.json`
@@ -211,13 +261,33 @@ arrow instead shows a connector editor (see [Relationships](#relationships-bound
   **callout** = speech/annotation, **star** = highlight, **cloud** = idea/external system), **Fill**,
   **Border** (swatch or ✕ for none), **B** for bold, **Reset** to clear; a **Font** picker
   (Sans / Serif / Mono) plus font size/colour live here too. Shapes and the chosen font render
-  identically on the canvas and in image exports.
+  identically on the canvas and in image exports. Beyond the preset fill swatches sit **◧
+  branch-colour tint** (a soft wash of the topic's own branch colour) and **◨ gradient**; a
+  **Colour** row of free pickers takes any custom **text**, **fill**, or **branch (connector)**
+  colour beyond the presets; **Raised / Flat** toggles a drop shadow; and **Fill image…** covers
+  the whole card with a picture (single topic; it wins over any fill — **Clear fill image** removes
+  it). The bar also *reads back*: the selected topic's active shape, fill, border, bold, and shadow
+  light up, so the style bar doubles as a readout of what's applied.
 - **Links** — give the node a clickable **🔗**: a **web** URL, **Link to a map** (another map in
   your library), or **Jump to a topic** (an in-map jump). Click the 🔗 on the node to follow it;
-  **✕ Remove link** clears it. A node holds one link at a time.
+  **✕ Remove link** clears it. Once a map link is set, a third picker appears — **…and a topic** —
+  listing the linked map's topics, so the link can land on a *specific topic* in the other map
+  (`#map=…&node=…`), not just open it. The 🔗 carries one **primary** link; the Details tab's
+  **Additional links** list holds any further URLs on the same topic — they're picked up by search
+  and the backlink scans. The same in-app addresses work **inside notes**: a Markdown link to
+  `#node=…` or `#map=…` in any note jumps through the canvas when clicked.
+- **Linked from other maps** — when topics in *other* maps link to this map, the inspector grows a
+  **Linked from other maps** section: each row names the linking topic and its map, and clicking it
+  opens that map and focuses the topic — cross-map backlinks, so an atlas is navigable in both
+  directions.
+- **Links to** — the outgoing view: every topic this one points at, via its jump link(s) (`↪`) or
+  an outgoing relationship arrow (`↬`, with its label), each row a one-click jump.
 - **Linked from** — the reverse view: every topic that points *at* this one, via a topic-jump link
   (`↪`) or an incoming relationship arrow (`↬`, with its label). Each row is a one-click jump that
-  selects and centres that source topic. The section appears only when something links in.
+  selects and centres that source topic. The section appears only when something links in. For the
+  whole map at once, the **Relationships panel** (Panels menu) lists **every relationship and
+  in-map topic link** as *from → to · label* rows, both ends click-to-jump — the map's connective
+  tissue in one list.
 
 ### Images
 
@@ -229,6 +299,39 @@ Don't have a file handy? The **ℹ Info** panel's **Stickers** grid offers 20 bu
 illustrations (see [Markers / Stickers](#topic-info-panel) above). A sticker *is* the node's image —
 same render, same exports — so it's the quickest way to add a touch of visual meaning without
 supplying your own picture. A node holds one image at a time, so a new image or sticker replaces it.
+
+### Smart paste
+
+With a topic selected (and no text field focused), **Ctrl/⌘ + V** looks at what's on the clipboard
+and does the right thing — no dialog:
+
+- An **image** → becomes the selected topic's picture.
+- A lone **URL** → one new topic under the selection, titled from the URL itself (the last path
+  segment, de-slugged and title-cased — `…/blog/my-great-post` becomes *My Great Post*; just a
+  domain becomes the host name) and carrying the link. Fully offline — nothing is fetched.
+- An **outline / bullet list / Markdown** → parsed into a subtree under the selection (indentation
+  or `#` levels set the hierarchy). Markdown shorthand is understood: `[ ]` / `[x]` prefixes become
+  to-do / done tasks, a whole-line `[label](url)` becomes a linked topic titled *label*, and
+  `**bold**` / `*italic*` / `` `code` `` markers are stripped to clean text.
+- A **spreadsheet selection** (Excel / Sheets — anything with tab-separated columns) → one topic
+  per row. With a header row, the *topic/name/title* column becomes the topic, other columns become
+  labelled note lines, and a *Tags* column becomes tags.
+
+(The internal **branch** clipboard is separate on purpose: `Ctrl/⌘+C` / `Ctrl/⌘+Shift+V` move
+branches; plain `Ctrl/⌘+V` handles the outside world.)
+
+### Type-ahead accelerators
+
+Three triggers work while you're typing a topic, all driven by the same ↑ ↓ Enter/Tab Esc keys:
+
+- **`/` as the first character** opens a small **command menu** — *Add child topic*, *Add sibling
+  topic*, *Mark as to-do*, *Mark as done*, *Due today*, *High priority*, *Group in a boundary*,
+  *Add a note*, *Star marker*. Keep typing to filter ("task" finds *Mark as to-do*).
+- **`#` at a word boundary** pops the **tag picker**: keep typing to match an existing tag or create
+  a new one; choosing it assigns the tag and strips the `#word` from the title.
+- **`[[` or `@`** opens **link autocomplete** over every topic (and map) by name; picking one
+  inserts its label into the text and attaches the jump link (`#node=…` for a topic, `#map=…` for a
+  map) — the fastest way to wire up a knowledge map.
 
 ### Rich-text topics
 
@@ -252,8 +355,11 @@ branch without scrolling.
 ### Outline panel
 
 **☰ Outline** opens a live, indented outline of the whole map. Click any row to jump to that
-node on the canvas. The **Filter outline…** box narrows the list to matching topics; 📝 marks
-noted nodes. **Drag a row** to reorder or re-nest it (drop on the top/bottom edge to place it
+node on the canvas — and it works the other way too: selecting a topic on the canvas scrolls its
+outline row into view. The **Filter outline…** box narrows the list to matching topics; 📝 marks
+noted nodes. **Double-click a row to rename it** in place (while renaming, **Enter** commits and
+adds a sibling, **Tab** commits and adds a child — rapid entry without touching the canvas).
+**Drag a row** to reorder or re-nest it (drop on the top/bottom edge to place it
 before/after, or in the middle to nest it as a child); with a keyboard, **Shift + ↑/↓** reorders and
 **Shift + ←/→** promotes/demotes the focused row. **On a touch screen, press and hold a row** for a
 moment to pick it up, then slide and lift to drop.
@@ -265,8 +371,12 @@ moment to pick it up, then slide and lift to drop.
 to image, PDF, and Office exports. The central topic is the implicit "0" and stays unnumbered.
 It's a view toggle: the numbers are derived from the tree's shape, never written into your topic
 text, so turning it off leaves your topics exactly as they were and search/exports stay clean.
+While the toggle is **on**, the numbers are also baked into **⧉ Copy outline** and the Markdown
+export, so a numbered map pastes as a numbered outline.
 Handy for referring to a specific node by number ("see 3.2") in a meeting or a written summary.
-The setting is remembered between sessions.
+The setting is remembered between sessions. Two **numbering styles** are available while the
+toggle is on (View menu, or the mobile Options menu): **decimal** (1, 1.1, 1.1.1 — the default)
+or **outline / legal** (I, A, 1, a, i by level).
 
 ### Marker & tag index
 
@@ -274,19 +384,29 @@ The setting is remembered between sessions.
 anywhere in the map, grouped by marker/tag with a count and the list of topics carrying it. Click
 any topic to centre and select it on the canvas. It's the read-only counterpart to the **Markers**
 palette: the palette *applies* markers to a node, the index *finds* every node that already has one
-— handy for "show me everything flagged ❗" on a big map.
+— handy for "show me everything flagged ❗" on a big map. Each row also has a **⧩ quick-filter**
+button that pre-fills the [Power Filter](#power-filter) with that one marker or tag — the map dims
+to just those topics in one click — and tag rows carry the rename / merge / delete / colour
+controls described under [Tags](#topic-info-panel).
 
 ### Power Filter
 
 **🎚 Filter** opens a read-only filter that **dims** every topic except the ones that match your
 criteria — and the branches leading to them, so each match keeps its context. Combine a free-text
 search (matches topic **and** note) with toggle chips for any marker or tag in the map, plus a
-**Due date** option (*Has a date · Overdue · Due ≤ 7 days*) and a **Priority** option (High / Med /
-Low); criteria are combined with AND (a topic must satisfy each category you've set). A live count
+**Due date** option (*Has a date · Overdue · Due ≤ 7 days*), a **Priority** option (a level 1–9,
+matching that priority or higher), a **Completion** option (*Done · In progress · Not done*, judged
+on rolled-up progress), and a **Has relationship** option (by direction, optionally a specific
+type); criteria are combined with AND (a topic must satisfy each category you've set). A live count
 shows how many topics matched. It changes nothing in the map — **Clear** or closing the panel restores
 everything — so it's a safe way to focus a crowded map on, say, every urgent (❗) item mentioning
 "budget". (This differs from **Find**, which steps you through matches one at a time, and the
 **Filter outline…** box, which narrows the outline list.)
+
+Two more controls at the foot of the panel: **Hide non-matches (instead of fading)** swaps the dim
+for a full hide — still read-only, still one click back — and, once a filter is active, **Extract
+matches to a new map** copies the lit set (matches plus their ancestors) into a fresh library map
+titled *"(filtered)"*, leaving the original untouched.
 
 Once a filter is set, name it and click **Save** to keep it as a reusable preset. **Saved filters**
 appear in the panel: click a name to re-apply it (on any map), or **✕** to remove it. Presets are
@@ -300,6 +420,13 @@ and the path back to the central topic stay bright while everything else dims. I
 to talk through one part of a busy map without deleting or collapsing anything. Press **Esc** or
 click **Show all** in the banner to bring the rest back. (Like the Power Filter, it only changes
 opacity — nothing is removed.)
+
+### Isolate a branch
+
+A structural cousin of Focus: **Isolate branch (collapse others)** (view menu or **⌘K**) collapses
+every *other* top-level branch and expands the path down to the selected topic. Unlike Focus and
+the Power Filter, this really toggles the branches' collapsed state — it's an ordinary, undoable
+edit, the "fold everything else away" move done in one step.
 
 ### Drill into a topic
 
@@ -317,40 +444,101 @@ open the **Find & Replace** overlay in the top-right corner. It's non-modal — 
 visible and editable behind it, and **Esc** closes it.
 
 Type in **Find** and every matching topic is **ringed on the canvas** as you type, so you can see all
-hits at once; press **Enter** repeatedly to jump between them (an `n/total` counter shows where you
-are). Clearing the box removes the rings. Type in the **Replace** box and click
+hits at once; press **Enter** repeatedly to jump between them (**Shift+Enter** steps backwards; an
+`n/total` counter shows where you are). Clearing the box removes the rings. **List all (N)** expands
+a clickable list of every match — each row with its ancestor breadcrumb and, when the hit is in a
+note, a snippet of the note around it. Type in the **Replace** box and click
 **Replace all** to rewrite the search text across every matching topic. **Aa** matches case and
 **`.*`** treats the query as a regular expression; the scope selector limits replace to topics,
-notes, or both.
+notes, or both. The Find box also remembers your **last 10 queries** — they're offered as a
+dropdown as you type.
 
-Find is **typo-tolerant**: if nothing matches exactly, it automatically retries with a fuzzy pass,
-so a slip like `Launhc` still finds **Launch**. Exact matches always take priority, and very short
-queries stay strict — so precise searches behave exactly as before.
+Find searches **every field a topic carries** — not just its text and note, but tags, markers, the
+hyperlink(s), callout text, attachment names, and resources — so "the node with the budget.xlsx
+attachment" is findable by the file name.
+
+**Operator search.** For sharper questions, the same box takes scoped operators (they can be
+combined, and combine as AND):
+
+| Operator | Matches |
+|---|---|
+| `tag:q3` | topics carrying that tag |
+| `marker:flag-red` (or `icon:`) | topics carrying that marker |
+| `priority:1` (or `p:1`) | task priority exactly that level (1–9) |
+| `due:dated` / `due:overdue` / `due:soon` | has any date / past due / due within ~7 days |
+| `has:note` / `has:attachment` / `has:link` / `has:task` / `has:image` | topic carries that field |
+| `level:2`, `level:>=2`, `level:<3` (or `depth:`) | outline depth (root = 0) |
+| `-term`, `-"phrase"` | excludes matches |
+| `"exact phrase"` | quoted exact phrase |
+
+Plain-word searches stay **typo-tolerant**: if nothing matches exactly, Find automatically retries
+with a fuzzy pass, so a slip like `Launhc` still finds **Launch**. Exact matches always take
+priority, and very short queries stay strict — so precise searches behave exactly as before.
 
 ### Search all maps
 
 **🔎 All maps** (in the header) searches your whole library at once — every map's topics and
-notes, including floating topics. Pick a result and it opens that map and focuses the node
-(if the match is in the current map, it jumps straight there). Handy once the library grows
-into a connected knowledge base.
+notes, including floating topics, with the same operators as in-map Find (`tag:`, `priority:`,
+`has:`, `-exclude`, …). Each result shows the topic, its **ancestor breadcrumb**, a **note
+snippet** when the match is in a note, and which map it's in. Pick a result and it opens that map
+and focuses the node (if the match is in the current map, it jumps straight there). Handy once the
+library grows into a connected knowledge base.
+
+### Back / forward, and links to a topic
+
+The app keeps a browser-style **history of the topics you visit**: press **Alt + ←** to go back
+and **Alt + →** to go forward (also in ⌘K as *Go back / Go forward*). A "visit" is arriving at a
+distinct topic — a Find jump, an outline click, a link — and history crosses maps, so backing out
+of a cross-map link returns you to where you came from.
+
+You can also link *into* a map from outside: **Copy link to this topic** (More menu, or ⌘K) puts a
+URL with `?map=…&node=…` on the clipboard. Opening that URL launches the app on that map and
+focuses that topic — paste it into a ticket, a doc, or a chat as a deep link (with nothing
+selected, the command is *Copy link to this map*). The address bar tracks your active map and
+selection, so the current URL is always shareable.
+
+### Saved views
+
+A view worth returning to — a particular zoom on a particular corner, a drill-in plus a filter —
+can be bookmarked: **View ▾ → Save current view…**, give it a name, and it joins the **Saved
+views** list in the same menu. Applying one restores the **pan/zoom**, any **drill-in**, and the
+**Power Filter** it was saved with; ✕ deletes it (with an undo toast). Views are per-map.
+
+### Map statistics & legend
+
+**📊 Map statistics** (Panels menu or ⌘K) is a read-only dashboard of the current map:
+**Structure** (topics, leaves, max depth, floating topics), **Tasks** (count, completed x/y,
+overdue), and **Content** (word count and an estimated **reading time**, notes, attachments,
+distinct tags and markers, relationships, boundaries).
+
+The **Legend** toggle (View menu) draws an on-canvas box listing every **marker, tag, and
+conditional-formatting rule actually in use**, each with its swatch — and the identical legend is
+drawn into SVG/PNG exports, so a shared map explains its own colour code.
 
 ### Board view (Kanban)
 
-**▦ Board** shows the map's topics as cards grouped into **columns by tag** — one column per tag,
-with everything else gathered in an **Untagged** column. Each card shows its rolled-up
-[progress](#topic-info-panel) and [due date](#topic-info-panel) (red when overdue). It's a
-**read-only** view of the same map — cards don't move and nothing is written back — so it's a quick
-status wall, not a task tracker. **Click a card** to jump to that topic on the canvas. Tag your
-topics (in the **ℹ Info** panel) to give the board its columns.
+**▦ Board** shows the map's topics as cards grouped into **columns** — pick the grouping source in
+the board's header: **Tags** (one column per tag, the rest in **Untagged**), a single-select
+**marker group** (Priority / Status / Mood / Vote), or **Schedule** (due-date buckets: Overdue /
+Today / This week / Later). Each card shows its rolled-up [progress](#topic-info-panel) and
+[due date](#topic-info-panel) (red when overdue). The board writes back: **drag a card to another
+column** to re-tag, re-mark, or re-schedule that topic on the map. **Click a card** to jump to it on
+the canvas. Tag your topics (in the **ℹ Info** panel) to give the tag board its columns.
 
 ### Conditional formatting
 
-**🎨 Styles** opens a panel where you set **rules** that auto-style topics: *When* a topic **has a
-tag**, **has a marker**, or **is completed** (task at 100%), apply a **fill** and/or **border**. So
-"colour completed topics green" or "give every **#risk** topic a red border" happens automatically as
-the map changes. Rules are a **view-only overlay** — they layer *under* a topic's own styling, so
-anything you set by hand on a node still wins, and nothing is baked into the topic. They're saved
-with the map and carried into image exports. Add a rule with **+ Add rule**; remove one with **✕**.
+**🎨 Styles** opens a panel where you set **rules** that auto-style topics. The *When* dropdown
+offers nine triggers: **has tag**, **has marker**, **is completed** (task at 100%), **is overdue**,
+**is due soon** (due within the next 7 days — the same window the Power Filter and search use),
+**priority ≤** (a threshold on the 1–9 scale), **text contains**, **has attachment**, and **has
+relationship** (any, or a specific semantic type). Each condition has a **NOT** checkbox to invert
+it, and **+ AND condition** adds further clauses — all must hold, each independently negatable —
+so "tagged `q3` AND NOT completed" is one rule. A matching rule can apply a **fill** and/or
+**border**, and can also **auto-apply a marker** or a **branch colour**. So "colour completed
+topics green" or "flag every overdue topic with ❗" happens automatically as the map changes.
+Rules are a **view-only overlay** — they layer *under* a topic's own styling, so anything you set
+by hand on a node still wins, and nothing is baked into the topic. They're saved with the map and
+carried into image exports. Add a rule with **+ Add rule**; remove one with **✕**.
 
 The same panel has a **Named styles** organizer: style a topic by hand (shape / fill / border / bold
 in the **ℹ Info** panel), then in **🎨 Styles** type a name and **Save** to capture that look. It
@@ -377,8 +565,11 @@ there. Below it, the zoom controls — **−**, a live **percentage**, **+**, an
 precise, stepped zoom (the mouse wheel zooms too). Handy for orienting on a large map and for
 lining one up before a screenshot or screen-share. When the overview is in the way, the
 **Minimap ▾** button collapses it (click **Minimap ▴** to bring it back); the choice is remembered.
-A slim **status bar** along the bottom shows the topic count, how many topics are selected, and the
-live zoom %.
+A slim **status bar** along the bottom shows the topic count, how many topics are selected (click
+it to zoom to the selection), and the live zoom % (click it to reset to 100%) — plus a
+**Map / Outline / Board** switcher that flips between the three views of the same map in one click.
+Very large maps stay fluid automatically: above ~500 topics the canvas **virtualises**, rendering
+only what's on screen — no toggle, nothing to configure.
 
 **Pan the canvas** by dragging any empty space. On a dense map where empty space is scarce, **hold
 the space bar and drag** — the cursor turns into a grab hand and the drag pans from anywhere, even
@@ -398,6 +589,8 @@ map re-flows into the new shape without losing any edits:
 - **Fishbone** — an Ishikawa cause-and-effect diagram, branches angling into a central spine.
 - **Grid / matrix** — tiles the first-level branches into a grid (four branches → a 2×2), each with
   its subtree beneath it and the root as a title above; the shape of a SWOT or Eisenhower matrix.
+- **Swimlane** — the first-level branches as parallel lanes, each with its subtree flowing down it;
+  the shape of a process split by owner or stage.
 - **Brace map** — a left-to-right tree where each parent joins its children with a `{` fork brace
   (the Thinking-Maps part-whole diagram) instead of the curved branches.
 - **Per-branch layout** — right-click any branch → **Branch layout** and pick a kind to lay out just
@@ -415,7 +608,11 @@ map re-flows into the new shape without losing any edits:
   (your positions are remembered, so you can switch back). Try the **Whiteboard (free layout)**
   example in **+ New…**. In free layout you can also **align & distribute** several topics: select 2+
   and pick *Align left / centre / right / top / middle / bottom*, or select 3+ and *Distribute
-  horizontally / vertically* (view menu or **⌘K**) to tidy them onto a clean grid.
+  horizontally / vertically* (view menu or **⌘K**) to tidy them onto a clean grid. While you drag,
+  **smart alignment guides** appear and snap the topic to the edges and centres of its neighbours
+  (within ~6 px), so hand-placed layouts line up without fuss. And a topic you've placed *just so*
+  can be pinned: right-click it → **Lock position** — it grows a 🔒 badge, can't be dragged, and
+  align/distribute skip it (**Unlock position** frees it again).
 - **◎ Diagram (backdrops)** — adds a geometric **frame** behind your topics and switches to free
   layout so you drop topics into its regions: an **onion** (concentric rings), a **funnel** (stacked
   stages), or a **Venn** (2 or 3 overlapping circles). Use **−/+** to change the ring/stage count
@@ -436,13 +633,27 @@ in the dropdown under *Custom* alongside the built-ins; choosing one applies its
 **Download** a theme as a `.json` to reuse it on another map or machine, and **Import** one back in.
 The four built-in themes can't be changed.
 
-### App appearance (dark mode)
+### Settings, appearance & accessibility
 
-Separately from the canvas theme, **Settings → Appearance → App theme** controls the *chrome* — the
-toolbar, side panels, inspector and dialogs. Choose **System** (the default — it follows your
-operating system's light/dark setting and updates live when you change it), **Light**, or **Dark**.
-The app theme is independent of the canvas theme, with one tie: a **Dark** canvas always darkens the
-chrome too, so you never end up with a bright toolbar around a dark map.
+**Settings** (Ctrl/⌘ + `,`, or via ⌘K) gathers the app-wide preferences:
+
+- **App theme** — separately from the canvas theme, this controls the *chrome*: the toolbar, side
+  panels, inspector and dialogs. Choose **System** (the default — it follows your operating
+  system's light/dark setting and updates live when you change it), **Light**, or **Dark**. The app
+  theme is independent of the canvas theme, with one tie: a **Dark** canvas always darkens the
+  chrome too, so you never end up with a bright toolbar around a dark map.
+- **Reduce motion** — **System / On / Off**. *System* follows your OS's reduced-motion preference;
+  *On* makes canvas zoom/fit and the guided walk instant and drops chrome transitions.
+- **High contrast** — **System / On / Off**. *System* follows your OS's contrast / forced-colors
+  setting (Windows High Contrast included); *On* strengthens chrome borders, dividers and text and
+  adds bolder focus rings.
+- **Getting started** — bring back the "3 things to try" tips card.
+- **Local data** — a storage-usage estimate, plus buttons to clear the ⌘K command history, the
+  branch clipboard, or (with confirmation) **all local data**.
+
+Screen-reader users get the canvas's non-focusable overlays as hidden navigable lists —
+**Boundaries**, **Summaries**, **Callouts**, and **Relationships**, each with its label and
+topics — so nothing drawn on the canvas is invisible to assistive tech.
 
 ### Canvas background
 
@@ -465,15 +676,21 @@ backdrop you see on the canvas. The second **✕** removes the image.
   node → **Link to…**, then click the target (you'll be prompted for an optional label). You can also
   **drag the small round grip** on a topic's right edge (it appears on hover) straight onto another
   topic — same result, same optional-label prompt — or press **Ctrl/⌘ + Shift + L** to start the link
-  from the keyboard (also in ⌘K as *Start a relationship from selected topic*). **Click a
-  relationship to select it** and the inspector becomes a connector editor — change its **label**,
-  **direction / arrowheads** (target, source, both, or none), **colour**, **width**, and **line
-  style** (dashed / solid / dotted), or **delete** it (right-click still deletes as a shortcut). The
+  from the keyboard (also in ⌘K as *Start a relationship from selected topic*). On a left-growing
+  branch the grip mirrors to the topic's **left (outward) edge**, alongside the add-child ＋.
+  **Click a relationship to select it** and the inspector becomes a connector editor — a
+  **Presets** row applies a whole look in one click (**Arrow**, **Dashed**, **Dotted**, **Thick**,
+  **Curved**, **Double**), and below it you can change the **label**, **direction / arrowheads**
+  (target, source, both, or none), **colour**, **width**, **line style** (dashed / solid / dotted),
+  and **curve** (auto / straight / bow), or **delete** it. **Double-click the line** to edit its
+  label right on the canvas, and **right-click a relationship** for the same options as a quick
+  menu (label, arrowheads / direction, line style, type, delete). The
   selected relationship gets a highlight halo. Styling is lossless in `.json` and carries into every
   image / PDF / HTML export; drawn and imported (`.mmap`) relationships both persist.
   - **Relationship types** — give a relationship a semantic **type** in the inspector: *relates-to*
     (the default), *depends-on*, *causes*, *supports*, or *blocks*. This is separate from its text
-    label. Turn on **Show type labels** to draw the type as a small pill near the arrowhead. Types
+    label. Tick **Show type labels on the canvas** (per relationship) to draw the type as a small
+    pill near the arrowhead. Types
     drive two queries: a **has relationship** [conditional-formatting rule](#conditional-formatting)
     that styles the endpoints, and a **Has relationship** section in the [Power Filter](#power-filter)
     (by direction — outgoing / incoming / either — and optionally a specific type). Types are saved in
@@ -484,7 +701,8 @@ backdrop you see on the canvas. The second **✕** removes the image.
     crossing, never two). It's a per-map setting, saved with the map, and the hops are drawn into
     every image export exactly as they appear on the canvas.
 - **Boundaries** — a shaded, rounded box grouping a node and its subtree. Select a node and
-  click **⬚ Group** in the toolbar. **Click the box (its rim or label) to select it** — the inspector
+  click **⬚ Group** in the toolbar. With **2+ topics selected**, **Insert ▸ Group selection
+  (boundary)** wraps the whole multi-selection in a single box instead. **Click the box (its rim or label) to select it** — the inspector
   becomes a boundary editor where you can **name** or **delete** it. Drawn and imported boundaries
   both round-trip and persist.
 - **Summary topics** — a labelled **bracket** beside a branch (rather than a box around it). Select a
@@ -511,16 +729,37 @@ backdrop you see on the canvas. The second **✕** removes the image.
   **paste a branch** under it, and **delete** it — and every inspector edit (note, colour, task fields,
   hyperlink, markers, tags, style, image, callouts) applies just as it does to a central topic. Drag one
   into the tree (or back out) to re-parent. All changes are saved.
-- **Sticky notes** — click **🗒 Note** in the toolbar to drop a free-floating **amber note** on the
-  canvas. It's a floating topic underneath, so you rename it, drag it (in **🧲 Free layout**), and it
-  exports and round-trips like any topic — handy for captions, reminders, and legends.
+- **Sticky notes** — **Insert ▸ Sticky note** drops a free-floating coloured note card on the
+  canvas. A row of **colour chips** under the menu item picks the colour at insert time — **amber**
+  (the default), lime, sky, rose, violet, or slate — and the chip you pick becomes the remembered
+  default for the plain *Sticky note* item. It's a floating topic underneath, so you rename it,
+  drag it (in **🧲 Free layout**), and it exports and round-trips like any topic — handy for
+  captions, reminders, and legends.
+- **Background shapes** — **Insert ▸ Shapes** drops a free, resizable shape *behind* the topics:
+  **Rectangle**, **Ellipse**, **Block arrow**, or **Chevron** — the raw material for SWOT quadrants,
+  Venn frames, and flow arrows. Adding one switches the map to **free-canvas** mode (positions
+  preserved). Click a shape to select it: drag the body to move, drag a **corner grip** to resize
+  (one undo step per gesture), and use its small floating toolbar to **recolour** it, **change its
+  kind**, or **delete** it. Shapes render behind the topics on the canvas and in every image / PDF /
+  HTML export.
+- **Smart containers** — two of those shapes are containers that *carry their contents*: a
+  **Swimlane** (a header band over vertical lanes) and a **Matrix** (a grid). A topic whose centre
+  sits inside the container belongs to it, and **dragging the container moves every contained topic
+  with it** in one undo step — move the lane, its cards follow. Membership is by position, so
+  there's nothing to wire up: drop topics into a lane and drag.
 
 ---
 
 ## The map library
 
 Every map you create or import is kept in the browser, keyed by name in the **map dropdown**.
-Switch freely; each is autosaved. **Delete** removes the current one.
+Switch freely; each is autosaved. **Delete** removes the current one — a **soft delete**: an Undo
+toast appears, and the map goes to the **Trash** (Start screen sidebar), where it stays until you
+**Restore** it or **Delete forever** / **Empty Trash** (permanent — that also drops the map's
+version history). Deleting a map that other maps link to or roll up warns you first.
+
+If the **same map is open in two browser tabs**, a one-time warning appears — "edits here may
+overwrite the other tab's autosaves" — so two-tab editing never clobbers silently.
 
 Maps you open appear as **tabs** in a strip under the toolbar — one tab per document, the active one
 underlined. Open a map (from the dropdown, a cross-map link, or **+**) and it gets a tab; click **×**
@@ -532,6 +771,16 @@ then use a map card's **⋯ → Move to folder…** to file it. Folders show as 
 maps; click one to drill in (an **All maps / Folder** breadcrumb takes you back, and you can rename or
 delete the folder there). A map lives in one folder or none; **deleting a folder keeps its maps** —
 they move back to the top level. Folder structure is included in the [library backup](#backup--restore).
+
+### Promote a branch, merge a map
+
+Two inverse moves keep a growing library well-factored (both in **⌘K**):
+
+- **New map from this topic** — copies the selected branch into a fresh, standalone library map
+  and opens it. Non-destructive: the source map keeps its branch, and no link is created. For the
+  branch that has outgrown its map.
+- **Insert map as branch: *map*** — the reverse: grafts another library map's whole tree under the
+  selected topic (re-numbered, so ids never clash). For consolidating small maps into one.
 
 ### Copying a branch between maps
 
@@ -561,11 +810,12 @@ children are replaced on each refresh, so edit the **source** map, not the pulle
 
 ### Examples
 
-The same **+ New…** menu has an **Examples** group: 14 *complete*, worked maps to open and
+The same **+ New…** menu has an **Examples** group: 20 *complete*, worked maps to open and
 adapt — Product launch plan, Meeting notes, Decision log, Quarterly OKRs, Team retrospective,
-a worked SWOT, Incident runbook, GTD natural planning, GTD Areas of Focus (the 20,000-ft
-"horizon" of standing responsibilities), Talk/content outline, Personal knowledge map,
-Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
+a worked SWOT, a Flowchart (shapes + flow), a Concept map (linked ideas), a Whiteboard (free
+layout), Onion / Funnel / Venn diagrams, Incident runbook, GTD natural planning, GTD Areas of
+Focus (the 20,000-ft "horizon" of standing responsibilities), Talk/content outline, Personal
+knowledge map, Study/revision map, Trip plan (with an image), and a Cross-map atlas. Unlike
 templates (empty frames), examples are filled in — the quickest way to see a finished map and
 learn a feature by reading one that uses it. Opening one creates a fresh, editable copy.
 
@@ -582,6 +832,8 @@ In **More ▸ File** (or the **⌘K** command palette):
 
 - **Open file…** (`Ctrl/⌘ + O`) — pick a `.mmst` (or `.json`) and open it. You can also pick a
   MindManager **`.mmap`** here — see *Opening MindManager files* below.
+- **Open recent** — the same menu lists your recently opened disk files (up to 8) for one-click
+  reopening.
 - **Save to file** (`Ctrl/⌘ + S`) — save the current map back to its linked file, with no dialog. The
   first time (no file linked yet) this acts like *Save as…*.
 - **Save as…** (`Ctrl/⌘ + Shift + S`) — choose a new file/location.
@@ -591,6 +843,11 @@ copy stays current without you pressing Save. The window/tab title shows the fil
 front whenever the file is briefly behind your latest edit; if you try to close the tab with unsaved
 file changes, the browser warns you first. The link is remembered, so reopening the app reconnects the
 map to its file.
+
+**If the file changes on disk** while you're working (edited elsewhere, or synced in), the app
+notices: background autosave-to-file **pauses** with a warning rather than overwriting, and an
+explicit **Save** asks first — *"File changed on disk … Overwrite it with this version?"* — with
+your map safe in the library either way.
 
 > **Browser support.** Open/Save-to-the-same-file and file autosave use the **File System Access API**,
 > available in **Chrome, Edge, and other Chromium browsers on desktop**. In Firefox, Safari, and on
@@ -642,11 +899,23 @@ For getting ideas down quickly, three header tools:
 
 - **Quick add** — type a topic in the **Quick add… ⏎** box and press **Enter**; it's added under the
   selected node (or the central topic if nothing's selected) and the box keeps focus, so you can
-  fire off several in a row without touching the canvas.
+  fire off several in a row without touching the canvas. **Paste multiple lines** into the same box
+  and they land as a whole nested **subtree** in one step — indentation or `#` levels set the
+  depth (a single line is always taken verbatim, so "1. Intro" stays "1. Intro").
+- **📥 Inbox** — a map-independent holding pen (Panels menu → *Inbox (quick capture)*). Jot a
+  thought and press **Enter**; items persist across map switches and reloads until you file them —
+  each row's **→ map** button drops it onto the current map as a floating topic, ✕ discards it.
+  For the idea that arrives while you're in the *wrong* map.
 - **Drop a link** — drag a link (or selected text) from your browser onto the canvas to create a
   **floating topic**; a dropped URL becomes a clickable link on it (unsafe links are refused).
 - **⏱ Brainstorm timer** — pick **3 / 5 / 10 / 15 min** to timebox an idea sprint; it counts down
   in the toolbar and flags **time's up**. Purely a focus aid — it changes nothing in the map.
+- **Map parts** — **Insert ▸ Map parts** drops a ready-made mini-structure under the selected
+  topic: **SWOT** (Strengths / Weaknesses / Opportunities / Threats), **Pros & cons**, **5W1H**
+  (Who / What / When / Where / Why / How), or **Meeting agenda** (Attendees / Topics / Decisions /
+  Action items / Next steps). The neighbouring **Insert ▸ Templates** fly-out grafts any full
+  [template](#templates)'s structure under the selection the same way — frameworks as building
+  blocks, not just starting points.
 
 ### Open files
 
@@ -710,18 +979,23 @@ Pick a format from the **⬆ Export…** menu:
 | `.mmd` | Mermaid `mindmap` text — paste into Markdown, GitHub, or docs that render Mermaid |
 | `.xmind` | XMind (2020+) — topic tree, notes, links, tags, plus floating topics + relationships |
 | `.smmx` | SimpleMind — topic tree, notes, web links, relations, plus floating topics |
-| `.mmap` | MindManager — topic tree, notes, hyperlinks, icons, relationships, and the two-sided side; the mirror of the `.mmap` importer (round-trips back into Studio for these fields) |
-| `.png` / `.svg` | Image of the map (inherits the current theme) |
+| `.mmap` | MindManager — topic tree, notes, hyperlinks, icons, tags, task info (dates / priority / progress), embedded images, relationships, and the two-sided side; the mirror of the `.mmap` importer (round-trips back into Studio for these fields) |
+| `.png` / `.svg` | Image of the map (inherits the current theme). PNG comes in four flavours: **`.png` (image)**, **`@2×` (sharp)**, **`@4×` (print)**, and **transparent** (no background fill) |
 | `.html` (standalone) | A single self-contained HTML file — the whole map as an image (opens anywhere, offline) |
 | `.html` (interactive) | A single self-contained HTML file that opens on the **visual map** (the real coloured render, pan/zoom) with a toggle to a **collapsible, searchable** outline: fold branches, filter topics (no app, no backend, offline) |
-| `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline). **Speaker notes** are included, hidden by default — press **N** or the footer **Notes** button to show them |
+| `.html` (slide deck) | A standalone, navigable slide presentation — the [Walk-Through](#presentation-mode) as a shareable file (arrow keys / click / Prev-Next, offline). Each branch slide shows the branch **as its actual map image** (the overview slide is the whole map), falling back to a bullet outline if the canvas isn't available. **Speaker notes** are included, hidden by default — press **N** or the footer **Notes** button to show them |
 | `.docx` | A Word document — the map as an editable, indented outline (opens in Word, LibreOffice, Pages, Google Docs) |
-| `.pptx` | A PowerPoint deck — an overview slide, then one per branch, **with each topic's note carried into the slide's speaker notes** (opens in PowerPoint, Keynote, LibreOffice, Google Slides) |
+| `.pptx` | A PowerPoint deck — an overview slide, then one per branch **rendered as its live map image**, with each topic's note carried into the slide's speaker notes (opens in PowerPoint, Keynote, LibreOffice, Google Slides) |
 | `.xlsx` | An Excel worksheet — the map as an indented outline (a column per depth) with a Notes column (opens in Excel, LibreOffice Calc, Numbers, Google Sheets) |
-| `.pdf` | Opens your browser's print dialog → "Save as PDF" (landscape) |
+| `.pdf` (file) | A real PDF file, no print dialog — **fit to map**, **A4 landscape**, or **Letter portrait** (the map embedded as a sharp 2× image) |
+| `.pdf` (via print dialog) | Opens your browser's print dialog → "Save as PDF" (landscape) |
 
 Or **⧉ Copy outline** copies the map as a Markdown outline straight to the clipboard — no
-file — for pasting into an email, chat, or doc.
+file — for pasting into an email, chat, or doc. Two more clipboard routes: **Copy image to
+clipboard** (in the Export menu's Image group) puts the map on the clipboard as a PNG, ready to
+paste into a chat or a slide; and **Copy as table (TSV)** (More ▸ Map, or ⌘K) copies every topic
+as a spreadsheet-ready row — **Topic / Depth / Note / Tags** — for pasting straight into Excel or
+Sheets.
 
 **Export just one branch.** Right-click a topic that has children and choose **Export this branch…**
 (or press ⌘K and pick **Export selected branch…**) to export only that topic and everything under it —
@@ -733,8 +1007,17 @@ render just the branch, framed to its own bounds, exactly as it looks on the can
 ## Presentation mode
 
 **▶ Present** opens a fullscreen **Walk-Through**: an overview slide, then one slide per
-branch with its nested points. Navigate with **Prev / Next**, the **arrow keys**, and **Esc**
-to exit.
+branch with its nested points. Navigate with **Prev / Next**, the **arrow keys** (**Home** returns
+to the first slide, **Space** advances), and **Esc** to exit. Press **B** for a black curtain or
+**W** for a white one — the classic "eyes on me" move; any key or click lifts it. A footer
+**clock** tracks elapsed time (pause / resume / reset).
+
+### Pacing timer
+
+In [Presenter view](#presenter-view), a **Timer** section adds a time **budget** in 5-minute steps
+(**−5 / +5**; 0 = off). With a budget set, the clock changes colour as you go — **green** while
+comfortably inside it, **amber** in the final 20%, **red** once you're over — and shows how far
+under or over you are, so pacing is a glance, not arithmetic.
 
 ### Presenter view
 
@@ -756,6 +1039,17 @@ It's a single-screen layout (no second window to manage), and the toggle only ch
 To share the same walk-through without the app, export it as a **slide deck** — the
 `.html (slide deck)` option in the **⬆ Export…** menu saves a standalone, navigable HTML file
 that opens in any browser, offline.
+
+### Guided walk
+
+Where Present is a slide overlay, the **guided walk** tours the *live canvas*: **More ▸ Guided
+walk (step through topics)** (or ⌘K → *Start guided walk*) spotlights each topic in depth-first
+order, dimming the rest. A floating bar gives **◀ / ▶** (or the **← / →** keys), an *n / total*
+counter, the current topic's **speaker note** in a strip below, and **Exit** (**Esc**). The **🎬**
+toggle switches on **cinematic mode** — each step animates a Prezi-style zoom that frames the
+whole branch instead of centring one topic flat; the choice is remembered across sessions. Use the
+walk for working sessions where the map should stay live and editable; use Present when you want
+slides.
 
 ---
 
@@ -787,10 +1081,23 @@ updates**.
 | F2 / double-click | Edit in place, keeping the text |
 | Ctrl + B / I / U (while editing) | Bold / italic / underline the selection |
 | Ctrl + Z / Ctrl + Shift + Z / Ctrl + Y | Undo / redo |
+| Ctrl + C / Ctrl + Shift + V / Ctrl + D | Copy branch(es) / paste under selection / duplicate as sibling |
+| Ctrl + V (topic selected) | Smart paste — image, outline, URL, or table |
+| Arrow keys | Walk selection: ← parent, → child, ↑↓ siblings |
+| Ctrl + Shift + ↑ / ↓ | Move topic up / down among siblings |
+| Alt + Shift + ← / → | Promote / demote the topic |
+| Ctrl + Shift + 1…9 | Set task priority |
+| Ctrl + Shift + L | Start a relationship from the selected topic |
+| Ctrl + + / − / 0 | Zoom in / out / reset to 100% |
+| Shift + 1 / Shift + 2 | Fit the whole map / fit the selection |
+| Alt + ← / Alt + → | Back / forward through visited topics |
 | Ctrl + K | Open the command palette — run anything, or jump to a topic |
-| `/` | Focus Find |
-| Enter (in Find) | Next match |
+| Ctrl + F or `/` | Open Find & Replace |
+| Enter / Shift + Enter (in Find) | Next / previous match |
+| Ctrl + O / Ctrl + S / Ctrl + Shift + S | Open file / save to file / save as |
+| Ctrl + `,` | Settings & preferences |
 | Arrow keys / Esc (in Present) | Navigate / exit slides |
+| P / B / W (in Present) | Presenter view / black curtain / white curtain |
 
 (All of these — Ctrl works as ⌘ on a Mac.) The same list is built into the app: press the **?**
 button at the bottom of the left rail, or ⌘K → **"Keyboard shortcuts"**, for a cheat-sheet grouped by

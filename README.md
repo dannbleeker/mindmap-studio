@@ -1,6 +1,7 @@
 # MindMap Studio
 
 **Live:** [mindmap-studio.struktureretsundfornuft.dk](https://mindmap-studio.struktureretsundfornuft.dk/)
+· **Status: finished** — feature-complete for its scope ([details](#status))
 
 A local-first, offline mind-mapping PWA — a self-hosted replacement for Corel/Mindjet
 MindManager. Built on [React Flow](https://reactflow.dev) (`@xyflow/react`, MIT) with a
@@ -34,6 +35,9 @@ GitHub Pages).
 - **Find & Replace** — search the map by topic or note (matches focused on the canvas,
   cycling on repeated Enter), and replace the search text across all matching topics. Find is
   **typo-tolerant** — it falls back to a fuzzy match when nothing matches exactly (`Launhc` → Launch).
+  It searches **every node field** (tags, markers, links, callouts, attachments), supports
+  **operators** (`tag:`, `marker:`, `priority:`, `due:`, `has:`, `level:`, `-exclude`, `"phrase"`),
+  lists **all matches** as a clickable list, and recalls your recent queries.
 - **Library-wide search** — the **🔎 All maps** button searches every map in the library by
   topic or note (floating topics included) and jumps to the chosen map and node.
 - **Outline** — a side panel showing the map as an indented outline; click a row to jump to
@@ -57,8 +61,9 @@ GitHub Pages).
   Parents **roll up automatically** (average + done/total count), with the percentage echoed in the
   Outline and in image exports.
 - **Due & start dates** — give a topic dates in the **ℹ Info** panel; a **📅 chip** shows on the node
-  and turns **red when overdue**. Filter by due date (has-a-date / overdue / due ≤ 7 days) in the
-  Power Filter.
+  and turns **red when overdue**. Date fields take **natural language** ("tomorrow", "next monday",
+  "+3d"). Filter by due date (has-a-date / overdue / due ≤ 7 days) in the Power Filter, and
+  **Move project** shifts every start/due date on a branch (or the whole map) ±N days in one undo step.
 - **Task priority** — set High / Med / Low on a topic (coloured chip on the node); filter by priority
   in the Power Filter.
 - **Fast capture** — a header **Quick add** box (type + Enter to add under the selection, keeps
@@ -66,10 +71,11 @@ GitHub Pages).
   **⏱ brainstorm timer** for timeboxed sprints.
 - **File attachments** — attach any file to a topic (**📎 chip** on the node); stored inline so it
   travels with the map, with one-click download.
-- **Board view (Kanban)** — **▦ Board** shows topics grouped into columns (read-only); a **Group by**
+- **Board view (Kanban)** — **▦ Board** shows topics grouped into columns; a **Group by**
   selector lays them out by **tag**, by a **marker group** (Priority / Status / Mood / Vote — one
   column per member), or by a **schedule** of date buckets (Overdue / Today / This week / Later /
-  Unscheduled). Cards carry progress + due, and clicking one jumps to it on the map.
+  Unscheduled). Cards carry progress + due; clicking one jumps to it on the map, and **dragging a
+  card to another column re-tags / re-marks / re-schedules** the topic.
 - **Summary topics** — **⊐ Summary** draws a labelled bracket beside a branch (side-aware;
   double-click to rename), the classic MindManager summary.
 - **Node shapes** — beyond box / rounded / pill, give a topic a **diamond** (decision), **oval**
@@ -103,8 +109,12 @@ GitHub Pages).
   (grid) that behave like MindManager Smart Shapes — **dragging the container moves every topic sitting
   inside it** (membership is by position, so there's nothing to wire up: drop topics onto a lane and
   drag it).
-- **Multi-map library** — keep many named maps; switch, create, and delete from the header. Open
-  maps appear as **tabs** under the toolbar (the open set is remembered across reloads).
+- **Multi-map library** — keep many named maps; switch, create, and delete from the header. Group
+  maps into **folders** (the ⌘K switcher groups by folder), **pin** favourites to the top, filter by
+  title, and recover deleted maps from a **Trash** (soft-delete with undo). Open maps appear as
+  **tabs** under the toolbar (the open set is remembered across reloads). Promote a branch to its
+  own map, or insert a library map as a branch — maps **cross-link**: topic links can target another
+  map's topic, and a backlinks section shows what links here from other maps.
 - **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
   capped at 30, stored in IndexedDB, deleted with the map.
 - **Autosave + reload** — every change persists to IndexedDB; your last map is restored on
@@ -121,9 +131,11 @@ GitHub Pages).
   isn't bound for autosave — use *Save as… `.mmst`* to keep working in a linked file). You can still
   **Export → `.mmap`** to write a map back out for MindManager.
 - **Relationships** — draw a labelled, **directional** arrow (arrowhead at the target) between two
-  nodes: right-click a node → **Link to…**, then click the target (with an optional label).
-  Double-click a relationship to relabel it, right-click to delete. Imported `.mmap` relationships
-  render too.
+  nodes: right-click a node → **Link to…**, then click the target (with an optional label). Give it a
+  **semantic type** (relates-to / depends-on / causes / supports / blocks) and filter by it;
+  double-click to relabel, right-click for the full menu (label, arrowheads/direction, line style,
+  type, delete). A map-wide **Relationships panel** lists every arrow and link, click-to-jump.
+  Imported `.mmap` relationships render too.
 - **Links** — from the **ℹ Info** panel, give a node a clickable 🔗 to another **topic** in the
   same map, to another **map**, or to a **web page**; click the 🔗 to follow it.
 - **Boundaries** — a toolbar **⬚ Group** draws a shaded, rounded box around the selected
@@ -137,15 +149,34 @@ GitHub Pages).
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
   (`.md`), OPML (`.opml`), **FreeMind/Freeplane `.mm`**, **Mermaid** (`.mmd`), **XMind `.xmind`**,
   **SimpleMind `.smmx`**, **MindManager `.mmap`** (round-trips topics/notes/links/icons, tags,
-  task metadata, and embedded images — the inverse of the importer), PNG, SVG, a
-  self-contained HTML file, a standalone HTML **slide deck** and a **PowerPoint** (`.pptx`) deck
-  (both render **each branch as its actual map image**, not a bullet outline), a Word **`.docx`**
-  outline document, an Excel **`.xlsx`** outline sheet, and print-to-PDF.
-- **Copy outline** — copy the map as a Markdown outline straight to the clipboard (no file),
-  for pasting into an email, chat, or doc.
-- **Present** — a Walk-Through mode that steps through the map as fullscreen slides.
-- **Theme gallery** — pick a canvas style (Light, Dark, Ocean, Sunset); persists and carries
-  into image exports. Per-topic font/colour/background via the node editor panel.
+  task metadata, and embedded images — the inverse of the importer), PNG (with **2×/4× scale** and
+  **transparent background** options), SVG, a self-contained HTML file, a standalone HTML
+  **slide deck** and a **PowerPoint** (`.pptx`) deck (both render **each branch as its actual map
+  image**, not a bullet outline, and carry per-slide **speaker notes**), a Word **`.docx`**
+  outline document, an Excel **`.xlsx`** outline sheet, direct **PDF** (fit / A4 / Letter, portrait
+  or landscape) as well as print-to-PDF. **Export a single branch** in any of these formats from
+  the node's context menu.
+- **Copy outline / copy image** — copy the map as a Markdown outline, or as a **PNG image**,
+  straight to the clipboard (no file) for pasting into an email, chat, or doc.
+- **Present** — a Walk-Through mode that steps through the map as fullscreen slides, plus a
+  **cinematic guided walk** that frames each branch with animated zoom on the real canvas. A
+  presenter **pacing timer** (with a time budget and colour cues) and a **B/W blackout** key
+  round out the workshop kit.
+- **Theme gallery** — pick a canvas style (Light, Dark, Ocean, Sunset) or **design your own** in
+  the custom theme designer (save, import, and export themes); persists and carries into image
+  exports. Per-topic font/colour/background via the node editor panel. The app chrome itself has
+  **System / Light / Dark** modes plus **high-contrast** and **reduced-motion** support (following
+  the OS or an in-app toggle).
+- **Quick-capture Inbox** — a map-independent **Unfiled** bucket: jot ideas down without leaving
+  the map you're in, and file them onto a map later.
+- **Editing accelerators** — a **slash menu** in the topic editor (insert child / task / date /
+  boundary / note / marker from the keyboard), an inline **`#tag`** picker, **`[[` / `@`**
+  name-based link autocomplete, **smart Ctrl+V** (image / outline / URL / internal branch routed
+  automatically), **sort children** (by name / priority / due / progress), and drag modifiers
+  (**Shift-drag** detaches a topic to floating, **Ctrl-drag** copies the subtree).
+- **Deep links & history** — every topic has a copyable **deep link** (`?node=` URL), in-note
+  links can jump to any topic or map, and **Alt+← / Alt+→** walk your navigation history.
+- **Scales to big maps** — viewport virtualisation keeps the canvas responsive above ~500 nodes.
 - **Installable PWA** — install to the home screen / desktop; precached app shell for offline use.
 
 ## Architecture
@@ -197,9 +228,15 @@ images through our own importer.
 
 ## Status
 
-**Phase 1 (Brainstorming MVP) is complete** and the app is **deployed** — live at
-<https://mindmap-studio.struktureretsundfornuft.dk/> (GitHub Pages, custom domain). Phase 2 is in
-progress. Scope intentionally excludes the task / Gantt / resource PM layer. See `NEXT_STEPS.md`.
+**Finished — feature-complete for its scope.** MindMap Studio set out to be a free, local-first,
+offline, single-user replacement for MindManager, and everything in that scope has shipped: the
+brainstorming MVP, the editor/UX redesign, the MindManager canvas-fidelity pass, the competitive
+gap-closing effort (19-tool survey), and the 2026 review programmes (the UX + feature-gap audit,
+two UI reviews, and the MindManager-inspired review — all tiers shipped). The app is **live** at
+<https://mindmap-studio.struktureretsundfornuft.dk/> (GitHub Pages, custom domain, redeployed on
+every push to `main`). Remaining work is documentation housekeeping only — see `NEXT_STEPS.md`.
+Scope intentionally excludes the task / Gantt / resource PM layer and real-time collaboration —
+recorded decisions, not gaps.
 
 ## The book
 

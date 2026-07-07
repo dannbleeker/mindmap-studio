@@ -66,8 +66,10 @@ GitHub Pages).
   **⏱ brainstorm timer** for timeboxed sprints.
 - **File attachments** — attach any file to a topic (**📎 chip** on the node); stored inline so it
   travels with the map, with one-click download.
-- **Board view (Kanban)** — **▦ Board** shows topics grouped into columns by tag (read-only); cards
-  carry progress + due, and clicking one jumps to it on the map.
+- **Board view (Kanban)** — **▦ Board** shows topics grouped into columns (read-only); a **Group by**
+  selector lays them out by **tag**, by a **marker group** (Priority / Status / Mood / Vote — one
+  column per member), or by a **schedule** of date buckets (Overdue / Today / This week / Later /
+  Unscheduled). Cards carry progress + due, and clicking one jumps to it on the map.
 - **Summary topics** — **⊐ Summary** draws a labelled bracket beside a branch (side-aware;
   double-click to rename), the classic MindManager summary.
 - **Node shapes** — beyond box / rounded / pill, give a topic a **diamond** (decision), **oval**
@@ -92,6 +94,15 @@ GitHub Pages).
   (concentric rings), **funnel** (stacked stages), or **Venn** (2 or 3 overlapping circles) — and
   switches to free layout so you drop topics into its regions; **−/+** changes the ring/stage count.
   The frame renders into image exports too.
+- **Free background shapes** — **Insert → Shapes** drops ad-hoc canvas objects behind your topics —
+  **rectangle, ellipse, block arrow, chevron** (SWOT quadrants, flow arrows, framing). Click to select,
+  drag the body to move, drag a corner grip to resize; a small inline toolbar recolours it, changes its
+  kind, or deletes it. Shapes render behind the topics on the canvas and in every image / PDF / HTML
+  export (canvas == export).
+- **Smart containers** — two of the shapes are **containers**: a **Swimlane** (lanes) and a **Matrix**
+  (grid) that behave like MindManager Smart Shapes — **dragging the container moves every topic sitting
+  inside it** (membership is by position, so there's nothing to wire up: drop topics onto a lane and
+  drag it).
 - **Multi-map library** — keep many named maps; switch, create, and delete from the header. Open
   maps appear as **tabs** under the toolbar (the open set is remembered across reloads).
 - **Version history** — per-map snapshots (auto while editing + on demand) with one-click restore;
@@ -106,8 +117,9 @@ GitHub Pages).
   `.mmst`, so double-clicking one in Windows Explorer opens it here. Browsers without the File System
   Access API (Firefox/Safari) fall back to a download/upload, and IndexedDB autosave still applies.
   An installed copy also registers for MindManager **`.mmap`** files: double-clicking (or **Open
-  file…**) one **imports** it into the library (one-way + lossy — there's no save-back to `.mmap`;
-  use *Save as… `.mmst`* to keep it as a file).
+  file…**) one **imports** it into the library (the import is one-way + lossy, and an opened `.mmap`
+  isn't bound for autosave — use *Save as… `.mmst`* to keep working in a linked file). You can still
+  **Export → `.mmap`** to write a map back out for MindManager.
 - **Relationships** — draw a labelled, **directional** arrow (arrowhead at the target) between two
   nodes: right-click a node → **Link to…**, then click the target (with an optional label).
   Double-click a relationship to relabel it, right-click to delete. Imported `.mmap` relationships
@@ -124,10 +136,11 @@ GitHub Pages).
   the changes round-trip back into the model.
 - **Export** — native `.json` (lossless — the format for backup/transfer), Markdown
   (`.md`), OPML (`.opml`), **FreeMind/Freeplane `.mm`**, **Mermaid** (`.mmd`), **XMind `.xmind`**,
-  **SimpleMind `.smmx`**, PNG, SVG, a
-  self-contained HTML file, a standalone HTML **slide deck** (the Walk-Through as a shareable
-  file), a **PowerPoint** (`.pptx`) deck, a Word **`.docx`** outline document, an Excel
-  **`.xlsx`** outline sheet, and print-to-PDF.
+  **SimpleMind `.smmx`**, **MindManager `.mmap`** (round-trips topics/notes/links/icons, tags,
+  task metadata, and embedded images — the inverse of the importer), PNG, SVG, a
+  self-contained HTML file, a standalone HTML **slide deck** and a **PowerPoint** (`.pptx`) deck
+  (both render **each branch as its actual map image**, not a bullet outline), a Word **`.docx`**
+  outline document, an Excel **`.xlsx`** outline sheet, and print-to-PDF.
 - **Copy outline** — copy the map as a Markdown outline straight to the clipboard (no file),
   for pasting into an email, chat, or doc.
 - **Present** — a Walk-Through mode that steps through the map as fullscreen slides.
@@ -143,8 +156,12 @@ replaceable:
 
 - `src/mindmap/flow/` — the React Flow canvas: model→nodes/edges projection (`project.ts`),
   layouts (`layout.ts`), pure edit ops (`ops.ts`), and the native-text SVG exporter (`exportSvg.ts`).
-- `src/import/mmap.ts` — one-way `.mmap` importer (ZIP of `Document.xml`; XSD-sourced mapping).
-- `src/io/` — Markdown, native-JSON, and self-contained-HTML/print I/O.
+- `src/import/mmap.ts` — one-way `.mmap` importer (ZIP of `Document.xml`; XSD-sourced mapping);
+  `src/io/mmap.ts` is the paired `.mmap` writer (the export inverse).
+- `src/mindmap/flow/canvasShapes.ts` — the free background-shape + smart-container geometry, shared
+  by the canvas (`ShapeLayer.tsx`) and the exporters so screen and export always match.
+- `src/io/` — the interchange adapters (Markdown, native-JSON, OPML, FreeMind, Mermaid, XMind,
+  SimpleMind, docx/xlsx, …) plus self-contained-HTML/print I/O.
 - `src/io/fileSystem.ts` — native `.mmst` open/save/autosave via the File System Access API
   (download/upload fallback + Windows file association through the PWA manifest `file_handlers`).
 - `src/useMapExports.ts` — the header's export handlers (json/md/png/svg/html/pdf).
@@ -174,7 +191,9 @@ open work.
 relationships, and boundaries (field-mapped from the bundled MindManager XSD), warns about
 out-of-scope data (e.g. tasks), and flags any topics it leaves behind. Validated against a real
 MindManager export (a 25-topic map imported with zero content loss) plus synthetic unit fixtures
-and a CI-safe, env-gated (`MMAP_FILE`) integration test.
+and a CI-safe, env-gated (`MMAP_FILE`) integration test. A paired **`.mmap` writer** (`src/io/mmap.ts`)
+exports maps back out — round-tripping topics, notes, links, icons, tags, task metadata, and embedded
+images through our own importer.
 
 ## Status
 

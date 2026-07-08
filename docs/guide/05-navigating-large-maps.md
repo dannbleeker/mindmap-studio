@@ -294,7 +294,10 @@ someone through the map by reference. When a single branch is all that matters f
 **focus** it and the rest dims to quiet context. The **Power Filter** does the same by rule rather
 than by hand -- dim, not hide, everything that lacks a marker, tag, or word, so the matches stand
 out while the map keeps its shape. Keep the **corner minimap** in view to hold your bearings while
-you are zoomed in, and don't fuss over a typo in **Find** -- a near-miss still lands the right node.
+you are zoomed in. And put Find's forgiveness to the test on purpose: pick a long topic on your
+map and search for it *misspelled* -- drop a letter, swap two (`recieve` for `receive`) -- and
+watch the typo-tolerant pass still land you on the node. Once you've felt that, you'll stop
+composing careful queries and just type.
 
 One more lens, the keyboard one. Press **Ctrl/Cmd + K** and first *do* something by name: type
 `collapse` and run **Collapse all branches**, then open the palette again and notice it now sits

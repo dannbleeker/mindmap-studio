@@ -7,9 +7,12 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 Phase 1 (Brainstorming MVP) complete; canvas engine is **@xyflow/react**. MindMap Studio is
 **feature-complete for its scope** (local-first, offline, single-user, free) — the competitive
 gap-closing effort is **concluded by decision (2026-06-16)**; remaining gaps are surveyed, not
-pursued (see Reference). `book`/`bookExample` were **100% as of 2026-06-19**; every feature shipped
-since (including the 2026-07-02 batch below) is catalogued but not yet written up — see Tier 5
-item **24** (USER_GUIDE catch-up sweep). The **editor/UX redesign** (2026-06-17) and the **MindManager
+pursued (see Reference). **Docs coverage:** `manual` is **100%** (2026-07-03 sweep). `book` coverage
+is **editorial by design** since the 2026-07-08 revision (which also added the method chapters, 2 and
+8): every feature that serves the book's technique-first narratives is written up, and the remaining
+`book:false` catalogue entries are deliberate exclusions (UI chrome/affordances that don't belong in
+the book — the user guide is the 100% reference) — not a backlog. The **editor/UX redesign**
+(2026-06-17) and the **MindManager
 canvas-fidelity pass** (2026-06-19) are both complete. Deployed to GitHub Pages on every push to
 `main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
 
@@ -47,10 +50,6 @@ Tiers 1–4 shipped (see `CHANGELOG.md`). Sizes: **S** = hours, **M** = days, **
 item: what + why → *Now* (verified current state) → *Scope* (the exact delta).
 
 ### Tier 5 — housekeeping / hygiene (no MindManager angle, found during the review)
-
-24. **USER_GUIDE catch-up sweep: 115 of 253 catalogue entries are `manual:false`** — everything
-    shipped since ~2026-06-19 (including the 2026-07-02 Tier 1–4 batch; book/bookExample lag too now).
-    A dedicated docs session: write the missing USER_GUIDE sections, flip flags as they land.
 
 25. **Rich-text editing rides deprecated `document.execCommand`** (bold/italic/underline/colour in
     the topic editor). Works today; needs a migration plan before browsers pull it.

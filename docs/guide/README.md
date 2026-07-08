@@ -38,6 +38,10 @@ automatically whenever the manuscript changes — see [AUTHORING.md](AUTHORING.m
 - [6. Sharing and exporting](06-sharing-and-exporting.md)
 - [7. Presenting and workshops](07-presenting-and-workshops.md)
 
+**Part 4 — The practice**
+
+- [8. Thinking with maps](08-thinking-with-maps.md)
+
 **Appendices**
 
 - [A. Keyboard reference](appendix-a-keyboard-reference.md)
@@ -53,3 +57,6 @@ automatically whenever the manuscript changes — see [AUTHORING.md](AUTHORING.m
   [Appendix B](appendix-b-format-reference.md) for what survives the trip.
 - **Running a session?** [Chapter 7](07-presenting-and-workshops.md) is the playbook;
   [Appendix A](appendix-a-keyboard-reference.md) is the card to keep open beside it.
+- **Here for the method, not the tool?** [Chapter 2](02-anatomy-of-a-map.md) is the why
+  and the rules; [Chapter 8](08-thinking-with-maps.md) applies them to the six most
+  common jobs.

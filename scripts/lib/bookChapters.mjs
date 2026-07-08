@@ -47,6 +47,7 @@ export const CHAPTER_FILES = [
   "05-navigating-large-maps.md",
   "06-sharing-and-exporting.md",
   "07-presenting-and-workshops.md",
+  "08-thinking-with-maps.md",
   "appendix-a-keyboard-reference.md",
   "appendix-b-format-reference.md",
   "appendix-c-further-reading.md",
@@ -85,5 +86,6 @@ export const TOC_GROUPS = [
   { label: "Part 1 — Getting started", match: (c) => /^0[12]-/.test(c.filename) },
   { label: "Part 2 — Building maps", match: (c) => /^0[345]-/.test(c.filename) },
   { label: "Part 3 — Sharing your thinking", match: (c) => /^0[67]-/.test(c.filename) },
+  { label: "Part 4 — The practice", match: (c) => c.filename.startsWith("08-") },
   { label: "Appendices", match: (c) => c.filename.startsWith("appendix-") },
 ];

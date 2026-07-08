@@ -38,6 +38,9 @@ tools.
   maps navigable.
 - **Part 3 -- Sharing your thinking** covers getting the map *out* -- exporting,
   presenting, and running a session with other people.
+- **Part 4 -- The practice** returns to pure method: the six jobs you'll most often
+  bring to a map -- brainstorming, studying, meetings, decisions, plans, root-cause --
+  and the shape of a good session for each.
 - The **appendices** are reference: a keyboard card, the file-format details, and
   where to read more.
 

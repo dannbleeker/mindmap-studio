@@ -5,6 +5,19 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The book downloads open again in the installed app.** The PWA service worker answers every
+  top-level navigation with the cached app shell unless the URL is on a denylist that only covered
+  `.html` — so for anyone who had visited before, `/Thinking-in-Maps.pdf` and `/Thinking-in-Maps.epub`
+  opened the app instead of the book (fresh, service-worker-free visitors got the real PDF, which is
+  why the deploy looked fine from outside). The denylist now excludes any URL with a file extension
+  (single unit-tested rule in `src/pwa/navigationDenylist.ts`), so the book, the standalone pages and
+  `stats.json` always reach the network; app routes — including dotted query values like
+  `/?map=Foo.mmst` — still get the offline shell. Reproduced and verified in a real browser (service
+  worker active: navigation returned `text/html` before, `application/pdf` after). Existing installs
+  pick the fix up via the normal "Refresh now" update toast.
+
 ### Added
 
 <!-- 2026-07-02 MindManager review — Tier 4 big-bets (items 21–23). -->

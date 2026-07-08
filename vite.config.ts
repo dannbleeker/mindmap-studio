@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import { marked } from "marked";
 import { type Plugin, defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { NAVIGATION_FALLBACK_DENYLIST } from "./src/pwa/navigationDenylist";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 
@@ -205,9 +206,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg}"],
-        // Don't rewrite the standalone pages (dashboard.html, notices.html,
-        // user-guide.html) into the SPA shell on navigation.
-        navigateFallbackDenylist: [/\.html$/],
+        // Don't rewrite navigations to real files (the book PDF/EPUB, the
+        // standalone .html pages, stats.json) into the SPA shell — see the
+        // unit-tested constant for the rule.
+        navigateFallbackDenylist: NAVIGATION_FALLBACK_DENYLIST,
       },
       // No service worker in dev — it causes confusing reload loops.
       devOptions: { enabled: false },

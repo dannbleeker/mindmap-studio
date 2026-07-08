@@ -20,6 +20,23 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **The book grew a method core — and caught up with the app for real.** *Thinking in Maps* now
+  teaches the technique, not only the tool. Chapter 2 expands into the method-foundations chapter —
+  why a map beats a list (working memory, visible relationships, deferred ordering, spatial recall),
+  the method in five rules, diverge-then-converge, and when *not* to map — and a new Part 4 /
+  Chapter 8 (*Thinking with maps*) applies the method to six recurring jobs (brainstorm, study
+  notes, meetings, decisions, plans, root-cause, plus the multi-map atlas), each a recipe with a
+  worked scenario. A feature pass folded ~50 shipped features into the chapters their narratives
+  serve (capture inbox, sort children, group-selection boundaries, tint/gradient + image fills,
+  hover-peek, draggable markers, the task checkbox + branch date shifting, outline editing, the
+  legend, hide/extract filtering, the Relationships and Map statistics panels, the status bar +
+  view switcher, copy-as-table, the Excel round trip, the accessibility settings, and more) with
+  exercises to match, and fixed the book's one factual contradiction (outline numbering *does*
+  bake into Copy outline / Markdown export while switched on). Appendix C gains the
+  cognitive-science pointers behind chapter 2's claims. Catalogue: book 75.5% → **96.8%**,
+  bookExample 51.8% → **59.3%**; the eight remaining `book:false` entries are deliberate
+  exclusions (UI chrome that doesn't belong in a technique-first book), recorded in NEXT_STEPS.
+
 <!-- 2026-07-02 MindManager review — Tier 4 big-bets (items 21–23). -->
 
 - **Free background shapes (T4-23).** A new canvas-object layer for ad-hoc composition — **rectangle,

@@ -184,5 +184,6 @@ Prefer a running start over a blank SWOT? Open an **Example** instead (**+ Newâ€
 blank page; it's also the quickest way to see a feature used in anger.
 
 That's the whole tool, end to end -- from a single node in Chapter 1 to a map you can
-think with, enrich, navigate, share and present. The appendices that follow are the
-reference you'll come back to.
+think with, enrich, navigate, share and present. One chapter remains, and it's about
+none of the buttons: Chapter 8 takes the method itself and applies it, job by job, to
+the work you'll actually bring to a map.

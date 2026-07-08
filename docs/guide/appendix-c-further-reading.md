@@ -14,6 +14,19 @@ stricter rules he proposed. ("Mind Map" is a term associated with the Buzan
 Organisation; MindMap Studio uses the phrase descriptively for the diagram type and is an
 independent project.)
 
+## On why it works
+
+Chapter 2's claims about the shape have older, deeper roots worth chasing. The limits of
+**working memory** -- the handful of items you can hold at once, and what happens when a
+task exceeds it -- are one of the most replicated findings in cognitive psychology; the
+literature on **cognitive load** carries it into learning and instruction. The value of
+pairing words with spatial and visual structure is studied as **dual coding**; the
+strength of *place* as a retrieval cue is as old as the ancient **method of loci** and as
+current as research on **spatial memory**. And the idea that thinking improves when it's
+moved out of the head and onto a rearrangeable surface is the field of **distributed and
+extended cognition**. None of this is required reading to use a map -- but if you want to
+know why the technique keeps working, these are the load-bearing walls.
+
 ## On externalising thought
 
 The broader idea -- that thinking gets better when you get it *out of your head* and onto

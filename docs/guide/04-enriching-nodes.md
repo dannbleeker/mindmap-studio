@@ -18,12 +18,22 @@ Notes are where a map stops being a brainstorm and becomes a brief. The node say
 the one you did. The canvas stays scannable; the detail is one click away on whichever
 node owns it.
 
+Less than a click, in fact. A node with a note grows a small **📝** indicator, and merely
+*hovering* it peeks the note in a small card -- enough to check a detail without opening the
+panel; clicking it opens the editor. The same trick works elsewhere: hover a collapsed branch's
+**+N** count and it peeks the first few hidden children, and a node's **📎** attachment chip
+lists its file names. The map keeps its depth behind the labels, but the depth answers to a
+glance.
+
 ## Markers: status at a glance
 
 A **marker** is a small icon or tag pinned to a node. Open the **Markers** palette and
 click to toggle one on the selected node: a priority flag, a tick, a question mark, a
-face. Markers are how a map carries *state* without words -- a row of green ticks and
-one red flag tells a reviewer where to look before they've read a single label.
+face. Each chip also **drags** -- pull a marker from the palette onto any topic on the
+canvas, selected or not, and it lands where you drop it, which is the natural motion when
+you're triaging a whole map rather than dressing one node. Markers are how a map carries
+*state* without words -- a row of green ticks and one red flag tells a reviewer where to
+look before they've read a single label.
 
 Pick a small vocabulary and stick to it. "Red flag means blocked, tick means done,
 question mark means undecided" is a convention a whole team can read at a glance; fifteen
@@ -40,7 +50,9 @@ themselves; the vocabulary stays yours.
 Tags get housekeeping to match. The tag field **autocompletes** from every tag already in the
 map, and the **Markers &amp; tags** index panel can **rename** a tag everywhere, **merge** two by
 renaming one onto the other, **delete** one from every topic, or give it a **colour** that tints
-every topic carrying it -- a view-only wash that a node's own styling still overrides.
+every topic carrying it -- a view-only wash that a node's own styling still overrides. Fastest of
+all, don't visit a panel at all: type **#** while editing a topic and the tag picker pops up
+mid-keystroke -- pick an existing tag or mint a new one, and keep typing.
 
 > Markers imported from a MindManager `.mmap` file are mapped to the closest emoji, so a
 > map you bring in from elsewhere keeps its visual cues rather than arriving as bare text.
@@ -64,11 +76,24 @@ slipping says so out loud. None of this turns MindMap Studio into a project plan
 *map* enough of one that you don't have to leave it to see what's done, what's next, and what's
 late. (Chapter 5's filter and board then let you ask the whole map "what's overdue?" at once.)
 
+Day to day you rarely need the panel. Hover a topic's left edge and a small **checkbox**
+appears: click it to cycle *not a task -> to-do -> done* -- the fastest way to run a checklist
+straight on the canvas. And when a plan slips wholesale, don't edit dates one at a time:
+**right-click** the branch's top node and the **Shift task dates** row moves every start and due
+date beneath it by **-1w / -1d / +1d / +1w / +1mo** in one undo step, relative gaps preserved.
+The deadline moved a week; the map takes one click to agree.
+
 ## Images
 
 A node can hold an **image** -- a screenshot, a logo, a photographed whiteboard, a chart.
-Attach one to the selected node and it renders inline on the canvas. An image is worth a
-paragraph of note when the thing you're describing is itself visual.
+Attach one to the selected node and it renders inline on the canvas -- and getting one in is as
+direct as **Ctrl+V**: copy a screenshot anywhere and paste it straight onto the selected topic.
+An image is worth a paragraph of note when the thing you're describing is itself visual.
+
+An image usually sits *beside* the label. For a stronger statement, the Style tab's **Fill
+image...** puts a picture *behind* it instead -- covering the whole card, the topic text over it,
+one per node, with **Clear fill image** to lift it off. It reads like a small poster: right for
+the handful of nodes that *are* their picture (a person, a place, a product), wrong for twenty.
 
 Sometimes you don't have a file to hand -- you just want a small visual cue: a **star** on the
 idea you're proudest of, a **warning** triangle on the risk, a **flag** on the decision still
@@ -95,7 +120,13 @@ with the idea it backs up.
 Beyond markers, individual nodes can be **styled**: change a node's shape, fill colour, border,
 or weight; bump a topic's font size or colour; and switch its **font family** from the **Font**
 picker -- the default sans-serif, a **serif** for a quieter, document-like topic, or **monospace**
-for code, IDs, and anything that should line up. Styling earns its keep when it
+for code, IDs, and anything that should line up. Two fill options go beyond a flat swatch: a
+**branch-colour tint** (◧) washes the node in a soft version of its own branch's colour --
+structure restated as colour, no palette decisions required -- and a **gradient** (◨) adds a
+gentle fade for the one node that should read as a header. And a topic that has outgrown its line
+doesn't have to stretch the layout: set its **wrap width** -- the snap slider in the Style tab, or
+the width grip on the selected node itself -- and long text folds into a tidy block instead of a
+banner. Styling earns its keep when it
 *encodes* something -- the three "decision" nodes all share a fill, the headline branch
 is bolder than the rest -- and costs you readability when it's merely decorative. Style
 to create a pattern the reader can rely on, not to make the map "pop".
@@ -132,9 +163,12 @@ theme's palette in one click, the fastest way to give a grown map a legible colo
 
 Styling paints the whole node; sometimes you want to stress just a word or two *inside* the
 label. While editing a topic, **Ctrl+B**, **Ctrl+I**, and **Ctrl+U** bold, italicise, or
-underline the selection -- the same muscle memory as any editor. Reach for it sparingly: one
-bold word that names the decision, an italicised term you're defining. The plain text is kept
-underneath, so your outline and every flat export stay clean even when the canvas is dressed up.
+underline the selection -- the same muscle memory as any editor -- and a small **floating bar**
+above the topic offers the same three plus a row of **text colours** for the mouse path. Reach
+for it sparingly: one bold word that names the decision, an italicised term you're defining. The
+plain text is kept underneath, so your outline and every flat export stay clean even when the
+canvas is dressed up. (A **Spell-check** toggle in the View menu turns the editors' squiggles on
+or off map-wide -- off is a mercy on a map full of product codenames.)
 
 ## Callouts: a note that points
 
@@ -159,6 +193,14 @@ six-colour branch palette, background, font and branch weight, and it joins the 
 exportable as a file, so a house style travels between machines. (The canvas theme is
 separate from the *app's* chrome, which follows your operating system's light/dark setting
 -- or force it in Settings.)
+
+One level up again, the Map panel's **Design gallery** applies a whole coordinated look --
+theme, connector style, branch weight, accent -- in one click: the "make it presentable" button
+for when the content is done and the meeting is soon. The same panel's **More styling** section
+sets the map's **typography**: a base **font** (Sans, Serif, or Mono) and a **text size**
+(Compact, Comfortable, Large) for the whole map, which any per-topic font or size still
+overrides. A serif base reads like a document; Compact buys a large plan another dozen visible
+topics.
 
 The **Canvas** colour control sits one notch below a theme: it overrides just the background of
 *this one map*, leaving the theme's branch and text palette intact. It's a quiet but useful signal
@@ -227,6 +269,14 @@ a faint background **image** behind everything -- it renders the same in every e
 arrange is what you ship.
 
 One more pass, this time on a group. Select three or four nodes at once -- the Markers palette switches to **bulk** mode. Click a marker and watch it land on the whole selection; notice that a chip already on *all* of them reads **lit** (click to clear all) while one on only *some* reads **dashed** (click to add to all). Add a **tag** across the same selection the same way. Then pin a **callout** and open its inspector: give it a **colour** from the swatch row so the remark reads as deliberately set-apart, and try **Default** to drop it back. Finally, just look at a node's inspector header -- the faint **created** and **modified** line is there without your having lifted a finger, and on an old map that one glance tells you what's still alive and what has gone quiet.
+
+A last pass for this chapter's quieter tools, in one loop. Hover a noted topic's **📝** and peek
+the note without opening anything; **drag** a marker from the palette onto a topic you haven't
+even selected; give one node a **branch-colour tint** and set a **wrap width** on your longest
+label so it folds instead of stretching. Then run a checklist from the canvas: hover three topics'
+left edges and click the **checkbox** through to-do and done. Finally, right-click your plan's
+top node and **shift its task dates +1w** -- the whole branch slips together, gaps preserved --
+and **Ctrl+Z** the slip away again. None of these needed a panel; the canvas was the interface.
 
 The next chapter is about the opposite problem: when a map gets big, how do you keep
 finding your way around it?

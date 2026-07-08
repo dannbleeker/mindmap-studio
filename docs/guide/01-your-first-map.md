@@ -44,8 +44,21 @@ escapes. Two shortcuts help. The **Quick add** box in the toolbar takes a topic 
 type, return, type, return -- and each line lands as a node without your touching the canvas: the
 fastest way to empty a head full of ideas into a map and sort them out later. And you can **drop**
 straight onto the canvas -- drag a link from your browser, or selected text from anywhere, onto the
-map and it becomes a **floating topic** where you let go. Capture first, structure second; the
-dragging-into-shape of Chapter 3 is a calmer job once the ideas are already on the page.
+map and it becomes a **floating topic** where you let go (a link arrives already titled after its
+address, no network needed). Capture first, structure second; the dragging-into-shape of Chapter 3
+is a calmer job once the ideas are already on the page.
+
+A third capture works from *inside* the editor: type **/** at the start of a topic and a small
+command menu opens -- add a child, a task, a date, a note, a marker -- so a hand that's typing
+never has to leave for the toolbar. (Appendix A collects these editor accelerators.)
+
+Both of those capture *into the map you're on*. For the thought that belongs to no map at all --
+or to one you don't want to open right now -- there's the **📥 Inbox** (in the Panels menu, as
+**Inbox (quick capture)**): jot a line into its box, press Enter, and it's held -- across maps,
+across reloads -- until you deal with it. Each held item has a small **→ map** button that files
+it onto whichever map you have open (it lands as a floating topic, ready to place) and a **×** to
+discard it. It's the app's back-of-an-envelope: capture now, decide where it lives later. Chapter 8
+builds a weekly ritual on exactly this.
 
 ## Moving around
 
@@ -94,10 +107,12 @@ and **Ctrl+Z** it back, just to feel the safety net. Then close the tab and reop
 is exactly where you left it. That loop -- Tab, Enter, type, undo, and it already saved itself
 -- is the whole foundation the rest of this book builds on.
 
-Two captures worth trying once: from the **⌂ Start** screen, type a title into the capture box and
-press Enter -- you're on a fresh map in a single line; and while building, throw three half-formed
+Three captures worth trying once: from the **⌂ Start** screen, type a title into the capture box
+and press Enter -- you're on a fresh map in a single line; while building, throw three half-formed
 ideas through the **Quick add** box (type, Enter, type, Enter) to feel how *capturing* and
-*structuring* are two different gears.
+*structuring* are two different gears; and drop one stray thought into the **📥 Inbox**, close the
+map, open a different one, and file it there with its **→ map** button -- proof that a thought no
+longer needs a destination before you're allowed to write it down.
 
 Try the mouse-only path too, so you know it is there when your hand is already on the trackpad. Hover a branch, click its **+** to add a child, and type the label that appears under your cursor. Then **double-click an empty patch** of canvas: a floating topic drops where you clicked, ready to name. Rename any node three ways to feel them -- **double-click** it, press **F2**, and on a third just **start typing** -- and notice you never had to reach for a menu.
 

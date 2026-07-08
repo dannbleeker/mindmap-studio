@@ -165,7 +165,7 @@ Each entry shows when it was taken and how big the map was; **Restore** rolls th
 The safety net under the safety net: restoring first checkpoints what you have *now*, so even an
 unwanted restore is one click from undone. It's all local (capped at the 30 most recent, kept in
 the browser's database) and travels with nothing -- a private undo that outlives the session, where
-the in-session Undo (Chapter 2) stops at the last reload. Think of Backup as the whole-library
+the in-session Undo (Chapter 1) stops at the last reload. Think of Backup as the whole-library
 snapshot and History as the per-map flight recorder.
 
 There's also a **▶ Play timeline** button: instead of eyeballing the list, play the snapshots back

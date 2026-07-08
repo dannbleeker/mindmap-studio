@@ -16,7 +16,8 @@ The toolbar's **Export** menu offers, in rough order of fidelity:
   might want to re-open it later with nothing lost.
 - **Markdown** -- the map as an indented outline (`#` root, nested bullets). Perfect for
   pasting into a document, a wiki, or a pull request. It's round-trippable as structure,
-  though it naturally drops canvas-only detail like colours and arrows.
+  though it naturally drops canvas-only detail like colours and arrows. (One thing it *keeps*
+  when you ask: with outline numbering on -- Chapter 5 -- the numbers are baked into each line.)
 - **OPML** -- the interchange format outliners speak. Use it to hand your structure to
   another outlining tool.
 - **FreeMind / Freeplane (`.mm`)** -- the most widely-read mind-map format. Carries the
@@ -83,6 +84,12 @@ same structure as the Markdown export without the round trip through a saved fil
 fastest way to turn a map into words somewhere else. Reach for it when the map was the
 *thinking* and some other place is where the writing has to land.
 
+Its sibling **Copy as table (TSV)** (in the **More** menu) flattens the tree into rows instead:
+one per topic, with **Topic / Depth / Note / Tags** columns, tab-separated so it pastes straight
+into a spreadsheet *as columns*. It's the bridge from map to grid -- tag topics with owners while
+you plan, copy as a table, paste into the sheet, and the per-owner breakdown is a pivot away.
+(Chapter 8's decision recipe reaches for this map-to-grid bridge when a comparison outgrows the map.)
+
 ## Importing
 
 The same breadth applies going in. MindMap Studio reads:
@@ -106,10 +113,20 @@ library of maps in one step. (The list keeps growing -- Word `.docx`, Excel `.xl
 ground between tools; each keeps the topic tree and the fields that map cleanly, and -- like the
 `.mmap` importer -- quietly leaves behind only the tool-specific extras it can't represent.
 
+The **Excel** door deserves a sentence of its own, because it's how a *spreadsheet-shaped* plan
+becomes a map: the importer reads the first sheet as an indented outline -- the column of a row's
+first filled cell is its depth (column A a root, B its child, and so on), and a later cell on the
+same row comes along as that topic's note. It's exactly the shape the Excel *export* writes, so
+the worksheet a colleague reorganised can come back in as the map it started from.
+
 Not everything you want to map arrives as a file, though. Often it's just *text* -- an agenda in
 an email, a list in a chat, the bones of an outline you typed somewhere else. **📋 Paste text**
 takes that straight from the clipboard: paste it in and the indentation (or `#` heading levels)
-becomes the tree, bullet and number markers are stripped, and you get topics. Drop it in as a new
+becomes the tree, bullet and number markers are stripped, and you get topics. It reads Markdown's
+shorthand on the way through: a `[ ]` or `[x]` checkbox becomes a real task (to-do or done), a
+`[text](url)` line becomes a topic with the link attached, and stray `**bold**` markers are
+cleaned off rather than pasted in. A rectangular *spreadsheet* selection pastes just as well --
+rows become topics, with the extra columns carried along. Drop it in as a new
 map, or **Add under selected** to graft it onto a branch you're already growing. It's the lowest-
 friction on-ramp there is -- and, because it never leaves the browser, the private way to bring in
 an outline you drafted anywhere, including one a chatbot wrote for you.
@@ -206,8 +223,14 @@ as a spreadsheet. For a big map someone needs to *explore* rather than glance at
 type in the filter box to narrow to what matters -- proof the export can carry the *navigation*,
 not just the picture. Finally, when you just need the words somewhere *now*, click **⧉ Copy
 outline** and paste -- no file, no download, just the map as a Markdown outline wherever your
-cursor is. Same map, every door out: a file to keep, a picture to show, a sheet to crunch, a
-paste to drop.
+cursor is; or **Copy as table (TSV)** and paste into a blank sheet to watch Topic / Depth /
+Note / Tags land as real columns. Same map, every door out: a file to keep, a picture to show, a
+sheet to crunch, a paste to drop.
+
+One round trip is worth running deliberately: export your map to **Excel**, move a row or edit a
+note in the spreadsheet, and **import** the `.xlsx` back -- the column-indented sheet returns as
+the tree it described. That's the full map-to-grid-to-map loop, and once you've made it, "can you
+put that in a spreadsheet?" stops being a rewrite.
 
 One safety net is worth feeling before you trust a map with real work: make a few edits, then
 open **version history** and restore an earlier snapshot -- the map rewinds intact, and you can

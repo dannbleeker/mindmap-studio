@@ -38,6 +38,17 @@ keep re-using no longer has to be rebuilt each time. It's the middle ground betw
 only moves things within one map) and a full file import (which brings in a whole map): a way to
 carry just the piece you want from one map to the next.
 
+## Putting siblings in order
+
+Within a branch, order is information: a reader assumes the top item matters most, so make the
+order say what you mean. **Ctrl+Shift+Up / Down** moves the selected node among its siblings when
+one deliberate nudge is all it takes. And when the right order is *mechanical* -- alphabetical, by
+priority, by date -- don't nudge it by hand: the command palette (**Ctrl+K**, Chapter 5) offers
+**Sort children A -> Z**, **by priority**, **by due date**, and **by progress**, each a one-shot
+reorder of the selected topic's direct children in a single undo step. It's a sort, not a standing
+rule -- the map keeps the order you sorted into until you change it, so sort by due date for the
+review and drag things back afterwards if the argument reads better another way.
+
 ## Layout direction
 
 By default MindMap Studio balances branches on both sides of the root. For some maps a
@@ -54,14 +65,22 @@ a shaded, rounded **boundary** box is drawn around it and all its descendants, a
 double-clicking the box's label chip lets you name it. The boundary follows the branch as you
 edit it, so it keeps enclosing the right nodes even after you add or move children.
 
-Boundaries are the right tool when the grouping is *hierarchical* -- it lines up with a
-single branch. When the grouping cuts across the tree, you want the next feature instead.
+A boundary doesn't have to follow the tree, though. Select several topics -- from different
+branches, if that's the truth of it -- and **Insert -> Group selection (boundary)** draws one box
+around exactly those topics; double-click its label to name what they have in common. That's the
+box for the grouping the hierarchy can't express ("these five, wherever they live, are this
+quarter's bets").
+
+For a *hierarchical* grouping -- one that lines up with a single branch -- the branch boundary
+above is the right tool. When the grouping is a genuine cross-cutting **link** between two ideas
+rather than a set, you want the next feature instead.
 
 ## Relationships: the arrows across the tree
 
 The tree is good at "X is part of Y". It is silent about "X depends on Y" when X and Y
-live on different branches. That's what **relationships** are for: draw an arrow from
-one node to another, anywhere on the canvas, and you've recorded a link the hierarchy
+live on different branches. That's what **relationships** are for: hover a topic and a small
+**grip dot** appears on its edge -- pull it onto the other topic and the arrow is drawn
+(**Ctrl+Shift+L** starts one from the keyboard). Either way you've recorded a link the hierarchy
 couldn't express. A risk on the *Budget* branch that threatens a deliverable on the
 *Programme* branch; a decision that unblocks three others; a "see also". Use them
 sparingly -- a map laced with dozens of arrows is as hard to read as no structure at
@@ -109,6 +128,9 @@ and it floats free again.
 A floating topic is still a *topic* -- a node you might grow into a branch. Sometimes you want
 something lighter: a remark on the canvas that isn't part of the structure at all. The **🗒 Note**
 button drops a **sticky note** -- a free-floating amber card you can drag anywhere and type into.
+Amber is only the default: a swatch row beneath the Insert menu's **Sticky note** entry offers
+lime, sky, rose, violet, and slate, and the colour you pick becomes the new default -- so a
+convention like "rose = open question, lime = decision" survives from map to map.
 Use it for the things that hover *around* a map rather than *in* it: a "finish before Friday" to
 yourself, a caption over a cluster, a question for whoever you hand the map to. It's the canvas
 equivalent of a Post-it stuck to the whiteboard -- visible, movable, and plainly a note rather than
@@ -253,7 +275,13 @@ through exactly as you see them.
 
 Two quick reuse moves to finish: **right-click a branch → Copy branch**, then paste it under
 another node -- or even into a *different* map -- and notice the copy is independent of the
-original. And drop a **🗒 sticky note** somewhere with a reminder to yourself: a remark that rides
-*with* the map without becoming part of its tree.
+original. And drop a **🗒 sticky note** somewhere with a reminder to yourself -- picking a
+non-default colour from the swatch row while you're at it -- a remark that rides *with* the map
+without becoming part of its tree.
+
+And two ordering moves. Select a topic with a handful of children and run **Sort children
+A -> Z** from the palette -- then **Ctrl+Z** it, because alphabetical was probably not the
+meaning. Then lasso topics from two *different* branches and **Insert -> Group selection
+(boundary)**: a grouping the tree itself couldn't draw, named with a double-click on its label.
 
 With structure under control, the next chapter makes individual nodes carry more.

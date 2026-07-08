@@ -76,6 +76,15 @@ structure linearly, jumping straight to a node (click it in the outline and the 
 focuses it), and spotting structural problems a radial layout can hide, like a branch
 that's gone six levels deep while its siblings stayed shallow.
 
+It's also a full **editor**, not just a table of contents. **Double-click** a row to rename it
+inline -- and while you're editing, **Tab** adds a child and **Enter** a sibling, exactly like
+the canvas. The **◂ ▸** buttons on a row promote and demote it; **drag** a row to reorder or
+re-parent (on a touchscreen, hold a row a beat and slide it); **Shift+Up / Down** reorder among
+siblings and **Shift+Left / Right** promote and demote from the keyboard, focus staying on the
+moved row. A long restructuring session is often *faster* here than on the canvas -- linear is
+the better shape for triage -- and the two views stay in step both ways: select a node on the
+canvas and the outline scrolls its row into view.
+
 The outline has its own **filter** box: type a few letters and it narrows to matching
 topics, so a long map becomes a short list you can scan.
 
@@ -90,8 +99,10 @@ count. Click a topic in the index and the canvas jumps to it, exactly like the o
 This is the read-only twin of the **Markers** palette. The palette is how you *put* a marker on
 the selected node; the index is how you *find* every node that already carries one. On a map with
 a hundred topics, that's the difference between scanning the whole thing for red flags and reading
-them off a list. Markers earn their keep precisely because the index makes them queryable after
-the fact -- so flag deliberately, and the index becomes a live status board.
+them off a list. Each row also offers a **Quick Filter**: one click and the canvas shows just the
+topics carrying that marker or tag -- the flag-then-ask loop closed in a single gesture. Markers
+earn their keep precisely because the index makes them queryable after the fact -- so flag
+deliberately, and the index becomes a live status board.
 
 ## Numbering the branches
 
@@ -104,10 +115,25 @@ you need them: a printed map handed round a meeting, or a slide that references 
 
 It's worth being clear about what numbering *isn't*. It doesn't change your map. The numbers are
 computed from the tree's shape the instant you switch it on and forgotten the instant you switch
-it off -- they never touch your topic text, so search still finds "Budget" and not "4.2 Budget",
-and a Markdown export is still clean prose. Reorder a branch and the numbers renumber themselves,
-because they were never really yours to begin with -- they belong to the structure. Turn it on
-when you need to talk *about* the map; turn it off when you just want to look *at* it.
+it off -- they never touch your topic text, so search still finds "Budget" and not "4.2 Budget".
+Reorder a branch and the numbers renumber themselves, because they were never really yours to
+begin with -- they belong to the structure. They do follow you *out*, though, and further than
+the images: while numbering is on, **⧉ Copy outline** and the **Markdown export** bake the
+numbers into each line too, so the reference you say out loud ("see 2.3") is the same one in the
+minutes; switch numbering off and the same exports come out clean. A **Numbering style** item
+under the toggle picks the scheme -- **decimal** (1, 1.1) or **outline** (I, A, 1) -- so the map
+can match the document it's headed into. Turn it on when you need to talk *about* the map; turn
+it off when you just want to look *at* it.
+
+## The legend: your conventions, on the page
+
+Chapter 4's advice was to keep a small marker vocabulary -- but a reader who wasn't there when
+you agreed it still needs the key. Toggle **Legend** (in the View menu, under Display) and a
+quiet box appears in the map's corner listing exactly the conventions *this map actually uses*:
+each marker with its name, each coloured tag, each conditional-formatting rule with its colour.
+Nothing in use, nothing listed. It's drawn on the canvas, so it rides into the SVG and image
+exports unchanged -- the handed-out PNG explains its own symbols. Turn it on for maps that
+travel; leave it off while the only reader is you.
 
 ## Filtering without losing the forest
 
@@ -118,12 +144,16 @@ tag chips for what you're hunting, and the map answers by **fading everything th
 leaving the matches, and the branches that lead to them, at full strength. A count tells you how
 many topics qualified.
 
-The phrase to hold onto is *read-only*. A filter here is a spotlight, not a pair of scissors:
-nothing is hidden, collapsed, or deleted, and the instant you hit **Clear** or close the panel the
-whole map comes back. That's deliberate. The fastest way to lose trust in a tool is to have it
-quietly remove something you needed; a filter that only changes opacity can never do that. The
-context stays too -- because the path from the centre to each match keeps its colour, you never get
-the disorienting "lone highlighted node floating in grey" that makes you forget where you are.
+The phrase to hold onto is *read-only*. A filter here is a spotlight, not a pair of scissors: by
+default everything else is only dimmed, and the instant you hit **Clear** or close the panel the
+whole map comes back. When even the dimmed context is noise -- a screenshot meant for one team, a
+map too dense to read faded -- tick **Hide non-matches** and the rest leaves the canvas entirely:
+still the same spotlight, the map itself untouched (the panel's footer says so), just with the
+house lights fully off. That read-only rule is deliberate. The fastest way to lose trust in a
+tool is to have it quietly remove something you needed; a filter that never edits the map -- only
+what's shown of it -- can't. The context stays too -- because the path from the centre to each
+match keeps its colour, you never get the disorienting "lone highlighted node floating in grey"
+that makes you forget where you are.
 
 It pairs naturally with markers. Flag the risks as you build the map (Chapter 4), then, when the
 map is big and the meeting is short, filter to ❗ and read the risks straight off the lit branches.
@@ -134,6 +164,12 @@ joins a list you re-apply in a click -- "❗ risks", "due this week", "tagged `q
 presets are kept app-wide, a filter that proves useful on one map is waiting on the next. The Power
 Filter stops being something you set up each time and becomes a set of saved questions you can ask
 of any map.
+
+Two more controls round it out. A **completion** selector -- *Done*, *In progress*, *Not done* --
+makes "what's genuinely finished?" a click instead of an audit. And when a filtered view turns out
+to be a *thing in its own right* -- the risk register hiding inside the programme map -- **Extract
+matches to a new map** copies the matching topics, with the branches that lead to them, into a
+fresh map of their own and leaves the original untouched: the spotlight, promoted to a document.
 
 The filter answers "where is everything matching X?" Its close cousin, **◎ Focus**, answers "show
 me just *this*." Select a node, click Focus, and the map dims to that node's branch and the single
@@ -166,7 +202,10 @@ open **List all** for a clickable list with each match's breadcrumb. Find is als
 if what you typed matches nothing exactly, it quietly falls back to a typo-tolerant pass, so a
 half-remembered spelling -- *recieve* for *receive* -- still lands you on the node instead of an
 empty result. **Replace** turns find into a tidy-up tool: rename a project that got called three
-slightly different things, fix a term you decided to change, all in one pass.
+slightly different things, fix a term you decided to change, all in one pass. Two conveniences
+ride along: the Find box remembers your **last ten queries** (start typing and they're offered
+back), and Replace has a **scope** -- *Topics*, *Notes*, or *Both* -- so renaming a project
+everywhere doesn't have to mean rewriting the prose behind the nodes, or vice versa.
 
 When the question is sharper than a word, the same box speaks **operators**: `tag:q3`,
 `marker:flag-red`, `priority:1`, `due:overdue`, `due:soon`, `has:note`, `has:attachment`,
@@ -214,6 +253,22 @@ opens in a new tab. The 🔗 carries one primary link; further URLs live in an *
 list on the same topic. Fastest of all, while *typing* a topic: `[[` or `@` autocompletes any
 topic or map by name and attaches the link as you pick it.
 
+The inspector keeps the ledger for a single topic: alongside **Linked from other maps** (the
+doorways pointing in), a **Links to** section lists the outgoing side -- the topic's own
+hyperlink plus every relationship leaving it, click-to-jump. And placed one by one, the whole
+map's connections can be read back all at once: the **🔗 Relationships** panel (Panels menu,
+under Analysis) lists every relationship arrow and every in-map topic link, both ends
+click-to-jump, labels shown. On a map where the arrows carry the real story -- a dependency web,
+a risk map -- the panel *is* the story, in rows; it's also the fastest way to find the arrow you
+meant to delete.
+
+Its neighbour in the Analysis section, **📊 Map statistics**, is the map's vital signs: topics,
+leaves and depth; task counts with done-so-far and overdue; the content tally -- words, notes,
+attachments, tags, relationships -- and a **reading time** estimate. The number worth watching is
+the word count: when a "map" passes a few thousand words it has usually become a document wearing
+a map's clothes (Chapter 2 said when not to map; the statistics panel is where you catch it
+happening).
+
 ## Search every map
 
 Find searches the map you're in. Once your library grows into an atlas, **🔎 All maps**
@@ -249,6 +304,17 @@ applied -- save it: **View -> Save current view...** names the exact combination
 drill and filter, and re-applies it from the same menu in one click. A weekly review can open on
 precisely the view you triage from. Need to point someone else at a spot instead? **Copy link to
 this topic** puts a URL on the clipboard that opens the app on that map with that topic focused.
+
+## The strip at the bottom
+
+A slim **status bar** sits bottom-centre of the canvas and answers the small questions before
+you ask them: how many topics are in view, how many are selected (click that count to zoom to
+the selection), and the live zoom percentage (click it to snap back to 100%). At its left end
+sits a three-way **view switcher** -- **Map / Outline / Board** -- one click between the canvas
+and its two other faces, no menu required. And one quiet scale note belongs here: past roughly
+five hundred nodes the canvas starts rendering only what's near the viewport, so a big map stays
+fluid to pan and edit. You'll never see the seam -- it's simply why the three-hundred-node map
+doesn't wade.
 
 ## A working rhythm for big maps
 
@@ -314,5 +380,14 @@ at a time, then **drill in** to a single branch, edit a node while you're inside
 you're at it: type `due:overdue tag:q3` into Find and watch a scan become a query. And when you've
 set up a view you'll want again -- a drill plus a filter -- **save it** from the View menu and
 re-apply it in one click.
+
+This chapter grew a second toolbox; give it one pass too. In the **Outline**, double-click a row
+and rename it, then **Shift+Down** it past a sibling -- structure work without touching the
+canvas. Open **📊 Map statistics** and read your map's word count and reading time; open
+**🔗 Relationships** and jump an arrow end to end. Filter to something real, tick **Hide
+non-matches** to feel the lights-off version, then **Extract matches to a new map** and watch a
+filtered view become its own document. Turn on the **Legend** and export a PNG that explains its
+own symbols. And on the way out, glance at the **status bar**: topic count, zoom, and the
+Map / Outline / Board switcher were under your cursor all chapter.
 
 Part 3 turns outward: getting the map off your screen and in front of other people.

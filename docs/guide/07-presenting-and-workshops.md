@@ -45,7 +45,8 @@ topic*, so a framework can be a branch, not only a map.)
 
 Where a template is an *empty* frame, the **Examples** group in the same **+ New…** menu
 gives you twenty *complete*, worked maps -- a filled launch plan, a sprint retro, a worked SWOT,
-a flowchart, a whiteboard, a trip itinerary, a study map -- to open and adapt rather than build
+a flowchart, a whiteboard, a trip itinerary, a study map, a **GTD Areas of Focus** overview
+(Chapter 8 builds its atlas pattern on it) -- to open and adapt rather than build
 from scratch. They're the fastest way to see what a finished map looks like, and to learn a
 feature by reading one that uses it.
 
@@ -132,6 +133,24 @@ squeezing the canvas -- so you can capture an idea or pull up a map on the move 
 laptop later. Same app, same maps, sized for the screen you're holding; paired with the offline
 caching above, it makes "the map is wherever I am" simply true.
 
+## A room you can't choose
+
+Present often enough and you'll meet the projector that washes colour out, the huge screen where
+every animated pan swings like a camera crane, and the colleague for whom motion is genuinely
+unpleasant rather than slick. Two settings (**Ctrl+,**, under Appearance) exist for exactly this.
+**Reduce motion** makes zoom, fit, and the guided walk *instant* instead of animated -- set it to
+**On** for the big screen or a motion-sensitive audience, or leave it on **System** and it follows
+each viewer's own operating-system preference. **High contrast** strengthens borders, dividers,
+text and focus rings the same way -- **On** for the washed-out projector, **System** to respect
+the reader's setting.
+
+The canvas also carries its structure where sight doesn't reach: the overlays that exist only as
+drawings for sighted readers -- relationships, boundaries, summaries, callouts -- are exposed to
+**screen readers** as navigable lists ("from Budget to Risk", with the label), so the map's
+cross-links survive the trip into assistive tech. None of this needs to matter until the day it's
+the only thing that does; it's the difference between a map you can present and a map anyone can
+be presented to.
+
 ## Back up the whole library
 
 Individual maps export as JSON (Chapter 6). The whole **library** can be backed up and
@@ -178,6 +197,10 @@ through your SWOT with the arrow keys -- edit a node mid-walk to feel that the m
 then flip the **cinematic** toggle and watch the step become a camera move. Back in **Present**,
 open presenter view and give yourself a ten-minute **budget**: the clock runs green, amber, red
 as you talk, and **B** blanks the screen when you want the room's eyes on you.
+
+And once, before a real session, open **Settings** and flip **Reduce motion** to On, then step
+three slides -- the spotlight now *cuts* instead of glides. Some rooms want the glide; some
+want the cut; know which switch gives you each.
 
 Prefer a running start over a blank SWOT? Open an **Example** instead (**+ New… → Examples**)
 -- a filled launch plan, a retro, a trip, a worked SWOT -- and adapt it. Same skills, less

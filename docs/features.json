@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 430,
+  "reviewedThroughChangelogBullets": 431,
   "areas": [
     "editing",
     "notes",
@@ -103,8 +103,8 @@
       "area": "markers",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "drag-detach-copy",
@@ -121,7 +121,7 @@
       "area": "structure",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -139,7 +139,7 @@
       "area": "markers",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -148,7 +148,7 @@
       "area": "navigation",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -157,7 +157,7 @@
       "area": "navigation",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -166,8 +166,8 @@
       "area": "structure",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "custom-theme-designer",
@@ -229,7 +229,7 @@
       "area": "editing",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -283,7 +283,7 @@
       "area": "navigation",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -301,7 +301,7 @@
       "area": "styling",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -310,7 +310,7 @@
       "area": "editing",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -346,7 +346,7 @@
       "area": "navigation",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -355,8 +355,8 @@
       "area": "editing",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "multi-branch-clipboard",
@@ -373,7 +373,7 @@
       "area": "navigation",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -382,8 +382,8 @@
       "area": "navigation",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "promote-branch-to-map",
@@ -418,7 +418,7 @@
       "area": "structure",
       "since": "2026-06-28",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -679,7 +679,7 @@
       "area": "styling",
       "since": "2026-06-22",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -787,7 +787,7 @@
       "area": "structure",
       "since": "2026-06-22",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -895,7 +895,7 @@
       "area": "navigation",
       "since": "2026-06-22",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1615,8 +1615,8 @@
       "area": "library",
       "since": "2026-06-19",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "detail-levels",
@@ -1651,7 +1651,7 @@
       "area": "notes",
       "since": "2026-06-20",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1660,8 +1660,8 @@
       "area": "notes",
       "since": "2026-06-20",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "drag-markers",
@@ -1669,8 +1669,8 @@
       "area": "markers",
       "since": "2026-06-20",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "canvas-breadcrumb",
@@ -1696,7 +1696,7 @@
       "area": "navigation",
       "since": "2026-06-20",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1732,7 +1732,7 @@
       "area": "images",
       "since": "2026-06-20",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1741,7 +1741,7 @@
       "area": "navigation",
       "since": "2026-06-20",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1777,8 +1777,8 @@
       "area": "styling",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "image-fill",
@@ -1786,7 +1786,7 @@
       "area": "images",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1795,7 +1795,7 @@
       "area": "styling",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1813,8 +1813,8 @@
       "area": "structure",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "numbering-schemes",
@@ -1822,7 +1822,7 @@
       "area": "structure",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1831,8 +1831,8 @@
       "area": "navigation",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "filter-hide-extract",
@@ -1840,8 +1840,8 @@
       "area": "navigation",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "map-legend",
@@ -1849,8 +1849,8 @@
       "area": "navigation",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "paste-table",
@@ -1858,7 +1858,7 @@
       "area": "import",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1867,7 +1867,7 @@
       "area": "editing",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1885,8 +1885,8 @@
       "area": "export",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "map-parts",
@@ -1903,8 +1903,8 @@
       "area": "editing",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "group-selection",
@@ -1912,8 +1912,8 @@
       "area": "structure",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "marker-suggestions",
@@ -1966,7 +1966,7 @@
       "area": "editing",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1975,7 +1975,7 @@
       "area": "export",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -1984,8 +1984,8 @@
       "area": "styling",
       "since": "2026-06-21",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "inline-link-label",
@@ -2074,7 +2074,7 @@
       "area": "structure",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2092,8 +2092,8 @@
       "area": "navigation",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "cross-map-topic-links",
@@ -2101,7 +2101,7 @@
       "area": "structure",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2119,7 +2119,7 @@
       "area": "editing",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2128,8 +2128,8 @@
       "area": "navigation",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "sr-overlay-lists",
@@ -2137,7 +2137,7 @@
       "area": "navigation",
       "since": "2026-06-30",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2164,7 +2164,7 @@
       "area": "editing",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2182,8 +2182,8 @@
       "area": "editing",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
-      "bookExample": false
+      "book": true,
+      "bookExample": true
     },
     {
       "id": "high-contrast-theme",
@@ -2191,7 +2191,7 @@
       "area": "navigation",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2209,7 +2209,7 @@
       "area": "editing",
       "since": "2026-07-01",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2254,7 +2254,7 @@
       "area": "editing",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2272,7 +2272,7 @@
       "area": "styling",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     },
     {
@@ -2290,7 +2290,7 @@
       "area": "navigation",
       "since": "2026-07-02",
       "manual": true,
-      "book": false,
+      "book": true,
       "bookExample": false
     }
   ]

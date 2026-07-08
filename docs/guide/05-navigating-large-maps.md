@@ -358,8 +358,8 @@ click a tag -- it lists every node carrying it and jumps you there, no scrolling
 **auto-numbering** and the branches read 1, 1.2, 1.3 like a document outline, so you can talk
 someone through the map by reference. When a single branch is all that matters for the moment,
 **focus** it and the rest dims to quiet context. The **Power Filter** does the same by rule rather
-than by hand -- dim, not hide, everything that lacks a marker, tag, or word, so the matches stand
-out while the map keeps its shape. Keep the **corner minimap** in view to hold your bearings while
+than by hand -- dimming (or, with **Hide non-matches** ticked, removing from view) everything
+that lacks a marker, tag, or word, so the matches stand out while the map keeps its shape. Keep the **corner minimap** in view to hold your bearings while
 you are zoomed in. And put Find's forgiveness to the test on purpose: pick a long topic on your
 map and search for it *misspelled* -- drop a letter, swap two (`recieve` for `receive`) -- and
 watch the typo-tolerant pass still land you on the node. Once you've felt that, you'll stop

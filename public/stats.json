@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-07-08T20:37:25.978Z",
-  "commit": "40e2b4d",
+  "generatedAt": "2026-07-08T21:30:12.556Z",
+  "commit": "5c3150b",
   "headline": {
-    "linesTsJs": 77160,
+    "linesTsJs": 77162,
     "tests": 2127,
-    "lineCoveragePct": 89.82,
-    "commits": 1083,
+    "lineCoveragePct": 89.79,
+    "commits": 1089,
     "ageDays": 27,
-    "trackedFiles": 502,
+    "trackedFiles": 503,
     "featureManualPct": 100,
-    "featureBookPct": 75.5,
-    "featureExamplePct": 51.8
+    "featureBookPct": 96.8,
+    "featureExamplePct": 59.3
   },
   "code": [
     {
@@ -26,7 +26,7 @@
     {
       "category": "Build scripts",
       "files": 7,
-      "lines": 1749
+      "lines": 1751
     },
     {
       "category": "Styles (CSS)",
@@ -35,19 +35,19 @@
     },
     {
       "category": "Docs (Markdown)",
-      "files": 15,
-      "lines": 2448
+      "files": 16,
+      "lines": 3030
     }
   ],
   "coverage": {
     "lines": {
-      "pct": 89.82,
-      "covered": 28717,
+      "pct": 89.79,
+      "covered": 28707,
       "total": 31969
     },
     "statements": {
-      "pct": 89.82,
-      "covered": 28717,
+      "pct": 89.79,
+      "covered": 28707,
       "total": 31969
     },
     "functions": {
@@ -56,35 +56,35 @@
       "total": 2195
     },
     "branches": {
-      "pct": 86.88,
-      "covered": 8758,
-      "total": 10080
+      "pct": 86.86,
+      "covered": 8755,
+      "total": 10079
     }
   },
   "tests": {
     "unit": 2127,
     "e2e": 0,
-    "durationMs": 88006,
+    "durationMs": 106043,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 22931
+        "ms": 28937
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 20713
+        "ms": 25923
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 8621
+        "ms": 9809
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 6928
+        "ms": 8104
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3777
+        "ms": 6300
       }
     ]
   },
@@ -143,8 +143,8 @@
         "pct": 56.81
       },
       {
-        "file": "io/importDispatch.ts",
-        "pct": 59.55
+        "file": "App.tsx",
+        "pct": 59.32
       }
     ],
     "churnHotspots": [
@@ -172,7 +172,7 @@
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 59.63,
+        "pct": 59.32,
         "commits": 212
       }
     ]
@@ -196,54 +196,54 @@
     "withinBudget": false
   },
   "docs": {
-    "bookWords": 20023,
-    "chapters": 11,
+    "bookWords": 26691,
+    "chapters": 12,
     "appLoc": 45365,
-    "docToCodeRatio": 0.44
+    "docToCodeRatio": 0.59
   },
   "featureCoverage": {
     "total": 253,
     "manual": 253,
     "manualPct": 100,
-    "book": 191,
-    "bookPct": 75.5,
-    "bookExample": 131,
-    "bookExamplePct": 51.8,
+    "book": 245,
+    "bookPct": 96.8,
+    "bookExample": 150,
+    "bookExamplePct": 59.3,
     "byArea": {
       "structure": {
         "total": 36,
         "manual": 36,
-        "book": 25
+        "book": 34
       },
       "styling": {
         "total": 28,
         "manual": 28,
-        "book": 21
+        "book": 27
       },
       "export": {
         "total": 26,
         "manual": 26,
-        "book": 24
+        "book": 26
       },
       "navigation": {
         "total": 58,
         "manual": 58,
-        "book": 39
+        "book": 56
       },
       "editing": {
         "total": 32,
         "manual": 32,
-        "book": 19
+        "book": 30
       },
       "markers": {
         "total": 15,
         "manual": 15,
-        "book": 12
+        "book": 15
       },
       "library": {
         "total": 22,
         "manual": 22,
-        "book": 21
+        "book": 22
       },
       "presentation": {
         "total": 5,
@@ -253,17 +253,17 @@
       "notes": {
         "total": 6,
         "manual": 6,
-        "book": 3
+        "book": 5
       },
       "images": {
         "total": 3,
         "manual": 3,
-        "book": 1
+        "book": 3
       },
       "import": {
         "total": 18,
         "manual": 18,
-        "book": 17
+        "book": 18
       },
       "pwa": {
         "total": 4,
@@ -280,64 +280,9 @@
           "since": "2026-07-02"
         },
         {
-          "id": "shift-project-dates",
-          "name": "Move project: shift all task start/due dates ±N days (branch or whole map) in one undo step",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "relationship-context-menu",
-          "name": "Relationship right-click menu (edit label, arrowheads/direction, line style, semantic type, delete)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "tag-accelerator",
-          "name": "Inline #tag accelerator: typing # mid-topic pops the tag picker to assign an existing or new tag",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "quick-filter-from-marker",
-          "name": "Quick Filter from any marker or tag row in the Markers & tags index (pre-fills the Power Filter)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "search-history",
-          "name": "Find & Replace search history (recalls the last ~10 queries)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "sticky-note-colours",
-          "name": "Sticky-note colour set at insert time with a remembered preferred default",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "insert-menu-submenus",
-          "name": "Insert menu fly-out submenus (Map parts / Templates) via a reusable MenuSub primitive",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "design-gallery-map-panel",
-          "name": "Design presets gallery consolidated into the Map panel (moved from the Toolbar Canvas menu)",
-          "since": "2026-07-02"
-        },
-        {
           "id": "side-aware-grips",
           "name": "Relate + wrap-width grips mirror to a left-growing branch's outward edge",
           "since": "2026-07-02"
-        },
-        {
-          "id": "status-bar-view-switcher",
-          "name": "Status-bar Map / Outline / Board view switcher (one-click peer projections)",
-          "since": "2026-07-02"
-        },
-        {
-          "id": "touch-outline-reorder",
-          "name": "Touch drag-to-reorder in the Outline (long-press a row and drag on touch devices)",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "smart-paste-markdown",
-          "name": "Markdown shorthand on paste — checkboxes, links, and emphasis parse into structure",
-          "since": "2026-07-01"
         },
         {
           "id": "long-press-menu",
@@ -345,73 +290,8 @@
           "since": "2026-07-01"
         },
         {
-          "id": "quick-capture-inbox",
-          "name": "Quick-capture inbox — map-independent 'Unfiled' bucket, file onto a map later",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "high-contrast-theme",
-          "name": "High-contrast theme — OS prefers-contrast/forced-colors + in-app toggle",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "slash-command-menu",
-          "name": "Slash / command menu in the topic editor — keyboard insert of child/task/date/boundary/note/marker",
-          "since": "2026-07-01"
-        },
-        {
-          "id": "big-map-virtualisation",
-          "name": "Big-map virtualisation (render only visible elements above ~500 nodes)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "free-colour-pickers",
-          "name": "Free colour pickers for node text / fill / branch (StyleBar)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "paste-url-title",
-          "name": "Paste a URL → a node titled from the URL (offline)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "reveal-in-outline",
-          "name": "Selecting a node scrolls its row into view in the Outline",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "sort-children",
-          "name": "Sort a topic's children by name / priority / due date / progress",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "outgoing-links-inspector",
-          "name": "\"Links to\" inspector section (outgoing links + relationships)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "relationships-panel",
-          "name": "Map-wide Relationships panel (every link + relationship, click-to-jump)",
-          "since": "2026-06-30"
-        },
-        {
           "id": "search-result-context",
           "name": "Search-across-maps results show ancestor breadcrumb + note snippet",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "filter-completion",
-          "name": "Power Filter by completion status (Done / In progress / Not done)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "reduced-motion",
-          "name": "Reduced-motion support — OS prefers-reduced-motion + in-app toggle (canvas + guided walk)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "cross-map-topic-links",
-          "name": "Cross-map topic links — #map=<id>&node=<id> opens another map + focuses a topic",
           "since": "2026-06-30"
         },
         {
@@ -420,109 +300,9 @@
           "since": "2026-06-30"
         },
         {
-          "id": "burst-quick-capture",
-          "name": "Multi-line burst quick-capture — a pasted outline becomes a subtree in one step",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "outline-keyboard-reorder",
-          "name": "Keyboard Outline reorder/indent (Shift+Arrows)",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "sr-overlay-lists",
-          "name": "Screen-reader lists for boundaries / summaries / callouts",
-          "since": "2026-06-30"
-        },
-        {
-          "id": "overlay-context-menu",
-          "name": "Right-click menu on overlays (recolour / shape / outline / delete)",
-          "since": "2026-06-28"
-        },
-        {
           "id": "node-popover-more",
           "name": "Topic quick-action popover More button (opens the full context menu)",
           "since": "2026-06-28"
-        },
-        {
-          "id": "map-typography",
-          "name": "Per-map typography (base font family + size scale; canvas == export)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "detach-branch",
-          "name": "Detach a branch to a floating topic (and re-attach)",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "replace-scope",
-          "name": "Replace scope: topics, notes, or both",
-          "since": "2026-06-22"
-        },
-        {
-          "id": "topic-fills",
-          "name": "Branch-colour topic fills (tint & gradient)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "image-fill",
-          "name": "Image fill for topics (a picture covering the whole card)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "design-gallery",
-          "name": "Design gallery — one-click theme + connector looks",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "editable-outline",
-          "name": "Editable outline panel — rename, promote/demote, drag-reorder",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "numbering-schemes",
-          "name": "Outline numbering schemes (decimal / legal outline)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "map-statistics",
-          "name": "Map statistics panel (+ word count & reading time)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "filter-hide-extract",
-          "name": "Power Filter hide mode + extract matches to a new map",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "map-legend",
-          "name": "On-canvas map legend (markers / tags / rules), carried into exports",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "paste-table",
-          "name": "Paste a spreadsheet selection as topics (row → topic, columns → note / tags)",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "drag-relate",
-          "name": "Drag-to-relate — draw a cross-link by dragging from a topic's grip",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "copy-table",
-          "name": "Copy map as a table (TSV) — Topic / Depth / Note / Tags to the clipboard",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "task-checkbox",
-          "name": "Quick task toggle — a hover checkbox to cycle not-a-task / to-do / done",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "group-selection",
-          "name": "Group a multi-selection of topics in one boundary box",
-          "since": "2026-06-21"
         },
         {
           "id": "note-editor-dock",
@@ -530,59 +310,9 @@
           "since": "2026-06-21"
         },
         {
-          "id": "spellcheck-toggle",
-          "name": "Spell-check toggle for the topic + note editors",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "numbered-export",
-          "name": "Bake outline numbers into the copied outline / Markdown export",
-          "since": "2026-06-21"
-        },
-        {
-          "id": "topic-wrap-width",
-          "name": "Per-topic wrap width (long topics wrap instead of stretching)",
-          "since": "2026-06-21"
-        },
-        {
           "id": "inline-link-label",
           "name": "Inline relationship label editing (double-click the line)",
           "since": "2026-06-21"
-        },
-        {
-          "id": "rich-text-toolbar",
-          "name": "Inline rich-text mini-toolbar (bold / italic / underline / colour) while editing",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "hover-peek",
-          "name": "Hover-peek for notes & attachments",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "drag-markers",
-          "name": "Drag markers from the inspector onto topics",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "status-bar",
-          "name": "Canvas status bar — visible topic count, selection size, live zoom",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "paste-image",
-          "name": "Paste an image from the clipboard onto a topic",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "find-highlight-all",
-          "name": "Find highlights every match on the canvas",
-          "since": "2026-06-20"
-        },
-        {
-          "id": "gtd-areas-example",
-          "name": "GTD Areas of Focus worked example",
-          "since": "2026-06-19"
         }
       ]
     }
@@ -590,7 +320,7 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 27,
-    "commits": 1083,
+    "commits": 1089,
     "commits7d": 59,
     "authors": [
       {
@@ -599,17 +329,17 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 493
+        "count": 494
       },
       {
         "name": "Claude",
-        "count": 57
+        "count": 62
       }
     ],
     "churn30d": {
-      "added": 140992,
-      "removed": 42589
+      "added": 141767,
+      "removed": 42753
     },
-    "changelogEntries": 430
+    "changelogEntries": 431
   }
 }

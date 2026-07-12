@@ -283,12 +283,21 @@ function tidy(
 }
 
 /** Lay out a tidy tree from `rootId`. Two MindManager-isms vs a plain grid:
- *  • breadth (cross-axis) spacing is PROPORTIONAL to each node's size via d3's `separation` — a tall
- *    image topic reserves more room while one-line siblings pack tight, instead of every sibling slot
- *    being as tall as the single biggest node in the map; and
+ *  • breadth (cross-axis) spacing is PROPORTIONAL to each node's size — a tall image topic reserves
+ *    more room while one-line siblings pack tight, instead of every sibling slot being as tall as the
+ *    single biggest node in the map; and
  *  • the major axis (depth) is accumulated PER SUBTREE — each child hangs just past its OWN parent's
  *    edge, so a short-label branch stays tight and a long label only pushes its own descendants out
  *    (not one global column per depth across unrelated branches).
+ *
+ *  Breadth is assigned by reserving each subtree a DISJOINT band sized to its own extent (post-order
+ *  measure, pre-order placement), rather than d3's tidy contour packing. Contour packing assumes one
+ *  uniform major column per depth; once the major axis is accumulated per-subtree (with wildly varying
+ *  node widths), a short subtree that d3 nestles into a tall neighbour's concavity can land at a major
+ *  position that OVERLAPS it. A full band per subtree keeps the two MindManager-isms above AND
+ *  guarantees no two boxes overlap at any depth: non-ancestor nodes are always in disjoint bands, and
+ *  ancestor/descendant pairs are always separated on the major axis.
+ *
  *  `orientation` picks which axis is breadth vs major; `sign` flips direction (left / up). Pure. */
 function layoutTidyTree(
   ctx: Ctx,
@@ -303,31 +312,57 @@ function layoutTidyTree(
   const majorGap = horizontal ? COL_GAP : VROW_GAP;
   const breadthOf = (id: string) => (horizontal ? size(id).height : size(id).width);
   const majorOf = (id: string) => (horizontal ? size(id).width : size(id).height);
-  const h = hierarchy<string>(rootId, childrenOf);
-  // nodeSize [1,1] + a size-aware separation → breadth distance between adjacent nodes is their
-  // half-sizes plus a gap (height-proportional packing).
-  tree<string>()
-    .nodeSize([1, 1])
-    .separation((a, b) => (breadthOf(a.data) + breadthOf(b.data)) / 2 + breadthGap)(h);
-  const rootBreadth = h.x ?? 0;
+
+  // Post-order: each subtree's breadth extent is the greater of the node's own breadth and its
+  // children's stacked breadth (heights + gaps). Memoised so the pre-order pass reuses it.
+  const extent = new Map<string, number>();
+  const measure = (id: string): number => {
+    let stacked = 0;
+    const kids = childrenOf(id);
+    kids.forEach((k, i) => {
+      stacked += measure(k);
+      if (i > 0) stacked += breadthGap;
+    });
+    const e = Math.max(breadthOf(id), stacked);
+    extent.set(id, e);
+    return e;
+  };
+  measure(rootId);
+
+  // Pre-order: centre each node in its band; stack its children's (disjoint) bands within it. The
+  // root's band is centred on 0 so the tree grows symmetrically around the hub.
+  const breadth = new Map<string, number>();
+  const assignBreadth = (id: string, centre: number): void => {
+    breadth.set(id, centre);
+    const kids = childrenOf(id);
+    if (kids.length === 0) return;
+    let span = 0;
+    kids.forEach((k, i) => {
+      span += extent.get(k) ?? 0;
+      if (i > 0) span += breadthGap;
+    });
+    let cursor = centre - span / 2;
+    for (const k of kids) {
+      const e = extent.get(k) ?? 0;
+      assignBreadth(k, cursor + e / 2);
+      cursor += e + breadthGap;
+    }
+  };
+  assignBreadth(rootId, 0);
+
   // Per-subtree major offset: each node sits one (half-parent + gap + half-self) past its parent.
   const major = new Map<string, number>();
-  h.eachBefore((node) => {
-    if (!node.parent) {
-      major.set(node.data, 0);
-      return;
-    }
-    const pm = major.get(node.parent.data) ?? 0;
-    major.set(
-      node.data,
-      pm + sign * (majorOf(node.parent.data) / 2 + majorGap + majorOf(node.data) / 2),
-    );
-  });
-  for (const node of h.descendants()) {
-    const breadth = (node.x ?? 0) - rootBreadth;
-    const m = major.get(node.data) ?? 0;
-    if (horizontal) place(ctx, node.data, m, breadth);
-    else place(ctx, node.data, breadth, m);
+  const assignMajor = (id: string, m: number): void => {
+    major.set(id, m);
+    for (const k of childrenOf(id))
+      assignMajor(k, m + sign * (majorOf(id) / 2 + majorGap + majorOf(k) / 2));
+  };
+  assignMajor(rootId, 0);
+
+  for (const [id, b] of breadth) {
+    const m = major.get(id) ?? 0;
+    if (horizontal) place(ctx, id, m, b);
+    else place(ctx, id, b, m);
   }
 }
 

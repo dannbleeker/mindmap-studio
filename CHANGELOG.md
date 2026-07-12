@@ -7,6 +7,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Tidy-tree layouts no longer overlap topics on dense, mixed-width maps.** The two-sided / left /
+  right / org-chart / brace layouts placed breadth (cross-axis) with d3-hierarchy's contour packing,
+  which assumes one uniform major column per depth. But the major axis is accumulated *per subtree*
+  (a deliberate MindManager-ism: a short-label branch stays tight, a long label only pushes its own
+  descendants out), so a **wide** depth-1 topic could reach into an adjacent branch's depth-2 column —
+  a pair d3 never guards, because it assumes different depths sit in different columns. On maps with
+  many mixed-width branches (typically `.mmap` imports) this produced visible collisions. Breadth is
+  now assigned by reserving each subtree a **disjoint band** sized to its own extent (post-order
+  measure, pre-order placement), which keeps the per-subtree columns *and* the height-proportional
+  sibling gaps while guaranteeing no two boxes overlap at any depth: non-ancestor nodes always land in
+  disjoint bands, ancestor/descendant pairs are always separated on the major axis. Pure change in
+  `src/mindmap/flow/layout.ts` (`layoutTidyTree`); backed by a regression test that reproduces the
+  import bug and fails on the old packing. Verified end-to-end by rendering a real 48-branch imported
+  map (11 inter-branch + 1 intra-branch overlaps → **0**). Tip for a lopsided import: **Balance map**
+  clears the imported side pins so both halves fill evenly.
+
 - **The book downloads open again in the installed app.** The PWA service worker answers every
   top-level navigation with the cached app shell unless the URL is on a denylist that only covered
   `.html` — so for anyone who had visited before, `/Thinking-in-Maps.pdf` and `/Thinking-in-Maps.epub`

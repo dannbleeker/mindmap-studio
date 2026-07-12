@@ -357,3 +357,63 @@ describe("flow layout (per-subtree columns + height-proportional gaps + fishbone
     expect(a1x.x).toBeLessThan(a1.x); // continues further out along the same bone than its parent
   });
 });
+
+describe("flow layout (band reservation → no box overlaps)", () => {
+  // Reproduces the imported-map bug (an .mmap with wide leaf branches next to multi-child branches):
+  // under d3's contour packing + a per-subtree major axis, a WIDE depth-1 leaf reached into an
+  // adjacent branch's depth-2 column and collided (d3 only guards same-depth pairs, assuming a uniform
+  // major column per depth — which the per-subtree major breaks). Band reservation gives every subtree
+  // a disjoint breadth band, so no two boxes overlap at any depth while the per-subtree columns stay.
+  const WIDE = new Set(["w1", "w2", "w3"]);
+  const sizeOf = (id: string) => ({ width: WIDE.has(id) ? 320 : 100, height: 44 });
+  const kids = (p: string, n: number) =>
+    Array.from({ length: n }, (_, i) => ({ id: `${p}${i}`, topic: `${p}${i}`, children: [] }));
+  // Wide leaves interleaved with branches that fan out several children — the SSF shape.
+  const doc: MindMapDoc = {
+    schemaVersion: 1,
+    id: "ov",
+    title: "R",
+    root: {
+      id: "r",
+      topic: "R",
+      children: [
+        { id: "w1", topic: "Wide leaf one", side: "right", children: [] },
+        { id: "p", topic: "Parent", side: "right", children: kids("c", 3) },
+        { id: "w2", topic: "Wide leaf two", side: "right", children: [] },
+        { id: "q", topic: "Parent two", side: "right", children: kids("d", 4) },
+        { id: "w3", topic: "Wide leaf three", side: "right", children: [] },
+      ],
+    },
+  };
+  const { nodes, edges } = project(doc);
+
+  const rectsFor = (kind: Parameters<typeof computeLayout>[3]) => {
+    const pos = computeLayout(nodes, edges, sizeOf, kind);
+    return nodes.map((n) => {
+      const p = pos.get(n.id);
+      if (!p) throw new Error(`no position for ${n.id}`);
+      const s = sizeOf(n.id);
+      return { id: n.id, x: p.x, y: p.y, w: s.width, h: s.height };
+    });
+  };
+  const firstOverlap = (rects: ReturnType<typeof rectsFor>) => {
+    for (let i = 0; i < rects.length; i++) {
+      for (let j = i + 1; j < rects.length; j++) {
+        const a = rects[i];
+        const b = rects[j];
+        const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        const oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+        if (ox > 1 && oy > 1) return `${a.id} ∩ ${b.id}`;
+      }
+    }
+    return null;
+  };
+
+  it("two-sided: no two topic boxes overlap", () => {
+    expect(firstOverlap(rectsFor("side"))).toBeNull();
+  });
+
+  it("single-sided (right): no two topic boxes overlap", () => {
+    expect(firstOverlap(rectsFor("right"))).toBeNull();
+  });
+});

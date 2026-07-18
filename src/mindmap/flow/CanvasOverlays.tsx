@@ -10,19 +10,40 @@ import type { TopicNode } from "./types";
 // Small canvas-only presentational overlays carved out of FlowMindMap's render. None are authored into
 // the SVG export, so exports stay unchanged. All take plain props (doc passed in, not via docRef).
 
-/** Empty-map coachmark — anchored under the root via NodeToolbar so it tracks pan/zoom. */
-export function CoachMark({ show, rootId }: { show: boolean; rootId: string }) {
+/** Empty-map coachmark — anchored under the root via NodeToolbar so it tracks pan/zoom. The keyboard
+ *  gestures (Tab / Enter / Shift-drag) don't exist on a phone, so `touch` swaps in the tap equivalents. */
+export function CoachMark({
+  show,
+  rootId,
+  touch = false,
+}: {
+  show: boolean;
+  rootId: string;
+  touch?: boolean;
+}) {
   if (!show) return null;
   return (
     <NodeToolbar nodeId={rootId} isVisible position={Position.Bottom} offset={18}>
       <div className="mm-coachmark nodrag nopan">
         <strong>Start your map</strong>
-        <span>
-          Press <kbd>Tab</kbd> for a child · <kbd>Enter</kbd> for a sibling · double-click to rename
-        </span>
-        <span>
-          <kbd>Shift</kbd>-drag the canvas to select several topics
-        </span>
+        {touch ? (
+          <>
+            <span>
+              Tap <kbd>＋</kbd> on a topic to add a child · double-tap a topic to rename
+            </span>
+            <span>Drag the background to pan · pinch to zoom</span>
+          </>
+        ) : (
+          <>
+            <span>
+              Press <kbd>Tab</kbd> for a child · <kbd>Enter</kbd> for a sibling · double-click to
+              rename
+            </span>
+            <span>
+              <kbd>Shift</kbd>-drag the canvas to select several topics
+            </span>
+          </>
+        )}
       </div>
     </NodeToolbar>
   );

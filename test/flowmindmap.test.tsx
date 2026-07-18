@@ -952,6 +952,31 @@ describe("FlowMindMap canvas", () => {
     expect(screen.queryByText("Start your map")).toBeNull();
   });
 
+  it("phrases the empty-map coachmark for touch on a phone-width viewport (#1)", () => {
+    // useIsMobile reads matchMedia("(max-width: 640px)"); make it match so the canvas renders in its
+    // phone mode. The coachmark then swaps its keyboard gestures for the tap equivalents.
+    const realMatchMedia = window.matchMedia;
+    window.matchMedia = ((q: string) =>
+      ({
+        matches: /max-width:\s*640px/.test(q),
+        media: q,
+        onchange: null,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList) as typeof window.matchMedia;
+    try {
+      const empty: MindMapDoc = { ...baseDoc(), root: { id: "root", topic: "Root", children: [] } };
+      mount(empty);
+      expect(screen.getByText(/double-tap a topic to rename/i)).toBeTruthy();
+      expect(screen.queryByText(/for a sibling/i)).toBeNull();
+    } finally {
+      window.matchMedia = realMatchMedia;
+    }
+  });
+
   it("draws a relationship via the Link to… gesture — silently, then inline-labels it", async () => {
     const { container, onChange } = mount();
     run(() => fireEvent.contextMenu(nodeEl(container, "a")));

@@ -7,6 +7,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **The canvas chrome reads for touch, not just a mouse.** On a phone the empty-map coachmark told you
+  to press `Tab` / `Enter` and `Shift`-drag, and a topic's first-touch tip said "Double-click or F2 to
+  edit" — gestures that don't exist without a keyboard or a mouse. The coachmark now swaps in the tap
+  equivalents on a phone-width canvas ("Tap ＋ to add a child · double-tap to rename · drag to pan,
+  pinch to zoom"), and the topic tip reads "Double-tap to edit" on any coarse pointer (a CSS pointer
+  swap, so it's the pointer type — not the width — that decides). The corner minimap also covered a big
+  share of a phone screen and its toggle overlapped the bottom status bar; the minimap now defaults
+  **closed** on a phone (an explicit choice still persists), and the toggle is lifted clear of the
+  status-bar row so the two no longer collide.
+
 - **Tidy-tree layouts no longer overlap topics on dense, mixed-width maps.** The two-sided / left /
   right / org-chart / brace layouts placed breadth (cross-axis) with d3-hierarchy's contour packing,
   which assumes one uniform major column per depth. But the major axis is accumulated *per subtree*

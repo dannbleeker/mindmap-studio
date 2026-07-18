@@ -394,12 +394,16 @@ function FlowInner({
   // so holding space makes every node pointer-inert (via the `.mm-space-pan` wrapper class), letting the
   // drag fall through to the pane's pan even over a topic, with a grab cursor. Matches Figma / XMind.
   const [spacePan, setSpacePan] = useState(false);
-  // The corner minimap can be collapsed (it covers dense maps); the choice persists.
+  // The corner minimap can be collapsed (it covers dense maps); the choice persists. It defaults open
+  // on desktop but closed on a phone, where an open minimap covers a big share of the small canvas and
+  // overlaps the bottom status bar — an explicit stored choice still wins.
   const [minimapOpen, setMinimapOpen] = useState(() => {
     try {
-      return localStorage.getItem("mindmap-minimap-open") !== "false";
+      const stored = localStorage.getItem("mindmap-minimap-open");
+      if (stored !== null) return stored !== "false";
+      return !isMobile;
     } catch {
-      return true;
+      return !isMobile;
     }
   });
   const toggleMinimap = () =>
@@ -2526,7 +2530,7 @@ function FlowInner({
               }}
               onMore={openNodeMenuAt}
             />
-            <CoachMark show={showCoach} rootId={renderDoc.root.id} />
+            <CoachMark show={showCoach} rootId={renderDoc.root.id} touch={isMobile} />
             <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
             {/* Sibling-reorder insertion line (#8): a bar at the target node's top/bottom edge. */}
             {insertEdge

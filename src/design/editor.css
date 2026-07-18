@@ -994,6 +994,20 @@
   pointer-events: none;
   z-index: 3;
 }
+/* The hint carries both the mouse phrasing ("Double-click or F2") and the touch phrasing
+   ("Double-tap") in the DOM; the pointer swaps which one shows so a phone never sees keyboard-only
+   gestures it can't perform. */
+.mm-hint-touch {
+  display: none;
+}
+@media (pointer: coarse) {
+  .mm-hint-mouse {
+    display: none;
+  }
+  .mm-hint-touch {
+    display: inline;
+  }
+}
 /* One-time drag-to-relate coach (C7) — same top-centre anchor as the edit hint (the two are sequential,
    never shown together) but accent-tinted to read as a "try this" nudge rather than a plain tip. */
 .mm-relate-hint {
@@ -1625,5 +1639,11 @@
     height: 18px;
     max-width: 18px;
     max-height: 18px;
+  }
+  /* On a narrow screen the bottom-centre status bar (view switcher + counts) is wide enough to reach
+     into the bottom-right corner and overlap the Minimap toggle. Lift the right-hand panel (the toggle,
+     and the minimap itself when open) above the status-bar row so the two stop colliding. */
+  .react-flow__panel.bottom.right {
+    margin-bottom: 56px;
   }
 }

@@ -7,6 +7,32 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Non-Latin topic text no longer overflows its box or its export.** Every width estimate on the
+  canvas and in the SVG exporter was a character count times a Latin-calibrated constant, so a
+  full-width glyph was charged about half the space it occupies. Measured against the app's own font
+  stack, CJK is exactly **1.000em** against the assumed 0.55: exported Japanese ran **75%** past its
+  node box (Chinese 60%, Korean 38%), and the layout reserved **43px where the browser rendered 65px**,
+  so CJK topics overlapped their neighbours. `flow/text.ts` now charges each code point a per-script
+  advance via a new shared `widthUnits()` — full-width forms (CJK, kana, Hangul, fullwidth) at 1.000em
+  and emoji at their real 1.373em, everything else narrow. Cyrillic (0.52), Hebrew (0.51), Greek
+  (0.49), Vietnamese (0.49), Thai (0.47) and Arabic (0.43) all measure *under* the existing 0.55 bound,
+  so one narrow class still covers every alphabetic script. `widthUnits()` is a drop-in for
+  `string.length` at all seven width sites (`layout.ts`'s box estimate and the exporter's callout,
+  boundary, summary, priority, date and attachment heuristics): pure-ASCII input returns exactly
+  `s.length`, so Latin geometry — and the byte-identical export snapshots pinning it — is unchanged.
+  The wrap also iterates by **code point**, so a hard split can no longer cut a surrogate pair in half
+  and emit lone surrogates into the SVG (reachable with the emoji markers the app ships). One
+  deliberate geometry change: the 📅 and 📎 export chips were sized as two narrow characters against a
+  real 1.373em advance, and are now correspondingly wider — pinned by a test so it can't drift back.
+
+- **Map titles keep their own script when downloaded.** The Start-screen "Export" ran the title through
+  an ASCII-only slug (`/[^a-z0-9]+/g`), so `Årsplan for Ø-teamet` downloaded as
+  `rsplan-for-teamet.json`, `Produktübersicht` as `produkt-bersicht.json`, and a Japanese or Arabic
+  title lost every character and fell back to `map.json`. That was one of *three* different filename
+  policies in the codebase. They now share one — `io/fileName.ts`'s `safeFileStem()`, which replaces
+  only the characters a filesystem actually rejects and is Unicode-preserving — so a download is named
+  the same way a native `.mmst` save already was.
+
 - **The canvas chrome reads for touch, not just a mouse.** On a phone the empty-map coachmark told you
   to press `Tab` / `Enter` and `Shift`-drag, and a topic's first-touch tip said "Double-click or F2 to
   edit" — gestures that don't exist without a keyboard or a mouse. The coachmark now swaps in the tap

@@ -128,7 +128,10 @@ describe("handleMapAction", () => {
   });
 
   describe("export", () => {
-    it("downloads a slugified .json file of the doc", async () => {
+    // The download filename now follows the same policy as a native .mmst save (io/fileName): keep
+    // the title, replace only what the filesystem rejects. It used to run through an ASCII-only slug,
+    // which lower-cased and kebab-cased Latin titles but silently destroyed every other script.
+    it("downloads a .json file named after the doc", async () => {
       await saveMap(docOf("m-exp", "My Great Map!"));
       let name = "";
       let blob: Blob | undefined;
@@ -143,14 +146,16 @@ describe("handleMapAction", () => {
         name = this.download;
       });
       await handleMapAction("export", entryOf("m-exp", "My Great Map!"), ctx);
-      expect(name).toBe("my-great-map.json");
+      expect(name).toBe("My Great Map!.json");
       expect(blob?.type).toBe("application/json");
       const parsed = JSON.parse(await (blob as Blob).text());
       expect(parsed.id).toBe("m-exp");
     });
 
-    it("falls back to 'map.json' when the title has no slug-able characters", async () => {
-      await saveMap(docOf("m-exp2", "!!!"));
+    it("keeps a non-ASCII title in the filename", async () => {
+      // The regression this replaced: "Årsplan for Ø-teamet" downloaded as "rsplan-for-teamet.json",
+      // and a Japanese or Arabic title lost every character and fell back to "map.json".
+      await saveMap(docOf("m-exp2", "Årsplan for Ø-teamet"));
       let name = "";
       URL.createObjectURL = vi.fn(() => "blob:mock");
       URL.revokeObjectURL = vi.fn();
@@ -159,7 +164,21 @@ describe("handleMapAction", () => {
       ) {
         name = this.download;
       });
-      await handleMapAction("export", entryOf("m-exp2", "!!!"), ctx);
+      await handleMapAction("export", entryOf("m-exp2", "Årsplan for Ø-teamet"), ctx);
+      expect(name).toBe("Årsplan for Ø-teamet.json");
+    });
+
+    it("falls back to 'map.json' when the title is empty", async () => {
+      await saveMap(docOf("m-exp3", "   "));
+      let name = "";
+      URL.createObjectURL = vi.fn(() => "blob:mock");
+      URL.revokeObjectURL = vi.fn();
+      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
+        this: HTMLAnchorElement,
+      ) {
+        name = this.download;
+      });
+      await handleMapAction("export", entryOf("m-exp3", "   "), ctx);
       expect(name).toBe("map.json");
     });
   });

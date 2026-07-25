@@ -11,6 +11,7 @@
 
 import type { MindMapDoc } from "../model/types";
 import { downloadBlob } from "./download";
+import { safeFileStem } from "./fileName";
 import { parseDoc, serializeDoc } from "./json";
 
 /** Native file extension (a custom extension is what lets Windows associate the PWA with it). */
@@ -49,14 +50,7 @@ export function supportsFileSystemAccess(): boolean {
 
 /** A filesystem-safe filename for a doc: its title, stripped of illegal characters, + `.mmst`. */
 export function suggestedFileName(doc: MindMapDoc): string {
-  const cleaned = (doc.title || "mindmap")
-    .replace(/[<>:"/\\|?*]+/g, "_") // characters illegal in Windows/macOS/Linux filenames
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/^\.+/, "") // a leading dot would make it a hidden / extension-only name
-    .slice(0, 80)
-    .trim();
-  return `${cleaned || "mindmap"}${NATIVE_EXT}`;
+  return `${safeFileStem(doc.title)}${NATIVE_EXT}`;
 }
 
 /** Parse a `.mmst`/`.json` File into a doc (throws on anything that isn't a MindMap Studio map). */

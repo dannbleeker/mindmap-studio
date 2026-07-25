@@ -21,6 +21,7 @@ import {
   resolveLevelBox,
   resolveSummaryStyle,
 } from "../src/mindmap/flow/style";
+import { widthUnits } from "../src/mindmap/flow/text";
 import type { CrossLink, MindMapDoc } from "../src/model/types";
 import { STICKERS, stickerImage } from "../src/stickers";
 
@@ -304,6 +305,12 @@ describe("flow exportSvg (model + rects → native-text SVG)", () => {
     ]);
     const out = buildFlowSvg(ddoc, drects, palette, cssVar);
     expect(out).toContain("📅"); // the calendar glyph the canvas DateChip shows must survive into the export
+    // The chip is sized from its label's width, and 📅 is a surrogate pair: charging it as two narrow
+    // characters under-sized the pill against the glyph's real 1.373em advance. Pin the corrected
+    // width so the emoji can't silently start overflowing its own chip again.
+    const label = "📅 20 Jun";
+    expect(widthUnits(label)).toBeGreaterThan(label.length); // the pill grew, it didn't shrink
+    expect(out).toContain(`width="${Number((widthUnits(label) * 6.2 + 10).toFixed(2))}"`);
   });
 
   it("renders a completed task as a filled pie with a check tick, a partial one as a wedge", () => {

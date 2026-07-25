@@ -95,6 +95,36 @@ MindManager access (backlog item 8 raises its value — re-test after shipping i
 
 ## Deferred / blocked (off the active list)
 
+- **UI localisation (i18n) — analysed 2026-07-25, deferred by decision; the *bugs* it surfaced are
+  fixed.** The app is English-only with no infrastructure: no library, zero `Intl.*` calls, no
+  `navigator.language`, no `dir`. A sweep counted **~2,000 distinct user-facing strings** (~2,730 call
+  sites) across **135 of 235** source files, of which ~1,440 are must-do chrome + IO messages and ~560
+  are seed content (`examples.ts`, `templates.ts`, marker/sticker names and their English *search
+  keywords*); the top 9 files carry 57%. Extraction won't be purely mechanical for ~340 of them
+  (expression-form props, interpolated templates, `editorCommands.ts`'s positional tuples).
+  Locale-sensitive logic beyond strings: 15 date sites (hand-rolled `timeAgo`, English `MONTHS`, and
+  `taskDate.parseNaturalDate`'s English-only weekday/`today`/`+Nd` grammar — logic work, not
+  translation), 11 number sites, 18 hand-rolled `n === 1 ? "" : "s"` plurals, 21 collation sites (9 raw
+  `.sort()`, 12 optionless `localeCompare` — Danish `å` already sorts wrong), 103 locale-unsafe
+  `toLowerCase` calls across 40 files (incl. the exported interactive HTML's own search), and English
+  regex cue-lists in `markerSuggest.ts`.
+  Two constraints shape any implementation: **i18next is not viable** (~40 kB against a 165 kB gz entry
+  budget currently at 164.0) — a ~1-2 kB `t()` plus lazily-fetched per-locale JSON is the fit, with
+  every formatter (`NumberFormat`/`RelativeTimeFormat`/`PluralRules`/`Collator`/`Segmenter`) native and
+  free; and **text metrics must not use canvas `measureText`**, which would make export output
+  machine-dependent and break the byte-identical export snapshots — the shipped `widthUnits()`
+  per-script table is the deterministic form. Rough shape if picked up: infra 1 session, extraction 3-5,
+  export pipeline 2 (SVG embeds no fonts; PDF is image-only; PPTX hardcodes `lang="en-US"` with empty
+  `<a:ea>`/`<a:cs>`; XLSX is Calibri-only), content plumbing 1.
+- **RTL — deferred (2026-07-25), lower value than it looks and gated on a spike.** ~113 physical
+  left/right CSS and inline-style sites in the chrome, 0 logical properties. Scope note that makes it
+  cheaper than it first appears: the **39 canvas `flow/*` sites must NOT be mirrored** — a node's
+  `side` is persisted *geometry* the user authored, not text direction — and arrow-key semantics need
+  only a ~5-line mirror at the `keyIntent.ts` boundary, because `ops.nextSelectionId` is already purely
+  topological (left = parent) rather than spatial, with the freeform `nudge` deliberately excluded.
+  Unverified risk to spike first: whether `dir="rtl"` on the chrome can be cleanly isolated from the
+  React Flow viewport's own transform maths. Note Arabic/Hebrew *content* already renders correctly
+  inside nodes via the Unicode bidi algorithm — what's LTR-only is the chrome.
 - **AI assist** — **decided against (2026-06-15).** The biggest category-wide gap, but the only fit
   for a no-backend, local-first app is a keyless copy-prompt → paste-result bridge (or BYO-key),
   which isn't worth building. The manual path already exists: paste an outline / Markdown → map.

@@ -1,7 +1,7 @@
 import { hierarchy, tree } from "d3-hierarchy";
 import type { LayoutKind } from "../contract";
 import { levelFontSize } from "./style";
-import { wrapText } from "./text";
+import { widthUnits, wrapText } from "./text";
 import type { FlowEdge, TopicNode } from "./types";
 
 // Position the projected nodes for a given layout. Tree-based kinds (side/left/right/
@@ -44,7 +44,7 @@ export function estimateSizeOf(nodes: TopicNode[]): SizeOf {
     // typography scale, so the layout reserves the right slot before React Flow measures the node.
     const fs = levelFontSize(d.depth) * (d.fontScale ?? 1);
     const rawLines = d.topic.split("\n");
-    const longest = Math.max(1, ...rawLines.map((l) => l.length));
+    const longest = Math.max(1, ...rawLines.map((l) => widthUnits(l)));
     // Markers now sit in their own fixed-height row above the title (~16px tiles).
     const markerRow = d.icons?.length ? 18 : 0;
     // Per-topic wrap width caps the estimate (and re-wraps for height) so a constrained topic reserves

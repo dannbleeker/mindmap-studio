@@ -1,4 +1,5 @@
 import { downloadBlob } from "../../io/download";
+import { safeFileStem } from "../../io/fileName";
 import type { MindMapDoc } from "../../model/types";
 import { loadMap, saveMap } from "../../store/mapStore";
 import type { MapEntry } from "./MapCard";
@@ -7,12 +8,7 @@ import type { StartContext } from "./types";
 // The MapCard kebab actions, wired to the store. Shared by Home / All maps / Recent.
 
 function download(doc: MindMapDoc): void {
-  const name =
-    doc.title
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "map";
+  const name = safeFileStem(doc.title, "map");
   const blob = new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" });
   downloadBlob(blob, `${name}.json`);
 }

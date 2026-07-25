@@ -43,7 +43,7 @@ import {
   resolveTopicFill,
   summaryLabel,
 } from "./style";
-import { wrapText } from "./text";
+import { widthUnits, wrapText } from "./text";
 import type { TopicNode } from "./types";
 
 // Author a clean, standalone SVG of the map directly from the canonical model + the live
@@ -158,7 +158,7 @@ function collectCallouts(doc: MindMapDoc, rects: Map<string, NodeRect>): Callout
         // Wrap like the canvas bubble (max-width 180, padding 8, font 12) and grow the bubble height
         // to the wrapped line count — so a multi-line callout isn't clipped to one strip in the export.
         const lines = wrapText(text, 164, 12);
-        const longest = Math.max(1, ...lines.map((l) => l.length));
+        const longest = Math.max(1, ...lines.map((l) => widthUnits(l)));
         out.push({
           ax: r.x + r.w,
           ay: r.y + r.h / 2,
@@ -214,7 +214,7 @@ function emitBoundaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[]
     const label = boundaryLabel(b.label);
     if (label) {
       out.push(
-        `<rect x="${r2(x + 14)}" y="${r2(y - 19)}" width="${r2(label.length * 6.6 + 14)}" height="19" rx="6" fill="${esc(bs.stroke)}"/>`,
+        `<rect x="${r2(x + 14)}" y="${r2(y - 19)}" width="${r2(widthUnits(label) * 6.6 + 14)}" height="19" rx="6" fill="${esc(bs.stroke)}"/>`,
         `<text x="${r2(x + 20)}" y="${r2(y - 5.5)}" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
       );
     }
@@ -255,7 +255,7 @@ function emitSummaries(doc: MindMapDoc, rects: Map<string, NodeRect>): string[] 
     );
     const label = summaryLabel(s.label);
     const midY = (y0 + y1) / 2;
-    const lw = label.length * 7 + 12;
+    const lw = widthUnits(label) * 7 + 12;
     const lx = onLeft ? spineX - 6 - lw : spineX + 6;
     out.push(
       `<rect x="${r2(lx)}" y="${r2(midY - 10)}" width="${r2(lw)}" height="20" rx="8" fill="${esc(ss.labelBg)}" stroke="${esc(ss.labelBorder)}"/>`,
@@ -697,7 +697,7 @@ export function buildFlowSvg(
     let badgeX = r.x + pad + ins.left;
     if (d.priority) {
       const label = priorityLabel(d.priority);
-      const w = label.length * 6.4 + 8;
+      const w = widthUnits(label) * 6.4 + 8;
       parts.push(
         `<rect x="${r2(badgeX)}" y="${r2(r.y + r.h - 20)}" width="${r2(w)}" height="16" rx="5" fill="${priorityColor(d.priority)}"/>`,
         `<text x="${r2(badgeX + 4)}" y="${r2(r.y + r.h - 8)}" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">${esc(label)}</text>`,
@@ -711,7 +711,7 @@ export function buildFlowSvg(
     if (d.due) {
       const over = isOverdue(d.due, d.progress?.progress ?? 0, today);
       const label = `📅 ${formatDateShort(d.due)}`; // match the canvas DateChip (Badge.tsx) — keep the glyph
-      const chipW = label.length * 6.2 + 10;
+      const chipW = widthUnits(label) * 6.2 + 10;
       const chipY = r.y + r.h - 20;
       parts.push(
         `<rect x="${r2(badgeX)}" y="${r2(chipY)}" width="${r2(chipW)}" height="16" rx="5" fill="${over ? "#fde2e2" : "rgba(0,0,0,0.06)"}"/>`,
@@ -722,7 +722,7 @@ export function buildFlowSvg(
     if (d.attachmentCount) {
       // Attachment count chip — drawn in the export too (the canvas had it; the export dropped it).
       const label = `📎 ${d.attachmentCount}`;
-      const chipW = label.length * 6.6 + 8;
+      const chipW = widthUnits(label) * 6.6 + 8;
       const chipY = r.y + r.h - 20;
       parts.push(
         `<rect x="${r2(badgeX)}" y="${r2(chipY)}" width="${r2(chipW)}" height="16" rx="5" fill="rgba(0,0,0,0.06)"/>`,

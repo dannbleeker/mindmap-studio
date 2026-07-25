@@ -12,6 +12,7 @@ import type {
   NodeStyle,
   NumberStyle,
   RelationshipType,
+  SavedView,
   SlideRef,
 } from "../model/types";
 import type { SortKey, StickyNoteColor } from "./flow/ops";
@@ -219,6 +220,10 @@ export interface MindMapHandle {
   setBackgroundImage: (url: string) => void;
   /** Toggle line-jumps: draw a hop where two relationship lines cross (per-map, lossless in .json). */
   setLineJumps: (on: boolean) => void;
+  /** Replace the map's saved views (bookmarked viewport + drill target + filter). Routed through the
+   *  normal doc-mutation path, so adding or removing one is undoable and autosaved like any other
+   *  map-meta change. */
+  setSavedViews: (views: SavedView[]) => void;
   /** Set the map's branch connector style (organic / curved / elbow / straight). */
   setConnectorStyle: (style: "organic" | "curved" | "elbow" | "straight") => void;
   /** Set the map's branch growth weight (fine / regular / bold); regular clears the override. */

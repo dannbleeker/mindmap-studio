@@ -34,7 +34,14 @@ import { gzipSync } from "node:zlib";
 // rides in the eagerly-imported export hook, nudging the entry ~0.2 kB over the old
 // razor-thin 163 ceiling. The 2 kB headroom also stops the near-flush margin from
 // flaking the gate under concurrent CI/Deploy/Stats runners.
-const BUDGET_KB = 165;
+// 165 → 167: the 2026-07-26 Tier 5 batch. Two eager additions, both unavoidable:
+// richTextCommands (item 25) replaces document.execCommand and is reached from the
+// always-mounted Notes panel, and saved views (item 33) moved onto the doc schema. The
+// XMind marker vocabulary from item 34 is deliberately NOT here — it was placed in
+// io/xmind.ts rather than the eager icons.ts precisely so the format adapters stay lazy,
+// which held the entry flat. This left 0.3 kB of headroom at 165; 167 restores a working
+// margin without loosening the ceiling enough to hide real bloat.
+const BUDGET_KB = 167;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

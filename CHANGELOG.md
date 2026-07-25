@@ -7,6 +7,23 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **Saved views travel with the map (backlog item 33).** A saved view captures a viewport, a
+  drilled-in topic **id** and the active Power Filter — all meaningless outside their own map — yet
+  they were persisted per-browser under `mindmap-views:<map id>`, so they didn't survive a
+  `.json`/`.mmst` export, never reached a second machine, and vanished with a cleared library. They
+  now live on the document (`meta.savedViews`) and are written through the canvas like any other
+  map-meta change, so adding or removing one is undoable and autosaved. Views left in localStorage are
+  folded into the doc once, on next open, keeping the doc's own copy of any same-named view; the old
+  key is then dropped. `FilterCriteria` and `SavedView` moved into `model/types.ts` (they're part of
+  the persisted schema now) and are re-exported from `filter.ts` / `savedViews.ts`, so no import site
+  changed.
+
+  **Saved *filters* deliberately stay in localStorage**, contrary to how the backlog item was written.
+  Their criteria are entirely generic — text, markers, tags, due, priority, completion, relationship
+  direction and type, with no map-specific ids — and they're documented as reusable across maps.
+  Moving them onto a document would have *removed* that reuse, turning a working feature into a
+  per-map one. The genuine gap there (reaching a second machine) wants a settings export, not doc meta.
+
 - **Rich-text editing moved off the deprecated `document.execCommand` (backlog item 25).** Bold,
   italic, underline, strikethrough, text colour, plain-text paste, link insertion and block/heading
   formatting are now selection-and-Range based, in one new tested module (`src/richTextCommands.ts`)

@@ -60,8 +60,19 @@ item: what + why → *Now* (verified current state) → *Scope* (the exact delta
     version would regress a working editor. Also note formatting now needs a selection (the old
     "typing style" armed by a collapsed-selection `execCommand` has no standards-track equivalent).
 
-33. **Saved views + saved filters live in localStorage** — they don't travel with `.json` export or
-    across machines. Consider persisting them in doc meta (like the deck) with a migration.
+~~33. **Saved views + saved filters live in localStorage**~~ — **SHIPPED 2026-07-26, but only half of
+    it: the filter half was declined on recon.** Saved **views** now live on the doc
+    (`meta.savedViews`), migrated once off the per-map `mindmap-views:<id>` key, and written through
+    the canvas `setSavedViews` so they land in undo + autosave and travel with a `.json`/`.mmst`
+    export. A view captures a viewport and a drilled-in topic **id**, so it is meaningless outside its
+    own map — it belongs to the document.
+    Saved **filters** deliberately stay app-wide in localStorage. `FilterCriteria` is entirely generic
+    (text / markers / tags / due / priority / completion / relationship direction + type) with no
+    map-specific ids, and `filter.ts` documents the presets as "persisted app-wide, reusable across
+    maps". Moving them into doc meta would *remove* that reuse — a preset saved on one map would stop
+    appearing on the next — which is a regression, not a fix. The real itch underneath ("they don't
+    reach a second machine") is a **settings export/import**, which is different work and not on the
+    list. Recorded here so the original item isn't re-raised as written.
 
 ~~34. **XMind export asymmetry**~~ — **SHIPPED 2026-07-25.** Loop closed both ways: detached topics,
     relationships (with id remapping), markers (via a new XMind vocabulary in `icons.ts`) and per-topic

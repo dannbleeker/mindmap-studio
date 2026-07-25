@@ -289,6 +289,53 @@ export interface CanvasShape {
   rows?: number;
 }
 
+// --- Saved views + the filter criteria they capture -------------------------
+//
+// These live in the model rather than beside the filter/view UI because they are now part of the
+// PERSISTED document (meta.savedViews) — a saved view captures a viewport and a drilled-in topic id,
+// both meaningless outside their map. `filter.ts` and `savedViews.ts` re-export them, so every
+// existing import site is unchanged.
+
+/** Due-date filter mode: any (off), has a date, overdue, or due within ~a week. */
+export type DueMode = "" | "dated" | "overdue" | "soon";
+
+/** "Has relationship" direction (see FilterCriteria.relDir). Undefined = the constraint is off. */
+export type RelDir = "out" | "in" | "either";
+
+/** Completion-status filter mode: any (off), fully done, not done, or partially done. */
+export type CompletionMode = "" | "complete" | "incomplete" | "in-progress";
+
+export interface FilterCriteria {
+  text: string;
+  /** A node must carry at least one of these markers (icons). Empty = no marker constraint. */
+  markers: string[];
+  /** A node must carry at least one of these tags. Empty = no tag constraint. */
+  tags: string[];
+  /** Due-date constraint (optional, so older saved filters without it still load). */
+  due?: DueMode;
+  /** Task-priority constraint: 1=High..3=Low, or 0/undefined for "any". */
+  priority?: number;
+  /** Completion constraint over the node's rolled-up progress; only task-bearing nodes match.
+   *  "" / undefined = any. (Optional, so older saved filters still load.) */
+  completion?: CompletionMode;
+  /** "Has relationship" constraint: the node must be an endpoint of a relationship in this direction
+   *  (outgoing = its `from`, incoming = its `to`, either = both). Undefined = off. */
+  relDir?: RelDir;
+  /** Narrow the "has relationship" constraint to relationships of this type; undefined = any type. */
+  relType?: RelationshipType;
+}
+
+/** A bookmarked perspective on a map: viewport + drill target + the Power Filter that was on. */
+export interface SavedView {
+  id: string;
+  name: string;
+  viewport: { x: number; y: number; zoom: number };
+  /** The drilled-in topic id, or null for the whole map. */
+  drillId: string | null;
+  /** The active Power-Filter criteria, or null when no filter was on. */
+  criteria: FilterCriteria | null;
+}
+
 export interface MindMapDoc {
   schemaVersion: 1;
   id: string;
@@ -346,6 +393,12 @@ export interface MindMapDoc {
     /** Show the map legend (markers / tags / conditional rules in use) on the canvas + in exports.
      *  Off by default. Lossless in .json, ignored by flat exporters. */
     legend?: boolean;
+    /** Bookmarked perspectives on this map (viewport + drill target + filter). Stored on the doc
+     *  rather than in localStorage so they travel with a `.json`/`.mmst` export and across machines;
+     *  a view references this map's own topic ids, so it belongs to the document. Migrated once from
+     *  the old per-map `mindmap-views:<id>` localStorage key. Lossless in .json, ignored by flat
+     *  exporters. */
+    savedViews?: SavedView[];
     /** Show a small type pill (e.g. "causes") on every relationship that carries a non-default `type`.
      *  Off by default. Lossless in .json, ignored by flat exporters; carried into the image/PDF/HTML
      *  export (canvas == export). */

@@ -1,41 +1,16 @@
-import type { MapNode, MindMapDoc, RelationshipType } from "./model/types";
+import type { CompletionMode, DueMode, FilterCriteria, MapNode, MindMapDoc } from "./model/types";
 import { priorityLabel } from "./priority";
 import { progressMap } from "./progress";
 import { isDueSoon, isOverdue, todayISO } from "./taskDate";
-
-/** Due-date filter mode: any (off), has a date, overdue, or due within ~a week. */
-export type DueMode = "" | "dated" | "overdue" | "soon";
 
 // Read-only "Power Filter": given criteria (free text + required markers/tags), find which nodes
 // match and which should stay lit on the canvas. Lit = matches *plus their ancestors*, so the
 // path from the root to each match stays visible while everything else dims. Pure + unit-tested;
 // the canvas only reduces opacity (no structural change, nothing deleted), hence "read-only".
 
-export interface FilterCriteria {
-  text: string;
-  /** A node must carry at least one of these markers (icons). Empty = no marker constraint. */
-  markers: string[];
-  /** A node must carry at least one of these tags. Empty = no tag constraint. */
-  tags: string[];
-  /** Due-date constraint (optional, so older saved filters without it still load). */
-  due?: DueMode;
-  /** Task-priority constraint: 1=High..3=Low, or 0/undefined for "any". */
-  priority?: number;
-  /** Completion constraint over the node's rolled-up progress; only task-bearing nodes match.
-   *  "" / undefined = any. (Optional, so older saved filters still load.) */
-  completion?: CompletionMode;
-  /** "Has relationship" constraint: the node must be an endpoint of a relationship in this direction
-   *  (outgoing = its `from`, incoming = its `to`, either = both). Undefined = off. */
-  relDir?: RelDir;
-  /** Narrow the "has relationship" constraint to relationships of this type; undefined = any type. */
-  relType?: RelationshipType;
-}
-
-/** "Has relationship" direction (see FilterCriteria.relDir). Undefined = the constraint is off. */
-export type RelDir = "out" | "in" | "either";
-
-/** Completion-status filter mode: any (off), fully done, not done, or partially done. */
-export type CompletionMode = "" | "complete" | "incomplete" | "in-progress";
+// The criteria types themselves live in the model — a saved view persists them into `doc.meta`, so
+// they're part of the document schema. Re-exported here so every existing import site is unchanged.
+export type { CompletionMode, DueMode, FilterCriteria, RelDir } from "./model/types";
 
 /** Is any criterion set? When false the canvas shows everything (no dimming). */
 export function isFilterActive(c: FilterCriteria): boolean {

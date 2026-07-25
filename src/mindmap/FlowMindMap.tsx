@@ -30,6 +30,7 @@ import type { Boundary, CanvasShape, MapNode, MindMapDoc, Summary } from "../mod
 import { PRIORITY_LEVELS, cyclePriority, priorityLabel } from "../priority";
 import { cycleTaskProgress, nextProgressLevel } from "../progress";
 import { isStandalonePwa } from "../pwa/standalone";
+import { setSavedViews } from "../savedViews";
 import { getBranches, setBranches } from "../store/branchClipboard";
 import { todayISO } from "../taskDate";
 import { useIsMobile } from "../useIsMobile";
@@ -2055,6 +2056,7 @@ function FlowInner({
       setAccentColor: (color) => apply(setAccentColor(docRef.current, color)),
       setBackgroundImage: (url) => apply(setBackgroundImage(docRef.current, url)),
       setLineJumps: (on) => apply(setLineJumps(docRef.current, on)),
+      setSavedViews: (views) => apply({ doc: setSavedViews(docRef.current, views) }),
       setConnectorStyle: (style) => apply(setConnectorStyle(docRef.current, style)),
       setBranchGrowth: (growth) => apply(setBranchGrowth(docRef.current, growth)),
       setNumberStyle: (style) => apply(setNumberStyle(docRef.current, style)),

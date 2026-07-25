@@ -342,7 +342,14 @@ export function App() {
   // Quick-capture inbox: a map-independent "Unfiled" bucket (persisted in IndexedDB). Filing an item
   // adds it to the current map as a floating topic, then drops it from the inbox.
   const inbox = useInbox();
-  const savedViews = useSavedViews(liveDoc.id);
+  // Saved views live on the doc (meta.savedViews) so they travel with an export and across machines;
+  // writes go through the canvas like any other map-meta change, landing in undo + autosave.
+  const savedViews = useSavedViews(
+    liveDoc,
+    useCallback((views) => {
+      mapRef.current?.setSavedViews(views);
+    }, []),
+  );
   // Open-document tabs: which maps are open + which is active (persisted). The active map's state
   // still lives in the doc/liveDoc singletons below — this registry just follows it (load() calls
   // ensureOpen) and drives the tab strip; switching a tab reloads that map.

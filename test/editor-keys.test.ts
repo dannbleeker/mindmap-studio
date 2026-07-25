@@ -23,11 +23,13 @@ const actions = (): EditorKeyActions & {
 } => ({ format: vi.fn(), commitAndAdd: vi.fn(), cancel: vi.fn() });
 
 describe("handleEditorKeyDown", () => {
-  it("maps Ctrl/Cmd + B / I / U to the matching format command", () => {
+  // The router now dispatches the SEMANTIC tag richTextCommands applies (b/i/u), not the old
+  // execCommand verb (bold/italic/underline) — the key letter is itself the tag.
+  it("maps Ctrl/Cmd + B / I / U to the matching format tag", () => {
     for (const [key, cmd] of [
-      ["b", "bold"],
-      ["i", "italic"],
-      ["u", "underline"],
+      ["b", "b"],
+      ["i", "i"],
+      ["u", "u"],
     ] as const) {
       const a = actions();
       const e = ev({ key, ctrlKey: true });

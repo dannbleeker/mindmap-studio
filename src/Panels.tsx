@@ -74,6 +74,14 @@ import { addSlide, removeSlide, reorderSlides, setSlideNote } from "./present/de
 import { OVERVIEW_SLIDE_ID } from "./present/slides";
 import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS, priorityLabel } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
+import {
+  type InlineTag,
+  createLink,
+  formatBlock,
+  insertText as insertPlainText,
+  listFallback,
+  toggleInline,
+} from "./richTextCommands";
 import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
 import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from "./stickers";
@@ -3981,14 +3989,23 @@ export function NotesPanel({
   const onPaste = (e: ReactClipboardEvent<HTMLDivElement>) => {
     e.preventDefault(); // block the default rich paste regardless — pasted HTML must never enter the DOM
     const text = e.clipboardData.getData("text/plain");
-    if (typeof document.execCommand === "function") document.execCommand("insertText", false, text);
+    if (ref.current) insertPlainText(ref.current, text);
     serialize();
   };
-  const exec = (command: string) => {
+  // Inline formats emit semantic tags directly (<b>/<i>/<s>), which is what the old
+  // execCommand("styleWithCSS", false, "false") was asking the browser for — so the serialiser below
+  // still sees the tag family it understands.
+  const exec = (tag: InlineTag) => {
     ref.current?.focus();
-    // Prefer semantic tags (<b>/<i>) over inline-style spans so the serialiser stays simple.
-    document.execCommand("styleWithCSS", false, "false");
-    document.execCommand(command);
+    if (ref.current) toggleInline(ref.current, tag);
+    serialize();
+  };
+  // Lists are the one command still on execCommand: toggling them is a rich-text-engine problem
+  // (splitting blocks into items, merging adjacent lists) and a shaky reimplementation would regress
+  // a working editor. Isolated in richTextCommands.listFallback so the deprecated surface is one call.
+  const execList = (command: "insertUnorderedList" | "insertOrderedList") => {
+    ref.current?.focus();
+    listFallback(command);
     serialize();
   };
   // Append a markdown block (image / table) to the note and re-render. Done at the markdown layer
@@ -4034,7 +4051,7 @@ export function NotesPanel({
       const s = window.getSelection();
       s?.removeAllRanges();
       s?.addRange(range); // restore the selection the prompt may have cleared
-      document.execCommand("createLink", false, url);
+      createLink(range, url);
       serialize();
     } else {
       appendBlock(`[${url}](${url})`);
@@ -4042,11 +4059,11 @@ export function NotesPanel({
   };
   const insertTable = () =>
     appendBlock("| Column A | Column B |\n| --- | --- |\n| Cell 1 | Cell 2 |");
-  // Block-level formatting (headings, code block) via the native formatBlock command — its <h1>/<pre>
-  // output round-trips through htmlToNote, so the note stays plain markdown.
+  // Block-level formatting (headings, code block): retags the block containing the selection, and its
+  // <h1>/<pre> output round-trips through htmlToNote so the note stays plain markdown.
   const execBlock = (tag: string) => {
     ref.current?.focus();
-    document.execCommand("formatBlock", false, tag);
+    if (ref.current) formatBlock(ref.current, tag);
     serialize();
   };
   // Highlight: wrap the current selection in <mark> (no execCommand for it). Serialises to ==text==.
@@ -4069,12 +4086,12 @@ export function NotesPanel({
     color: colors.text,
   } as const;
   const fmtBtns = [
-    { cmd: "bold", label: <b>B</b>, title: "Bold (Ctrl+B)" },
-    { cmd: "italic", label: <i>I</i>, title: "Italic (Ctrl+I)" },
-    { cmd: "strikeThrough", label: <s>S</s>, title: "Strikethrough" },
-    { cmd: "insertUnorderedList", label: "• List", title: "Bulleted list" },
-    { cmd: "insertOrderedList", label: "1. List", title: "Numbered list" },
-  ];
+    { cmd: "b", label: <b>B</b>, title: "Bold (Ctrl+B)", list: false },
+    { cmd: "i", label: <i>I</i>, title: "Italic (Ctrl+I)", list: false },
+    { cmd: "s", label: <s>S</s>, title: "Strikethrough", list: false },
+    { cmd: "insertUnorderedList", label: "• List", title: "Bulleted list", list: true },
+    { cmd: "insertOrderedList", label: "1. List", title: "Numbered list", list: true },
+  ] as const;
 
   return (
     <div
@@ -4120,7 +4137,11 @@ export function NotesPanel({
                 key={b.cmd}
                 // Keep the selection in the editor — don't let the button steal focus before exec.
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => exec(b.cmd)}
+                onClick={() =>
+                  b.list
+                    ? execList(b.cmd as "insertUnorderedList" | "insertOrderedList")
+                    : exec(b.cmd as InlineTag)
+                }
                 title={b.title}
                 style={{
                   padding: "2px 8px",

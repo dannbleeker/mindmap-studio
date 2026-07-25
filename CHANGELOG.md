@@ -5,6 +5,32 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Rich-text editing moved off the deprecated `document.execCommand` (backlog item 25).** Bold,
+  italic, underline, strikethrough, text colour, plain-text paste, link insertion and block/heading
+  formatting are now selection-and-Range based, in one new tested module (`src/richTextCommands.ts`)
+  shared by the Notes panel and the inline topic editor. `execCommand` has no specification, no
+  replacement API and inconsistent behaviour across engines; it was reached for in five places across
+  two editors. The commands emit **semantic tags** (`<b>`/`<i>`/`<u>`/`<s>`, `<a>`, `<h1..3>`, a
+  colour `<span>`) — exactly what the old `execCommand("styleWithCSS", false, "false")` call was
+  asking the browser for — so the markdown serialiser still sees the tag family it understands. That
+  serialiser is also what makes the change testable: both editors round-trip through `htmlToNote`, so
+  the tests assert the **markdown each command produces** rather than DOM shape (jsdom doesn't
+  implement `execCommand` at all, so the old path could never be tested directly).
+
+  **The two list commands deliberately stay on `execCommand`**, isolated behind a single
+  `listFallback()`: list toggling is a genuine rich-text-engine problem (splitting blocks into items,
+  merging adjacent lists, nesting) and a shaky reimplementation would regress a working editor. The
+  deprecated surface is now one call in one file instead of five across two.
+
+  One deliberate behaviour change: formatting now requires a **selection**. `execCommand` armed a
+  "typing style" so the next typed characters came out bold; there's no standards-track way to
+  reproduce that. Two bugs were caught during the work — a real-browser check (not jsdom) found that
+  select-all over already-bold content double-wrapped to `<b><b>…</b></b>` instead of toggling off,
+  because an ancestor-only lookup misses the case where the common ancestor *is* the editor root; and
+  formatting a partly-formatted run nested the same tag. Both fixed and pinned.
+
 ### Fixed
 
 - **The XMind round trip no longer loses half the map (backlog item 34).** The `.xmind` writer already

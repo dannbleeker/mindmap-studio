@@ -4,6 +4,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
+  type RefObject,
   memo,
   useCallback,
   useEffect,
@@ -19,6 +20,7 @@ import { sanitizeRich } from "../../io/richText";
 import { priorityColor, priorityLabel } from "../../priority";
 import type { ProgressInfo } from "../../progress";
 import { toPercent } from "../../progress";
+import { type InlineTag, applyColor, toggleInline } from "../../richTextCommands";
 import { isOverdue, taskInfoLine, todayISO } from "../../taskDate";
 import {
   WRAP_MAX,
@@ -192,10 +194,17 @@ const RICH_COLORS = ["#e23b3b", "#1b8a5e", "#3f6fb0", "#b5852a", "#111827"];
 
 /** The floating bold/italic/underline + colour bar shown above a topic while it's being edited
  *  (MindManager's inline format bar). Buttons preventDefault on mousedown so clicking them keeps the
- *  contentEditable's selection + focus (no blur/commit); execCommand mirrors the Ctrl+B/I/U path. */
-function RichEditToolbar() {
+ *  contentEditable's selection + focus (no blur/commit); the commands mirror the Ctrl+B/I/U path.
+ *  `editRef` is the contentEditable being edited — every command is scoped to it so a stray selection
+ *  elsewhere on the page can't be reformatted. */
+function RichEditToolbar({ editRef }: { editRef: RefObject<HTMLDivElement | null> }) {
   const stop = (e: ReactMouseEvent) => e.preventDefault();
-  const fmt = (cmd: string, value?: string) => document.execCommand(cmd, false, value);
+  const fmt = (tag: InlineTag) => {
+    if (editRef.current) toggleInline(editRef.current, tag);
+  };
+  const color = (c: string) => {
+    if (editRef.current) applyColor(editRef.current, c);
+  };
   const btn: CSSProperties = {
     width: 22,
     height: 22,
@@ -230,7 +239,7 @@ function RichEditToolbar() {
         type="button"
         title="Bold (Ctrl/⌘+B)"
         onMouseDown={stop}
-        onClick={() => fmt("bold")}
+        onClick={() => fmt("b")}
         style={{ ...btn, fontWeight: 800 }}
       >
         B
@@ -239,7 +248,7 @@ function RichEditToolbar() {
         type="button"
         title="Italic (Ctrl/⌘+I)"
         onMouseDown={stop}
-        onClick={() => fmt("italic")}
+        onClick={() => fmt("i")}
         style={{ ...btn, fontStyle: "italic" }}
       >
         I
@@ -248,7 +257,7 @@ function RichEditToolbar() {
         type="button"
         title="Underline (Ctrl/⌘+U)"
         onMouseDown={stop}
-        onClick={() => fmt("underline")}
+        onClick={() => fmt("u")}
         style={{ ...btn, textDecoration: "underline" }}
       >
         U
@@ -268,7 +277,7 @@ function RichEditToolbar() {
           title={`Text colour ${c}`}
           aria-label={`Text colour ${c}`}
           onMouseDown={stop}
-          onClick={() => fmt("foreColor", c)}
+          onClick={() => color(c)}
           style={{
             width: 16,
             height: 16,
@@ -952,7 +961,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               {number}
             </span>
           ) : null}
-          {isEditing ? <RichEditToolbar /> : null}
+          {isEditing ? <RichEditToolbar editRef={editRef} /> : null}
           {isEditing ? (
             <span style={{ position: "relative", display: "inline-block" }}>
               <span
@@ -1010,7 +1019,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                   }
                   const html = editRef.current?.innerHTML ?? "";
                   handleEditorKeyDown(e, {
-                    format: (cmd) => document.execCommand(cmd),
+                    format: (tag) => {
+                      if (editRef.current) toggleInline(editRef.current, tag);
+                    },
                     commitAndAdd: (what) => editing?.commitAndAdd(id, html, what),
                     cancel: () => editing?.cancelEdit(html),
                   });

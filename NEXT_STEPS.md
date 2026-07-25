@@ -51,8 +51,14 @@ item: what + why → *Now* (verified current state) → *Scope* (the exact delta
 
 ### Tier 5 — housekeeping / hygiene (no MindManager angle, found during the review)
 
-25. **Rich-text editing rides deprecated `document.execCommand`** (bold/italic/underline/colour in
-    the topic editor). Works today; needs a migration plan before browsers pull it.
+~~25. **Rich-text editing rides deprecated `document.execCommand`**~~ — **SHIPPED 2026-07-26.**
+    Migrated to selection/Range commands in `src/richTextCommands.ts` (bold/italic/underline/strike,
+    colour, plain-text paste, link, block/heading), shared by the Notes panel and the topic editor and
+    tested against the markdown each command serialises to. **Residual, deliberate:** the two list
+    commands (`insertUnorderedList`/`insertOrderedList`) still call `execCommand` behind a single
+    `listFallback()` — reimplementing list toggling well is a rich-text-engine problem and a shaky
+    version would regress a working editor. Also note formatting now needs a selection (the old
+    "typing style" armed by a collapsed-selection `execCommand` has no standards-track equivalent).
 
 33. **Saved views + saved filters live in localStorage** — they don't travel with `.json` export or
     across machines. Consider persisting them in doc meta (like the deck) with a migration.

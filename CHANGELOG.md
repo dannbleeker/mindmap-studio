@@ -7,6 +7,27 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **The XMind round trip no longer loses half the map (backlog item 34).** The `.xmind` writer already
+  emitted floating topics as `children.detached` and relationship arrows as sheet `relationships` —
+  but our own importer read neither back, so exporting to XMind and reimporting silently dropped every
+  floating topic and every cross-link. Per-topic **markers** and **styling** dropped in *both*
+  directions. All four now survive: markers translate through a new XMind marker vocabulary
+  (`priority-3`, `task-done`, `flag-red`…) built on the same many-to-one map + curated inverse the
+  `.mmap` writer already uses, so an emoji XMind has no equivalent for is skipped rather than emitted
+  as a junk id, and an unknown incoming id is kept as a visible glyph instead of vanishing. Those
+  tables live in `io/xmind.ts` rather than beside the MindManager pair in `icons.ts`, because
+  `icons.ts` is in the eager entry chunk while the format adapters are lazy — keeping them next to
+  their only caller held the initial bundle flat at 164.0 kB. Styling maps
+  to XMind's XSL-FO/SVG property bag (`svg:fill`, `fo:color`, `fo:font-family`, `fo:font-size`,
+  `fo:font-weight`, border colour + width). Relationships reference topic ids while the importer mints
+  its own, so the walk now threads an original-id → new-id map and resolves both endpoints through it —
+  a relationship whose ends don't both resolve is dropped rather than left dangling. The legacy
+  (pre-2020) `content.xml` path gained `marker-refs`, detached topics and relationships too. Point/pixel
+  conversion is deliberately unrounded: rounding to whole points grew a 2px border to 3px on every
+  round trip (caught by the round-trip test, which now pins it). Still lossy by design, and now said so
+  in the header: legacy per-topic *style* lives in a separate `styles.xml` keyed by style-id, and XMind's
+  line/shape/branch styling has no counterpart in our model.
+
 - **Non-Latin topic text no longer overflows its box or its export.** Every width estimate on the
   canvas and in the SVG exporter was a character count times a Latin-calibrated constant, so a
   full-width glyph was charged about half the space it occupies. Measured against the app's own font

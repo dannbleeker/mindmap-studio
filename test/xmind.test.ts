@@ -124,3 +124,112 @@ describe("XMind .xmind export", () => {
     expect(contentOf(toXmind(danger)).rootTopic.href).toBeUndefined();
   });
 });
+
+// The writer emitted detached topics, relationships, markers and styles that our own importer never
+// read back, so an export→import round trip silently dropped all four. These pin the closed loop.
+describe("XMind round-trip closes (item 34)", () => {
+  it("reads floating topics back out of children.detached", () => {
+    const back = fromXmind(toXmind(doc));
+    expect(back.floatingTopics?.map((f) => f.topic)).toEqual(["Legend"]);
+  });
+
+  it("reads cross-links back, remapped onto the imported node ids", () => {
+    const back = fromXmind(toXmind(doc));
+    expect(back.links).toHaveLength(1);
+    const [link] = back.links ?? [];
+    expect(link.label).toBe("rel");
+    // The importer mints its own ids, so the endpoints must be resolved through the id map — not
+    // left as the original "a"/"b", which would dangle.
+    expect(link.from).toBe(back.root.children[0].id);
+    expect(link.to).toBe(back.root.children[1].id);
+  });
+
+  it("drops a relationship whose endpoint doesn't resolve, rather than dangling", () => {
+    const orphan = makeXmind([
+      {
+        title: "S",
+        rootTopic: { id: "r", title: "R", children: { attached: [{ id: "a", title: "A" }] } },
+        relationships: [{ id: "x1", end1Id: "a", end2Id: "nope" }],
+      },
+    ]);
+    expect(fromXmind(orphan).links).toBeUndefined();
+  });
+
+  it("round-trips markers through the XMind marker vocabulary", () => {
+    const marked: MindMapDoc = {
+      schemaVersion: 1,
+      id: "m",
+      title: "M",
+      root: {
+        id: "r",
+        topic: "R",
+        icons: ["✅", "⭐", "3️⃣"],
+        children: [],
+      },
+    };
+    expect(contentOf(toXmind(marked)).rootTopic.markers).toEqual([
+      { markerId: "task-done" },
+      { markerId: "star-yellow" },
+      { markerId: "priority-3" },
+    ]);
+    expect(fromXmind(toXmind(marked)).root.icons).toEqual(["✅", "⭐", "3️⃣"]);
+  });
+
+  it("skips a marker XMind has no equivalent for instead of emitting a junk id", () => {
+    const odd: MindMapDoc = {
+      schemaVersion: 1,
+      id: "m",
+      title: "M",
+      root: { id: "r", topic: "R", icons: ["🎯", "✅"], children: [] },
+    };
+    expect(contentOf(toXmind(odd)).rootTopic.markers).toEqual([{ markerId: "task-done" }]);
+  });
+
+  it("keeps an unknown incoming marker id as a visible glyph", () => {
+    const exotic = makeXmind([
+      { title: "S", rootTopic: { id: "r", title: "R", markers: [{ markerId: "custom-thing" }] } },
+    ]);
+    expect(fromXmind(exotic).root.icons).toEqual(["custom-thing"]);
+  });
+
+  it("round-trips per-topic style through XMind's fo:/svg: property bag", () => {
+    const styled: MindMapDoc = {
+      schemaVersion: 1,
+      id: "s",
+      title: "S",
+      root: {
+        id: "r",
+        topic: "R",
+        style: {
+          background: "#ff0000",
+          color: "#ffffff",
+          fontFamily: "Georgia",
+          fontSize: "24px",
+          fontWeight: "bold",
+          border: "2px solid #00ff00",
+        },
+        children: [],
+      },
+    };
+    const props = contentOf(toXmind(styled)).rootTopic.style.properties;
+    expect(props["svg:fill"]).toBe("#ff0000");
+    expect(props["fo:color"]).toBe("#ffffff");
+    expect(props["fo:font-family"]).toBe("Georgia");
+    expect(props["fo:font-size"]).toBe("18pt"); // 24px = 18pt
+    expect(props["border-line-color"]).toBe("#00ff00");
+
+    const back = fromXmind(toXmind(styled)).root.style;
+    expect(back?.background).toBe("#ff0000");
+    expect(back?.color).toBe("#ffffff");
+    expect(back?.fontFamily).toBe("Georgia");
+    expect(back?.fontSize).toBe("24px"); // 18pt back to 24px
+    expect(back?.fontWeight).toBe("bold");
+    expect(back?.border).toBe("2px solid #00ff00");
+  });
+
+  it("leaves an unstyled, unmarked topic clean", () => {
+    const back = fromXmind(toXmind(doc));
+    expect(back.root.children[1].style).toBeUndefined();
+    expect(back.root.children[1].icons).toBeUndefined();
+  });
+});

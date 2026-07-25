@@ -57,8 +57,11 @@ item: what + why → *Now* (verified current state) → *Scope* (the exact delta
 33. **Saved views + saved filters live in localStorage** — they don't travel with `.json` export or
     across machines. Consider persisting them in doc meta (like the deck) with a migration.
 
-34. **XMind export asymmetry** — the writer emits relationships/detached topics **our own XMind
-    importer can't read back**; styles/markers drop both ways. Either close the loop or document.
+~~34. **XMind export asymmetry**~~ — **SHIPPED 2026-07-25.** Loop closed both ways: detached topics,
+    relationships (with id remapping), markers (via a new XMind vocabulary in `icons.ts`) and per-topic
+    style all round-trip, on the modern JSON *and* legacy XML import paths. Remaining lossy by design
+    and documented in the file header: legacy per-topic style (a separate `styles.xml` subsystem) and
+    XMind's line/shape/branch styling.
 
 ### Surveyed rough edges (unprioritised; record so they're not re-found)
 

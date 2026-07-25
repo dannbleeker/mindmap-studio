@@ -44,13 +44,27 @@ const LEGACY_XML = `<?xml version="1.0" encoding="UTF-8"?>
               <label>tag-alpha</label>
               <label>tag-beta</label>
             </labels>
+            <marker-refs>
+              <marker-ref marker-id="priority-1"/>
+              <marker-ref marker-id="flag-red"/>
+            </marker-refs>
           </topic>
           <topic id="c2" xlink:href="javascript:alert(1)">
             <title>Child Two</title>
           </topic>
         </topics>
+        <topics type="detached">
+          <topic id="f1">
+            <title>Floating Note</title>
+          </topic>
+        </topics>
       </children>
     </topic>
+    <relationships>
+      <relationship id="rel1" end1="c1" end2="c2">
+        <title>depends on</title>
+      </relationship>
+    </relationships>
   </sheet>
 </xmap-content>`;
 
@@ -102,6 +116,22 @@ describe("XMind legacy content.xml import", () => {
     const noSheetTitle = LEGACY_XML.replace("<title>My Legacy Sheet</title>", "");
     const doc = fromXmind(makeLegacyXmind(noSheetTitle));
     expect(doc.title).toBe("Central Topic");
+  });
+
+  it("carries <marker-refs> as emoji markers", () => {
+    const doc = fromXmind(makeLegacyXmind(LEGACY_XML));
+    expect(doc.root.children[0].icons).toEqual(["1️⃣", "🚩"]);
+    expect(doc.root.children[1].icons).toBeUndefined();
+  });
+
+  it("maps detached topics to floatingTopics and relationships to cross-links", () => {
+    const doc = fromXmind(makeLegacyXmind(LEGACY_XML));
+    expect(doc.floatingTopics?.map((f) => f.topic)).toEqual(["Floating Note"]);
+    expect(doc.links).toHaveLength(1);
+    const [link] = doc.links ?? [];
+    expect(link.label).toBe("depends on");
+    expect(link.from).toBe(doc.root.children[0].id);
+    expect(link.to).toBe(doc.root.children[1].id);
   });
 
   it("still prefers content.json when both are present in the zip", () => {

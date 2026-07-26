@@ -2816,7 +2816,7 @@ export function App() {
           <p style={{ margin: 0, fontSize: 13, color: "var(--ed-muted)" }}>
             Paste an outline, a bullet list, or Markdown — indentation (or <code>#</code> headings)
             sets the hierarchy. A spreadsheet selection (Excel / Sheets) becomes one topic per row,
-            with extra columns as the note and a <code>{t("paste.tags")}</code> column as tags.
+            with extra columns as the note and a <code>{t("common.tags")}</code> column as tags.
           </p>
           <textarea
             value={paste.text}

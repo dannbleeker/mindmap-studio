@@ -1318,8 +1318,8 @@ export function MarkerTagIndex({
             {t("panel.noMarkersOr")}
           </div>
         ) : null}
-        {group("Markers", markers, "marker")}
-        {group("Tags", tags, "tag", manageTags)}
+        {group(t("common.markers"), markers, "marker")}
+        {group(t("common.tags"), tags, "tag", manageTags)}
       </div>
     </Panel>
   );
@@ -1943,7 +1943,7 @@ export function FilterPanel({
         ) : null}
         {tagEntries.length > 0 ? (
           <>
-            <PanelSection>{t("paste.tags")}</PanelSection>
+            <PanelSection>{t("common.tags")}</PanelSection>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
               {tagEntries.map((e) => chip(e.key, tags.includes(e.key), () => onToggleTag(e.key)))}
             </div>

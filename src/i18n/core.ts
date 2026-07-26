@@ -24,6 +24,7 @@ export const CORE_EN = {
   // without the lazy canvas chunk, so an eager call site pointing at a canvas-registered key would
   // throw until that chunk happened to load. A duplicate-text test caught all four.
   "common.markers": "Markers",
+  "common.tags": "Tags",
   "common.priority": "Priority",
   "common.branchColour": "Branch colour",
   "common.addTag": "Add a tag",
@@ -533,7 +534,6 @@ export const CORE_EN = {
 
   // Paste-outline dialog + the command palette's search box
   "paste.inputLabel": "Paste outline text",
-  "paste.tags": "Tags",
   "paste.addUnder": 'Add under "{topic}"',
   "palette.placeholder": "Search commands…",
 

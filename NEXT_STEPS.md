@@ -105,8 +105,11 @@ detectors, and `App.tsx` was missing from this plan entirely until someone did e
 Entry bundle 174.1 kB against a 175 ceiling; `scripts/bundle-budget.mjs` records that ceiling as
 measured rather than projected, so the loop it opened is closed. The rest of
 the `Intl` adoption: `timeAgo` and all 12 collation sites are
-**done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic, not
-translation) and the OOXML **font** questions — PPTX's empty `<a:ea>`/`<a:cs>` theme slots and XLSX's
+**done**, and so is `taskDate.ts`'s `MONTHS` table — the date chip now formats through
+`Intl.DateTimeFormat`, so name AND day/month order follow the locale. Still open: `parseNaturalDate`'s
+INPUT grammar ("today", "tomorrow", "+7d", weekday names) is English-only and is genuinely logic rather
+than translation — a second locale needs its own keyword table and its own relative-date shapes, not a
+catalogue entry. And the OOXML **font** questions — PPTX's empty `<a:ea>`/`<a:cs>` theme slots and XLSX's
 Calibri-only font. Recon those before building: empty `ea`/`cs` is what Office's own stock theme ships,
 so the real gap is likely the per-script `<a:font script="…">` list rather than the empty slots the
 earlier note pointed at.

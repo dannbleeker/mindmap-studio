@@ -4,14 +4,42 @@
 // `today` as an argument so it stays deterministic + unit-tested. Drives the node date chip, the
 // overdue highlight, and the Power Filter's due criterion.
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+import { type Locale, getLocale } from "./i18n/registry";
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/** Compact "Mon D" label for an ISO date (returns the input unchanged if it isn't an ISO date). */
+// The date chip's formatter, cached per locale. `Intl.DateTimeFormat` is comparatively expensive to
+// construct and `formatDateShort` runs once per dated node — including inside the SVG exporter, which
+// walks the whole map — so building one per call would be a real cost on a large export.
+let shortDateFmt: { locale: Locale; fmt: Intl.DateTimeFormat } | null = null;
+function shortDateFormatter(): Intl.DateTimeFormat {
+  const locale = getLocale();
+  if (shortDateFmt?.locale !== locale)
+    shortDateFmt = { locale, fmt: new Intl.DateTimeFormat(locale, dateChipOptions) };
+  return shortDateFmt.fmt;
+}
+const dateChipOptions: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+
+/** Compact date label for the node chip — "Jun 20" in English, "20. jun." in Danish (returns the input
+ *  unchanged if it isn't an ISO date).
+ *
+ *  Formatted through `Intl` rather than a hardcoded English `MONTHS` table, so month names and the
+ *  day/month ORDER both follow the locale — an English table gets the order wrong for most of the
+ *  world even after translating the names.
+ *
+ *  The ISO string is split and rebuilt as LOCAL midnight, matching `addDaysISO`/`isoWeekday` above.
+ *  Two wrong ways to do this, both verified in `America/New_York`: `new Date("2026-06-20")` parses as
+ *  UTC midnight and renders as the 19th, and so does `Date.UTC(...)` — because `Intl.DateTimeFormat`
+ *  formats in the LOCAL zone unless told otherwise, so building a UTC instant only moves the bug. Local
+ *  midnight formatted locally is the pairing that holds. (`timeZone: "UTC"` on both sides also works;
+ *  local is chosen to match the rest of the module.)
+ *
+ *  Shared with the SVG exporter (`flow/exportSvg.ts`) as well as the canvas chip (`Badge.tsx`), which
+ *  is what keeps canvas == export: both sides get the same string from the same formatter. */
 export function formatDateShort(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   if (!m) return iso;
-  return `${MONTHS[Number(m[2]) - 1] ?? "?"} ${Number(m[3])}`;
+  return shortDateFormatter().format(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
 }
 
 /** The inline task-info row (MindManager schedule/assignment line): "▶ start · Nd · @resources",

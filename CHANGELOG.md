@@ -251,6 +251,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   implemented. It gains `lang` + `dir` instead, so the launcher at least knows what language its three
   strings are in, with the per-locale-manifest answer recorded for when a second language ships.
 
+  **The node date chip formats through `Intl`.** `formatDateShort` used a hardcoded English `MONTHS`
+  table; it now uses `Intl.DateTimeFormat`, so the month NAME and the day/month ORDER both follow the
+  locale — "Jun 20" in English, "20. jun." in Danish. Order is the half a translated month table would
+  still get wrong, since most of the world writes the day first. The formatter is cached per locale
+  because this runs once per dated node, including inside the SVG exporter walking the whole map, and
+  canvas == export holds because both sides call this one function.
+
+  **Writing it surfaced a timezone bug, and then a second one hiding behind the first.**
+  `new Date("2026-06-20")` parses as UTC midnight and renders as the 19th west of Greenwich — but so
+  does `new Date(Date.UTC(…))`, because `Intl.DateTimeFormat` formats in the LOCAL zone unless given a
+  `timeZone`. The first draft shipped that second form with a comment claiming it was safe. It was
+  caught only by checking whether the accompanying test could fail *at all*: on this UTC+1 machine it
+  could not, so it was vacuous. The fix is local midnight formatted locally, and the test now lives in
+  its own file with `process.env.TZ` set to `America/New_York` — where it fails against BOTH wrong
+  forms and passes against the right one.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

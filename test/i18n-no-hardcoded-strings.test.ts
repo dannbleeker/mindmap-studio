@@ -95,6 +95,8 @@ const MIGRATED = [
   "src/components/start/sections/Recent.tsx",
   "src/components/start/sections/Templates.tsx",
   "src/components/start/sections/Trash.tsx",
+  "src/components/ThemeDesignerDialog.tsx",
+  "src/present/Presentation.tsx",
   "src/components/start/tokens.ts",
   "src/components/start/types.ts",
   "src/components/start/useLibrary.ts",

@@ -75,10 +75,22 @@ fetching clearly wins. The architecture already supports it — `registerMessage
 later registrations overlay earlier ones, which is exactly the hook a fetched translation needs — so
 build it in the commit that adds the second language, where it earns its complexity, not before.
 
-Also still open from the plan: the remaining chrome strings — the biggest by far is **`Panels.tsx` (342
-counted)**, then **`FlowMindMap.tsx` (121, and lazy — so its catalogue belongs in `flow/messages.ts`)**;
-recount both against the current guard before planning, since its five detectors see shapes the earlier
-counts were taken without. The rest of the `Intl` adoption: `timeAgo` and all 12 collation sites are
+Also still open from the plan: the remaining chrome strings. Get the worklist from the scanner rather
+than from a number written down here — `node scripts/i18n-scan.mjs <file>` runs the guard's own
+detectors over any file, so you see what it will hold you to *before* joining the allowlist:
+
+```sh
+node scripts/i18n-scan.mjs src/Panels.tsx src/App.tsx src/mindmap/FlowMindMap.tsx --count
+```
+
+As of 2026-07-26 that reports **193 `Panels.tsx` + 75 `App.tsx` + 34 `FlowMindMap.tsx` = 302**.
+`FlowMindMap.tsx` is lazy, so its catalogue belongs in `flow/messages.ts`, not `i18n/core.ts`.
+**`App.tsx` was missing from this plan entirely** until the scanner was pointed at it.
+
+These differ from the 342 / 121 recorded earlier because that pass counted quoted strings broadly while
+the guard counts only what it can confidently call user-facing; neither is wrong, they measure different
+things. Expect hand-work in the gap — the guard's documented limitations are listed below. The rest of
+the `Intl` adoption: `timeAgo` and all 12 collation sites are
 **done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic, not
 translation) and the ~103 locale-unsafe `toLowerCase` sites. Then the exporters taking the locale (`lang`
 attributes, PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA

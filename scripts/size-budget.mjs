@@ -41,7 +41,13 @@ import { gzipSync } from "node:zlib";
 // io/xmind.ts rather than the eager icons.ts precisely so the format adapters stay lazy,
 // which held the entry flat. This left 0.3 kB of headroom at 165; 167 restores a working
 // margin without loosening the ceiling enough to hide real bloat.
-const BUDGET_KB = 167;
+// 167 → 169: the i18n layer (2026-07-26). The registry + Intl plumbing is a ~1 kB one-off; after that
+// the marginal cost of migrating a string is the KEY, not the text, because the English text was
+// already in the bundle inline. Measured: 43 catalogue entries ≈ 25 bytes of key each. That makes the
+// FULL ~1,440-string extraction roughly +12 kB gz of keys, which this ceiling cannot absorb — see the
+// open decision in NEXT_STEPS before the bulk migration. This bump covers the layer plus the first
+// migrated surface; it is not headroom for the rest.
+const BUDGET_KB = 169;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

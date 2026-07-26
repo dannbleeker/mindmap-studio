@@ -70,6 +70,7 @@ import { usePasteOutline } from "./hooks/usePasteOutline";
 import { useSheetDrag } from "./hooks/useSheetDrag";
 import { useToast } from "./hooks/useToast";
 import { useVersionHistory } from "./hooks/useVersionHistory";
+import { t } from "./i18n";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
 import { downloadBlob } from "./io/download";
@@ -2760,14 +2761,16 @@ export function App() {
           const file = collectSettings(new Date().toISOString());
           const keys = settingsKeysIn(file);
           if (keys.length === 0) {
-            showHint("No preferences to export yet.");
+            showHint(t("settings.prefsFile.nothingToExport"));
             return;
           }
           downloadBlob(
             new Blob([serializeSettings(file)], { type: "application/json" }),
             "mindmap-studio-preferences.json",
           );
-          showHint(`Exported ${keys.length} preference${keys.length === 1 ? "" : "s"}.`);
+          showHint(
+            t("settings.prefsFile.exported", { count: t("count.preferences", { n: keys.length }) }),
+          );
         }}
         onImportSettings={(f) => {
           void (async () => {
@@ -2775,20 +2778,22 @@ export function App() {
             try {
               parsed = parseSettingsFile(await f.text());
             } catch (err) {
-              setError(err instanceof Error ? err.message : "Couldn't read that file.");
+              setError(err instanceof Error ? err.message : t("settings.prefsFile.unreadable"));
               return;
             }
             const keys = settingsKeysIn(parsed);
             if (keys.length === 0) {
-              setError("That file has no preferences this version can use.");
+              setError(t("settings.prefsFile.unusable"));
               return;
             }
             // Preferences are read at mount, so applying them needs a reload to take effect —
             // confirm first, and say exactly how many are being replaced.
             const ok = await editorConfirm({
-              title: "Import preferences?",
-              body: `This replaces ${keys.length} preference${keys.length === 1 ? "" : "s"} on this device (saved filters, themes, styles and panel layout as present in the file). Your maps are not touched. The app will reload.`,
-              confirmText: "Import + reload",
+              title: t("settings.prefsFile.confirmTitle"),
+              body: t("settings.prefsFile.confirmBody", {
+                count: t("count.preferences", { n: keys.length }),
+              }),
+              confirmText: t("settings.prefsFile.confirmAction"),
             });
             if (!ok) return;
             applySettings(parsed);

@@ -20,6 +20,40 @@ Tiers 1–5). Per-item detail lives in `CHANGELOG.md`. Three of that review's ca
 or *Out of scope*, so the decisions don't get re-litigated. Known-thin areas that are neither open work
 nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
+## Open — localisation (i18n), in progress since 2026-07-26
+
+The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
+catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
+handlers are migrated as the first real consumers. English is the only locale and is expected to stay
+that way for now — adding one means adding a JSON catalogue, not changing the app.
+
+**Decide this before the bulk extraction — it does not fit the bundle budget as designed.** Measured on
+the first 43 catalogue entries: the layer itself is a ~1 kB gz one-off, and the marginal cost per
+migrated string is the **key**, not the text (the English text was already in the bundle, inline). At
+~25 bytes of key per entry, the remaining ~1,400 chrome strings are **roughly +12 kB gz**. The entry
+chunk is 166.8 kB against a 169 kB ceiling, so that does not fit. Three ways out, none yet chosen:
+
+1. **Fetch English too.** Only boot-critical strings stay inline; the rest load as a JSON asset like any
+   other locale. Scales indefinitely, but introduces a first-paint story (a flash of keys, or a gate on
+   the fetch) that has to be designed.
+2. **Push more into lazy catalogues.** Already the pattern for chunk-local strings — `FlowMindMap` is a
+   ~100 kB lazy chunk holding ~175 of them. Helps, but a large share of the chrome is genuinely eager.
+3. **Raise the ceiling to ~180 kB** and accept the initial-load cost. Simplest, and the least defensible
+   for a local-first app whose pitch is that it starts instantly.
+
+Also still open from the plan: the remaining ~1,400 chrome strings (the top files being `Panels.tsx`
+342, `Toolbar.tsx` 220, `App.tsx` 127, `editorCommands.ts` 123, `FlowMindMap.tsx` 121 — ~340 of the
+total need hand conversion, not mechanical replacement); the rest of the `Intl` adoption (`ui.ts`
+`timeAgo`, `taskDate.ts` months + `parseNaturalDate`, the ~103 locale-unsafe `toLowerCase` sites, and
+wiring `compareText` into the 21 collation sites); the exporters taking the locale (`lang` attributes,
+PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font); the PWA manifest strings;
+and a lint-style guard that fails when a new hardcoded string appears in an already-migrated file.
+
+Correction to the earlier analysis, found on implementation: **"Danish `å` sorts wrong today" was
+overstated.** Collation follows the *active* locale, so with English active `Å` correctly collates as
+`A`. The default `.sort()` is still wrong for both English and Danish (codepoint order strands å/æ past
+z), so `compareText` is a real fix — but Danish's å-after-z order only arrives with a Danish locale.
+
 ## Blocked on owner access
 
 - **Manual MindManager open-test of a Studio-exported `.mmap`.** The writer is Studio-faithful but has
@@ -39,28 +73,6 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
   turning a working feature into a per-map one. The real gap — getting them to a second machine — was
   closed instead by the preferences export/import in Settings (2026-07-26).
 
-- **UI localisation (i18n) — analysed 2026-07-25, deferred by decision; the *bugs* it surfaced are
-  fixed.** The app is English-only with no infrastructure: no library, zero `Intl.*` calls, no
-  `navigator.language`, no `dir`. A sweep counted **~2,000 distinct user-facing strings** (~2,730 call
-  sites) across **135 of 235** source files, of which ~1,440 are must-do chrome + IO messages and ~560
-  are seed content (`examples.ts`, `templates.ts`, marker/sticker names and their English *search
-  keywords*); the top 9 files carry 57%. Extraction won't be purely mechanical for ~340 of them
-  (expression-form props, interpolated templates, `editorCommands.ts`'s positional tuples).
-  Locale-sensitive logic beyond strings: 15 date sites (hand-rolled `timeAgo`, English `MONTHS`, and
-  `taskDate.parseNaturalDate`'s English-only weekday/`today`/`+Nd` grammar — logic work, not
-  translation), 11 number sites, 18 hand-rolled `n === 1 ? "" : "s"` plurals, 21 collation sites (9 raw
-  `.sort()`, 12 optionless `localeCompare` — Danish `å` already sorts wrong), 103 locale-unsafe
-  `toLowerCase` calls across 40 files (incl. the exported interactive HTML's own search), and English
-  regex cue-lists in `markerSuggest.ts`.
-  Two constraints shape any implementation: **i18next is not viable** (~40 kB against the gz entry
-  budget in `scripts/size-budget.mjs`, which the app already nearly fills) — a ~1-2 kB `t()` plus
-  lazily-fetched per-locale JSON is the fit, with
-  every formatter (`NumberFormat`/`RelativeTimeFormat`/`PluralRules`/`Collator`/`Segmenter`) native and
-  free; and **text metrics must not use canvas `measureText`**, which would make export output
-  machine-dependent and break the byte-identical export snapshots — the shipped `widthUnits()`
-  per-script table is the deterministic form. Rough shape if picked up: infra 1 session, extraction 3-5,
-  export pipeline 2 (SVG embeds no fonts; PDF is image-only; PPTX hardcodes `lang="en-US"` with empty
-  `<a:ea>`/`<a:cs>`; XLSX is Calibri-only), content plumbing 1.
 - **RTL — deferred (2026-07-25), lower value than it looks and gated on a spike.** ~113 physical
   left/right CSS and inline-style sites in the chrome, 0 logical properties. Scope note that makes it
   cheaper than it first appears: the **39 canvas `flow/*` sites must NOT be mirrored** — a node's

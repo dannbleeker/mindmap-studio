@@ -2,6 +2,7 @@
 //
 // (jsdom for localStorage — these functions read and write it directly.)
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { LOCALE_PREF_KEY } from "../src/i18n";
 import { LOCAL_PREF_KEYS } from "../src/store/localPrefs";
 import {
   PORTABLE_PREF_KEYS,
@@ -44,6 +45,18 @@ describe("collectSettings", () => {
 
   it("only ever offers keys the app actually owns", () => {
     for (const k of PORTABLE_PREF_KEYS) expect(LOCAL_PREF_KEYS).toContain(k);
+  });
+
+  it("carries the language choice between machines", () => {
+    // PORTABLE_PREF_KEYS is derived from LOCAL_PREF_KEYS, so a new preference travels automatically —
+    // but that's exactly the kind of thing that quietly stops being true, and a language that doesn't
+    // follow you to a second machine is the whole point of this file.
+    expect(PORTABLE_PREF_KEYS).toContain(LOCALE_PREF_KEY);
+    localStorage.setItem(LOCALE_PREF_KEY, "en");
+    const text = serializeSettings(collectSettings("t"));
+    localStorage.clear();
+    applySettings(parseSettingsFile(text));
+    expect(localStorage.getItem(LOCALE_PREF_KEY)).toBe("en");
   });
 });
 

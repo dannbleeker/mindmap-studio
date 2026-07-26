@@ -7,6 +7,37 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **A localisation layer, with English as the only locale.** The point isn't a second language — it's
+  that adding one later is "write a JSON catalogue" rather than "re-architect the app". `src/i18n/`
+  holds a message registry, a typed English catalogue, `Intl.PluralRules`-based plurals and
+  `Intl.Collator`-based collation; `<html lang>` / `<html dir>` are now stamped from the resolved locale
+  at startup instead of being hardcoded in `index.html`; and the language choice persists and travels
+  through the preferences file. `SettingsDialog` and the preferences-file handlers are migrated as the
+  first real consumers (43 catalogue entries), which is how two design flaws surfaced — see below.
+
+  **Catalogues are chunk-local, not one global object.** `FlowMindMap` is a ~100 kB *lazy* chunk holding
+  ~175 of the app's strings and the exporters under `io/` are lazy too, so a single eager catalogue would
+  quietly relocate all of that into the entry chunk that `scripts/size-budget.mjs` caps. Each catalogue
+  therefore lives beside the code that uses it and registers itself on import; only the message-key
+  *type* union is global, and it's `import type` so it erases at build time and costs nothing.
+
+  Keys are a compile-time union, so a typo or a deleted string fails `tsc --noEmit` (which the gate runs)
+  rather than rendering a blank label. A missing key — or a count message called without its `n`, which
+  would otherwise print a literal `{n}` — throws in dev and degrades gracefully in production; the throw
+  is compiled out by `import.meta.env.DEV`.
+
+  Two things found only by wiring it up to real code, both fixed: registration originally lived in
+  `main.tsx`, which meant every *other* entry point (the test suite, and equally any future embed) got a
+  working `t()` over an empty registry and threw on every call — the barrel now imports the catalogue, so
+  "can call `t()`" and "the messages exist" are one fact. And plural selection ran through
+  `Intl.PluralRules` before checking that a count was supplied.
+
+  Budget note: 167 → 169 kB gz, documented in `size-budget.mjs`. The layer is a ~1 kB one-off and the
+  marginal cost of migrating a string is the **key**, not the text (the text was already in the bundle,
+  inline) — measured at ~25 bytes per entry, which puts the full ~1,400-string extraction at roughly
+  +12 kB gz. That does not fit the current ceiling, so **the strategy for it is an open decision recorded
+  in `NEXT_STEPS.md`**, not something to absorb with further bumps.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

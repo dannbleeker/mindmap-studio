@@ -18,6 +18,7 @@ export const LOCAL_PREF_KEYS = [
   "mindmap-relate-hint",
   "mindmap-cinematic-walk",
   "mindmap-reduce-motion",
+  "mindmap-locale",
 ] as const;
 
 /** Remove every app preference key from localStorage (best-effort — never throws). */

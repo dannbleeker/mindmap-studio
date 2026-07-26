@@ -1,7 +1,13 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { initLocale } from "./i18n";
 import "./mobile.css";
+
+// Resolve the locale and stamp <html lang> / <html dir> before anything renders, so the first paint is
+// already right rather than corrected. English is the only locale today, so this always lands on "en" —
+// the resolution path is real, not stubbed, so adding a catalogue works without touching startup.
+initLocale();
 
 // StrictMode intentionally omitted: its double-invoked effects re-init the canvas
 // engine instance, which muddies headless screenshots used for verification.

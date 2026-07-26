@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../design/primitives";
+import { t } from "../i18n";
 import type { Appearance } from "../useAppearance";
 import type { ContrastPref } from "../useHighContrast";
 import type { MotionPref } from "../useReducedMotion";
@@ -91,7 +92,7 @@ export function SettingsDialog({
     <Dialog
       open={open}
       onClose={onClose}
-      title="Settings"
+      title={t("settings.title")}
       style={{
         width: "min(440px, 92vw)",
         padding: 20,
@@ -100,18 +101,18 @@ export function SettingsDialog({
         boxShadow: "var(--ed-shadow-pop)",
       }}
     >
-      <Section title="Appearance">
+      <Section title={t("settings.appearance")}>
         <label className="mm-map-field">
-          <span>App theme</span>
+          <span>{t("settings.appTheme")}</span>
           <select
             className="mm-map-control"
             value={appearance}
             onChange={(e) => setAppearance(e.target.value as Appearance)}
-            aria-label="App theme"
+            aria-label={t("settings.appTheme")}
           >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
+            <option value="system">{t("settings.appTheme.system")}</option>
+            <option value="light">{t("settings.appTheme.light")}</option>
+            <option value="dark">{t("settings.appTheme.dark")}</option>
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
@@ -120,16 +121,16 @@ export function SettingsDialog({
           dark canvas always darkens the chrome too.
         </p>
         <label className="mm-map-field">
-          <span>Reduce motion</span>
+          <span>{t("settings.reduceMotion")}</span>
           <select
             className="mm-map-control"
             value={motionPref}
             onChange={(e) => setMotionPref(e.target.value as MotionPref)}
-            aria-label="Reduce motion"
+            aria-label={t("settings.reduceMotion")}
           >
-            <option value="system">System</option>
-            <option value="reduced">On</option>
-            <option value="full">Off</option>
+            <option value="system">{t("settings.toggle.system")}</option>
+            <option value="reduced">{t("settings.toggle.on")}</option>
+            <option value="full">{t("settings.toggle.off")}</option>
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
@@ -137,16 +138,16 @@ export function SettingsDialog({
           transitions. System follows your device's reduced-motion setting.
         </p>
         <label className="mm-map-field">
-          <span>High contrast</span>
+          <span>{t("settings.highContrast")}</span>
           <select
             className="mm-map-control"
             value={contrastPref}
             onChange={(e) => setContrastPref(e.target.value as ContrastPref)}
-            aria-label="High contrast"
+            aria-label={t("settings.highContrast")}
           >
-            <option value="system">System</option>
-            <option value="high">On</option>
-            <option value="normal">Off</option>
+            <option value="system">{t("settings.toggle.system")}</option>
+            <option value="high">{t("settings.toggle.on")}</option>
+            <option value="normal">{t("settings.toggle.off")}</option>
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
@@ -155,22 +156,21 @@ export function SettingsDialog({
         </p>
       </Section>
 
-      <Section title="Getting started">
+      <Section title={t("settings.gettingStarted")}>
         <Button onClick={onReShowGettingStarted} style={{ alignSelf: "flex-start" }}>
-          Show the getting-started tips again
+          {t("settings.gettingStarted.action")}
         </Button>
       </Section>
 
-      <Section title="Preferences file">
+      <Section title={t("settings.prefsFile")}>
         <p style={{ margin: 0, fontSize: 12.5, color: "var(--ed-muted)", lineHeight: 1.5 }}>
-          Preferences live in this browser, not in your maps — so saved filter presets, custom
-          themes and named styles stay behind when you move machines. Export them to a file to carry
-          them across. Importing only replaces the preferences the file contains, and never touches
-          your maps.
+          {t("settings.prefsFile.body")}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          <Button onClick={onExportSettings}>Export preferences…</Button>
-          <Button onClick={() => settingsFileRef.current?.click()}>Import preferences…</Button>
+          <Button onClick={onExportSettings}>{t("settings.prefsFile.export")}</Button>
+          <Button onClick={() => settingsFileRef.current?.click()}>
+            {t("settings.prefsFile.import")}
+          </Button>
           <input
             ref={settingsFileRef}
             type="file"
@@ -185,7 +185,7 @@ export function SettingsDialog({
         </div>
       </Section>
 
-      <Section title="Local data">
+      <Section title={t("settings.localData")}>
         <p style={{ margin: 0, fontSize: 12.5, color: "var(--ed-muted)", lineHeight: 1.5 }}>
           Everything — your maps, version history and preferences — is stored only in this browser.
           {storage
@@ -193,8 +193,10 @@ export function SettingsDialog({
             : ""}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          <Button onClick={onClearRecents}>Clear command history</Button>
-          <Button onClick={onClearBranchClipboard}>Clear branch clipboard</Button>
+          <Button onClick={onClearRecents}>{t("settings.localData.clearRecents")}</Button>
+          <Button onClick={onClearBranchClipboard}>
+            {t("settings.localData.clearBranchClipboard")}
+          </Button>
         </div>
         <Button
           onClick={onClearAllData}
@@ -205,7 +207,7 @@ export function SettingsDialog({
             border: "1px solid var(--ed-danger)",
           }}
         >
-          Clear all local data…
+          {t("settings.localData.clearAll")}
         </Button>
       </Section>
     </Dialog>

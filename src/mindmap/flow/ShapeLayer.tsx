@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { ViewportPortal, useReactFlow } from "@xyflow/react";
 import {
   type ReactElement,
@@ -94,12 +96,12 @@ function primEl(p: ShapePrim): ReactElement {
 // whenever the doc has one); adding a shape flips free-canvas mode on so it reads as a whiteboard object.
 
 const SHAPE_KINDS: { kind: CanvasShapeKind; glyph: string; title: string }[] = [
-  { kind: "rect", glyph: "▭", title: "Rectangle" },
-  { kind: "ellipse", glyph: "⬭", title: "Ellipse" },
-  { kind: "blockArrow", glyph: "➜", title: "Block arrow" },
-  { kind: "chevron", glyph: "❯", title: "Chevron" },
-  { kind: "swimlane", glyph: "▥", title: "Swimlane" },
-  { kind: "matrix", glyph: "▦", title: "Matrix" },
+  { kind: "rect", glyph: "▭", title: t("toolbar.rectangle") },
+  { kind: "ellipse", glyph: "⬭", title: t("toolbar.ellipse") },
+  { kind: "blockArrow", glyph: "➜", title: t("toolbar.blockArrow") },
+  { kind: "chevron", glyph: "❯", title: t("toolbar.chevron") },
+  { kind: "swimlane", glyph: "▥", title: t("cmd.layout.swimlane") },
+  { kind: "matrix", glyph: "▦", title: t("canvas.matrix") },
 ];
 
 const COLORS = ["#8a84c6", "#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"];
@@ -300,7 +302,7 @@ function ShapeLayer({
               key={c}
               type="button"
               title={`Colour ${c}`}
-              aria-label={`Shape colour ${c}`}
+              aria-label={t("canvas.shapeColour", { colour: c })}
               onClick={() => onColor(selected.id, c)}
               style={{
                 width: 16,
@@ -347,8 +349,8 @@ function ShapeLayer({
           />
           <button
             type="button"
-            title="Delete shape"
-            aria-label="Delete shape"
+            title={t("canvas.deleteShape")}
+            aria-label={t("canvas.deleteShape")}
             onClick={() => onDelete(selected.id)}
             style={{
               fontSize: 13,

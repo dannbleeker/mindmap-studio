@@ -168,6 +168,46 @@ export const CANVAS_EN = {
   // chips. They were two keys until the duplicate check refused them.
   "canvas.colour.default": "Default",
   "canvas.hint.clickTargetToLink": "Click a target node to draw a relationship · Esc to cancel",
+  // --- the rest of the canvas chunk -----------------------------------------------------------------
+  // CanvasOverlays, BulkNodeMenu, ShapeLayer, NodePopover, CrosslinkEdge, slashCommands. All in the
+  // lazy FlowMindMap chunk, so these cost the entry bundle nothing.
+  "canvas.switchView": "Switch view",
+  "canvas.zoomToFitTheSelection": "Zoom to fit the selection",
+  "canvas.hideMinimap": "Hide minimap",
+  "canvas.showMinimap": "Show minimap",
+  "canvas.minimap": "Minimap ▾",
+  "canvas.minimap2": "Minimap ▴",
+  "canvas.board": "Board",
+  "canvas.startYourMap": "Start your map",
+  "canvas.dragTheBackgroundToPan": "Drag the background to pan · pinch to zoom",
+  "canvas.groupInABoundary": "Group in a boundary",
+  "canvas.clearPriorityOnTheSelection": "Clear priority on the selection",
+  "canvas.defaultBranchColourOnThe": "Default branch colour on the selection",
+  "canvas.deleteShape": "Delete shape",
+  "canvas.matrix": "Matrix",
+  "canvas.moreActions": "More actions",
+  "canvas.openNote": "Open note",
+  "canvas.cyclePriority": "Cycle priority",
+  "canvas.addPriority": "Add priority",
+  "canvas.dragToReshapeTheRelationship": "Drag to reshape the relationship",
+  "canvas.reshapeRelationship": "Reshape relationship",
+  "canvas.relationshipLabel": "Relationship label",
+  "canvas.label": "label…",
+  "canvas.addChildTopic": "Add child topic",
+  "canvas.addSiblingTopic": "Add sibling topic",
+  "canvas.markAsToDo": "Mark as to-do",
+  "canvas.markAsDone": "Mark as done",
+  "canvas.dueToday": "Due today",
+  "canvas.highPriority": "High priority",
+  "canvas.addANote": "Add a note",
+  "canvas.starMarker": "Star marker",
+  // Interpolated canvas labels. Plural where a count drives the wording.
+  "canvas.switchToView": "Switch to {view} view",
+  "canvas.bulk.deleteTopics": { one: "Delete {n} topic", other: "Delete {n} topics" },
+  "canvas.bulk.toggleMarker": "Toggle marker {marker} on the selection",
+  "canvas.bulk.setPriority": "Set priority {level} on the selection",
+  "canvas.bulk.branchColour": "Branch colour {colour} on the selection",
+  "canvas.shapeColour": "Shape colour {colour}",
 } as const satisfies Catalogue;
 
 export type CanvasKey = keyof typeof CANVAS_EN;

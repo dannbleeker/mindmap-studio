@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 // The slash `/` command menu — pure catalogue + matching + key-routing, so the stateful popup in
 // TopicNode stays thin and this logic is unit-tested. Typing `/` at the start of a topic opens the
 // menu; the text after the slash filters it; Arrow/Enter/Escape drive it. Each command's *effect*
@@ -17,40 +19,55 @@ export interface SlashCommand {
 export const SLASH_COMMANDS: SlashCommand[] = [
   {
     id: "child",
-    label: "Add child topic",
+    label: t("canvas.addChildTopic"),
     hint: "⇥",
     keywords: ["child", "subtopic", "sub", "add"],
   },
-  { id: "sibling", label: "Add sibling topic", hint: "⏎", keywords: ["sibling", "add", "next"] },
+  {
+    id: "sibling",
+    label: t("canvas.addSiblingTopic"),
+    hint: "⏎",
+    keywords: ["sibling", "add", "next"],
+  },
   {
     id: "todo",
-    label: "Mark as to-do",
+    label: t("canvas.markAsToDo"),
     hint: "☐",
     keywords: ["todo", "task", "checkbox", "check"],
   },
-  { id: "done", label: "Mark as done", hint: "☑", keywords: ["done", "complete", "finished"] },
+  {
+    id: "done",
+    label: t("canvas.markAsDone"),
+    hint: "☑",
+    keywords: ["done", "complete", "finished"],
+  },
   {
     id: "due-today",
-    label: "Due today",
+    label: t("canvas.dueToday"),
     hint: "📅",
     keywords: ["due", "date", "today", "deadline"],
   },
   {
     id: "priority-high",
-    label: "High priority",
+    label: t("canvas.highPriority"),
     hint: "❗",
     keywords: ["priority", "high", "important", "urgent"],
   },
   {
     id: "boundary",
-    label: "Group in a boundary",
+    label: t("canvas.groupInABoundary"),
     hint: "▢",
     keywords: ["boundary", "group", "box"],
   },
-  { id: "note", label: "Add a note", hint: "📝", keywords: ["note", "comment", "annotation"] },
+  {
+    id: "note",
+    label: t("canvas.addANote"),
+    hint: "📝",
+    keywords: ["note", "comment", "annotation"],
+  },
   {
     id: "marker-star",
-    label: "Star marker",
+    label: t("canvas.starMarker"),
     hint: "⭐",
     keywords: ["star", "marker", "favourite"],
   },

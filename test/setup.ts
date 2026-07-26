@@ -7,6 +7,19 @@
 // a no-op under node — it only takes effect for the jsdom-environment component/hook tests.
 import { afterEach } from "vitest";
 
+// Register the EAGER catalogue for every test.
+//
+// In the app this is guaranteed: main.tsx imports the i18n barrel, which registers core, long before
+// any lazy chunk loads. A unit test that imports a lazy LEAF directly — `test/bulk-node-menu.test.tsx`
+// renders BulkNodeMenu on its own — has no such path. The leaf imports `./messages` and so gets the
+// CANVAS catalogue, but any message it reads from the eager one (`common.markers`, `common.tags`)
+// resolves to nothing and `t()` throws.
+//
+// Fixed here rather than per-test, so the next lazy leaf test does not rediscover it. NOT fixed by
+// having flow/messages.ts pull in core — that would drag the whole eager chrome catalogue into the
+// lazy canvas chunk and undo the bundle arrangement the whole layer is built around.
+import "../src/i18n";
+
 const hasDom = typeof window !== "undefined" && typeof document !== "undefined";
 
 if (hasDom) {

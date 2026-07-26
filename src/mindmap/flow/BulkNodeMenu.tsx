@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { MenuItem, MenuLabel, MenuSeparator } from "../../design/primitives";
 import { MARKER_PALETTE, markerImage } from "../../icons";
 import type { MindMapDoc } from "../../model/types";
@@ -36,17 +38,24 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
   return (
     <>
       <MenuLabel>{ids.length} topics selected</MenuLabel>
-      <MenuItem label={`Delete ${ids.length} topics`} danger onSelect={onDelete} />
-      <MenuItem label="Group in a boundary" onSelect={() => apply(groupNodes(getDoc(), ids))} />
+      <MenuItem
+        label={t("canvas.bulk.deleteTopics", { n: ids.length })}
+        danger
+        onSelect={onDelete}
+      />
+      <MenuItem
+        label={t("canvas.groupInABoundary")}
+        onSelect={() => apply(groupNodes(getDoc(), ids))}
+      />
       <MenuSeparator />
-      <MenuLabel>Markers</MenuLabel>
+      <MenuLabel>{t("common.markers")}</MenuLabel>
       <div className="mm-menu-row">
         {MARKER_PALETTE.map((m) => (
           <button
             key={m}
             type="button"
             className="mm-menu-chip"
-            aria-label={`Toggle marker ${m} on the selection`}
+            aria-label={t("canvas.bulk.toggleMarker", { marker: m })}
             onClick={() => apply(bulkToggleIcon(getDoc(), ids, m))}
           >
             {markerImage(m) ? (
@@ -57,14 +66,14 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
           </button>
         ))}
       </div>
-      <MenuLabel>Priority</MenuLabel>
+      <MenuLabel>{t("common.priority")}</MenuLabel>
       <div className="mm-menu-row">
         {PRIORITY_LEVELS.map((p) => (
           <button
             key={p}
             type="button"
             className="mm-menu-chip"
-            aria-label={`Set priority ${priorityLabel(p)} on the selection`}
+            aria-label={t("canvas.bulk.setPriority", { level: priorityLabel(p) })}
             onClick={() => across((d, i) => setPriority(d, i, p))}
           >
             {priorityLabel(p)}
@@ -73,20 +82,20 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
         <button
           type="button"
           className="mm-menu-chip"
-          aria-label="Clear priority on the selection"
+          aria-label={t("canvas.clearPriorityOnTheSelection")}
           onClick={() => across((d, i) => setPriority(d, i, undefined))}
         >
-          None
+          {t("canvas.priority.none")}
         </button>
       </div>
-      <MenuLabel>Branch colour</MenuLabel>
+      <MenuLabel>{t("common.branchColour")}</MenuLabel>
       <div className="mm-menu-row">
         {BRANCH_COLOURS.map((c) => (
           <button
             key={c}
             type="button"
             className="mm-menu-chip"
-            aria-label={`Branch colour ${c} on the selection`}
+            aria-label={t("canvas.bulk.branchColour", { colour: c })}
             onClick={() => across((d, i) => setBranchColor(d, i, c))}
             style={{ background: c, width: 18, height: 18, padding: 0 }}
           />
@@ -94,10 +103,10 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
         <button
           type="button"
           className="mm-menu-chip"
-          aria-label="Default branch colour on the selection"
+          aria-label={t("canvas.defaultBranchColourOnThe")}
           onClick={() => across((d, i) => setBranchColor(d, i, ""))}
         >
-          Default
+          {t("canvas.colour.default")}
         </button>
       </div>
     </>

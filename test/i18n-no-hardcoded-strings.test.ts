@@ -68,7 +68,18 @@ const MIGRATED = [
   "src/mindmap/FlowMindMap.tsx",
   "src/App.tsx",
   "src/Panels.tsx",
+  "src/mindmap/flow/BulkNodeMenu.tsx",
+  "src/mindmap/flow/ShapeLayer.tsx",
+  "src/mindmap/flow/NodePopover.tsx",
+  "src/mindmap/flow/CrosslinkEdge.tsx",
+  "src/mindmap/flow/slashCommands.ts",
 ];
+
+// NOT on the list, deliberately: src/mindmap/flow/CanvasOverlays.tsx. It is migrated except for three
+// physical key names (<kbd>Tab</kbd>, <kbd>Enter</kbd>, <kbd>Shift</kbd>) that policy keeps literal —
+// but they sit inside a sentence the surrounding markup has already fragmented, which a translator
+// could not reorder. Resolving that changes either the design or the rendering, so it is an owner
+// decision: see docs/I18N_BLOCKED.md.
 
 const scan = (rel: string): Violation[] =>
   scanSource(readFileSync(join(process.cwd(), rel), "utf8"));

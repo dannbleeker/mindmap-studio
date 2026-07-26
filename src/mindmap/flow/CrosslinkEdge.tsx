@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -45,9 +47,9 @@ function collectSegments(
   const segs: HopSegment[] = [];
   crosslinks.forEach((e, i) => {
     const s = nodeBox.get(e.source);
-    const t = nodeBox.get(e.target);
-    if (!s || !t) return;
-    const { sx, sy, tx, ty } = floatingPoints(s, t);
+    const tgt = nodeBox.get(e.target);
+    if (!s || !tgt) return;
+    const { sx, sy, tx, ty } = floatingPoints(s, tgt);
     segs.push({ id: e.id, order: i, sx, sy, tx, ty, fromId: e.source, toId: e.target });
   });
   return segs;
@@ -72,7 +74,9 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
   const [previewCurve, setPreviewCurve] = useState<number | null>(null);
   const dragging = useRef(false);
   const s = useInternalNode(source);
-  const t = useInternalNode(target);
+  // `tgt`, not `t` — a local named `t` shadows the imported translation function, which makes
+  // t("…") uncallable in this component. tsc catches it as "not callable"; the rename avoids it.
+  const tgt = useInternalNode(target);
   // Subscribe to all nodes + edges so the hops re-compute live as ANY node moves or a relationship
   // is added/removed (not just when THIS edge's own endpoints move).
   const nodes = useNodes();
@@ -93,8 +97,8 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
     const self = segs.find((seg) => seg.id === id);
     return self ? hopPath(self, segs) : null;
   }, [nodes, edges, id, lineJumps]);
-  if (!s || !t) return null;
-  const { sx, sy, tx, ty } = getFloatingPoints(s, t);
+  if (!s || !tgt) return null;
+  const { sx, sy, tx, ty } = getFloatingPoints(s, tgt);
   // The bezier carries the wide invisible hit-area (and is the visible line when line-jumps is off).
   // Built from the SHARED helper the exporter uses, so the curve bows along the same (horizontal) axis
   // on screen and in exports — canvas == export.
@@ -150,8 +154,8 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
         <EdgeLabelRenderer>
           <div
             className="nodrag nopan"
-            title="Drag to reshape the relationship"
-            aria-label="Reshape relationship"
+            title={t("canvas.dragToReshapeTheRelationship")}
+            aria-label={t("canvas.reshapeRelationship")}
             onPointerDown={(e) => {
               e.stopPropagation();
               (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -190,7 +194,7 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
             // biome-ignore lint/a11y/noAutofocus: inline editor opened by an explicit double-click.
             autoFocus
             defaultValue={typeof label === "string" ? label : ""}
-            aria-label="Relationship label"
+            aria-label={t("canvas.relationshipLabel")}
             className="nodrag nopan"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
@@ -198,7 +202,7 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
               else if (e.key === "Escape") linkEdit.cancel();
             }}
             onBlur={(e) => linkEdit.commit(id, e.target.value)}
-            placeholder="label…"
+            placeholder={t("canvas.label")}
             style={{
               position: "absolute",
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,

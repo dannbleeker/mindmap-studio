@@ -59,10 +59,12 @@ total need hand conversion, not mechanical replacement); the rest of the `Intl` 
 `timeAgo`, `taskDate.ts` months + `parseNaturalDate`, the ~103 locale-unsafe `toLowerCase` sites, and
 wiring `compareText` into the 21 collation sites); the exporters taking the locale (`lang` attributes,
 PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font); the PWA manifest strings;
-and extending the lint guard past its **known blind spot: positional string arguments**. A label passed
-as an unnamed argument — `add("open-file", "Open file…", "map", run)`, or a tuple member — is neither a
-JSX prop nor a bare prose line, so neither detector sees it. `editorCommands.ts` is deliberately absent
-from the guard's allowlist for that reason, despite its layout + export labels being migrated.
+and finishing `editorCommands.ts`. The lint guard now has three detectors — prop literal, **prose in a
+positional argument**, and bare prose — so it sees the `add(id, "Label", …)` shape it was blind to (52
+hits in that file, 0 in the migrated ones). `editorCommands.ts` stays off the allowlist until those are
+migrated, which is now an honest signal rather than a missing capability. Documented limitation: the
+positional check needs a capitalised MULTI-WORD literal, so a single-word label (`"Present"`) still
+slips through — widening it would collide with ids and `kind` values.
 
 For `editorCommands.ts`'s remaining ~85 labels, the design to use (worked out but not yet built): the
 `add(id, label, kind, run)` helper should **drop the label argument entirely** and derive the message key

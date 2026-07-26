@@ -291,6 +291,42 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   at the summary level: a tick that claims coverage nobody measured. Point the scanner at a file before
   calling it clean.
 
+  **The migration continued on `i18n/complete-migration` (11 batches).** The canvas chunk, the Start
+  screen, the theme designer, presentation mode, the eager inspectors, the panel labels, the stickers
+  and the eager hook tail are migrated — roughly 750 strings into five chunk-local catalogues. Scanner
+  hits across the whole tree went 768 → 405, and the two numbers are only comparable because three more
+  detectors landed in between; the count rose to 1001 when they did. What remains is 213 declined map
+  content, 46 catalogues quoting their own English (a permanent false positive), 68 in the XML-building
+  exporters, 15 blocked on a decision, and ~63 real chrome in a long tail.
+
+  **Three tools were built because the gate could not see this work.** The migration is observationally
+  a no-op — every string comes back identical in English — so a passing suite proves nothing about it.
+  A **pseudo-locale harness** overlays catalogues via `registerMessages` and renders components under
+  markers, which catches an unmigrated string as text that failed to change. Adding it immediately found
+  two. The **detectors became one shared module** (`scripts/lib/i18nDetectors.mjs`) so the guard test and
+  the tree-wide scanner cannot disagree; each new detector had to run clean over every already-migrated
+  file before being added, and the three that landed exposed 85 strings previous batches had ticked off.
+  And the catalogue tests now walk N catalogues pairwise, fail on dead keys, catch HTML entities
+  captured from JSX (`Find &amp; replace` would have shipped verbatim), and reject a lazy chunk
+  referencing another lazy chunk's key — which throws on first use.
+
+  **A trap found at the end, and pinned rather than fixed.** `t()` reads the active locale *at call
+  time*, so a call at module scope freezes its string at import. 194 of the migrated strings are that
+  shape. They are all correct today — nothing calls `setLocale` outside tests — and all of them stop
+  being correct the day a language picker ships, quietly: the app switches locale and the panel tabs,
+  slash commands and edge presets stay English. An AST walker now counts them (a regex cannot tell
+  module-scope `{ label: t("x") }` from the identical text inside JSX), a test proves the mechanism in
+  both directions, and a per-file ratchet stops the count growing. The fix is 194 behaviour-neutral call
+  sites and wants its own review; it is decision 4 in `docs/I18N_BLOCKED.md`.
+
+  **`scripts/size-budget.mjs` was measuring a subset of first load.** It weighed `index-*.js` only, but
+  Vite emits `<link rel="modulepreload">` for shared eager chunks and the browser fetches those on first
+  paint too. So the gate reported a 10.5 kB *improvement* (168.5 → 158.0) for a change that added 141
+  catalogue keys — 16.6 kB had moved sideways into `primitives-*.js`. It now computes and prints true
+  first load (180.0 kB against a 175 ceiling), and still gates on the old metric deliberately: the true
+  figure was already over before this work started, so flipping it silently would read as a regression
+  this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

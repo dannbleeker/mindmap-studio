@@ -20,22 +20,38 @@ Tiers 1–5). Per-item detail lives in `CHANGELOG.md`. Three of that review's ca
 or *Out of scope*, so the decisions don't get re-litigated. Known-thin areas that are neither open work
 nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
-## Localisation (i18n) — the programme is COMPLETE; what remains is listed here
+## Localisation (i18n) — the LAYER is done; a long tail of chrome is not
 
-Shipped detail lives in `CHANGELOG.md`. This section keeps only the **decisions**, so they don't get
-re-litigated, and the one open item.
+Shipped detail lives in `CHANGELOG.md`. This section keeps the **decisions**, so they don't get
+re-litigated, and the open work.
 
 `src/i18n/` holds the registry, the typed English catalogue and the `Intl` plural/collation helpers.
-**684 catalogue entries** (599 eager + 85 in the lazy canvas chunk) across eight migrated files;
-`node scripts/i18n-scan.mjs <file> --count` reports 0 for every one. Entry bundle **174.2 kB against a
-175 ceiling**, recorded in `scripts/bundle-budget.mjs` as measured rather than projected. English is the
-only locale and is expected to stay that way — adding one means adding a JSON catalogue, not changing
-the app.
+**684 catalogue entries** (599 eager + 85 in the lazy canvas chunk) across **eight** migrated files;
+`node scripts/i18n-scan.mjs <file> --count` reports 0 for each of those. Entry bundle **174.2 kB against
+a 175 ceiling**, recorded in `scripts/bundle-budget.mjs` as measured rather than projected. English is
+the only locale and is expected to stay that way — adding one means adding a JSON catalogue, not
+changing the app.
 
-**Still open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
+**CORRECTION (2026-07-26): this was briefly written up as "the chrome migration is DONE". It is not.**
+Eight files were migrated — the eight *biggest* — and the claim was made without scanning the rest of
+the tree. Scanning all 241 source files reports **768 hits across 101 files**. That breaks down as:
+
+| bucket | hits | what it is |
+| --- | --- | --- |
+| user-facing chrome, unmigrated | **~490** | real work: `MapPanel` 67, `FindReplaceOverlay` 26, `EdgeInspector` 25, `ThemeDesignerDialog` 24, the Start screen ~103, `Presentation` 18, `CanvasOverlays` 14, `OverlayInspector` 14, and a long tail |
+| map CONTENT | 207 | `examples.ts` 165, `templates.ts` 30, `sampleMap.ts` 12 — the sample maps' own topic text. A **separate decision**: translating example content is not the same question as translating chrome, and may well be declined. |
+| the catalogue itself | 21 | `i18n/core.ts` — the scanner reading its own English values. Always a false positive; core.ts must never join the allowlist. |
+| XML/SVG markup | ~50 | `io/pptx.ts`, `io/xlsx.ts`, `io/interactiveHtml.ts`, `flow/exportSvg.ts` — the template-literal detector reading `<a:p>`/`<defs>` as prose. **Also a false-positive class**: a markup-building file cannot join the allowlist without a markup exemption in the detector. |
+
+So the honest state is that the layer, the tooling, the guard and the eight highest-traffic surfaces are
+done, and roughly half the user-facing strings by count are not. **Point the scanner at a file before
+assuming it is clean** — that is the whole lesson of this programme, and it was violated one last time
+by the summary of it.
+
+**Also open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
 English-only, and it is genuinely logic rather than translation — a second locale needs its own keyword
-table and its own relative-date shapes, not a catalogue entry. There is nothing to do here until a
-second locale exists.
+table and its own relative-date shapes, not a catalogue entry. Nothing to do until a second locale
+exists.
 
 ### How to add strings without undoing this
 

@@ -192,7 +192,7 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   no second surface saying "Couldn't access the clipboard" — which is why reuse, not string count,
   predicts the cost.
 
-  **`Panels.tsx` is migrated (233 strings) — the eager chrome is now complete.** Outline, markers & tags
+  **`Panels.tsx` is migrated (233 strings).** Outline, markers & tags
   index, relationships, agenda, maps, inbox, deck editor, power filter, version history, conditional
   styles, the topic inspector, the note editor and the sticker/marker pickers. **684 catalogue entries**
   across the two catalogues, and the scanner reports **0** hardcoded strings in all eight migrated files.
@@ -278,6 +278,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   test pushes CJK, Arabic, Hebrew, Cyrillic, Greek, an emoji (a surrogate pair, the case a naive
   per-charCode escaper splits in half) and raw markup characters through both exporters. Today's code
   passes; mutating the escaper to drop non-ASCII fails all three cases.
+
+  **Correction: this work was briefly summarised as "the chrome migration is complete". It is not.**
+  Eight files were migrated — the eight biggest — and that claim was made without scanning the rest of
+  the tree. Scanning all 241 source files reports 768 hits across 101: roughly **490 are genuinely
+  unmigrated chrome** (`MapPanel` 67, the Start screen ~103, `FindReplaceOverlay` 26, `EdgeInspector`
+  25, `ThemeDesignerDialog` 24, and a long tail), 207 are the sample maps' own CONTENT — a separate
+  decision from translating chrome — and ~71 are false positives the scanner produces on its own
+  catalogue and on the XML/SVG-building exporters. The breakdown is in `NEXT_STEPS.md`.
+
+  Worth recording because it is the same failure the whole programme kept finding, committed once more
+  at the summary level: a tick that claims coverage nobody measured. Point the scanner at a file before
+  calling it clean.
 
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately

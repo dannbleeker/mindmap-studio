@@ -138,6 +138,42 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   free. The projection assumed every remaining string is new text; wherever the chrome repeats itself —
   and a toolbar mirroring a command palette repeats itself a lot — the real cost is well below it.
 
+  **The canvas is migrated: `FlowMindMap.tsx`, 73 strings, at zero cost to the entry bundle.** Its
+  catalogue is chunk-local (`mindmap/flow/messages.ts`, now 89 entries), so the three right-click menus,
+  the transient hints, the branch layout/side/colour pickers and the shape toolbar all ship in the lazy
+  canvas chunk. Proven in the built output rather than asserted: `"Detach to floating topic"` and
+  `"Shift task dates (this branch)"` appear in `FlowMindMap-*.js` and NOT in `index-*.js`, and the entry
+  chunk is unchanged at 170.6 kB. Nine labels reuse `cmd.layout.*` / `toolbar.*` keys, because a
+  per-branch layout override offers the same layouts as the map-wide picker.
+
+  Six `=== 1` ternaries became **plural messages** — "Branch copied" / "{n} branches copied", "Paste
+  branch here" / "Paste {n} branches here", "by {n} day" / "by {n} days". English needs two forms and
+  Slavic four; `Intl.PluralRules` picks the arm so no call site has to know a locale's boundaries.
+
+  **Three more detectors, each added only after proving it clean on every file already on the list.**
+  A *label/action tuple* (`["Copy image to clipboard", () => io.copyPng()]`) — menus built from data
+  rather than JSX, invisible because the label sits behind a `[` and often opens with a `.`; the second
+  member must look like a function or a number, which is what keeps `["relates-to", "depends-on"]` (ids,
+  not labels) out. *JSX text between its tags* (`<MenuLabel>Arrowheads</MenuLabel>`) — the one place a
+  SINGLE word is safe to flag, because `>Type</` is unambiguously rendered content while a bare "Type"
+  could be an id. And a *sentence-case rule for short prose lines*: the 12-character floor existed to
+  exclude `return null`, but it was also hiding `Map side`, and JS keywords are lowercase.
+
+  Between them they found **51 more live strings in files already ticked** — Toolbar's entire export
+  menu (24 format labels + 4 group headings), TopicNode's three one-time coach hints, and FlowMindMap's
+  26 menu labels. The habit that keeps failing is now stated in the guard: re-verify the files already
+  on the list when a detector is added, rather than trusting the tick.
+
+  **A duplicate-text test across catalogues**, which earned its place the moment it ran: four canvas
+  keys repeated messages the eager catalogue already had, and the build confirmed one of them shipping
+  the same sentence in *both* chunks. Three were collapsed onto the existing key. The fourth is a real
+  homonym — the layout picker's optgroup heading "Radial" names the radial *family*, the branch-layout
+  option "Radial" names the layout — so it is listed as an explicit exception with its reasoning, which
+  is the point: a locale that distinguishes the two senses must be able to translate them apart.
+
+  A fifth shadowed `t` turned up in the relationship-type chips, which is why that `aria-label` had
+  stayed hardcoded through the first canvas pass.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

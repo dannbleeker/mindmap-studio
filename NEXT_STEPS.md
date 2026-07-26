@@ -24,22 +24,30 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
 The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
 catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
-handlers plus the `TopicNode` canvas strings, the whole keyboard cheat sheet, the ⌘K command registry and
-the **entire editor toolbar** are migrated (**353 catalogue entries** so far — 328 eager + 25 in the lazy
-canvas chunk), behind a lint guard that fails on any new hardcoded user-facing string in a migrated file.
-English is the only locale and is expected to stay that way for now — adding one means adding a JSON
-catalogue, not changing the app.
+handlers plus the whole keyboard cheat sheet, the ⌘K command registry, the **entire editor toolbar** and
+the **entire canvas** (`TopicNode` + `FlowMindMap`) are migrated (**423 catalogue entries** so far — 334
+eager + 89 in the lazy canvas chunk), behind a lint guard that fails on any new hardcoded user-facing
+string in a migrated file. English is the only locale and is expected to stay that way for now — adding
+one means adding a JSON catalogue, not changing the app.
 
 **Trust the guard's list, not its tick — re-verify a file when the guard gains a detector.** On
 2026-07-26 it was green over five files while 46 user-facing strings were still hardcoded in three of
-them, because it had no detector for a template literal, for the `label` prop, or for `"(untitled)"`.
-It now has five detectors and its own self-test pins each one. The failure mode is structural, not a
-one-off: every detector added so far was added *after* a file it was supposed to cover had already been
-ticked. Before adding the next file, re-run the guard over the ones already on the list.
+them; three more detectors later that day found **51 more** in files already ticked. It now has seven
+detectors and its own self-test pins each one. The failure mode is structural, not a one-off: every
+detector so far was added *after* a file it should have covered was ticked. So the rule when you add
+one: prove it clean on every file already on the allowlist FIRST — if it fires there, those are real
+misses and fixing them is part of the same commit.
 
-Watch for **a local named `t` shadowing the imported `t()`** — four existed, and in that scope `t("…")`
-is uncallable, so a migration pass skips the strings silently. A scripted pass that rewrites into such a
-scope produces code that compiles and throws at runtime; one nearly shipped.
+Two recurring traps, both of which cost real bugs:
+
+- **A local named `t` shadowing the imported `t()`** — five existed. In that scope `t("…")` is
+  uncallable, so a migration pass skips the strings *silently* and leaves no trace. Worse, a scripted
+  pass that rewrites INTO such a scope produces code that compiles and throws "t is not a function" at
+  runtime; one nearly shipped from `insertableTemplates.map((t) => …)`.
+- **Duplicate text across catalogues.** A test now fails when a canvas message repeats an eager one
+  word for word — it caught four on the first run, one of which was demonstrably shipping the same
+  sentence in both chunks. Reuse the existing key (a lazy chunk can reference an eager one for free);
+  keep both only for a genuine homonym, and then add it to that test's documented exception list.
 
 **Bundle strategy — decided 2026-07-26.** Measured on the first 43 catalogue entries: the layer itself
 is a ~1 kB gz one-off, and the marginal cost per migrated string is the **key**, not the text (the
@@ -80,23 +88,26 @@ than from a number written down here — `node scripts/i18n-scan.mjs <file>` run
 detectors over any file, so you see what it will hold you to *before* joining the allowlist:
 
 ```sh
-node scripts/i18n-scan.mjs src/Panels.tsx src/App.tsx src/mindmap/FlowMindMap.tsx --count
+node scripts/i18n-scan.mjs src/Panels.tsx src/App.tsx --count
 ```
 
-As of 2026-07-26 that reports **193 `Panels.tsx` + 75 `App.tsx` + 33 `FlowMindMap.tsx` = 301**.
-`FlowMindMap.tsx` is lazy, so its catalogue belongs in `flow/messages.ts`, not `i18n/core.ts`.
-**`App.tsx` was missing from this plan entirely** until the scanner was pointed at it.
+As of 2026-07-26 that reports **233 `Panels.tsx` + 83 `App.tsx` = 316**, and those two are what's left
+of the chrome. **`App.tsx` was missing from this plan entirely** until the scanner was pointed at it.
+Both are eager, so unlike the canvas their strings land in the entry chunk — measure after, and expect
+`Panels.tsx` to be the one that finally forces the ceiling decision.
 
-These differ from the 342 / 121 recorded earlier because that pass counted quoted strings broadly while
-the guard counts only what it can confidently call user-facing; neither is wrong, they measure different
-things. Expect hand-work in the gap — the guard's documented limitations are listed below. The rest of
+The counts move whenever a detector is added (they went 301 → 374 → 316 in a day: two new detectors
+found more, then migrating the canvas removed a file). That is why the command above is the source of
+truth and the number here is a snapshot. Expect hand-work beyond it too — the guard's documented
+limitations are listed below. The rest of
 the `Intl` adoption: `timeAgo` and all 12 collation sites are
 **done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic, not
 translation) and the ~103 locale-unsafe `toLowerCase` sites. Then the exporters taking the locale (`lang`
 attributes, PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA
 manifest strings.
 
-`editorCommands.ts` and `Toolbar.tsx` are **done** — don't re-plan them. The design once recorded here
+`editorCommands.ts`, `Toolbar.tsx`, `TopicNode.tsx` and `FlowMindMap.tsx` are **done** — don't re-plan
+them. The design once recorded here
 for `editorCommands.ts` (drop the label argument and derive the key from the command id inside `add()`)
 was **rejected on implementation and should not be revived**: a template-literal key cannot be verified
 by `tsc`, and compile-time key checking is the property the typed catalogue exists for. Each call site

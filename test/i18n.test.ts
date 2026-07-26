@@ -22,6 +22,7 @@ import {
   t,
 } from "../src/i18n";
 import { CORE_EN } from "../src/i18n/core";
+import { CANVAS_EN } from "../src/mindmap/flow/messages";
 
 beforeEach(() => {
   localStorage.clear();
@@ -58,6 +59,43 @@ describe("catalogue", () => {
   it("throws on a missing key in dev, so it can't ship as a blank label", () => {
     // import.meta.env.DEV is true under vitest.
     expect(() => t("nope.not.a.key" as keyof typeof CORE_EN)).toThrow(/no message for key/);
+  });
+
+  it("never says the same thing twice across catalogues", () => {
+    // One source of truth for a user-facing string. Two catalogues holding identical English is how a
+    // translation drifts: a translator sees the sentence twice, renders it two ways, and the same
+    // control reads differently depending on which surface you reached it from. It also duplicates the
+    // text across two chunks.
+    //
+    // The rule when this fires: delete the newer key and reference the existing one — a lazy chunk can
+    // reference an eager key for free, because the core catalogue always loads before the canvas does.
+    // Keep both only if they genuinely mean different things and their English merely coincides, and
+    // then give one wording that reflects the difference.
+    //
+    // This caught a real duplicate on the FlowMindMap migration: `canvas.menu.rollUp` repeated
+    // `toolbar.rollUpMirrorAnotherMap` word for word, and the build showed that sentence landing in
+    // the entry chunk AND the lazy canvas chunk.
+    // Homonyms: two messages that genuinely mean different things and whose ENGLISH merely coincides.
+    // Listed explicitly, one line of reasoning each, so the decision is made once and consciously
+    // rather than by widening the check. A locale that distinguishes the two senses translates them
+    // apart, which is exactly why they must not be collapsed into one key.
+    const HOMONYMS = new Set([
+      // The optgroup heading names the radial FAMILY of layouts (both-sides, right, left, radial/hub);
+      // the branch-layout option names the radial layout itself. English spells both "Radial".
+      "canvas.branchLayout.radial",
+    ]);
+
+    const coreByText = new Map<string, string>();
+    for (const [key, message] of Object.entries(CORE_EN))
+      if (typeof message === "string" && !coreByText.has(message)) coreByText.set(message, key);
+
+    const dupes: string[] = [];
+    for (const [key, message] of Object.entries(CANVAS_EN)) {
+      if (typeof message !== "string" || HOMONYMS.has(key)) continue;
+      const existing = coreByText.get(message);
+      if (existing) dupes.push(`${key} duplicates ${existing} — both say "${message}"`);
+    }
+    expect(dupes).toEqual([]);
   });
 });
 

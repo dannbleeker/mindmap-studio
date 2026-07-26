@@ -65,6 +65,7 @@ const MIGRATED = [
   "src/shortcuts.ts",
   "src/components/editorCommands.ts",
   "src/components/Toolbar.tsx",
+  "src/mindmap/FlowMindMap.tsx",
 ];
 
 const scan = (rel: string): Violation[] =>
@@ -186,6 +187,13 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(proseViolations("          background: style?.fillImage")).toHaveLength(0);
     expect(proseViolations("            style?.background ??")).toHaveLength(0);
     expect(proseViolations("        boxShadow: dropTarget")).toHaveLength(0);
+    // Short prose is allowed through only when it's sentence-cased. `Map side` is a real label in the
+    // branch menu and only 8 characters; the length floor alone was hiding it. JS keywords are
+    // lowercase, which is what keeps the short code lines out.
+    expect(proseViolations("                        Map side")).toHaveLength(1);
+    expect(proseViolations("      return null")).toHaveLength(0);
+    expect(proseViolations("      const x")).toHaveLength(0);
+    expect(proseViolations("      break")).toHaveLength(0);
   });
 
   it("does not mistake a multi-line block comment's continuation lines for prose", () => {

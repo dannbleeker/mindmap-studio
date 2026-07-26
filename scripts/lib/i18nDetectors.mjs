@@ -179,7 +179,12 @@ export function tupleLabelViolations(src) {
   const inComment = commentLineSet(src);
   src.split("\n").forEach((line, i) => {
     if (inComment.has(i)) return;
-    for (const m of line.matchAll(/\[\s*"([^"]{2,})"\s*,\s*(?:\(|(?:\w+\.)*\w+\s*\])/g)) {
+    // Second member: an arrow / call, a dotted-or-bare identifier closing the array, or a NUMBER
+    // closing it. The number case is the label/value pair — `["−1w", -7]` in the date-shift presets,
+    // where the other four entries of the same array were already migrated and these two were not,
+    // leaving one control half-translated.
+    const tuple = /\[\s*"([^"]{2,})"\s*,\s*(?:\(|(?:\w+\.)*\w+\s*\]|-?\d+(?:\.\d+)?\s*\])/g;
+    for (const m of line.matchAll(tuple)) {
       if (ALLOWED_LITERALS.has(m[1].toLowerCase())) continue;
       out.push({ line: i + 1, text: `"${m[1]}"`, why: "label in a label/action tuple" });
     }
@@ -226,7 +231,12 @@ export function proseViolations(src) {
   const inComment = commentLineSet(src);
   src.split("\n").forEach((line, i) => {
     const trimmed = line.trim();
-    if (trimmed.length < 12) return;
+    // The length floor keeps short CODE lines out — `return null`, `const x`, `break` all satisfy every
+    // other rule below. Between 6 and 11 characters a capital first letter is what separates the two:
+    // JS keywords are lowercase, UI copy is sentence-cased. That distinction is worth having, because
+    // the floor alone was hiding `Map side` — a real label in the branch menu, 8 characters long.
+    if (trimmed.length < 6) return;
+    if (trimmed.length < 12 && !/^[A-Z]/.test(trimmed)) return;
     // Comments are prose on purpose — including the CONTINUATION lines of a multi-line block comment,
     // which open with prose rather than with a star. That was this detector's one false-positive shape.
     if (inComment.has(i)) return;

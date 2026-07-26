@@ -22,7 +22,13 @@ import {
 import { ContextMenu, MenuItem, MenuLabel, MenuSeparator } from "../design/primitives";
 import { colors, motion } from "../design/tokens";
 import { useLongPress } from "../hooks/useLongPress";
+// `../i18n/registry`, NOT the `../i18n` barrel: the barrel pulls in the eager core catalogue, which
+// would drag the whole chrome catalogue into this lazy chunk. The side-effect import registers the
+// canvas catalogue when this chunk loads. There's a test asserting the canvas strings stay out of the
+// entry chunk.
+import { t } from "../i18n/registry";
 import { MARKER_PALETTE, markerImage } from "../icons";
+import "./flow/messages";
 import { parseOutline } from "../io/pasteOutline";
 import { hasFormatting, richToPlain, sanitizeRich } from "../io/richText";
 import { isDangerousUrl } from "../io/urlSafety";
@@ -1446,7 +1452,7 @@ function FlowInner({
         // No-op: the central topic can't be deleted. Tell the user why nothing happened (a missing
         // node — already gone — is silent; only the root case reaches here with a live node).
         if (node && id === docRef.current.root.id)
-          onHintRef.current?.("The central topic can't be deleted.");
+          onHintRef.current?.(t("canvas.hint.rootUndeletable"));
         return;
       }
       apply(r);
@@ -1470,7 +1476,7 @@ function FlowInner({
     if (r.doc === docRef.current) {
       // Every selected id was the root / already gone (e.g. only the central topic was selected).
       if (list.includes(docRef.current.root.id))
-        onHintRef.current?.("The central topic can't be deleted.");
+        onHintRef.current?.(t("canvas.hint.rootUndeletable"));
       return true;
     }
     apply(r);
@@ -1539,7 +1545,7 @@ function FlowInner({
           break;
         case "startLinking":
           setLinkingFrom(intent.id);
-          onHintRef.current?.("Linking — arrow to a target, Enter to link, Esc to cancel.");
+          onHintRef.current?.(t("canvas.hint.linkingKeyboard"));
           break;
         case "completeLink": {
           const from = linkingFromRef.current;
@@ -1648,38 +1654,32 @@ function FlowInner({
             .map((n) => structuredClone(n));
           if (nodes.length === 0) break;
           setBranches(nodes);
-          onHintRef.current?.(
-            nodes.length === 1
-              ? "Branch copied — paste with Ctrl/⌘+Shift+V."
-              : `${nodes.length} branches copied — paste with Ctrl/⌘+Shift+V.`,
-          );
+          // One plural message, not a hand-written `=== 1` ternary: English needs two forms here but
+          // Slavic languages need four, and `Intl.PluralRules` picks the arm from `n`.
+          onHintRef.current?.(t("canvas.hint.branchCopied", { n: nodes.length }));
           break;
         }
         case "duplicateBranch": {
           const n = findAnyNode(docRef.current, intent.id);
           if (!n || intent.id === docRef.current.root.id) {
-            onHintRef.current?.("Select a topic to duplicate (not the central one).");
+            onHintRef.current?.(t("canvas.hint.selectToDuplicate"));
             break;
           }
           // Paste a clone under the same parent → a sibling (or floating if the node has no parent).
           const parent = findParent(docRef.current, intent.id);
           apply(pasteBranch(docRef.current, parent?.id ?? null, structuredClone(n)));
-          onHintRef.current?.("Branch duplicated.");
+          onHintRef.current?.(t("canvas.hint.branchDuplicated"));
           break;
         }
         case "pasteBranch": {
           const clips = getBranches();
           if (clips.length === 0) {
-            onHintRef.current?.("Nothing to paste — copy a branch first (Ctrl/⌘+C).");
+            onHintRef.current?.(t("canvas.hint.nothingToPaste"));
             break;
           }
           // Graft all copied branches under the selection in one undo step (addSubtree re-ids them).
           apply(addSubtree(docRef.current, intent.id, clips));
-          onHintRef.current?.(
-            clips.length === 1
-              ? "Branch pasted under the selection."
-              : `${clips.length} branches pasted under the selection.`,
-          );
+          onHintRef.current?.(t("canvas.hint.branchPasted", { n: clips.length }));
           break;
         }
       }
@@ -2237,7 +2237,9 @@ function FlowInner({
           className={spacePan ? "mm-space-pan" : undefined}
           tabIndex={-1}
           aria-roledescription="mind map canvas"
-          aria-label={`Mind map: ${renderDoc.title?.trim() || "Untitled"}`}
+          aria-label={t("canvas.region.label", {
+            title: renderDoc.title?.trim() || t("canvas.region.untitledMap"),
+          })}
           {...paneLongPress}
           style={{
             height: "100%",
@@ -2526,9 +2528,7 @@ function FlowInner({
               onCyclePriority={editingApi.cyclePriority}
               onStartLink={(id) => {
                 setLinkingFrom(id);
-                onHintRef.current?.(
-                  "Linking — click or arrow to a target, Enter to link, Esc to cancel.",
-                );
+                onHintRef.current?.(t("canvas.hint.linkingPointer"));
               }}
               onMore={openNodeMenuAt}
             />
@@ -2616,14 +2616,14 @@ function FlowInner({
                 return (
                   <>
                     <MenuItem
-                      label="Edit label"
+                      label={t("canvas.link.editLabel")}
                       onSelect={() => {
                         setEditingLinkId(id);
                         setEdgeMenu(null);
                       }}
                     />
                     <MenuSeparator />
-                    <MenuLabel>Arrowheads</MenuLabel>
+                    <MenuLabel>{t("canvas.link.arrowheads")}</MenuLabel>
                     <div className="mm-menu-row">
                       {(
                         [
@@ -2646,14 +2646,14 @@ function FlowInner({
                         </button>
                       ))}
                     </div>
-                    <MenuLabel>Line</MenuLabel>
+                    <MenuLabel>{t("canvas.link.line")}</MenuLabel>
                     <div className="mm-menu-row">
                       {(["dashed", "solid", "dotted"] as const).map((dash) => (
                         <button
                           key={dash}
                           type="button"
                           className="mm-menu-chip"
-                          aria-label={`Line style: ${dash}`}
+                          aria-label={t("canvas.link.lineStyle", { style: dash })}
                           aria-pressed={(link?.dash ?? "dashed") === dash}
                           data-on={(link?.dash ?? "dashed") === dash || undefined}
                           onClick={() => patch({ dash })}
@@ -2662,27 +2662,29 @@ function FlowInner({
                         </button>
                       ))}
                     </div>
-                    <MenuLabel>Type</MenuLabel>
+                    <MenuLabel>{t("canvas.link.type")}</MenuLabel>
                     <div className="mm-menu-row">
                       {(["relates-to", "depends-on", "causes", "supports", "blocks"] as const).map(
-                        (t) => (
+                        // `kind`, not `t` — the loop variable shadowed the translation function, which
+                        // is why the aria-label below stayed hardcoded through the first canvas pass.
+                        (kind) => (
                           <button
-                            key={t}
+                            key={kind}
                             type="button"
                             className="mm-menu-chip"
-                            aria-label={`Relationship type: ${t}`}
-                            aria-pressed={(link?.type ?? "relates-to") === t}
-                            data-on={(link?.type ?? "relates-to") === t || undefined}
-                            onClick={() => patch({ type: t })}
+                            aria-label={t("canvas.link.typeNamed", { type: kind })}
+                            aria-pressed={(link?.type ?? "relates-to") === kind}
+                            data-on={(link?.type ?? "relates-to") === kind || undefined}
+                            onClick={() => patch({ type: kind })}
                           >
-                            {t}
+                            {kind}
                           </button>
                         ),
                       )}
                     </div>
                     <MenuSeparator />
                     <MenuItem
-                      label="Delete relationship"
+                      label={t("canvas.link.delete")}
                       danger
                       onSelect={() => {
                         apply(deleteLink(docRef.current, id));
@@ -2719,23 +2721,23 @@ function FlowInner({
                   );
                 }
                 const items: [string, () => void, boolean?][] = [
-                  ["Add child", () => apply(addChild(docRef.current, id), true)],
-                  ["Add sibling", () => apply(addSibling(docRef.current, id), true)],
-                  ["Rename", () => startEdit(id)],
+                  [t("canvas.menu.addChild"), () => apply(addChild(docRef.current, id), true)],
+                  [t("canvas.menu.addSibling"), () => apply(addSibling(docRef.current, id), true)],
+                  [t("canvas.menu.rename"), () => startEdit(id)],
                   [
-                    "Add note",
+                    t("canvas.menu.addNote"),
                     () => {
                       selectOnly(id);
                       fireSelect(id);
                       onOpenNoteRef.current?.();
                     },
                   ],
-                  ["Link to…", () => setLinkingFrom(id)],
-                  ["Add callout", () => apply(addCallout(docRef.current, id))],
-                  ["Group in boundary", () => apply(groupBranch(docRef.current, id))],
-                  ["Summarize branch", () => apply(groupSummary(docRef.current, id))],
+                  [t("canvas.menu.linkTo"), () => setLinkingFrom(id)],
+                  [t("canvas.menu.addCallout"), () => apply(addCallout(docRef.current, id))],
+                  [t("canvas.menu.groupInBoundary"), () => apply(groupBranch(docRef.current, id))],
+                  [t("canvas.menu.summarizeBranch"), () => apply(groupSummary(docRef.current, id))],
                   [
-                    "Copy branch",
+                    t("canvas.menu.copyBranch"),
                     () => {
                       const n = findAnyNode(docRef.current, id);
                       if (n) setBranches([structuredClone(n)]);
@@ -2745,20 +2747,26 @@ function FlowInner({
                 // Export this branch (B4): scoped export of the subtree, only for a non-leaf node
                 // (a lone topic has nothing to scope — the whole-map export already covers it).
                 if ((findAnyNode(docRef.current, id)?.children.length ?? 0) > 0)
-                  items.push(["Export this branch…", () => onExportBranchRef.current?.(id)]);
+                  items.push([
+                    t("canvas.menu.exportBranch"),
+                    () => onExportBranchRef.current?.(id),
+                  ]);
                 // Cross-map paste: show only when the branch clipboard has something (it persists in
                 // localStorage, so branches copied in another map show up here too).
                 const clips = getBranches();
                 if (clips.length)
                   items.push([
-                    clips.length === 1
-                      ? "Paste branch here"
-                      : `Paste ${clips.length} branches here`,
+                    t("canvas.menu.pasteBranches", { n: clips.length }),
                     () => apply(addSubtree(docRef.current, id, clips)),
                   ]);
-                items.push(["Collapse / expand", () => apply(toggleCollapse(docRef.current, id))]);
                 items.push([
-                  findAnyNode(docRef.current, id)?.locked ? "Unlock position" : "Lock position",
+                  t("canvas.menu.collapseExpand"),
+                  () => apply(toggleCollapse(docRef.current, id)),
+                ]);
+                items.push([
+                  findAnyNode(docRef.current, id)?.locked
+                    ? t("canvas.menu.unlockPosition")
+                    : t("canvas.menu.lockPosition"),
                   () => apply(toggleLocked(docRef.current, id)),
                 ]);
                 // Detach a central-tree branch out to a floating topic; re-attach a floating one to
@@ -2768,15 +2776,15 @@ function FlowInner({
                 );
                 if (isFloatingTop)
                   items.push([
-                    "Re-attach to centre",
+                    t("canvas.menu.reattach"),
                     () => apply(reparent(docRef.current, id, docRef.current.root.id)),
                   ]);
                 else if (id !== docRef.current.root.id)
                   items.push([
-                    "Detach to floating topic",
+                    t("canvas.menu.detach"),
                     () => apply(detachBranch(docRef.current, id)),
                   ]);
-                items.push(["Delete", () => deleteNodeWithUndo(id), true]);
+                items.push([t("canvas.menu.delete"), () => deleteNodeWithUndo(id), true]);
                 // Live marker/priority state so the quick-setters reflect the node (and toggle off).
                 const node = findAnyNode(docRef.current, id);
                 const activeMarkers = node?.icons ?? [];
@@ -2795,7 +2803,7 @@ function FlowInner({
                     <MenuSeparator />
                     {/* Inline marker quick-setter (the "Set marker" submenu): toggle several without
                       closing, mirroring the inspector's MarkerBar but reachable in one right-click. */}
-                    <MenuLabel>Markers</MenuLabel>
+                    <MenuLabel>{t("canvas.menu.markers")}</MenuLabel>
                     <div className="mm-menu-row">
                       {MARKER_PALETTE.map((m) => {
                         const on = activeMarkers.includes(m);
@@ -2819,7 +2827,7 @@ function FlowInner({
                       })}
                     </div>
                     {/* Inline priority quick-setter (the "Set priority" submenu). */}
-                    <MenuLabel>Priority</MenuLabel>
+                    <MenuLabel>{t("canvas.menu.priority")}</MenuLabel>
                     <div className="mm-menu-row">
                       {PRIORITY_LEVELS.map((p) => (
                         <button
@@ -2860,22 +2868,22 @@ function FlowInner({
                       if (!hasDated) return null;
                       return (
                         <>
-                          <MenuLabel>Shift task dates (this branch)</MenuLabel>
+                          <MenuLabel>{t("canvas.menu.shiftDates")}</MenuLabel>
                           <div className="mm-menu-row">
                             {(
                               [
-                                ["−1w", -7],
-                                ["−1d", -1],
-                                ["+1d", 1],
-                                ["+1w", 7],
-                                ["+1mo", 30],
+                                [t("canvas.menu.shiftMinus1w"), -7],
+                                [t("canvas.menu.shiftMinus1d"), -1],
+                                [t("canvas.menu.shift1d"), 1],
+                                [t("canvas.menu.shift1w"), 7],
+                                [t("canvas.menu.shift1mo"), 30],
                               ] as const
                             ).map(([label, days]) => (
                               <button
                                 key={label}
                                 type="button"
                                 className="mm-menu-chip"
-                                aria-label={`Shift this branch's task dates by ${days} days`}
+                                aria-label={t("canvas.menu.shiftDatesBy", { n: days })}
                                 onClick={() => apply(shiftDates(docRef.current, days, id))}
                               >
                                 {label}
@@ -2890,7 +2898,7 @@ function FlowInner({
                       className="mm-menu-label"
                       style={{ display: "block", textTransform: "none", letterSpacing: 0 }}
                     >
-                      Branch layout
+                      {t("canvas.menu.branchLayout")}
                       <select
                         className="mm-select"
                         defaultValue={findNode(docRef.current, menu.id)?.layout ?? ""}
@@ -2902,16 +2910,16 @@ function FlowInner({
                         }}
                         style={{ width: "100%", marginTop: 4 }}
                       >
-                        <option value="">Default (map)</option>
-                        <option value="org-down">Org chart ↓</option>
-                        <option value="org-up">Org chart ↑</option>
-                        <option value="right">Right</option>
-                        <option value="left">Left</option>
-                        <option value="radial">Radial</option>
-                        <option value="timeline">Timeline</option>
-                        <option value="fishbone">Fishbone</option>
-                        <option value="grid">Grid</option>
-                        <option value="brace">Brace</option>
+                        <option value="">{t("canvas.branchLayout.default")}</option>
+                        <option value="org-down">{t("toolbar.orgChart")}</option>
+                        <option value="org-up">{t("toolbar.orgChart2")}</option>
+                        <option value="right">{t("cmd.layout.right")}</option>
+                        <option value="left">{t("cmd.layout.left")}</option>
+                        <option value="radial">{t("canvas.branchLayout.radial")}</option>
+                        <option value="timeline">{t("cmd.layout.timeline")}</option>
+                        <option value="fishbone">{t("cmd.layout.fishbone")}</option>
+                        <option value="grid">{t("canvas.branchLayout.grid")}</option>
+                        <option value="brace">{t("canvas.branchLayout.brace")}</option>
                       </select>
                     </label>
                     {/* Map side — pin a main branch to a half of the two-sided map (else auto-balance).
@@ -2923,7 +2931,7 @@ function FlowInner({
                         className="mm-menu-label"
                         style={{ display: "block", textTransform: "none", letterSpacing: 0 }}
                       >
-                        Map side
+                        {t("canvas.menu.mapSide")}
                         <select
                           className="mm-select"
                           defaultValue={findNode(docRef.current, menu.id)?.side ?? ""}
@@ -2940,13 +2948,13 @@ function FlowInner({
                           }}
                           style={{ width: "100%", marginTop: 4 }}
                         >
-                          <option value="">Auto (balance)</option>
-                          <option value="left">Left side</option>
-                          <option value="right">Right side</option>
+                          <option value="">{t("canvas.branchSide.auto")}</option>
+                          <option value="left">{t("canvas.branchSide.left")}</option>
+                          <option value="right">{t("canvas.branchSide.right")}</option>
                         </select>
                       </label>
                     ) : null}
-                    <MenuLabel>Branch colour</MenuLabel>
+                    <MenuLabel>{t("canvas.menu.branchColour")}</MenuLabel>
                     <div className="mm-menu-row">
                       {["#c2701a", "#3f6fb0", "#1b8a5e", "#b23b6a", "#8a6d2f", "#6a5acd"].map(
                         (c) => {
@@ -2956,7 +2964,7 @@ function FlowInner({
                               key={c}
                               type="button"
                               className="mm-menu-chip"
-                              aria-label={`Branch colour ${c}`}
+                              aria-label={t("canvas.menu.branchColourNamed", { colour: c })}
                               aria-pressed={on}
                               data-on={on || undefined}
                               onClick={() => apply(setBranchColor(docRef.current, id, on ? "" : c))}
@@ -2973,7 +2981,7 @@ function FlowInner({
                         Default
                       </button>
                     </div>
-                    <MenuLabel>Branch line</MenuLabel>
+                    <MenuLabel>{t("canvas.menu.branchLine")}</MenuLabel>
                     <div className="mm-menu-row">
                       {(["solid", "dashed", "dotted"] as const).map((d) => {
                         const on = (findNode(docRef.current, id)?.lineDash ?? "solid") === d;
@@ -2995,7 +3003,7 @@ function FlowInner({
                         mirror that map; shown only when the library has other maps (I11). */}
                     {libraryMaps.length > 0 ? (
                       <>
-                        <MenuLabel>Roll-up (mirror another map)</MenuLabel>
+                        <MenuLabel>{t("toolbar.rollUpMirrorAnotherMap")}</MenuLabel>
                         <div style={{ padding: "2px 6px" }}>
                           <select
                             className="mm-select"
@@ -3005,18 +3013,18 @@ function FlowInner({
                               apply(setRollup(docRef.current, id, e.target.value || undefined));
                               setMenu(null);
                             }}
-                            aria-label="Bind roll-up source"
+                            aria-label={t("toolbar.bindRollUpSource")}
                           >
                             {findNode(docRef.current, id)?.rollup ? (
                               <option value="">— Unbind</option>
                             ) : (
-                              <option value="">Bind source map…</option>
+                              <option value="">{t("toolbar.bindSourceMap")}</option>
                             )}
                             {libraryMaps
                               .filter((mm) => mm.id !== docRef.current.id)
                               .map((mm) => (
                                 <option key={mm.id} value={mm.id}>
-                                  {mm.title || "(untitled)"}
+                                  {mm.title || t("common.untitled")}
                                 </option>
                               ))}
                           </select>
@@ -3038,16 +3046,12 @@ function FlowInner({
               sheet={isMobile}
             >
               <MenuItem
-                label="Add topic here"
+                label={t("canvas.pane.addTopic")}
                 onSelect={() => apply(addFloatingTopic(docRef.current, ""), true)}
               />
               {getBranches().length ? (
                 <MenuItem
-                  label={
-                    getBranches().length === 1
-                      ? "Paste branch here"
-                      : `Paste ${getBranches().length} branches here`
-                  }
+                  label={t("canvas.menu.pasteBranches", { n: getBranches().length })}
                   onSelect={() => {
                     const clips = getBranches();
                     if (clips.length === 0) return;
@@ -3060,13 +3064,13 @@ function FlowInner({
               ) : null}
               <MenuSeparator />
               <MenuItem
-                label="Fit to view"
+                label={t("canvas.pane.fitToView")}
                 onSelect={() =>
                   fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit })
                 }
               />
               <MenuItem
-                label="Reset zoom (100%)"
+                label={t("canvas.pane.resetZoom")}
                 onSelect={() =>
                   zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport })
                 }
@@ -3099,7 +3103,7 @@ function FlowInner({
                 ] as const;
                 return (
                   <>
-                    <MenuLabel>Recolour</MenuLabel>
+                    <MenuLabel>{t("canvas.shape.recolour")}</MenuLabel>
                     <div className="mm-menu-row">
                       {colors.strokeSwatches.map((c) => (
                         <button
@@ -3117,7 +3121,7 @@ function FlowInner({
                     </div>
                     {ov.kind === "boundary" ? (
                       <>
-                        <MenuLabel>Shape</MenuLabel>
+                        <MenuLabel>{t("canvas.shape.shape")}</MenuLabel>
                         <div className="mm-menu-row">
                           {SHAPES.map(([sh, lbl]) => (
                             <button
@@ -3136,7 +3140,7 @@ function FlowInner({
                             </button>
                           ))}
                         </div>
-                        <MenuLabel>Outline</MenuLabel>
+                        <MenuLabel>{t("canvas.shape.outline")}</MenuLabel>
                         <div className="mm-menu-row">
                           {(["solid", "dashed", "dotted"] as const).map((d) => (
                             <button
@@ -3159,7 +3163,7 @@ function FlowInner({
                     ) : null}
                     <MenuSeparator />
                     <MenuItem
-                      label="Delete"
+                      label={t("canvas.menu.delete")}
                       danger
                       onSelect={() => {
                         deleteSelectedOverlay();

@@ -22,7 +22,11 @@ import { describe, expect, it } from "vitest";
 // exceptions.
 
 /** Files whose user-facing strings have been moved into a catalogue. Add a file when you migrate it. */
-const MIGRATED = ["src/components/SettingsDialog.tsx", "src/mindmap/flow/TopicNode.tsx"];
+const MIGRATED = [
+  "src/components/SettingsDialog.tsx",
+  "src/mindmap/flow/TopicNode.tsx",
+  "src/shortcuts.ts",
+];
 
 /** Props whose value is read by a user or a screen reader. */
 const USER_FACING_PROPS = ["title", "aria-label", "placeholder", "alt"];

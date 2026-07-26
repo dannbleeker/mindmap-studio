@@ -78,6 +78,62 @@ export const CORE_EN = {
   "settings.prefsFile.confirmBody":
     "This replaces {count} on this device (saved filters, themes, styles and panel layout as present in the file). Your maps are not touched. The app will reload.",
   "settings.prefsFile.confirmAction": "Import + reload",
+
+  // Keyboard cheat sheet (src/shortcuts.ts). The KEY names themselves ("Ctrl/⌘ + Z", "Tab") stay
+  // literal: they denote physical keys, and the canvas bindings they document are not locale-dependent.
+  // Only the group titles and the action descriptions are translated.
+  "shortcuts.group.editing": "Editing",
+  "shortcuts.group.selectionMoving": "Selection & moving",
+  "shortcuts.group.file": "File",
+  "shortcuts.group.navigation": "Navigation",
+  "shortcuts.group.view": "View",
+  "shortcuts.action.addASiblingTopic": "Add a sibling topic",
+  "shortcuts.action.addAChildTopic": "Add a child topic",
+  "shortcuts.action.outdentPromoteOneLevel": "Outdent (promote one level)",
+  "shortcuts.action.renameTheSelectedTopic": "Rename the selected topic",
+  "shortcuts.action.startEditingTheSelectedTopic": "Start editing the selected topic",
+  "shortcuts.action.openTheSelectedTopicSNote":
+    "Open the selected topic's note (installed app only)",
+  "shortcuts.action.deleteTheTopicItsBranchUndoable": "Delete the topic + its branch (undoable)",
+  "shortcuts.action.copyTheSelectedBranch": "Copy the selected branch",
+  "shortcuts.action.duplicateTheSelectedBranchAsA": "Duplicate the selected branch (as a sibling)",
+  "shortcuts.action.pasteAnImageOrTextAs":
+    "Paste an image, or text (as topics), onto the selection",
+  "shortcuts.action.pasteACopiedBranchUnderThe": "Paste a copied branch under the selection",
+  "shortcuts.action.boldItalicUnderlineWhileEditing": "Bold / italic / underline (while editing)",
+  "shortcuts.action.undo": "Undo",
+  "shortcuts.action.redo": "Redo",
+  "shortcuts.action.redoAlternative": "Redo (alternative)",
+  "shortcuts.action.setTheSelectedTopicSPriority":
+    "Set the selected topic's priority (1 = highest, 9 = lowest)",
+  "shortcuts.action.moveTheSelectionThroughTheTree": "Move the selection through the tree",
+  "shortcuts.action.reorderTheTopicAmongItsSiblings": "Reorder the topic among its siblings",
+  "shortcuts.action.outdentIndentTheSelectedTopic": "Outdent / indent the selected topic",
+  "shortcuts.action.nudgeTheTopicSPositionFree": "Nudge the topic's position (free layout only)",
+  "shortcuts.action.rubberBandSelectSeveralTopics": "Rubber-band select several topics",
+  "shortcuts.action.startARelationshipArrowToA":
+    "Start a relationship — arrow to a target, Enter to link (Esc cancels)",
+  "shortcuts.action.saveToTheLinkedFile": "Save to the linked file",
+  "shortcuts.action.saveToAFileAs": "Save to a file as…",
+  "shortcuts.action.openAFile": "Open a file",
+  "shortcuts.action.openTheCommandPaletteDoAnything": "Open the command palette (do anything)",
+  "shortcuts.action.openSettingsPreferences": "Open Settings & preferences",
+  "shortcuts.action.focusOnTheSelectedTopicEsc": "Focus on the selected topic (Esc to exit)",
+  "shortcuts.action.openFindReplaceOrPress": "Open Find & Replace (or press /)",
+  "shortcuts.action.openFindReplace": "Open Find & Replace",
+  "shortcuts.action.goBackToThePreviousTopic": "Go back to the previous topic you visited",
+  "shortcuts.action.goForwardAgain": "Go forward again",
+  "shortcuts.action.cancelClearTheCurrentSelection": "Cancel / clear the current selection",
+  "shortcuts.action.panTheCanvas": "Pan the canvas",
+  "shortcuts.action.panTheCanvasEvenOverA": "Pan the canvas (even over a topic)",
+  "shortcuts.action.zoomInAndOut": "Zoom in and out",
+  "shortcuts.action.zoomInOut": "Zoom in / out",
+  "shortcuts.action.resetZoomTo100": "Reset zoom to 100%",
+  "shortcuts.action.fitTheWholeMapToView": "Fit the whole map to view",
+  "shortcuts.action.fitTheSelectionToView": "Fit the selection to view",
+  "shortcuts.action.renameIt": "Rename it",
+  "shortcuts.action.addAFloatingTopic": "Add a floating topic",
+  "shortcuts.action.drawARelationshipToAnotherTopic": "Draw a relationship to another topic",
 } as const satisfies Catalogue;
 
 export type CoreKey = keyof typeof CORE_EN;

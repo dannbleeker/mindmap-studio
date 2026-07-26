@@ -1,8 +1,8 @@
-import { SHORTCUTS } from "../shortcuts";
+import { shortcutGroups } from "../shortcuts";
 import { Dialog } from "./Dialog";
 
 // The keyboard-shortcut cheat sheet (#2). Opened from the icon-rail (?) button and ⌘K; rendered from
-// the centralized SHORTCUTS map so it can never drift from the real bindings. Controlled like the
+// the centralized shortcutGroups() table so it can never drift from the real bindings. Controlled like the
 // other app dialogs (always mounted, `open` flipped); theme-reactive via the .mm-shortcuts* classes.
 
 export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -22,7 +22,7 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
       }}
     >
       <div className="mm-shortcuts">
-        {SHORTCUTS.map((group) => (
+        {shortcutGroups().map((group) => (
           <section key={group.title} className="mm-shortcuts-group">
             <h3>{group.title}</h3>
             <dl>

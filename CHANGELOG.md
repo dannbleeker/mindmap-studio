@@ -51,6 +51,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   indistinguishable from `background: style?.fillImage` without a parser. On its first run it found five
   genuinely un-migrated paragraphs in `SettingsDialog`, now moved into the catalogue.
 
+  **The keyboard cheat sheet is migrated (48 entries).** `shortcuts.ts` became `shortcutGroups()` — a
+  function rather than a `const` array, because a module-scope `t()` would bake the locale in at import
+  time and never reflect a later switch. The **key names themselves stay literal** ("Ctrl/⌘ + Z",
+  "Tab"): they denote physical keys, and the bindings they document aren't locale-dependent. Only the
+  five group titles and 44 action descriptions are translated. Proven behaviour-preserving by capturing
+  every rendered string before the change and asserting the migrated table reproduces it exactly.
+
   Budget note: 167 → 169 kB gz, documented in `size-budget.mjs`. The layer is a ~1 kB one-off and the
   marginal cost of migrating a string is the **key**, not the text (the text was already in the bundle,
   inline) — measured at ~25 bytes per entry, which puts the full ~1,400-string extraction at roughly

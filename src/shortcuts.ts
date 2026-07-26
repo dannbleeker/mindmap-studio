@@ -3,6 +3,8 @@
 // bindings. Those bindings live in: src/mindmap/FlowMindMap.tsx (canvas keydown + pan/zoom props),
 // src/App.tsx (⌘K / "/" / Escape), and src/mindmap/flow/TopicNode.tsx (B/I/U while editing).
 
+import { t } from "./i18n";
+
 export interface Shortcut {
   /** Display form of the keys/gesture, e.g. "Tab" or "Ctrl/⌘ + Z". */
   keys: string;
@@ -15,87 +17,104 @@ export interface ShortcutGroup {
 }
 
 // Cross-platform display: the canvas handles Ctrl OR ⌘ for the same bindings, so show both.
-export const SHORTCUTS: ShortcutGroup[] = [
-  {
-    title: "Editing",
-    items: [
-      { keys: "Enter", action: "Add a sibling topic" },
-      { keys: "Tab", action: "Add a child topic" },
-      { keys: "Ctrl/⌘ + Enter", action: "Add a child topic" },
-      { keys: "Shift + Tab", action: "Outdent (promote one level)" },
-      { keys: "F2", action: "Rename the selected topic" },
-      { keys: "Type a letter", action: "Start editing the selected topic" },
-      { keys: "Ctrl/⌘ + T", action: "Open the selected topic's note (installed app only)" },
-      { keys: "Delete / Backspace", action: "Delete the topic + its branch (undoable)" },
-      { keys: "Ctrl/⌘ + C", action: "Copy the selected branch" },
-      { keys: "Ctrl/⌘ + D", action: "Duplicate the selected branch (as a sibling)" },
-      { keys: "Ctrl/⌘ + V", action: "Paste an image, or text (as topics), onto the selection" },
-      { keys: "Ctrl/⌘ + Shift + V", action: "Paste a copied branch under the selection" },
-      { keys: "Ctrl/⌘ + B / I / U", action: "Bold / italic / underline (while editing)" },
-      { keys: "Ctrl/⌘ + Z", action: "Undo" },
-      { keys: "Ctrl/⌘ + Shift + Z", action: "Redo" },
-      { keys: "Ctrl/⌘ + Y", action: "Redo (alternative)" },
-      {
-        keys: "Ctrl/⌘ + Shift + 1…9",
-        action: "Set the selected topic's priority (1 = highest, 9 = lowest)",
-      },
-    ],
-  },
-  {
-    title: "Selection & moving",
-    items: [
-      { keys: "Arrow keys", action: "Move the selection through the tree" },
-      { keys: "Ctrl/⌘ + Shift + ↑ / ↓", action: "Reorder the topic among its siblings" },
-      { keys: "Alt + Shift + ← / →", action: "Outdent / indent the selected topic" },
-      { keys: "Ctrl/⌘ + arrow keys", action: "Nudge the topic's position (free layout only)" },
-      { keys: "Shift + drag", action: "Rubber-band select several topics" },
-      {
-        keys: "Ctrl/⌘ + Shift + L",
-        action: "Start a relationship — arrow to a target, Enter to link (Esc cancels)",
-      },
-    ],
-  },
-  {
-    title: "File",
-    items: [
-      { keys: "Ctrl/⌘ + S", action: "Save to the linked file" },
-      { keys: "Ctrl/⌘ + Shift + S", action: "Save to a file as…" },
-      { keys: "Ctrl/⌘ + O", action: "Open a file" },
-    ],
-  },
-  {
-    title: "Navigation",
-    items: [
-      { keys: "Ctrl/⌘ + K", action: "Open the command palette (do anything)" },
-      { keys: "Ctrl/⌘ + ,", action: "Open Settings & preferences" },
-      { keys: "Ctrl/⌘ + .", action: "Focus on the selected topic (Esc to exit)" },
-      { keys: "Ctrl/⌘ + F", action: "Open Find & Replace (or press /)" },
-      { keys: "/", action: "Open Find & Replace" },
-      { keys: "Alt + ←", action: "Go back to the previous topic you visited" },
-      { keys: "Alt + →", action: "Go forward again" },
-      { keys: "Esc", action: "Cancel / clear the current selection" },
-    ],
-  },
-  {
-    title: "View",
-    items: [
-      { keys: "Drag the background", action: "Pan the canvas" },
-      { keys: "Space + drag", action: "Pan the canvas (even over a topic)" },
-      { keys: "Scroll / ⌘ + scroll", action: "Zoom in and out" },
-      { keys: "Ctrl/⌘ + + / −", action: "Zoom in / out" },
-      { keys: "Ctrl/⌘ + 0", action: "Reset zoom to 100%" },
-      { keys: "Shift + 1", action: "Fit the whole map to view" },
-      { keys: "Shift + 2", action: "Fit the selection to view" },
-      { keys: "Double-click a topic", action: "Rename it" },
-      { keys: "Double-click the canvas", action: "Add a floating topic" },
-      { keys: "Drag a topic's grip", action: "Draw a relationship to another topic" },
-    ],
-  },
-];
+export function shortcutGroups(): ShortcutGroup[] {
+  return [
+    {
+      title: t("shortcuts.group.editing"),
+      items: [
+        { keys: "Enter", action: t("shortcuts.action.addASiblingTopic") },
+        { keys: "Tab", action: t("shortcuts.action.addAChildTopic") },
+        { keys: "Ctrl/⌘ + Enter", action: t("shortcuts.action.addAChildTopic") },
+        { keys: "Shift + Tab", action: t("shortcuts.action.outdentPromoteOneLevel") },
+        { keys: "F2", action: t("shortcuts.action.renameTheSelectedTopic") },
+        { keys: "Type a letter", action: t("shortcuts.action.startEditingTheSelectedTopic") },
+        { keys: "Ctrl/⌘ + T", action: t("shortcuts.action.openTheSelectedTopicSNote") },
+        {
+          keys: "Delete / Backspace",
+          action: t("shortcuts.action.deleteTheTopicItsBranchUndoable"),
+        },
+        { keys: "Ctrl/⌘ + C", action: t("shortcuts.action.copyTheSelectedBranch") },
+        { keys: "Ctrl/⌘ + D", action: t("shortcuts.action.duplicateTheSelectedBranchAsA") },
+        { keys: "Ctrl/⌘ + V", action: t("shortcuts.action.pasteAnImageOrTextAs") },
+        { keys: "Ctrl/⌘ + Shift + V", action: t("shortcuts.action.pasteACopiedBranchUnderThe") },
+        {
+          keys: "Ctrl/⌘ + B / I / U",
+          action: t("shortcuts.action.boldItalicUnderlineWhileEditing"),
+        },
+        { keys: "Ctrl/⌘ + Z", action: t("shortcuts.action.undo") },
+        { keys: "Ctrl/⌘ + Shift + Z", action: t("shortcuts.action.redo") },
+        { keys: "Ctrl/⌘ + Y", action: t("shortcuts.action.redoAlternative") },
+        {
+          keys: "Ctrl/⌘ + Shift + 1…9",
+          action: t("shortcuts.action.setTheSelectedTopicSPriority"),
+        },
+      ],
+    },
+    {
+      title: t("shortcuts.group.selectionMoving"),
+      items: [
+        { keys: "Arrow keys", action: t("shortcuts.action.moveTheSelectionThroughTheTree") },
+        {
+          keys: "Ctrl/⌘ + Shift + ↑ / ↓",
+          action: t("shortcuts.action.reorderTheTopicAmongItsSiblings"),
+        },
+        {
+          keys: "Alt + Shift + ← / →",
+          action: t("shortcuts.action.outdentIndentTheSelectedTopic"),
+        },
+        { keys: "Ctrl/⌘ + arrow keys", action: t("shortcuts.action.nudgeTheTopicSPositionFree") },
+        { keys: "Shift + drag", action: t("shortcuts.action.rubberBandSelectSeveralTopics") },
+        {
+          keys: "Ctrl/⌘ + Shift + L",
+          action: t("shortcuts.action.startARelationshipArrowToA"),
+        },
+      ],
+    },
+    {
+      title: t("shortcuts.group.file"),
+      items: [
+        { keys: "Ctrl/⌘ + S", action: t("shortcuts.action.saveToTheLinkedFile") },
+        { keys: "Ctrl/⌘ + Shift + S", action: t("shortcuts.action.saveToAFileAs") },
+        { keys: "Ctrl/⌘ + O", action: t("shortcuts.action.openAFile") },
+      ],
+    },
+    {
+      title: t("shortcuts.group.navigation"),
+      items: [
+        { keys: "Ctrl/⌘ + K", action: t("shortcuts.action.openTheCommandPaletteDoAnything") },
+        { keys: "Ctrl/⌘ + ,", action: t("shortcuts.action.openSettingsPreferences") },
+        { keys: "Ctrl/⌘ + .", action: t("shortcuts.action.focusOnTheSelectedTopicEsc") },
+        { keys: "Ctrl/⌘ + F", action: t("shortcuts.action.openFindReplaceOrPress") },
+        { keys: "/", action: t("shortcuts.action.openFindReplace") },
+        { keys: "Alt + ←", action: t("shortcuts.action.goBackToThePreviousTopic") },
+        { keys: "Alt + →", action: t("shortcuts.action.goForwardAgain") },
+        { keys: "Esc", action: t("shortcuts.action.cancelClearTheCurrentSelection") },
+      ],
+    },
+    {
+      title: t("shortcuts.group.view"),
+      items: [
+        { keys: "Drag the background", action: t("shortcuts.action.panTheCanvas") },
+        { keys: "Space + drag", action: t("shortcuts.action.panTheCanvasEvenOverA") },
+        { keys: "Scroll / ⌘ + scroll", action: t("shortcuts.action.zoomInAndOut") },
+        { keys: "Ctrl/⌘ + + / −", action: t("shortcuts.action.zoomInOut") },
+        { keys: "Ctrl/⌘ + 0", action: t("shortcuts.action.resetZoomTo100") },
+        { keys: "Shift + 1", action: t("shortcuts.action.fitTheWholeMapToView") },
+        { keys: "Shift + 2", action: t("shortcuts.action.fitTheSelectionToView") },
+        { keys: "Double-click a topic", action: t("shortcuts.action.renameIt") },
+        { keys: "Double-click the canvas", action: t("shortcuts.action.addAFloatingTopic") },
+        {
+          keys: "Drag a topic's grip",
+          action: t("shortcuts.action.drawARelationshipToAnotherTopic"),
+        },
+      ],
+    },
+  ];
+}
 
 // Display bindings keyed by command id (the ids in editorCommands.ts), so menus + the ⌘K palette can
 // show a shortcut hint at the point of use. ONLY commands that actually have a global key binding are
-// listed — never invent one. Each value MUST appear verbatim as a `keys` string in SHORTCUTS above;
+// listed — never invent one. Each value MUST appear verbatim as a `keys` string in shortcutGroups() above;
 // `test/shortcut-bindings.test.ts` enforces that, so this map can't drift from the documented cheat-sheet.
 export const SHORTCUT_BINDINGS: Record<string, string> = {
   undo: "Ctrl/⌘ + Z",

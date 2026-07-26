@@ -29,11 +29,23 @@ export const CANVAS_EN = {
   "canvas.node.rollUpSource": "Roll-up source",
   "canvas.node.addChild": "Add child (Tab)",
   "canvas.node.addSibling": "Add sibling (Enter)",
+  "canvas.node.wrapWidth": "Wrap width: {width}. Drag or use arrow keys to change.",
+  "canvas.node.editTopic": "Edit topic",
+  "canvas.node.editTopicNamed": "Edit topic: {topic}",
+  "canvas.node.followLink": "Follow link: {url}",
+  "canvas.node.rollUpMirrors": 'Roll-up: mirrors "{title}" — Refresh roll-ups to pull the latest',
+  "canvas.node.rollUpMirrorsUnknown":
+    "Roll-up: this topic mirrors another map — Refresh roll-ups to pull the latest",
+  // The collapsed-branch peek footer. Plural-formed even though English needs one wording for both
+  // categories, because a locale that inflects "more" needs somewhere to put the second form.
+  "canvas.node.moreChildren": { one: "…({n} more)", other: "…({n} more)" },
 
   // On-canvas menus raised from the editor
   "canvas.menu.insertCommand": "Insert command",
   "canvas.menu.linkToTopic": "Link to a topic",
   "canvas.menu.addTag": "Add a tag",
+  // Trailing space is deliberate: the label reads "New tag: #foo", with the `#tag` in its own span.
+  "canvas.slash.newTagPrefix": "New tag: ",
 } as const satisfies Catalogue;
 
 export type CanvasKey = keyof typeof CANVAS_EN;

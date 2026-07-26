@@ -13,6 +13,11 @@ import { type Catalogue, registerMessages } from "./registry";
 // this migration is behaviour-preserving, and the tests assert the rendered strings.
 
 export const CORE_EN = {
+  // Shared across features — a string with more than one home belongs here once, under `common.`, so a
+  // translator sees it once and the wording can't drift between the toolbar, the canvas and ⌘K.
+  // `untitled` is the fallback shown wherever a map or topic has no title; it had 20 hardcoded copies.
+  "common.untitled": "(untitled)",
+
   // Settings dialog
   "settings.title": "Settings",
   "settings.appearance": "Appearance",
@@ -262,6 +267,13 @@ export const CORE_EN = {
   "cmd.layout": "Layout: {name}",
   "cmd.exportAs": "Export {format}",
   "cmd.switchMap": "Switch to map: {title}",
+  "cmd.mergeMap": "Insert map as branch: {title}",
+  "cmd.node-priority-clear": "Priority: clear on selected topic",
+  // One command, two labels: the row names what the link will point AT, which depends on whether a
+  // topic is selected. Two keys rather than an interpolated noun — a language that inflects the verb
+  // for its object can't be served by swapping one word.
+  "cmd.copy-deep-link.topic": "Copy link to this topic",
+  "cmd.copy-deep-link.map": "Copy link to this map",
   "hint.stickyAdded": "Sticky note added — drag it anywhere.",
   "hint.mapPartInserted": "Inserted the {name} map part.",
   "hint.selectTopicFirst": "Select a topic first.",

@@ -1,5 +1,4 @@
-import { compareText } from "../i18n";
-import { t } from "../i18n";
+import { compareText, t } from "../i18n";
 import { MARKER_PALETTE } from "../icons";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
 import type { LayoutKind } from "../mindmap";
@@ -18,8 +17,10 @@ function* walkTopics(node: MapNode): Generator<MapNode> {
 
 /** A one-line, length-capped preview of a topic for a palette row. */
 function topicLabel(topic: string): string {
-  const t = topic.replace(/\s+/g, " ").trim() || "(untitled)";
-  return t.length > 60 ? `${t.slice(0, 57)}…` : t;
+  // `text`, not `t` — the local shadowed the imported translation function, which is why the fallback
+  // below stayed hardcoded through the main migration pass: `t("…")` was unreachable in this scope.
+  const text = topic.replace(/\s+/g, " ").trim() || t("common.untitled");
+  return text.length > 60 ? `${text.slice(0, 57)}…` : text;
 }
 
 // The editor command registry — one flat `Command[]`, 1:1 with the toolbar's actions, built from the
@@ -106,7 +107,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   add("copy-table", t("cmd.copy-table"), "map", () => io.copyTable());
   add(
     "copy-deep-link",
-    sel ? "Copy link to this topic" : "Copy link to this map",
+    sel ? t("cmd.copy-deep-link.topic") : t("cmd.copy-deep-link.map"),
     "map",
     () => io.copyDeepLink(),
     true,
@@ -316,7 +317,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     );
   add(
     "node-priority:clear",
-    "Priority: clear on selected topic",
+    t("cmd.node-priority-clear"),
     "priority",
     () => m()?.setSelectedPriority(undefined),
     !!sel,
@@ -381,7 +382,8 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
         compareText(a.title || "", b.title || ""),
     );
   for (const summary of otherMaps) {
-    const title = topicLabel(summary.title || "(untitled)");
+    // No `|| "(untitled)"` here — `topicLabel` already substitutes it for an empty title.
+    const title = topicLabel(summary.title);
     const label = summary.folderName ? `${summary.folderName} / ${title}` : title;
     const folderKw = summary.folderName ? `folder ${summary.folderName}` : "";
     add(
@@ -396,7 +398,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     );
     add(
       `merge-map:${summary.id}`,
-      `Insert map as branch: ${label}`,
+      t("cmd.mergeMap", { title: label }),
       "map",
       () => map.mergeMap(summary.id),
       !!sel,

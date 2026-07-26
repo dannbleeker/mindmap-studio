@@ -847,7 +847,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         <button
           type="button"
           className="mm-wrap-handle nodrag nopan"
-          aria-label={`Wrap width: ${wrapWidthLabel(styleToWrapWidth(ownStyle?.maxWidth))}. Drag or use arrow keys to change.`}
+          aria-label={t("canvas.node.wrapWidth", {
+            width: wrapWidthLabel(styleToWrapWidth(ownStyle?.maxWidth)),
+          })}
           title={t("canvas.node.wrapGrip")}
           onPointerDown={onWrapPointerDown}
           onPointerMove={onWrapPointerMove}
@@ -971,7 +973,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 contentEditable
                 suppressContentEditableWarning
                 // contentEditable already exposes an implicit textbox role + focusability; just name it.
-                aria-label={`Edit topic${topic ? `: ${topic}` : ""}`}
+                aria-label={
+                  topic ? t("canvas.node.editTopicNamed", { topic }) : t("canvas.node.editTopic")
+                }
                 spellCheck={editing?.spellcheck ?? false}
                 className="nodrag nopan"
                 style={{ outline: "none", display: "inline-block", minWidth: 16 }}
@@ -1101,7 +1105,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                         className="mm-slash-item"
                       >
                         <span>
-                          {isNew ? "New tag: " : ""}#{tag}
+                          {isNew ? t("canvas.slash.newTagPrefix") : ""}#{tag}
                         </span>
                         <span className="mm-slash-hint">🏷️</span>
                       </button>
@@ -1120,7 +1124,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             <button
               type="button"
               className="nodrag nopan"
-              title={`Follow link: ${hyperlink}`}
+              title={t("canvas.node.followLink", { url: hyperlink })}
               onClick={(e) => {
                 e.stopPropagation();
                 editing?.openLink(hyperlink);
@@ -1175,8 +1179,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             <span
               title={
                 rollupTitle
-                  ? `Roll-up: mirrors "${rollupTitle}" — Refresh roll-ups to pull the latest`
-                  : "Roll-up: this topic mirrors another map — Refresh roll-ups to pull the latest"
+                  ? t("canvas.node.rollUpMirrors", { title: rollupTitle })
+                  : t("canvas.node.rollUpMirrorsUnknown")
               }
               aria-label={t("canvas.node.rollUpSource")}
               style={{ marginLeft: 4, opacity: 0.6, fontSize: "0.85em" }}
@@ -1343,16 +1347,20 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             zIndex: 7,
           }}
         >
-          {childTitles.map((t, i) => (
+          {/* `title`, not `t` — the loop variable used to shadow the translation function, which made
+              `t("…")` unreachable inside this block. */}
+          {childTitles.map((title, i) => (
             <div
-              key={`${i}:${t}`}
+              key={`${i}:${title}`}
               style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
             >
-              {t.trim() || "(untitled)"}
+              {title.trim() || t("common.untitled")}
             </div>
           ))}
           {(hiddenCount ?? 0) > childTitles.length ? (
-            <div style={{ opacity: 0.6 }}>…({(hiddenCount ?? 0) - childTitles.length} more)</div>
+            <div style={{ opacity: 0.6 }}>
+              {t("canvas.node.moreChildren", { n: (hiddenCount ?? 0) - childTitles.length })}
+            </div>
           ) : null}
         </output>
       ) : null}

@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { LOCAL_PREF_KEYS } from "./localPrefs";
 
 // Settings export / import — carry your preferences to another machine.
@@ -68,21 +69,21 @@ export function parseSettingsFile(text: string): SettingsFile {
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error("That file isn't valid JSON.");
+    throw new Error(t("app.thatFileIsnTValid"));
   }
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error("That file isn't a MindMap Studio settings file.");
+    throw new Error(t("app.thatFileIsnTA"));
   }
   const obj = raw as Record<string, unknown>;
   if (obj.kind !== KIND) {
-    throw new Error("That file isn't a MindMap Studio settings file.");
+    throw new Error(t("app.thatFileIsnTA"));
   }
   if (typeof obj.version !== "number" || obj.version > SETTINGS_FILE_VERSION) {
-    throw new Error("That settings file was written by a newer version of MindMap Studio.");
+    throw new Error(t("app.thatSettingsFileWasWritten"));
   }
   const prefsRaw = obj.prefs;
   if (!prefsRaw || typeof prefsRaw !== "object" || Array.isArray(prefsRaw)) {
-    throw new Error("That settings file has no preferences in it.");
+    throw new Error(t("app.thatSettingsFileHasNo"));
   }
   // Keep only allowlisted string values — anything else is dropped rather than trusted.
   const prefs: Record<string, string> = {};

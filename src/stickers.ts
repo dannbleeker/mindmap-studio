@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import type { MapImage } from "./model/types";
 
 // A curated, built-in library of simple inline-SVG stickers/illustrations the user can drop on a
@@ -43,7 +44,7 @@ function svg(body: string): string {
 export const STICKERS: readonly Sticker[] = [
   {
     id: "star",
-    label: "Star",
+    label: t("app.star"),
     category: "Symbols",
     keywords: ["favourite", "favorite", "highlight", "best"],
     svg: svg(
@@ -52,7 +53,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "heart",
-    label: "Heart",
+    label: t("app.heart"),
     category: "Symbols",
     keywords: ["love", "like", "favourite"],
     svg: svg(
@@ -61,7 +62,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "check-badge",
-    label: "Check badge",
+    label: t("app.checkBadge"),
     category: "Status",
     keywords: ["done", "complete", "ok", "yes", "approved"],
     svg: svg(
@@ -70,7 +71,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "cross-badge",
-    label: "Cross badge",
+    label: t("app.crossBadge"),
     category: "Status",
     keywords: ["no", "fail", "cancel", "wrong", "reject"],
     svg: svg(
@@ -79,7 +80,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "flag",
-    label: "Flag",
+    label: t("app.flag"),
     category: "Symbols",
     keywords: ["mark", "milestone", "review"],
     svg: svg(
@@ -88,7 +89,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "lightbulb",
-    label: "Idea (lightbulb)",
+    label: t("app.ideaLightbulb"),
     category: "Symbols",
     keywords: ["idea", "insight", "tip", "suggestion"],
     svg: svg(
@@ -97,7 +98,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "warning",
-    label: "Warning",
+    label: t("app.warning"),
     category: "Status",
     keywords: ["caution", "risk", "danger", "alert"],
     svg: svg(
@@ -106,7 +107,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "info",
-    label: "Info",
+    label: t("app.info"),
     category: "Status",
     keywords: ["information", "note", "detail"],
     svg: svg(
@@ -115,14 +116,14 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "speech",
-    label: "Speech bubble",
+    label: t("app.speechBubble"),
     category: "Objects",
     keywords: ["comment", "talk", "discuss", "chat", "feedback"],
     svg: svg(`<path d="M3 5h18v12H9l-5 4v-4H3z"/>`),
   },
   {
     id: "thumbs-up",
-    label: "Thumbs up",
+    label: t("app.thumbsUp"),
     category: "Actions",
     keywords: ["yes", "approve", "good", "agree"],
     svg: svg(
@@ -131,7 +132,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "thumbs-down",
-    label: "Thumbs down",
+    label: t("app.thumbsDown"),
     category: "Actions",
     keywords: ["no", "reject", "bad", "disagree"],
     svg: svg(
@@ -140,7 +141,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "target",
-    label: "Target",
+    label: t("app.target"),
     category: "Symbols",
     keywords: ["goal", "aim", "focus", "objective"],
     svg: svg(
@@ -149,7 +150,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "rocket",
-    label: "Rocket",
+    label: t("app.rocket"),
     category: "Actions",
     keywords: ["launch", "ship", "start", "release"],
     svg: svg(
@@ -158,7 +159,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "lock",
-    label: "Lock",
+    label: t("app.lock"),
     category: "Objects",
     keywords: ["secure", "private", "protected"],
     svg: svg(
@@ -167,7 +168,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "key",
-    label: "Key",
+    label: t("app.key"),
     category: "Objects",
     keywords: ["access", "secret", "critical"],
     svg: svg(
@@ -176,7 +177,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "clock",
-    label: "Clock",
+    label: t("app.clock"),
     category: "Objects",
     keywords: ["time", "schedule", "due", "deadline"],
     svg: svg(
@@ -185,7 +186,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "pin",
-    label: "Location pin",
+    label: t("app.locationPin"),
     category: "Objects",
     keywords: ["location", "place", "where", "map"],
     svg: svg(
@@ -194,7 +195,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "fire",
-    label: "Fire",
+    label: t("app.fire"),
     category: "Symbols",
     keywords: ["hot", "urgent", "trending", "critical"],
     svg: svg(
@@ -203,7 +204,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "question-badge",
-    label: "Question badge",
+    label: t("app.questionBadge"),
     category: "Status",
     keywords: ["help", "unknown", "ask", "unsure"],
     svg: svg(
@@ -212,7 +213,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "arrow-right",
-    label: "Arrow right",
+    label: t("app.arrowRight"),
     category: "Actions",
     keywords: ["next", "forward", "go", "continue"],
     svg: svg(
@@ -221,7 +222,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "bug",
-    label: "Bug",
+    label: t("app.bug"),
     category: "Status",
     keywords: ["defect", "issue", "error", "fix", "problem"],
     svg: svg(
@@ -230,7 +231,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "gear",
-    label: "Settings (gear)",
+    label: t("app.settingsGear"),
     category: "Objects",
     keywords: ["config", "settings", "process", "system", "build"],
     svg: svg(
@@ -239,7 +240,7 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "calendar",
-    label: "Calendar",
+    label: t("app.calendar"),
     category: "Objects",
     keywords: ["date", "schedule", "event", "deadline", "due"],
     svg: svg(
@@ -248,14 +249,14 @@ export const STICKERS: readonly Sticker[] = [
   },
   {
     id: "person",
-    label: "Person",
+    label: t("app.person"),
     category: "Symbols",
     keywords: ["user", "owner", "assignee", "who", "contact"],
     svg: svg(`<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/>`),
   },
   {
     id: "chart",
-    label: "Bar chart",
+    label: t("app.barChart"),
     category: "Objects",
     keywords: ["data", "report", "metrics", "stats", "analysis"],
     svg: svg(

@@ -1,6 +1,7 @@
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { editorConfirm } from "../components/editorDialogs";
 import { nextPlaybackIndex } from "../historyPlayback";
+import { t } from "../i18n";
 import type { MindMapDoc } from "../model/types";
 import {
   type VersionMeta,
@@ -78,15 +79,15 @@ export function useVersionHistory({
     try {
       const latest = await latestVersionDoc(d.id);
       if (latest && JSON.stringify(latest) === JSON.stringify(d)) {
-        showHint("No changes since the last version.");
+        showHint(t("app.noChangesSinceTheLast"));
         return;
       }
       await saveVersion(d, Date.now());
       lastSnapshotByMap.current.set(d.id, Date.now());
       await refreshVersions();
-      showHint("Version saved.");
+      showHint(t("app.versionSaved"));
     } catch {
-      showHint("Couldn't save a version.");
+      showHint(t("app.couldnTSaveAVersion"));
     }
   }
 
@@ -94,9 +95,9 @@ export function useVersionHistory({
     const v = await loadVersion(id);
     if (!v) return;
     const ok = await editorConfirm({
-      title: "Restore this version?",
-      body: "Your current map is saved to history first, so you can undo.",
-      confirmText: "Restore",
+      title: t("app.restoreThisVersion"),
+      body: t("app.yourCurrentMapIsSaved"),
+      confirmText: t("common.restore"),
     });
     if (!ok) return;
     try {
@@ -111,9 +112,9 @@ export function useVersionHistory({
       await setLastOpened(next.id);
       await refreshMaps();
       await refreshVersions();
-      showHint("Version restored — the previous state is saved in history.");
+      showHint(t("app.versionRestoredThePreviousState"));
     } catch {
-      showHint("Couldn't restore the version.");
+      showHint(t("app.couldnTRestoreTheVersion"));
     }
   }
 
@@ -121,12 +122,12 @@ export function useVersionHistory({
     try {
       const snaps = await loadAllVersions(liveDocRef.current.id);
       if (snaps.length < 2) {
-        showHint("Save at least two versions to play the timeline.");
+        showHint(t("app.saveAtLeastTwoVersions"));
         return;
       }
       setPlayback({ snaps, index: 0, playing: true });
     } catch {
-      showHint("Couldn't load the history for playback.");
+      showHint(t("app.couldnTLoadTheHistory"));
     }
   }
 

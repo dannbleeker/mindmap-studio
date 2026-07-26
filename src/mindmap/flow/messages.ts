@@ -172,7 +172,6 @@ export const CANVAS_EN = {
   "canvas.minimap2": "Minimap ▴",
   "canvas.board": "Board",
   "canvas.startYourMap": "Start your map",
-  "canvas.dragTheBackgroundToPan": "Drag the background to pan · pinch to zoom",
   "canvas.groupInABoundary": "Group in a boundary",
   "canvas.clearPriorityOnTheSelection": "Clear priority on the selection",
   "canvas.defaultBranchColourOnThe": "Default branch colour on the selection",

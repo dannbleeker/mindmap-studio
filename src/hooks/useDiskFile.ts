@@ -1,5 +1,6 @@
 import { type RefObject, useCallback, useRef } from "react";
 import { editorConfirm } from "../components/editorDialogs";
+import { t } from "../i18n";
 import {
   downloadMapFile,
   ensureWritePermission,
@@ -111,14 +112,11 @@ export function useDiskFile({
       const { parseMmap } = await import("../import/mmap"); // lazy: keeps the importer out of the entry
       const { doc: next, warnings } = parseMmap(bytes);
       next.id = crypto.randomUUID(); // an import is a new library map, not a re-openable native file
-      load(next, [
-        "Imported from MindManager — saved to your library. You can't save back to .mmap; use “Save as…” to keep it as a .mmst file.",
-        ...warnings,
-      ]);
+      load(next, [t("app.importedFromMindmanagerSavedTo"), ...warnings]);
       setFileName(null); // library-only: not bound to a disk file
       setDirty(false);
       setView("editor");
-      showHint(`Imported ${handle.name} — use “Save as…” to keep it as a .mmst file.`);
+      showHint(t("hint.importedUseSaveAs", { name: handle.name }));
     },
     [load, setFileName, setDirty, setView, showHint],
   );
@@ -168,11 +166,11 @@ export function useDiskFile({
       try {
         const handle = await loadMapHandle(id);
         if (!handle) {
-          setError("That file is no longer available — its handle was lost.");
+          setError(t("app.thatFileIsNoLonger"));
           return;
         }
         if (!(await ensureWritePermission(handle, true))) {
-          showHint("Couldn't open — permission to access the file was denied.");
+          showHint(t("app.couldnTOpenPermissionTo"));
           return;
         }
         const opened = await readMapFromHandle(handle);
@@ -200,21 +198,19 @@ export function useDiskFile({
     }
     try {
       if (!(await ensureWritePermission(handle, true))) {
-        showHint("Couldn't save — permission to write the file was denied.");
+        showHint(t("app.couldnTSavePermissionTo"));
         return;
       }
       // The file changed on disk since we last read/wrote it — confirm before overwriting it.
       if (await diskChangedSince(d.id, handle)) {
         const overwrite = await editorConfirm({
-          title: "File changed on disk",
-          body: `“${handle.name}” was modified since you opened it (edited elsewhere, or synced). Overwrite it with this version? Your map stays in the library either way.`,
-          confirmText: "Overwrite",
+          title: t("app.fileChangedOnDisk"),
+          body: t("dialog.fileChanged.body", { name: handle.name }),
+          confirmText: t("app.overwrite"),
           danger: true,
         });
         if (!overwrite) {
-          showHint(
-            "Save cancelled — the file on disk was left as-is (your edits are kept in the library).",
-          );
+          showHint(t("app.saveCancelledTheFileOn"));
           return;
         }
       }
@@ -241,9 +237,7 @@ export function useDiskFile({
       if (await diskChangedSince(d.id, handle)) {
         if (!conflictWarned.current.has(d.id)) {
           conflictWarned.current.add(d.id);
-          showHint(
-            `“${handle.name}” changed on disk — use Save to overwrite (auto-save to file paused).`,
-          );
+          showHint(t("hint.fileChangedOnDisk", { name: handle.name }));
         }
         return;
       }

@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 // One source of truth for every dockable panel's name (item 20). The left-dock TAB shows the terse
 // base name; the Panels MENU shows a more descriptive form (the base plus a parenthetical/qualifier).
 // Both the dock (App.tsx) and the menu (Toolbar.tsx) read from here, so the two vocabularies can't
@@ -13,17 +14,17 @@ export interface PanelLabel {
 
 /** Panel key → its dock-tab + menu labels. Keys match the dock entry keys in App.tsx. */
 export const PANEL_LABELS = {
-  outline: { tab: "Outline", menu: "Outline" },
-  index: { tab: "Markers & tags", menu: "Markers & tags index" },
-  relationships: { tab: "Relationships", menu: "Relationships" },
-  stats: { tab: "Stats", menu: "Map statistics" },
-  agenda: { tab: "Agenda", menu: "Agenda (due tasks)" },
-  maps: { tab: "Maps", menu: "Maps (all maps)" },
-  inbox: { tab: "Inbox", menu: "Inbox (quick capture)" },
-  deck: { tab: "Deck", menu: "Slide deck (custom)" },
-  note: { tab: "Note", menu: "Note editor (dockable)" },
-  filter: { tab: "Filter", menu: "Power Filter" },
-  styles: { tab: "Styles", menu: "Conditional styles" },
-  history: { tab: "History", menu: "Version history" },
-  info: { tab: "Topic info", menu: "Topic info / inspector" },
+  outline: { tab: t("panel.outline"), menu: t("panel.outline") },
+  index: { tab: t("panel.markersTags"), menu: t("app.markersTagsIndex") },
+  relationships: { tab: t("app.relationships"), menu: t("app.relationships") },
+  stats: { tab: t("app.stats"), menu: t("app.mapStatistics") },
+  agenda: { tab: t("app.agenda"), menu: t("app.agendaDueTasks") },
+  maps: { tab: t("app.maps"), menu: t("app.mapsAllMaps") },
+  inbox: { tab: t("app.inbox"), menu: t("app.inboxQuickCapture") },
+  deck: { tab: t("app.deck"), menu: t("app.slideDeckCustom") },
+  note: { tab: t("app.note"), menu: t("app.noteEditorDockable") },
+  filter: { tab: t("app.filter"), menu: t("app.powerFilter") },
+  styles: { tab: t("app.styles"), menu: t("app.conditionalStyles") },
+  history: { tab: t("app.history"), menu: t("app.versionHistory") },
+  info: { tab: t("panel.topicInfo"), menu: t("app.topicInfoInspector") },
 } as const satisfies Record<string, PanelLabel>;

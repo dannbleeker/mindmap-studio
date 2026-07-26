@@ -33,7 +33,7 @@ export function CoachMark({
             <span>
               Tap <kbd>＋</kbd> on a topic to add a child · double-tap a topic to rename
             </span>
-            <span>{t("canvas.dragTheBackgroundToPan")}</span>
+            <span>{t("app.dragTheBackgroundToPan")}</span>
           </>
         ) : (
           <>

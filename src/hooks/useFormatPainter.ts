@@ -1,4 +1,5 @@
 import { type RefObject, useCallback, useState } from "react";
+import { t } from "../i18n";
 import type { MindMapHandle } from "../mindmap";
 import type { NodeStyle } from "../model/types";
 
@@ -22,20 +23,20 @@ export function useFormatPainter(
   const copyFormat = useCallback(() => {
     const style = mapRef.current?.copySelectedStyle();
     if (!style) {
-      showHint("Select a topic first, then Copy format.");
+      showHint(t("app.selectATopicFirstThen2"));
       return;
     }
     setCopiedStyle(style);
     showHint(
       Object.keys(style).length > 0
-        ? "Format copied — select topic(s) and Paste format."
-        : "That topic has no custom format to copy.",
+        ? t("app.formatCopiedSelectTopicS")
+        : t("app.thatTopicHasNoCustom"),
     );
   }, [mapRef, showHint]);
 
   const pasteFormat = useCallback(() => {
     if (!copiedStyle) return;
-    if (!mapRef.current?.setSelectedStyle(copiedStyle)) showHint("Select a topic first.");
+    if (!mapRef.current?.setSelectedStyle(copiedStyle)) showHint(t("hint.selectTopicFirst"));
   }, [mapRef, showHint, copiedStyle]);
 
   return { copyFormat, pasteFormat, canPasteFormat: copiedStyle !== null };

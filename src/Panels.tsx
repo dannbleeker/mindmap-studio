@@ -79,8 +79,8 @@ import {
   createLink,
   formatBlock,
   insertText as insertPlainText,
-  listFallback,
   toggleInline,
+  toggleList,
 } from "./richTextCommands";
 import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
@@ -4000,12 +4000,12 @@ export function NotesPanel({
     if (ref.current) toggleInline(ref.current, tag);
     serialize();
   };
-  // Lists are the one command still on execCommand: toggling them is a rich-text-engine problem
-  // (splitting blocks into items, merging adjacent lists) and a shaky reimplementation would regress
-  // a working editor. Isolated in richTextCommands.listFallback so the deprecated surface is one call.
-  const execList = (command: "insertUnorderedList" | "insertOrderedList") => {
+  // Bulleted / numbered lists — selection-based like the rest. See richTextCommands.toggleList for why
+  // this is tractable here: the markdown subset is flat, and splitting an item on Enter is native
+  // contentEditable behaviour rather than something execCommand supplied.
+  const execList = (ordered: boolean) => {
     ref.current?.focus();
-    listFallback(command);
+    if (ref.current) toggleList(ref.current, ordered);
     serialize();
   };
   // Append a markdown block (image / table) to the note and re-render. Done at the markdown layer
@@ -4089,8 +4089,8 @@ export function NotesPanel({
     { cmd: "b", label: <b>B</b>, title: "Bold (Ctrl+B)", list: false },
     { cmd: "i", label: <i>I</i>, title: "Italic (Ctrl+I)", list: false },
     { cmd: "s", label: <s>S</s>, title: "Strikethrough", list: false },
-    { cmd: "insertUnorderedList", label: "• List", title: "Bulleted list", list: true },
-    { cmd: "insertOrderedList", label: "1. List", title: "Numbered list", list: true },
+    { cmd: "ul", label: "• List", title: "Bulleted list", list: true },
+    { cmd: "ol", label: "1. List", title: "Numbered list", list: true },
   ] as const;
 
   return (
@@ -4137,11 +4137,7 @@ export function NotesPanel({
                 key={b.cmd}
                 // Keep the selection in the editor — don't let the button steal focus before exec.
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() =>
-                  b.list
-                    ? execList(b.cmd as "insertUnorderedList" | "insertOrderedList")
-                    : exec(b.cmd as InlineTag)
-                }
+                onClick={() => (b.list ? execList(b.cmd === "ol") : exec(b.cmd as InlineTag))}
                 title={b.title}
                 style={{
                   padding: "2px 8px",

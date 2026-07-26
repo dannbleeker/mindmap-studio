@@ -20,20 +20,6 @@ Tiers 1–5). Per-item detail lives in `CHANGELOG.md`. Three of that review's ca
 or *Out of scope*, so the decisions don't get re-litigated. Known-thin areas that are neither open work
 nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
-## Open residuals (2026-07-26)
-
-- **The two list commands still call `document.execCommand`** (`insertUnorderedList` /
-  `insertOrderedList`), isolated behind `listFallback()` in `src/richTextCommands.ts` — everything else
-  in both editors is now selection/Range based. Left deliberately: reimplementing list toggling
-  (splitting blocks into items, merging adjacent lists, nesting) is a rich-text-engine problem and a
-  shaky version would regress a working editor. `listFallback` already returns false if a browser drops
-  the API, so the failure mode is a dead button, not a crash. Related behaviour note: inline formatting
-  now requires a **selection** — the old collapsed-selection "typing style" has no standards-track
-  equivalent.
-- ~~**Settings export / import**~~ — **SHIPPED 2026-07-26.** Settings ▸ *Preferences file*; see
-  `CHANGELOG.md`. Saved filter presets, custom themes, named styles, panel layout and the
-  accessibility preferences travel; the branch clipboard and ⌘K recents deliberately don't.
-
 ## Blocked on owner access
 
 - **Manual MindManager open-test of a Studio-exported `.mmap`.** The writer is Studio-faithful but has
@@ -50,8 +36,8 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
   tags / due / priority / completion / relationship direction + type) with **no map-specific ids**, and
   `filter.ts` documents the presets as "persisted app-wide, reusable across maps". Scoping them to a
   document would *remove* that reuse — a preset saved on one map would stop appearing on the next —
-  turning a working feature into a per-map one. The real gap (getting them to a second machine) is a
-  settings export, listed under *Open residuals*.
+  turning a working feature into a per-map one. The real gap — getting them to a second machine — was
+  closed instead by the preferences export/import in Settings (2026-07-26).
 
 - **UI localisation (i18n) — analysed 2026-07-25, deferred by decision; the *bugs* it surfaced are
   fixed.** The app is English-only with no infrastructure: no library, zero `Intl.*` calls, no

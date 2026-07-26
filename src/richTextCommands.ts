@@ -8,13 +8,22 @@
 // with a colour). That's why these emit semantic tags rather than styled spans — exactly what the old
 // `execCommand("styleWithCSS", false, "false")` call was asking the browser for.
 //
-// Deliberately NOT reimplemented here: `insertUnorderedList` / `insertOrderedList`. List toggling is a
-// genuine rich-text-engine problem (splitting blocks into items, merging adjacent lists, nesting) and
-// a shaky version would regress a working editor, so the two list buttons still call execCommand —
-// see `listFallback` below and the note in NEXT_STEPS.
+// Nothing here calls `execCommand` any more, including the list commands. Those looked like a
+// rich-text-engine problem at first, and were deferred once on that basis; two facts about *this*
+// editor make them tractable, and both are load-bearing enough to state up front. The markdown subset
+// is FLAT — `noteFormat.serializeList` reads only the direct `<li>` children of a list, so nesting is
+// not representable and not a requirement. And splitting an item on Enter or merging on Backspace is
+// native `contentEditable` behaviour, not something `execCommand` supplied. Only the toggle itself
+// ever needed replacing.
 
 /** Tags we toggle as inline formatting. Semantic, so the markdown serialiser recognises them. */
 export type InlineTag = "b" | "i" | "u" | "s";
+
+/** Block-level tags the editor produces. Shared by `formatBlock` and the list commands. */
+const BLOCKS = new Set(["p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "blockquote"]);
+
+const isBlockEl = (n: Node): boolean =>
+  n.nodeType === 1 && BLOCKS.has((n as HTMLElement).tagName.toLowerCase());
 
 /** The live selection range, but only when it sits inside `root` (so a command can't reach out of the
  *  editor and mangle the rest of the page). Null when there's no usable selection. */
@@ -168,7 +177,6 @@ export function formatBlock(root: HTMLElement, tag: string): void {
   const range = rangeWithin(root);
   if (!range) return;
   const wanted = tag.replace(/[<>]/g, "").toLowerCase();
-  const BLOCKS = new Set(["p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "blockquote"]);
   const block = closestWithin(range.commonAncestorContainer, root, (el) =>
     BLOCKS.has(el.tagName.toLowerCase()),
   );
@@ -185,14 +193,95 @@ export function formatBlock(root: HTMLElement, tag: string): void {
   selectContents(replacement);
 }
 
-/** The two list commands still route through `execCommand` — see the header. Isolated here so the
- *  remaining deprecated surface is one call in one place, and so the call sites read the same as
- *  every other command. Returns false when the browser has dropped it, letting a caller react. */
-export function listFallback(command: "insertUnorderedList" | "insertOrderedList"): boolean {
-  if (typeof document.execCommand !== "function") return false;
-  try {
-    return document.execCommand(command);
-  } catch {
-    return false;
+/** The root-level units a range covers: each block-level child is its own unit, and a run of loose
+ *  inline/text siblings collapses into one (that run is a "line" as far as the user is concerned). */
+function coveredUnits(root: HTMLElement, range: Range): Node[][] {
+  const units: Node[][] = [];
+  let run: Node[] = [];
+  const flush = () => {
+    if (run.length > 0) units.push(run);
+    run = [];
+  };
+  for (const child of Array.from(root.childNodes)) {
+    const hit = range.intersectsNode(child);
+    if (isBlockEl(child)) {
+      flush();
+      if (hit) units.push([child]);
+    } else if (hit) {
+      run.push(child);
+    } else {
+      flush();
+    }
   }
+  flush();
+  return units;
+}
+
+/**
+ * Toggle the selection between a list and plain blocks, replacing
+ * `execCommand("insertUnorderedList" | "insertOrderedList")`.
+ *
+ * Three cases: already a list of this kind → unwrap it; already a list of the *other* kind → retag
+ * the container (bulleted ↔ numbered); otherwise → wrap each covered line in an `<li>`.
+ *
+ * This is tractable — where a general list implementation would not be — because of two facts about
+ * this editor specifically. The markdown subset behind it is **flat**: `noteFormat.serializeList`
+ * walks only the *direct* `<li>` children of a list, so nested lists aren't representable and
+ * therefore aren't a requirement. And splitting an item on Enter, or merging on Backspace, is native
+ * `contentEditable` behaviour rather than something `execCommand` provided — so only the toggle itself
+ * ever needed replacing.
+ *
+ * Known limit: unwrapping a *subset* of a list's items lifts them out above the list rather than
+ * splitting it in place, so a partial toggle-off can reorder items. Toggling a whole list off — the
+ * ordinary case — is exact.
+ */
+export function toggleList(root: HTMLElement, ordered: boolean): void {
+  const range = rangeWithin(root);
+  if (!range) return;
+  const wanted = ordered ? "ol" : "ul";
+  const covered = coveredTextNodes(range, root);
+  if (covered.length === 0) return;
+
+  const items = covered.map((n) => closestWithin(n, root, (el) => el.tagName === "LI"));
+  if (items.every(Boolean)) {
+    const lis = [...new Set(items as HTMLElement[])];
+    const list = lis[0].parentElement;
+    // Switching kind keeps the items and only retags their container.
+    if (list && root.contains(list) && list.tagName.toLowerCase() !== wanted) {
+      const next = document.createElement(wanted);
+      while (list.firstChild) next.appendChild(list.firstChild);
+      list.parentNode?.replaceChild(next, list);
+      selectContents(next);
+      return;
+    }
+    // Same kind → toggle off: each item becomes a plain block again.
+    for (const li of lis) {
+      const block = document.createElement("div");
+      while (li.firstChild) block.appendChild(li.firstChild);
+      list?.parentNode?.insertBefore(block, list);
+      li.remove();
+    }
+    if (list && list.childNodes.length === 0) list.remove();
+    return;
+  }
+
+  const units = coveredUnits(root, range);
+  if (units.length === 0) return;
+  const list = document.createElement(wanted);
+  root.insertBefore(list, units[0][0]);
+  for (const unit of units) {
+    const li = document.createElement("li");
+    for (const node of unit) {
+      if (isBlockEl(node)) {
+        // Lift the block's contents into the item — an <li> wrapping a <div> serialises with a stray
+        // blank line, and the markdown subset has no use for the wrapper.
+        while (node.firstChild) li.appendChild(node.firstChild);
+        (node as HTMLElement).remove();
+      } else {
+        li.appendChild(node); // moves it out of the root
+      }
+    }
+    list.appendChild(li);
+  }
+  selectContents(list);
 }

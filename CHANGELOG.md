@@ -25,6 +25,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Changed
 
+- **The last two `execCommand` calls are gone — lists are selection-based too.** Item 25 left the
+  bulleted/numbered list buttons on `document.execCommand` behind a `listFallback()`, on the grounds
+  that list toggling is a rich-text-engine problem. That deferral was overweighted, and two facts about
+  *this* editor are why. The markdown subset behind the Notes panel is **flat** —
+  `noteFormat.serializeList` reads only the *direct* `<li>` children of a list, so nested lists aren't
+  representable and were never a requirement. And splitting an item on Enter or merging on Backspace is
+  native `contentEditable` behaviour, not something `execCommand` supplied. That left only the toggle,
+  which `richTextCommands.toggleList` now does in three cases: already a list of this kind → unwrap;
+  already the other kind → retag the container (bulleted ↔ numbered); otherwise → wrap each covered
+  line in an `<li>`. A block's *contents* are lifted into the item rather than nesting the wrapper,
+  since `<li><div>x</div></li>` serialises with a stray blank line. Verified in a real browser as well
+  as in tests, including a markdown → render → toggle → markdown round trip. One documented limit:
+  unwrapping a *subset* of a list's items lifts them out above the list rather than splitting it in
+  place, so a partial toggle-off can reorder items; toggling a whole list off is exact. `src/` now
+  contains no `document.execCommand` call at all.
+
 - **Saved views travel with the map (backlog item 33).** A saved view captures a viewport, a
   drilled-in topic **id** and the active Power Filter — all meaningless outside their own map — yet
   they were persisted per-browser under `mindmap-views:<map id>`, so they didn't survive a

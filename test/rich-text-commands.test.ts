@@ -13,6 +13,7 @@ import {
   insertText,
   rangeWithin,
   toggleInline,
+  toggleList,
 } from "../src/richTextCommands";
 
 let root: HTMLDivElement;
@@ -196,6 +197,92 @@ describe("createLink", () => {
     const range = rangeWithin(root) as Range;
     createLink(range, "https://example.com");
     expect(htmlToNote(root.innerHTML)).toBe("[click me](https://example.com)");
+  });
+});
+
+// The last commands off execCommand. Tractable here because the markdown subset is flat (serializeList
+// reads only direct <li> children, so nesting isn't representable) and because Enter/Backspace inside
+// an item is native contentEditable behaviour, not something execCommand provided.
+describe("toggleList", () => {
+  it("turns loose text into a bulleted list", () => {
+    root.innerHTML = "milk";
+    selectAll();
+    toggleList(root, false);
+    expect(htmlToNote(root.innerHTML)).toBe("- milk");
+  });
+
+  it("turns loose text into a numbered list", () => {
+    root.innerHTML = "first";
+    selectAll();
+    toggleList(root, true);
+    expect(htmlToNote(root.innerHTML)).toBe("1. first");
+  });
+
+  it("makes one item per block across a multi-block selection", () => {
+    root.innerHTML = "<div>milk</div><div>eggs</div><div>bread</div>";
+    selectAll();
+    toggleList(root, false);
+    expect(root.querySelectorAll("li")).toHaveLength(3);
+    expect(htmlToNote(root.innerHTML)).toBe("- milk\n- eggs\n- bread");
+  });
+
+  it("numbers items in document order", () => {
+    root.innerHTML = "<div>one</div><div>two</div>";
+    selectAll();
+    toggleList(root, true);
+    expect(htmlToNote(root.innerHTML)).toBe("1. one\n2. two");
+  });
+
+  it("toggles a whole list back off", () => {
+    root.innerHTML = "<ul><li>milk</li><li>eggs</li></ul>";
+    selectAll();
+    toggleList(root, false);
+    expect(root.querySelectorAll("li")).toHaveLength(0);
+    expect(root.querySelector("ul")).toBeNull();
+    expect(root.textContent).toBe("milkeggs");
+  });
+
+  it("switches a bulleted list to numbered without losing items", () => {
+    root.innerHTML = "<ul><li>one</li><li>two</li></ul>";
+    selectAll();
+    toggleList(root, true);
+    expect(root.querySelector("ol")).toBeTruthy();
+    expect(root.querySelector("ul")).toBeNull();
+    expect(htmlToNote(root.innerHTML)).toBe("1. one\n2. two");
+  });
+
+  it("switches numbered back to bulleted", () => {
+    root.innerHTML = "<ol><li>one</li></ol>";
+    selectAll();
+    toggleList(root, false);
+    expect(htmlToNote(root.innerHTML)).toBe("- one");
+  });
+
+  it("lifts a block's contents into the item rather than nesting the wrapper", () => {
+    // <li><div>x</div></li> serialises with a stray blank line, and the flat markdown subset has no
+    // use for the wrapper.
+    root.innerHTML = "<div>milk</div>";
+    selectAll();
+    toggleList(root, false);
+    expect(root.querySelector("li > div")).toBeNull();
+    expect(htmlToNote(root.innerHTML)).toBe("- milk");
+  });
+
+  it("keeps inline formatting inside an item", () => {
+    root.innerHTML = "<div>buy <b>milk</b></div>";
+    selectAll();
+    toggleList(root, false);
+    expect(htmlToNote(root.innerHTML)).toBe("- buy **milk**");
+  });
+
+  it("ignores a selection outside the editor", () => {
+    const outside = document.createElement("div");
+    outside.textContent = "elsewhere";
+    document.body.appendChild(outside);
+    root.innerHTML = "milk";
+    selectAll(outside);
+    toggleList(root, false);
+    expect(root.innerHTML).toBe("milk");
   });
 });
 

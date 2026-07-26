@@ -33,6 +33,17 @@ object canvas.
 - The relate grip is hidden on touch (the "Link to…" menu is the fallback).
 - Floating topics auto-stack below the map in tree layouts; free placement needs freeform mode.
 
+## Rich-text editing
+
+Both editors (the Notes panel and the inline topic editor) run on selection/Range commands in
+`src/richTextCommands.ts` — no `document.execCommand` anywhere. Two known behaviours:
+
+- **Inline formatting requires a selection.** `execCommand` used to arm a "typing style" so the next
+  characters you typed came out bold; there is no standards-track way to reproduce that, so Ctrl+B with
+  a collapsed caret does nothing. Select, then format.
+- **Un-listing a *subset* of a list's items lifts them out above the list** rather than splitting the
+  list in place, so a partial toggle-off can reorder items. Toggling a whole list off is exact.
+
 ## Views / panels
 
 - Kanban has no column reorder, WIP limits, in-board card creation, or ordering (tags are

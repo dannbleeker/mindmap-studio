@@ -3,6 +3,8 @@
 // The localisation layer. English is the only shipped locale, so these assert the machinery rather than
 // any translation: key typing, plural selection via Intl.PluralRules, locale resolution, the document
 // lang/dir wiring, and locale-aware collation.
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Catalogue } from "../src/i18n";
 import {
@@ -150,6 +152,40 @@ describe("document wiring", () => {
 
   it("every shipped locale has a direction", () => {
     for (const l of LOCALES) expect(["ltr", "rtl"]).toContain(directionOf(l));
+  });
+});
+
+describe("bundle locality", () => {
+  // The load-bearing arrangement: a lazy chunk's catalogue must reach registerMessages/t through
+  // i18n/registry, NEVER through the i18n barrel — the barrel side-effect-imports the EAGER core
+  // catalogue, so one wrong import path silently drags every chrome string into that chunk. Confirmed by
+  // build measurement (canvas strings land in FlowMindMap-*.js, chrome strings in index-*.js); this is
+  // the cheap regression net for it.
+  const LAZY_FILES = ["src/mindmap/flow/messages.ts", "src/mindmap/flow/TopicNode.tsx"];
+
+  const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
+
+  it("lazy-chunk modules import the registry directly, not the barrel", () => {
+    for (const rel of LAZY_FILES) {
+      const importLines = read(rel)
+        .split("\n")
+        .filter((l) => l.startsWith("import") && l.includes("i18n"));
+      expect(importLines.length, `${rel} should import i18n`).toBeGreaterThan(0);
+      for (const line of importLines) {
+        // A barrel import ends `.../i18n";` — the registry one ends `.../i18n/registry";`.
+        expect(line.endsWith('/i18n";'), `${rel}: must not import the i18n barrel — ${line}`).toBe(
+          false,
+        );
+      }
+      expect(read(rel)).toContain('i18n/registry"');
+    }
+  });
+
+  it("the canvas catalogue registers itself on import, not from main.tsx", () => {
+    // The same failure mode that broke the first cut of this layer: registration belongs to the module,
+    // so any entry point rendering the canvas gets its messages.
+    expect(read("src/mindmap/flow/messages.ts")).toContain('registerMessages("en", CANVAS_EN)');
+    expect(read("src/mindmap/flow/TopicNode.tsx")).toContain('import "./messages"');
   });
 });
 

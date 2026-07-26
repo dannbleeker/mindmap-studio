@@ -27,19 +27,31 @@ catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + 
 handlers are migrated as the first real consumers. English is the only locale and is expected to stay
 that way for now — adding one means adding a JSON catalogue, not changing the app.
 
-**Decide this before the bulk extraction — it does not fit the bundle budget as designed.** Measured on
-the first 43 catalogue entries: the layer itself is a ~1 kB gz one-off, and the marginal cost per
-migrated string is the **key**, not the text (the English text was already in the bundle, inline). At
-~25 bytes of key per entry, the remaining ~1,400 chrome strings are **roughly +12 kB gz**. The entry
-chunk is 166.8 kB against a 169 kB ceiling, so that does not fit. Three ways out, none yet chosen:
+**Bundle strategy — decided 2026-07-26.** Measured on the first 43 catalogue entries: the layer itself
+is a ~1 kB gz one-off, and the marginal cost per migrated string is the **key**, not the text (the
+English text was already in the bundle, inline). At ~25 bytes of key per entry, the remaining ~1,400
+chrome strings are **roughly +12 kB gz** — more than the current ceiling allows.
 
-1. **Fetch English too.** Only boot-critical strings stay inline; the rest load as a JSON asset like any
-   other locale. Scales indefinitely, but introduces a first-paint story (a flash of keys, or a gate on
-   the fetch) that has to be designed.
-2. **Push more into lazy catalogues.** Already the pattern for chunk-local strings — `FlowMindMap` is a
-   ~100 kB lazy chunk holding ~175 of them. Helps, but a large share of the chrome is genuinely eager.
-3. **Raise the ceiling to ~180 kB** and accept the initial-load cost. Simplest, and the least defensible
-   for a local-first app whose pitch is that it starts instantly.
+**The approach: chunk-locality first, then raise the ceiling for what's left. Keep `t()` synchronous.**
+
+Put every string that *can* be chunk-local into a lazy catalogue beside its callers, so the eager
+catalogue carries only genuinely-eager chrome — `FlowMindMap` alone is a ~100 kB lazy chunk holding ~175
+strings. Then bump the ceiling to cover the eager remainder, documenting the reason in
+`size-budget.mjs` as every prior bump has.
+
+**Deliberately NOT doing yet: fetching English as a JSON asset.** It looks like the scalable answer and
+it is — later. With one locale it saves nothing: the ~12 kB doesn't disappear, it becomes a second
+request, and since the UI can't render its own labels until that request lands it's on the critical path
+regardless. What you'd actually buy is a `t()` that can be called before messages exist (precisely the
+bug that bit this layer on day one), a gate on first paint or a flash of raw keys, and every consumer
+having to tolerate "not loaded yet". For scale: the service worker already precaches **43 entries,
+1,690 KiB** — 12 kB is **0.7%** of what ships and caches today, once per release.
+
+Fetching becomes correct at **N locales**, where inline costs N × 12 kB (everyone downloads every
+language) and fetched costs 12 kB (everyone downloads one). At two it's a wash; at three or more
+fetching clearly wins. The architecture already supports it — `registerMessages()` is per-locale and
+later registrations overlay earlier ones, which is exactly the hook a fetched translation needs — so
+build it in the commit that adds the second language, where it earns its complexity, not before.
 
 Also still open from the plan: the remaining ~1,400 chrome strings (the top files being `Panels.tsx`
 342, `Toolbar.tsx` 220, `App.tsx` 127, `editorCommands.ts` 123, `FlowMindMap.tsx` 121 — ~340 of the

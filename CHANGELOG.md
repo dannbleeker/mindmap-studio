@@ -32,6 +32,14 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   "can call `t()`" and "the messages exist" are one fact. And plural selection ran through
   `Intl.PluralRules` before checking that a count was supplied.
 
+  **Chunk-locality proven, not just asserted.** The canvas now has its own catalogue
+  (`mindmap/flow/messages.ts`) and 21 `TopicNode` strings moved onto it. Measured after the build:
+  `"Drag onto another topic to link them"` lands in `FlowMindMap-*.js` while
+  `"Preferences live in this browser"` lands in `index-*.js`, and **the entry chunk did not grow at
+  all** (166.8 kB before and after). A test guards the single mistake that would break it — a lazy
+  module importing the `i18n` barrel instead of `i18n/registry`, which would pull the eager chrome
+  catalogue into that chunk.
+
   Budget note: 167 → 169 kB gz, documented in `size-budget.mjs`. The layer is a ~1 kB one-off and the
   marginal cost of migrating a string is the **key**, not the text (the text was already in the bundle,
   inline) — measured at ~25 bytes per entry, which puts the full ~1,400-string extraction at roughly

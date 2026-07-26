@@ -15,6 +15,7 @@ import {
 } from "react";
 import { Badge, DateChip } from "../../Badge";
 import { ProgressPie } from "../../ProgressPie";
+import { t } from "../../i18n/registry";
 import { markerImage } from "../../icons";
 import { sanitizeRich } from "../../io/richText";
 import { priorityColor, priorityLabel } from "../../priority";
@@ -31,6 +32,7 @@ import {
   wrapWidthToStyle,
 } from "../../wrapWidth";
 import { MARKER_DND_TYPE } from "../contract";
+import "./messages"; // registers the canvas catalogue into this (lazy) chunk
 import { useEditing } from "./editing";
 import { handleEditorKeyDown } from "./editorKeys";
 import { matchBorderColor } from "./geometry";
@@ -237,7 +239,7 @@ function RichEditToolbar({ editRef }: { editRef: RefObject<HTMLDivElement | null
     >
       <button
         type="button"
-        title="Bold (Ctrl/⌘+B)"
+        title={t("canvas.format.bold")}
         onMouseDown={stop}
         onClick={() => fmt("b")}
         style={{ ...btn, fontWeight: 800 }}
@@ -246,7 +248,7 @@ function RichEditToolbar({ editRef }: { editRef: RefObject<HTMLDivElement | null
       </button>
       <button
         type="button"
-        title="Italic (Ctrl/⌘+I)"
+        title={t("canvas.format.italic")}
         onMouseDown={stop}
         onClick={() => fmt("i")}
         style={{ ...btn, fontStyle: "italic" }}
@@ -255,7 +257,7 @@ function RichEditToolbar({ editRef }: { editRef: RefObject<HTMLDivElement | null
       </button>
       <button
         type="button"
-        title="Underline (Ctrl/⌘+U)"
+        title={t("canvas.format.underline")}
         onMouseDown={stop}
         onClick={() => fmt("u")}
         style={{ ...btn, textDecoration: "underline" }}
@@ -274,8 +276,8 @@ function RichEditToolbar({ editRef }: { editRef: RefObject<HTMLDivElement | null
         <button
           key={c}
           type="button"
-          title={`Text colour ${c}`}
-          aria-label={`Text colour ${c}`}
+          title={t("canvas.format.textColour", { colour: c })}
+          aria-label={t("canvas.format.textColour", { colour: c })}
           onMouseDown={stop}
           onClick={() => color(c)}
           style={{
@@ -817,7 +819,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           // add-child ＋ and collapse toggle, matching the tip-side affordance cluster (C4/tipLeft).
           position={tipLeft ? Position.Left : Position.Right}
           className="mm-relate-handle nodrag"
-          title="Drag onto another topic to link them"
+          title={t("canvas.node.relateGrip")}
           // Grabbing the grip retires its one-time coach hint (C7).
           onMouseDown={markRelateHintSeen}
           style={{
@@ -846,7 +848,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           type="button"
           className="mm-wrap-handle nodrag nopan"
           aria-label={`Wrap width: ${wrapWidthLabel(styleToWrapWidth(ownStyle?.maxWidth))}. Drag or use arrow keys to change.`}
-          title="Drag to set the topic's text-wrap width"
+          title={t("canvas.node.wrapGrip")}
           onPointerDown={onWrapPointerDown}
           onPointerMove={onWrapPointerMove}
           onPointerUp={onWrapPointerUp}
@@ -867,9 +869,9 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         <button
           type="button"
           className="mm-task-check nodrag nopan"
-          aria-label="Toggle task"
+          aria-label={t("canvas.node.toggleTask")}
           aria-pressed={(progress?.progress ?? 0) >= 1}
-          title="Mark as task / done (cycle)"
+          title={t("canvas.node.cycleTask")}
           onClick={(e) => {
             e.stopPropagation();
             editing?.cycleTask(id);
@@ -1032,7 +1034,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 // Plain buttons (not an ARIA listbox): keyboard focus stays in the editor — the menu is
                 // driven by the editor's keydown + aria-pressed reflects the highlighted row — so a
                 // focusable listbox would fight the contentEditable. Buttons are natively interactive.
-                <div className="nodrag nopan mm-slash-menu" aria-label="Insert command">
+                <div
+                  className="nodrag nopan mm-slash-menu"
+                  aria-label={t("canvas.menu.insertCommand")}
+                >
                   {slashItems.map((cmd, i) => (
                     <button
                       key={cmd.id}
@@ -1053,7 +1058,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 </div>
               ) : null}
               {linkOpen ? (
-                <div className="nodrag nopan mm-slash-menu" aria-label="Link to a topic">
+                <div
+                  className="nodrag nopan mm-slash-menu"
+                  aria-label={t("canvas.menu.linkToTopic")}
+                >
                   {linkItems.map((cand, i) => (
                     <button
                       key={cand.id}
@@ -1072,7 +1080,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 </div>
               ) : null}
               {tagOpen ? (
-                <div className="nodrag nopan mm-slash-menu" aria-label="Add a tag">
+                <div className="nodrag nopan mm-slash-menu" aria-label={t("canvas.menu.addTag")}>
                   {tagItems.map((tag, i) => {
                     // The first row for a brand-new (not-yet-existing) tag reads as "create".
                     const isNew =
@@ -1133,8 +1141,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             <button
               type="button"
               className="nodrag nopan"
-              title="Show note"
-              aria-label="Show note"
+              title={t("canvas.node.showNote")}
+              aria-label={t("canvas.node.showNote")}
               onClick={(e) => {
                 e.stopPropagation();
                 editing?.openNote(id);
@@ -1156,8 +1164,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           ) : null}
           {locked ? (
             <span
-              title="Position locked — right-click to unlock"
-              aria-label="Position locked"
+              title={t("canvas.node.positionLocked")}
+              aria-label={t("canvas.node.positionLockedShort")}
               style={{ marginLeft: 4, opacity: 0.55, fontSize: "0.85em" }}
             >
               🔒
@@ -1170,7 +1178,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                   ? `Roll-up: mirrors "${rollupTitle}" — Refresh roll-ups to pull the latest`
                   : "Roll-up: this topic mirrors another map — Refresh roll-ups to pull the latest"
               }
-              aria-label="Roll-up source"
+              aria-label={t("canvas.node.rollUpSource")}
               style={{ marginLeft: 4, opacity: 0.6, fontSize: "0.85em" }}
             >
               ⤵
@@ -1359,8 +1367,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           <button
             type="button"
             className="mm-node-add nodrag nopan"
-            title="Add child (Tab)"
-            aria-label="Add child (Tab)"
+            title={t("canvas.node.addChild")}
+            aria-label={t("canvas.node.addChild")}
             onClick={(e) => {
               e.stopPropagation();
               editing?.addChild(id);
@@ -1380,8 +1388,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             <button
               type="button"
               className="mm-node-add nodrag nopan"
-              title="Add sibling (Enter)"
-              aria-label="Add sibling (Enter)"
+              title={t("canvas.node.addSibling")}
+              aria-label={t("canvas.node.addSibling")}
               onClick={(e) => {
                 e.stopPropagation();
                 editing?.addSibling(id);

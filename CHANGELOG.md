@@ -51,6 +51,21 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   indistinguishable from `background: style?.fillImage` without a parser. On its first run it found five
   genuinely un-migrated paragraphs in `SettingsDialog`, now moved into the catalogue.
 
+  **Relative times and text ordering now go through `Intl`.** `timeAgo` was hand-built strings;
+  it now uses `Intl.RelativeTimeFormat`, so CLDR supplies each locale's phrasing and plural boundaries —
+  Danish reads "2 min. siden" and Slavic four-way plurals work with **no catalogue entries at all**. Its
+  past-a-week date fallback also formats for the APP's locale now, where the bare `toLocaleDateString()`
+  followed whatever the browser happened to be set to. **Visible change:** English wording shifted
+  slightly — "2 h ago" is now "2 hr. ago" — because no `Intl` style matches the old terse form exactly,
+  and hand-writing one per locale would discard the reason for using `Intl`. "just now" has no
+  relative-time equivalent so it stays a message.
+
+  All 12 collation sites now route through `compareText` (`Intl.Collator`): the Kanban tag columns, the
+  marker/tag index, the tag/marker value sets, map titles, folder names, the ⌘K map switcher and the
+  "Sort by name" control. A bare `.sort()` orders by UTF-16 code point, which strands å/æ/ö past z in
+  **every** alphabet — wrong for English as much as Danish — and a bare `localeCompare()` followed the
+  browser rather than the app and gave no numeric ordering, so "Item 10" sorted before "Item 2".
+
   **The editor toolbar is migrated (55 entries).** 70 literals across four shapes — prop attributes, JSX
   text nodes, positional arguments and `label:`/`name:` object properties — collapsing to 55 messages,
   because identical text shares one key (a label repeated across two menus appears once).

@@ -1,3 +1,4 @@
+import { compareText } from "../i18n";
 import { t } from "../i18n";
 import { MARKER_PALETTE } from "../icons";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
@@ -376,8 +377,8 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     .slice()
     .sort(
       (a, b) =>
-        (a.folderName ?? "").localeCompare(b.folderName ?? "") ||
-        (a.title || "").localeCompare(b.title || ""),
+        compareText(a.folderName ?? "", b.folderName ?? "") ||
+        compareText(a.title || "", b.title || ""),
     );
   for (const summary of otherMaps) {
     const title = topicLabel(summary.title || "(untitled)");

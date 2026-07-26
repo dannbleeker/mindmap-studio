@@ -1,4 +1,5 @@
 import { type DBSchema, type IDBPDatabase, deleteDB, openDB } from "idb";
+import { compareText } from "../i18n";
 import { normalizeDoc } from "../model/normalize";
 import type { MapNode, MindMapDoc } from "../model/types";
 
@@ -180,7 +181,7 @@ export async function listMaps(): Promise<MapSummary[]> {
         ? { id: doc.id, title: doc.title, folderId, folderName }
         : { id: doc.id, title: doc.title };
     })
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .sort((a, b) => compareText(a.title, b.title));
 }
 
 // Every full map, for library-wide search. Read-all is fine for a personal library;
@@ -201,7 +202,7 @@ export async function findMapReferences(targetId: string): Promise<MapSummary[]>
     .filter((d) => d.id !== targetId)
     .filter((d) => refsTarget(d.root) || (d.floatingTopics ?? []).some(refsTarget))
     .map((d) => ({ id: d.id, title: d.title }))
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .sort((a, b) => compareText(a.title, b.title));
 }
 
 /** Wipe the entire local library (maps, versions, handles, meta) by deleting the IndexedDB database —
@@ -314,7 +315,7 @@ export async function getFolders(): Promise<Folder[]> {
     if (!Array.isArray(parsed)) return [];
     return parsed
       .filter((f): f is Folder => !!f && typeof f.id === "string" && typeof f.name === "string")
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => compareText(a.name, b.name));
   } catch {
     return [];
   }

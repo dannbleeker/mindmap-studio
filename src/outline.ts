@@ -1,3 +1,4 @@
+import { compareText } from "./i18n";
 import { classifyLink } from "./mindmap/contract";
 import type { MapNode, MindMapDoc, NumberStyle } from "./model/types";
 import { progressMap, toPercent } from "./progress";
@@ -87,7 +88,7 @@ export function markerTagIndex(
   walk(root);
   for (const f of floatingTopics) walk(f);
   const sorted = (m: Map<string, IndexHit[]>): IndexEntry[] =>
-    [...m.keys()].sort().map((key) => ({ key, hits: m.get(key) ?? [] }));
+    [...m.keys()].sort(compareText).map((key) => ({ key, hits: m.get(key) ?? [] }));
   return { markers: sorted(markers), tags: sorted(tags) };
 }
 
@@ -141,7 +142,7 @@ export function backlinksFor(doc: MindMapDoc, targetId: string): Backlink[] {
     const src = byId.get(l.from);
     if (src) out.push({ id: l.from, topic: src.topic, kind: "relationship", label: l.label });
   }
-  return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
+  return out.sort((a, b) => compareText(a.topic, b.topic) || compareText(a.kind, b.kind));
 }
 
 /** A link OUT of a node — to where it points (mirror of Backlink). */
@@ -187,7 +188,7 @@ export function outgoingLinksFor(doc: MindMapDoc, sourceId: string): OutgoingLin
     const tgt = byId.get(l.to);
     if (tgt) out.push({ id: l.to, topic: tgt.topic, kind: "relationship", label: l.label });
   }
-  return out.sort((a, b) => a.topic.localeCompare(b.topic) || a.kind.localeCompare(b.kind));
+  return out.sort((a, b) => compareText(a.topic, b.topic) || compareText(a.kind, b.kind));
 }
 
 /** An incoming reference from ANOTHER map's topic (via a `#map=` / `#map=&node=` hyperlink). */
@@ -233,7 +234,7 @@ export function crossMapBacklinksFor(docs: MindMapDoc[], targetMapId: string): C
     for (const f of doc.floatingTopics ?? []) walk(f);
   }
   return out.sort(
-    (a, b) => a.sourceMapTitle.localeCompare(b.sourceMapTitle) || a.topic.localeCompare(b.topic),
+    (a, b) => compareText(a.sourceMapTitle, b.sourceMapTitle) || compareText(a.topic, b.topic),
   );
 }
 
@@ -291,7 +292,7 @@ export function mapLinks(doc: MindMapDoc): MapLink[] {
       });
     }
   }
-  return out.sort((a, b) => a.fromTopic.localeCompare(b.fromTopic) || a.kind.localeCompare(b.kind));
+  return out.sort((a, b) => compareText(a.fromTopic, b.fromTopic) || compareText(a.kind, b.kind));
 }
 
 /** 1-based index → uppercase letters (1→A, 26→Z, 27→AA). */

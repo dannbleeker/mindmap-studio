@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button, Input } from "../../../design/primitives";
+import { compareText } from "../../../i18n";
 import { createFolder, deleteFolder, moveMapToFolder, renameFolder } from "../../../store/mapStore";
 import { timeAgo } from "../../../ui";
 import { Dialog } from "../../Dialog";
@@ -36,7 +37,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
 
   const sorted = [...entries.filter(inView)].sort((a, b) => {
     if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
-    if (sort === "name") return a.title.localeCompare(b.title);
+    if (sort === "name") return compareText(a.title, b.title);
     if (sort === "nodes") return b.nodeCount - a.nodeCount;
     return (b.updatedAt ?? 0) - (a.updatedAt ?? 0);
   });

@@ -1,3 +1,4 @@
+import { compareText } from "./i18n";
 import { MARKER_GROUPS, markerName } from "./icons";
 import type { MapNode, MindMapDoc } from "./model/types";
 import { progressMap, toPercent } from "./progress";
@@ -154,7 +155,7 @@ export function buildBoard(doc: MindMapDoc, source: BoardSource, today: string):
   if (source.kind === "tag") {
     const tagged = [...cols.keys()]
       .filter((k) => k !== UNTAGGED)
-      .sort()
+      .sort(compareText)
       .map((tag) => ({ key: tag, label: tag, cards: cols.get(tag) ?? [] }));
     const untagged = cols.get(UNTAGGED);
     return untagged ? [...tagged, { key: UNTAGGED, label: "Untagged", cards: untagged }] : tagged;

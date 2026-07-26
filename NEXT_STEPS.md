@@ -55,9 +55,9 @@ build it in the commit that adds the second language, where it earns its complex
 
 Also still open from the plan: the remaining ~1,150 chrome strings (the biggest remaining being `Panels.tsx`
 (342 counted) and `FlowMindMap.tsx` (121, and lazy — so its catalogue belongs in `flow/messages.ts`) — ~340 of the
-total need hand conversion, not mechanical replacement); the rest of the `Intl` adoption (`ui.ts`
-`timeAgo`, `taskDate.ts` months + `parseNaturalDate`, the ~103 locale-unsafe `toLowerCase` sites, and
-wiring `compareText` into the 21 collation sites); the exporters taking the locale (`lang` attributes,
+total need hand conversion, not mechanical replacement); the rest of the `Intl` adoption — `timeAgo` and all 12 collation
+sites are **done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic,
+not translation) and the ~103 locale-unsafe `toLowerCase` sites; the exporters taking the locale (`lang` attributes,
 PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font); the PWA manifest strings;
 and finishing `editorCommands.ts`. The lint guard now has three detectors — prop literal, **prose in a
 positional argument**, and bare prose — so it sees the `add(id, "Label", …)` shape it was blind to (52

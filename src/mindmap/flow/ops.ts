@@ -1,3 +1,4 @@
+import { compareText } from "../../i18n/registry";
 import { toggleMarkerInList } from "../../icons";
 import { isDangerousUrl } from "../../io/urlSafety";
 import type {
@@ -233,8 +234,8 @@ function selectionSets(
   const all: string[] = [];
   const some: string[] = [];
   for (const [k, c] of count) (resolved > 0 && c === resolved ? all : some).push(k);
-  all.sort();
-  some.sort();
+  all.sort(compareText);
+  some.sort(compareText);
   return { all, some };
 }
 

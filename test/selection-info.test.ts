@@ -42,7 +42,7 @@ describe("selectionInfo", () => {
     expect(info.facts).toContain("depth 1");
     expect(info.facts).toContain("2 children"); // plural
     expect(info.facts).toContain("note 2w · 11c");
-    expect(info.times).toBe("created 2 min ago · modified 2 min ago");
+    expect(info.times).toBe("created 2 min. ago · modified 2 min. ago");
   });
 
   it("singularises one child and surfaces a reading time for a long note", () => {

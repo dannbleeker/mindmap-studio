@@ -163,6 +163,34 @@ export function placeholderViolations(src) {
   return out;
 }
 
+/** JSX text content sitting on ONE line between its tags — `<MenuLabel>Arrowheads</MenuLabel>`,
+ *  `<option value="left">Left side</option>`, `<span>Double-tap to edit</span>`.
+ *
+ *  This is where the SHORT labels live, and short is exactly what the other detectors give up on: the
+ *  argument rule needs a capitalised multi-word literal and the bare-prose rule needs a line with no
+ *  code punctuation, so a one-word section heading satisfies neither. Anchoring on the tags instead of
+ *  on the text is what makes single words safe here — `>Type</` is unambiguously rendered content,
+ *  whereas a bare `"Type"` could be an id, a `kind` or a discriminator.
+ *
+ *  Content containing `{` is skipped, so `<span>{t("…")}</span>` and any other interpolation passes.
+ *  Verified against every file on the allowlist before being added: all clean, while it found three
+ *  live hardcoded coach hints in `TopicNode.tsx` and 26 menu labels in `FlowMindMap.tsx`. */
+export function jsxTextViolations(src) {
+  const out = [];
+  const inComment = commentLineSet(src);
+  src.split("\n").forEach((line, i) => {
+    if (inComment.has(i)) return;
+    for (const m of line.matchAll(/>([A-Z][^<>{}]*)<\//g)) {
+      const text = m[1].trim();
+      // A single character is a glyph or an initial, not a label — `<kbd>K</kbd>`.
+      if (text.length < 2) continue;
+      if (ALLOWED_LITERALS.has(text.toLowerCase())) continue;
+      out.push({ line: i + 1, text: `>${text}<`, why: "user-facing JSX text" });
+    }
+  });
+  return out;
+}
+
 /** A line that is bare prose — how the multi-line paragraphs inside JSX look in source.
  *
  *  Tuned for NO false positives, accepting that it therefore misses some shapes. In particular a prose
@@ -197,6 +225,7 @@ export function scanSource(src) {
     ...argumentViolations(src),
     ...templateViolations(src),
     ...placeholderViolations(src),
+    ...jsxTextViolations(src),
     ...proseViolations(src),
   ];
 }

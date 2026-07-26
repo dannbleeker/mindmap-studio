@@ -1418,14 +1418,14 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
       ) : null}
       {hovered && !isEditing && !editHintSeen ? (
         <span className="mm-node-hint nodrag nopan">
-          <span className="mm-hint-mouse">Double-click or F2 to edit</span>
-          <span className="mm-hint-touch">Double-tap to edit</span>
+          <span className="mm-hint-mouse">{t("canvas.coach.editMouse")}</span>
+          <span className="mm-hint-touch">{t("canvas.coach.editTouch")}</span>
         </span>
       ) : null}
       {/* Drag-to-relate coach (C7) — shown after the edit hint is retired, until the grip is grabbed.
           Non-root only (the root has no grip); hidden on touch via CSS (the grip is hidden there too). */}
       {hovered && !isRoot && !isEditing && editHintSeen && !relateHintSeen ? (
-        <span className="mm-relate-hint nodrag nopan">Drag the dot onto another topic to link</span>
+        <span className="mm-relate-hint nodrag nopan">{t("canvas.coach.relate")}</span>
       ) : null}
     </div>
   );

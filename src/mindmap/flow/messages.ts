@@ -40,6 +40,13 @@ export const CANVAS_EN = {
   // categories, because a locale that inflects "more" needs somewhere to put the second form.
   "canvas.node.moreChildren": { one: "…({n} more)", other: "…({n} more)" },
 
+  // One-time coaches shown on hover until the user has done the thing once. The mouse and touch
+  // wordings are separate messages, not one string with a device word swapped — a locale may name the
+  // gesture differently in each, and CSS picks which span is visible.
+  "canvas.coach.editMouse": "Double-click or F2 to edit",
+  "canvas.coach.editTouch": "Double-tap to edit",
+  "canvas.coach.relate": "Drag the dot onto another topic to link",
+
   // On-canvas menus raised from the editor
   "canvas.menu.insertCommand": "Insert command",
   "canvas.menu.linkToTopic": "Link to a topic",

@@ -5,6 +5,7 @@
 // only escaped topic text is interpolated into the document (the nav script is
 // static), so there is no scripting surface from map content.
 
+import { getLocale } from "../i18n/registry";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
 import { resolveSlides, slideKey } from "../present/slides";
@@ -133,7 +134,7 @@ export function buildDeckHtml(doc: MindMapDoc, branchSvgs?: Map<string, string>)
   const title = doc.title || doc.root.topic || "Mind map";
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${getLocale()}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />

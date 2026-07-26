@@ -182,6 +182,14 @@ export default defineConfig({
       registerType: "prompt",
       includeAssets: ["icon.svg", "apple-touch-icon.png"],
       manifest: {
+        // A manifest is BAKED AT BUILD TIME, so unlike `<html lang>` and the exporters it cannot follow
+        // the locale the user picks at runtime — the install prompt and the OS launcher read this file
+        // before the app runs. The web-app-manifest spec has no supported runtime i18n (the
+        // `translations` member is not broadly implemented), so serving a per-locale manifest is the
+        // real answer if a second language ships. Until then `lang` + `dir` at least tell the OS what
+        // language these three strings ARE, which is what a screen reader in the launcher needs.
+        lang: "en",
+        dir: "ltr",
         name: "MindMap Studio",
         short_name: "MindMap",
         description: "Local-first mind mapping — a self-hosted MindManager replacement.",

@@ -235,6 +235,22 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   and the shape it should take if picked up are recorded in `NEXT_STEPS.md` rather than left as a
   one-line invitation to break the sanitiser.
 
+  **The exporters and the manifest now carry the locale.** `<html lang>` in the standalone HTML, the
+  slide deck and the interactive HTML, plus PPTX's run-level `lang`, are stamped from the active locale
+  instead of a baked `"en"` / `"en-US"`. This is not cosmetic: `<html lang>` is what a screen reader
+  uses to pick a voice and what a browser uses to hyphenate, and the PPTX run language is what
+  PowerPoint uses to choose a **spellcheck dictionary** — a Danish map exported today would be read
+  aloud in English and underlined in red throughout.
+
+  Asserting today's output would be tautological with one locale, so the tests **activate a second
+  locale** and assert the output follows, exercising the exact path a real language will take before
+  there is one. Mutation-proven: putting `"en"` back fails them.
+
+  The PWA manifest is the one that genuinely **cannot** follow the locale — it is baked at build time
+  and read by the OS launcher before the app runs, and the spec's `translations` member is not broadly
+  implemented. It gains `lang` + `dir` instead, so the launcher at least knows what language its three
+  strings are in, with the per-locale-manifest answer recorded for when a second language ships.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

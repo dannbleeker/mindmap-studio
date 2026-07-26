@@ -15,6 +15,7 @@
 //   • The runtime <script> and <style> are static string constants — no map
 //     content is interpolated into them.
 
+import { getLocale } from "../i18n/registry";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
 // Quote- and slash-safe: escaping `"`/`'` keeps text safe in attributes, and escaping `/` means a
@@ -258,7 +259,7 @@ export function buildInteractiveHtml(doc: MindMapDoc, svg?: string): string {
     ? `<button type="button" class="ctl" id="mode" aria-pressed="false" title="Switch between the visual map and the text outline">Outline view</button>`
     : "";
   return `<!doctype html>
-<html lang="en">
+<html lang="${getLocale()}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />

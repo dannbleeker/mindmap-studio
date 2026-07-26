@@ -41,10 +41,14 @@ misses and fixing them is part of the same commit.
 
 Two recurring traps, both of which cost real bugs:
 
-- **A local named `t` shadowing the imported `t()`** — five existed. In that scope `t("…")` is
+- **A local named `t` shadowing the imported `t()`** — SEVEN existed. In that scope `t("…")` is
   uncallable, so a migration pass skips the strings *silently* and leaves no trace. Worse, a scripted
   pass that rewrites INTO such a scope produces code that compiles and throws "t is not a function" at
-  runtime; one nearly shipped from `insertableTemplates.map((t) => …)`.
+  runtime; one nearly shipped from `insertableTemplates.map((t) => …)`. Renaming the loop variable also
+  strands any `{t}` still used as CONTENT — `tsc` catches that one, as "not a ReactNode".
+- **A catalogue holds CHARACTERS, not HTML entities.** JSX may write `Markers &amp; tags` and React
+  decodes it; `t()` returns a plain string React renders verbatim, so a scripted extraction that copies
+  the JSX source ships `&amp;` to the user. A catalogue-wide entity check now blocks it.
 - **Duplicate text across catalogues.** A test now fails when a canvas message repeats an eager one
   word for word — it caught four on the first run, one of which was demonstrably shipping the same
   sentence in both chunks. Reuse the existing key (a lazy chunk can reference an eager one for free);
@@ -69,15 +73,16 @@ The `App.tsx` `hint.*` batch measured +1.2 kB gz for ~124 new keys (entry 170.6 
 one move instead of a bump per batch. The chunk-locality work below is still worth doing — it is now an
 optimisation rather than a precondition. Two consequences to hold onto: ~4 kB of slack is unguarded
 until the migration lands, so watch for unrelated bloat riding in; and the ceiling should be
-**re-measured and tightened** once `Panels.tsx` is done. See the `171 → 175` note in
-`scripts/bundle-budget.mjs` (which is also where the ceiling now lives — no longer `size-budget.mjs`).
+**re-measured and tightened** once `Panels.tsx` is done. **Both are now resolved** — `Panels.tsx` landed
+at an entry of 174.2 kB, so 175 is a measured ceiling with 0.8 kB of headroom rather than open slack;
+`scripts/bundle-budget.mjs` records that (and is where the ceiling now lives — no longer
+`size-budget.mjs`).
 
-**The approach: chunk-locality first, then raise the ceiling for what's left. Keep `t()` synchronous.**
-
-Put every string that *can* be chunk-local into a lazy catalogue beside its callers, so the eager
-catalogue carries only genuinely-eager chrome — `FlowMindMap` alone is a ~100 kB lazy chunk holding ~175
-strings. Then bump the ceiling to cover the eager remainder, documenting the reason in
-`bundle-budget.mjs` as every prior bump has.
+**The approach, now carried out: chunk-locality first, then raise the ceiling for what's left. `t()`
+stayed synchronous.** Every string that could be chunk-local went into a lazy catalogue beside its
+callers — the canvas's 85 entries ride in the `FlowMindMap` chunk and cost the entry bundle nothing —
+and the eager remainder is covered by the 175 ceiling. Keep that split when adding strings: a lazy
+feature registers its own catalogue and imports `i18n/registry`, never the `i18n` barrel.
 
 **Deliberately NOT doing yet: fetching English as a JSON asset.** It looks like the scalable answer and
 it is — later. With one locale it saves nothing: the ~12 kB doesn't disappear, it becomes a second
@@ -101,8 +106,17 @@ Entry bundle 174.1 kB against a 175 ceiling; `scripts/bundle-budget.mjs` records
 measured rather than projected, so the loop it opened is closed. The rest of
 the `Intl` adoption: `timeAgo` and all 12 collation sites are
 **done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic, not
-translation), the exporters taking the locale (`lang` attributes, PPTX `lang="en-US"` + its empty
-`<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA manifest strings.
+translation) and the OOXML **font** questions — PPTX's empty `<a:ea>`/`<a:cs>` theme slots and XLSX's
+Calibri-only font. Recon those before building: empty `ea`/`cs` is what Office's own stock theme ships,
+so the real gap is likely the per-script `<a:font script="…">` list rather than the empty slots the
+earlier note pointed at.
+
+The `lang` attributes are **done**: the standalone HTML, slide deck and interactive HTML stamp
+`<html lang>` from the active locale, and PPTX stamps its run-level `lang` (which drives PowerPoint's
+spellcheck dictionary). The **PWA manifest cannot follow the locale** — it is baked at build time and
+read by the OS launcher before the app runs, and the spec's `translations` member is not broadly
+implemented; it now carries `lang` + `dir`, and the answer when a second language ships is a per-locale
+manifest, not a runtime one.
 
 ### DECLINED (2026-07-26): "make the ~103 locale-unsafe `toLowerCase` sites locale-safe"
 

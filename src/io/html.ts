@@ -6,12 +6,13 @@
 // exports through useMapExports.cleanSvg, which does exactly that). Never hand this
 // raw exporter output or untrusted SVG; `title` is escaped here, the SVG body is not.
 
+import { getLocale } from "../i18n/registry";
 import { escapeHtmlContent as escapeHtml } from "./htmlEscape";
 
 /** Wrap an ALREADY-SANITISED SVG (see module note) in a standalone HTML document. */
 export function wrapSvgHtml(svg: string, title: string): string {
   return `<!doctype html>
-<html lang="en">
+<html lang="${getLocale()}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -38,7 +39,7 @@ export function wrapSvgHtml(svg: string, title: string): string {
 /** Build a print-to-PDF document from an ALREADY-SANITISED SVG (see module note) + optional notes. */
 export function buildPrintDoc(svg: string, title: string, appendixHtml = ""): string {
   return `<!doctype html>
-<html lang="en">
+<html lang="${getLocale()}">
 <head>
 <meta charset="utf-8" />
 <title>${escapeHtml(title)}</title>

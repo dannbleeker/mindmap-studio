@@ -11,6 +11,7 @@
 // Pure + deterministic (entry mtimes pinned); only escaped topic text is
 // interpolated. Reuses the same slide model the in-app presentation renders.
 
+import { getLocale } from "../i18n/registry";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { resolveSlides, slideKey } from "../present/slides";
 import { escapeXml, zipOoxml } from "./ooxml";
@@ -79,13 +80,13 @@ function collectBody(slide: { isOverview: boolean; node: MapNode }, doc: MindMap
 }
 
 function titlePara(title: string): string {
-  return `<a:p><a:r><a:rPr lang="en-US" sz="4000" b="1"><a:solidFill><a:srgbClr val="1F1B4D"/></a:solidFill></a:rPr><a:t>${escapeXml(title)}</a:t></a:r></a:p>`;
+  return `<a:p><a:r><a:rPr lang="${getLocale()}" sz="4000" b="1"><a:solidFill><a:srgbClr val="1F1B4D"/></a:solidFill></a:rPr><a:t>${escapeXml(title)}</a:t></a:r></a:p>`;
 }
 
 function bodyPara(line: BodyLine): string {
   const sz = Math.max(1400, 2000 - line.level * 200);
   const marL = 285750 * (line.level + 1);
-  return `<a:p><a:pPr lvl="${line.level}" marL="${marL}" indent="-285750"><a:buFont typeface="Arial"/><a:buChar char="•"/></a:pPr><a:r><a:rPr lang="en-US" sz="${sz}"><a:solidFill><a:srgbClr val="333333"/></a:solidFill></a:rPr><a:t>${escapeXml(line.text)}</a:t></a:r></a:p>`;
+  return `<a:p><a:pPr lvl="${line.level}" marL="${marL}" indent="-285750"><a:buFont typeface="Arial"/><a:buChar char="•"/></a:pPr><a:r><a:rPr lang="${getLocale()}" sz="${sz}"><a:solidFill><a:srgbClr val="333333"/></a:solidFill></a:rPr><a:t>${escapeXml(line.text)}</a:t></a:r></a:p>`;
 }
 
 function textBox(
@@ -143,7 +144,9 @@ function notesParas(note: string): string {
   const lines = note.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length === 0) return "<a:p/>";
   return lines
-    .map((line) => `<a:p><a:r><a:rPr lang="en-US"/><a:t>${escapeXml(line)}</a:t></a:r></a:p>`)
+    .map(
+      (line) => `<a:p><a:r><a:rPr lang="${getLocale()}"/><a:t>${escapeXml(line)}</a:t></a:r></a:p>`,
+    )
     .join("");
 }
 

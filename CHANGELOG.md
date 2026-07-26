@@ -5,6 +5,24 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Added
+
+- **Export / import your preferences (closes the settings-export residual).** The app has no account,
+  so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
+  app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to
+  lose them. Settings ▸ **Preferences file** now writes them to a small JSON file and reads one back:
+  saved filter presets, custom themes, named styles, panel layout, canvas + app theme, and the
+  accessibility preferences. Two things are deliberately excluded — the branch clipboard (a copied
+  subtree, not a setting, and potentially large) and the ⌘K recents (this machine's own usage history).
+  Import **only replaces the keys the file contains**, so a partial file can't clear a preference it
+  never mentioned, and it confirms with a count before reloading. Maps are never touched.
+
+  A settings file is untrusted input, so import is **allowlisted twice**: `parseSettingsFile` keeps
+  only known preference keys with string values, and `applySettings` filters again on the way out.
+  Without that, an arbitrary `prefs` map in a downloaded file could write any localStorage key in the
+  origin.
+  Verified in a real browser as well as in tests: a hostile file's extra key is not written.
+
 ### Changed
 
 - **Saved views travel with the map (backlog item 33).** A saved view captures a viewport, a

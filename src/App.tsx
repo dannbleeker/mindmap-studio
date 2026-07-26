@@ -133,6 +133,14 @@ import {
   setLastOpened,
   softDeleteMap,
 } from "./store/mapStore";
+import {
+  type SettingsFile,
+  applySettings,
+  collectSettings,
+  parseSettingsFile,
+  serializeSettings,
+  settingsKeysIn,
+} from "./store/settingsFile";
 import { useTabPresence } from "./store/tabCoordination";
 import { setTagColor, tagColor } from "./tagColors";
 import { todayISO } from "./taskDate";
@@ -2747,6 +2755,45 @@ export function App() {
         onClearBranchClipboard={() => {
           clearBranch();
           showHint("Branch clipboard cleared.");
+        }}
+        onExportSettings={() => {
+          const file = collectSettings(new Date().toISOString());
+          const keys = settingsKeysIn(file);
+          if (keys.length === 0) {
+            showHint("No preferences to export yet.");
+            return;
+          }
+          downloadBlob(
+            new Blob([serializeSettings(file)], { type: "application/json" }),
+            "mindmap-studio-preferences.json",
+          );
+          showHint(`Exported ${keys.length} preference${keys.length === 1 ? "" : "s"}.`);
+        }}
+        onImportSettings={(f) => {
+          void (async () => {
+            let parsed: SettingsFile;
+            try {
+              parsed = parseSettingsFile(await f.text());
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Couldn't read that file.");
+              return;
+            }
+            const keys = settingsKeysIn(parsed);
+            if (keys.length === 0) {
+              setError("That file has no preferences this version can use.");
+              return;
+            }
+            // Preferences are read at mount, so applying them needs a reload to take effect —
+            // confirm first, and say exactly how many are being replaced.
+            const ok = await editorConfirm({
+              title: "Import preferences?",
+              body: `This replaces ${keys.length} preference${keys.length === 1 ? "" : "s"} on this device (saved filters, themes, styles and panel layout as present in the file). Your maps are not touched. The app will reload.`,
+              confirmText: "Import + reload",
+            });
+            if (!ok) return;
+            applySettings(parsed);
+            location.reload();
+          })();
         }}
         onClearAllData={clearAllLocalData}
       />

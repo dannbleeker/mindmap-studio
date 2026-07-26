@@ -30,10 +30,9 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
   the API, so the failure mode is a dead button, not a crash. Related behaviour note: inline formatting
   now requires a **selection** — the old collapsed-selection "typing style" has no standards-track
   equivalent.
-- **Settings export / import** — the genuine gap behind the declined half of item 33. Saved *filter*
-  presets are app-wide by design and deliberately stayed in localStorage (see *Deferred* below), so the
-  way to get them onto a second machine is exporting preferences, not scoping them to a document. Not
-  started; no size estimate yet.
+- ~~**Settings export / import**~~ — **SHIPPED 2026-07-26.** Settings ▸ *Preferences file*; see
+  `CHANGELOG.md`. Saved filter presets, custom themes, named styles, panel layout and the
+  accessibility preferences travel; the branch clipboard and ⌘K recents deliberately don't.
 
 ## Blocked on owner access
 

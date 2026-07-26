@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../design/primitives";
 import type { Appearance } from "../useAppearance";
 import type { ContrastPref } from "../useHighContrast";
@@ -29,6 +29,10 @@ export interface SettingsDialogProps {
   onClearRecents: () => void;
   /** Clear the cross-map branch clipboard. */
   onClearBranchClipboard: () => void;
+  /** Download the portable preferences as a .json file. */
+  onExportSettings: () => void;
+  /** Read a preferences .json and apply it (App confirms, reports, and reloads). */
+  onImportSettings: (file: File) => void;
   /** Wipe the whole local library + preferences (App confirms + reloads). */
   onClearAllData: () => void;
 }
@@ -60,9 +64,12 @@ export function SettingsDialog({
   onReShowGettingStarted,
   onClearRecents,
   onClearBranchClipboard,
+  onExportSettings,
+  onImportSettings,
   onClearAllData,
 }: SettingsDialogProps) {
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null);
+  const settingsFileRef = useRef<HTMLInputElement>(null);
 
   // Read the local storage estimate when the dialog opens (best-effort — not in every browser/jsdom).
   useEffect(() => {
@@ -152,6 +159,30 @@ export function SettingsDialog({
         <Button onClick={onReShowGettingStarted} style={{ alignSelf: "flex-start" }}>
           Show the getting-started tips again
         </Button>
+      </Section>
+
+      <Section title="Preferences file">
+        <p style={{ margin: 0, fontSize: 12.5, color: "var(--ed-muted)", lineHeight: 1.5 }}>
+          Preferences live in this browser, not in your maps — so saved filter presets, custom
+          themes and named styles stay behind when you move machines. Export them to a file to carry
+          them across. Importing only replaces the preferences the file contains, and never touches
+          your maps.
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <Button onClick={onExportSettings}>Export preferences…</Button>
+          <Button onClick={() => settingsFileRef.current?.click()}>Import preferences…</Button>
+          <input
+            ref={settingsFileRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = ""; // let the same file be picked again after a failed import
+              if (f) onImportSettings(f);
+            }}
+            style={{ display: "none" }}
+          />
+        </div>
       </Section>
 
       <Section title="Local data">

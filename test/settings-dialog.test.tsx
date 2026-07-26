@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { SettingsDialog } from "../src/components/SettingsDialog";
@@ -32,6 +32,8 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
     onReShowGettingStarted: vi.fn(),
     onClearRecents: vi.fn(),
     onClearBranchClipboard: vi.fn(),
+    onExportSettings: vi.fn(),
+    onImportSettings: vi.fn(),
     onClearAllData: vi.fn(),
     ...over,
   };
@@ -44,7 +46,23 @@ describe("SettingsDialog", () => {
     setup();
     expect(screen.getByText("Settings")).toBeTruthy();
     expect(screen.getByText("Appearance")).toBeTruthy();
+    expect(screen.getByText("Preferences file")).toBeTruthy();
     expect(screen.getByText("Local data")).toBeTruthy();
+  });
+
+  // Preferences are app-wide and don't live on any document (saved filter presets deliberately so), so
+  // a settings file is the only way they reach a second machine.
+  it("exports preferences on demand, and picks a file to import", () => {
+    const props = setup();
+    fireEvent.click(screen.getByText("Export preferences…"));
+    expect(props.onExportSettings).toHaveBeenCalled();
+
+    // The Import button proxies to a hidden file input; picking a file hands it straight to App.
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(input).toBeTruthy();
+    const file = new File(["{}"], "prefs.json", { type: "application/json" });
+    fireEvent.change(input, { target: { files: [file] } });
+    expect(props.onImportSettings).toHaveBeenCalledWith(file);
   });
 
   // Design-surface consolidation (T3-25): the canvas-theme select used to live here too, duplicating

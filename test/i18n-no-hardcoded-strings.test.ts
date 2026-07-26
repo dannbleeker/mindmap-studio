@@ -136,6 +136,16 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(templateViolations("  title={`Delete view ${v.name}`}")).toHaveLength(1);
     expect(templateViolations("  showHint(`Inserted the ${p.name} map part.`)")).toHaveLength(1);
     expect(templateViolations('  title={t("view.delete", { name: v.name })}')).toHaveLength(0);
+    // MARKUP is stripped before the prose rule runs — the exporters build OOXML and SVG by
+    // concatenation, and a tag or attribute name reads exactly like "capitalised word, lowercase word".
+    expect(templateViolations('  `<a:p><a:r><a:rPr lang="en"/></a:r></a:p>`')).toHaveLength(0);
+    expect(
+      templateViolations('  `<Relationships xmlns="http://x"><Sld name="Blank"/>`'),
+    ).toHaveLength(0);
+    // …but prose BETWEEN tags must still fire. Stripping the tags must not strip the file.
+    expect(
+      templateViolations('  `<div class="warn">Could not render ${n} topics</div>`'),
+    ).toHaveLength(1);
     // Machine-facing templates that must NOT trip it — all real shapes from the canvas and exporters.
     expect(templateViolations("  transform: `translate(${x}px, ${y}px) scale(${s})`")).toHaveLength(
       0,
@@ -189,6 +199,13 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(proseViolations("          background: style?.fillImage")).toHaveLength(0);
     expect(proseViolations("            style?.background ??")).toHaveLength(0);
     expect(proseViolations("        boxShadow: dropTarget")).toHaveLength(0);
+    // A control-flow keyword plus ONE identifier is a wrapped statement, not a sentence. Seven of
+    // these exist in src and none is prose.
+    expect(proseViolations("      return parsed")).toHaveLength(0);
+    expect(proseViolations("      return folderName")).toHaveLength(0);
+    expect(proseViolations("      throw err")).toHaveLength(0);
+    // Anchored to end-of-line, so real copy opening with the same word keeps firing.
+    expect(proseViolations("      Return to the map to continue")).toHaveLength(1);
     // Short prose is allowed through only when it's sentence-cased. `Map side` is a real label in the
     // branch menu and only 8 characters; the length floor alone was hiding it. JS keywords are
     // lowercase, which is what keeps the short code lines out.

@@ -140,7 +140,18 @@ export function templateViolations(src) {
   src.split("\n").forEach((line, i) => {
     if (inComment.has(i)) return;
     for (const m of line.matchAll(/`([^`]*)`/g)) {
-      const text = m[1].replace(/\$\{[^}]*\}/g, " ");
+      const text = m[1]
+        .replace(/\$\{[^}]*\}/g, " ")
+        // Strip MARKUP before looking for prose. The exporters build OOXML and SVG by concatenation,
+        // and a tag or attribute name reads exactly like prose to the rule below — `<a:p>` and
+        // `<Relationships xmlns=` and `<Sld name="Blank">` are all "capitalised word, lowercase word".
+        // That was 32 false positives across io/pptx.ts, io/xlsx.ts, io/interactiveHtml.ts,
+        // io/deck.ts and flow/exportSvg.ts, and it is why those files could never join the allowlist.
+        //
+        // This strips the TAGS, not the file: prose sitting BETWEEN tags still reads as prose, so
+        // `<div class="warn">Could not render ${n} topics</div>` is still caught. Only the markup
+        // itself goes quiet.
+        .replace(/<\/?[A-Za-z][^<>]*>/g, " ");
       if (!/[A-Z][a-z]+\s+[a-z]+/.test(text)) continue;
       out.push({ line: i + 1, text: `\`${m[1]}\``, why: "prose in a template literal" });
     }
@@ -245,6 +256,14 @@ export function proseViolations(src) {
     // Property access (`navigator.storage`) reads as two words once the dot is allowed; a full stop in
     // prose is followed by a space or end-of-line, never immediately by a letter.
     if (/\.\w/.test(trimmed)) return;
+    // A control-flow keyword followed by ONE identifier is a wrapped statement, not a sentence:
+    // `return parsed`, `return folderName`, `return lines`. Two words, no punctuation, sentence-cased
+    // only by accident of the keyword being lowercase — it satisfies every rule below. Seven of these
+    // exist today and none is prose.
+    //
+    // Deliberately anchored to `$`: real copy that opens with one of these words keeps going
+    // ("Return to the map to continue"), so requiring the identifier to END the line separates them.
+    if (/^(?:return|throw|yield|await|delete|typeof|void)\s+[\w$]+$/.test(trimmed)) return;
     // Needs at least two letter-words to be prose rather than an identifier.
     if (!/^[A-Za-z][A-Za-z'’À-ſ.,!—–-]*(\s+[A-Za-z'’À-ſ.,!—–-]+){1,}$/.test(trimmed)) return;
     out.push({ line: i + 1, text: trimmed, why: "bare prose in JSX" });

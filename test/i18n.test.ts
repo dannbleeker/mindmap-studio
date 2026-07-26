@@ -61,6 +61,31 @@ describe("catalogue", () => {
     expect(() => t("nope.not.a.key" as keyof typeof CORE_EN)).toThrow(/no message for key/);
   });
 
+  it("never says the same thing twice WITHIN a catalogue", () => {
+    // The sibling check below compares canvas-vs-core and so was blind to core repeating ITSELF — it
+    // did, 21 times, almost all `toolbar.*` twins of a `cmd.*` message left by the toolbar pass, which
+    // slugged its keys from English text without checking whether that text already had a key.
+    // `toolbar.bothSides` == `cmd.layout.side`, `toolbar.alignLeft` == `cmd.align.left`, and so on.
+    //
+    // Same rule as across catalogues: collapse onto the key that names the CONCEPT rather than the
+    // surface it was slugged from, and move it to `common.` when neither surface owns it.
+    const seen = new Map<string, string>();
+    const dupes: string[] = [];
+    for (const [name, catalogue] of [
+      ["CORE_EN", CORE_EN],
+      ["CANVAS_EN", CANVAS_EN],
+    ] as const) {
+      seen.clear();
+      for (const [key, message] of Object.entries(catalogue)) {
+        if (typeof message !== "string") continue;
+        const first = seen.get(message);
+        if (first) dupes.push(`${name}: ${key} duplicates ${first} — both say "${message}"`);
+        else seen.set(message, key);
+      }
+    }
+    expect(dupes).toEqual([]);
+  });
+
   it("never says the same thing twice across catalogues", () => {
     // One source of truth for a user-facing string. Two catalogues holding identical English is how a
     // translation drifts: a translator sees the sentence twice, renders it two ways, and the same

@@ -2812,7 +2812,7 @@ export function App() {
         style={{ padding: 0, width: "min(560px, 92vw)" }}
       >
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-          <strong style={{ color: "var(--ed-ink)" }}>{t("paste.title")}</strong>
+          <strong style={{ color: "var(--ed-ink)" }}>{t("cmd.paste-topics")}</strong>
           <p style={{ margin: 0, fontSize: 13, color: "var(--ed-muted)" }}>
             Paste an outline, a bullet list, or Markdown — indentation (or <code>#</code> headings)
             sets the hierarchy. A spreadsheet selection (Excel / Sheets) becomes one topic per row,

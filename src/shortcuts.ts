@@ -41,8 +41,8 @@ export function shortcutGroups(): ShortcutGroup[] {
           keys: "Ctrl/⌘ + B / I / U",
           action: t("shortcuts.action.boldItalicUnderlineWhileEditing"),
         },
-        { keys: "Ctrl/⌘ + Z", action: t("shortcuts.action.undo") },
-        { keys: "Ctrl/⌘ + Shift + Z", action: t("shortcuts.action.redo") },
+        { keys: "Ctrl/⌘ + Z", action: t("cmd.undo") },
+        { keys: "Ctrl/⌘ + Shift + Z", action: t("cmd.redo") },
         { keys: "Ctrl/⌘ + Y", action: t("shortcuts.action.redoAlternative") },
         {
           keys: "Ctrl/⌘ + Shift + 1…9",
@@ -92,7 +92,7 @@ export function shortcutGroups(): ShortcutGroup[] {
       ],
     },
     {
-      title: t("shortcuts.group.view"),
+      title: t("common.view"),
       items: [
         { keys: "Drag the background", action: t("shortcuts.action.panTheCanvas") },
         { keys: "Space + drag", action: t("shortcuts.action.panTheCanvasEvenOverA") },

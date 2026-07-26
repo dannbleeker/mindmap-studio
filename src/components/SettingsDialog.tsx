@@ -110,7 +110,7 @@ export function SettingsDialog({
             onChange={(e) => setAppearance(e.target.value as Appearance)}
             aria-label={t("settings.appTheme")}
           >
-            <option value="system">{t("settings.appTheme.system")}</option>
+            <option value="system">{t("settings.toggle.system")}</option>
             <option value="light">{t("settings.appTheme.light")}</option>
             <option value="dark">{t("settings.appTheme.dark")}</option>
           </select>

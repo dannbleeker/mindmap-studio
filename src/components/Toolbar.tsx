@@ -933,12 +933,12 @@ export function Toolbar({
               <MenuLabel>{t("toolbar.arrangeFreeLayout")}</MenuLabel>
               {(
                 [
-                  ["left", t("toolbar.alignLeft")],
-                  ["hcenter", t("toolbar.alignCentresHorizontal")],
-                  ["right", t("toolbar.alignRight")],
-                  ["top", t("toolbar.alignTop")],
-                  ["vmiddle", t("toolbar.alignMiddlesVertical")],
-                  ["bottom", t("toolbar.alignBottom")],
+                  ["left", t("cmd.align.left")],
+                  ["hcenter", t("cmd.align.hcenter")],
+                  ["right", t("cmd.align.right")],
+                  ["top", t("cmd.align.top")],
+                  ["vmiddle", t("cmd.align.vmiddle")],
+                  ["bottom", t("cmd.align.bottom")],
                 ] as const
               ).map(([mode, label]) => (
                 <MenuItem
@@ -1051,7 +1051,7 @@ export function Toolbar({
                   label={t("toolbar.stickyNote")}
                   onSelect={() => {
                     m()?.addStickyNote(loadStickyColor());
-                    showHint(t("toolbar.stickyNoteAddedDragIt"));
+                    showHint(t("hint.stickyAdded"));
                   }}
                 />
                 {/* Colour set (item 17): pick a colour to add a note of that colour AND remember it as
@@ -1286,7 +1286,7 @@ export function Toolbar({
             triggerAriaLabel="Options"
             sheet
           >
-            <MenuLabel>{t("toolbar.view")}</MenuLabel>
+            <MenuLabel>{t("common.view")}</MenuLabel>
             <MenuCheckboxItem
               icon={mi("check")}
               label={t("toolbar.outlineNumbering")}
@@ -1344,21 +1344,21 @@ export function Toolbar({
                 disabled={!!liveDoc.meta?.freeform}
               >
                 <optgroup label={t("toolbar.layoutGroupRadial")}>
-                  <option value="side">{t("toolbar.bothSides")}</option>
-                  <option value="right">{t("toolbar.right")}</option>
-                  <option value="left">{t("toolbar.left")}</option>
-                  <option value="radial">{t("toolbar.radialHub")}</option>
+                  <option value="side">{t("cmd.layout.side")}</option>
+                  <option value="right">{t("cmd.layout.right")}</option>
+                  <option value="left">{t("cmd.layout.left")}</option>
+                  <option value="radial">{t("cmd.layout.radial")}</option>
                 </optgroup>
                 <optgroup label={t("toolbar.layoutGroupTree")}>
                   <option value="org-down">{t("toolbar.orgChart")}</option>
                   <option value="org-up">{t("toolbar.orgChart2")}</option>
                 </optgroup>
                 <optgroup label={t("toolbar.layoutGroupDiagram")}>
-                  <option value="timeline">{t("toolbar.timeline")}</option>
-                  <option value="fishbone">{t("toolbar.fishbone")}</option>
-                  <option value="grid">{t("toolbar.gridMatrix")}</option>
-                  <option value="swimlane">{t("toolbar.swimlane")}</option>
-                  <option value="brace">{t("toolbar.braceMap")}</option>
+                  <option value="timeline">{t("cmd.layout.timeline")}</option>
+                  <option value="fishbone">{t("cmd.layout.fishbone")}</option>
+                  <option value="grid">{t("cmd.layout.grid")}</option>
+                  <option value="swimlane">{t("cmd.layout.swimlane")}</option>
+                  <option value="brace">{t("cmd.layout.brace")}</option>
                 </optgroup>
               </select>
             </div>
@@ -1377,21 +1377,21 @@ export function Toolbar({
               disabled={!!liveDoc.meta?.freeform}
             >
               <optgroup label={t("toolbar.layoutGroupRadial")}>
-                <option value="side">{t("toolbar.bothSides")}</option>
-                <option value="right">{t("toolbar.right")}</option>
-                <option value="left">{t("toolbar.left")}</option>
-                <option value="radial">{t("toolbar.radialHub")}</option>
+                <option value="side">{t("cmd.layout.side")}</option>
+                <option value="right">{t("cmd.layout.right")}</option>
+                <option value="left">{t("cmd.layout.left")}</option>
+                <option value="radial">{t("cmd.layout.radial")}</option>
               </optgroup>
               <optgroup label={t("toolbar.layoutGroupTree")}>
                 <option value="org-down">{t("toolbar.orgChart")}</option>
                 <option value="org-up">{t("toolbar.orgChart2")}</option>
               </optgroup>
               <optgroup label={t("toolbar.layoutGroupDiagram")}>
-                <option value="timeline">{t("toolbar.timeline")}</option>
-                <option value="fishbone">{t("toolbar.fishbone")}</option>
-                <option value="grid">{t("toolbar.gridMatrix")}</option>
-                <option value="swimlane">{t("toolbar.swimlane")}</option>
-                <option value="brace">{t("toolbar.braceMap")}</option>
+                <option value="timeline">{t("cmd.layout.timeline")}</option>
+                <option value="fishbone">{t("cmd.layout.fishbone")}</option>
+                <option value="grid">{t("cmd.layout.grid")}</option>
+                <option value="swimlane">{t("cmd.layout.swimlane")}</option>
+                <option value="brace">{t("cmd.layout.brace")}</option>
               </optgroup>
             </select>
             <span className="mm-vdiv" />

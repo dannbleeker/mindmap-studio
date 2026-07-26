@@ -17,12 +17,14 @@ export const CORE_EN = {
   // translator sees it once and the wording can't drift between the toolbar, the canvas and ⌘K.
   // `untitled` is the fallback shown wherever a map or topic has no title; it had 20 hardcoded copies.
   "common.untitled": "(untitled)",
+  // Named by the CONCEPT, not by a surface: the toolbar's menu and the cheat sheet's group heading are
+  // both "View", and neither owns the word. They were two keys until a duplicate-text check found them.
+  "common.view": "View",
 
   // Settings dialog
   "settings.title": "Settings",
   "settings.appearance": "Appearance",
   "settings.appTheme": "App theme",
-  "settings.appTheme.system": "System",
   "settings.appTheme.light": "Light",
   "settings.appTheme.dark": "Dark",
   "settings.reduceMotion": "Reduce motion",
@@ -91,7 +93,6 @@ export const CORE_EN = {
   "shortcuts.group.selectionMoving": "Selection & moving",
   "shortcuts.group.file": "File",
   "shortcuts.group.navigation": "Navigation",
-  "shortcuts.group.view": "View",
   "shortcuts.action.addASiblingTopic": "Add a sibling topic",
   "shortcuts.action.addAChildTopic": "Add a child topic",
   "shortcuts.action.outdentPromoteOneLevel": "Outdent (promote one level)",
@@ -106,8 +107,6 @@ export const CORE_EN = {
     "Paste an image, or text (as topics), onto the selection",
   "shortcuts.action.pasteACopiedBranchUnderThe": "Paste a copied branch under the selection",
   "shortcuts.action.boldItalicUnderlineWhileEditing": "Bold / italic / underline (while editing)",
-  "shortcuts.action.undo": "Undo",
-  "shortcuts.action.redo": "Redo",
   "shortcuts.action.redoAlternative": "Redo (alternative)",
   "shortcuts.action.setTheSelectedTopicSPriority":
     "Set the selected topic's priority (1 = highest, 9 = lowest)",
@@ -305,15 +304,8 @@ export const CORE_EN = {
   "toolbar.detailLevel": "Detail level",
   "toolbar.format": "Format",
   "toolbar.arrangeFreeLayout": "Arrange (free layout)",
-  "toolbar.alignLeft": "Align left",
-  "toolbar.alignCentresHorizontal": "Align centres (horizontal)",
-  "toolbar.alignRight": "Align right",
-  "toolbar.alignTop": "Align top",
-  "toolbar.alignMiddlesVertical": "Align middles (vertical)",
-  "toolbar.alignBottom": "Align bottom",
   "toolbar.display": "Display",
   "toolbar.savedViews": "Saved views",
-  "toolbar.stickyNoteAddedDragIt": "Sticky note added — drag it anywhere.",
   "toolbar.mapPartInsertUnderSelected": "Map part (insert under selected)",
   "toolbar.templateInsertStructureUnderSelected": "Template (insert structure under selected)",
   "toolbar.backgroundShapeFreeCanvas": "Background shape (free-canvas)",
@@ -322,19 +314,9 @@ export const CORE_EN = {
   "toolbar.bindSourceMap": "Bind source map…",
   "toolbar.openTheMapPanelTo":
     "Open the Map panel to change theme, layout, design presets, background, connectors, fonts and backdrop",
-  "toolbar.view": "View",
   "toolbar.layout": "Layout",
-  "toolbar.bothSides": "Both sides",
-  "toolbar.right": "Right",
-  "toolbar.left": "Left",
-  "toolbar.radialHub": "Radial / hub",
   "toolbar.orgChart": "Org chart ↓",
   "toolbar.orgChart2": "Org chart ↑",
-  "toolbar.timeline": "Timeline",
-  "toolbar.fishbone": "Fishbone",
-  "toolbar.gridMatrix": "Grid / matrix",
-  "toolbar.swimlane": "Swimlane",
-  "toolbar.braceMap": "Brace map",
   "toolbar.quickAdd": "Quick add… ⏎",
   "toolbar.quickAddTopic": "Quick add topic",
   "toolbar.typeATopicAndPress":
@@ -543,7 +525,6 @@ export const CORE_EN = {
   "about.checkUpdates": "Check for updates",
 
   // Paste-outline dialog + the command palette's search box
-  "paste.title": "Paste text → topics",
   "paste.inputLabel": "Paste outline text",
   "paste.tags": "Tags",
   "paste.addUnder": 'Add under "{topic}"',

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { EXAMPLE_DESCRIPTIONS, buildExample, examples } from "../../../examples";
+import { EXAMPLE_DESCRIPTIONS, buildExample } from "../../../exampleBuilders";
+import { examples } from "../../../examples";
 import { TemplateCard } from "../TemplateCard";
 import { branchLabels } from "../nodeStats";
 import type { StartContext } from "../types";
@@ -14,7 +15,7 @@ export function Examples({ ctx }: { ctx: StartContext }) {
     id: e.id,
     name: e.name,
     description: EXAMPLE_DESCRIPTIONS[e.id],
-    doc: e.build(),
+    doc: buildExample(e.id),
   }));
   const query = q.trim().toLowerCase();
   const shown = query

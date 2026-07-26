@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildExample, examples } from "../src/examples";
+import { buildExample } from "../src/exampleBuilders";
+import { examples } from "../src/examples";
 import type { MapNode, MindMapDoc } from "../src/model/types";
 
 // The examples are hand-authored content, so the real risk is a typo'd id: a link or
@@ -32,7 +33,7 @@ describe("examples gallery", () => {
 
   for (const ex of examples) {
     describe(ex.name, () => {
-      const d = ex.build();
+      const d = buildExample(ex.id);
 
       it("builds a well-formed, example-sourced doc", () => {
         expect(d.schemaVersion).toBe(1);
@@ -69,7 +70,7 @@ describe("examples gallery", () => {
   }
 
   it("collectively demonstrates every major feature at least once", () => {
-    const docs = examples.map((e) => e.build());
+    const docs = examples.map((e) => buildExample(e.id));
     const anyTopic = (pred: (n: MapNode) => boolean) =>
       docs.some((d) => {
         let hit = false;
@@ -106,7 +107,7 @@ describe("examples gallery", () => {
 
   it("buildExample returns the requested example and a stable fallback", () => {
     expect(buildExample("okrs").title).toBe("Q3 OKRs — Growth team");
-    expect(buildExample("does-not-exist").title).toBe(examples[0].build().title);
+    expect(buildExample("does-not-exist").title).toBe(buildExample(examples[0].id).title);
   });
 
   it("each build produces a fresh doc id (so opening twice makes two maps)", () => {

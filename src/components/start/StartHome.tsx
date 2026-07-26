@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { EXAMPLE_DESCRIPTIONS, buildExample, examples } from "../../examples";
+import { EXAMPLE_DESCRIPTIONS, buildExample } from "../../exampleBuilders";
+import { examples } from "../../examples";
 import { TEMPLATE_DESCRIPTIONS, buildTemplate, templates } from "../../templates";
 import { AppTips } from "./AppTips";
 import { CaptureCard } from "./CaptureCard";
@@ -18,13 +19,18 @@ import { useLibrary } from "./useLibrary";
 const FEATURED_TEMPLATES = ["brainstorm", "swot", "project", "five-whys"];
 const FEATURED_EXAMPLES = ["launch", "okrs", "retro", "runbook"];
 
-function pick<
-  T extends { id: string; name: string; build: () => import("../../model/types").MindMapDoc },
->(all: T[], ids: string[], descriptions: Record<string, string>) {
+// Takes the BUILDER as an argument rather than reading a `build` off each entry: the example index is
+// now id+name only, so that its bodies can stay out of the entry chunk (see src/examples.ts).
+function pick<T extends { id: string; name: string }>(
+  all: T[],
+  ids: string[],
+  descriptions: Record<string, string>,
+  build: (id: string) => import("../../model/types").MindMapDoc,
+) {
   return ids
     .map((id) => all.find((x) => x.id === id))
     .filter((x): x is T => !!x)
-    .map((x) => ({ id: x.id, name: x.name, description: descriptions[x.id], doc: x.build() }));
+    .map((x) => ({ id: x.id, name: x.name, description: descriptions[x.id], doc: build(x.id) }));
 }
 
 export function StartHome({ ctx }: { ctx: StartContext }) {
@@ -35,8 +41,8 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
       return (b.updatedAt ?? 0) - (a.updatedAt ?? 0);
     })
     .slice(0, 3);
-  const featured = pick(templates, FEATURED_TEMPLATES, TEMPLATE_DESCRIPTIONS);
-  const featuredExamples = pick(examples, FEATURED_EXAMPLES, EXAMPLE_DESCRIPTIONS);
+  const featured = pick(templates, FEATURED_TEMPLATES, TEMPLATE_DESCRIPTIONS, buildTemplate);
+  const featuredExamples = pick(examples, FEATURED_EXAMPLES, EXAMPLE_DESCRIPTIONS, buildExample);
   const [newHereDismissed, setNewHereDismissed] = useState(false);
   const touch = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
 

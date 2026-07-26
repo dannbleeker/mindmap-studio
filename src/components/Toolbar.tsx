@@ -8,7 +8,7 @@ import {
   MenuSeparator,
   MenuSub,
 } from "../design/primitives";
-import { buildExample, examples } from "../examples";
+import { examples } from "../examples";
 import type { SaveState } from "../hooks/useIdbAutosave";
 import { t } from "../i18n";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
@@ -480,9 +480,19 @@ export function Toolbar({
             <select
               className="mm-select"
               value=""
-              onChange={(e) => {
+              onChange={async (e) => {
                 const v = e.target.value;
-                if (v) map.load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
+                if (!v) return;
+                // The example BODIES load on demand. This module is eager, so a static import here
+                // would pull every example map into the entry chunk — measured at 6.7 kB gz, carried
+                // by every first visit whether or not anyone opens one. Templates stay static: they
+                // are small, and `buildTemplate` is also reached from the synchronous Insert menu.
+                if (v.startsWith("ex:")) {
+                  const { buildExample } = await import("../exampleBuilders");
+                  map.load(buildExample(v.slice(3)));
+                } else {
+                  map.load(buildTemplate(v));
+                }
               }}
               aria-label={t("toolbar.newMapFromATemplate")}
               title={t("toolbar.newMapBlankTemplateOr")}

@@ -24,7 +24,7 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
 The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
 catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
-handlers plus the `TopicNode` canvas strings and the whole keyboard cheat sheet are migrated (**122 catalogue entries** so far), behind a lint guard that fails on any new hardcoded user-facing string in a migrated file. English is the only locale and is expected to stay
+handlers plus the `TopicNode` canvas strings and the whole keyboard cheat sheet are migrated (**155 catalogue entries** so far), behind a lint guard that fails on any new hardcoded user-facing string in a migrated file. English is the only locale and is expected to stay
 that way for now — adding one means adding a JSON catalogue, not changing the app.
 
 **Bundle strategy — decided 2026-07-26.** Measured on the first 43 catalogue entries: the layer itself
@@ -59,7 +59,19 @@ total need hand conversion, not mechanical replacement); the rest of the `Intl` 
 `timeAgo`, `taskDate.ts` months + `parseNaturalDate`, the ~103 locale-unsafe `toLowerCase` sites, and
 wiring `compareText` into the 21 collation sites); the exporters taking the locale (`lang` attributes,
 PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font); the PWA manifest strings;
-and a lint-style guard that fails when a new hardcoded string appears in an already-migrated file.
+and extending the lint guard past its **known blind spot: positional string arguments**. A label passed
+as an unnamed argument — `add("open-file", "Open file…", "map", run)`, or a tuple member — is neither a
+JSX prop nor a bare prose line, so neither detector sees it. `editorCommands.ts` is deliberately absent
+from the guard's allowlist for that reason, despite its layout + export labels being migrated.
+
+For `editorCommands.ts`'s remaining ~85 labels, the design to use (worked out but not yet built): the
+`add(id, label, kind, run)` helper should **drop the label argument entirely** and derive the message key
+from the `id` it already receives — `label: t(`cmd.${id}`)`. The id is stable and unique, so the
+catalogue becomes a clean id→label map and 85 call sites lose an argument rather than gaining a wrapper.
+That trades compile-time key checking for a test that builds the registry and lets `t()`'s dev-mode
+throw catch any missing entry — a stronger guarantee in practice, since it exercises the real registry.
+~26 of those call sites are the genuinely hand-written cases (dynamic ids like `expand-level:${n}`,
+interpolated labels, labels held in variables).
 
 Correction to the earlier analysis, found on implementation: **"Danish `å` sorts wrong today" was
 overstated.** Collation follows the *active* locale, so with English active `Å` correctly collates as

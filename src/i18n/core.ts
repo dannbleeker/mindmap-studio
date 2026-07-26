@@ -134,6 +134,48 @@ export const CORE_EN = {
   "shortcuts.action.renameIt": "Rename it",
   "shortcuts.action.addAFloatingTopic": "Add a floating topic",
   "shortcuts.action.drawARelationshipToAnotherTopic": "Draw a relationship to another topic",
+
+  // ⌘K palette: layout names and export-format labels (src/components/editorCommands.ts). Keyed by
+  // the command id rather than a slug of the English text, because the id is already stable and unique
+  // — and because the export labels are POSITIONAL tuple members (`["json", ".json (lossless)", fn]`)
+  // with no key naming them, which is exactly why a key-based sweep can't find them.
+  //
+  // The file extension stays inside the message rather than being composed around it: a translator may
+  // want to reorder or re-qualify ("(lossless)" translates, "(Markdown)" is a product name and won't),
+  // and one whole string per label gives them that control.
+  "cmd.layout.side": "Both sides",
+  "cmd.layout.right": "Right",
+  "cmd.layout.left": "Left",
+  "cmd.layout.radial": "Radial / hub",
+  "cmd.layout.org-down": "Org chart down",
+  "cmd.layout.org-up": "Org chart up",
+  "cmd.layout.timeline": "Timeline",
+  "cmd.layout.fishbone": "Fishbone",
+  "cmd.layout.grid": "Grid / matrix",
+  "cmd.layout.swimlane": "Swimlane",
+  "cmd.layout.brace": "Brace map",
+  "cmd.export.json": ".json (lossless)",
+  "cmd.export.md": ".md (Markdown)",
+  "cmd.export.opml": ".opml (outline)",
+  "cmd.export.freemind": ".mm (FreeMind/Freeplane)",
+  "cmd.export.mermaid": ".mmd (Mermaid)",
+  "cmd.export.xmind": ".xmind (XMind)",
+  "cmd.export.smmx": ".smmx (SimpleMind)",
+  "cmd.export.mmap": ".mmap (MindManager)",
+  "cmd.export.png": ".png (image)",
+  "cmd.export.png2x": ".png @2× (sharp)",
+  "cmd.export.png4x": ".png @4× (print)",
+  "cmd.export.png-transparent": ".png (transparent)",
+  "cmd.export.svg": ".svg (vector)",
+  "cmd.export.html": ".html (standalone)",
+  "cmd.export.ihtml": ".html (interactive)",
+  "cmd.export.pdf-fit": ".pdf (fit to map)",
+  "cmd.export.pdf-a4": ".pdf (A4 landscape)",
+  "cmd.export.pdf-print": ".pdf (via print dialog)",
+  "cmd.export.docx": ".docx (Word)",
+  "cmd.export.xlsx": ".xlsx (Excel)",
+  "cmd.export.deck": ".html (slide deck)",
+  "cmd.export.pptx": ".pptx (PowerPoint)",
 } as const satisfies Catalogue;
 
 export type CoreKey = keyof typeof CORE_EN;

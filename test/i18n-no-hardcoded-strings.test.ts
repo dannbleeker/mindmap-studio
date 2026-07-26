@@ -17,6 +17,12 @@ import { describe, expect, it } from "vitest";
 //   1. a literal in a user-facing prop  — title="Save" rather than title={t("…")}
 //   2. a line of bare prose             — the multi-line paragraphs inside <p>…</p>
 //
+// KNOWN BLIND SPOT: positional string arguments. A label passed as an unnamed argument —
+// `add("open-file", "Open file…", "map", run)` in editorCommands.ts, or a tuple member — is neither a
+// JSX prop nor a bare prose line, so neither detector sees it. That file is therefore NOT on the list
+// below despite being partly migrated; extend this guard with a positional-argument check before adding
+// it, or the list will claim a coverage it does not have.
+//
 // When this fires, the fix is to move the string into a catalogue — not to add the file to an ignore
 // list. If a genuinely non-user-facing string trips it, narrow the check rather than widening the
 // exceptions.

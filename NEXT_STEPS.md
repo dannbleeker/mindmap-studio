@@ -20,108 +20,69 @@ Tiers 1–5). Per-item detail lives in `CHANGELOG.md`. Three of that review's ca
 or *Out of scope*, so the decisions don't get re-litigated. Known-thin areas that are neither open work
 nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
-## Open — localisation (i18n), in progress since 2026-07-26
+## Localisation (i18n) — the programme is COMPLETE; what remains is listed here
 
-The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
-catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
-handlers plus the whole keyboard cheat sheet, the ⌘K command registry, the **entire editor toolbar** and
-the **entire canvas** (`TopicNode` + `FlowMindMap`), **`App.tsx`** and **`Panels.tsx`** are migrated —
-**the eager chrome is complete**, at **684 catalogue entries** (599 eager + 85 in the lazy canvas chunk),
-with the scanner reporting 0 hardcoded strings across all eight files, behind a lint guard that fails on any new hardcoded user-facing
-string in a migrated file. English is the only locale and is expected to stay that way for now — adding
-one means adding a JSON catalogue, not changing the app.
+Shipped detail lives in `CHANGELOG.md`. This section keeps only the **decisions**, so they don't get
+re-litigated, and the one open item.
 
-**Trust the guard's list, not its tick — re-verify a file when the guard gains a detector.** On
-2026-07-26 it was green over five files while 46 user-facing strings were still hardcoded in three of
-them; three more detectors later that day found **51 more** in files already ticked. It now has seven
-detectors and its own self-test pins each one. The failure mode is structural, not a one-off: every
-detector so far was added *after* a file it should have covered was ticked. So the rule when you add
-one: prove it clean on every file already on the allowlist FIRST — if it fires there, those are real
-misses and fixing them is part of the same commit.
+`src/i18n/` holds the registry, the typed English catalogue and the `Intl` plural/collation helpers.
+**684 catalogue entries** (599 eager + 85 in the lazy canvas chunk) across eight migrated files;
+`node scripts/i18n-scan.mjs <file> --count` reports 0 for every one. Entry bundle **174.2 kB against a
+175 ceiling**, recorded in `scripts/bundle-budget.mjs` as measured rather than projected. English is the
+only locale and is expected to stay that way — adding one means adding a JSON catalogue, not changing
+the app.
 
-Two recurring traps, both of which cost real bugs:
+**Still open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
+English-only, and it is genuinely logic rather than translation — a second locale needs its own keyword
+table and its own relative-date shapes, not a catalogue entry. There is nothing to do here until a
+second locale exists.
 
-- **A local named `t` shadowing the imported `t()`** — SEVEN existed. In that scope `t("…")` is
-  uncallable, so a migration pass skips the strings *silently* and leaves no trace. Worse, a scripted
-  pass that rewrites INTO such a scope produces code that compiles and throws "t is not a function" at
-  runtime; one nearly shipped from `insertableTemplates.map((t) => …)`. Renaming the loop variable also
-  strands any `{t}` still used as CONTENT — `tsc` catches that one, as "not a ReactNode".
-- **A catalogue holds CHARACTERS, not HTML entities.** JSX may write `Markers &amp; tags` and React
-  decodes it; `t()` returns a plain string React renders verbatim, so a scripted extraction that copies
-  the JSX source ships `&amp;` to the user. A catalogue-wide entity check now blocks it.
-- **Duplicate text across catalogues.** A test now fails when a canvas message repeats an eager one
-  word for word — it caught four on the first run, one of which was demonstrably shipping the same
-  sentence in both chunks. Reuse the existing key (a lazy chunk can reference an eager one for free);
-  keep both only for a genuine homonym, and then add it to that test's documented exception list.
+### How to add strings without undoing this
 
-**Bundle strategy — decided 2026-07-26.** Measured on the first 43 catalogue entries: the layer itself
-is a ~1 kB gz one-off, and the marginal cost per migrated string is the **key**, not the text (the
-English text was already in the bundle, inline). At ~25 bytes of key per entry, the remaining ~1,400
-chrome strings are **roughly +12 kB gz** — more than the current ceiling allows.
+- **Chunk-locality holds.** A lazy feature registers its own catalogue and imports `i18n/registry`,
+  never the `i18n` barrel — importing the barrel drags the eager chrome catalogue into that chunk. The
+  canvas's 85 entries ride in the `FlowMindMap` chunk and cost the entry bundle nothing.
+- **Reuse before minting.** Two keys holding identical English is how a translation drifts; a test in
+  `test/i18n.test.ts` fails on it, both within a catalogue and across the two. When collapsing a
+  duplicate the survivor must be **eager** — `Panels.tsx` renders without the canvas chunk, so eager
+  code pointing at a canvas-registered key throws until that chunk loads. Shared strings go to
+  `common.*`. Genuine homonyms go in that test's documented exception list.
+- **The guard's green tick is not proof of coverage.** Every detector it has was added *after* a file it
+  should have covered was already ticked — 46 hardcoded strings survived in five "migrated" files, then
+  51 more after three further detectors. So when you ADD a detector, prove it clean on every file
+  already on the allowlist FIRST; if it fires there, those are real misses and fixing them is part of
+  the same commit.
+- **Two traps that cost real bugs.** A local named `t` **shadows** the imported `t()` — seven existed;
+  in that scope `t("…")` is uncallable, so a pass skips those strings silently, and a scripted pass that
+  rewrites INTO such a scope compiles and throws at runtime. Renaming the loop variable also strands any
+  `{t}` used as content (`tsc` catches that as "not a ReactNode"). And a **catalogue holds characters,
+  not HTML entities**: JSX may write `&amp;` and React decodes it, but `t()` returns a plain string
+  React renders verbatim, so a scripted extraction that copies JSX source ships `&amp;` to the user.
+  Both are pinned by tests.
 
-**That +12 kB is an upper bound, and the toolbar came in far under it — remeasure before bumping the
-ceiling.** Finishing `Toolbar.tsx` (93 strings) cost **+0.5 kB gz**, 170.1 → 170.6 against a 171 kB
-ceiling, no bump. The reason generalises: 31 of those labels are word-for-word ⌘K commands, so they
-**reuse the existing `cmd.*` key** instead of adding a message — which deletes a duplicate copy of the
-English text and substitutes a shorter key, netting out near zero. The projection assumed every string
-is new text. Wherever the chrome repeats itself, it doesn't. So: migrate, measure, and only then decide
-whether the ceiling needs moving.
+### Deliberately NOT doing yet: fetching English as a JSON asset
 
-**Superseded on the ordering (2026-07-26, owner decision): the ceiling was raised to 175 UP FRONT.**
-The `App.tsx` `hint.*` batch measured +1.2 kB gz for ~124 new keys (entry 170.6 → 171.8), and
-`Panels.tsx`'s remaining 233 strings project to ~+2.3 kB, so 175 covers the finished eager migration in
-one move instead of a bump per batch. The chunk-locality work below is still worth doing — it is now an
-optimisation rather than a precondition. Two consequences to hold onto: ~4 kB of slack is unguarded
-until the migration lands, so watch for unrelated bloat riding in; and the ceiling should be
-**re-measured and tightened** once `Panels.tsx` is done. **Both are now resolved** — `Panels.tsx` landed
-at an entry of 174.2 kB, so 175 is a measured ceiling with 0.8 kB of headroom rather than open slack;
-`scripts/bundle-budget.mjs` records that (and is where the ceiling now lives — no longer
-`size-budget.mjs`).
+It looks like the scalable answer and it is — later. With one locale it saves nothing: the bytes don't
+disappear, they become a second request, and since the UI can't render its own labels until it lands
+it's on the critical path regardless. What you'd actually buy is a `t()` callable before messages exist
+(precisely the bug that bit this layer on day one), a gate on first paint or a flash of raw keys, and
+every consumer having to tolerate "not loaded yet".
 
-**The approach, now carried out: chunk-locality first, then raise the ceiling for what's left. `t()`
-stayed synchronous.** Every string that could be chunk-local went into a lazy catalogue beside its
-callers — the canvas's 85 entries ride in the `FlowMindMap` chunk and cost the entry bundle nothing —
-and the eager remainder is covered by the 175 ceiling. Keep that split when adding strings: a lazy
-feature registers its own catalogue and imports `i18n/registry`, never the `i18n` barrel.
+Fetching becomes correct at **N locales**, where inline costs N × the catalogue (everyone downloads
+every language) and fetched costs one. At two it's a wash; at three or more fetching clearly wins. The
+architecture already supports it — `registerMessages()` is per-locale and later registrations overlay
+earlier ones, which is exactly the hook a fetched translation needs — so build it in the commit that
+adds the second language, where it earns its complexity, not before.
 
-**Deliberately NOT doing yet: fetching English as a JSON asset.** It looks like the scalable answer and
-it is — later. With one locale it saves nothing: the ~12 kB doesn't disappear, it becomes a second
-request, and since the UI can't render its own labels until that request lands it's on the critical path
-regardless. What you'd actually buy is a `t()` that can be called before messages exist (precisely the
-bug that bit this layer on day one), a gate on first paint or a flash of raw keys, and every consumer
-having to tolerate "not loaded yet". For scale: the service worker already precaches **43 entries,
-1,690 KiB** — 12 kB is **0.7%** of what ships and caches today, once per release.
+The **PWA manifest cannot follow the locale**: it is baked at build time and read by the OS launcher
+before the app runs, and the spec's `translations` member is not broadly implemented. It carries
+`lang` + `dir`; the answer at a second language is a per-locale manifest, not a runtime one.
 
-Fetching becomes correct at **N locales**, where inline costs N × 12 kB (everyone downloads every
-language) and fetched costs 12 kB (everyone downloads one). At two it's a wash; at three or more
-fetching clearly wins. The architecture already supports it — `registerMessages()` is per-locale and
-later registrations overlay earlier ones, which is exactly the hook a fetched translation needs — so
-build it in the commit that adds the second language, where it earns its complexity, not before.
-
-**The chrome migration is DONE.** `node scripts/i18n-scan.mjs <file> --count` reports 0 for all eight
-migrated files. Point it at anything else before assuming that file is clean — it runs the guard's own
-detectors, and `App.tsx` was missing from this plan entirely until someone did exactly that.
-
-Entry bundle 174.1 kB against a 175 ceiling; `scripts/bundle-budget.mjs` records that ceiling as
-measured rather than projected, so the loop it opened is closed. The rest of
-the `Intl` adoption: `timeAgo` and all 12 collation sites are
-**done**, and so is `taskDate.ts`'s `MONTHS` table — the date chip now formats through
-`Intl.DateTimeFormat`, so name AND day/month order follow the locale. Still open: `parseNaturalDate`'s
-INPUT grammar ("today", "tomorrow", "+7d", weekday names) is English-only and is genuinely logic rather
-than translation — a second locale needs its own keyword table and its own relative-date shapes, not a
-catalogue entry. The OOXML **font** question is now **reconned and largely declined**: the empty `<a:ea>`/`<a:cs>` slots
-are what Office's own stock theme ships, and both Office apps glyph-fall-back for scripts Calibri lacks,
-so there is no verifiable defect here — only a possible refinement (the per-script `<a:font script="…">`
-list) that no test in this repo could confirm. The genuinely unguarded part was ENCODING, and that is
-now pinned by `test/ooxml-non-latin.test.ts`. If this is ever picked up, it needs a real Office render,
-not more unit tests.
-
-The `lang` attributes are **done**: the standalone HTML, slide deck and interactive HTML stamp
-`<html lang>` from the active locale, and PPTX stamps its run-level `lang` (which drives PowerPoint's
-spellcheck dictionary). The **PWA manifest cannot follow the locale** — it is baked at build time and
-read by the OS launcher before the app runs, and the spec's `translations` member is not broadly
-implemented; it now carries `lang` + `dir`, and the answer when a second language ships is a per-locale
-manifest, not a runtime one.
+The **OOXML font question is reconned and largely declined.** The empty `<a:ea>`/`<a:cs>` slots are what
+Office's own stock theme ships, and both Office apps glyph-fall-back for scripts Calibri lacks, so there
+is no verifiable defect — only a possible refinement (the per-script `<a:font script="…">` list) that no
+test here could confirm; it needs a real Office render. The genuinely unguarded part was ENCODING, now
+pinned by `test/ooxml-non-latin.test.ts`.
 
 ### DECLINED (2026-07-26): "make the ~103 locale-unsafe `toLowerCase` sites locale-safe"
 

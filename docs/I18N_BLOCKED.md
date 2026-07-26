@@ -98,3 +98,51 @@ sideways.
 
 Worth noting either way: `primitives-*.js` at 16.6 kB is the UI-primitive layer, pulled in eagerly. If
 first-load size matters, that chunk — not the catalogue — is where the weight actually is.
+
+---
+
+## 4. 194 strings are frozen at import and will not follow a language picker
+
+`test/i18n-frozen-ratchet.test.ts` holds the per-file list; `test/i18n-frozen-constants.test.ts` proves
+the mechanism.
+
+`t()` reads the **active** locale at call time. A call inside a render function therefore follows a
+later `setLocale`. A call at **module scope** runs once, when the module is first imported, and freezes
+its result into a `const`:
+
+```ts
+// src/panelLabels.ts — evaluated at import, forever English
+export const PANEL_LABELS = {
+  outline: { tab: t("panel.outline"), menu: t("panel.outline") },
+  …
+```
+
+**This is not broken today, and that is exactly what makes it worth writing down.** Nothing outside
+tests calls `setLocale`, and the registry resolves the stored locale before any catalogue-consuming
+module loads — so the frozen strings are currently correct. They stop being correct the moment a
+language picker ships, and they fail *quietly*: the app switches to Danish and the panel tabs, slash
+commands, edge presets, Start sidebar and theme names stay English. A half-translated UI reads as a
+broken translation, not as a code defect, so it would be reported late and diagnosed slowly.
+
+**Measured spread** — 194 calls in 23 files, concentrated in the ones that build label tables:
+`panelLabels.ts` (26), `stickers.ts` (25), `EdgeInspector.tsx` (15), `start/sections/Layouts.tsx` (15),
+`start/sections/Learn.tsx` (12), `editorCommands.ts` (11), then a tail.
+
+**Why it isn't just fixed here:** the fix is mechanical but not free. Each site becomes either a getter
+or a function call, and the second form changes every consumer — `PANEL_LABELS.outline.tab` becomes
+`panelLabels().outline.tab` in `App.tsx` and `Toolbar.tsx`. Across 194 sites that is a wide,
+behaviour-neutral diff touching files this branch has otherwise finished with, landed at the end of a
+long migration, and impossible to verify by eye. It wants its own change with its own review.
+
+**The options:**
+
+- **Getters** (`get tab() { return t("panel.outline"); }`) — no call-site churn at all, since property
+  access already looks like property access. Pinned as working in the third test. Slight cost: the
+  object is no longer a plain frozen literal, and `as const satisfies` typing needs a look.
+- **Functions** (`panelLabels()`) — the most explicit about the cost, and the most churn.
+- **Accept it and drop `setLocale`'s dynamism** — decide the locale is fixed for a session and require
+  a reload to change it. Legitimate, much smaller, and needs saying out loud rather than emerging by
+  accident. If this is the choice, `setLocale` should reload the page so the contract is honest.
+
+Until then the ratchet holds the line: the count cannot grow, no new file can join, and the budget
+table is the worklist.

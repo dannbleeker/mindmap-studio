@@ -32,21 +32,20 @@ a 175 ceiling**, recorded in `scripts/bundle-budget.mjs` as measured rather than
 the only locale and is expected to stay that way — adding one means adding a JSON catalogue, not
 changing the app.
 
-**CORRECTION (2026-07-26): this was briefly written up as "the chrome migration is DONE". It is not.**
-Eight files were migrated — the eight *biggest* — and the claim was made without scanning the rest of
-the tree. Scanning all 241 source files reports **768 hits across 101 files**. That breaks down as:
+**Progress, on branch `i18n/complete-migration` (not merged).** The tree-wide scanner total went
+768 → 405, and the number is only comparable because three more detectors were added along the way —
+it briefly rose to 1001 when they landed. What is left breaks down as:
 
-| bucket | hits | what it is |
+| bucket | strings | status |
 | --- | --- | --- |
-| user-facing chrome, unmigrated | **~490** | real work: `MapPanel` 67, `FindReplaceOverlay` 26, `EdgeInspector` 25, `ThemeDesignerDialog` 24, the Start screen ~103, `Presentation` 18, `CanvasOverlays` 14, `OverlayInspector` 14, and a long tail |
-| map CONTENT | 207 | `examples.ts` 165, `templates.ts` 30, `sampleMap.ts` 12 — the sample maps' own topic text. A **separate decision**: translating example content is not the same question as translating chrome, and may well be declined. |
-| the catalogue itself | 21 | `i18n/core.ts` — the scanner reading its own English values. Always a false positive; core.ts must never join the allowlist. |
-| XML/SVG markup | ~50 | `io/pptx.ts`, `io/xlsx.ts`, `io/interactiveHtml.ts`, `flow/exportSvg.ts` — the template-literal detector reading `<a:p>`/`<defs>` as prose. **Also a false-positive class**: a markup-building file cannot join the allowlist without a markup exemption in the detector. |
+| declined map CONTENT | 213 | owner decision, recorded — `exampleBuilders` 169, `templates` 30, `sampleMap` 14 |
+| catalogue self-hits | 46 | permanent false positive: a catalogue quoting its own English. The five catalogue files must never join the allowlist |
+| `src/io/` + `src/import/` | 68 | mixed — mostly XML/SVG markup the template rule still reads as prose, plus a handful of real import diagnostics |
+| blocked on a decision | 15 | `docs/I18N_BLOCKED.md` — interleaved `<kbd>`/`<strong>` markup, and ErrorBoundary |
+| genuinely remaining chrome | ~63 | a long tail across ~20 small files, none over 6 strings |
 
-So the honest state is that the layer, the tooling, the guard and the eight highest-traffic surfaces are
-done, and roughly half the user-facing strings by count are not. **Point the scanner at a file before
-assuming it is clean** — that is the whole lesson of this programme, and it was violated one last time
-by the summary of it.
+**41 files are on the guard's allowlist** and scan 0. Five catalogues now exist: `i18n/core.ts` (eager)
+plus chunk-local ones for the canvas, the Start screen, the theme designer and presentation mode.
 
 **Also open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
 English-only, and it is genuinely logic rather than translation — a second locale needs its own keyword

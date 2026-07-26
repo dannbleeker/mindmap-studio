@@ -48,6 +48,25 @@ describe("sanitizeSvg", () => {
     expect(out).toMatch(/<circle/i);
   });
 
+  it("strips hostile tags whatever their case — the folding must stay locale-INVARIANT", () => {
+    // SVG is parsed as `image/svg+xml`, i.e. XML, which is CASE-SENSITIVE — so `<IFRAME>` keeps its
+    // case and the `.toLowerCase()` in the sanitiser is load-bearing, not decorative.
+    //
+    // This test exists because `NEXT_STEPS` once carried an item to make ~103 `toLowerCase()` calls
+    // "locale-safe". Executing that here would open a hole: `FORBIDDEN_TAGS` holds "iframe", "script"
+    // and "link", every one of which contains an "i", and Turkish folds a dotted capital I to a
+    // DOTLESS ı — so `"IFRAME".toLocaleLowerCase("tr")` is "ıframe", which is not in the set, and the
+    // iframe would survive into an exported file. Case folding for a MACHINE token must never be
+    // locale-sensitive. Proven by mutation: switching these calls to `toLocaleLowerCase("tr")` makes
+    // this test fail while every other test in this file still passes.
+    const out = sanitizeSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg"><IFRAME src="evil.html"/><SCRIPT>alert(1)</SCRIPT><circle r="5"/></svg>`,
+    );
+    expect(out).not.toMatch(/iframe/i);
+    expect(out).not.toMatch(/<script/i);
+    expect(out).toMatch(/<circle/i);
+  });
+
   it("fails safe on malformed input (regex fallback, never the raw string)", () => {
     // Unclosed tags → XML parse error → conservative string strip.
     const out = sanitizeSvg(`<svg><script>alert(1)</script><rect onmouseover="x()"`);

@@ -218,6 +218,23 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   chunk happened to load. They moved to `common.*` in the eager catalogue instead, which both surfaces
   can reference safely.
 
+  **Declined, with proof: "make the ~103 locale-unsafe `toLowerCase` sites locale-safe".** The count was
+  right; the framing was not. Most of those calls fold a MACHINE TOKEN — a tag name, a `KeyboardEvent.key`,
+  a BCP-47 language tag — and for a machine token, locale-sensitive folding is a defect, because Turkish
+  folds a dotted capital `I` to a dotless `ı`.
+
+  The sharp end is `io/svgSanitize.ts`, which folds tag names to match `FORBIDDEN_TAGS` — a set holding
+  `iframe`, `script` and `link`, every one containing an `i`. SVG is parsed as XML, which is
+  case-sensitive, so `<IFRAME>` arrives with its case intact; under Turkish folding it becomes `ıframe`,
+  misses the set, and **survives into the exported file**. A new regression test pins the invariant
+  behaviour, and mutating the sanitiser to `toLocaleLowerCase("tr")` fails that test and only that test —
+  the other seven pass, so without it the hole ships silently. Ctrl+I, `<LI>` handling and the locale
+  resolver in the i18n layer itself break the same way.
+
+  The genuine question is the smaller subset that folds *user-authored* text for search; the reasoning
+  and the shape it should take if picked up are recorded in `NEXT_STEPS.md` rather than left as a
+  one-line invitation to break the sanitiser.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

@@ -101,9 +101,37 @@ Entry bundle 174.1 kB against a 175 ceiling; `scripts/bundle-budget.mjs` records
 measured rather than projected, so the loop it opened is closed. The rest of
 the `Intl` adoption: `timeAgo` and all 12 collation sites are
 **done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic, not
-translation) and the ~103 locale-unsafe `toLowerCase` sites. Then the exporters taking the locale (`lang`
-attributes, PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA
-manifest strings.
+translation), the exporters taking the locale (`lang` attributes, PPTX `lang="en-US"` + its empty
+`<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA manifest strings.
+
+### DECLINED (2026-07-26): "make the ~103 locale-unsafe `toLowerCase` sites locale-safe"
+
+**Do not execute this as written — it would open a security hole.** The count was right (105 today) but
+the framing was wrong: the great majority of those calls fold a **machine token**, not user text, and
+for a machine token locale-sensitive folding is a *defect*, because Turkish folds a dotted capital `I`
+to a **dotless `ı`**.
+
+Concretely, and demonstrated rather than argued:
+
+- `io/svgSanitize.ts` folds tag and attribute names to match `FORBIDDEN_TAGS`, which holds `iframe`,
+  `script` and `link` — every one containing an `i`. SVG is parsed as `image/svg+xml`, i.e. XML, which
+  is case-sensitive, so `<IFRAME>` reaches that check with its case intact. Under Turkish folding it
+  becomes `ıframe`, misses the set, and **survives into the exported file**. Mutating the file to
+  `toLocaleLowerCase("tr")` fails exactly one test — the new
+  *"strips hostile tags whatever their case"* case in `test/svgSanitize.test.ts`, added for this — while
+  the other seven still pass. Without that test the regression ships silently.
+- `mindmap/flow/keyIntent.ts` compares `e.key.toLowerCase()` to `"z"`, `"c"`, `"d"`, `"l"` — Ctrl+I
+  would stop matching.
+- `richTextCommands.ts` and `noteFormat.ts` compare `tagName.toLowerCase()`; `"LI"` folds to `"lı"` and
+  list handling breaks.
+- `i18n/registry.ts` folds the BCP-47 tag before matching a locale — inside the i18n layer itself.
+
+What IS a real question is the smaller subset that folds **user-authored text** for search and matching
+(`search.ts`, `filter.ts`, `flow/linkAutocomplete.ts`, the list filters). Even there `toLocaleLowerCase`
+is not obviously right: it helps a Turkish user whose query and content agree on which `i` they used,
+and hurts them when they don't. With one shipped locale it changes nothing today. If it is ever picked
+up, do it as **one `foldForSearch()` seam over that subset only**, and leave every machine-token site
+explicitly invariant.
 
 All eight migrated files — `SettingsDialog`, `shortcuts`, `editorCommands`, `Toolbar`, `TopicNode`,
 `FlowMindMap`, `App` and `Panels` — are **done**; don't re-plan them. The design once recorded here

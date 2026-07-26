@@ -331,10 +331,10 @@
   },
   {
     "date": "2026-07-26",
-    "linesTsJs": 81033,
+    "linesTsJs": 81039,
     "coveragePct": 90.09,
-    "tests": 2238,
-    "bundleKb": 534.7,
+    "tests": 2239,
+    "bundleKb": 534.5,
     "mutationScore": null,
     "featureManualPct": 100,
     "featureBookPct": 96.8,

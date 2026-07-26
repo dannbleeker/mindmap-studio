@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { Button } from "../design/primitives";
 import { space } from "../design/tokens";
+import { t } from "../i18n";
 import type { MindMapHandle } from "../mindmap";
 import { findAnyNode, subtreeExportDoc } from "../mindmap/flow/ops";
 import type { MindMapDoc } from "../model/types";
@@ -25,13 +26,13 @@ type BranchIo = Pick<
 >;
 
 const FORMATS: { label: string; run: (io: BranchIo) => void | Promise<void> }[] = [
-  { label: "PNG image", run: (io) => io.exportPng() },
-  { label: "SVG vector", run: (io) => io.exportSvg() },
-  { label: "HTML (standalone picture)", run: (io) => io.exportHtml() },
-  { label: "HTML (interactive)", run: (io) => io.exportInteractiveHtml() },
-  { label: "PDF (print)", run: (io) => io.exportPdf() },
-  { label: ".json (lossless)", run: (io) => io.exportJson() },
-  { label: "Markdown", run: (io) => io.exportMarkdown() },
+  { label: t("panel.pngImage"), run: (io) => io.exportPng() },
+  { label: t("panel.svgVector"), run: (io) => io.exportSvg() },
+  { label: t("panel.htmlStandalonePicture"), run: (io) => io.exportHtml() },
+  { label: t("panel.htmlInteractive"), run: (io) => io.exportInteractiveHtml() },
+  { label: t("panel.pdfPrint"), run: (io) => io.exportPdf() },
+  { label: t("cmd.export.json"), run: (io) => io.exportJson() },
+  { label: t("panel.markdown"), run: (io) => io.exportMarkdown() },
 ];
 
 export function BranchExportDialog({
@@ -63,11 +64,11 @@ export function BranchExportDialog({
     <Dialog
       open
       onClose={onClose}
-      title={`Export branch: ${branchName || "(untitled)"}`}
+      title={t("panel.exportBranchNamed", { name: branchName || t("common.untitled") })}
       style={{ width: "min(92vw, 340px)", padding: space.xxl, boxShadow: "var(--ed-shadow-pop)" }}
     >
       <p style={{ margin: `0 0 ${space.lg}px`, color: "var(--ed-muted)", fontSize: 13 }}>
-        Export just this topic and everything under it.
+        {t("panel.exportJustThisTopicAnd")}
       </p>
       <div style={{ display: "grid", gap: space.sm }}>
         {FORMATS.map((f) => (

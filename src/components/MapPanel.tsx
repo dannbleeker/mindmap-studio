@@ -3,6 +3,7 @@ import { CollapsibleSection } from "../Panels";
 import { Menu, MenuItem, MenuLabel } from "../design/primitives";
 import { designPreviewModel } from "../designPreview";
 import { DESIGNS } from "../designs";
+import { t } from "../i18n";
 import { LAYOUT_PREVIEW_NODE_R, LAYOUT_PREVIEW_ROOT_R, layoutPreviewModel } from "../layoutPreview";
 import type { LayoutKind } from "../mindmap";
 import { type CanvasTheme, canvasThemes } from "../mindmap/theme";
@@ -82,7 +83,7 @@ function LayoutPreview({ kind }: { kind: LayoutKind }) {
 /** Layout gallery rows, grouped exactly like the native select's optgroups (Radial / Tree / Diagram). */
 const LAYOUT_GROUPS: { label: string; kinds: { kind: LayoutKind; name: string }[] }[] = [
   {
-    label: "Radial",
+    label: t("toolbar.layoutGroupRadial"),
     kinds: [
       { kind: "side", name: "Both sides" },
       { kind: "right", name: "Right" },
@@ -91,14 +92,14 @@ const LAYOUT_GROUPS: { label: string; kinds: { kind: LayoutKind; name: string }[
     ],
   },
   {
-    label: "Tree",
+    label: t("toolbar.layoutGroupTree"),
     kinds: [
       { kind: "org-down", name: "Org chart ↓" },
       { kind: "org-up", name: "Org chart ↑" },
     ],
   },
   {
-    label: "Diagram",
+    label: t("toolbar.layoutGroupDiagram"),
     kinds: [
       { kind: "timeline", name: "Timeline" },
       { kind: "fishbone", name: "Fishbone" },
@@ -228,7 +229,11 @@ export function MapPanel({
     if (v && v !== doc.title) onRenameMap(v);
   };
   return (
-    <aside className="mm-inspector" aria-label="Map overview" style={width ? { width } : undefined}>
+    <aside
+      className="mm-inspector"
+      aria-label={t("panel.mapOverview")}
+      style={width ? { width } : undefined}
+    >
       {width && onResize ? <InspectorResizer width={width} onResize={onResize} /> : null}
       <div
         className="mm-inspector-head"
@@ -236,7 +241,7 @@ export function MapPanel({
       >
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 11.5, color: "var(--ed-muted)", marginBottom: 5 }}>
-            No node selected
+            {t("panel.noNodeSelected")}
           </div>
           {/* Editable map title — commits on Enter/blur via renameMap (sets the root topic; the doc
               title follows). Keyed on the doc so it resets when switching maps. */}
@@ -247,8 +252,8 @@ export function MapPanel({
               if (e.key === "Enter") (e.target as HTMLInputElement).blur();
             }}
             onBlur={(e) => commitTitle(e.target.value)}
-            aria-label="Map title"
-            placeholder="Untitled map"
+            aria-label={t("panel.mapTitle")}
+            placeholder={t("panel.untitledMap")}
             style={{
               width: "100%",
               boxSizing: "border-box",
@@ -268,8 +273,8 @@ export function MapPanel({
           <button
             type="button"
             className="mm-inspector-min"
-            title="Minimize"
-            aria-label="Minimize map overview"
+            title={t("panel.minimize")}
+            aria-label={t("panel.minimizeMapOverview")}
             onClick={onMinimize}
           >
             ›
@@ -279,18 +284,18 @@ export function MapPanel({
       <div className="mm-inspector-body">
         {/* Map settings — all wired to existing app state / handle methods. */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div className="mm-map-section-title">Map</div>
+          <div className="mm-map-section-title">{t("toolbar.map")}</div>
           {onApplyDesign ? (
             <div className="mm-map-field">
-              <span>Design</span>
+              <span>{t("panel.design")}</span>
               {/* One-shot preset: sets theme + connector style + branch weight + accent together
                   (T3-25 — moved here from the Toolbar's Canvas menu so the map's look has one home). */}
               <Menu
-                trigger={<>Choose a preset…</>}
+                trigger={<>{t("panel.chooseAPreset")}</>}
                 triggerClassName="mm-map-control mm-layout-trigger"
-                triggerAriaLabel="Apply a design preset"
-                triggerTitle="Apply a design preset (theme + connectors + branch weight + accent)"
-                menuAriaLabel="Design presets"
+                triggerAriaLabel={t("panel.applyADesignPreset")}
+                triggerTitle={t("panel.applyADesignPresetTheme")}
+                menuAriaLabel={t("panel.designPresets")}
               >
                 {DESIGNS.map((d) => (
                   <MenuItem
@@ -305,7 +310,7 @@ export function MapPanel({
             </div>
           ) : null}
           <label className="mm-map-field">
-            <span>Theme</span>
+            <span>{t("panel.theme")}</span>
             <select
               className="mm-map-control"
               value={theme.id}
@@ -323,30 +328,30 @@ export function MapPanel({
                   onSetBranchGrowth(ct.branchGrowth);
                 }
               }}
-              aria-label="Canvas theme"
+              aria-label={t("panel.canvasTheme")}
             >
-              {canvasThemes.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+              {canvasThemes.map((ct) => (
+                <option key={ct.id} value={ct.id}>
+                  {ct.name}
                 </option>
               ))}
               {customThemes.length > 0 ? (
-                <optgroup label="Custom">
-                  {customThemes.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
+                <optgroup label={t("panel.custom")}>
+                  {customThemes.map((ct) => (
+                    <option key={ct.id} value={ct.id}>
+                      {ct.name}
                     </option>
                   ))}
                 </optgroup>
               ) : null}
-              <option value="__manage__">Manage themes…</option>
+              <option value="__manage__">{t("panel.manageThemes")}</option>
             </select>
           </label>
           {/* A plain div, not <label> — the Menu trigger below carries its own aria-label (like the
               Background/Accent fields), so wrapping it in a <label> would be a redundant, unlinked
               association (the trigger isn't a native form control the label can associate with). */}
           <div className="mm-map-field">
-            <span>Layout</span>
+            <span>{t("toolbar.layout")}</span>
             {/* A visual gallery (SVG thumbnails, 10c) instead of a text-only select — layout is
                 inherently spatial, so seeing the shape beats reading its name. */}
             <Menu
@@ -357,10 +362,10 @@ export function MapPanel({
                 </>
               }
               triggerClassName="mm-map-control mm-layout-trigger"
-              triggerAriaLabel="Layout"
+              triggerAriaLabel={t("toolbar.layout")}
               disabled={!!freeform}
-              triggerTitle={freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"}
-              menuAriaLabel="Choose a layout"
+              triggerTitle={freeform ? t("toolbar.layoutPaused") : "Layout"}
+              menuAriaLabel={t("panel.chooseALayout")}
             >
               {LAYOUT_GROUPS.map((g) => (
                 <div key={g.label}>
@@ -378,14 +383,14 @@ export function MapPanel({
             </Menu>
           </div>
           <div className="mm-map-field">
-            <span>Background</span>
+            <span>{t("panel.background")}</span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <input
                 type="color"
                 className="mm-map-control"
                 value={background || "#ffffff"}
                 onChange={(e) => onSetBackground(e.target.value)}
-                aria-label="Background colour"
+                aria-label={t("panel.backgroundColour")}
                 style={{ padding: 1, width: 34, height: 24 }}
               />
               {background ? (
@@ -393,10 +398,10 @@ export function MapPanel({
                   type="button"
                   className="mm-map-control"
                   onClick={() => onSetBackground("")}
-                  title="Reset background colour"
+                  title={t("panel.resetBackgroundColour")}
                   style={{ cursor: "pointer" }}
                 >
-                  Reset
+                  {t("common.reset")}
                 </button>
               ) : null}
             </div>
@@ -404,14 +409,14 @@ export function MapPanel({
           {/* Accent — the default tint for relationship lines + boundary boxes. Previously only
               settable as a side effect of a whole Design preset; now a standalone control. */}
           <div className="mm-map-field">
-            <span>Accent</span>
+            <span>{t("panel.accent")}</span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <input
                 type="color"
                 className="mm-map-control"
                 value={accentColor || "#1b8a5e"}
                 onChange={(e) => onSetAccentColor(e.target.value)}
-                aria-label="Accent colour"
+                aria-label={t("panel.accentColour")}
                 style={{ padding: 1, width: 34, height: 24 }}
               />
               {accentColor ? (
@@ -419,10 +424,10 @@ export function MapPanel({
                   type="button"
                   className="mm-map-control"
                   onClick={() => onSetAccentColor("")}
-                  title="Reset accent colour"
+                  title={t("panel.resetAccentColour")}
                   style={{ cursor: "pointer" }}
                 >
-                  Reset
+                  {t("common.reset")}
                 </button>
               ) : null}
             </div>
@@ -430,10 +435,10 @@ export function MapPanel({
         </div>
         {/* Progressive disclosure: the high-frequency controls (Theme/Layout/Background/Accent) stay
             visible; the rest tuck behind a collapsed disclosure so the panel isn't an 11-control wall. */}
-        <CollapsibleSection label="More styling" defaultOpen={false}>
+        <CollapsibleSection label={t("panel.moreStyling")} defaultOpen={false}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingBottom: 8 }}>
             <div className="mm-map-field">
-              <span>Image</span>
+              <span>{t("toolbar.exportGroup.image")}</span>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <label className="mm-map-control" style={{ cursor: "pointer" }}>
                   {doc.meta?.backgroundImage ? "Replace…" : "Add…"}
@@ -449,98 +454,98 @@ export function MapPanel({
                     type="button"
                     className="mm-map-control"
                     onClick={() => onSetBackgroundImage("")}
-                    title="Clear background image"
+                    title={t("panel.clearBackgroundImage")}
                     style={{ cursor: "pointer" }}
                   >
-                    Clear
+                    {t("common.clear")}
                   </button>
                 ) : null}
               </div>
             </div>
             <label className="mm-map-field" style={{ cursor: "pointer" }}>
-              <span>Line jumps</span>
+              <span>{t("toolbar.lineJumps")}</span>
               <input
                 type="checkbox"
                 checked={lineJumps}
                 onChange={onToggleLineJumps}
-                aria-label="Line jumps where relationships cross"
+                aria-label={t("panel.lineJumpsWhereRelationshipsCross")}
               />
             </label>
             {/* Connector style / branch weight / type — moved here from the Canvas menu (T5) so the
               map's persistent styling lives in one place. The Canvas menu now keeps only Design
               presets + Free layout and points here. */}
             <label className="mm-map-field">
-              <span>Connectors</span>
+              <span>{t("panel.connectors")}</span>
               <select
                 className="mm-map-control"
                 value={doc.meta?.connectorStyle ?? "organic"}
                 onChange={(e) => onSetConnectorStyle(e.target.value as ConnectorStyle)}
-                aria-label="Connector style"
+                aria-label={t("panel.connectorStyle")}
               >
-                <option value="organic">Organic</option>
-                <option value="curved">Curved</option>
-                <option value="elbow">Elbow</option>
-                <option value="straight">Straight</option>
+                <option value="organic">{t("panel.organic")}</option>
+                <option value="curved">{t("panel.curved")}</option>
+                <option value="elbow">{t("panel.elbow")}</option>
+                <option value="straight">{t("panel.straight")}</option>
               </select>
             </label>
             <label className="mm-map-field">
-              <span>Branch weight</span>
+              <span>{t("panel.branchWeight")}</span>
               <select
                 className="mm-map-control"
                 value={doc.meta?.branchGrowth ?? "regular"}
                 onChange={(e) => onSetBranchGrowth(e.target.value as BranchGrowth)}
-                aria-label="Branch growth weight"
+                aria-label={t("panel.branchGrowthWeight")}
               >
-                <option value="fine">Fine</option>
-                <option value="regular">Regular</option>
-                <option value="bold">Bold</option>
+                <option value="fine">{t("panel.fine")}</option>
+                <option value="regular">{t("panel.regular")}</option>
+                <option value="bold">{t("panel.bold")}</option>
               </select>
             </label>
             <label className="mm-map-field">
-              <span>Font</span>
+              <span>{t("panel.font2")}</span>
               <select
                 className="mm-map-control"
                 value={doc.meta?.fontFamily ?? ""}
                 onChange={(e) => onSetFontFamily(e.target.value)}
-                aria-label="Base font family"
-                title="Map-wide base font (a per-topic font still overrides it)"
+                aria-label={t("panel.baseFontFamily")}
+                title={t("panel.mapWideBaseFontA")}
               >
-                <option value="">Default</option>
-                <option value="Inter, system-ui, sans-serif">Sans</option>
-                <option value="Georgia, 'Times New Roman', serif">Serif</option>
-                <option value="'Courier New', ui-monospace, monospace">Mono</option>
+                <option value="">{t("panel.default")}</option>
+                <option value="Inter, system-ui, sans-serif">{t("panel.sans")}</option>
+                <option value="Georgia, 'Times New Roman', serif">{t("panel.serif")}</option>
+                <option value="'Courier New', ui-monospace, monospace">{t("panel.mono")}</option>
               </select>
             </label>
             <label className="mm-map-field">
-              <span>Text size</span>
+              <span>{t("panel.textSize")}</span>
               <select
                 className="mm-map-control"
                 value={doc.meta?.fontScale ?? "comfortable"}
                 onChange={(e) => onSetFontScale(e.target.value as FontScale)}
-                aria-label="Font size scale"
-                title="Map-wide text size (a per-topic size still overrides it)"
+                aria-label={t("panel.fontSizeScale")}
+                title={t("panel.mapWideTextSizeA")}
               >
-                <option value="compact">Compact</option>
-                <option value="comfortable">Comfortable</option>
-                <option value="large">Large</option>
+                <option value="compact">{t("panel.compact")}</option>
+                <option value="comfortable">{t("panel.comfortable")}</option>
+                <option value="large">{t("panel.large")}</option>
               </select>
             </label>
             {!doc.backdrop && onSetBackdrop ? (
               <label className="mm-map-field">
-                <span>Backdrop</span>
+                <span>{t("panel.backdrop")}</span>
                 <select
                   className="mm-map-control"
                   value=""
                   onChange={(e) => {
                     if (e.target.value) onSetBackdrop(e.target.value as BackdropKind);
                   }}
-                  aria-label="Add a diagram backdrop"
+                  aria-label={t("panel.addADiagramBackdrop")}
                 >
                   <option value="">None</option>
-                  <option value="onion">Onion (rings)</option>
-                  <option value="funnel">Funnel (stages)</option>
-                  <option value="venn2">Venn (2 circles)</option>
-                  <option value="venn3">Venn (3 circles)</option>
+                  <option value="onion">{t("panel.onionRings")}</option>
+                  <option value="funnel">{t("panel.funnelStages")}</option>
+                  <option value="venn2">{t("panel.venn2Circles")}</option>
+                  <option value="venn3">{t("panel.venn3Circles")}</option>
                 </select>
               </label>
             ) : null}
@@ -550,7 +555,7 @@ export function MapPanel({
         {/* Diagram backdrop controls — shown only when the map has one (a singleton on the doc). */}
         {doc.backdrop && (onBackdropRings || onClearBackdrop || onSetBackdropColor) ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div className="mm-map-section-title">Backdrop</div>
+            <div className="mm-map-section-title">{t("panel.backdrop")}</div>
             <div className="mm-map-field">
               <span>{BACKDROP_LABELS[doc.backdrop.kind] ?? doc.backdrop.kind}</span>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -561,8 +566,8 @@ export function MapPanel({
                       type="button"
                       className="mm-map-control"
                       onClick={() => onBackdropRings(-1)}
-                      title="Fewer rings / stages"
-                      aria-label="Fewer rings"
+                      title={t("panel.fewerRingsStages")}
+                      aria-label={t("panel.fewerRings")}
                       style={{ cursor: "pointer" }}
                     >
                       −
@@ -579,8 +584,8 @@ export function MapPanel({
                       type="button"
                       className="mm-map-control"
                       onClick={() => onBackdropRings(1)}
-                      title="More rings / stages"
-                      aria-label="More rings"
+                      title={t("panel.moreRingsStages")}
+                      aria-label={t("panel.moreRings")}
                       style={{ cursor: "pointer" }}
                     >
                       +
@@ -592,17 +597,17 @@ export function MapPanel({
                     type="button"
                     className="mm-map-control"
                     onClick={onClearBackdrop}
-                    title="Remove the backdrop"
+                    title={t("panel.removeTheBackdrop")}
                     style={{ cursor: "pointer" }}
                   >
-                    Remove
+                    {t("panel.remove")}
                   </button>
                 ) : null}
               </div>
             </div>
             {onSetBackdropColor ? (
               <div className="mm-map-field">
-                <span>Colour</span>
+                <span>{t("panel.colour")}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <input
                     type="color"
@@ -610,7 +615,7 @@ export function MapPanel({
                     // Default-accent placeholder (BACKDROP_STROKE) until an override is set.
                     value={doc.backdrop.color || "#9a93d6"}
                     onChange={(e) => onSetBackdropColor(e.target.value)}
-                    aria-label="Backdrop colour"
+                    aria-label={t("panel.backdropColour")}
                     style={{ padding: 1, width: 34, height: 24 }}
                   />
                   {doc.backdrop.color ? (
@@ -618,10 +623,10 @@ export function MapPanel({
                       type="button"
                       className="mm-map-control"
                       onClick={() => onSetBackdropColor("")}
-                      title="Reset backdrop colour"
+                      title={t("panel.resetBackdropColour")}
                       style={{ cursor: "pointer" }}
                     >
-                      Reset
+                      {t("common.reset")}
                     </button>
                   ) : null}
                 </div>
@@ -646,7 +651,7 @@ export function MapPanel({
         {counts.withProgress > 0 && (
           <div className="mm-stat" style={{ flex: "none" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 600 }}>Task progress</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{t("panel.taskProgress")}</span>
               <span
                 className="mm-mono"
                 style={{ fontSize: 11.5, fontWeight: 700, color: "var(--ed-accent)" }}
@@ -682,7 +687,7 @@ export function MapPanel({
             lineHeight: 1.7,
           }}
         >
-          Select a topic to edit it
+          {t("panel.selectATopicToEdit")}
         </div>
       </div>
     </aside>

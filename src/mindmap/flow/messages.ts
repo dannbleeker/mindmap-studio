@@ -86,10 +86,8 @@ export const CANVAS_EN = {
 
   // Relationship (edge) menu
   "canvas.link.editLabel": "Edit label",
-  "canvas.link.delete": "Delete relationship",
   "canvas.link.arrowheads": "Arrowheads",
   "canvas.link.line": "Line",
-  "canvas.link.type": "Type",
   "canvas.link.lineStyle": "Line style: {style}",
   "canvas.link.typeNamed": "Relationship type: {type}",
 
@@ -152,8 +150,6 @@ export const CANVAS_EN = {
 
   // Canvas-shape toolbar
   "canvas.shape.recolour": "Recolour",
-  "canvas.shape.shape": "Shape",
-  "canvas.shape.outline": "Outline",
   // Trailing space is deliberate: the label reads "New tag: #foo", with the `#tag` in its own span.
   "canvas.slash.newTagPrefix": "New tag: ",
   // Context-menu accessible names, and the chip labels prettier wrapped onto their own lines.
@@ -164,7 +160,6 @@ export const CANVAS_EN = {
   "canvas.priority.none": "None",
   // One concept — "reset to the default colour" — shared by the branch-colour and shape-recolour
   // chips. They were two keys until the duplicate check refused them.
-  "canvas.colour.default": "Default",
   "canvas.hint.clickTargetToLink": "Click a target node to draw a relationship · Esc to cancel",
   // --- the rest of the canvas chunk -----------------------------------------------------------------
   // CanvasOverlays, BulkNodeMenu, ShapeLayer, NodePopover, CrosslinkEdge, slashCommands. All in the
@@ -189,7 +184,6 @@ export const CANVAS_EN = {
   "canvas.addPriority": "Add priority",
   "canvas.dragToReshapeTheRelationship": "Drag to reshape the relationship",
   "canvas.reshapeRelationship": "Reshape relationship",
-  "canvas.relationshipLabel": "Relationship label",
   "canvas.label": "label…",
   "canvas.addChildTopic": "Add child topic",
   "canvas.addSiblingTopic": "Add sibling topic",

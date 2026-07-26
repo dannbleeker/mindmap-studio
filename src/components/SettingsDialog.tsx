@@ -111,8 +111,8 @@ export function SettingsDialog({
             aria-label={t("settings.appTheme")}
           >
             <option value="system">{t("settings.toggle.system")}</option>
-            <option value="light">{t("settings.appTheme.light")}</option>
-            <option value="dark">{t("settings.appTheme.dark")}</option>
+            <option value="light">{t("common.light")}</option>
+            <option value="dark">{t("common.dark")}</option>
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>

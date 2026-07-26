@@ -81,7 +81,7 @@ const statBtn: CSSProperties = {
 
 const VIEWS: { id: "map" | "outline" | "board"; label: string }[] = [
   { id: "map", label: t("toolbar.map") },
-  { id: "outline", label: t("canvas.shape.outline") },
+  { id: "outline", label: t("panel.outline") },
   { id: "board", label: t("canvas.board") },
 ];
 

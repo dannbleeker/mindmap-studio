@@ -194,7 +194,7 @@ function CrosslinkEdgeImpl({ id, source, target, label, data, selected }: EdgePr
             // biome-ignore lint/a11y/noAutofocus: inline editor opened by an explicit double-click.
             autoFocus
             defaultValue={typeof label === "string" ? label : ""}
-            aria-label={t("canvas.relationshipLabel")}
+            aria-label={t("panel.relationshipLabel")}
             className="nodrag nopan"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => {

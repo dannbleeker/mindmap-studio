@@ -2662,7 +2662,7 @@ function FlowInner({
                         </button>
                       ))}
                     </div>
-                    <MenuLabel>{t("canvas.link.type")}</MenuLabel>
+                    <MenuLabel>{t("panel.type")}</MenuLabel>
                     <div className="mm-menu-row">
                       {(["relates-to", "depends-on", "causes", "supports", "blocks"] as const).map(
                         // `kind`, not `t` — the loop variable shadowed the translation function, which
@@ -2684,7 +2684,7 @@ function FlowInner({
                     </div>
                     <MenuSeparator />
                     <MenuItem
-                      label={t("canvas.link.delete")}
+                      label={t("panel.deleteRelationship")}
                       danger
                       onSelect={() => {
                         apply(deleteLink(docRef.current, id));
@@ -2978,7 +2978,7 @@ function FlowInner({
                         className="mm-menu-chip"
                         onClick={() => apply(setBranchColor(docRef.current, id, ""))}
                       >
-                        {t("canvas.colour.default")}
+                        {t("panel.default")}
                       </button>
                     </div>
                     <MenuLabel>{t("canvas.menu.branchLine")}</MenuLabel>
@@ -3116,12 +3116,12 @@ function FlowInner({
                         />
                       ))}
                       <button type="button" className="mm-menu-chip" onClick={() => recolour("")}>
-                        {t("canvas.colour.default")}
+                        {t("panel.default")}
                       </button>
                     </div>
                     {ov.kind === "boundary" ? (
                       <>
-                        <MenuLabel>{t("canvas.shape.shape")}</MenuLabel>
+                        <MenuLabel>{t("panel.shape")}</MenuLabel>
                         <div className="mm-menu-row">
                           {SHAPES.map(([sh, lbl]) => (
                             <button
@@ -3140,7 +3140,7 @@ function FlowInner({
                             </button>
                           ))}
                         </div>
-                        <MenuLabel>{t("canvas.shape.outline")}</MenuLabel>
+                        <MenuLabel>{t("panel.outline")}</MenuLabel>
                         <div className="mm-menu-row">
                           {(["solid", "dashed", "dotted"] as const).map((d) => (
                             <button

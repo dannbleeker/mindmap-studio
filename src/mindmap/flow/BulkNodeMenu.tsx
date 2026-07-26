@@ -106,7 +106,7 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
           aria-label={t("canvas.defaultBranchColourOnThe")}
           onClick={() => across((d, i) => setBranchColor(d, i, ""))}
         >
-          {t("canvas.colour.default")}
+          {t("panel.default")}
         </button>
       </div>
     </>

@@ -1,4 +1,5 @@
 import { type ChangeEvent, useRef } from "react";
+import { t } from "../i18n";
 import { BrandMark } from "./BrandMark";
 import { EditorIcon } from "./EditorIcons";
 
@@ -56,8 +57,8 @@ export function IconRail({
       <button
         type="button"
         className="mm-rail-btn"
-        title="Back to Start — new maps, templates, library"
-        aria-label="Back to Start"
+        title={t("panel.backToStartNewMaps")}
+        aria-label={t("panel.backToStart")}
         onClick={onHome}
         style={{ width: 40, height: 40, marginBottom: 4 }}
       >
@@ -70,8 +71,8 @@ export function IconRail({
       <button
         type="button"
         className="mm-rail-btn"
-        title="Insert image on the selected node"
-        aria-label="Insert image"
+        title={t("panel.insertImageOnTheSelected")}
+        aria-label={t("panel.insertImage")}
         onClick={() => imageInputRef.current?.click()}
       >
         <EditorIcon name="image" size={19} />
@@ -83,12 +84,12 @@ export function IconRail({
         onChange={onImage}
         style={{ display: "none" }}
       />
-      <RailBtn icon="paste" label="Paste text → topics" onClick={onPaste} />
-      <RailBtn icon="search" label="Command palette (Ctrl/⌘+K)" onClick={onCommandPalette} />
+      <RailBtn icon="paste" label={t("cmd.paste-topics")} onClick={onPaste} />
+      <RailBtn icon="search" label={t("panel.commandPaletteCtrlK")} onClick={onCommandPalette} />
       <div className="mm-rail-spacer">
-        <RailBtn icon="star" label="Getting started tips" onClick={onGettingStarted} />
-        <RailBtn icon="settings" label="Settings" onClick={onSettings} />
-        <RailBtn icon="help" label="Keyboard shortcuts" onClick={onShortcuts} />
+        <RailBtn icon="star" label={t("panel.gettingStartedTips")} onClick={onGettingStarted} />
+        <RailBtn icon="settings" label={t("settings.title")} onClick={onSettings} />
+        <RailBtn icon="help" label={t("cmd.shortcuts")} onClick={onShortcuts} />
       </div>
     </aside>
   );

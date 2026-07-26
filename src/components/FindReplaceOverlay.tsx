@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../i18n";
 import { loadHistory, recordSearch } from "../io/searchHistory";
 import { SearchResults } from "./SearchResults";
 import type { ToolbarFind } from "./Toolbar";
@@ -33,7 +34,7 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
     // canvas, and jsdom can't render <dialog open>). Esc closes it via the bubbled keydown below.
     <div
       className="mm-find-overlay"
-      aria-label="Find and replace"
+      aria-label={t("panel.findAndReplace")}
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           e.stopPropagation();
@@ -42,12 +43,12 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
       }}
     >
       <div className="mm-find-head">
-        <span className="mm-find-title">Find &amp; replace</span>
+        <span className="mm-find-title">{t("panel.findReplace")}</span>
         <button
           type="button"
           className="mm-find-close"
-          aria-label="Close find"
-          title="Close (Esc)"
+          aria-label={t("panel.closeFind")}
+          title={t("panel.closeEsc")}
           onClick={onClose}
         >
           ×
@@ -67,8 +68,8 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
               find.findPrev();
             }
           }}
-          placeholder="Find… (↵ next · ⇧↵ prev)"
-          aria-label="Find node"
+          placeholder={t("panel.findNextPrev")}
+          aria-label={t("panel.findNode")}
           title={
             "Find by text, or use operators:\n" +
             'tag:foo  marker:flag-red  priority:1  due:overdue  has:note  level:>=2  -exclude  "exact phrase"'
@@ -83,37 +84,37 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
           className="mm-input"
           value={find.replaceWith}
           onChange={(e) => find.setReplaceWith(e.target.value)}
-          placeholder="Replace…"
-          aria-label="Replace with"
+          placeholder={t("panel.replace")}
+          aria-label={t("panel.replaceWith")}
         />
         <div className="mm-find-row">
           <select
             className="mm-input"
             value={find.replaceScope}
             onChange={(e) => find.setReplaceScope(e.target.value as "topics" | "notes" | "both")}
-            aria-label="Replace scope"
-            title="Where to replace: topics, notes, or both"
+            aria-label={t("panel.replaceScope")}
+            title={t("panel.whereToReplaceTopicsNotes")}
           >
-            <option value="topics">Topics</option>
-            <option value="notes">Notes</option>
-            <option value="both">Both</option>
+            <option value="topics">{t("panel.topics")}</option>
+            <option value="notes">{t("panel.tab.notes")}</option>
+            <option value="both">{t("panel.both")}</option>
           </select>
           <button
             type="button"
             className={`mm-toggle-btn${find.matchCase ? " is-on" : ""}`}
             aria-pressed={find.matchCase}
-            title="Match case"
-            aria-label="Match case"
+            title={t("panel.matchCase")}
+            aria-label={t("panel.matchCase")}
             onClick={() => find.setMatchCase(!find.matchCase)}
           >
-            Aa
+            {t("panel.aa")}
           </button>
           <button
             type="button"
             className={`mm-toggle-btn${find.useRegex ? " is-on" : ""}`}
             aria-pressed={find.useRegex}
-            title="Use regular expression"
-            aria-label="Use regular expression"
+            title={t("panel.useRegularExpression")}
+            aria-label={t("panel.useRegularExpression")}
             onClick={() => find.setUseRegex(!find.useRegex)}
           >
             .*
@@ -121,18 +122,18 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
           <button
             type="button"
             className="mm-tbtn mm-tbtn-ghost"
-            title="Replace the find text in every match (topics and/or notes per scope)"
+            title={t("panel.replaceTheFindTextIn")}
             onClick={find.runReplace}
           >
-            Replace all
+            {t("panel.replaceAll")}
           </button>
         </div>
         <div className="mm-find-row">
           <button
             type="button"
             className="mm-tbtn mm-tbtn-ghost"
-            title="Previous match (Shift+Enter)"
-            aria-label="Previous match"
+            title={t("panel.previousMatchShiftEnter")}
+            aria-label={t("panel.previousMatch")}
             onClick={find.findPrev}
           >
             ▴
@@ -140,8 +141,8 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
           <button
             type="button"
             className="mm-tbtn mm-tbtn-ghost"
-            title="Next match (Enter)"
-            aria-label="Next match"
+            title={t("panel.nextMatchEnter")}
+            aria-label={t("panel.nextMatch")}
             onClick={find.findNext}
           >
             ▾
@@ -155,10 +156,10 @@ export function FindReplaceOverlay({ find, onClose }: { find: ToolbarFind; onClo
               type="button"
               className="mm-tbtn mm-tbtn-ghost"
               aria-expanded={showList}
-              title="Show every match as a clickable list"
+              title={t("panel.showEveryMatchAsA")}
               onClick={() => setShowList((v) => !v)}
             >
-              {showList ? "Hide list" : `List all (${find.matches.length})`}
+              {showList ? t("panel.hideList") : t("panel.listAll", { n: find.matches.length })}
             </button>
           )}
         </div>

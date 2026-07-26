@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 // Default canvas theme — the warm-cream + emerald brand language (matches the editor chrome + Start
 // screen as of the 2026-06 redesign).
 //
@@ -92,10 +93,10 @@ export interface CanvasTheme {
 
 // The canvas style gallery, in pick order. id is persisted in localStorage.
 export const canvasThemes: CanvasTheme[] = [
-  { id: "light", name: "Light", theme: mindManagerTheme },
-  { id: "dark", name: "Dark", theme: mindManagerDarkTheme },
-  { id: "ocean", name: "Ocean", theme: oceanTheme },
-  { id: "sunset", name: "Sunset", theme: sunsetTheme },
+  { id: "light", name: t("common.light"), theme: mindManagerTheme },
+  { id: "dark", name: t("common.dark"), theme: mindManagerDarkTheme },
+  { id: "ocean", name: t("theme.ocean"), theme: oceanTheme },
+  { id: "sunset", name: t("theme.sunset"), theme: sunsetTheme },
 ];
 
 export function themeById(id: string): CanvasTheme {

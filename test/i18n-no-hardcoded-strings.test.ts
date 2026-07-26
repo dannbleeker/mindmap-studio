@@ -82,9 +82,10 @@ function scan(rel: string): Violation[] {
   return [...propViolations(src), ...proseViolations(src)];
 }
 
-const report = (rel: string, v: Violation[]) =>
-  `${rel} has ${v.length} hardcoded user-facing string(s) — move them into a catalogue:\n` +
-  v.map((x) => `  ${rel}:${x.line}  ${x.why}\n    ${x.text}`).join("\n");
+const report = (rel: string, v: Violation[]) => {
+  const lines = v.map((x) => `  ${rel}:${x.line}  ${x.why}\n    ${x.text}`).join("\n");
+  return `${rel} has ${v.length} hardcoded user-facing string(s) — move them into a catalogue:\n${lines}`;
+};
 
 describe("migrated files carry no hardcoded user-facing strings", () => {
   for (const rel of MIGRATED) {

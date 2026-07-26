@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { useMemo } from "react";
 import { loadMap } from "../../store/mapStore";
 import { type Command, CommandPalette as Palette } from "../CommandPalette";
@@ -13,21 +15,41 @@ export function CommandPalette({ ctx, onClose }: { ctx: StartContext; onClose: (
 
   const commands = useMemo<Command[]>(() => {
     const actions: Command[] = [
-      { id: "new", label: "New blank map", kind: "action", run: () => ctx.onOpen(blankDoc()) },
-      { id: "import", label: "Import a file", kind: "action", run: () => ctx.go("import") },
+      {
+        id: "new",
+        label: t("start.newBlankMap"),
+        kind: "action",
+        run: () => ctx.onOpen(blankDoc()),
+      },
+      { id: "import", label: t("start.importAFile"), kind: "action", run: () => ctx.go("import") },
       {
         id: "templates",
-        label: "Browse templates",
+        label: t("start.browseTemplates"),
         kind: "action",
         run: () => ctx.go("templates"),
       },
-      { id: "examples", label: "Browse examples", kind: "action", run: () => ctx.go("examples") },
-      { id: "layouts", label: "Browse layouts", kind: "action", run: () => ctx.go("layouts") },
-      { id: "learn", label: "Learn mind mapping", kind: "action", run: () => ctx.go("learn") },
+      {
+        id: "examples",
+        label: t("start.browseExamples"),
+        kind: "action",
+        run: () => ctx.go("examples"),
+      },
+      {
+        id: "layouts",
+        label: t("start.browseLayouts"),
+        kind: "action",
+        run: () => ctx.go("layouts"),
+      },
+      {
+        id: "learn",
+        label: t("start.learnMindMapping"),
+        kind: "action",
+        run: () => ctx.go("learn"),
+      },
     ];
     const mapCmds: Command[] = maps.map((m) => ({
       id: `map:${m.id}`,
-      label: m.title || "(untitled)",
+      label: m.title || t("common.untitled"),
       kind: "map",
       run: () => {
         loadMap(m.id)
@@ -44,12 +66,12 @@ export function CommandPalette({ ctx, onClose }: { ctx: StartContext; onClose: (
     <Palette
       commands={commands}
       onClose={onClose}
-      placeholder="Search maps and commands…"
+      placeholder={t("start.searchMapsAndCommands")}
       makeQueryCommand={(query) =>
         query
           ? {
               id: "new-topic",
-              label: `New map: "${query}"`,
+              label: t("start.newMapNamed", { name: query }),
               kind: "create",
               run: () => ctx.onOpen(topicDoc(query)),
             }

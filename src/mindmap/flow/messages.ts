@@ -96,7 +96,6 @@ export const CANVAS_EN = {
   // Topic context menu
   "canvas.menu.addChild": "Add child",
   "canvas.menu.addSibling": "Add sibling",
-  "canvas.menu.rename": "Rename",
   "canvas.menu.addNote": "Add note",
   "canvas.menu.linkTo": "Link to…",
   "canvas.menu.addCallout": "Add callout",
@@ -132,7 +131,6 @@ export const CANVAS_EN = {
   "canvas.menu.branchLayout": "Branch layout",
   "canvas.branchLayout.default": "Default (map)",
   "canvas.branchLayout.radial": "Radial",
-  "canvas.branchLayout.grid": "Grid",
   "canvas.branchLayout.brace": "Brace",
   "canvas.menu.mapSide": "Map side",
   "canvas.branchSide.auto": "Auto (balance)",

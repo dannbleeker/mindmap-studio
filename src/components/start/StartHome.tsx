@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { useState } from "react";
 import { EXAMPLE_DESCRIPTIONS, buildExample } from "../../exampleBuilders";
 import { examples } from "../../examples";
@@ -51,10 +53,8 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
       {ctx.showNewHere && !newHereDismissed ? (
         <div className="st-newhere" role="note">
           <div>
-            <strong>New here?</strong>{" "}
-            {touch
-              ? "Capture a thought below, then tap ＋ on a topic to grow it — pinch to zoom."
-              : "Capture a thought below, then press Tab to add topics and ⌘K for anything."}
+            <strong>{t("start.newHere")}</strong>{" "}
+            {touch ? t("start.captureAThoughtBelowThen") : t("start.captureAThoughtBelowThen2")}
           </div>
           <div className="st-newhere-actions">
             <button
@@ -67,7 +67,7 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
             <button
               type="button"
               className="st-newhere-x"
-              aria-label="Dismiss"
+              aria-label={t("start.dismiss")}
               onClick={() => setNewHereDismissed(true)}
             >
               ×
@@ -87,9 +87,9 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
       {recent.length > 0 ? (
         <section>
           <div className="st-row">
-            <h2 className="st-section-title">Pick up where you left off</h2>
+            <h2 className="st-section-title">{t("start.pickUpWhereYouLeft")}</h2>
             <button type="button" className="st-link" onClick={() => ctx.go("all")}>
-              View all maps →
+              {t("start.viewAllMaps")}
             </button>
           </div>
           <div className="st-grid" style={{ marginTop: 12 }}>
@@ -102,9 +102,9 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
 
       <section>
         <div className="st-row">
-          <h2 className="st-section-title">Start from a template</h2>
+          <h2 className="st-section-title">{t("start.startFromATemplate")}</h2>
           <button type="button" className="st-link" onClick={() => ctx.go("templates")}>
-            Browse all templates →
+            {t("start.browseAllTemplates")}
           </button>
         </div>
         <div className="st-grid" style={{ marginTop: 12 }}>
@@ -123,9 +123,9 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
 
       <section>
         <div className="st-row">
-          <h2 className="st-section-title">Or open a worked example</h2>
+          <h2 className="st-section-title">{t("start.orOpenAWorkedExample")}</h2>
           <button type="button" className="st-link" onClick={() => ctx.go("examples")}>
-            Browse all examples →
+            {t("start.browseAllExamples")}
           </button>
         </div>
         <div className="st-grid" style={{ marginTop: 12 }}>

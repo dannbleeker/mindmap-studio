@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { timeAgo } from "../../ui";
 import { MiniMap } from "./MiniMap";
 
@@ -18,12 +20,12 @@ export interface MapEntry {
 }
 
 const KEBAB: { key: string; label: string }[] = [
-  { key: "open", label: "Open" },
-  { key: "rename", label: "Rename" },
-  { key: "duplicate", label: "Duplicate" },
-  { key: "move", label: "Move to folder…" },
-  { key: "export", label: "Export…" },
-  { key: "delete", label: "Delete" },
+  { key: "open", label: t("start.open") },
+  { key: "rename", label: t("common.rename") },
+  { key: "duplicate", label: t("start.duplicate") },
+  { key: "move", label: t("start.moveToFolder") },
+  { key: "export", label: t("start.export") },
+  { key: "delete", label: t("start.deleteMap") },
 ];
 
 export function MapCard({
@@ -36,7 +38,10 @@ export function MapCard({
   const meta = [`${entry.nodeCount} node${entry.nodeCount === 1 ? "" : "s"}`];
   if (entry.updatedAt) meta.push(timeAgo(entry.updatedAt));
   // Pin/unpin leads the kebab so a curated map can be kept at (or released from) the top of the lists.
-  const kebabItems = [{ key: "pin", label: entry.pinned ? "Unpin" : "Pin to top" }, ...KEBAB];
+  const kebabItems = [
+    { key: "pin", label: entry.pinned ? "Unpin" : t("start.pinToTop") },
+    ...KEBAB,
+  ];
   return (
     <div className="st-card st-card-hover st-tile">
       <button
@@ -51,14 +56,14 @@ export function MapCard({
         <div className="st-row">
           <div className="st-card-title">
             {entry.pinned ? (
-              <span aria-hidden="true" title="Pinned" style={{ marginRight: 5 }}>
+              <span aria-hidden="true" title={t("start.pinned")} style={{ marginRight: 5 }}>
                 ★
               </span>
             ) : null}
-            {entry.title || "(untitled)"}
+            {entry.title || t("common.untitled")}
           </div>
           <details className="st-kebab">
-            <summary aria-label="Map actions">⋯</summary>
+            <summary aria-label={t("start.mapActions")}>⋯</summary>
             <div className="st-kebab-menu">
               {kebabItems.map((k) => (
                 <button

@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { type ReactNode, useEffect, useState } from "react";
 import { InstallButton } from "../InstallButton";
 import { ACCENT } from "./tokens";
@@ -7,16 +9,16 @@ import type { StartSection } from "./types";
 // "local & private" footer card.
 
 const NAV: { id: StartSection; label: string }[] = [
-  { id: "start", label: "Start" },
-  { id: "all", label: "All maps" },
-  { id: "recent", label: "Recent" },
-  { id: "templates", label: "Templates" },
-  { id: "examples", label: "Examples" },
-  { id: "layouts", label: "Layouts" },
-  { id: "import", label: "Import" },
-  { id: "learn", label: "Learn mind mapping" },
-  { id: "about", label: "About" },
-  { id: "trash", label: "Trash" },
+  { id: "start", label: t("start.start") },
+  { id: "all", label: t("toolbar.allMaps") },
+  { id: "recent", label: t("toolbar.recent") },
+  { id: "templates", label: t("toolbar.templates") },
+  { id: "examples", label: t("toolbar.examples") },
+  { id: "layouts", label: t("start.layouts") },
+  { id: "import", label: t("start.import") },
+  { id: "learn", label: t("start.learnMindMapping") },
+  { id: "about", label: t("start.about") },
+  { id: "trash", label: t("start.trash") },
 ];
 
 /** Inline 20×20 line icons for the section nav (stroke = currentColor, so the active emerald tint flows
@@ -163,10 +165,10 @@ export function StartSidebar({
   }, [drawerOpen]);
 
   return (
-    <nav className="st-sidebar" aria-label="Start sections">
+    <nav className="st-sidebar" aria-label={t("start.startSections")}>
       <div className="st-brand">
         <BrandGlyph />
-        MindMap Studio
+        {t("about.appName")}
       </div>
       <button type="button" className="st-new" onClick={onNewMap}>
         <span aria-hidden="true">＋</span> New map
@@ -174,7 +176,7 @@ export function StartSidebar({
       <button
         type="button"
         className="st-hamburger"
-        aria-label="Sections menu"
+        aria-label={t("start.sectionsMenu")}
         aria-expanded={drawerOpen}
         aria-controls="st-nav-drawer"
         onClick={() => setDrawerOpen((v) => !v)}
@@ -185,7 +187,7 @@ export function StartSidebar({
         <button
           type="button"
           className="st-nav-backdrop"
-          aria-label="Close sections menu"
+          aria-label={t("start.closeSectionsMenu")}
           onClick={() => setDrawerOpen(false)}
         />
       ) : null}

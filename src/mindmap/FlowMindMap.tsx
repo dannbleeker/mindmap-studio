@@ -2723,7 +2723,7 @@ function FlowInner({
                 const items: [string, () => void, boolean?][] = [
                   [t("canvas.menu.addChild"), () => apply(addChild(docRef.current, id), true)],
                   [t("canvas.menu.addSibling"), () => apply(addSibling(docRef.current, id), true)],
-                  [t("canvas.menu.rename"), () => startEdit(id)],
+                  [t("common.rename"), () => startEdit(id)],
                   [
                     t("canvas.menu.addNote"),
                     () => {
@@ -2918,7 +2918,7 @@ function FlowInner({
                         <option value="radial">{t("canvas.branchLayout.radial")}</option>
                         <option value="timeline">{t("cmd.layout.timeline")}</option>
                         <option value="fishbone">{t("cmd.layout.fishbone")}</option>
-                        <option value="grid">{t("canvas.branchLayout.grid")}</option>
+                        <option value="grid">{t("common.grid")}</option>
                         <option value="brace">{t("canvas.branchLayout.brace")}</option>
                       </select>
                     </label>

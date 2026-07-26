@@ -1,3 +1,4 @@
+import type { StartKey } from "../components/start/messages";
 import type { CanvasKey } from "../mindmap/flow/messages";
 import type { CoreKey } from "./core";
 
@@ -9,4 +10,4 @@ import type { CoreKey } from "./core";
 // chunk-local while the key type stays global. Keep them `import type`; a value import would undo it.
 //
 // As each catalogue is added (io, …) add its key type to this union.
-export type MessageKey = CoreKey | CanvasKey;
+export type MessageKey = CoreKey | CanvasKey | StartKey;

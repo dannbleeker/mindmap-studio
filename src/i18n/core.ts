@@ -26,6 +26,10 @@ export const CORE_EN = {
   "common.markers": "Markers",
   "common.tags": "Tags",
   "common.cancel": "Cancel",
+  // Shared by the canvas context menu and the Start screen's map cards. EAGER on purpose: two
+  // different LAZY chunks need it, and neither can rely on the other having loaded.
+  "common.rename": "Rename",
+  "common.grid": "Grid",
   "common.save": "Save",
   "common.close": "Close",
   "common.clear": "Clear",

@@ -356,6 +356,37 @@ describe("bundle locality", () => {
     }
   });
 
+  it("no lazy chunk references another lazy chunk's key", () => {
+    // A lazy catalogue registers when ITS chunk loads. So a file in the Start chunk calling a
+    // `canvas.*` key throws "no message for key" for any user who opens the Start screen without
+    // having loaded the canvas — which is the normal first-run path.
+    //
+    // Reuse is still right, but the SURVIVOR MUST BE EAGER: promote the shared message to core.ts and
+    // point both chunks at it. Two real instances (`canvas.menu.rename`, `canvas.branchLayout.grid`)
+    // shipped into the Start screen before this existed, and three tests caught them only because
+    // those particular components happened to be rendered by a test.
+    const offenders: string[] = [];
+    const check = (dir: string, ownPrefix: string, foreignPrefixes: string[]) => {
+      const walk = (d: string) => {
+        for (const e of readdirSync(join(process.cwd(), d), { withFileTypes: true })) {
+          const rel = `${d}/${e.name}`;
+          if (e.isDirectory()) walk(rel);
+          else if (/\.(ts|tsx)$/.test(e.name) && e.name !== "messages.ts") {
+            const src = readFileSync(join(process.cwd(), rel), "utf8");
+            for (const foreign of foreignPrefixes)
+              for (const m of src.matchAll(new RegExp(`t\\("(${foreign}\\.[\\w.]+)"`, "g")))
+                offenders.push(`${rel} calls ${m[1]} — ${foreign} is a different lazy chunk`);
+          }
+        }
+      };
+      walk(dir);
+      void ownPrefix;
+    };
+    check("src/components/start", "start", ["canvas"]);
+    check("src/mindmap/flow", "canvas", ["start"]);
+    expect(offenders).toEqual([]);
+  });
+
   it("the canvas catalogue registers itself on import, not from main.tsx", () => {
     // The same failure mode that broke the first cut of this layer: registration belongs to the module,
     // so any entry point rendering the canvas gets its messages.

@@ -1,3 +1,5 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import type { BackdropKind, MindMapDoc } from "../../../model/types";
 import { blankDoc } from "../docBuilders";
 import type { StartContext } from "../types";
@@ -6,24 +8,24 @@ import type { StartContext } from "../types";
 // clear a layout is just a view you can switch any time; your topics don't move.
 
 const LAYOUTS: { kind: string; label: string }[] = [
-  { kind: "side", label: "Two-sided" },
-  { kind: "right", label: "All right" },
-  { kind: "left", label: "All left" },
-  { kind: "radial", label: "Radial / hub" },
-  { kind: "org-down", label: "Org chart ↓" },
-  { kind: "org-up", label: "Org chart ↑" },
-  { kind: "timeline", label: "Timeline" },
-  { kind: "fishbone", label: "Fishbone" },
-  { kind: "grid", label: "Grid / matrix" },
-  { kind: "swimlane", label: "Swimlane" },
-  { kind: "brace", label: "Brace map" },
+  { kind: "side", label: t("start.twoSided") },
+  { kind: "right", label: t("start.allRight") },
+  { kind: "left", label: t("start.allLeft") },
+  { kind: "radial", label: t("cmd.layout.radial") },
+  { kind: "org-down", label: t("toolbar.orgChart") },
+  { kind: "org-up", label: t("toolbar.orgChart2") },
+  { kind: "timeline", label: t("cmd.layout.timeline") },
+  { kind: "fishbone", label: t("cmd.layout.fishbone") },
+  { kind: "grid", label: t("cmd.layout.grid") },
+  { kind: "swimlane", label: t("cmd.layout.swimlane") },
+  { kind: "brace", label: t("cmd.layout.brace") },
 ];
 
 const BACKDROPS: { kind: BackdropKind; label: string }[] = [
-  { kind: "onion", label: "Onion" },
-  { kind: "funnel", label: "Funnel" },
-  { kind: "venn2", label: "Venn (2)" },
-  { kind: "venn3", label: "Venn (3)" },
+  { kind: "onion", label: t("start.onion") },
+  { kind: "funnel", label: t("start.funnel") },
+  { kind: "venn2", label: t("start.venn2") },
+  { kind: "venn3", label: t("start.venn3") },
 ];
 
 function backdropDoc(kind: BackdropKind): MindMapDoc {
@@ -35,7 +37,7 @@ export function Layouts({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Layouts</h2>
+        <h2 className="st-section-title">{t("start.layouts")}</h2>
         <p className="st-section-sub">
           A layout is a <strong>view</strong> you can switch any time from the toolbar — your topics
           don't move. Open a blank map in one to start.
@@ -44,7 +46,7 @@ export function Layouts({ ctx }: { ctx: StartContext }) {
 
       <section>
         <h3 className="st-section-title" style={{ fontSize: 13, color: "var(--st-muted)" }}>
-          Structural layouts
+          {t("start.structuralLayouts")}
         </h3>
         <div className="st-grid" style={{ marginTop: 10 }}>
           {LAYOUTS.map((l) => (
@@ -66,9 +68,9 @@ export function Layouts({ ctx }: { ctx: StartContext }) {
 
       <section>
         <h3 className="st-section-title" style={{ fontSize: 13, color: "var(--st-muted)" }}>
-          Diagram backdrops
+          {t("start.diagramBackdrops")}
         </h3>
-        <p className="st-section-sub">A geometric frame behind free-positioned topics.</p>
+        <p className="st-section-sub">{t("start.aGeometricFrameBehindFree")}</p>
         <div className="st-grid" style={{ marginTop: 10 }}>
           {BACKDROPS.map((b) => (
             <button

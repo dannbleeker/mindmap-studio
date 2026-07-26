@@ -1,35 +1,37 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 // Six short principles of mind mapping. Static content.
 
 const PRINCIPLES: { icon: string; title: string; body: string }[] = [
   {
     icon: "◎",
-    title: "Start central",
-    body: "Put the subject in the middle and grow outward — the centre keeps everything anchored to one idea.",
+    title: t("start.startCentral"),
+    body: t("start.putTheSubjectInThe"),
   },
   {
     icon: "✦",
-    title: "One keyword per branch",
-    body: "A single word or short phrase per node. It's faster to scan and forces you to distil the thought.",
+    title: t("start.oneKeywordPerBranch"),
+    body: t("start.aSingleWordOrShort"),
   },
   {
     icon: "❖",
-    title: "Radial hierarchy",
-    body: "Main branches near the centre, detail further out. Distance from the centre = level of detail.",
+    title: t("start.radialHierarchy"),
+    body: t("start.mainBranchesNearTheCentre"),
   },
   {
     icon: "🎨",
-    title: "Colour by theme",
-    body: "Give each main branch its own colour so the eye groups related ideas at a glance.",
+    title: t("start.colourByTheme"),
+    body: t("start.giveEachMainBranchIts"),
   },
   {
     icon: "↔",
-    title: "Cross-links",
-    body: "Draw a relationship arrow between branches that connect — maps aren't only trees.",
+    title: t("start.crossLinks"),
+    body: t("start.drawARelationshipArrowBetween"),
   },
   {
     icon: "⚡",
-    title: "Capture, then tidy",
-    body: "Get everything down first; rearrange, group, and prune afterwards. Don't edit while you brainstorm.",
+    title: t("start.captureThenTidy"),
+    body: t("start.getEverythingDownFirstRearrange"),
   },
 ];
 
@@ -37,10 +39,8 @@ export function Learn() {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Learn mind mapping</h2>
-        <p className="st-section-sub">
-          A few principles that make maps clearer and faster to think with.
-        </p>
+        <h2 className="st-section-title">{t("start.learnMindMapping")}</h2>
+        <p className="st-section-sub">{t("start.aFewPrinciplesThatMake")}</p>
       </section>
       <div className="st-principles">
         {PRINCIPLES.map((p) => (
@@ -55,10 +55,10 @@ export function Learn() {
       </div>
 
       <div className="st-card" style={{ padding: 18 }}>
-        <h3 style={{ margin: "0 0 6px", fontSize: 15 }}>Go deeper — the book</h3>
+        <h3 style={{ margin: "0 0 6px", fontSize: 15 }}>{t("start.goDeeperTheBook")}</h3>
         <p className="st-prose" style={{ marginTop: 0 }}>
-          <strong>Thinking in Maps</strong> is the companion book: the why and how of mapping,
-          worked examples, and every feature in context.
+          <strong>{t("start.thinkingInMaps")}</strong> is the companion book: the why and how of
+          mapping, worked examples, and every feature in context.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
           <a

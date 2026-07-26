@@ -1,3 +1,5 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { useState } from "react";
 import { EXAMPLE_DESCRIPTIONS, buildExample } from "../../../exampleBuilders";
 import { examples } from "../../../examples";
@@ -29,7 +31,7 @@ export function Examples({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Examples</h2>
+        <h2 className="st-section-title">{t("toolbar.examples")}</h2>
         <p className="st-section-sub">
           Complete, worked maps — open one to explore, then make it your own. The same set as the
           editor's New-map gallery. {built.length} examples.
@@ -37,7 +39,7 @@ export function Examples({ ctx }: { ctx: StartContext }) {
       </section>
       <input
         className="st-input"
-        placeholder="Search examples…"
+        placeholder={t("start.searchExamples")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />

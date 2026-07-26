@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { useState } from "react";
 
 // The hero capture card: three segmented tabs that are the three ways into a new map. Presentational
@@ -5,13 +7,17 @@ import { useState } from "react";
 
 type Tab = "topic" | "paste" | "blank";
 
-const EXAMPLES = ["Plan a product launch", "Organize my research", "Map the new onboarding"];
+const EXAMPLES = [
+  t("start.suggestionLaunch"),
+  t("start.organizeMyResearch"),
+  t("start.mapTheNewOnboarding"),
+];
 
 const BLANK_LAYOUTS: { kind: string; label: string }[] = [
-  { kind: "side", label: "Two-sided" },
-  { kind: "org-down", label: "Org chart" },
-  { kind: "radial", label: "Radial" },
-  { kind: "grid", label: "Grid" },
+  { kind: "side", label: t("start.twoSided") },
+  { kind: "org-down", label: t("start.orgChart") },
+  { kind: "radial", label: t("toolbar.layoutGroupRadial") },
+  { kind: "grid", label: t("common.grid") },
 ];
 
 export function CaptureCard({
@@ -29,13 +35,13 @@ export function CaptureCard({
 
   return (
     <section className="st-card st-hero">
-      <div className="st-eyebrow">Local-first mind mapping</div>
-      <h1>What's on your mind?</h1>
+      <div className="st-eyebrow">{t("start.localFirstMindMapping")}</div>
+      <h1>{t("start.whatSOnYourMind")}</h1>
       <p className="st-hero-sub">
         Capture a thought, paste an outline, or open a blank canvas — it all becomes a map you own.
       </p>
 
-      <div className="st-tabs" role="tablist" aria-label="New map">
+      <div className="st-tabs" role="tablist" aria-label={t("start.newMap")}>
         <button
           type="button"
           role="tab"
@@ -43,7 +49,7 @@ export function CaptureCard({
           className="st-tab"
           onClick={() => setTab("topic")}
         >
-          Type a topic
+          {t("start.typeATopic")}
         </button>
         <button
           type="button"
@@ -52,7 +58,7 @@ export function CaptureCard({
           className="st-tab"
           onClick={() => setTab("paste")}
         >
-          Paste an outline
+          {t("start.pasteAnOutline")}
         </button>
         <button
           type="button"
@@ -61,7 +67,7 @@ export function CaptureCard({
           className="st-tab"
           onClick={() => setTab("blank")}
         >
-          Blank canvas
+          {t("start.blankCanvas")}
         </button>
       </div>
 
@@ -70,7 +76,7 @@ export function CaptureCard({
           <div className="st-capture-row">
             <input
               className="st-input"
-              placeholder="e.g. Launch plan for Q3"
+              placeholder={t("start.eGLaunchPlanFor")}
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               onKeyDown={(e) => {
@@ -83,11 +89,11 @@ export function CaptureCard({
               disabled={!topic.trim()}
               onClick={() => onTopic(topic.trim())}
             >
-              Grow the map
+              {t("start.growTheMap")}
             </button>
           </div>
           <div className="st-try">
-            <span>Try</span>
+            <span>{t("start.try")}</span>
             {EXAMPLES.map((ex) => (
               <button key={ex} type="button" className="st-pill" onClick={() => onTopic(ex)}>
                 {ex}
@@ -101,9 +107,7 @@ export function CaptureCard({
         <div>
           <textarea
             className="st-textarea"
-            placeholder={
-              "Paste an outline — indentation or # levels set the hierarchy:\n\n# Launch\n  Product\n    Beta\n  Marketing"
-            }
+            placeholder={t("start.pasteAnOutlineIndentationOr")}
             value={outline}
             onChange={(e) => setOutline(e.target.value)}
           />
@@ -114,7 +118,7 @@ export function CaptureCard({
               disabled={!outline.trim()}
               onClick={() => onPaste(outline)}
             >
-              Turn into a map
+              {t("start.turnIntoAMap")}
             </button>
           </div>
         </div>
@@ -142,7 +146,7 @@ export function CaptureCard({
             ))}
           </div>
           <button type="button" className="st-btn-primary st-btn" onClick={() => onBlank()}>
-            Open canvas
+            {t("start.openCanvas")}
           </button>
         </div>
       ) : null}

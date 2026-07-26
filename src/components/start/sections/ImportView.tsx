@@ -1,3 +1,5 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { useRef, useState } from "react";
 import type { StartContext } from "../types";
 
@@ -45,11 +47,8 @@ export function ImportView({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Import</h2>
-        <p className="st-section-sub">
-          Drop a file or pick one — it opens as a new map. Everything is parsed in your browser;
-          nothing is uploaded.
-        </p>
+        <h2 className="st-section-title">{t("start.import")}</h2>
+        <p className="st-section-sub">{t("start.importBlurb")}</p>
       </section>
 
       <button
@@ -85,15 +84,15 @@ export function ImportView({ ctx }: { ctx: StartContext }) {
         <div style={{ fontSize: 28 }} aria-hidden="true">
           ⤓
         </div>
-        <div style={{ fontWeight: 600, marginTop: 6 }}>Drop a file here, or click to browse</div>
+        <div style={{ fontWeight: 600, marginTop: 6 }}>{t("start.dropAFileHereOr")}</div>
         <div className="st-card-meta" style={{ justifyContent: "center", marginTop: 4 }}>
-          One file opens as a map · multiple import into the library
+          {t("start.oneFileOpensAsA")}
         </div>
       </button>
 
       <section>
         <h3 className="st-section-title" style={{ fontSize: 13, color: "var(--st-muted)" }}>
-          Supported formats
+          {t("start.supportedFormats")}
         </h3>
         <div className="st-grid" style={{ marginTop: 10 }}>
           {FORMATS.map((f) => (

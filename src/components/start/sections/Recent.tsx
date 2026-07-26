@@ -1,3 +1,5 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { MapCard, type MapEntry } from "../MapCard";
 import { handleMapAction } from "../mapActions";
 import type { StartContext } from "../types";
@@ -11,10 +13,10 @@ import { EmptyMaps } from "./EmptyMaps";
 const GROUPS = [
   "Today",
   "Yesterday",
-  "Earlier this week",
-  "This month",
+  t("start.earlierThisWeek"),
+  t("start.thisMonth"),
   "Older",
-  "Not yet saved",
+  t("start.notYetSaved"),
 ] as const;
 type Group = (typeof GROUPS)[number];
 
@@ -46,8 +48,8 @@ export function Recent({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Recent</h2>
-        <p className="st-section-sub">Your maps, newest first.</p>
+        <h2 className="st-section-title">{t("toolbar.recent")}</h2>
+        <p className="st-section-sub">{t("start.yourMapsNewestFirst")}</p>
       </section>
       {entries.length === 0 ? (
         <EmptyMaps ctx={ctx} />

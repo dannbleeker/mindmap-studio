@@ -59,3 +59,42 @@ One item inside this decision is a *correctness* defect rather than a translatio
 revisiting separately if a second locale ships: a handful of example notes give UI-referential
 instructions ("open Notes", "use the Markers panel"). Once the chrome is translated those sentences name
 controls that no longer exist under those names — they become wrong, not merely untranslated.
+
+---
+
+## 3. The bundle gate measures a subset of first-load JS
+
+`scripts/size-budget.mjs`, `scripts/bundle-budget.mjs`
+
+The gate weighs `index-*.js` and calls it "the initial bundle". Rollup also splits code shared by
+several eagerly-imported modules into its own chunk, and Vite emits a `<link rel="modulepreload">` for
+it — so the browser fetches it on first paint exactly like the entry. The gate filed those under "lazy"
+and stopped counting.
+
+**Measured:**
+
+| | entry | preloaded | true first load |
+| --- | --- | --- | --- |
+| at this branch's start | 168.1 | 8.4 | **176.5** |
+| after the eager-inspector batch | 158.0 | 20.6 | **178.6** |
+
+Two things follow, and they point in opposite directions:
+
+- **The true figure has been above the 175 ceiling since before this work started.** Not a regression
+  introduced here — verified by building the branch point.
+- **The gate can report an improvement for a change that made things worse.** Migrating the eager
+  inspectors moved ~16.6 kB into `primitives-*.js`; the gate reported 168.5 → 158.0, a 10.5 kB "win",
+  for a change that added 141 catalogue keys. Real first load went *up* ~2 kB.
+
+`size-budget.mjs` now **computes and prints** the true figure, and flags it when it exceeds the ceiling.
+It still **gates on the old metric**, deliberately — switching it changes what a guard-rail means, and
+because the true number was already over, flipping it silently would either read as a regression this
+work caused or invite raising the ceiling to hide it.
+
+**The decision:** gate on true first load and re-base `BUDGET_KB` to the measured figure plus a margin
+(recording it as a metric correction, not an allowance) — or keep the entry-only metric and document
+that it is a proxy. The one option to avoid is leaving a gate that can be satisfied by moving weight
+sideways.
+
+Worth noting either way: `primitives-*.js` at 16.6 kB is the UI-primitive layer, pulled in eagerly. If
+first-load size matters, that chunk — not the catalogue — is where the weight actually is.

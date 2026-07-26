@@ -291,7 +291,7 @@ export function MapPanel({
               {/* One-shot preset: sets theme + connector style + branch weight + accent together
                   (T3-25 — moved here from the Toolbar's Canvas menu so the map's look has one home). */}
               <Menu
-                trigger={<>{t("panel.chooseAPreset")}</>}
+                trigger={t("panel.chooseAPreset")}
                 triggerClassName="mm-map-control mm-layout-trigger"
                 triggerAriaLabel={t("panel.applyADesignPreset")}
                 triggerTitle={t("panel.applyADesignPresetTheme")}

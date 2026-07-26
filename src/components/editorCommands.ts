@@ -86,23 +86,23 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   ) => cmds.push({ id, label, kind, run, enabled, shortcut: SHORTCUT_BINDINGS[id], ...extra });
 
   // Map / file
-  add("open-file", "Open file…", "map", () => io.openFile());
-  add("save-file", "Save to file", "map", () => io.saveFile());
-  add("save-file-as", "Save to file as…", "map", () => io.saveFileAs());
-  add("present", "Present", "map", () => map.present());
-  add("duplicate-map", "Duplicate map", "map", () => map.duplicateMap());
-  add("delete-map", "Delete map", "map", () => map.deleteCurrent());
-  add("refresh-rollups", "Refresh all roll-ups", "map", () => map.refreshRollupsNow());
-  add("search-all", "Search across every map", "map", () => nav.openSearchAll());
-  add("nav-back", "Go back", "nav", () => nav.navBack(), nav.canBack, {
+  add("open-file", t("cmd.open-file"), "map", () => io.openFile());
+  add("save-file", t("cmd.save-file"), "map", () => io.saveFile());
+  add("save-file-as", t("cmd.save-file-as"), "map", () => io.saveFileAs());
+  add("present", t("cmd.present"), "map", () => map.present());
+  add("duplicate-map", t("cmd.duplicate-map"), "map", () => map.duplicateMap());
+  add("delete-map", t("cmd.delete-map"), "map", () => map.deleteCurrent());
+  add("refresh-rollups", t("cmd.refresh-rollups"), "map", () => map.refreshRollupsNow());
+  add("search-all", t("cmd.search-all"), "map", () => nav.openSearchAll());
+  add("nav-back", t("cmd.nav-back"), "nav", () => nav.navBack(), nav.canBack, {
     keywords: "history previous backward alt left",
   });
-  add("nav-forward", "Go forward", "nav", () => nav.navForward(), nav.canForward, {
+  add("nav-forward", t("cmd.nav-forward"), "nav", () => nav.navForward(), nav.canForward, {
     keywords: "history next forward alt right",
   });
-  add("paste-topics", "Paste text → topics", "map", () => nav.openPaste());
-  add("copy-outline", "Copy outline to clipboard", "map", () => io.copyOutline());
-  add("copy-table", "Copy as table (TSV)", "map", () => io.copyTable());
+  add("paste-topics", t("cmd.paste-topics"), "map", () => nav.openPaste());
+  add("copy-outline", t("cmd.copy-outline"), "map", () => io.copyOutline());
+  add("copy-table", t("cmd.copy-table"), "map", () => io.copyTable());
   add(
     "copy-deep-link",
     sel ? "Copy link to this topic" : "Copy link to this map",
@@ -111,41 +111,34 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     true,
     { keywords: "deep link url share permalink node" },
   );
-  add("copy-image", "Copy map as image", "map", () => io.copyPng(), true, {
+  add("copy-image", t("cmd.copy-image"), "map", () => io.copyPng(), true, {
     keywords: "png picture clipboard screenshot paste",
   });
-  add("backup", "Back up whole library", "map", () => io.exportLibrary());
-  add("shortcuts", "Keyboard shortcuts", "map", () => nav.openShortcuts());
-  add("settings", "Settings & preferences", "map", () => nav.openSettings());
-  add("about", "About MindMap Studio", "map", () => nav.openAbout());
-  add(
-    "getting-started",
-    "Show getting-started tips again",
-    "map",
-    () => nav.reShowGettingStarted(),
-    true,
-    {
-      keywords: "onboarding tutorial first run 3 things to try help tips",
-    },
-  );
+  add("backup", t("cmd.backup"), "map", () => io.exportLibrary());
+  add("shortcuts", t("cmd.shortcuts"), "map", () => nav.openShortcuts());
+  add("settings", t("cmd.settings"), "map", () => nav.openSettings());
+  add("about", t("cmd.about"), "map", () => nav.openAbout());
+  add("getting-started", t("cmd.getting-started"), "map", () => nav.reShowGettingStarted(), true, {
+    keywords: "onboarding tutorial first run 3 things to try help tips",
+  });
 
   // Edit history
-  add("undo", "Undo", "edit", () => history.undo(), history.canUndo);
-  add("redo", "Redo", "edit", () => history.redo(), history.canRedo);
+  add("undo", t("cmd.undo"), "edit", () => history.undo(), history.canUndo);
+  add("redo", t("cmd.redo"), "edit", () => history.redo(), history.canRedo);
 
   // View
-  add("fit", "Fit map to screen", "view", () => m()?.fit());
+  add("fit", t("cmd.fit"), "view", () => m()?.fit());
   add(
     "balance-map",
-    "Balance map (even out both sides)",
+    t("cmd.balance-map"),
     "view",
     () => m()?.balanceMap(),
     canvas.layout === "side" && !map.liveDoc.meta?.freeform,
   );
-  add("guided-walk", "Start guided walk", "view", () => canvas.startWalk());
+  add("guided-walk", t("cmd.guided-walk"), "view", () => canvas.startWalk());
   add(
     "isolate-branch",
-    "Isolate branch (collapse others)",
+    t("cmd.isolate-branch"),
     "view",
     () => {
       if (sel) m()?.isolateBranch(sel.id);
@@ -155,44 +148,46 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   for (const p of MAP_PARTS)
     add(
       `map-part:${p.id}`,
-      `Insert map part: ${p.name}`,
+      t("cmd.mapPart", { name: p.name }),
       "view",
       () => {
         const part = buildMapPart(p.id);
         const ok = part ? m()?.addSubtreeToSelected(part) : false;
-        showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");
+        showHint(ok ? t("hint.mapPartInserted", { name: p.name }) : t("hint.selectTopicFirst"));
       },
       !!sel,
     );
-  add("collapse-all", "Collapse all branches", "view", () => m()?.setAllExpanded(false));
-  add("expand-all", "Expand all branches", "view", () => m()?.setAllExpanded(true));
+  add("collapse-all", t("cmd.collapse-all"), "view", () => m()?.setAllExpanded(false));
+  add("expand-all", t("cmd.expand-all"), "view", () => m()?.setAllExpanded(true));
   for (const n of [1, 2, 3, 4, 5])
-    add(`expand-level:${n}`, `Show detail level ${n}`, "view", () => m()?.setExpandedToLevel(n));
-  add("copy-format", "Copy format", "view", () => canvas.copyFormat(), !!sel);
+    add(`expand-level:${n}`, t("cmd.expandLevel", { n }), "view", () => m()?.setExpandedToLevel(n));
+  add("copy-format", t("cmd.copy-format"), "view", () => canvas.copyFormat(), !!sel);
   add(
     "paste-format",
-    "Paste format",
+    t("cmd.paste-format"),
     "view",
     () => canvas.pasteFormat(),
     !!sel && canvas.canPasteFormat,
   );
-  add("auto-colour-branches", "Auto-colour branches", "view", () => canvas.shuffleBranchColors());
+  add("auto-colour-branches", t("cmd.auto-colour-branches"), "view", () =>
+    canvas.shuffleBranchColors(),
+  );
   add(
     "focus-branch",
-    "Focus the selected branch",
+    t("cmd.focus-branch"),
     "view",
     () => {
       if (sel) canvas.setFocus({ id: sel.id, topic: sel.topic });
     },
     !!sel,
   );
-  add("drill-in", "Drill into the selected topic", "view", () => canvas.drillIn(), !!sel);
+  add("drill-in", t("cmd.drill-in"), "view", () => canvas.drillIn(), !!sel);
   // Export the selected branch (B4) — only for a non-leaf, non-root topic (a lone topic has nothing
   // to scope; the whole-map export already covers it).
   const selNode = sel ? findAnyNode(map.liveDoc, sel.id) : null;
   add(
     "export-branch",
-    "Export selected branch…",
+    t("cmd.export-branch"),
     "view",
     () => {
       if (sel) canvas.exportBranch(sel.id);
@@ -203,69 +198,69 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   const canAlign = canvas.freeform && canvas.selectedCount >= 2;
   const canDistribute = canvas.freeform && canvas.selectedCount >= 3;
   for (const [mode, label] of [
-    ["left", "Align left"],
-    ["hcenter", "Align centres (horizontal)"],
-    ["right", "Align right"],
-    ["top", "Align top"],
-    ["vmiddle", "Align middles (vertical)"],
-    ["bottom", "Align bottom"],
+    ["left", t("cmd.align.left")],
+    ["hcenter", t("cmd.align.hcenter")],
+    ["right", t("cmd.align.right")],
+    ["top", t("cmd.align.top")],
+    ["vmiddle", t("cmd.align.vmiddle")],
+    ["bottom", t("cmd.align.bottom")],
   ] as const)
     add(`align:${mode}`, label, "view", () => canvas.alignSelection(mode), canAlign);
   add(
     "distribute-h",
-    "Distribute horizontally",
+    t("cmd.distribute-h"),
     "view",
     () => canvas.distributeSelection("h"),
     canDistribute,
   );
   add(
     "distribute-v",
-    "Distribute vertically",
+    t("cmd.distribute-v"),
     "view",
     () => canvas.distributeSelection("v"),
     canDistribute,
   );
-  add("toggle-numbering", "Toggle outline numbering", "view", () => panels.setNumbered((v) => !v));
-  add("toggle-spellcheck", "Toggle spell-check", "view", () => panels.setSpellcheck((v) => !v));
-  add("toggle-line-jumps", "Toggle line jumps", "view", () =>
+  add("toggle-numbering", t("cmd.toggle-numbering"), "view", () => panels.setNumbered((v) => !v));
+  add("toggle-spellcheck", t("cmd.toggle-spellcheck"), "view", () =>
+    panels.setSpellcheck((v) => !v),
+  );
+  add("toggle-line-jumps", t("cmd.toggle-line-jumps"), "view", () =>
     m()?.setLineJumps(!map.liveDoc.meta?.lineJumps),
   );
 
   // Side panels
-  add("panel-outline", "Toggle Outline panel", "panel", () => panels.setOutlineOpen((v) => !v));
-  add("panel-index", "Toggle Markers & tags index", "panel", () => panels.setIndexOpen((v) => !v));
-  add("panel-filter", "Toggle Power Filter", "panel", () => panels.toggleFilter());
-  add("panel-styles", "Toggle Conditional styles", "panel", () => panels.setStylesOpen((v) => !v));
-  add("panel-relationships", "Toggle Relationships panel", "panel", () =>
+  add("panel-outline", t("cmd.panel-outline"), "panel", () => panels.setOutlineOpen((v) => !v));
+  add("panel-index", t("cmd.panel-index"), "panel", () => panels.setIndexOpen((v) => !v));
+  add("panel-filter", t("cmd.panel-filter"), "panel", () => panels.toggleFilter());
+  add("panel-styles", t("cmd.panel-styles"), "panel", () => panels.setStylesOpen((v) => !v));
+  add("panel-relationships", t("cmd.panel-relationships"), "panel", () =>
     panels.setRelationshipsOpen((v) => !v),
   );
-  add("panel-history", "Toggle Version history", "panel", () => panels.setHistoryOpen((v) => !v));
-  add("panel-board", "Toggle Board (Kanban)", "panel", () => panels.setBoardOpen((v) => !v));
-  add("panel-stats", "Toggle Map statistics", "panel", () => panels.setStatsOpen((v) => !v));
-  add("panel-note-editor", "Toggle Note editor (dockable)", "panel", () =>
+  add("panel-history", t("cmd.panel-history"), "panel", () => panels.setHistoryOpen((v) => !v));
+  add("panel-board", t("cmd.panel-board"), "panel", () => panels.setBoardOpen((v) => !v));
+  add("panel-stats", t("cmd.panel-stats"), "panel", () => panels.setStatsOpen((v) => !v));
+  add("panel-note-editor", t("cmd.panel-note-editor"), "panel", () =>
     panels.setNoteEditorOpen((v) => !v),
   );
-  add("panel-info", "Toggle Topic info / inspector", "panel", () => {
+  add("panel-info", t("cmd.panel-info"), "panel", () => {
     const shown = panels.infoOpen || panels.infoMinimized;
     panels.setInfoMinimized(() => false);
     panels.setInfoOpen(() => !shown);
   });
   // Parity with the Panels menu (item 19): these four were reachable only from the menu, not ⌘K.
-  add("panel-agenda", "Toggle Agenda (due tasks)", "panel", () => panels.setAgendaOpen((v) => !v));
-  add("panel-maps", "Toggle Maps (all maps)", "panel", () => panels.setMapsOpen((v) => !v));
-  add("panel-inbox", "Toggle Inbox (quick capture)", "panel", () => panels.setInboxOpen((v) => !v));
-  add("panel-deck", "Toggle Slide deck (custom)", "panel", () =>
-    panels.setDeckEditorOpen((v) => !v),
-  );
+  add("panel-agenda", t("cmd.panel-agenda"), "panel", () => panels.setAgendaOpen((v) => !v));
+  add("panel-maps", t("cmd.panel-maps"), "panel", () => panels.setMapsOpen((v) => !v));
+  add("panel-inbox", t("cmd.panel-inbox"), "panel", () => panels.setInboxOpen((v) => !v));
+  add("panel-deck", t("cmd.panel-deck"), "panel", () => panels.setDeckEditorOpen((v) => !v));
 
   // Insert
-  add("insert-sticky", "Insert sticky note", "insert", () => {
+  add("insert-sticky", t("cmd.insert-sticky"), "insert", () => {
     m()?.addStickyNote();
-    showHint("Sticky note added — drag it anywhere.");
+    showHint(t("hint.stickyAdded"));
   });
   add(
     "insert-group",
-    "Group branch (boundary)",
+    t("cmd.insert-group"),
     "insert",
     () => {
       if (sel) m()?.groupBranch(sel.id);
@@ -274,7 +269,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   );
   add(
     "insert-group-selection",
-    "Group selection (boundary)",
+    t("cmd.insert-group-selection"),
     "insert",
     () => {
       m()?.groupSelection();
@@ -283,7 +278,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   );
   add(
     "insert-summary",
-    "Summary bracket",
+    t("cmd.insert-summary"),
     "insert",
     () => {
       if (sel) m()?.groupSummary(sel.id);
@@ -293,25 +288,19 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
 
   // Selected node — shown only when a node is selected (Command.enabled). These give mouse-free
   // parity with the right-click menu: add a child, set a marker/priority, or delete. (#12)
-  add(
-    "node-add-child",
-    "Add child to selected topic",
-    "node",
-    () => m()?.addChildToSelected(),
-    !!sel,
-  );
+  add("node-add-child", t("cmd.node-add-child"), "node", () => m()?.addChildToSelected(), !!sel);
   add(
     "start-relationship",
-    "Start a relationship from selected topic",
+    t("cmd.start-relationship"),
     "node",
     () => m()?.startLinkFromSelected(),
     !!sel,
   );
-  add("node-delete", "Delete selected topic", "node", () => m()?.deleteSelected(), !!sel);
+  add("node-delete", t("cmd.node-delete"), "node", () => m()?.deleteSelected(), !!sel);
   for (const marker of MARKER_PALETTE)
     add(
       `node-marker:${marker}`,
-      `Marker: ${marker} on selected topic`,
+      t("cmd.marker", { marker }),
       "marker",
       () => m()?.toggleSelectedIcon(marker),
       !!sel,
@@ -319,7 +308,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   for (const p of PRIORITY_LEVELS)
     add(
       `node-priority:${p}`,
-      `Priority: ${priorityLabel(p)} on selected topic`,
+      t("cmd.priority", { level: priorityLabel(p) }),
       "priority",
       () => m()?.setSelectedPriority(p),
       !!sel,
@@ -333,15 +322,15 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   );
   // Reorder the selected topic's direct children by a key (topic / priority / due / progress).
   const SORTS: [SortKey, string][] = [
-    ["alpha", "A → Z"],
-    ["priority", "by priority"],
-    ["due", "by due date"],
-    ["progress", "by progress"],
+    ["alpha", t("cmd.sortBy.alpha")],
+    ["priority", t("cmd.sortBy.priority")],
+    ["due", t("cmd.sortBy.due")],
+    ["progress", t("cmd.sortBy.progress")],
   ];
   for (const [key, label] of SORTS)
     add(
       `sort-children:${key}`,
-      `Sort children ${label}`,
+      t("cmd.sortChildren", { by: label }),
       "node",
       () => {
         if (sel) m()?.sortChildren(sel.id, key);
@@ -353,7 +342,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
   for (const n of walkTopics(map.liveDoc.root))
     add(
       `jump:${n.id}`,
-      `Go to: ${topicLabel(n.topic)}`,
+      t("cmd.goTo", { topic: topicLabel(n.topic) }),
       "topic",
       () => m()?.focusNode(n.id),
       true,
@@ -365,7 +354,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     for (const n of walkTopics(f))
       add(
         `jump:${n.id}`,
-        `Go to: ${topicLabel(n.topic)}`,
+        t("cmd.goTo", { topic: topicLabel(n.topic) }),
         "topic",
         () => m()?.focusNode(n.id),
         true,
@@ -374,7 +363,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
 
   // Restructure across maps: promote the selected branch to its own map, or merge another library
   // map in as a branch under the selection.
-  add("promote-branch", "New map from this topic", "map", () => map.promoteBranch(), !!sel);
+  add("promote-branch", t("cmd.promote-branch"), "map", () => map.promoteBranch(), !!sel);
 
   // Switch to another library map from the keyboard (the cross-map half of the quick switcher; the
   // in-map "Go to" rows above cover topics within the active map). Skips the map already open. The
@@ -396,7 +385,7 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     const folderKw = summary.folderName ? `folder ${summary.folderName}` : "";
     add(
       `map-switch:${summary.id}`,
-      `Switch to map: ${label}`,
+      t("cmd.switchMap", { title: label }),
       "map",
       () => map.switchMap(summary.id),
       true,
@@ -416,10 +405,13 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
 
   // Layout
   for (const l of LAYOUTS)
-    add(`layout:${l.id}`, `Layout: ${l.label}`, "layout", () => canvas.changeLayout(l.id));
+    add(`layout:${l.id}`, t("cmd.layout", { name: l.label }), "layout", () =>
+      canvas.changeLayout(l.id),
+    );
 
   // Export
-  for (const [id, label, fn] of EXPORTS(io)) add(`export:${id}`, `Export ${label}`, "export", fn);
+  for (const [id, label, fn] of EXPORTS(io))
+    add(`export:${id}`, t("cmd.exportAs", { format: label }), "export", fn);
 
   return cmds;
 }

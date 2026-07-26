@@ -419,4 +419,17 @@ describe("buildEditorCommands", () => {
     cmds.get("node-priority:1")?.run();
     expect(props.mapRef.current?.setSelectedPriority).toHaveBeenCalledWith(1);
   });
+
+  // Localisation: every label comes from the catalogue now. Building the registry is itself the
+  // completeness check — t() throws in dev on a missing key — so this adds what that would NOT catch:
+  // a placeholder that never got substituted, which would ship "Layout: {name}" to a user.
+  it("resolves every command label with no key or placeholder leaking", () => {
+    const cmds = buildEditorCommands(mkProps({ id: "n1", topic: "N", note: "" }));
+    expect(cmds.length).toBeGreaterThan(40);
+    for (const c of cmds) {
+      expect(c.label.length, c.id).toBeGreaterThan(0);
+      expect(c.label, `${c.id} leaks a raw message key`).not.toMatch(/^(cmd|hint)\./);
+      expect(c.label, `${c.id} has an unsubstituted placeholder`).not.toMatch(/\{\w+\}/);
+    }
+  });
 });

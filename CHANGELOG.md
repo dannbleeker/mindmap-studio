@@ -51,6 +51,26 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   indistinguishable from `background: style?.fillImage` without a parser. On its first run it found five
   genuinely un-migrated paragraphs in `SettingsDialog`, now moved into the catalogue.
 
+  **The ⌘K command registry is migrated (82 entries).** All 87 palette rows now come from the catalogue.
+  This was the shape the plan called hand-work, and it split three ways: ~60 uniform
+  `add("id", "Label", …)` sites done by script; 10 labels living in data tuples with no key naming them
+  (align modes, sort keys); and 12 **composed** labels that needed a named placeholder — `Layout: {name}`,
+  `Export {format}`, `Show detail level {n}`, `Marker: {marker} on selected topic`. Those compose an
+  inner label that is itself already translated, and the placeholder is what lets a translator reorder:
+  string concatenation could never produce `{name}-layout` for a language that needs it.
+
+  I revised the design recorded in `NEXT_STEPS` while building it. The plan was to drop the label
+  argument and derive the key from the command id inside `add()`, which reads elegantly — but a
+  template-literal key **cannot be verified by `tsc`**, and compile-time key checking is the property the
+  typed catalogue exists for. Each call site now passes an explicit key literal instead: a smaller diff,
+  and every key stays checked.
+
+  Building the registry is itself the completeness check, because `t()` throws in dev on a missing key. A
+  test adds what that would *not* catch — a placeholder that never got substituted, which would ship
+  `Layout: {name}` to a user. That check was vacuous on its first write (a shell-escaping slip left the
+  regex as `/{w+}/`, matching literal text) and only caught the fault once fixed; proved by misspelling a
+  placeholder in the catalogue and watching it fail.
+
   **The keyboard cheat sheet is migrated (48 entries).** `shortcuts.ts` became `shortcutGroups()` — a
   function rather than a `const` array, because a module-scope `t()` would bake the locale in at import
   time and never reflect a later switch. The **key names themselves stay literal** ("Ctrl/⌘ + Z",

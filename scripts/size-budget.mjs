@@ -47,7 +47,10 @@ import { gzipSync } from "node:zlib";
 // FULL ~1,440-string extraction roughly +12 kB gz of keys, which this ceiling cannot absorb — see the
 // open decision in NEXT_STEPS before the bulk migration. This bump covers the layer plus the first
 // migrated surface; it is not headroom for the rest.
-const BUDGET_KB = 169;
+// 169 → 171: the editorCommands / ⌘K registry batch (2026-07-26). ~50 more catalogue keys at the
+// measured ~17 bytes gz each. Tracking the strategy note in NEXT_STEPS: chunk-locality first, then bump
+// for the eager remainder. This is the eager chrome registry, so it has to sit in the entry chunk.
+const BUDGET_KB = 171;
 
 const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
 

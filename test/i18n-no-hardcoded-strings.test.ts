@@ -20,7 +20,8 @@ import { describe, expect, it } from "vitest";
 //
 // (2) was added after (1) and (3) turned out to be blind to it: putting `editorCommands.ts` on the list
 // below made it PASS with ~50 labels still hardcoded, because an unnamed argument is neither a prop nor a
-// bare prose line. A green tick that claims coverage it doesn't have is worse than no tick.
+// bare prose line. A green tick that claims coverage it doesn't have is worse than no tick. That file is
+// now genuinely migrated and on the list below, verified WITH (2) active.
 //
 // Remaining limitation, stated so nobody assumes otherwise: (2) needs a capitalised MULTI-WORD literal,
 // so a single-word label — `add("present", "Present", …)` — still slips through. Widening it to single
@@ -35,6 +36,7 @@ const MIGRATED = [
   "src/components/SettingsDialog.tsx",
   "src/mindmap/flow/TopicNode.tsx",
   "src/shortcuts.ts",
+  "src/components/editorCommands.ts",
 ];
 
 /** Props whose value is read by a user or a screen reader. */

@@ -52,4 +52,17 @@
 // 169 → 171: the editorCommands / ⌘K registry batch (2026-07-26). ~50 more catalogue keys at the
 // measured ~17 bytes gz each. Tracking the strategy note in NEXT_STEPS: chunk-locality first, then bump
 // for the eager remainder. This is the eager chrome registry, so it has to sit in the entry chunk.
-export const BUDGET_KB = 171;
+// 171 → 175: forward headroom for the rest of the i18n migration (2026-07-26), by owner decision.
+// Unlike every bump above, this one is a PROJECTION, not a measurement of landed work — recorded as
+// such so the next reader doesn't mistake it for evidence. Measured so far: the App.tsx `hint.*` batch
+// is +1.2 kB gz for ~124 new keys (~10 bytes each), taking the entry to 171.8. Almost none of those keys
+// reuse an existing message the way Toolbar.tsx's 31 shared `cmd.*` keys did, which is why this batch
+// costs what Toolbar's 93 strings did not. Panels.tsx's remaining 233 strings project to ~+2.3 kB at
+// that rate, landing near 174; 175 covers the finished eager migration in one move rather than a bump
+// per batch.
+// What that buys and what it costs: no repeat bumps mid-migration, but ~4 kB of slack sits unguarded
+// until the migration lands, so unrelated bloat can ride in unnoticed — the precise risk the 167 → 169
+// note warned about. It also front-runs the "chunk-locality first, then raise the ceiling" ordering in
+// NEXT_STEPS, which is recorded there as superseded by this decision.
+// TIGHTEN THIS BACK when Panels.tsx lands: re-measure the real entry and set the ceiling just above it.
+export const BUDGET_KB = 175;

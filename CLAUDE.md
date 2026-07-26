@@ -60,7 +60,8 @@ The `vitest run --coverage` step enforces a no-regression coverage floor
   importer in `src/import/`) are deterministic with no DOM coupling. The React Flow canvas is
   wrapped behind a thin contract (`src/mindmap/contract.ts`) so the renderer stays replaceable.
 - **One source of truth** for any cross-cutting rule: the canonical model
-  (`src/model/types.ts`), the bundle budget (`scripts/size-budget.mjs`),
+  (`src/model/types.ts`), the bundle budget (`scripts/bundle-budget.mjs`, imported by both the gate
+  and the stats dashboard — it was a hand-copied constant in two files and drifted 21 kB),
   validation — no drift between call sites.
 - New capabilities **additive and opt-in / off-by-default**. Prefer an optional
   field over a data migration.

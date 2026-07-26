@@ -62,12 +62,21 @@ English text and substitutes a shorter key, netting out near zero. The projectio
 is new text. Wherever the chrome repeats itself, it doesn't. So: migrate, measure, and only then decide
 whether the ceiling needs moving.
 
+**Superseded on the ordering (2026-07-26, owner decision): the ceiling was raised to 175 UP FRONT.**
+The `App.tsx` `hint.*` batch measured +1.2 kB gz for ~124 new keys (entry 170.6 → 171.8), and
+`Panels.tsx`'s remaining 233 strings project to ~+2.3 kB, so 175 covers the finished eager migration in
+one move instead of a bump per batch. The chunk-locality work below is still worth doing — it is now an
+optimisation rather than a precondition. Two consequences to hold onto: ~4 kB of slack is unguarded
+until the migration lands, so watch for unrelated bloat riding in; and the ceiling should be
+**re-measured and tightened** once `Panels.tsx` is done. See the `171 → 175` note in
+`scripts/bundle-budget.mjs` (which is also where the ceiling now lives — no longer `size-budget.mjs`).
+
 **The approach: chunk-locality first, then raise the ceiling for what's left. Keep `t()` synchronous.**
 
 Put every string that *can* be chunk-local into a lazy catalogue beside its callers, so the eager
 catalogue carries only genuinely-eager chrome — `FlowMindMap` alone is a ~100 kB lazy chunk holding ~175
 strings. Then bump the ceiling to cover the eager remainder, documenting the reason in
-`size-budget.mjs` as every prior bump has.
+`bundle-budget.mjs` as every prior bump has.
 
 **Deliberately NOT doing yet: fetching English as a JSON asset.** It looks like the scalable answer and
 it is — later. With one locale it saves nothing: the ~12 kB doesn't disappear, it becomes a second

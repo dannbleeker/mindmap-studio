@@ -435,20 +435,16 @@ export function Toolbar({
     <header className="mm-topbar">
       {/* ── Row 1 — file / identity ── */}
       <div className="mm-topbar-row mm-topbar-row1">
-        <TBtn
-          icon="home"
-          label="Start screen — new maps, templates, library"
-          onClick={nav.goHome}
-        />
+        <TBtn icon="home" label={t("toolbar.startScreen")} onClick={nav.goHome} />
         <TBtn
           icon="undo"
-          label="Undo (Ctrl/⌘+Z)"
+          label={t("toolbar.undo")}
           disabled={!history.canUndo}
           onClick={history.undo}
         />
         <TBtn
           icon="redo"
-          label="Redo (Ctrl/⌘+Shift+Z)"
+          label={t("toolbar.redo")}
           disabled={!history.canRedo}
           onClick={history.redo}
         />
@@ -469,7 +465,7 @@ export function Toolbar({
           <option value="">{t("toolbar.openAMap")}</option>
           {map.mapOptions.map((mm) => (
             <option key={mm.id} value={mm.id}>
-              {mm.title || "(untitled)"}
+              {mm.title || t("common.untitled")}
             </option>
           ))}
         </select>
@@ -489,14 +485,15 @@ export function Toolbar({
               title={t("toolbar.newMapBlankTemplateOr")}
             >
               <option value="">+ New…</option>
-              <optgroup label="Templates">
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
+              <optgroup label={t("toolbar.templates")}>
+                {/* `tpl`, not `t` — see the templates MenuSub below; the shadow is a live trap. */}
+                {templates.map((tpl) => (
+                  <option key={tpl.id} value={tpl.id}>
+                    {tpl.name}
                   </option>
                 ))}
               </optgroup>
-              <optgroup label="Examples">
+              <optgroup label={t("toolbar.examples")}>
                 {examples.map((e) => (
                   <option key={e.id} value={`ex:${e.id}`}>
                     {e.name}
@@ -506,7 +503,7 @@ export function Toolbar({
             </select>
             <TBtn
               icon="grid"
-              label="Search across every map in your library"
+              label={t("toolbar.searchAllMaps")}
               text="All maps"
               ghost
               onClick={nav.openSearchAll}
@@ -519,17 +516,15 @@ export function Toolbar({
               // aria-live alone makes the span a live region (no role needed — the text is the status).
               aria-live={saveState === "error" ? "assertive" : "polite"}
               title={
-                saveState === "error"
-                  ? "Couldn't save to this browser — it may be out of storage or in private mode."
-                  : "Your maps are stored locally in this browser."
+                saveState === "error" ? t("toolbar.saveError.title") : t("toolbar.saveOk.title")
               }
             >
               <span className="mm-saved-dot" />{" "}
               {saveState === "saving"
                 ? "Saving…"
                 : saveState === "error"
-                  ? "Couldn't save"
-                  : "Saved locally"}
+                  ? t("toolbar.saveError.label")
+                  : t("toolbar.saveOk.label")}
             </span>
           </>
         )}
@@ -537,7 +532,7 @@ export function Toolbar({
         <TBtn
           icon="search"
           text={isMobile ? undefined : "Find"}
-          label="Find & replace (Ctrl/⌘+F)"
+          label={t("toolbar.findReplace")}
           ghost
           onClick={nav.openFind}
         />
@@ -600,7 +595,7 @@ export function Toolbar({
                 </MenuLabel>
                 <MenuItem
                   icon={mi("import")}
-                  label="Open file…"
+                  label={t("cmd.open-file")}
                   shortcut={SHORTCUT_BINDINGS["open-file"]}
                   onSelect={() => {
                     io.openFile();
@@ -609,13 +604,13 @@ export function Toolbar({
                 />
                 <MenuItem
                   icon={mi("export")}
-                  label="Save to file"
+                  label={t("cmd.save-file")}
                   shortcut={SHORTCUT_BINDINGS["save-file"]}
                   onSelect={() => io.saveFile()}
                 />
                 <MenuItem
                   icon={mi("export")}
-                  label="Save as…"
+                  label={t("toolbar.saveAs")}
                   shortcut={SHORTCUT_BINDINGS["save-file-as"]}
                   onSelect={() => io.saveFileAs()}
                 />
@@ -637,15 +632,19 @@ export function Toolbar({
                 ) : null}
                 <MenuSeparator />
                 <MenuLabel>{t("toolbar.map")}</MenuLabel>
-                <MenuItem icon={mi("present")} label="Present" onSelect={() => map.present()} />
+                <MenuItem
+                  icon={mi("present")}
+                  label={t("cmd.present")}
+                  onSelect={() => map.present()}
+                />
                 <MenuItem
                   icon={mi("copy")}
-                  label="Duplicate map"
+                  label={t("cmd.duplicate-map")}
                   onSelect={() => map.duplicateMap()}
                 />
                 <MenuItem
                   icon={mi("trash")}
-                  label="Delete map"
+                  label={t("cmd.delete-map")}
                   danger
                   onSelect={() => map.deleteCurrent()}
                 />
@@ -673,43 +672,43 @@ export function Toolbar({
                 />
                 <MenuItem
                   icon={mi("paste")}
-                  label="Paste text → topics"
+                  label={t("cmd.paste-topics")}
                   onSelect={() => nav.openPaste()}
                 />
                 <MenuItem
                   icon={mi("copy")}
-                  label="Copy outline to clipboard"
+                  label={t("cmd.copy-outline")}
                   onSelect={() => io.copyOutline()}
                 />
                 <MenuItem
                   icon={mi("copy")}
-                  label="Copy as table (TSV)"
+                  label={t("cmd.copy-table")}
                   onSelect={() => io.copyTable()}
                 />
                 <MenuItem
                   icon={mi("link")}
-                  label="Copy link to this topic"
+                  label={t("cmd.copy-deep-link.topic")}
                   onSelect={() => io.copyDeepLink()}
                 />
                 <MenuItem
                   icon={mi("export")}
-                  label="Back up whole library"
+                  label={t("cmd.backup")}
                   onSelect={() => io.exportLibrary()}
                 />
                 <MenuSeparator />
                 <MenuItem
                   icon={mi("settings")}
-                  label="Settings & preferences"
+                  label={t("cmd.settings")}
                   onSelect={() => nav.openSettings()}
                 />
                 <MenuItem
                   icon={mi("help")}
-                  label="Keyboard shortcuts"
+                  label={t("cmd.shortcuts")}
                   onSelect={() => nav.openShortcuts()}
                 />
                 <MenuItem
                   icon={mi("help")}
-                  label="About MindMap Studio"
+                  label={t("cmd.about")}
                   onSelect={() => nav.openAbout()}
                 />
               </>
@@ -823,7 +822,7 @@ export function Toolbar({
           />
           <MenuCheckboxItem
             icon={mi("board")}
-            label="Board (Kanban)"
+            label={t("toolbar.boardKanban")}
             checked={panels.boardOpen}
             trailing={mi("check")}
             onSelect={() => panels.setBoardOpen((v) => !v)}
@@ -845,26 +844,26 @@ export function Toolbar({
           triggerAriaLabel={isMobile ? "View" : undefined}
           sheet={isMobile}
         >
-          <MenuItem icon={mi("fit")} label="Fit map to screen" onSelect={() => m()?.fit()} />
+          <MenuItem icon={mi("fit")} label={t("cmd.fit")} onSelect={() => m()?.fit()} />
           <MenuItem
             icon={mi("balance")}
-            label="Balance map (even out both sides)"
+            label={t("cmd.balance-map")}
             disabled={canvas.layout !== "side" || !!liveDoc.meta?.freeform}
             title={
               canvas.layout === "side" && !liveDoc.meta?.freeform
-                ? "Clear any pinned sides and redistribute the main branches evenly"
-                : "Only the two-sided (Both sides) layout has sides to balance"
+                ? t("toolbar.balanceEnabled")
+                : t("toolbar.balanceDisabled")
             }
             onSelect={() => m()?.balanceMap()}
           />
           <MenuItem
             icon={mi("minus")}
-            label="Collapse all branches"
+            label={t("cmd.collapse-all")}
             onSelect={() => m()?.setAllExpanded(false)}
           />
           <MenuItem
             icon={mi("plus")}
-            label="Expand all branches"
+            label={t("cmd.expand-all")}
             onSelect={() => m()?.setAllExpanded(true)}
           />
           <MenuLabel>{t("toolbar.detailLevel")}</MenuLabel>
@@ -872,13 +871,13 @@ export function Toolbar({
             <MenuItem
               key={n}
               icon={mi("layers")}
-              label={`Show level ${n}`}
+              label={t("toolbar.showLevel", { n })}
               onSelect={() => m()?.setExpandedToLevel(n)}
             />
           ))}
           <MenuItem
             icon={mi("balance")}
-            label="Focus the selected branch"
+            label={t("cmd.focus-branch")}
             disabled={!canvas.selected}
             onSelect={() =>
               canvas.selected &&
@@ -887,41 +886,41 @@ export function Toolbar({
           />
           <MenuItem
             icon={mi("layers")}
-            label="Drill into the selected topic"
+            label={t("cmd.drill-in")}
             disabled={!canvas.selected}
             onSelect={() => canvas.drillIn()}
           />
           <MenuItem
             icon={mi("layers")}
-            label="Isolate branch (collapse others)"
+            label={t("cmd.isolate-branch")}
             disabled={!canvas.selected}
-            title={canvas.selected ? undefined : "Select a topic in a branch to isolate it"}
+            title={canvas.selected ? undefined : t("toolbar.isolateDisabled")}
             onSelect={() => {
               const ok = canvas.selected?.id ? m()?.isolateBranch(canvas.selected.id) : false;
-              showHint(ok ? "Isolated this branch." : "Select a topic in a branch first.");
+              showHint(ok ? t("hint.branchIsolated") : t("hint.selectTopicInBranch"));
             }}
           />
           <MenuItem
             icon={mi("present")}
-            label="Guided walk (step through topics)"
+            label={t("toolbar.guidedWalk")}
             onSelect={() => canvas.startWalk()}
           />
           <MenuLabel>{t("toolbar.format")}</MenuLabel>
           <MenuItem
             icon={mi("copy")}
-            label="Copy format"
+            label={t("cmd.copy-format")}
             disabled={!canvas.selected}
             onSelect={() => canvas.copyFormat()}
           />
           <MenuItem
             icon={mi("paste")}
-            label="Paste format"
+            label={t("cmd.paste-format")}
             disabled={!canvas.selected || !canvas.canPasteFormat}
             onSelect={() => canvas.pasteFormat()}
           />
           <MenuItem
             icon={mi("palette")}
-            label="Auto-colour branches"
+            label={t("cmd.auto-colour-branches")}
             onSelect={() => canvas.shuffleBranchColors()}
           />
           {/* Arrange tools only apply in free-canvas mode — hide the whole group otherwise instead of
@@ -947,12 +946,12 @@ export function Toolbar({
                 />
               ))}
               <MenuItem
-                label="Distribute horizontally"
+                label={t("cmd.distribute-h")}
                 disabled={canvas.selectedCount < 3}
                 onSelect={() => canvas.distributeSelection("h")}
               />
               <MenuItem
-                label="Distribute vertically"
+                label={t("cmd.distribute-v")}
                 disabled={canvas.selectedCount < 3}
                 onSelect={() => canvas.distributeSelection("v")}
               />
@@ -964,7 +963,7 @@ export function Toolbar({
             <>
               <MenuLabel>{t("toolbar.display")}</MenuLabel>
               <MenuCheckboxItem
-                label="Outline numbering"
+                label={t("toolbar.outlineNumbering")}
                 checked={panels.numbered}
                 onSelect={() => panels.setNumbered((v) => !v)}
               />
@@ -972,8 +971,8 @@ export function Toolbar({
                 <MenuItem
                   label={
                     liveDoc.meta?.numberStyle === "outline"
-                      ? "Numbering style: outline (I, A, 1)"
-                      : "Numbering style: decimal (1, 1.1)"
+                      ? t("toolbar.numberingStyle.outline")
+                      : t("toolbar.numberingStyle.decimal")
                   }
                   onSelect={() =>
                     m()?.setNumberStyle(
@@ -983,24 +982,28 @@ export function Toolbar({
                 />
               ) : null}
               <MenuCheckboxItem
-                label="Line jumps"
+                label={t("toolbar.lineJumps")}
                 checked={!!liveDoc.meta?.lineJumps}
                 onSelect={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
               />
               <MenuCheckboxItem
-                label="Legend"
+                label={t("toolbar.legend")}
                 checked={!!liveDoc.meta?.legend}
                 onSelect={() => m()?.setLegend(!liveDoc.meta?.legend)}
               />
               <MenuCheckboxItem
-                label="Spell-check"
+                label={t("toolbar.spellCheck")}
                 checked={panels.spellcheck}
                 onSelect={() => panels.setSpellcheck((v) => !v)}
               />
             </>
           )}
           <MenuLabel>{t("toolbar.savedViews")}</MenuLabel>
-          <MenuItem icon={mi("star")} label="Save current view…" onSelect={() => views.onSave()} />
+          <MenuItem
+            icon={mi("star")}
+            label={t("toolbar.saveCurrentView")}
+            onSelect={() => views.onSave()}
+          />
           {views.list.map((v) => (
             <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 2 }}>
               <button
@@ -1015,8 +1018,8 @@ export function Toolbar({
               <button
                 type="button"
                 className="mm-menu-item"
-                aria-label={`Delete view ${v.name}`}
-                title={`Delete view ${v.name}`}
+                aria-label={t("toolbar.deleteView", { name: v.name })}
+                title={t("toolbar.deleteView", { name: v.name })}
                 style={{ flex: "0 0 auto" }}
                 onClick={() => views.onDelete(v.id)}
               >
@@ -1042,7 +1045,7 @@ export function Toolbar({
               <>
                 <MenuItem
                   icon={mi("note")}
-                  label="Sticky note"
+                  label={t("toolbar.stickyNote")}
                   onSelect={() => {
                     m()?.addStickyNote(loadStickyColor());
                     showHint(t("toolbar.stickyNoteAddedDragIt"));
@@ -1061,12 +1064,19 @@ export function Toolbar({
                       key={name}
                       type="button"
                       className="mm-menu-chip"
-                      aria-label={`Sticky note: ${name}`}
-                      title={`Add a ${name} sticky note (and make it the default)`}
+                      aria-label={t("toolbar.stickyNoteNamed", { colour: name })}
+                      title={t("toolbar.addStickyNote", { colour: name })}
                       onClick={() => {
                         saveStickyColor(name);
                         m()?.addStickyNote(name);
-                        showHint(`${name[0].toUpperCase()}${name.slice(1)} sticky note added.`);
+                        // Capitalising the colour is done here rather than in the message because the
+                        // message decides where the word goes; a locale that never sentence-cases a
+                        // colour just leaves the placeholder mid-sentence.
+                        showHint(
+                          t("hint.stickyColourAdded", {
+                            colour: `${name[0].toUpperCase()}${name.slice(1)}`,
+                          }),
+                        );
                         close();
                       }}
                       style={{
@@ -1082,52 +1092,34 @@ export function Toolbar({
                 </div>
                 <MenuItem
                   icon={mi("layers")}
-                  label="Group branch (boundary)"
+                  label={t("cmd.insert-group")}
                   disabled={!canvas.selected}
-                  title={canvas.selected ? undefined : "Select a topic first to group its branch"}
+                  title={canvas.selected ? undefined : t("toolbar.groupBranchDisabled")}
                   onSelect={() => {
                     const id = canvas.selected?.id;
                     const ok = id ? m()?.groupBranch(id) : false;
-                    showHint(
-                      ok
-                        ? "Branch grouped — double-click the label to rename."
-                        : "Select a node first, then group its branch.",
-                    );
+                    showHint(ok ? t("hint.branchGrouped") : t("hint.selectNodeToGroup"));
                   }}
                 />
                 <MenuItem
                   icon={mi("layers")}
-                  label="Group selection (boundary)"
+                  label={t("cmd.insert-group-selection")}
                   disabled={canvas.selectedCount < 2}
-                  title={
-                    canvas.selectedCount < 2
-                      ? "Select 2+ topics to group them in one boundary"
-                      : undefined
-                  }
+                  title={canvas.selectedCount < 2 ? t("toolbar.groupSelectionDisabled") : undefined}
                   onSelect={() => {
                     const ok = m()?.groupSelection();
-                    showHint(
-                      ok
-                        ? "Selection grouped — double-click the label to rename."
-                        : "Select 2+ topics first.",
-                    );
+                    showHint(ok ? t("hint.selectionGrouped") : t("hint.selectTwoTopics"));
                   }}
                 />
                 <MenuItem
                   icon={mi("balance")}
-                  label="Summary bracket"
+                  label={t("cmd.insert-summary")}
                   disabled={!canvas.selected}
-                  title={
-                    canvas.selected ? undefined : "Select a topic first to summarise its branch"
-                  }
+                  title={canvas.selected ? undefined : t("toolbar.summaryDisabled")}
                   onSelect={() => {
                     const id = canvas.selected?.id;
                     const ok = id ? m()?.groupSummary(id) : false;
-                    showHint(
-                      ok
-                        ? "Summary added — double-click its label to rename."
-                        : "Select a node first, then summarise its branch.",
-                    );
+                    showHint(ok ? t("hint.summaryAdded") : t("hint.selectNodeToSummarise"));
                   }}
                 />
                 <button
@@ -1149,7 +1141,7 @@ export function Toolbar({
                   style={{ display: "none" }}
                 />
                 <MenuSeparator />
-                <MenuSub icon={mi("plus")} label="Map parts">
+                <MenuSub icon={mi("plus")} label={t("toolbar.mapParts")}>
                   <MenuLabel>{t("toolbar.mapPartInsertUnderSelected")}</MenuLabel>
                   {MAP_PARTS.map((p) => (
                     <MenuItem
@@ -1157,38 +1149,42 @@ export function Toolbar({
                       icon={mi("plus")}
                       label={p.name}
                       disabled={!canvas.selected}
-                      title={
-                        canvas.selected ? undefined : "Select a topic first to insert under it"
-                      }
+                      title={canvas.selected ? undefined : t("toolbar.insertUnderDisabled")}
                       onSelect={() => {
                         const part = buildMapPart(p.id);
                         const ok = part ? m()?.addSubtreeToSelected(part) : false;
-                        showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");
-                      }}
-                    />
-                  ))}
-                </MenuSub>
-                <MenuSub icon={mi("plus")} label="Templates">
-                  <MenuLabel>{t("toolbar.templateInsertStructureUnderSelected")}</MenuLabel>
-                  {insertableTemplates.map((t) => (
-                    <MenuItem
-                      key={t.id}
-                      icon={mi("plus")}
-                      label={t.name}
-                      disabled={!canvas.selected}
-                      title={
-                        canvas.selected ? undefined : "Select a topic first to insert under it"
-                      }
-                      onSelect={() => {
-                        const ok = m()?.addSubtreeToSelected(templateSubtree(t.id)) ?? false;
                         showHint(
-                          ok ? `Inserted the ${t.name} structure.` : "Select a topic first.",
+                          ok
+                            ? t("hint.mapPartInserted", { name: p.name })
+                            : t("hint.selectTopicFirst"),
                         );
                       }}
                     />
                   ))}
                 </MenuSub>
-                <MenuSub icon={mi("plus")} label="Shapes">
+                <MenuSub icon={mi("plus")} label={t("toolbar.templates")}>
+                  <MenuLabel>{t("toolbar.templateInsertStructureUnderSelected")}</MenuLabel>
+                  {/* `tpl`, not `t` — the loop variable shadowed the translation function, so `t("…")`
+                      could not be called anywhere inside this item. */}
+                  {insertableTemplates.map((tpl) => (
+                    <MenuItem
+                      key={tpl.id}
+                      icon={mi("plus")}
+                      label={tpl.name}
+                      disabled={!canvas.selected}
+                      title={canvas.selected ? undefined : t("toolbar.insertUnderDisabled")}
+                      onSelect={() => {
+                        const ok = m()?.addSubtreeToSelected(templateSubtree(tpl.id)) ?? false;
+                        showHint(
+                          ok
+                            ? t("hint.structureInserted", { name: tpl.name })
+                            : t("hint.selectTopicFirst"),
+                        );
+                      }}
+                    />
+                  ))}
+                </MenuSub>
+                <MenuSub icon={mi("plus")} label={t("toolbar.shapes")}>
                   <MenuLabel>{t("toolbar.backgroundShapeFreeCanvas")}</MenuLabel>
                   {SHAPE_ITEMS.map((s) => (
                     <MenuItem
@@ -1197,9 +1193,7 @@ export function Toolbar({
                       label={s.name}
                       onSelect={() => {
                         m()?.addShape(s.kind);
-                        showHint(
-                          `Added a ${s.name.toLowerCase()} — drag to move, drag a corner to resize.`,
-                        );
+                        showHint(t("hint.shapeAdded", { shape: s.name.toLowerCase() }));
                       }}
                     />
                   ))}
@@ -1219,10 +1213,10 @@ export function Toolbar({
                         : false;
                       showHint(
                         !ok
-                          ? "Select a node first, then bind a roll-up source."
+                          ? t("hint.selectNodeToBindRollup")
                           : v === "none"
-                            ? "Roll-up unbound."
-                            : "Bound — refresh to pull the latest.",
+                            ? t("hint.rollupUnbound")
+                            : t("hint.rollupBound"),
                       );
                       close();
                     }}
@@ -1233,7 +1227,7 @@ export function Toolbar({
                       .filter((mm) => mm.id !== liveDoc.id)
                       .map((mm) => (
                         <option key={mm.id} value={mm.id}>
-                          {mm.title || "(untitled)"}
+                          {mm.title || t("common.untitled")}
                         </option>
                       ))}
                     <option value="none">— Unbind</option>
@@ -1241,7 +1235,7 @@ export function Toolbar({
                 </div>
                 <MenuItem
                   icon={mi("history")}
-                  label="Refresh all roll-ups"
+                  label={t("cmd.refresh-rollups")}
                   onSelect={() => map.refreshRollupsNow()}
                 />
               </>
@@ -1257,7 +1251,7 @@ export function Toolbar({
               <>
                 <MenuCheckboxItem
                   icon={mi("hand")}
-                  label="Free layout (whiteboard)"
+                  label={t("toolbar.freeLayout")}
                   checked={!!liveDoc.meta?.freeform}
                   trailing={mi("check")}
                   onSelect={() => m()?.setFreeform(!liveDoc.meta?.freeform)}
@@ -1268,7 +1262,7 @@ export function Toolbar({
                     being split across this menu, Settings, and the panel (T5, T3-25). This opens it. */}
                 <MenuItem
                   icon={mi("palette")}
-                  label="Theme, design presets & backdrop…"
+                  label={t("toolbar.themeAndDesign")}
                   title={t("toolbar.openTheMapPanelTo")}
                   onSelect={() => {
                     canvas.openMapPanel();
@@ -1292,7 +1286,7 @@ export function Toolbar({
             <MenuLabel>{t("toolbar.view")}</MenuLabel>
             <MenuCheckboxItem
               icon={mi("check")}
-              label="Outline numbering"
+              label={t("toolbar.outlineNumbering")}
               checked={panels.numbered}
               trailing={mi("check")}
               onSelect={() => panels.setNumbered((v) => !v)}
@@ -1302,8 +1296,8 @@ export function Toolbar({
                 icon={mi("layers")}
                 label={
                   liveDoc.meta?.numberStyle === "outline"
-                    ? "Numbering: outline (I, A, 1)"
-                    : "Numbering: decimal (1, 1.1)"
+                    ? t("toolbar.numbering.outline")
+                    : t("toolbar.numbering.decimal")
                 }
                 checked={liveDoc.meta?.numberStyle === "outline"}
                 trailing={mi("check")}
@@ -1316,21 +1310,21 @@ export function Toolbar({
             ) : null}
             <MenuCheckboxItem
               icon={mi("link")}
-              label="Line jumps"
+              label={t("toolbar.lineJumps")}
               checked={!!liveDoc.meta?.lineJumps}
               trailing={mi("check")}
               onSelect={() => m()?.setLineJumps(!liveDoc.meta?.lineJumps)}
             />
             <MenuCheckboxItem
               icon={mi("layers")}
-              label="Legend"
+              label={t("toolbar.legend")}
               checked={!!liveDoc.meta?.legend}
               trailing={mi("check")}
               onSelect={() => m()?.setLegend(!liveDoc.meta?.legend)}
             />
             <MenuCheckboxItem
               icon={mi("text")}
-              label="Spell-check"
+              label={t("toolbar.spellCheck")}
               checked={panels.spellcheck}
               trailing={mi("check")}
               onSelect={() => panels.setSpellcheck((v) => !v)}
@@ -1346,17 +1340,17 @@ export function Toolbar({
                 aria-label={t("toolbar.layout")}
                 disabled={!!liveDoc.meta?.freeform}
               >
-                <optgroup label="Radial">
+                <optgroup label={t("toolbar.layoutGroupRadial")}>
                   <option value="side">{t("toolbar.bothSides")}</option>
                   <option value="right">{t("toolbar.right")}</option>
                   <option value="left">{t("toolbar.left")}</option>
                   <option value="radial">{t("toolbar.radialHub")}</option>
                 </optgroup>
-                <optgroup label="Tree">
+                <optgroup label={t("toolbar.layoutGroupTree")}>
                   <option value="org-down">{t("toolbar.orgChart")}</option>
                   <option value="org-up">{t("toolbar.orgChart2")}</option>
                 </optgroup>
-                <optgroup label="Diagram">
+                <optgroup label={t("toolbar.layoutGroupDiagram")}>
                   <option value="timeline">{t("toolbar.timeline")}</option>
                   <option value="fishbone">{t("toolbar.fishbone")}</option>
                   <option value="grid">{t("toolbar.gridMatrix")}</option>
@@ -1376,22 +1370,20 @@ export function Toolbar({
               value={canvas.layout}
               onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
               aria-label={t("toolbar.layout")}
-              title={
-                liveDoc.meta?.freeform ? "Auto-layout is paused (Free layout is on)" : "Layout"
-              }
+              title={liveDoc.meta?.freeform ? t("toolbar.layoutPaused") : "Layout"}
               disabled={!!liveDoc.meta?.freeform}
             >
-              <optgroup label="Radial">
+              <optgroup label={t("toolbar.layoutGroupRadial")}>
                 <option value="side">{t("toolbar.bothSides")}</option>
                 <option value="right">{t("toolbar.right")}</option>
                 <option value="left">{t("toolbar.left")}</option>
                 <option value="radial">{t("toolbar.radialHub")}</option>
               </optgroup>
-              <optgroup label="Tree">
+              <optgroup label={t("toolbar.layoutGroupTree")}>
                 <option value="org-down">{t("toolbar.orgChart")}</option>
                 <option value="org-up">{t("toolbar.orgChart2")}</option>
               </optgroup>
-              <optgroup label="Diagram">
+              <optgroup label={t("toolbar.layoutGroupDiagram")}>
                 <option value="timeline">{t("toolbar.timeline")}</option>
                 <option value="fishbone">{t("toolbar.fishbone")}</option>
                 <option value="grid">{t("toolbar.gridMatrix")}</option>

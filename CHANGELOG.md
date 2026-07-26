@@ -110,6 +110,34 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   +12 kB gz. That does not fit the current ceiling, so **the strategy for it is an open decision recorded
   in `NEXT_STEPS.md`**, not something to absorb with further bumps.
 
+  **The guard was passing over 46 hardcoded strings, and now sees three more shapes.** Every detector so
+  far only looked at double quotes, so **prose in a template literal** was invisible —
+  `` title={`Delete view ${v.name}`} `` and `` showHint(`Inserted the ${p.name} map part.`) ``, 12 of
+  them. `label` was never a watched prop even though it names every `<MenuItem>` and `<optgroup>`, hiding
+  60 more. And `"(untitled)"` matched nothing: it opens with `(` so it isn't "capitalised", and it's one
+  word so it isn't "multi-word" — it had **20 hardcoded copies**, now one `common.untitled`, the first
+  entry in a shared `common.` section. Two further misses were wrapped arguments and ternary arms that
+  prettier put on their own lines, where nothing precedes the quote; the `else` arm is now recognised by
+  the **space before its colon**, which is how prettier distinguishes `cond ? a : b` from `key: value`.
+
+  Two of the misses shared a root cause worth naming: **a local variable called `t` shadowing the
+  imported `t()`**, in `topicLabel`, in the collapsed-branch peek and in two template loops. `t("…")` was
+  literally uncallable in those scopes, so the migration passes skipped them silently and left no trace.
+  All four locals are renamed — and the last one mattered, because the scripted pass had by then injected
+  a `t("hint.selectTopicFirst")` call into one of those scopes, which would have thrown at runtime.
+
+  **The editor toolbar is genuinely finished (93 strings).** It had been on the migrated allowlist since
+  the 55-entry pass with a green tick it hadn't earned; it came **off** the list while the rest was done,
+  because removing a file is the honest move when the guard turns out to have been blind, and adding an
+  exception to keep the tick is not.
+
+  **Budget note — the +12 kB projection above is too pessimistic, measured.** Finishing the toolbar cost
+  **+0.5 kB gz** (170.1 → 170.6, still under the 171 kB ceiling, no bump needed) for 93 strings, because
+  31 of its labels are word-for-word ⌘K commands and now **reuse the existing `cmd.*` key**. That deletes
+  a duplicate copy of the English text and adds a shorter key in its place, so those sites are roughly
+  free. The projection assumed every remaining string is new text; wherever the chrome repeats itself —
+  and a toolbar mirroring a command palette repeats itself a lot — the real cost is well below it.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

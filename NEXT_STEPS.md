@@ -24,13 +24,35 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
 The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
 catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
-handlers plus the `TopicNode` canvas strings and the whole keyboard cheat sheet are migrated (**292 catalogue entries** so far), behind a lint guard that fails on any new hardcoded user-facing string in a migrated file. English is the only locale and is expected to stay
-that way for now — adding one means adding a JSON catalogue, not changing the app.
+handlers plus the `TopicNode` canvas strings, the whole keyboard cheat sheet, the ⌘K command registry and
+the **entire editor toolbar** are migrated (**353 catalogue entries** so far — 328 eager + 25 in the lazy
+canvas chunk), behind a lint guard that fails on any new hardcoded user-facing string in a migrated file.
+English is the only locale and is expected to stay that way for now — adding one means adding a JSON
+catalogue, not changing the app.
+
+**Trust the guard's list, not its tick — re-verify a file when the guard gains a detector.** On
+2026-07-26 it was green over five files while 46 user-facing strings were still hardcoded in three of
+them, because it had no detector for a template literal, for the `label` prop, or for `"(untitled)"`.
+It now has five detectors and its own self-test pins each one. The failure mode is structural, not a
+one-off: every detector added so far was added *after* a file it was supposed to cover had already been
+ticked. Before adding the next file, re-run the guard over the ones already on the list.
+
+Watch for **a local named `t` shadowing the imported `t()`** — four existed, and in that scope `t("…")`
+is uncallable, so a migration pass skips the strings silently. A scripted pass that rewrites into such a
+scope produces code that compiles and throws at runtime; one nearly shipped.
 
 **Bundle strategy — decided 2026-07-26.** Measured on the first 43 catalogue entries: the layer itself
 is a ~1 kB gz one-off, and the marginal cost per migrated string is the **key**, not the text (the
 English text was already in the bundle, inline). At ~25 bytes of key per entry, the remaining ~1,400
 chrome strings are **roughly +12 kB gz** — more than the current ceiling allows.
+
+**That +12 kB is an upper bound, and the toolbar came in far under it — remeasure before bumping the
+ceiling.** Finishing `Toolbar.tsx` (93 strings) cost **+0.5 kB gz**, 170.1 → 170.6 against a 171 kB
+ceiling, no bump. The reason generalises: 31 of those labels are word-for-word ⌘K commands, so they
+**reuse the existing `cmd.*` key** instead of adding a message — which deletes a duplicate copy of the
+English text and substitutes a shorter key, netting out near zero. The projection assumed every string
+is new text. Wherever the chrome repeats itself, it doesn't. So: migrate, measure, and only then decide
+whether the ceiling needs moving.
 
 **The approach: chunk-locality first, then raise the ceiling for what's left. Keep `t()` synchronous.**
 
@@ -53,27 +75,26 @@ fetching clearly wins. The architecture already supports it — `registerMessage
 later registrations overlay earlier ones, which is exactly the hook a fetched translation needs — so
 build it in the commit that adds the second language, where it earns its complexity, not before.
 
-Also still open from the plan: the remaining ~1,150 chrome strings (the biggest remaining being `Panels.tsx`
-(342 counted) and `FlowMindMap.tsx` (121, and lazy — so its catalogue belongs in `flow/messages.ts`) — ~340 of the
-total need hand conversion, not mechanical replacement); the rest of the `Intl` adoption — `timeAgo` and all 12 collation
-sites are **done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic,
-not translation) and the ~103 locale-unsafe `toLowerCase` sites; the exporters taking the locale (`lang` attributes,
-PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font); the PWA manifest strings;
-and finishing `editorCommands.ts`. The lint guard now has three detectors — prop literal, **prose in a
-positional argument**, and bare prose — so it sees the `add(id, "Label", …)` shape it was blind to (52
-hits in that file, 0 in the migrated ones). `editorCommands.ts` stays off the allowlist until those are
-migrated, which is now an honest signal rather than a missing capability. Documented limitation: the
-positional check needs a capitalised MULTI-WORD literal, so a single-word label (`"Present"`) still
-slips through — widening it would collide with ids and `kind` values.
+Also still open from the plan: the remaining chrome strings — the biggest by far is **`Panels.tsx` (342
+counted)**, then **`FlowMindMap.tsx` (121, and lazy — so its catalogue belongs in `flow/messages.ts`)**;
+recount both against the current guard before planning, since its five detectors see shapes the earlier
+counts were taken without. The rest of the `Intl` adoption: `timeAgo` and all 12 collation sites are
+**done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic, not
+translation) and the ~103 locale-unsafe `toLowerCase` sites. Then the exporters taking the locale (`lang`
+attributes, PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA
+manifest strings.
 
-For `editorCommands.ts`'s remaining ~85 labels, the design to use (worked out but not yet built): the
-`add(id, label, kind, run)` helper should **drop the label argument entirely** and derive the message key
-from the `id` it already receives — `label: t(`cmd.${id}`)`. The id is stable and unique, so the
-catalogue becomes a clean id→label map and 85 call sites lose an argument rather than gaining a wrapper.
-That trades compile-time key checking for a test that builds the registry and lets `t()`'s dev-mode
-throw catch any missing entry — a stronger guarantee in practice, since it exercises the real registry.
-~26 of those call sites are the genuinely hand-written cases (dynamic ids like `expand-level:${n}`,
-interpolated labels, labels held in variables).
+`editorCommands.ts` and `Toolbar.tsx` are **done** — don't re-plan them. The design once recorded here
+for `editorCommands.ts` (drop the label argument and derive the key from the command id inside `add()`)
+was **rejected on implementation and should not be revived**: a template-literal key cannot be verified
+by `tsc`, and compile-time key checking is the property the typed catalogue exists for. Each call site
+passes an explicit key literal instead.
+
+Documented guard limitations, so nobody assumes coverage that isn't there: the positional check needs a
+capitalised MULTI-WORD literal, so a single-word label (`"Present"`, `"+ New…"`) still slips through —
+widening it would collide with ids and `kind` values. Object properties with prose values are exempt on
+purpose (`shortcuts.ts` keeps physical key names literal), which also means a genuinely user-facing
+`title:` inside an object literal is invisible.
 
 Correction to the earlier analysis, found on implementation: **"Danish `å` sorts wrong today" was
 overstated.** Collation follows the *active* locale, so with English active `Å` correctly collates as

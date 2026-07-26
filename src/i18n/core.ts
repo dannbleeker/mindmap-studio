@@ -339,6 +339,81 @@ export const CORE_EN = {
   "toolbar.quickAddTopic": "Quick add topic",
   "toolbar.typeATopicAndPress":
     "Type a topic and press Enter to add it under the selection (or the central topic).",
+
+  // The rest of the toolbar, finished after the guard learned to see `label=` props, template literals
+  // and wrapped ternary arms. Where a label matches a ⌘K command word for word it reuses that `cmd.*`
+  // key instead of appearing here — the toolbar and the command registry are 1:1 by design, so the
+  // string is written once and a translator sees it once.
+  "toolbar.startScreen": "Start screen — new maps, templates, library",
+  "toolbar.undo": "Undo (Ctrl/⌘+Z)",
+  "toolbar.redo": "Redo (Ctrl/⌘+Shift+Z)",
+  "toolbar.templates": "Templates",
+  "toolbar.examples": "Examples",
+  "toolbar.searchAllMaps": "Search across every map in your library",
+  "toolbar.findReplace": "Find & replace (Ctrl/⌘+F)",
+  "toolbar.saveAs": "Save as…",
+  "toolbar.boardKanban": "Board (Kanban)",
+  "toolbar.guidedWalk": "Guided walk (step through topics)",
+  "toolbar.outlineNumbering": "Outline numbering",
+  "toolbar.lineJumps": "Line jumps",
+  "toolbar.legend": "Legend",
+  "toolbar.spellCheck": "Spell-check",
+  "toolbar.saveCurrentView": "Save current view…",
+  "toolbar.deleteView": "Delete view {name}",
+  "toolbar.stickyNote": "Sticky note",
+  "toolbar.stickyNoteNamed": "Sticky note: {colour}",
+  "toolbar.addStickyNote": "Add a {colour} sticky note (and make it the default)",
+  "toolbar.mapParts": "Map parts",
+  "toolbar.shapes": "Shapes",
+  "toolbar.showLevel": "Show level {n}",
+  "toolbar.freeLayout": "Free layout (whiteboard)",
+  "toolbar.themeAndDesign": "Theme, design presets & backdrop…",
+  // Optgroup headings in the layout picker. Keyed by role rather than by the English word, because
+  // "Tree" and "Diagram" are also topic text a user might type — a slug of the text would read as
+  // though those two were the same string.
+  "toolbar.layoutGroupRadial": "Radial",
+  "toolbar.layoutGroupTree": "Tree",
+  "toolbar.layoutGroupDiagram": "Diagram",
+
+  // The "Saved locally" status badge: the visible label and its longer tooltip, in both states.
+  "toolbar.saveOk.label": "Saved locally",
+  "toolbar.saveOk.title": "Your maps are stored locally in this browser.",
+  "toolbar.saveError.label": "Couldn't save",
+  "toolbar.saveError.title":
+    "Couldn't save to this browser — it may be out of storage or in private mode.",
+
+  // Why a menu item is greyed out. Each names the specific precondition, so they don't collapse into
+  // one generic "not available" that a translator would have to make vague.
+  "toolbar.balanceEnabled": "Clear any pinned sides and redistribute the main branches evenly",
+  "toolbar.balanceDisabled": "Only the two-sided (Both sides) layout has sides to balance",
+  "toolbar.isolateDisabled": "Select a topic in a branch to isolate it",
+  "toolbar.groupBranchDisabled": "Select a topic first to group its branch",
+  "toolbar.groupSelectionDisabled": "Select 2+ topics to group them in one boundary",
+  "toolbar.summaryDisabled": "Select a topic first to summarise its branch",
+  "toolbar.insertUnderDisabled": "Select a topic first to insert under it",
+  "toolbar.layoutPaused": "Auto-layout is paused (Free layout is on)",
+
+  // Numbering toggles. The label states the style that is CURRENTLY on, so both wordings ship.
+  "toolbar.numberingStyle.outline": "Numbering style: outline (I, A, 1)",
+  "toolbar.numberingStyle.decimal": "Numbering style: decimal (1, 1.1)",
+  "toolbar.numbering.outline": "Numbering: outline (I, A, 1)",
+  "toolbar.numbering.decimal": "Numbering: decimal (1, 1.1)",
+
+  // Transient toasts raised from the toolbar (`showHint`). Paired success/precondition wordings.
+  "hint.branchIsolated": "Isolated this branch.",
+  "hint.selectTopicInBranch": "Select a topic in a branch first.",
+  "hint.branchGrouped": "Branch grouped — double-click the label to rename.",
+  "hint.selectNodeToGroup": "Select a node first, then group its branch.",
+  "hint.selectionGrouped": "Selection grouped — double-click the label to rename.",
+  "hint.selectTwoTopics": "Select 2+ topics first.",
+  "hint.summaryAdded": "Summary added — double-click its label to rename.",
+  "hint.selectNodeToSummarise": "Select a node first, then summarise its branch.",
+  "hint.selectNodeToBindRollup": "Select a node first, then bind a roll-up source.",
+  "hint.rollupUnbound": "Roll-up unbound.",
+  "hint.rollupBound": "Bound — refresh to pull the latest.",
+  "hint.structureInserted": "Inserted the {name} structure.",
+  "hint.stickyColourAdded": "{colour} sticky note added.",
+  "hint.shapeAdded": "Added a {shape} — drag to move, drag a corner to resize.",
 } as const satisfies Catalogue;
 
 export type CoreKey = keyof typeof CORE_EN;

@@ -42,13 +42,8 @@ const MIGRATED = [
   "src/mindmap/flow/TopicNode.tsx",
   "src/shortcuts.ts",
   "src/components/editorCommands.ts",
+  "src/components/Toolbar.tsx",
 ];
-
-// `src/components/Toolbar.tsx` was on the list above and is deliberately OFF it again: once `label` was
-// added to the watched props and the template-literal detector went in, it reported 93 hardcoded strings
-// — the migration commit moved 55 and the guard couldn't see the rest, so the tick was false. It goes
-// back on the list in the commit that finishes it. Removing a file from this list is the honest move
-// when the guard turns out to have been blind; adding an exception to keep the tick is not.
 
 /** Props whose value is read by a user or a screen reader. `label` covers both the menu components in
  *  `Toolbar.tsx` (`<MenuItem label="Fit map to screen">`) and the DOM's own `<optgroup label>`; leaving
@@ -116,10 +111,14 @@ function argumentViolations(src: string): Violation[] {
     // this, only the `?` half of a wrapped ternary is seen and the `else` string ships untranslated.
     const arm = /^\s*[?:]\s*"([A-Z][^"]*\s[^"]*)"[,})\]]*$/.exec(line);
     if (arm) push(arm[1]);
-    // The `else` half of a ternary — `sel ? "Copy link to this topic" : "Copy link to this map"`. Only
-    // when a `? "…"` is on the same line, so a plain object property stays exempt.
-    if (/\?\s*"/.test(line))
-      for (const m of line.matchAll(/:\s*"([A-Z][^"]*\s[^"]*)"/g)) push(m[1]);
+    // The `else` half of a same-line ternary. The discriminator against an object property is the SPACE
+    // BEFORE the colon: prettier writes a ternary as `cond ? a : b` and a property as `key: value`, and
+    // it formats every file here. Gating on a `?` somewhere on the line keeps `keys: "Ctrl/⌘ + Z"`
+    // exempt twice over. An earlier version required the `?` arm to be a double-quoted string too, which
+    // missed `showHint(ok ? `Inserted the ${p.name}…` : "Select a topic first.")` — a template in the
+    // `then` arm hid a hardcoded `else`, twice in Toolbar.tsx.
+    if (line.includes("?"))
+      for (const m of line.matchAll(/\s:\s*"([A-Z][^"]*\s[^"]*)"/g)) push(m[1]);
   });
   return out;
 }
@@ -239,8 +238,18 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     // …including the arms prettier wraps onto their own lines, where only the `?` half used to be seen.
     expect(argumentViolations('                  ? "Couldn\'t save"')).toHaveLength(1);
     expect(argumentViolations('                  : "Saved locally"}')).toHaveLength(1);
-    // …but a plain object property with a prose value stays exempt, as before — no `?` on the line.
+    // A template in the `then` arm must not hide a hardcoded `else` arm.
+    expect(
+      argumentViolations(
+        '  showHint(ok ? `Inserted the ${p.name} map part.` : "Select a topic first.");',
+      ),
+    ).toHaveLength(1);
+    // …but a plain object property with a prose value stays exempt, as before — no space before its
+    // colon, and no `?` on the line either.
     expect(argumentViolations('      { keys: "Ctrl/⌘ + Z" },')).toHaveLength(0);
+    expect(
+      argumentViolations('      { keys: cond ? a : b, action: "Undo The Thing" },'),
+    ).toHaveLength(0);
     expect(argumentViolations('  const label = "Saved locally";')).toHaveLength(0);
     // Documented limitation: a single-word label isn't caught.
     expect(argumentViolations('  add("present", "Present", "map", run);')).toHaveLength(0);

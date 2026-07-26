@@ -267,6 +267,18 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   its own file with `process.env.TZ` set to `America/New_York` — where it fails against BOTH wrong
   forms and passes against the right one.
 
+  **The OOXML exports are pinned against non-Latin text — and the "font" half of that backlog item was
+  overstated.** Whether PowerPoint substitutes a CJK face for Calibri is a rendering decision inside
+  Office that nothing here can observe; both apps do glyph fallback, and the empty `<a:ea>`/`<a:cs>`
+  theme slots the note pointed at are what Office's own stock theme ships.
+
+  What *was* unguarded is the part that can fail silently and completely: these writers build XML by
+  string concatenation and hand it to fflate, so a mis-encoding would yield a file that opens to
+  mojibake or refuses to open — and every fixture in `pptx.test.ts` and `xlsx.test.ts` was ASCII. A new
+  test pushes CJK, Arabic, Hebrew, Cyrillic, Greek, an emoji (a surrogate pair, the case a naive
+  per-charCode escaper splits in half) and raw markup characters through both exporters. Today's code
+  passes; mutating the escaper to drop non-ASCII fails all three cases.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

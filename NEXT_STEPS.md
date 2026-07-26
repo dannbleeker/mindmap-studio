@@ -109,10 +109,12 @@ the `Intl` adoption: `timeAgo` and all 12 collation sites are
 `Intl.DateTimeFormat`, so name AND day/month order follow the locale. Still open: `parseNaturalDate`'s
 INPUT grammar ("today", "tomorrow", "+7d", weekday names) is English-only and is genuinely logic rather
 than translation — a second locale needs its own keyword table and its own relative-date shapes, not a
-catalogue entry. And the OOXML **font** questions — PPTX's empty `<a:ea>`/`<a:cs>` theme slots and XLSX's
-Calibri-only font. Recon those before building: empty `ea`/`cs` is what Office's own stock theme ships,
-so the real gap is likely the per-script `<a:font script="…">` list rather than the empty slots the
-earlier note pointed at.
+catalogue entry. The OOXML **font** question is now **reconned and largely declined**: the empty `<a:ea>`/`<a:cs>` slots
+are what Office's own stock theme ships, and both Office apps glyph-fall-back for scripts Calibri lacks,
+so there is no verifiable defect here — only a possible refinement (the per-script `<a:font script="…">`
+list) that no test in this repo could confirm. The genuinely unguarded part was ENCODING, and that is
+now pinned by `test/ooxml-non-latin.test.ts`. If this is ever picked up, it needs a real Office render,
+not more unit tests.
 
 The `lang` attributes are **done**: the standalone HTML, slide deck and interactive HTML stamp
 `<html lang>` from the active locale, and PPTX stamps its run-level `lang` (which drives PowerPoint's

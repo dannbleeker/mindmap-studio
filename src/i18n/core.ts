@@ -35,6 +35,15 @@ export const CORE_EN = {
   "settings.localData.clearBranchClipboard": "Clear branch clipboard",
   "settings.localData.clearAll": "Clear all local data…",
   "settings.language": "Language",
+  "settings.appTheme.help":
+    "App theme colours the chrome (toolbar, panels, dialogs). The canvas theme (which colours the topics) lives in the Map panel, alongside layout and the rest of the map's look — a dark canvas always darkens the chrome too.",
+  "settings.reduceMotion.help":
+    "Reduce motion makes canvas zoom/fit and the guided walk instant, and drops chrome transitions. System follows your device's reduced-motion setting.",
+  "settings.highContrast.help":
+    "High contrast strengthens chrome borders, dividers and text, and adds bolder focus rings. System follows your device's contrast / forced-colors setting.",
+  "settings.localData.body":
+    "Everything — your maps, version history and preferences — is stored only in this browser.",
+  "settings.localData.usage": " About {used} used of {quota} available.",
 
   // Counts — plural categories rather than a `?  "" : "s"` ternary, so a locale with different
   // boundaries (or four categories) needs no call-site change.

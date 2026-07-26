@@ -40,6 +40,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   module importing the `i18n` barrel instead of `i18n/registry`, which would pull the eager chrome
   catalogue into that chunk.
 
+  **A guard against the work rotting.** Nothing stops the next person adding a button with a hardcoded
+  label, and the failure is silent — the UI looks right in English and simply never translates. `tsc`
+  can't see it (a plain string is valid) and no behavioural test notices, because English IS the
+  fallback. So a test scans the migrated files for user-facing literals: a literal in `title` /
+  `aria-label` / `placeholder` / `alt`, and bare prose lines (the multi-line paragraphs inside JSX).
+  It's an allowlist that grows as files are migrated, rather than a whole-tree scan that would block
+  everything untouched. It is tuned for zero false positives — a noisy guard gets switched off, which is
+  worse than a narrow one — so it deliberately skips prose containing `:` or `?`, which is
+  indistinguishable from `background: style?.fillImage` without a parser. On its first run it found five
+  genuinely un-migrated paragraphs in `SettingsDialog`, now moved into the catalogue.
+
   Budget note: 167 → 169 kB gz, documented in `size-budget.mjs`. The layer is a ~1 kB one-off and the
   marginal cost of migrating a string is the **key**, not the text (the text was already in the bundle,
   inline) — measured at ~25 bytes per entry, which puts the full ~1,400-string extraction at roughly

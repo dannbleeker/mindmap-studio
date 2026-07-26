@@ -116,9 +116,7 @@ export function SettingsDialog({
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
-          App theme colours the chrome (toolbar, panels, dialogs). The canvas theme (which colours
-          the topics) lives in the Map panel, alongside layout and the rest of the map's look — a
-          dark canvas always darkens the chrome too.
+          {t("settings.appTheme.help")}
         </p>
         <label className="mm-map-field">
           <span>{t("settings.reduceMotion")}</span>
@@ -134,8 +132,7 @@ export function SettingsDialog({
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
-          Reduce motion makes canvas zoom/fit and the guided walk instant, and drops chrome
-          transitions. System follows your device's reduced-motion setting.
+          {t("settings.reduceMotion.help")}
         </p>
         <label className="mm-map-field">
           <span>{t("settings.highContrast")}</span>
@@ -151,8 +148,7 @@ export function SettingsDialog({
           </select>
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
-          High contrast strengthens chrome borders, dividers and text, and adds bolder focus rings.
-          System follows your device's contrast / forced-colors setting.
+          {t("settings.highContrast.help")}
         </p>
       </Section>
 
@@ -187,9 +183,12 @@ export function SettingsDialog({
 
       <Section title={t("settings.localData")}>
         <p style={{ margin: 0, fontSize: 12.5, color: "var(--ed-muted)", lineHeight: 1.5 }}>
-          Everything — your maps, version history and preferences — is stored only in this browser.
+          {t("settings.localData.body")}
           {storage
-            ? ` About ${fmtBytes(storage.usage)} used of ${fmtBytes(storage.quota)} available.`
+            ? t("settings.localData.usage", {
+                used: fmtBytes(storage.usage),
+                quota: fmtBytes(storage.quota),
+              })
             : ""}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>

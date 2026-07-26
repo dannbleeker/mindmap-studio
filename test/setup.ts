@@ -39,8 +39,11 @@ if (hasDom) {
     }
   }
 
-  // <dialog>: jsdom implements the element but not showModal()/close(). The app's <Dialog> wrapper
-  // calls them in an effect, so provide minimal versions that just toggle `open` + fire `close`.
+  // <dialog>: the current jsdom (29.x) implements showModal()/close() natively, so this shim is a
+  // dormant fallback for an older/leaner DOM — the guard below self-disables it. Don't read it as "the
+  // app's <Dialog> runs on a stub": it doesn't. What matters for tests either way is that showModal()
+  // sets [open], because a <dialog> without [open] is display:none per the UA stylesheet and *byRole
+  // then can't see anything inside it (see test/editor-dialogs.test.tsx's header).
   const dlg = globalThis.HTMLDialogElement?.prototype as
     | (HTMLDialogElement & { showModal: () => void; close: () => void })
     | undefined;

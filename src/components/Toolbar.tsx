@@ -543,7 +543,7 @@ export function Toolbar({
         <div className="mm-cluster">
           <Menu
             trigger={menuTrigger("export", "Export", isMobile)}
-            triggerTitle="Export"
+            triggerTitle={t("toolbar.trigger.export")}
             triggerAriaLabel={isMobile ? "Export" : undefined}
             align="right"
             sheet={isMobile}
@@ -586,7 +586,7 @@ export function Toolbar({
           </Menu>
           <Menu
             trigger={menuTrigger("dots", "More", isMobile)}
-            triggerTitle="More"
+            triggerTitle={t("toolbar.trigger.more")}
             triggerAriaLabel={isMobile ? "More" : undefined}
             align="right"
             sheet={isMobile}
@@ -724,7 +724,7 @@ export function Toolbar({
       <div className={`mm-topbar-row mm-topbar-row2${isMobile ? "" : " mm-wrap"}`}>
         <Menu
           trigger={menuTrigger("layers", "Panels", isMobile)}
-          triggerTitle="Panels"
+          triggerTitle={t("toolbar.trigger.panels")}
           triggerAriaLabel={isMobile ? "Panels" : undefined}
           sheet={isMobile}
         >
@@ -843,7 +843,7 @@ export function Toolbar({
             reads clearly instead of four ambiguous icons (#4). Mirrored 1:1 in ⌘K (kind "view"). */}
         <Menu
           trigger={menuTrigger("fit", "View", isMobile)}
-          triggerTitle="View actions"
+          triggerTitle={t("toolbar.trigger.viewActions")}
           triggerAriaLabel={isMobile ? "View" : undefined}
           sheet={isMobile}
         >
@@ -1040,7 +1040,7 @@ export function Toolbar({
           <Menu
             trigger={menuTrigger("plus", "Insert", isMobile)}
             triggerClassName="mm-tbtn mm-tbtn-accent"
-            triggerTitle="Insert"
+            triggerTitle={t("toolbar.trigger.insert")}
             triggerAriaLabel={isMobile ? "Insert" : undefined}
             sheet={isMobile}
           >
@@ -1246,7 +1246,7 @@ export function Toolbar({
           </Menu>
           <Menu
             trigger={menuTrigger("palette", "Canvas", isMobile)}
-            triggerTitle="Canvas"
+            triggerTitle={t("toolbar.trigger.canvas")}
             triggerAriaLabel={isMobile ? "Canvas" : undefined}
             sheet={isMobile}
           >
@@ -1282,8 +1282,8 @@ export function Toolbar({
         {isMobile ? (
           <Menu
             trigger={menuTrigger("settings", "Options", true)}
-            triggerTitle="View options & layout"
-            triggerAriaLabel="Options"
+            triggerTitle={t("toolbar.trigger.viewOptions")}
+            triggerAriaLabel={t("toolbar.trigger.optionsAria")}
             sheet
           >
             <MenuLabel>{t("common.view")}</MenuLabel>

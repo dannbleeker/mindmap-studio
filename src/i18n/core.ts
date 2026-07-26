@@ -25,6 +25,14 @@ export const CORE_EN = {
   // throw until that chunk happened to load. A duplicate-text test caught all four.
   "common.markers": "Markers",
   "common.tags": "Tags",
+  "common.cancel": "Cancel",
+  "common.save": "Save",
+  "common.close": "Close",
+  "common.clear": "Clear",
+  "common.add": "Add",
+  "common.reset": "Reset",
+  "common.restore": "Restore",
+  "common.exit": "Exit",
   "common.priority": "Priority",
   "common.branchColour": "Branch colour",
   "common.addTag": "Add a tag",
@@ -758,6 +766,89 @@ export const CORE_EN = {
 
   "panel.tagOnAllSelected": '"{tag}" is on all selected topics — click to remove from all',
   "panel.tagOnSomeSelected": '"{tag}" is on some selected topics — click to add to all',
+  // The menu TRIGGERS — the buttons that open each toolbar menu. A custom `triggerTitle` prop rather
+  // than a DOM `title`, which is why the guard could not see them until it learned this codebase's own
+  // prop names.
+  "toolbar.trigger.export": "Export",
+  "toolbar.trigger.more": "More",
+  "toolbar.trigger.panels": "Panels",
+  "toolbar.trigger.viewActions": "View actions",
+  "toolbar.trigger.insert": "Insert",
+  "toolbar.trigger.canvas": "Canvas",
+  "toolbar.trigger.viewOptions": "View options & layout",
+  "toolbar.trigger.optionsAria": "Options",
+  // Confirm/prompt dialogs raised from App. Title, body and button copy are OBJECT PROPERTIES, which
+  // the argument rule exempts so that shortcuts.ts can keep physical key names literal — that exemption
+  // was hiding this whole class.
+  "dialog.clearAllData.title": "Delete all local data?",
+  "dialog.clearAllData.body":
+    "Every map, its version history, and your preferences in this browser will be removed. This cannot be undone.",
+  "dialog.clearAllData.confirm": "Delete everything",
+  "dialog.deleteMap.title": "Delete this map?",
+  "dialog.deleteMap.confirm": "Delete anyway",
+  "dialog.nameView.title": "Name this view",
+  "dialog.nameView.placeholder": "View name",
+  "about.source": "Source",
+  // --- Panels.tsx, second pass ---------------------------------------------------------------------
+  // Everything here was invisible to the scanner until it learned three more shapes: this codebase's
+  // own camelCase props, user-facing OBJECT properties, and JSX text whose opening tag ended on the
+  // previous line. Panels.tsx scanned 0 while holding 55 of them.
+
+  "panel.topicInfoSections": "Topic info sections",
+  "panel.startDate": "Start date",
+
+  // Flowchart shape palette — the tooltip names the shape AND its conventional meaning, which is the
+  // part a translator must keep: the glyph is universal, the semantics are taught differently.
+  "panel.shape.diamond": "Diamond (decision)",
+  "panel.shape.oval": "Oval (start / end)",
+  "panel.shape.parallelogram": "Parallelogram (input / output)",
+  "panel.shape.hexagon": "Hexagon (preparation)",
+  "panel.shape.cylinder": "Cylinder (data store)",
+  "panel.shape.trapezoid": "Trapezoid (manual operation)",
+  "panel.shape.octagon": "Octagon (stop / limit)",
+  "panel.shape.document": "Document (report / output)",
+  "panel.shape.callout": "Callout (speech / annotation)",
+  "panel.shape.star": "Star (highlight)",
+  "panel.shape.cloud": "Cloud (idea / external system)",
+
+  // Topic inspector tabs — each is a label plus the tooltip explaining what the tab holds.
+  "panel.tab.details": "Details",
+  "panel.tab.detailsHint": "Markers, tags, progress, dates, priority, attachments & links",
+  "panel.tab.notes": "Notes",
+  "panel.tab.notesHint": "The selected topic's rich-text note",
+  "panel.tab.style": "Style",
+  "panel.tab.styleHint": "Shape, colour, font & stickers",
+
+  // Note-editor insert dialogs
+  "panel.insertImage": "Insert image",
+  "panel.imageUrl": "Image URL",
+  "panel.insertLink": "Insert link",
+  "panel.linkUrl": "Link URL",
+
+  // Rich-text toolbar. The KEY names in the tooltips (Ctrl+B) stay inside the message: a locale may
+  // write the modifier differently, and splitting them would make the tooltip unassemblable.
+  "panel.rt.bold": "Bold (Ctrl+B)",
+  "panel.rt.italic": "Italic (Ctrl+I)",
+  "panel.rt.strikethrough": "Strikethrough",
+  "panel.rt.bulletList": "Bulleted list",
+  "panel.rt.numberedList": "Numbered list",
+  "panel.rt.h1": "H1",
+  "panel.rt.h2": "H2",
+  "panel.rt.h3": "H3",
+  "panel.rt.table": "▦ Table",
+
+  // Panel body copy and controls
+  "panel.inboxEmpty": "Nothing unfiled. Jot ideas here, file them onto a map later.",
+  "panel.toMap": "→ map",
+  "panel.addRow": "+ Add",
+  "panel.saveVersionNow": "＋ Save version now",
+  "panel.playTimeline": "▶ Play timeline",
+  "panel.not": "NOT",
+  "panel.addAndCondition": "+ AND condition",
+  "panel.addRule": "+ Add rule",
+  "panel.mixed": "Mixed",
+  "panel.suggested": "Suggested:",
+  "panel.markersLabel": "Markers:",
 } as const satisfies Catalogue;
 
 export type CoreKey = keyof typeof CORE_EN;

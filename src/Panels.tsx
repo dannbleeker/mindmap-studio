@@ -469,17 +469,17 @@ export function StyleBar({
     );
   };
   const geomShapes: { shape: NodeShape; title: string }[] = [
-    { shape: "diamond", title: "Diamond (decision)" },
-    { shape: "ellipse", title: "Oval (start / end)" },
-    { shape: "parallelogram", title: "Parallelogram (input / output)" },
-    { shape: "hexagon", title: "Hexagon (preparation)" },
-    { shape: "cylinder", title: "Cylinder (data store)" },
-    { shape: "trapezoid", title: "Trapezoid (manual operation)" },
-    { shape: "octagon", title: "Octagon (stop / limit)" },
-    { shape: "document", title: "Document (report / output)" },
-    { shape: "callout", title: "Callout (speech / annotation)" },
-    { shape: "star", title: "Star (highlight)" },
-    { shape: "cloud", title: "Cloud (idea / external system)" },
+    { shape: "diamond", title: t("panel.shape.diamond") },
+    { shape: "ellipse", title: t("panel.shape.oval") },
+    { shape: "parallelogram", title: t("panel.shape.parallelogram") },
+    { shape: "hexagon", title: t("panel.shape.hexagon") },
+    { shape: "cylinder", title: t("panel.shape.cylinder") },
+    { shape: "trapezoid", title: t("panel.shape.trapezoid") },
+    { shape: "octagon", title: t("panel.shape.octagon") },
+    { shape: "document", title: t("panel.shape.document") },
+    { shape: "callout", title: t("panel.shape.callout") },
+    { shape: "star", title: t("panel.shape.star") },
+    { shape: "cloud", title: t("panel.shape.cloud") },
   ];
   // Which controls match the current single selection (so the bar reflects state, not just writes it).
   const s = style;
@@ -730,7 +730,7 @@ export function StyleBar({
           })
         }
       >
-        Reset
+        {t("common.reset")}
       </button>
     </div>
   );
@@ -1606,13 +1606,13 @@ export function InboxPanel({
           style={{ width: "auto", flex: 1 }}
         />
         <Button onClick={capture} disabled={!draft.trim()} style={{ padding: "2px 8px" }}>
-          Add
+          {t("common.add")}
         </Button>
       </div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {items.length === 0 ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
-            Nothing unfiled. Jot ideas here, file them onto a map later.
+            {t("panel.inboxEmpty")}
           </div>
         ) : (
           items.map((it) => (
@@ -1645,7 +1645,7 @@ export function InboxPanel({
                 aria-label={`File "${it.text}" onto the map`}
                 style={{ padding: "2px 6px", fontSize: fontSize.sm }}
               >
-                → map
+                {t("panel.toMap")}
               </Button>
               <Button
                 onClick={() => onDiscard(it.id)}
@@ -1765,7 +1765,7 @@ export function SlideDeckEditorPanel({
           }}
           style={{ fontSize: fontSize.sm }}
         >
-          + Add
+          {t("panel.addRow")}
         </Button>
       </div>
       {isCustom ? (
@@ -1965,7 +1965,7 @@ export function FilterPanel({
           </span>
           {active ? (
             <Button onClick={onClear} style={{ padding: "2px 8px" }}>
-              Clear
+              {t("common.clear")}
             </Button>
           ) : null}
         </div>
@@ -2066,7 +2066,7 @@ export function FilterPanel({
               }}
               style={{ padding: "2px 8px", fontSize: fontSize.sm }}
             >
-              Save
+              {t("common.save")}
             </Button>
           </div>
         ) : null}
@@ -2103,14 +2103,14 @@ export function HistoryPanel({
       >
         <span>🕔 History</span>
         <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
-          Close
+          {t("common.close")}
         </Button>
       </div>
       <Button
         onClick={onSaveNow}
         style={{ margin: "0 10px 6px", padding: "4px 8px", fontSize: fontSize.sm }}
       >
-        ＋ Save version now
+        {t("panel.saveVersionNow")}
       </Button>
       <Button
         onClick={onPlay}
@@ -2118,7 +2118,7 @@ export function HistoryPanel({
         title={versions.length < 2 ? t("panel.saveAtLeast") : t("panel.playTheMap")}
         style={{ margin: "0 10px 8px", padding: "4px 8px", fontSize: fontSize.sm }}
       >
-        ▶ Play timeline
+        {t("panel.playTimeline")}
       </Button>
       {/* Be honest that auto-history is finite + throttled, so a user doesn't expect to roll back to
           an arbitrary point on a busy map (snapshots coalesce to ~3 min; the last MAX_VERSIONS kept). */}
@@ -2158,7 +2158,7 @@ export function HistoryPanel({
                 onClick={() => onRestore(v.id)}
                 style={{ padding: "1px 8px", fontSize: fontSize.sm }}
               >
-                Restore
+                {t("common.restore")}
               </Button>
             </div>
           ))
@@ -2249,7 +2249,7 @@ export function PlaybackBar({
         {t("panel.restoreThis")}
       </Button>
       <Button onClick={onExit} style={btn} title={t("panel.exitPlaybackEsc")}>
-        Exit
+        {t("common.exit")}
       </Button>
     </div>
   );
@@ -2350,7 +2350,7 @@ export function WalkBar({
           </Button>
         ) : null}
         <Button onClick={onExit} style={btn} title={t("panel.exitWalkEsc")}>
-          Exit
+          {t("common.exit")}
         </Button>
       </div>
       {note?.trim() ? (
@@ -2624,7 +2624,7 @@ export function StylesPanel({
             title={t("panel.invertThisCondition")}
           >
             <input type="checkbox" checked={negate} onChange={(e) => setNegate(e.target.checked)} />
-            NOT
+            {t("panel.not")}
           </label>
           <Select
             value={kind}
@@ -2657,7 +2657,7 @@ export function StylesPanel({
                   checked={!!c.negate}
                   onChange={(e) => updateAlso(i, { negate: e.target.checked })}
                 />
-                NOT
+                {t("panel.not")}
               </label>
               <Select
                 value={c.kind}
@@ -2691,7 +2691,7 @@ export function StylesPanel({
           }
           style={{ margin: "0 10px 4px", fontSize: fontSize.sm }}
         >
-          + AND condition
+          {t("panel.addAndCondition")}
         </Button>
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}
@@ -2715,7 +2715,7 @@ export function StylesPanel({
         </div>
         {swatchRow(BORDER_SWATCHES, actionColor, setActionColor, "Branch")}
         <Button onClick={add} style={{ margin: "4px 10px", fontSize: fontSize.sm }}>
-          + Add rule
+          {t("panel.addRule")}
         </Button>
 
         <PanelSection>{t("panel.namedStyles")}</PanelSection>
@@ -2770,7 +2770,7 @@ export function StylesPanel({
             }}
             style={{ fontSize: fontSize.sm }}
           >
-            Save
+            {t("common.save")}
           </Button>
         </div>
       </div>
@@ -2789,11 +2789,11 @@ type InfoTab = "details" | "notes" | "style";
 const INFO_TABS: readonly TabItem[] = [
   {
     id: "details",
-    label: "Details",
-    title: "Markers, tags, progress, dates, priority, attachments & links",
+    label: t("panel.tab.details"),
+    title: t("panel.tab.detailsHint"),
   },
-  { id: "notes", label: "Notes", title: "The selected topic's rich-text note" },
-  { id: "style", label: "Style", title: "Shape, colour, font & stickers" },
+  { id: "notes", label: t("panel.tab.notes"), title: t("panel.tab.notesHint") },
+  { id: "style", label: t("panel.tab.style"), title: t("panel.tab.styleHint") },
 ];
 
 export function InfoPanel({
@@ -2969,7 +2969,7 @@ export function InfoPanel({
   // A faint "Mixed" tag shown next to a bulk-edit control whose selected topics hold differing values.
   const mixedHint = (
     <span style={{ color: "var(--ed-faint)", fontSize: fontSize.sm, fontStyle: "italic" }}>
-      Mixed
+      {t("panel.mixed")}
     </span>
   );
   const sectionLabel = (text: string) => <PanelSection>{text}</PanelSection>;
@@ -3106,7 +3106,7 @@ export function InfoPanel({
             tabs={tabs}
             active={activeTab}
             onChange={(id) => setTab(id as InfoTab)}
-            ariaLabel="Topic info sections"
+            ariaLabel={t("panel.topicInfoSections")}
             idBase="topic-info"
           />
           {
@@ -3264,7 +3264,7 @@ export function InfoPanel({
                             }}
                           >
                             <span style={{ fontSize: fontSize.xs, color: "var(--ed-faint)" }}>
-                              Suggested:
+                              {t("panel.suggested")}
                             </span>
                             {suggested.map((m) => (
                               <button
@@ -3438,7 +3438,7 @@ export function InfoPanel({
                           value={node.task?.start ?? ""}
                           mixed={mixed.start}
                           onSet={onSetStart}
-                          ariaLabel="Start date"
+                          ariaLabel={t("panel.startDate")}
                         />
                         {mixed.start ? mixedHint : null}
                       </label>
@@ -3450,7 +3450,7 @@ export function InfoPanel({
                           value={node.task?.due ?? ""}
                           mixed={mixed.due}
                           onSet={onSetDue}
-                          ariaLabel="Due date"
+                          ariaLabel={t("panel.dueDate")}
                         />
                         {mixed.due ? mixedHint : null}
                       </label>
@@ -4047,8 +4047,8 @@ export function NotesPanel({
   const insertImage = async () => {
     const url = (
       await editorPrompt({
-        title: "Insert image",
-        label: "Image URL",
+        title: t("panel.insertImage"),
+        label: t("panel.imageUrl"),
         placeholder: "https://… or data:image/…",
       })
     )?.trim();
@@ -4066,8 +4066,8 @@ export function NotesPanel({
     const hasText = !!range && range.toString().trim().length > 0;
     const url = (
       await editorPrompt({
-        title: "Insert link",
-        label: "Link URL",
+        title: t("panel.insertLink"),
+        label: t("panel.linkUrl"),
         placeholder: "https://… or mailto:…",
       })
     )?.trim();
@@ -4112,11 +4112,11 @@ export function NotesPanel({
     color: colors.text,
   } as const;
   const fmtBtns = [
-    { cmd: "b", label: <b>B</b>, title: "Bold (Ctrl+B)", list: false },
-    { cmd: "i", label: <i>I</i>, title: "Italic (Ctrl+I)", list: false },
-    { cmd: "s", label: <s>S</s>, title: "Strikethrough", list: false },
-    { cmd: "ul", label: "• List", title: "Bulleted list", list: true },
-    { cmd: "ol", label: "1. List", title: "Numbered list", list: true },
+    { cmd: "b", label: <b>B</b>, title: t("panel.rt.bold"), list: false },
+    { cmd: "i", label: <i>I</i>, title: t("panel.rt.italic"), list: false },
+    { cmd: "s", label: <s>S</s>, title: t("panel.rt.strikethrough"), list: false },
+    { cmd: "ul", label: "• List", title: t("panel.rt.bulletList"), list: true },
+    { cmd: "ol", label: "1. List", title: t("panel.rt.numberedList"), list: true },
   ] as const;
 
   return (
@@ -4144,7 +4144,7 @@ export function NotesPanel({
         <span>📝 Note{selected ? ` — ${selected.topic}` : ""}</span>
         {onClose && (
           <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
-            Close
+            {t("common.close")}
           </Button>
         )}
       </div>
@@ -4181,7 +4181,7 @@ export function NotesPanel({
               title={t("panel.heading1")}
               style={tbBtn}
             >
-              H1
+              {t("panel.rt.h1")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4189,7 +4189,7 @@ export function NotesPanel({
               title={t("panel.heading2")}
               style={tbBtn}
             >
-              H2
+              {t("panel.rt.h2")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4197,7 +4197,7 @@ export function NotesPanel({
               title={t("panel.heading3")}
               style={tbBtn}
             >
-              H3
+              {t("panel.rt.h3")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4250,7 +4250,7 @@ export function NotesPanel({
                 color: colors.text,
               }}
             >
-              ▦ Table
+              {t("panel.rt.table")}
             </Button>
           </div>
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: contentEditable note editor — the onClick only reroutes in-app links through the canvas; the same targets stay keyboard-reachable via the inspector's Links section + the Outline jumps. */}
@@ -4404,7 +4404,7 @@ export function MarkerBar({
   return (
     <div style={{ ...barRow, gap: 4 }}>
       <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)", marginRight: 4 }}>
-        Markers:
+        {t("panel.markersLabel")}
       </span>
       <input
         type="search"

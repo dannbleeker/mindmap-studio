@@ -566,9 +566,9 @@ export function App() {
   }, []);
   const clearAllLocalData = useCallback(async () => {
     const ok = await editorConfirm({
-      title: "Delete all local data?",
-      body: "Every map, its version history, and your preferences in this browser will be removed. This cannot be undone.",
-      confirmText: "Delete everything",
+      title: t("dialog.clearAllData.title"),
+      body: t("dialog.clearAllData.body"),
+      confirmText: t("dialog.clearAllData.confirm"),
       danger: true,
     });
     if (!ok) return;
@@ -1137,9 +1137,9 @@ export function App() {
           .join(", ");
         const more = refs.length > 3 ? `, and ${refs.length - 3} more` : "";
         const ok = await editorConfirm({
-          title: "Delete this map?",
+          title: t("dialog.deleteMap.title"),
           body: t("dialog.deleteMapRefs", { n: refs.length, names: `${names}${more}` }),
-          confirmText: "Delete anyway",
+          confirmText: t("dialog.deleteMap.confirm"),
           danger: true,
         });
         if (!ok) return;
@@ -1161,7 +1161,7 @@ export function App() {
       load(next ?? buildTemplate("blank"));
       showToast("info", `Deleted “${deleted.title || "Untitled map"}”`, {
         action: {
-          label: "Undo",
+          label: t("cmd.undo"),
           run: async () => {
             try {
               await restoreMapFromTrash(deleted.id);
@@ -1614,7 +1614,10 @@ export function App() {
       list: savedViews.list.map((v) => ({ id: v.id, name: v.name })),
       onSave: async () => {
         const name = (
-          await editorPrompt({ title: "Name this view", placeholder: "View name" })
+          await editorPrompt({
+            title: t("dialog.nameView.title"),
+            placeholder: t("dialog.nameView.placeholder"),
+          })
         )?.trim();
         if (!name) return;
         const vp = mapRef.current?.getViewport();
@@ -1650,7 +1653,7 @@ export function App() {
         if (v)
           showToast("info", t("hint.viewDeleted", { name: v.name }), {
             action: {
-              label: "Undo",
+              label: t("cmd.undo"),
               run: () =>
                 savedViews.add(v.name, {
                   viewport: v.viewport,
@@ -2263,7 +2266,7 @@ export function App() {
                       ? ` and ${descendants} sub-topic${descendants === 1 ? "" : "s"}`
                       : "";
                   showToast("info", `Deleted “${topic}”${detail}`, {
-                    action: { label: "Undo", run: () => mapRef.current?.undo() },
+                    action: { label: t("cmd.undo"), run: () => mapRef.current?.undo() },
                   });
                 }}
                 onHint={showHint}
@@ -2563,7 +2566,7 @@ export function App() {
             setLibDocs([live, ...all.filter((d) => d.id !== live.id)]);
           })();
         }}
-        ariaLabel="Search all maps"
+        ariaLabel={t("search.title")}
         style={{
           boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
           padding: "18px 20px",
@@ -2613,7 +2616,7 @@ export function App() {
       <Dialog
         open={aboutOpen}
         onClose={() => setAboutOpen(false)}
-        ariaLabel="About MindMap Studio"
+        ariaLabel={t("cmd.about")}
         style={{
           boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
           padding: "22px 24px",
@@ -2671,7 +2674,7 @@ export function App() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Source
+            {t("about.source")}
           </a>
         </div>
         <div
@@ -2850,7 +2853,7 @@ export function App() {
                 onClick={() => paste.setOpen(false)}
                 style={{ ...controlStyle, background: "var(--ed-card)" }}
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"

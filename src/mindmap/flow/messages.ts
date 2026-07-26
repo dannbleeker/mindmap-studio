@@ -158,6 +158,16 @@ export const CANVAS_EN = {
   "canvas.shape.outline": "Outline",
   // Trailing space is deliberate: the label reads "New tag: #foo", with the `#tag` in its own span.
   "canvas.slash.newTagPrefix": "New tag: ",
+  // Context-menu accessible names, and the chip labels prettier wrapped onto their own lines.
+  "canvas.menu.relationshipActions": "Relationship actions",
+  "canvas.menu.topicActions": "Topic actions",
+  "canvas.menu.canvasActions": "Canvas actions",
+  "canvas.menu.overlayActions": "Overlay actions",
+  "canvas.priority.none": "None",
+  // One concept — "reset to the default colour" — shared by the branch-colour and shape-recolour
+  // chips. They were two keys until the duplicate check refused them.
+  "canvas.colour.default": "Default",
+  "canvas.hint.clickTargetToLink": "Click a target node to draw a relationship · Esc to cancel",
 } as const satisfies Catalogue;
 
 export type CanvasKey = keyof typeof CANVAS_EN;

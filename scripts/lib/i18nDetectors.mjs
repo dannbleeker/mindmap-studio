@@ -12,8 +12,24 @@
 
 /** Props whose value is read by a user or a screen reader. `label` covers both the menu components in
  *  `Toolbar.tsx` (`<MenuItem label="Fit map to screen">`) and the DOM's own `<optgroup label>`; leaving
- *  it out hid 60 menu labels in a file the allowlist already called migrated. */
-export const USER_FACING_PROPS = ["title", "aria-label", "placeholder", "alt", "label"];
+ *  it out hid 60 menu labels in a file the allowlist already called migrated.
+ *
+ *  The camelCase entries are THIS codebase's own component props, not DOM attributes — `<Menu
+ *  triggerTitle="Export">`. A detector that only knows DOM attribute names is blind to every custom
+ *  component a codebase defines, which hid 18 more menu labels in files the allowlist called clean. */
+export const USER_FACING_PROPS = [
+  "title",
+  "aria-label",
+  "placeholder",
+  "alt",
+  "label",
+  "ariaLabel",
+  "triggerTitle",
+  "triggerAriaLabel",
+  "menuAriaLabel",
+  "labelText",
+  "tooltipText",
+];
 
 /** Values that are legitimately literal: DOM/ARIA plumbing rather than prose. */
 export const ALLOWED_LITERALS = new Set([
@@ -203,6 +219,89 @@ export function tupleLabelViolations(src) {
   return out;
 }
 
+/** A user-facing string in an OBJECT PROPERTY — `{ title: "Delete this map?", confirmText: "Delete
+ *  anyway" }`. Menus, dialogs and shape palettes are built from data here, so this is where a lot of
+ *  the copy actually lives.
+ *
+ *  The argument detector deliberately exempts object properties, because `shortcuts.ts` keeps
+ *  `keys: "Ctrl/⌘ + Z"` literal on purpose — it names a physical key. That exemption was hiding 36 real
+ *  strings: dialog titles and bodies, shape tooltips, undo labels.
+ *
+ *  Resolved by keying on the PROPERTY NAME rather than the value. The list below is the honest part of
+ *  this rule and its weakest point — it catches exactly the names on it, so adding a component prop
+ *  called `caption` silently reintroduces the blind spot. Prefer the names below when writing new
+ *  data-driven UI. `keys` is deliberately absent, which is what preserves the shortcuts exemption. */
+export const USER_FACING_OBJECT_PROPS = [
+  "title",
+  "body",
+  "label",
+  "text",
+  "heading",
+  "subtitle",
+  "placeholder",
+  "confirmText",
+  "cancelText",
+  "hint",
+  "description",
+  "tooltip",
+  "caption",
+  "message",
+  "menu",
+  "tab",
+];
+
+export function objectPropViolations(src) {
+  const out = [];
+  const inComment = commentLineSet(src);
+  const names = USER_FACING_OBJECT_PROPS.join("|");
+  const re = new RegExp(`(?:^|[{,\\s])(${names})\\s*:\\s*"([^"]{2,})"`, "g");
+  src.split("\n").forEach((line, i) => {
+    if (inComment.has(i)) return;
+    for (const m of line.matchAll(re)) {
+      const value = m[2];
+      if (ALLOWED_LITERALS.has(value.toLowerCase())) continue;
+      // Sentence-cased, parenthesised or elliptical — the shapes UI copy takes. A lowercase value is
+      // far more likely an id, a CSS value or a discriminator (`kind: "note"`, `text: "plain"`).
+      if (!/^[A-Z(.…+—]/.test(value)) continue;
+      out.push({ line: i + 1, text: `${m[1]}: "${value}"`, why: "user-facing object property" });
+    }
+  });
+  return out;
+}
+
+/** JSX text whose OPENING TAG ended on the previous line:
+ *
+ *      <button
+ *        onClick={…}
+ *      >
+ *        Save
+ *      </button>
+ *
+ *  The single-line `>text</` rule can't see this, and the bare-prose rule skips it for being one word
+ *  or too short. That combination hid 32 strings — `Save`, `Close`, `Reset`, `+ Add`, `→ map` — in
+ *  files the allowlist called migrated. Prettier produces this shape whenever a tag has more than a
+ *  couple of attributes, so it is common, not exotic.
+ *
+ *  Anchored on BOTH neighbours: the previous line must end the opening tag and the next must close it.
+ *  That is what keeps it from reading an ordinary wrapped sentence as a label. */
+export function loneJsxTextViolations(src) {
+  const out = [];
+  const inComment = commentLineSet(src);
+  const lines = src.split("\n");
+  lines.forEach((line, i) => {
+    if (inComment.has(i)) return;
+    const text = line.trim();
+    if (text.length < 2 || text.length > 80) return;
+    if (/[<>{}=`"';()[\]]/.test(text)) return;
+    if (!/\p{Letter}/u.test(text)) return;
+    if (!/^[A-Z＋✕←→‹›▦☰⏸▶↺−+]/u.test(text)) return;
+    if (!/>$/.test((lines[i - 1] ?? "").trim())) return;
+    if (!/^<\//.test((lines[i + 1] ?? "").trim())) return;
+    out.push({ line: i + 1, text: `>${text}<`, why: "user-facing JSX text (wrapped tag)" });
+  });
+  return out;
+}
+
 /** JSX text content sitting on ONE line between its tags — `<MenuLabel>Arrowheads</MenuLabel>`,
  *  `<option value="left">Left side</option>`, `<span>Double-tap to edit</span>`.
  *
@@ -279,6 +378,8 @@ export function scanSource(src) {
     ...templateViolations(src),
     ...placeholderViolations(src),
     ...tupleLabelViolations(src),
+    ...objectPropViolations(src),
+    ...loneJsxTextViolations(src),
     ...jsxTextViolations(src),
     ...proseViolations(src),
   ];

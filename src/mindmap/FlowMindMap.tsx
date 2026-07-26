@@ -2605,7 +2605,7 @@ function FlowInner({
               x={edgeMenu.x}
               y={edgeMenu.y}
               onClose={() => setEdgeMenu(null)}
-              menuAriaLabel="Relationship actions"
+              menuAriaLabel={t("canvas.menu.relationshipActions")}
               sheet={isMobile}
             >
               {(() => {
@@ -2701,7 +2701,7 @@ function FlowInner({
               x={menu.x}
               y={menu.y}
               onClose={() => setMenu(null)}
-              menuAriaLabel="Topic actions"
+              menuAriaLabel={t("canvas.menu.topicActions")}
               sheet={isMobile}
             >
               {(() => {
@@ -2852,7 +2852,7 @@ function FlowInner({
                         data-on={!curPriority || undefined}
                         onClick={() => apply(setPriority(docRef.current, id, undefined))}
                       >
-                        None
+                        {t("canvas.priority.none")}
                       </button>
                     </div>
                     {/* "Move project" (item 14): shift every task date in THIS branch by a preset,
@@ -2978,7 +2978,7 @@ function FlowInner({
                         className="mm-menu-chip"
                         onClick={() => apply(setBranchColor(docRef.current, id, ""))}
                       >
-                        Default
+                        {t("canvas.colour.default")}
                       </button>
                     </div>
                     <MenuLabel>{t("canvas.menu.branchLine")}</MenuLabel>
@@ -3042,7 +3042,7 @@ function FlowInner({
               x={paneMenu.x}
               y={paneMenu.y}
               onClose={() => setPaneMenu(null)}
-              menuAriaLabel="Canvas actions"
+              menuAriaLabel={t("canvas.menu.canvasActions")}
               sheet={isMobile}
             >
               <MenuItem
@@ -3084,7 +3084,7 @@ function FlowInner({
               x={overlayMenu.x}
               y={overlayMenu.y}
               onClose={() => setOverlayMenu(null)}
-              menuAriaLabel="Overlay actions"
+              menuAriaLabel={t("canvas.menu.overlayActions")}
               sheet={isMobile}
             >
               {(() => {
@@ -3116,7 +3116,7 @@ function FlowInner({
                         />
                       ))}
                       <button type="button" className="mm-menu-chip" onClick={() => recolour("")}>
-                        Default
+                        {t("canvas.colour.default")}
                       </button>
                     </div>
                     {ov.kind === "boundary" ? (
@@ -3192,7 +3192,7 @@ function FlowInner({
                 pointerEvents: "none",
               }}
             >
-              Click a target node to draw a relationship · Esc to cancel
+              {t("canvas.hint.clickTargetToLink")}
             </div>
           ) : null}
         </section>

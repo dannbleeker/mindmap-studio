@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-26T14:12:07.287Z",
-  "commit": "a84ca07",
+  "generatedAt": "2026-07-26T14:19:38.540Z",
+  "commit": "24b056f",
   "headline": {
-    "linesTsJs": 80508,
-    "tests": 2234,
+    "linesTsJs": 80568,
+    "tests": 2235,
     "lineCoveragePct": 89.99,
-    "commits": 1139,
+    "commits": 1141,
     "ageDays": 44,
     "trackedFiles": 521,
     "featureManualPct": 100,
@@ -21,12 +21,12 @@
     {
       "category": "Unit tests",
       "files": 210,
-      "lines": 31415
+      "lines": 31436
     },
     {
       "category": "Build scripts",
       "files": 9,
-      "lines": 1971
+      "lines": 2010
     },
     {
       "category": "Styles (CSS)",
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 86.77,
-      "covered": 9014,
-      "total": 10388
+      "covered": 9012,
+      "total": 10386
     }
   },
   "tests": {
-    "unit": 2234,
+    "unit": 2235,
     "e2e": 0,
-    "durationMs": 88236,
+    "durationMs": 104818,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 22363
+        "ms": 27136
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 19714
+        "ms": 24072
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 7715
+        "ms": 9447
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 6249
+        "ms": 8938
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 4414
+        "ms": 5845
       }
     ]
   },
@@ -320,16 +320,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 44,
-    "commits": 1139,
-    "commits7d": 43,
+    "commits": 1141,
+    "commits7d": 45,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 544
+        "count": 545
       },
       {
         "name": "github-actions[bot]",
-        "count": 520
+        "count": 521
       },
       {
         "name": "Claude",
@@ -337,8 +337,8 @@
       }
     ],
     "churn30d": {
-      "added": 40761,
-      "removed": 12124
+      "added": 40850,
+      "removed": 12153
     },
     "changelogEntries": 441
   }

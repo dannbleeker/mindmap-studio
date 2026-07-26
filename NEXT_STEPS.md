@@ -4,54 +4,22 @@ Shipped work lives in `CHANGELOG.md`. Keep this list to things not yet done.
 
 ## Status
 
-Phase 1 (Brainstorming MVP) complete; canvas engine is **@xyflow/react**. MindMap Studio is
-**feature-complete for its scope** (local-first, offline, single-user, free) — the competitive
-gap-closing effort is **concluded by decision (2026-06-16)**; remaining gaps are surveyed, not
-pursued (see Reference). **Docs coverage:** `manual` is **100%** (2026-07-03 sweep). `book` coverage
-is **editorial by design** since the 2026-07-08 revision (which also added the method chapters, 2 and
-8): every feature that serves the book's technique-first narratives is written up, and the remaining
-`book:false` catalogue entries are deliberate exclusions (UI chrome/affordances that don't belong in
-the book — the user guide is the 100% reference) — not a backlog. The **editor/UX redesign**
-(2026-06-17) and the **MindManager
-canvas-fidelity pass** (2026-06-19) are both complete. Deployed to GitHub Pages on every push to
-`main` — live at <https://mindmap-studio.struktureretsundfornuft.dk/>.
+MindMap Studio is **feature-complete for its scope** (local-first, offline, single-user, free) and
+**live** at <https://mindmap-studio.struktureretsundfornuft.dk/> (GitHub Pages, custom domain,
+redeployed on every push to `main`). Canvas engine is **@xyflow/react**.
 
-**All prior remediation programmes are shipped** — see `CHANGELOG.md` for the per-item detail:
+**Docs coverage:** the user manual covers **100%** of the feature catalogue. `book` coverage is
+**editorial by design** — the remaining `book:false` catalogue entries are deliberate exclusions (UI
+chrome/affordances that don't belong in a technique-first book; the user guide is the 100% reference),
+**not a backlog**.
 
-- the **2026-06-28 UX + feature-gap audit** (56 items, Phases 0–9);
-- the **2026-06-29 UI review** (48 suggestions, Phases 1–12, including 10b wrap-width **Layers 1 & 2** —
-  the Style-tab snap slider *and* the on-canvas right-edge drag grip);
-- the **2026-06-30 UI research** report
-  ([`docs/UI_RESEARCH_2026-06-30.md`](docs/UI_RESEARCH_2026-06-30.md), phases UI-1…UI-7);
-- the **2026-07-01 UX/feature-gap batch** — space-bar pan, natural-language dates, touch outline
-  drag-reorder, typed relationships, export-a-branch, deck/PPTX speaker notes, visual interactive-HTML
-  export, library folders + ⌘K folder grouping, and the custom theme designer.
+Every remediation programme is shipped, including the 2026-07-02 MindManager review (all 33 items,
+Tiers 1–5). Per-item detail lives in `CHANGELOG.md`; programme provenance is under *Reference*. Three
+of that review's candidates were rejected as **already shipped** — user-savable map parts, instant task
+filters, active-filter indicator — **don't re-propose them**. Anything deliberately **not** built is
+recorded under *Deferred / blocked* or *Out of scope*, so the decisions don't get re-litigated.
 
-**2026-07-02: MindManager-inspired review.** A multi-agent review (5 code-inventory readers, 4
-MindManager 23→2025/26 researchers, gap analysis, per-candidate adversarial verification against the
-real repo) produced the backlog below. The six outright **bugs** it surfaced were fixed the same day
-(commit `918a1eb`: swimlane persistence, Relationships/Inbox mobile sheets + dock activation,
-Breadcrumb/BrainstormTimer theme tokens, reduced-motion reset-zoom, stale `files-mmst` flag). Every
-backlog item below was **verified against the code** — evidence paths are as of that date. Three
-review candidates were rejected as already shipped (user-savable map parts, instant task filters,
-active-filter indicator) — don't re-propose them.
-
-**Tiers 1–4 — all 30 items — shipped on 2026-07-02** (batches A–G, then the Tier-4 blocks; see
-`CHANGELOG.md` for the per-item detail), along with a cross-cutting `border`/`borderColor`
-shorthand-conflict sweep found while verifying Tier 3. The three **Tier 5 housekeeping** items shipped
-on 2026-07-25/26, closing the review backlog; the two residuals they left are listed under *Open
-residuals*.
-
-Anything deliberately **not** built is recorded under *Deferred / blocked* or *Out of scope* below,
-so the decisions don't get re-litigated.
-
-## Backlog — 2026-07-02 MindManager review: CLOSED
-
-**All 33 items are shipped** — Tiers 1–4 on 2026-07-02, and the three Tier-5 housekeeping items (25
-`execCommand`, 33 saved views, 34 XMind round-trip) on 2026-07-25/26. Per-item detail is in
-`CHANGELOG.md`. The two deliberate residuals they left are under *Open residuals* below.
-
-## Open residuals (from the Tier 5 batch, 2026-07-26)
+## Open residuals (2026-07-26)
 
 - **The two list commands still call `document.execCommand`** (`insertUnorderedList` /
   `insertOrderedList`), isolated behind `listFallback()` in `src/richTextCommands.ts` — everything else
@@ -66,38 +34,13 @@ so the decisions don't get re-litigated.
   way to get them onto a second machine is exporting preferences, not scoping them to a document. Not
   started; no size estimate yet.
 
-### Surveyed rough edges (unprioritised; record so they're not re-found)
+## Blocked on owner access
 
-Canvas/interaction: callout bubbles have no on-canvas drag (dx/dy fixed at creation); unlabelled
-boundaries are selectable only via the 6 px border rim; type-to-edit **replaces** the topic text
-(append-expecters get surprised; Escape/undo recovers); grid/timeline/radial spacing keys off the
-single largest node (one image topic inflates every cell/ring); wrap grip only appears on
-single-selected nodes ≥72 px tall, desktop only; freeform **group** drags skip alignment
-guides/snapping; the relate grip is hidden on touch (Link to… is the fallback); floating topics
-auto-stack below the map in tree layouts (free placement needs freeform mode).
-
-Views/panels: Kanban has no column reorder, WIP limits, in-board card creation or ordering
-(alphabetical tags); presentation keyboard lacks End/PageUp/PageDown and the elapsed timer resets on
-exit; brainstorm timer has no audible time's-up cue and no custom duration; query grammar lacks OR,
-`completion:`, and date-range comparisons; natural-language dates skip month-name forms ("Mar 14")
-and relative weeks/months; `markerSuggest` cue words are English-only; flat vector markers cover 21
-of 46 glyphs (the rest fall back to platform emoji, weakening identical-everywhere rendering).
-
-Files/IO: version history is capped at 30 snapshots/map with no diff view; deep links resolve only
-on the same machine/library; cross-tab same-map editing is warn-only (ignoring it still loses the
-losing tab's autosave); 5 MB attachment cap + 800 px image downscale limit document-heavy use; no
-`.txt`/`.csv`/`.html` file import (paste-only); Office imports are structure-only (.docx ignores
-hyperlinks/images, .xlsx expects depth-per-column); save-back to disk + OS file association are
-Chromium-desktop-only (documented).
-
-## Open items (pre-review)
-
-The MindManager `.mmap` importer is feature-complete for its scope (Phases A–C shipped). Both
-real-file importer validations remain done — **`.mmap`** and **`.smmx`** — each owner-validated
-**2026-06-19** and guarded by an env-gated integration test (`MMAP_FILE` / `SMMX_FILE`). Running a
-genuine export through those env-gated tests is an optional extra-confidence check, not a blocker.
-The single **manual MindManager open-test** of a Studio-exported `.mmap` still awaits Dann's next
-MindManager access (backlog item 8 raises its value — re-test after shipping it).
+- **Manual MindManager open-test of a Studio-exported `.mmap`.** The writer is Studio-faithful but has
+  never been opened in real MindManager; the `.mmap`/`.smmx` *importers* are both owner-validated
+  (2026-06-19) and guarded by env-gated integration tests (`MMAP_FILE` / `SMMX_FILE`). Awaits Dann's
+  next MindManager access. Value rose once the writer began emitting tags, task metadata and embedded
+  images, so re-test against that.
 
 ## Deferred / blocked (off the active list)
 
@@ -123,8 +66,9 @@ MindManager access (backlog item 8 raises its value — re-test after shipping i
   `.sort()`, 12 optionless `localeCompare` — Danish `å` already sorts wrong), 103 locale-unsafe
   `toLowerCase` calls across 40 files (incl. the exported interactive HTML's own search), and English
   regex cue-lists in `markerSuggest.ts`.
-  Two constraints shape any implementation: **i18next is not viable** (~40 kB against a 165 kB gz entry
-  budget currently at 164.0) — a ~1-2 kB `t()` plus lazily-fetched per-locale JSON is the fit, with
+  Two constraints shape any implementation: **i18next is not viable** (~40 kB against the gz entry
+  budget in `scripts/size-budget.mjs`, which the app already nearly fills) — a ~1-2 kB `t()` plus
+  lazily-fetched per-locale JSON is the fit, with
   every formatter (`NumberFormat`/`RelativeTimeFormat`/`PluralRules`/`Collator`/`Segmenter`) native and
   free; and **text metrics must not use canvas `measureText`**, which would make export output
   machine-dependent and break the byte-identical export snapshots — the shipped `widthUnits()`
@@ -165,6 +109,15 @@ no-backend PWA can't and shouldn't chase these.
 
 ## Reference
 
+- **Programme provenance** — for tracing why a change was made. The shipped remediation programmes:
+  the editor/UX redesign (2026-06-17), the MindManager canvas-fidelity pass (2026-06-19), the
+  2026-06-28 UX + feature-gap audit (56 items, Phases 0–9), the 2026-06-29 UI review (48 suggestions,
+  Phases 1–12), the 2026-06-30 UI research report
+  ([`docs/UI_RESEARCH_2026-06-30.md`](docs/UI_RESEARCH_2026-06-30.md), phases UI-1…UI-7), the
+  2026-07-01 UX/feature-gap batch, and the 2026-07-02 MindManager-inspired review (33 items over 5
+  tiers, each verified against the code before it was accepted; the six outright bugs it surfaced were
+  fixed same-day in commit `918a1eb`). Kept here deliberately: `CHANGELOG.md` records the *changes* but
+  cites neither the UI-research document nor `918a1eb`, so this is the only pointer to either.
 - **Competitive gaps (19-tool survey — concluded 2026-06-16).** The standalone cross-tool comparison
   doc has been retired and folded in here. The category was surveyed across 19 mind-mapping tools; the
   B–G gap clusters shipped (see `CHANGELOG.md`) and the rest is decided. Feasible-but-deprioritised
@@ -173,7 +126,28 @@ no-backend PWA can't and shouldn't chase these.
   data binding, embed-a-live-webpage, idea voting, arbitrary custom fonts, named bookmarks, native
   desktop / mobile shells, and an infinite Miro-style object canvas. The decided / blocked ones are
   under *Deferred* and *Out of scope* above.
-- **Book worked examples — COMPLETE (2026-06-19).** `book` + `bookExample` are both at **100%**:
-  every catalogued feature is covered in prose AND carries a concrete worked example across chapters
-  1–7 (the import/export format adapters + PWA got concrete walkthroughs in chapter 6; the UX
-  affordances got prose + examples in chapters 1/3/4/5).
+### Surveyed rough edges
+
+Unprioritised, recorded so they are not re-found — **not a backlog**.
+
+Canvas/interaction: callout bubbles have no on-canvas drag (dx/dy fixed at creation); unlabelled
+boundaries are selectable only via the 6 px border rim; type-to-edit **replaces** the topic text
+(append-expecters get surprised; Escape/undo recovers); grid/timeline/radial spacing keys off the
+single largest node (one image topic inflates every cell/ring); wrap grip only appears on
+single-selected nodes ≥72 px tall, desktop only; freeform **group** drags skip alignment
+guides/snapping; the relate grip is hidden on touch (Link to… is the fallback); floating topics
+auto-stack below the map in tree layouts (free placement needs freeform mode).
+
+Views/panels: Kanban has no column reorder, WIP limits, in-board card creation or ordering
+(alphabetical tags); presentation keyboard lacks End/PageUp/PageDown and the elapsed timer resets on
+exit; brainstorm timer has no audible time's-up cue and no custom duration; query grammar lacks OR,
+`completion:`, and date-range comparisons; natural-language dates skip month-name forms ("Mar 14")
+and relative weeks/months; `markerSuggest` cue words are English-only; flat vector markers cover 21
+of 46 glyphs (the rest fall back to platform emoji, weakening identical-everywhere rendering).
+
+Files/IO: version history is capped at 30 snapshots/map with no diff view; deep links resolve only
+on the same machine/library; cross-tab same-map editing is warn-only (ignoring it still loses the
+losing tab's autosave); 5 MB attachment cap + 800 px image downscale limit document-heavy use; no
+`.txt`/`.csv`/`.html` file import (paste-only); Office imports are structure-only (.docx ignores
+hyperlinks/images, .xlsx expects depth-per-column); save-back to disk + OS file association are
+Chromium-desktop-only (documented).

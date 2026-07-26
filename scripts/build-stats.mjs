@@ -17,6 +17,7 @@ import { execSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { gzipSync } from "node:zlib";
+import { BUDGET_KB } from "./bundle-budget.mjs";
 
 const ROOT = process.cwd();
 const sh = (cmd) =>
@@ -258,7 +259,7 @@ const bundle = safe(
       else jsBytes += gz;
       if (/(^|\/)assets\/index-[^/]+\.js$/.test(rel)) entryBytes = gz; // the entry chunk
     }
-    const budgetKb = 150; // mirrors scripts/size-budget.mjs (entry-chunk budget)
+    const budgetKb = BUDGET_KB; // imported, not mirrored — see scripts/bundle-budget.mjs
     return {
       jsGzipKb: round1(jsBytes),
       cssGzipKb: round1(cssBytes),

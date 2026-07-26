@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-26T14:04:02.667Z",
-  "commit": "fb47ec0",
+  "generatedAt": "2026-07-26T14:12:07.287Z",
+  "commit": "a84ca07",
   "headline": {
-    "linesTsJs": 80435,
+    "linesTsJs": 80508,
     "tests": 2234,
     "lineCoveragePct": 89.99,
-    "commits": 1137,
+    "commits": 1139,
     "ageDays": 44,
-    "trackedFiles": 518,
+    "trackedFiles": 521,
     "featureManualPct": 100,
     "featureBookPct": 96.8,
     "featureExamplePct": 59.3
@@ -21,12 +21,12 @@
     {
       "category": "Unit tests",
       "files": 210,
-      "lines": 31546
+      "lines": 31415
     },
     {
       "category": "Build scripts",
-      "files": 7,
-      "lines": 1767
+      "files": 9,
+      "lines": 1971
     },
     {
       "category": "Styles (CSS)",
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 86.77,
-      "covered": 9012,
-      "total": 10386
+      "covered": 9014,
+      "total": 10388
     }
   },
   "tests": {
     "unit": 2234,
     "e2e": 0,
-    "durationMs": 109663,
+    "durationMs": 88236,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 28577
+        "ms": 22363
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 25576
+        "ms": 19714
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 10500
+        "ms": 7715
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 7637
+        "ms": 6249
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 6472
+        "ms": 4414
       }
     ]
   },
@@ -320,16 +320,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 44,
-    "commits": 1137,
-    "commits7d": 41,
+    "commits": 1139,
+    "commits7d": 43,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 543
+        "count": 544
       },
       {
         "name": "github-actions[bot]",
-        "count": 519
+        "count": 520
       },
       {
         "name": "Claude",
@@ -337,8 +337,8 @@
       }
     ],
     "churn30d": {
-      "added": 40467,
-      "removed": 11936
+      "added": 40761,
+      "removed": 12124
     },
     "changelogEntries": 441
   }

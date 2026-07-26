@@ -1084,7 +1084,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 </div>
               ) : null}
               {tagOpen ? (
-                <div className="nodrag nopan mm-slash-menu" aria-label={t("canvas.menu.addTag")}>
+                <div className="nodrag nopan mm-slash-menu" aria-label={t("common.addTag")}>
                   {tagItems.map((tag, i) => {
                     // The first row for a brand-new (not-yet-existing) tag reads as "create".
                     const isNew =

@@ -2803,7 +2803,7 @@ function FlowInner({
                     <MenuSeparator />
                     {/* Inline marker quick-setter (the "Set marker" submenu): toggle several without
                       closing, mirroring the inspector's MarkerBar but reachable in one right-click. */}
-                    <MenuLabel>{t("canvas.menu.markers")}</MenuLabel>
+                    <MenuLabel>{t("common.markers")}</MenuLabel>
                     <div className="mm-menu-row">
                       {MARKER_PALETTE.map((m) => {
                         const on = activeMarkers.includes(m);
@@ -2827,7 +2827,7 @@ function FlowInner({
                       })}
                     </div>
                     {/* Inline priority quick-setter (the "Set priority" submenu). */}
-                    <MenuLabel>{t("canvas.menu.priority")}</MenuLabel>
+                    <MenuLabel>{t("common.priority")}</MenuLabel>
                     <div className="mm-menu-row">
                       {PRIORITY_LEVELS.map((p) => (
                         <button
@@ -2954,7 +2954,7 @@ function FlowInner({
                         </select>
                       </label>
                     ) : null}
-                    <MenuLabel>{t("canvas.menu.branchColour")}</MenuLabel>
+                    <MenuLabel>{t("common.branchColour")}</MenuLabel>
                     <div className="mm-menu-row">
                       {["#c2701a", "#3f6fb0", "#1b8a5e", "#b23b6a", "#8a6d2f", "#6a5acd"].map(
                         (c) => {

@@ -67,6 +67,7 @@ const MIGRATED = [
   "src/components/Toolbar.tsx",
   "src/mindmap/FlowMindMap.tsx",
   "src/App.tsx",
+  "src/Panels.tsx",
 ];
 
 const scan = (rel: string): Violation[] =>

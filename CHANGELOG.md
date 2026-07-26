@@ -192,6 +192,32 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   no second surface saying "Couldn't access the clipboard" — which is why reuse, not string count,
   predicts the cost.
 
+  **`Panels.tsx` is migrated (233 strings) — the eager chrome is now complete.** Outline, markers & tags
+  index, relationships, agenda, maps, inbox, deck editor, power filter, version history, conditional
+  styles, the topic inspector, the note editor and the sticker/marker pickers. **684 catalogue entries**
+  across the two catalogues, and the scanner reports **0** hardcoded strings in all eight migrated files.
+
+  Entry **174.1 kB gz** against the 175 ceiling — the projection recorded when that ceiling was raised
+  was ~174, so it is now a *measured* ceiling with 0.9 kB of headroom rather than forward slack, and the
+  note in `bundle-budget.mjs` records the loop as closed.
+
+  **Two bugs the extraction introduced, both caught before landing.** The JSX source wrote its heading
+  as the HTML entity `Markers &amp; tags`; a catalogue may not, because `t()` returns a plain JS string
+  that React renders verbatim, so the panel would have displayed the entity to the user. An existing
+  panel test caught it, and a catalogue-wide entity check now makes the class impossible. And renaming a
+  shadowed `t` loop variable left one `{t}` behind in the JSX — caught by `tsc`, which typed it as
+  "translation function is not a ReactNode".
+
+  Three more shadowed `t` locals turned up in the tag chips, bringing the total to **seven**. Two of
+  them carried hardcoded `title` templates that no detector saw, because stripping `${t}` leaves no
+  capitalised word for the template rule to recognise as prose.
+
+  The duplicate-text test paid for itself twice more. It caught four canvas keys repeating new panel
+  ones — and the fix direction mattered: `Panels.tsx` is EAGER while the canvas catalogue is LAZY, so
+  pointing eager code at a canvas-registered key would have thrown "no message for key" until the canvas
+  chunk happened to load. They moved to `common.*` in the eager catalogue instead, which both surfaces
+  can reference safely.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

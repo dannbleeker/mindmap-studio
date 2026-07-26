@@ -50,7 +50,6 @@ export const CANVAS_EN = {
   // On-canvas menus raised from the editor
   "canvas.menu.insertCommand": "Insert command",
   "canvas.menu.linkToTopic": "Link to a topic",
-  "canvas.menu.addTag": "Add a tag",
 
   // --- FlowMindMap ---------------------------------------------------------------------------------
   // The canvas itself: its accessible region name, the transient hints it raises, and the three
@@ -115,8 +114,6 @@ export const CANVAS_EN = {
   "canvas.menu.reattach": "Re-attach to centre",
   "canvas.menu.detach": "Detach to floating topic",
   "canvas.menu.delete": "Delete",
-  "canvas.menu.markers": "Markers",
-  "canvas.menu.priority": "Priority",
 
   // Date shifting. The preset chips are messages too — a locale may not abbreviate day/week/month the
   // way English does — and the aria-label is plural-formed so "by 1 day" doesn't read "by 1 days".
@@ -143,7 +140,6 @@ export const CANVAS_EN = {
   "canvas.branchSide.right": "Right side",
 
   // Branch styling
-  "canvas.menu.branchColour": "Branch colour",
   "canvas.menu.branchColourNamed": "Branch colour {colour}",
   "canvas.menu.branchLine": "Branch line",
 

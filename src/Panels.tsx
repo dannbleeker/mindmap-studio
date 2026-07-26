@@ -34,6 +34,7 @@ import {
   type SavedFilter,
   describeCriteria,
 } from "./filter";
+import { t } from "./i18n";
 import { markerImage, searchMarkers } from "./icons";
 import { formatBytes } from "./io/attachment";
 import { suggestNewMarkers } from "./markerSuggest";
@@ -159,7 +160,7 @@ export function NaturalDateInput({
         type="text"
         className="mm-prim-input"
         value={text}
-        placeholder="e.g. next fri, +7d"
+        placeholder={t("panel.dueDatePlaceholder")}
         onChange={(e) => {
           setText(e.target.value);
           if (err) setErr(false);
@@ -173,7 +174,7 @@ export function NaturalDateInput({
         }}
         aria-label={ariaLabel}
         aria-invalid={err || undefined}
-        title={err ? "Couldn't read that date — try “today”, “+7d”, or “next fri”." : undefined}
+        title={err ? t("panel.couldnTRead") : undefined}
         style={{
           ...inputStyle,
           width: 104,
@@ -186,7 +187,7 @@ export function NaturalDateInput({
       <button
         type="button"
         aria-label={`${ariaLabel}: pick from calendar`}
-        title="Pick from calendar"
+        title={t("panel.pickFromCalendar")}
         onClick={() => {
           try {
             dateRef.current?.showPicker?.();
@@ -501,7 +502,7 @@ export function StyleBar({
         type="button"
         style={btn(isBox)}
         aria-pressed={isBox}
-        title="Box"
+        title={t("panel.box")}
         onClick={() => onStyle({ borderRadius: "4px", shape: undefined })}
       >
         ▭
@@ -510,7 +511,7 @@ export function StyleBar({
         type="button"
         style={btn(isRounded)}
         aria-pressed={isRounded}
-        title="Rounded"
+        title={t("panel.rounded")}
         onClick={() => onStyle({ borderRadius: "14px", shape: undefined })}
       >
         ▢
@@ -519,7 +520,7 @@ export function StyleBar({
         type="button"
         style={btn(isPill)}
         aria-pressed={isPill}
-        title="Pill"
+        title={t("panel.pill")}
         onClick={() => onStyle({ borderRadius: "999px", shape: undefined })}
       >
         ⬭
@@ -545,7 +546,7 @@ export function StyleBar({
         type="button"
         style={btn(noFill)}
         aria-pressed={noFill}
-        title="No fill"
+        title={t("panel.noFill")}
         onClick={() => onStyle({ background: "", fill: undefined })}
       >
         ✕
@@ -554,7 +555,7 @@ export function StyleBar({
         type="button"
         style={btn(isTint)}
         aria-pressed={isTint}
-        title="Branch-colour tint"
+        title={t("panel.branchColourTint")}
         onClick={() => onStyle({ fill: "tint" })}
       >
         ◧
@@ -563,7 +564,7 @@ export function StyleBar({
         type="button"
         style={btn(isGradient)}
         aria-pressed={isGradient}
-        title="Gradient fill"
+        title={t("panel.gradientFill")}
         onClick={() => onStyle({ fill: "gradient" })}
       >
         ◨
@@ -577,35 +578,41 @@ export function StyleBar({
         type="button"
         style={btn(noBorder)}
         aria-pressed={noBorder}
-        title="No border"
+        title={t("panel.noBorder")}
         onClick={() => onStyle({ border: "" })}
       >
         ✕
       </button>
       {divider}
       {label("Colour")}
-      {colorCtl(textColor, "#2b2a26", (c) => onStyle({ color: c }), "Text colour", "Text colour")}
+      {colorCtl(
+        textColor,
+        "#2b2a26",
+        (c) => onStyle({ color: c }),
+        t("panel.textColour"),
+        t("panel.textColour"),
+      )}
       {colorCtl(
         fillColor,
         "#ffffff",
         (c) => onStyle({ background: c }),
-        "Fill colour",
-        "Fill colour",
+        t("panel.fillColour"),
+        t("panel.fillColour"),
       )}
       {onBranchColor
         ? colorCtl(
             branchColor,
             "#4f46e5",
             onBranchColor,
-            "Branch (connector) colour",
-            "Branch colour",
+            t("panel.branchConnectorColour"),
+            t("common.branchColour"),
           )
         : null}
       <button
         type="button"
         style={btn(isBold)}
         aria-pressed={isBold}
-        title="Bold"
+        title={t("panel.bold")}
         onClick={() => onStyle({ fontWeight: isBold ? "" : "bold" })}
       >
         <b>B</b>
@@ -614,7 +621,7 @@ export function StyleBar({
         type="button"
         style={btn(isRaised)}
         aria-pressed={isRaised}
-        title="Raised (drop shadow)"
+        title={t("panel.raisedDropShadow")}
         onClick={() => onStyle({ shadow: true })}
       >
         ◰
@@ -623,7 +630,7 @@ export function StyleBar({
         type="button"
         style={btn(isFlat)}
         aria-pressed={isFlat}
-        title="Flat (no shadow)"
+        title={t("panel.flatNoShadow")}
         onClick={() => onStyle({ shadow: undefined })}
       >
         ◳
@@ -635,13 +642,13 @@ export function StyleBar({
         onChange={(e) => {
           if (e.target.value) onStyle({ fontFamily: e.target.value });
         }}
-        title="Topic font family"
+        title={t("panel.topicFontFamily")}
         style={{ ...btn(false), padding: coarse ? "4px 6px" : "2px 4px", fontSize: 12 }}
       >
-        <option value="">Font…</option>
-        <option value="sans-serif">Sans</option>
-        <option value="serif">Serif</option>
-        <option value="monospace">Mono</option>
+        <option value="">{t("panel.font")}</option>
+        <option value="sans-serif">{t("panel.sans")}</option>
+        <option value="serif">{t("panel.serif")}</option>
+        <option value="monospace">{t("panel.mono")}</option>
       </select>
       {divider}
       {label("Wrap")}
@@ -654,8 +661,8 @@ export function StyleBar({
         step={4}
         value={wrapPx}
         list="mm-wrap-ticks"
-        aria-label="Topic wrap width"
-        title="Drag to set the topic wrap width (snaps to Narrow / Medium / Wide; far end = None)"
+        aria-label={t("panel.topicWrapWidth")}
+        title={t("panel.dragToSet")}
         onChange={(e) => {
           const px = snapWrapWidth(Number(e.target.value));
           setWrapPx(px);
@@ -688,7 +695,7 @@ export function StyleBar({
               type="button"
               onClick={() => onStyle(s.style)}
               title={`Apply "${s.name}"`}
-              aria-label={`Apply preset ${s.name}`}
+              aria-label={t("panel.applyPreset", { name: s.name })}
               style={{
                 width: 18,
                 height: 18,
@@ -705,7 +712,7 @@ export function StyleBar({
       <button
         type="button"
         style={{ ...styleBtn, fontSize: 12 }}
-        title="Reset style"
+        title={t("panel.resetStyle")}
         onClick={() =>
           onStyle({
             background: "",
@@ -986,15 +993,15 @@ export function OutlinePanel({
       <Input
         value={filter}
         onChange={(e) => onFilterChange(e.target.value)}
-        placeholder="Filter outline…"
-        aria-label="Filter outline"
+        placeholder={t("panel.filterOutlinePlaceholder")}
+        aria-label={t("panel.filterOutline")}
         style={{ width: "auto", margin: "8px 10px 4px" }}
       />
       {/* The Outline panel is the screen-reader-primary tree (UI-5). Keyboard nav (arrows/Home/End/
           Enter) is handled here on the container; focus rides the roving treeitem rows below. */}
       <div
         role="tree"
-        aria-label="Outline tree"
+        aria-label={t("panel.outlineTree")}
         onKeyDown={onTreeKeyDown}
         style={{ overflowY: "auto", padding: "4px 0 8px" }}
       >
@@ -1076,7 +1083,7 @@ export function OutlinePanel({
                       commitThen(e.shiftKey ? "outdent" : "child");
                     } else if (e.key === "Escape") setEditId(null);
                   }}
-                  aria-label="Rename topic"
+                  aria-label={t("panel.renameTopic")}
                   style={{ ...inputStyle, flex: 1, margin: "1px 6px", padding: "2px 6px" }}
                 />
               ) : (
@@ -1092,7 +1099,7 @@ export function OutlinePanel({
                   >
                     {row.hasNote ? "📝 " : ""}
                     {numbers?.get(row.id) ? `${numbers.get(row.id)} ` : ""}
-                    {row.topic || "(untitled)"}
+                    {row.topic || t("common.untitled")}
                     {row.progress !== undefined ? (
                       <span style={{ marginLeft: 6, fontSize: fontSize.xs, color: colors.faint }}>
                         {row.progress}%
@@ -1105,8 +1112,8 @@ export function OutlinePanel({
                         type="button"
                         tabIndex={-1}
                         onClick={() => onIndent?.(row.id, "out")}
-                        title="Promote (outdent)"
-                        aria-label="Promote topic"
+                        title={t("panel.promoteOutdent")}
+                        aria-label={t("panel.promoteTopic")}
                         style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                       >
                         ◂
@@ -1115,8 +1122,8 @@ export function OutlinePanel({
                         type="button"
                         tabIndex={-1}
                         onClick={() => onIndent?.(row.id, "in")}
-                        title="Demote (indent)"
-                        aria-label="Demote topic"
+                        title={t("panel.demoteIndent")}
+                        aria-label={t("panel.demoteTopic")}
                         style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                       >
                         ▸
@@ -1175,7 +1182,7 @@ export function MarkerTagIndex({
       title={hit.topic}
       style={{ ...listRow, padding: "2px 10px 2px 24px" }}
     >
-      {hit.topic || "(untitled)"}
+      {hit.topic || t("common.untitled")}
     </button>
   );
 
@@ -1202,7 +1209,7 @@ export function MarkerTagIndex({
                   if (e.key === "Enter") commitTagRename();
                   else if (e.key === "Escape") setEditTag(null);
                 }}
-                aria-label={`Rename tag ${key}`}
+                aria-label={t("panel.renameTagNamed", { tag: key })}
                 style={{ ...inputStyle, margin: "1px 10px", padding: "2px 6px", width: "auto" }}
               />
             ) : (
@@ -1227,8 +1234,12 @@ export function MarkerTagIndex({
                   <button
                     type="button"
                     onClick={() => onFilterBy(kind, key)}
-                    title={`Filter the map to topics with ${kind === "marker" ? "marker" : "tag"} "${key}"`}
-                    aria-label={`Filter by ${kind} ${key}`}
+                    title={
+                      kind === "marker"
+                        ? t("panel.filterToMarker", { key })
+                        : t("panel.filterToTag", { key })
+                    }
+                    aria-label={t("panel.filterByKindKey", { kind, key })}
                     style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                   >
                     ⧩
@@ -1241,8 +1252,8 @@ export function MarkerTagIndex({
                         type="color"
                         value={tagColorOf?.(key) ?? "#3b82f6"}
                         onChange={(e) => onSetTagColor(key, e.target.value)}
-                        title={`Colour for "${key}" — tints every topic with this tag`}
-                        aria-label={`Colour for tag ${key}`}
+                        title={t("panel.tagColourTitle", { tag: key })}
+                        aria-label={t("panel.tagColourLabel", { tag: key })}
                         style={{
                           width: 18,
                           height: 18,
@@ -1258,8 +1269,8 @@ export function MarkerTagIndex({
                       <button
                         type="button"
                         onClick={() => onSetTagColor(key, undefined)}
-                        title={`Clear colour for "${key}"`}
-                        aria-label={`Clear colour for tag ${key}`}
+                        title={t("panel.clearTagColourTitle", { tag: key })}
+                        aria-label={t("panel.clearTagColourLabel", { tag: key })}
                         style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                       >
                         ⊘
@@ -1272,7 +1283,7 @@ export function MarkerTagIndex({
                         setTagDraft(key);
                       }}
                       title={`Rename / merge "${key}" — type an existing tag name to merge`}
-                      aria-label={`Rename tag ${key}`}
+                      aria-label={t("panel.renameTagNamed", { tag: key })}
                       style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                     >
                       ✎
@@ -1280,8 +1291,8 @@ export function MarkerTagIndex({
                     <button
                       type="button"
                       onClick={() => onDeleteTag?.(key)}
-                      title={`Delete tag "${key}" from every topic`}
-                      aria-label={`Delete tag ${key}`}
+                      title={t("panel.deleteTagTitle", { tag: key })}
+                      aria-label={t("panel.deleteTagLabel", { tag: key })}
                       style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                     >
                       ✕
@@ -1300,11 +1311,11 @@ export function MarkerTagIndex({
   const empty = markers.length === 0 && tags.length === 0;
   return (
     <Panel>
-      <div style={panelTitle}>Markers &amp; tags</div>
+      <div style={panelTitle}>{t("panel.markersTags")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {empty ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
-            No markers or tags in this map yet.
+            {t("panel.noMarkersOr")}
           </div>
         ) : null}
         {group("Markers", markers, "marker")}
@@ -1344,7 +1355,7 @@ export function RelationshipsPanel({
       <div style={panelTitle}>🔗 Relationships</div>
       {links.length === 0 ? (
         <div style={{ padding: "8px 12px", color: colors.muted, fontSize: fontSize.sm }}>
-          No relationships or topic links in this map yet.
+          {t("panel.noRelationshipsOr")}
         </div>
       ) : (
         <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
@@ -1361,16 +1372,16 @@ export function RelationshipsPanel({
             >
               <span
                 style={{ color: colors.muted }}
-                title={l.kind === "relationship" ? "Relationship" : "Topic link"}
+                title={l.kind === "relationship" ? "Relationship" : t("panel.topicLink")}
               >
                 {l.kind === "relationship" ? "↬" : "↪"}
               </span>
               <button type="button" onClick={() => onPick(l.fromId)} style={linkBtn}>
-                {l.fromTopic || "(untitled)"}
+                {l.fromTopic || t("common.untitled")}
               </button>
               <span style={{ color: colors.muted }}>→</span>
               <button type="button" onClick={() => onPick(l.toId)} style={linkBtn}>
-                {l.toTopic || "(untitled)"}
+                {l.toTopic || t("common.untitled")}
               </button>
               {l.label ? (
                 <span style={{ color: colors.muted, whiteSpace: "nowrap" }}>· {l.label}</span>
@@ -1406,22 +1417,22 @@ export function StatsPanel({ doc }: { doc: MindMapDoc }) {
     <Panel>
       <div style={panelTitle}>📊 Map statistics</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
-        <PanelSection>Structure</PanelSection>
+        <PanelSection>{t("toolbar.structure")}</PanelSection>
         {row("Topics", s.topics)}
         {row("Leaves", s.leaves)}
-        {row("Max depth", s.maxDepth)}
-        {s.floating > 0 ? row("Floating topics", s.floating) : null}
-        <PanelSection>Tasks</PanelSection>
+        {row(t("panel.maxDepth"), s.maxDepth)}
+        {s.floating > 0 ? row(t("panel.floatingTopics"), s.floating) : null}
+        <PanelSection>{t("panel.tasks")}</PanelSection>
         {row("Tasks", s.tasks)}
         {row("Completed", `${s.completed} / ${s.tasks} (${pct}%)`)}
         {row("Overdue", s.overdue, s.overdue > 0 ? "#b23b3a" : undefined)}
-        <PanelSection>Content</PanelSection>
+        <PanelSection>{t("panel.content")}</PanelSection>
         {row("Words", s.words)}
-        {row("Reading time", s.readingMinutes <= 1 ? "~1 min" : `~${s.readingMinutes} min`)}
+        {row(t("panel.readingTime"), s.readingMinutes <= 1 ? "~1 min" : `~${s.readingMinutes} min`)}
         {row("Notes", s.notes)}
         {row("Attachments", s.attachments)}
-        {row("Distinct tags", s.tags)}
-        {row("Distinct markers", s.markers)}
+        {row(t("panel.distinctTags"), s.tags)}
+        {row(t("panel.distinctMarkers"), s.markers)}
         {row("Relationships", s.links)}
         {row("Boundaries", s.boundaries)}
       </div>
@@ -1455,7 +1466,7 @@ export function AgendaPanel({
             key={it.id}
             type="button"
             onClick={() => onPick(it.id)}
-            title={`${it.topic || "(untitled)"} — due ${it.due}`}
+            title={`${it.topic || t("common.untitled")} — due ${it.due}`}
             style={{
               ...listRow,
               display: "flex",
@@ -1465,7 +1476,7 @@ export function AgendaPanel({
             }}
           >
             <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
-              {it.topic || "(untitled)"}
+              {it.topic || t("common.untitled")}
             </span>
             <span style={{ flexShrink: 0, fontSize: fontSize.sm, color: accent ?? colors.faint }}>
               {formatDateShort(it.due)}
@@ -1481,12 +1492,12 @@ export function AgendaPanel({
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {agendaIsEmpty(buckets) ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
-            No overdue or upcoming tasks.
+            {t("panel.noOverdueOr")}
           </div>
         ) : null}
         {group("Overdue", buckets.overdue, "#b23b3a")}
         {group("Today", buckets.today, colors.text)}
-        {group("This week", buckets.thisWeek)}
+        {group(t("panel.thisWeek"), buckets.thisWeek)}
         {group("Later", buckets.later)}
       </div>
     </Panel>
@@ -1514,15 +1525,15 @@ export function MapsPanel({
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Filter maps…"
-          aria-label="Filter maps"
+          placeholder={t("panel.filterMapsPlaceholder")}
+          aria-label={t("panel.filterMaps")}
           style={{ width: "auto" }}
         />
       </div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {shown.length === 0 ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
-            No maps match.
+            {t("panel.noMapsMatch")}
           </div>
         ) : (
           shown.map((m) => {
@@ -1533,7 +1544,7 @@ export function MapsPanel({
                 type="button"
                 onClick={() => onOpen(m.id)}
                 aria-current={current ? "true" : undefined}
-                title={m.title || "(untitled)"}
+                title={m.title || t("common.untitled")}
                 style={{
                   ...listRow,
                   padding: "3px 10px",
@@ -1541,7 +1552,7 @@ export function MapsPanel({
                   background: current ? "var(--ed-hover, rgba(0,0,0,0.05))" : undefined,
                 }}
               >
-                {m.title || "(untitled)"}
+                {m.title || t("common.untitled")}
               </button>
             );
           })
@@ -1590,8 +1601,8 @@ export function InboxPanel({
               capture();
             }
           }}
-          placeholder="Jot a thought…"
-          aria-label="Capture to inbox"
+          placeholder={t("panel.inboxPlaceholder")}
+          aria-label={t("panel.captureToInbox")}
           style={{ width: "auto", flex: 1 }}
         />
         <Button onClick={capture} disabled={!draft.trim()} style={{ padding: "2px 8px" }}>
@@ -1630,7 +1641,7 @@ export function InboxPanel({
               <Button
                 onClick={() => onFile(it.id, it.text)}
                 disabled={!canFile}
-                title={canFile ? "File onto the current map" : "Open a map to file onto"}
+                title={canFile ? t("panel.fileOntoThe") : t("panel.openAMap")}
                 aria-label={`File "${it.text}" onto the map`}
                 style={{ padding: "2px 6px", fontSize: fontSize.sm }}
               >
@@ -1638,7 +1649,7 @@ export function InboxPanel({
               </Button>
               <Button
                 onClick={() => onDiscard(it.id)}
-                title="Discard"
+                title={t("panel.discard")}
                 aria-label={`Discard "${it.text}"`}
                 style={{ padding: "2px 6px", fontSize: fontSize.sm }}
               >
@@ -1697,8 +1708,8 @@ export function SlideDeckEditorPanel({
               <Button
                 onClick={() => onChange(reorderSlides(refs, i, i - 1))}
                 disabled={i === 0}
-                title="Move up"
-                aria-label={`Move ${row.heading} up`}
+                title={t("panel.moveUp")}
+                aria-label={t("panel.moveSlideUp", { name: row.heading })}
                 style={{ padding: "0 6px", fontSize: fontSize.sm }}
               >
                 ↑
@@ -1706,15 +1717,15 @@ export function SlideDeckEditorPanel({
               <Button
                 onClick={() => onChange(reorderSlides(refs, i, i + 1))}
                 disabled={i === deck.length - 1}
-                title="Move down"
-                aria-label={`Move ${row.heading} down`}
+                title={t("panel.moveDown")}
+                aria-label={t("panel.moveSlideDown", { name: row.heading })}
                 style={{ padding: "0 6px", fontSize: fontSize.sm }}
               >
                 ↓
               </Button>
               <Button
                 onClick={() => onChange(removeSlide(refs, i))}
-                title="Remove slide"
+                title={t("panel.removeSlide")}
                 aria-label={`Remove ${row.heading}`}
                 style={{ padding: "0 6px", fontSize: fontSize.sm }}
               >
@@ -1724,8 +1735,8 @@ export function SlideDeckEditorPanel({
             <textarea
               value={row.ref.note ?? ""}
               onChange={(e) => onChange(setSlideNote(refs, i, e.target.value))}
-              placeholder="Speaker note…"
-              aria-label={`Speaker note for ${row.heading}`}
+              placeholder={t("panel.speakerNotePlaceholder")}
+              aria-label={t("panel.speakerNoteFor", { name: row.heading })}
               rows={2}
               style={{ ...inputStyle, width: "100%", marginTop: 3, resize: "vertical" }}
             />
@@ -1736,10 +1747,10 @@ export function SlideDeckEditorPanel({
         <Select
           value={addId}
           onChange={(e) => setAddId(e.target.value)}
-          aria-label="Add a slide"
+          aria-label={t("panel.addASlide")}
           style={{ width: "auto", flex: 1 }}
         >
-          <option value="">Add a slide…</option>
+          <option value="">{t("panel.addASlide2")}</option>
           {topics.map((t) => (
             <option key={t.id} value={t.id}>
               {`${"  ".repeat(t.depth)}${t.topic}`}
@@ -1759,7 +1770,7 @@ export function SlideDeckEditorPanel({
       </div>
       {isCustom ? (
         <Button onClick={onRestoreDefault} style={{ margin: "0 10px 8px", fontSize: fontSize.sm }}>
-          Restore default deck
+          {t("panel.restoreDefaultDeck")}
         </Button>
       ) : null}
     </Panel>
@@ -1850,69 +1861,69 @@ export function FilterPanel({
         <Input
           value={text}
           onChange={(e) => onText(e.target.value)}
-          placeholder="Filter by text…"
-          aria-label="Filter by text"
+          placeholder={t("panel.filterByTextPlaceholder")}
+          aria-label={t("panel.filterByText")}
           style={{ width: "auto", margin: "4px 10px" }}
         />
-        <PanelSection>Due date</PanelSection>
+        <PanelSection>{t("panel.dueDate")}</PanelSection>
         <Select
           value={due}
           onChange={(e) => onDue(e.target.value as DueMode)}
-          aria-label="Filter by due date"
+          aria-label={t("panel.filterByDue")}
           style={{ width: "auto", margin: "0 10px 4px" }}
         >
-          <option value="">Any</option>
-          <option value="dated">Has a date</option>
-          <option value="overdue">Overdue</option>
-          <option value="soon">Due ≤ 7 days</option>
+          <option value="">{t("panel.any")}</option>
+          <option value="dated">{t("panel.hasADate")}</option>
+          <option value="overdue">{t("panel.overdue")}</option>
+          <option value="soon">{t("panel.due7Days")}</option>
         </Select>
-        <PanelSection>Priority</PanelSection>
+        <PanelSection>{t("common.priority")}</PanelSection>
         <Select
           value={priority}
           onChange={(e) => onPriority(Number(e.target.value))}
-          aria-label="Filter by priority"
+          aria-label={t("panel.filterByPriority")}
           style={{ width: "auto", margin: "0 10px 4px" }}
         >
-          <option value={0}>Any</option>
+          <option value={0}>{t("panel.any")}</option>
           {PRIORITY_LEVELS.map((p) => (
             <option key={p} value={p}>
               {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]}` : String(p)}
             </option>
           ))}
         </Select>
-        <PanelSection>Completion</PanelSection>
+        <PanelSection>{t("panel.completion")}</PanelSection>
         <Select
           value={completion}
           onChange={(e) => onCompletion(e.target.value as CompletionMode)}
-          aria-label="Filter by completion"
+          aria-label={t("panel.filterByCompletion")}
           style={{ width: "auto", margin: "0 10px 4px" }}
         >
-          <option value="">Any</option>
-          <option value="complete">Done</option>
-          <option value="in-progress">In progress</option>
-          <option value="incomplete">Not done</option>
+          <option value="">{t("panel.any")}</option>
+          <option value="complete">{t("panel.done")}</option>
+          <option value="in-progress">{t("panel.inProgress")}</option>
+          <option value="incomplete">{t("panel.notDone")}</option>
         </Select>
-        <PanelSection>Has relationship</PanelSection>
+        <PanelSection>{t("panel.hasRelationship")}</PanelSection>
         <div style={{ display: "flex", gap: 4, padding: "0 10px 4px" }}>
           <Select
             value={relDir}
             onChange={(e) => onRelDir(e.target.value as RelDir | "")}
-            aria-label="Filter by relationship direction"
+            aria-label={t("panel.filterByRelationship")}
             style={{ width: "auto", flex: 1 }}
           >
-            <option value="">Any / off</option>
-            <option value="out">Outgoing →</option>
-            <option value="in">Incoming ←</option>
-            <option value="either">Either ↔</option>
+            <option value="">{t("panel.anyOff")}</option>
+            <option value="out">{t("panel.outgoing")}</option>
+            <option value="in">{t("panel.incoming")}</option>
+            <option value="either">{t("panel.either")}</option>
           </Select>
           <Select
             value={relType}
             onChange={(e) => onRelType(e.target.value)}
-            aria-label="Filter by relationship type"
+            aria-label={t("panel.filterByRelationshipType")}
             disabled={relDir === ""}
             style={{ width: "auto", flex: 1 }}
           >
-            <option value="">Any type</option>
+            <option value="">{t("panel.anyType")}</option>
             <option value="relates-to">relates-to</option>
             <option value="depends-on">depends-on</option>
             <option value="causes">causes</option>
@@ -1922,7 +1933,7 @@ export function FilterPanel({
         </div>
         {markerEntries.length > 0 ? (
           <>
-            <PanelSection>Markers</PanelSection>
+            <PanelSection>{t("common.markers")}</PanelSection>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
               {markerEntries.map((e) =>
                 chip(e.key, markers.includes(e.key), () => onToggleMarker(e.key)),
@@ -1932,7 +1943,7 @@ export function FilterPanel({
         ) : null}
         {tagEntries.length > 0 ? (
           <>
-            <PanelSection>Tags</PanelSection>
+            <PanelSection>{t("paste.tags")}</PanelSection>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
               {tagEntries.map((e) => chip(e.key, tags.includes(e.key), () => onToggleTag(e.key)))}
             </div>
@@ -1950,7 +1961,7 @@ export function FilterPanel({
           }}
         >
           <span>
-            {active ? `${matchCount} match${matchCount === 1 ? "" : "es"}` : "Showing all"}
+            {active ? `${matchCount} match${matchCount === 1 ? "" : "es"}` : t("panel.showingAll")}
           </span>
           {active ? (
             <Button onClick={onClear} style={{ padding: "2px 8px" }}>
@@ -1975,7 +1986,7 @@ export function FilterPanel({
         {active && onExtract ? (
           <div style={{ padding: "2px 10px 4px" }}>
             <Button onClick={onExtract} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
-              Extract matches to a new map
+              {t("panel.extractMatchesTo")}
             </Button>
           </div>
         ) : null}
@@ -1984,10 +1995,10 @@ export function FilterPanel({
           unchanged.
         </div>
 
-        <PanelSection>Saved filters</PanelSection>
+        <PanelSection>{t("panel.savedFilters")}</PanelSection>
         {savedFilters.length === 0 ? (
           <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-            Save a filter to reuse it across maps.
+            {t("panel.saveAFilter")}
           </div>
         ) : (
           savedFilters.map((f) => (
@@ -2043,8 +2054,8 @@ export function FilterPanel({
                   setSaveName("");
                 }
               }}
-              placeholder="Name this filter…"
-              aria-label="Save filter name"
+              placeholder={t("panel.nameFilterPlaceholder")}
+              aria-label={t("panel.saveFilterName")}
               style={{ width: "auto", flex: 1 }}
             />
             <Button
@@ -2104,11 +2115,7 @@ export function HistoryPanel({
       <Button
         onClick={onPlay}
         disabled={versions.length < 2}
-        title={
-          versions.length < 2
-            ? "Save at least two versions to play the timeline"
-            : "Play the map's history as a timeline"
-        }
+        title={versions.length < 2 ? t("panel.saveAtLeast") : t("panel.playTheMap")}
         style={{ margin: "0 10px 8px", padding: "4px 8px", fontSize: fontSize.sm }}
       >
         ▶ Play timeline
@@ -2116,13 +2123,12 @@ export function HistoryPanel({
       {/* Be honest that auto-history is finite + throttled, so a user doesn't expect to roll back to
           an arbitrary point on a busy map (snapshots coalesce to ~3 min; the last MAX_VERSIONS kept). */}
       <div style={{ padding: "0 10px 8px", fontSize: fontSize.xs, color: colors.faint }}>
-        Auto-saves are throttled (~3 min); the last {MAX_VERSIONS} are kept. Use “Save version now”
-        to pin an important state.
+        {t("panel.autoSaveNote", { n: MAX_VERSIONS })}
       </div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {versions.length === 0 ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
-            No saved versions yet. Snapshots are captured automatically as you edit.
+            {t("panel.noSavedVersions")}
           </div>
         ) : (
           versions.map((v) => (
@@ -2188,7 +2194,7 @@ export function PlaybackBar({
   return (
     <div
       role="toolbar"
-      aria-label="History playback"
+      aria-label={t("panel.historyPlayback")}
       style={{
         position: "absolute",
         left: "50%",
@@ -2210,8 +2216,8 @@ export function PlaybackBar({
         onClick={() => onStep(-1)}
         disabled={index <= 0}
         style={btn}
-        title="Previous version"
-        aria-label="Previous version"
+        title={t("panel.previousVersion")}
+        aria-label={t("panel.previousVersion")}
       >
         ⏮
       </Button>
@@ -2222,8 +2228,8 @@ export function PlaybackBar({
         onClick={() => onStep(1)}
         disabled={index >= count - 1}
         style={btn}
-        title="Next version"
-        aria-label="Next version"
+        title={t("panel.nextVersion")}
+        aria-label={t("panel.nextVersion")}
       >
         ⏭
       </Button>
@@ -2233,16 +2239,16 @@ export function PlaybackBar({
         max={Math.max(0, count - 1)}
         value={index}
         onChange={(e) => onSeek(Number(e.target.value))}
-        aria-label="Version timeline"
+        aria-label={t("panel.versionTimeline")}
         style={{ flex: 1, minWidth: 90, accentColor: colors.accentSlider }}
       />
       <span style={{ fontSize: fontSize.sm, color: colors.muted, whiteSpace: "nowrap" }}>
         {label}
       </span>
-      <Button onClick={onRestore} style={btn} title="Restore this version">
-        Restore this
+      <Button onClick={onRestore} style={btn} title={t("panel.restoreThisVersion")}>
+        {t("panel.restoreThis")}
       </Button>
-      <Button onClick={onExit} style={btn} title="Exit playback (Esc)">
+      <Button onClick={onExit} style={btn} title={t("panel.exitPlaybackEsc")}>
         Exit
       </Button>
     </div>
@@ -2277,7 +2283,7 @@ export function WalkBar({
   return (
     <div
       role="toolbar"
-      aria-label="Guided walk"
+      aria-label={t("panel.guidedWalk")}
       style={{
         position: "absolute",
         left: "50%",
@@ -2296,7 +2302,12 @@ export function WalkBar({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Button onClick={onPrev} disabled={index <= 0} style={btn} aria-label="Previous topic">
+        <Button
+          onClick={onPrev}
+          disabled={index <= 0}
+          style={btn}
+          aria-label={t("panel.previousTopic")}
+        >
           ◀
         </Button>
         <span
@@ -2312,9 +2323,14 @@ export function WalkBar({
             textOverflow: "ellipsis",
           }}
         >
-          {topic || "(untitled)"}
+          {topic || t("common.untitled")}
         </span>
-        <Button onClick={onNext} disabled={index >= total - 1} style={btn} aria-label="Next topic">
+        <Button
+          onClick={onNext}
+          disabled={index >= total - 1}
+          style={btn}
+          aria-label={t("panel.nextTopic")}
+        >
           ▶
         </Button>
         <span style={{ fontSize: fontSize.sm, color: colors.muted, whiteSpace: "nowrap" }}>
@@ -2328,16 +2344,12 @@ export function WalkBar({
               ...btn,
               ...(cinematic ? { background: colors.accent, color: colors.white } : {}),
             }}
-            title={
-              cinematic
-                ? "Cinematic zoom on — frames each branch (click for flat 100%)"
-                : "Cinematic zoom off — centres each topic (click to zoom each branch)"
-            }
+            title={cinematic ? t("panel.cinematicZoomOn") : t("panel.cinematicZoomOff")}
           >
             🎬
           </Button>
         ) : null}
-        <Button onClick={onExit} style={btn} title="Exit walk (Esc)">
+        <Button onClick={onExit} style={btn} title={t("panel.exitWalkEsc")}>
           Exit
         </Button>
       </div>
@@ -2452,7 +2464,7 @@ export function StylesPanel({
         <Input
           value={v}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="tag name"
+          placeholder={t("panel.tagName")}
           aria-label={label}
           style={{ width: "auto", margin: "0 10px 4px" }}
         />
@@ -2465,7 +2477,7 @@ export function StylesPanel({
           aria-label={label}
           style={{ width: "auto", margin: "0 10px 4px" }}
         >
-          <option value="">Pick a marker…</option>
+          <option value="">{t("panel.pickAMarker")}</option>
           {markers.map((m) => (
             <option key={m} value={m}>
               {m}
@@ -2481,7 +2493,7 @@ export function StylesPanel({
           aria-label={label}
           style={{ width: "auto", margin: "0 10px 4px" }}
         >
-          <option value="">Pick a priority…</option>
+          <option value="">{t("panel.pickAPriority")}</option>
           {PRIORITY_LEVELS.map((p) => (
             <option key={p} value={p}>
               {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]} & up` : `${p} & up`}
@@ -2494,7 +2506,7 @@ export function StylesPanel({
         <Input
           value={v}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="topic contains…"
+          placeholder={t("panel.topicContains")}
           aria-label={label}
           style={{ width: "auto", margin: "0 10px 4px" }}
         />
@@ -2571,10 +2583,9 @@ export function StylesPanel({
     <Panel>
       <div style={panelTitle}>🎨 Styles</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
-        <PanelSection>Conditional formatting</PanelSection>
+        <PanelSection>{t("panel.conditionalFormatting")}</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-          Auto-style topics by tag, marker, completion, due date, priority, text, or attachment —
-          and optionally auto-apply a marker or branch colour. Manual styling still wins.
+          {t("panel.conditionalStylesHelp")}
         </div>
         {rules.map((r) => (
           <div
@@ -2588,7 +2599,7 @@ export function StylesPanel({
             </span>
             <Button
               onClick={() => onDeleteRule(r.id)}
-              title="Remove rule"
+              title={t("panel.removeRule")}
               style={{ padding: "0 6px", fontSize: fontSize.sm }}
             >
               ✕
@@ -2599,7 +2610,9 @@ export function StylesPanel({
           style={{ borderTop: `1px solid ${colors.border}`, margin: "6px 10px", paddingTop: 6 }}
         />
         <div style={{ display: "flex", gap: 4, padding: "0 10px 4px", alignItems: "center" }}>
-          <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>When</span>
+          <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>
+            {t("panel.when")}
+          </span>
           <label
             style={{
               display: "flex",
@@ -2608,7 +2621,7 @@ export function StylesPanel({
               fontSize: fontSize.sm,
               color: colors.muted,
             }}
-            title="Invert this condition"
+            title={t("panel.invertThisCondition")}
           >
             <input type="checkbox" checked={negate} onChange={(e) => setNegate(e.target.checked)} />
             NOT
@@ -2616,17 +2629,19 @@ export function StylesPanel({
           <Select
             value={kind}
             onChange={(e) => setKind(e.target.value as RuleConditionKind)}
-            aria-label="Rule condition"
+            aria-label={t("panel.ruleCondition")}
             style={{ width: "auto", flex: 1 }}
           >
             {conditionKindOptions}
           </Select>
         </div>
-        {conditionValueField(kind, value, setValue, "Rule value")}
+        {conditionValueField(kind, value, setValue, t("panel.ruleValue"))}
         {also.map((c, i) => (
           <div key={c._key}>
             <div style={{ display: "flex", gap: 4, padding: "0 10px 4px", alignItems: "center" }}>
-              <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>AND</span>
+              <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>
+                {t("panel.and")}
+              </span>
               <label
                 style={{
                   display: "flex",
@@ -2635,7 +2650,7 @@ export function StylesPanel({
                   fontSize: fontSize.sm,
                   color: colors.muted,
                 }}
-                title="Invert this condition"
+                title={t("panel.invertThisCondition")}
               >
                 <input
                   type="checkbox"
@@ -2649,14 +2664,14 @@ export function StylesPanel({
                 onChange={(e) =>
                   updateAlso(i, { kind: e.target.value as RuleConditionKind, value: "" })
                 }
-                aria-label="AND condition"
+                aria-label={t("panel.andCondition")}
                 style={{ width: "auto", flex: 1 }}
               >
                 {conditionKindOptions}
               </Select>
               <Button
                 onClick={() => setAlso((rows) => rows.filter((_, ri) => ri !== i))}
-                title="Remove this AND condition"
+                title={t("panel.removeThisAnd")}
                 style={{ padding: "0 6px", fontSize: fontSize.sm }}
               >
                 ✕
@@ -2666,7 +2681,7 @@ export function StylesPanel({
               c.kind,
               c.value ?? "",
               (v) => updateAlso(i, { value: v }),
-              "AND condition value",
+              t("panel.andConditionValue"),
             )}
           </div>
         ))}
@@ -2681,14 +2696,16 @@ export function StylesPanel({
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}
         <div style={{ display: "flex", gap: 4, padding: "2px 10px 4px", alignItems: "center" }}>
-          <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>Marker</span>
+          <span style={{ fontSize: fontSize.sm, color: colors.muted, width: 44 }}>
+            {t("panel.marker")}
+          </span>
           <Select
             value={actionIcon}
             onChange={(e) => setActionIcon(e.target.value)}
-            aria-label="Rule action marker"
+            aria-label={t("panel.ruleActionMarker")}
             style={{ width: "auto", flex: 1 }}
           >
-            <option value="">No marker</option>
+            <option value="">{t("panel.noMarker")}</option>
             {markers.map((m) => (
               <option key={m} value={m}>
                 {m}
@@ -2701,7 +2718,7 @@ export function StylesPanel({
           + Add rule
         </Button>
 
-        <PanelSection>Named styles</PanelSection>
+        <PanelSection>{t("panel.namedStyles")}</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
           Save the selected topic's look, then reuse it on others.
         </div>
@@ -2729,7 +2746,7 @@ export function StylesPanel({
             </button>
             <Button
               onClick={() => onDeleteStyle(s.id)}
-              title="Remove named style"
+              title={t("panel.removeNamedStyle")}
               style={{ padding: "0 6px", fontSize: fontSize.sm }}
             >
               ✕
@@ -2740,8 +2757,8 @@ export function StylesPanel({
           <Input
             value={styleName}
             onChange={(e) => setStyleName(e.target.value)}
-            placeholder="Name this style…"
-            aria-label="Name this style"
+            placeholder={t("panel.nameThisStylePlaceholder")}
+            aria-label={t("panel.nameThisStyle")}
             style={{ width: "auto", flex: 1 }}
           />
           <Button
@@ -2967,7 +2984,7 @@ export function InfoPanel({
     const derived = !progressMixed && hasTaskDescendants(n);
     const pct = info ? toPercent(info.progress) : null;
     return (
-      <PropRow label="Progress">
+      <PropRow label={t("panel.progress")}>
         {derived ? (
           <div
             style={{
@@ -3004,7 +3021,7 @@ export function InfoPanel({
                   key={step}
                   active={active}
                   onClick={() => onSetProgress(step / 100)}
-                  title={`Set task to ${step}% complete`}
+                  title={t("panel.setTaskPercent", { n: step })}
                   style={{
                     padding: "1px 7px",
                     fontSize: fontSize.sm,
@@ -3020,7 +3037,7 @@ export function InfoPanel({
             {info ? (
               <Button
                 onClick={() => onSetProgress(undefined)}
-                title="Clear task status (remove the pie)"
+                title={t("panel.clearTaskStatus")}
                 style={{ padding: "1px 7px", fontSize: fontSize.sm }}
               >
                 ✕
@@ -3032,7 +3049,7 @@ export function InfoPanel({
     );
   };
   const aside = (
-    <aside className="mm-inspector" aria-label="Topic info" style={{ width }}>
+    <aside className="mm-inspector" aria-label={t("panel.topicInfo")} style={{ width }}>
       <InspectorResizer width={width} onResize={onResize} />
       <div className="mm-inspector-head">
         <div
@@ -3047,14 +3064,14 @@ export function InfoPanel({
               color: "var(--ed-ink)",
             }}
           >
-            ℹ {node ? node.topic || "(untitled)" : "Topic info"}
+            ℹ {node ? node.topic || t("common.untitled") : t("panel.topicInfo")}
           </span>
           <button
             type="button"
             className="mm-inspector-min"
             onClick={onMinimize}
-            title="Minimize — collapse to the right edge"
-            aria-label="Minimize topic info"
+            title={t("panel.minimizeCollapseTo")}
+            aria-label={t("panel.minimizeTopicInfo")}
           >
             ›
           </button>
@@ -3081,7 +3098,7 @@ export function InfoPanel({
       </div>
       {!node ? (
         <div style={{ padding: "8px 16px", fontSize: fontSize.md, color: "var(--ed-faint)" }}>
-          Select a node to see and edit its details.
+          {t("panel.selectANode")}
         </div>
       ) : (
         <>
@@ -3168,10 +3185,10 @@ export function InfoPanel({
                             <button
                               type="button"
                               onClick={onClearFillImage}
-                              title="Remove the fill image"
+                              title={t("panel.removeTheFill")}
                               style={{ ...styleBtn, fontSize: fontSize.sm }}
                             >
-                              Clear fill image
+                              {t("panel.clearFillImage")}
                             </button>
                           ) : null}
                         </div>
@@ -3188,7 +3205,7 @@ export function InfoPanel({
                     <button
                       type="button"
                       onClick={onExpandNote}
-                      title="Open this note in the dockable editor for more room"
+                      title={t("panel.openThisNote")}
                       style={{
                         alignSelf: "flex-end",
                         margin: "2px 8px 4px",
@@ -3285,12 +3302,14 @@ export function InfoPanel({
                       <div
                         style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}
                       >
-                        {(node.tags ?? []).map((t) => (
+                        {/* `tag`, not `t` — the loop variable would shadow the translation
+                            function, making t("…") uncallable inside this button. */}
+                        {(node.tags ?? []).map((tag) => (
                           <button
-                            key={t}
+                            key={tag}
                             type="button"
-                            onClick={() => onRemoveTag(t)}
-                            title={`Remove tag "${t}"`}
+                            onClick={() => onRemoveTag(tag)}
+                            title={t("panel.removeTagNamed", { tag })}
                             style={{
                               border: "1px solid var(--ed-border)",
                               background: "var(--ed-card)",
@@ -3301,7 +3320,7 @@ export function InfoPanel({
                               color: "var(--ed-ink)",
                             }}
                           >
-                            {t} ✕
+                            {tag} ✕
                           </button>
                         ))}
                       </div>
@@ -3315,8 +3334,8 @@ export function InfoPanel({
                           }
                         }}
                         list={allTags && allTags.length > 0 ? "mm-tag-suggestions" : undefined}
-                        placeholder="Add a tag, press Enter"
-                        aria-label="Add a tag"
+                        placeholder={t("panel.addATagPlaceholder")}
+                        aria-label={t("common.addTag")}
                         style={{ width: "auto", margin: "0 10px 4px" }}
                       />
                       {allTags && allTags.length > 0 ? (
@@ -3335,12 +3354,12 @@ export function InfoPanel({
                       <div
                         style={{ padding: "0 10px 4px", display: "flex", flexWrap: "wrap", gap: 4 }}
                       >
-                        {bulkTags.all.map((t) => (
+                        {bulkTags.all.map((tag) => (
                           <button
-                            key={`all:${t}`}
+                            key={`all:${tag}`}
                             type="button"
-                            onClick={() => onBulkToggleTag(t)}
-                            title={`"${t}" is on all selected topics — click to remove from all`}
+                            onClick={() => onBulkToggleTag(tag)}
+                            title={t("panel.tagOnAllSelected", { tag })}
                             style={{
                               border: "1px solid var(--ed-accent)",
                               background: "var(--ed-accent-tint)",
@@ -3351,15 +3370,15 @@ export function InfoPanel({
                               color: "var(--ed-ink)",
                             }}
                           >
-                            {t} ✕
+                            {tag} ✕
                           </button>
                         ))}
-                        {bulkTags.some.map((t) => (
+                        {bulkTags.some.map((tag) => (
                           <button
-                            key={`some:${t}`}
+                            key={`some:${tag}`}
                             type="button"
-                            onClick={() => onBulkToggleTag(t)}
-                            title={`"${t}" is on some selected topics — click to add to all`}
+                            onClick={() => onBulkToggleTag(tag)}
+                            title={t("panel.tagOnSomeSelected", { tag })}
                             style={{
                               border: "1px dashed var(--ed-accent)",
                               background: "var(--ed-card)",
@@ -3371,12 +3390,12 @@ export function InfoPanel({
                               opacity: 0.7,
                             }}
                           >
-                            {t} +
+                            {tag} +
                           </button>
                         ))}
                         {bulkTags.all.length === 0 && bulkTags.some.length === 0 ? (
                           <span style={{ fontSize: fontSize.sm, color: "var(--ed-faint)" }}>
-                            No tags on the selection
+                            {t("panel.noTagsOn")}
                           </span>
                         ) : null}
                       </div>
@@ -3389,8 +3408,8 @@ export function InfoPanel({
                             setTagInput("");
                           }
                         }}
-                        placeholder="Add a tag to all, press Enter"
-                        aria-label="Add a tag to all selected"
+                        placeholder={t("panel.addATagTo")}
+                        aria-label={t("panel.addATagToAll")}
                         style={{ width: "auto", margin: "0 10px 4px" }}
                       />
                     </>
@@ -3398,7 +3417,7 @@ export function InfoPanel({
 
                   {renderProgress(node)}
 
-                  <PropRow label="Dates">
+                  <PropRow label={t("panel.dates")}>
                     <div
                       style={{
                         display: "flex",
@@ -3438,7 +3457,7 @@ export function InfoPanel({
                     </div>
                   </PropRow>
 
-                  <PropRow label="Priority">
+                  <PropRow label={t("common.priority")}>
                     <div
                       style={{
                         display: "flex",
@@ -3474,7 +3493,7 @@ export function InfoPanel({
                       {node.task?.priority ? (
                         <Button
                           onClick={() => onSetPriority(undefined)}
-                          title="Clear priority"
+                          title={t("panel.clearPriority")}
                           style={{ padding: "1px 7px", fontSize: fontSize.sm }}
                         >
                           ✕
@@ -3487,7 +3506,7 @@ export function InfoPanel({
                     <>
                       <CollapsibleSection
                         key={`att:${node.id}`}
-                        label="Attachments"
+                        label={t("panel.attachments")}
                         count={(node.attachments ?? []).length}
                       >
                         <div
@@ -3527,7 +3546,7 @@ export function InfoPanel({
                               </span>
                               <Button
                                 onClick={() => onRemoveAttachment(i)}
-                                title="Remove attachment"
+                                title={t("panel.removeAttachment")}
                                 style={{ padding: "1px 6px", fontSize: fontSize.sm }}
                               >
                                 ✕
@@ -3561,7 +3580,7 @@ export function InfoPanel({
 
                       <CollapsibleSection
                         key={`links:${node.id}`}
-                        label="Links"
+                        label={t("panel.links")}
                         count={(link ? 1 : 0) + (node.hyperlinks?.length ?? 0)}
                       >
                         <Input
@@ -3575,14 +3594,14 @@ export function InfoPanel({
                             const v = e.target.value.trim();
                             if (v !== webUrl) onSetHyperlink(v);
                           }}
-                          placeholder="Link (https://, mailto:, tel:…)"
-                          aria-label="Web link"
+                          placeholder={t("panel.linkHttpsMailto")}
+                          aria-label={t("panel.webLink")}
                           style={{ width: "auto", margin: "0 10px 4px" }}
                         />
                         <Select
                           value=""
                           onChange={(e) => e.target.value && onLinkMap(e.target.value)}
-                          aria-label="Link to another map"
+                          aria-label={t("panel.linkToAnother")}
                           style={{ width: "auto", margin: "0 10px 4px" }}
                         >
                           <option value="">🔗 Link to a map…</option>
@@ -3595,13 +3614,13 @@ export function InfoPanel({
                         <Select
                           value=""
                           onChange={(e) => e.target.value && onJump(e.target.value)}
-                          aria-label="Jump to another topic"
+                          aria-label={t("panel.jumpToAnother")}
                           style={{ width: "auto", margin: "0 10px 4px" }}
                         >
                           <option value="">↪ Jump to a topic…</option>
                           {jumpTargets.map((row) => (
                             <option key={row.id} value={row.id}>
-                              {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+                              {`${"  ".repeat(row.depth)}${row.topic || t("common.untitled")}`}
                             </option>
                           ))}
                         </Select>
@@ -3613,13 +3632,13 @@ export function InfoPanel({
                                 buildMapLink(crossLinkMapId, e.target.value || undefined),
                               )
                             }
-                            aria-label="Focus a topic in the linked map"
+                            aria-label={t("panel.focusATopic")}
                             style={{ width: "auto", margin: "0 10px 4px" }}
                           >
                             <option value="">🗺 …and a topic (whole map)</option>
                             {crossLinkTopics.map((row) => (
                               <option key={row.id} value={row.id}>
-                                {`${"  ".repeat(row.depth)}${row.topic || "(untitled)"}`}
+                                {`${"  ".repeat(row.depth)}${row.topic || t("common.untitled")}`}
                               </option>
                             ))}
                           </Select>
@@ -3659,7 +3678,7 @@ export function InfoPanel({
                               marginBottom: 4,
                             }}
                           >
-                            Additional links
+                            {t("panel.additionalLinks")}
                           </div>
                           {(node.hyperlinks ?? []).map((h, i) => (
                             <div
@@ -3702,8 +3721,8 @@ export function InfoPanel({
                               )}
                               <Button
                                 onClick={() => onRemoveHyperlink(i)}
-                                title="Remove this link"
-                                aria-label={`Remove additional link ${h}`}
+                                title={t("panel.removeThisLink")}
+                                aria-label={t("panel.removeAdditionalLink", { link: h })}
                                 style={{ padding: "0 6px", fontSize: fontSize.sm }}
                               >
                                 ✕
@@ -3723,8 +3742,8 @@ export function InfoPanel({
                                 }
                               }
                             }}
-                            placeholder="Add another link + Enter"
-                            aria-label="Add another link"
+                            placeholder={t("panel.addAnotherLinkPlaceholder")}
+                            aria-label={t("panel.addAnotherLink")}
                             style={{ width: "auto", marginBottom: 6 }}
                           />
                         </div>
@@ -3733,7 +3752,7 @@ export function InfoPanel({
                       {backlinks.length > 0 && (
                         <CollapsibleSection
                           key={`backlinks:${node.id}`}
-                          label="Linked from"
+                          label={t("panel.linkedFrom")}
                           count={backlinks.length}
                         >
                           <div
@@ -3749,7 +3768,9 @@ export function InfoPanel({
                                 key={`${b.kind}:${b.id}`}
                                 type="button"
                                 onClick={() => onFollowBacklink(b.id)}
-                                title={`Go to "${b.topic || "(untitled)"}"`}
+                                title={t("panel.goToTopic", {
+                                  topic: b.topic || t("common.untitled"),
+                                })}
                                 style={{
                                   display: "block",
                                   width: "100%",
@@ -3769,7 +3790,7 @@ export function InfoPanel({
                                 <span style={{ color: "var(--ed-faint)" }}>
                                   {b.kind === "relationship" ? "↬ " : "↪ "}
                                 </span>
-                                {b.topic || "(untitled)"}
+                                {b.topic || t("common.untitled")}
                                 {b.label ? (
                                   <span style={{ color: "var(--ed-faint)" }}> — {b.label}</span>
                                 ) : null}
@@ -3782,7 +3803,7 @@ export function InfoPanel({
                       {outgoingLinks.length > 0 && (
                         <CollapsibleSection
                           key={`outgoing:${node.id}`}
-                          label="Links to"
+                          label={t("panel.linksTo")}
                           count={outgoingLinks.length}
                         >
                           <div
@@ -3798,7 +3819,9 @@ export function InfoPanel({
                                 key={`${b.kind}:${b.id}`}
                                 type="button"
                                 onClick={() => onFollowBacklink(b.id)}
-                                title={`Go to "${b.topic || "(untitled)"}"`}
+                                title={t("panel.goToTopic", {
+                                  topic: b.topic || t("common.untitled"),
+                                })}
                                 style={{
                                   display: "block",
                                   width: "100%",
@@ -3818,7 +3841,7 @@ export function InfoPanel({
                                 <span style={{ color: "var(--ed-faint)" }}>
                                   {b.kind === "relationship" ? "↬ " : "↪ "}
                                 </span>
-                                {b.topic || "(untitled)"}
+                                {b.topic || t("common.untitled")}
                                 {b.label ? (
                                   <span style={{ color: "var(--ed-faint)" }}> — {b.label}</span>
                                 ) : null}
@@ -3831,7 +3854,7 @@ export function InfoPanel({
                       {crossMapBacklinks && crossMapBacklinks.length > 0 && (
                         <CollapsibleSection
                           key={`xmap:${node.id}`}
-                          label="Linked from other maps"
+                          label={t("panel.linkedFromOther")}
                           count={crossMapBacklinks.length}
                         >
                           <div
@@ -3847,7 +3870,10 @@ export function InfoPanel({
                                 key={`${b.sourceMapId}:${b.id}`}
                                 type="button"
                                 onClick={() => onFollowCrossMapBacklink?.(b.sourceMapId, b.id)}
-                                title={`Go to "${b.topic || "(untitled)"}" in ${b.sourceMapTitle}`}
+                                title={t("panel.goToTopicInMap", {
+                                  topic: b.topic || t("common.untitled"),
+                                  map: b.sourceMapTitle,
+                                })}
                                 style={{
                                   display: "block",
                                   width: "100%",
@@ -3865,7 +3891,7 @@ export function InfoPanel({
                                 }}
                               >
                                 <span style={{ color: "var(--ed-faint)" }}>🗺 </span>
-                                {b.topic || "(untitled)"}
+                                {b.topic || t("common.untitled")}
                                 <span style={{ color: "var(--ed-faint)" }}>
                                   {" "}
                                   — {b.sourceMapTitle}
@@ -3927,14 +3953,14 @@ export function NoteEditorPanel({
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close note editor"
+              aria-label={t("panel.closeNoteEditor")}
               style={{ ...styleBtn, fontSize: fontSize.sm }}
             >
               ✕
             </button>
           </div>
           <div style={{ padding: "4px 14px", fontSize: fontSize.sm, color: colors.faint }}>
-            Select a topic to edit its note here.
+            {t("panel.selectATopic")}
           </div>
         </>
       )}
@@ -4129,7 +4155,7 @@ export function NotesPanel({
         <>
           <div
             role="toolbar"
-            aria-label="Note formatting"
+            aria-label={t("panel.noteFormatting")}
             style={{ display: "flex", flexWrap: "wrap", gap: 4, rowGap: 4 }}
           >
             {fmtBtns.map((b) => (
@@ -4152,7 +4178,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => execBlock("<h1>")}
-              title="Heading 1"
+              title={t("panel.heading1")}
               style={tbBtn}
             >
               H1
@@ -4160,7 +4186,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => execBlock("<h2>")}
-              title="Heading 2"
+              title={t("panel.heading2")}
               style={tbBtn}
             >
               H2
@@ -4168,7 +4194,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => execBlock("<h3>")}
-              title="Heading 3"
+              title={t("panel.heading3")}
               style={tbBtn}
             >
               H3
@@ -4176,7 +4202,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={highlight}
-              title="Highlight selection"
+              title={t("panel.highlightSelection")}
               style={tbBtn}
             >
               <mark>H</mark>
@@ -4184,7 +4210,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => execBlock("<pre>")}
-              title="Code block"
+              title={t("panel.codeBlock")}
               style={tbBtn}
             >
               {"</>"}
@@ -4192,7 +4218,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={insertChecklist}
-              title="Checklist"
+              title={t("panel.checklist")}
               style={tbBtn}
             >
               ☑ List
@@ -4200,7 +4226,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={insertLink}
-              title="Insert link (wraps the selected text)"
+              title={t("panel.insertLinkWraps")}
               style={tbBtn}
             >
               🔗 Link
@@ -4208,7 +4234,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={insertImage}
-              title="Insert image (by URL)"
+              title={t("panel.insertImageBy")}
               style={tbBtn}
             >
               🖼 Image
@@ -4216,7 +4242,7 @@ export function NotesPanel({
             <Button
               onMouseDown={(e) => e.preventDefault()}
               onClick={insertTable}
-              title="Insert table"
+              title={t("panel.insertTable")}
               style={{
                 padding: "2px 8px",
                 fontSize: fontSize.sm,
@@ -4237,7 +4263,7 @@ export function NotesPanel({
             role="textbox"
             tabIndex={0}
             aria-multiline="true"
-            aria-label="Node note"
+            aria-label={t("panel.nodeNote")}
             data-placeholder="Add a note… headings, highlight, code, lists, links, images & tables"
             onInput={serialize}
             onPaste={onPaste}
@@ -4275,7 +4301,7 @@ export function NotesPanel({
             fontSize: fontSize.md,
           }}
         >
-          Select a node to add or edit its note.
+          {t("panel.selectANodeTo")}
         </div>
       )}
     </div>
@@ -4292,8 +4318,8 @@ export function StickerBar({ onPick }: { onPick: (sticker: Sticker) => void }) {
       key={s.id}
       type="button"
       onClick={() => onPick(s)}
-      title={`Add the ${s.label} sticker to this node`}
-      aria-label={`Add ${s.label} sticker`}
+      title={t("panel.addStickerTitle", { sticker: s.label })}
+      aria-label={t("panel.addStickerLabel", { sticker: s.label })}
       style={{
         width: 30,
         height: 30,
@@ -4319,13 +4345,13 @@ export function StickerBar({ onPick }: { onPick: (sticker: Sticker) => void }) {
   const results = q ? searchStickers(q) : [];
   return (
     <>
-      <PanelSection>Stickers</PanelSection>
+      <PanelSection>{t("panel.stickers")}</PanelSection>
       <div style={{ padding: "0 10px 4px" }}>
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Find a sticker…"
-          aria-label="Search stickers"
+          placeholder={t("panel.findASticker")}
+          aria-label={t("panel.searchStickers")}
           style={{ width: "auto" }}
         />
       </div>
@@ -4334,7 +4360,7 @@ export function StickerBar({ onPick }: { onPick: (sticker: Sticker) => void }) {
           grid(results)
         ) : (
           <div style={{ padding: "0 10px 6px", fontSize: fontSize.sm, color: colors.faint }}>
-            No stickers match.
+            {t("panel.noStickersMatch")}
           </div>
         )
       ) : (
@@ -4384,8 +4410,8 @@ export function MarkerBar({
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Find a marker…"
-        aria-label="Search markers"
+        placeholder={t("panel.findAMarker")}
+        aria-label={t("panel.searchMarkers")}
         style={{
           ...inputStyle,
           width: 110,
@@ -4395,7 +4421,9 @@ export function MarkerBar({
         }}
       />
       {query.trim() && shown.length === 0 && (
-        <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)" }}>No markers</span>
+        <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)" }}>
+          {t("panel.noMarkers")}
+        </span>
       )}
       {shown.map((marker) => {
         const on = active?.includes(marker);
@@ -4414,7 +4442,7 @@ export function MarkerBar({
             title={
               some
                 ? `${marker} is on some selected topics — click to add to all`
-                : `Toggle ${marker} on the selected topic(s) — or drag it onto any topic`
+                : t("panel.toggleMarker", { marker })
             }
             style={{
               border: `1px ${some ? "dashed" : "solid"} ${on || some ? "var(--ed-accent)" : "var(--ed-border)"}`,

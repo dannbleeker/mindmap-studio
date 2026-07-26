@@ -64,5 +64,10 @@
 // until the migration lands, so unrelated bloat can ride in unnoticed — the precise risk the 167 → 169
 // note warned about. It also front-runs the "chunk-locality first, then raise the ceiling" ordering in
 // NEXT_STEPS, which is recorded there as superseded by this decision.
-// TIGHTEN THIS BACK when Panels.tsx lands: re-measure the real entry and set the ceiling just above it.
+// RESOLVED 2026-07-26: Panels.tsx landed (233 strings) and the eager migration is complete. Measured
+// entry 174.1 kB, against a projection of ~174 — so 175 is now a MEASURED ceiling with 0.9 kB of
+// headroom, not a projection, and no further tightening is warranted. Dropping to ~174.5 would buy
+// nothing (this figure is deterministic, so a thin margin can't flake the way the coverage floor does)
+// while making the next legitimate change a two-line edit. The "~4 kB of unguarded slack" the bump
+// above warned about is closed: the slack is now 0.9 kB.
 export const BUDGET_KB = 175;

@@ -42,6 +42,24 @@ describe("catalogue", () => {
     }
   });
 
+  it("holds characters, not HTML entities", () => {
+    // JSX may write `&amp;` and React decodes it; a CATALOGUE may not, because `t()` returns a plain
+    // JS string that React renders verbatim — so an entity would ship to the user as "Markers &amp;
+    // tags". The Panels extraction captured exactly that from the JSX source, and an existing panel
+    // test caught it. Extraction is scripted, so this checks the whole catalogue rather than trusting
+    // the next script.
+    const entity = /&(?:amp|lt|gt|quot|apos|nbsp|mdash|ndash|hellip|#\d+|#x[0-9a-f]+);/i;
+    const offenders = [...Object.entries(CORE_EN), ...Object.entries(CANVAS_EN)]
+      .flatMap(([key, message]) =>
+        (typeof message === "string" ? [message] : Object.values(message)).map(
+          (form) => [key, form] as const,
+        ),
+      )
+      .filter(([, form]) => form && entity.test(form))
+      .map(([key, form]) => `${key}: ${form}`);
+    expect(offenders).toEqual([]);
+  });
+
   it("returns the English text for a plain key", () => {
     expect(t("settings.title")).toBe("Settings");
   });

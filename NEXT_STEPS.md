@@ -25,8 +25,9 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
 catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
 handlers plus the whole keyboard cheat sheet, the ⌘K command registry, the **entire editor toolbar** and
-the **entire canvas** (`TopicNode` + `FlowMindMap`) and **`App.tsx`** are migrated (**503 catalogue
-entries** so far — 414 eager + 89 in the lazy canvas chunk), behind a lint guard that fails on any new hardcoded user-facing
+the **entire canvas** (`TopicNode` + `FlowMindMap`), **`App.tsx`** and **`Panels.tsx`** are migrated —
+**the eager chrome is complete**, at **684 catalogue entries** (599 eager + 85 in the lazy canvas chunk),
+with the scanner reporting 0 hardcoded strings across all eight files, behind a lint guard that fails on any new hardcoded user-facing
 string in a migrated file. English is the only locale and is expected to stay that way for now — adding
 one means adding a JSON catalogue, not changing the app.
 
@@ -92,35 +93,20 @@ fetching clearly wins. The architecture already supports it — `registerMessage
 later registrations overlay earlier ones, which is exactly the hook a fetched translation needs — so
 build it in the commit that adds the second language, where it earns its complexity, not before.
 
-Also still open from the plan: the remaining chrome strings. Get the worklist from the scanner rather
-than from a number written down here — `node scripts/i18n-scan.mjs <file>` runs the guard's own
-detectors over any file, so you see what it will hold you to *before* joining the allowlist:
+**The chrome migration is DONE.** `node scripts/i18n-scan.mjs <file> --count` reports 0 for all eight
+migrated files. Point it at anything else before assuming that file is clean — it runs the guard's own
+detectors, and `App.tsx` was missing from this plan entirely until someone did exactly that.
 
-```sh
-node scripts/i18n-scan.mjs src/Panels.tsx --count
-```
-
-As of 2026-07-26 that reports **233 in `Panels.tsx`**, and it is the last of the chrome. It is eager, so
-unlike the canvas its strings land in the entry chunk; the ceiling was already raised to 175 to cover
-it, and the note in `scripts/bundle-budget.mjs` asks for that ceiling to be **re-measured and tightened
-once this lands**.
-
-`App.tsx` is done (83 strings, +1.2 kB gz). It was **missing from this plan entirely** until the scanner
-was pointed at it — which is the argument for running the scanner over the whole tree rather than
-working from this list.
-
-The counts move whenever a detector is added (they went 301 → 374 → 316 in a day: two new detectors
-found more, then migrating the canvas removed a file). That is why the command above is the source of
-truth and the number here is a snapshot. Expect hand-work beyond it too — the guard's documented
-limitations are listed below. The rest of
+Entry bundle 174.1 kB against a 175 ceiling; `scripts/bundle-budget.mjs` records that ceiling as
+measured rather than projected, so the loop it opened is closed. The rest of
 the `Intl` adoption: `timeAgo` and all 12 collation sites are
 **done**; still open are `taskDate.ts`'s English `MONTHS` + `parseNaturalDate` grammar (logic, not
 translation) and the ~103 locale-unsafe `toLowerCase` sites. Then the exporters taking the locale (`lang`
 attributes, PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA
 manifest strings.
 
-`editorCommands.ts`, `Toolbar.tsx`, `TopicNode.tsx`, `FlowMindMap.tsx` and `App.tsx` are **done** — don't re-plan
-them. The design once recorded here
+All eight migrated files — `SettingsDialog`, `shortcuts`, `editorCommands`, `Toolbar`, `TopicNode`,
+`FlowMindMap`, `App` and `Panels` — are **done**; don't re-plan them. The design once recorded here
 for `editorCommands.ts` (drop the label argument and derive the key from the command id inside `add()`)
 was **rejected on implementation and should not be revived**: a template-literal key cannot be verified
 by `tsc`, and compile-time key checking is the property the typed catalogue exists for. Each call site

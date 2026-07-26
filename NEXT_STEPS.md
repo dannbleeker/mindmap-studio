@@ -38,47 +38,33 @@ active-filter indicator) — don't re-propose them.
 
 **Tiers 1–4 — all 30 items — shipped on 2026-07-02** (batches A–G, then the Tier-4 blocks; see
 `CHANGELOG.md` for the per-item detail), along with a cross-cutting `border`/`borderColor`
-shorthand-conflict sweep found while verifying Tier 3. Only the **Tier 5 housekeeping** items below
-remain open.
+shorthand-conflict sweep found while verifying Tier 3. The three **Tier 5 housekeeping** items shipped
+on 2026-07-25/26, closing the review backlog; the two residuals they left are listed under *Open
+residuals*.
 
 Anything deliberately **not** built is recorded under *Deferred / blocked* or *Out of scope* below,
 so the decisions don't get re-litigated.
 
-## Backlog — 2026-07-02 MindManager review (remaining: Tier 5 housekeeping)
+## Backlog — 2026-07-02 MindManager review: CLOSED
 
-Tiers 1–4 shipped (see `CHANGELOG.md`). Sizes: **S** = hours, **M** = days, **L** = a week+. Each
-item: what + why → *Now* (verified current state) → *Scope* (the exact delta).
+**All 33 items are shipped** — Tiers 1–4 on 2026-07-02, and the three Tier-5 housekeeping items (25
+`execCommand`, 33 saved views, 34 XMind round-trip) on 2026-07-25/26. Per-item detail is in
+`CHANGELOG.md`. The two deliberate residuals they left are under *Open residuals* below.
 
-### Tier 5 — housekeeping / hygiene (no MindManager angle, found during the review)
+## Open residuals (from the Tier 5 batch, 2026-07-26)
 
-~~25. **Rich-text editing rides deprecated `document.execCommand`**~~ — **SHIPPED 2026-07-26.**
-    Migrated to selection/Range commands in `src/richTextCommands.ts` (bold/italic/underline/strike,
-    colour, plain-text paste, link, block/heading), shared by the Notes panel and the topic editor and
-    tested against the markdown each command serialises to. **Residual, deliberate:** the two list
-    commands (`insertUnorderedList`/`insertOrderedList`) still call `execCommand` behind a single
-    `listFallback()` — reimplementing list toggling well is a rich-text-engine problem and a shaky
-    version would regress a working editor. Also note formatting now needs a selection (the old
-    "typing style" armed by a collapsed-selection `execCommand` has no standards-track equivalent).
-
-~~33. **Saved views + saved filters live in localStorage**~~ — **SHIPPED 2026-07-26, but only half of
-    it: the filter half was declined on recon.** Saved **views** now live on the doc
-    (`meta.savedViews`), migrated once off the per-map `mindmap-views:<id>` key, and written through
-    the canvas `setSavedViews` so they land in undo + autosave and travel with a `.json`/`.mmst`
-    export. A view captures a viewport and a drilled-in topic **id**, so it is meaningless outside its
-    own map — it belongs to the document.
-    Saved **filters** deliberately stay app-wide in localStorage. `FilterCriteria` is entirely generic
-    (text / markers / tags / due / priority / completion / relationship direction + type) with no
-    map-specific ids, and `filter.ts` documents the presets as "persisted app-wide, reusable across
-    maps". Moving them into doc meta would *remove* that reuse — a preset saved on one map would stop
-    appearing on the next — which is a regression, not a fix. The real itch underneath ("they don't
-    reach a second machine") is a **settings export/import**, which is different work and not on the
-    list. Recorded here so the original item isn't re-raised as written.
-
-~~34. **XMind export asymmetry**~~ — **SHIPPED 2026-07-25.** Loop closed both ways: detached topics,
-    relationships (with id remapping), markers (via a new XMind vocabulary in `icons.ts`) and per-topic
-    style all round-trip, on the modern JSON *and* legacy XML import paths. Remaining lossy by design
-    and documented in the file header: legacy per-topic style (a separate `styles.xml` subsystem) and
-    XMind's line/shape/branch styling.
+- **The two list commands still call `document.execCommand`** (`insertUnorderedList` /
+  `insertOrderedList`), isolated behind `listFallback()` in `src/richTextCommands.ts` — everything else
+  in both editors is now selection/Range based. Left deliberately: reimplementing list toggling
+  (splitting blocks into items, merging adjacent lists, nesting) is a rich-text-engine problem and a
+  shaky version would regress a working editor. `listFallback` already returns false if a browser drops
+  the API, so the failure mode is a dead button, not a crash. Related behaviour note: inline formatting
+  now requires a **selection** — the old collapsed-selection "typing style" has no standards-track
+  equivalent.
+- **Settings export / import** — the genuine gap behind the declined half of item 33. Saved *filter*
+  presets are app-wide by design and deliberately stayed in localStorage (see *Deferred* below), so the
+  way to get them onto a second machine is exporting preferences, not scoping them to a document. Not
+  started; no size estimate yet.
 
 ### Surveyed rough edges (unprioritised; record so they're not re-found)
 
@@ -114,6 +100,15 @@ The single **manual MindManager open-test** of a Studio-exported `.mmap` still a
 MindManager access (backlog item 8 raises its value — re-test after shipping it).
 
 ## Deferred / blocked (off the active list)
+
+- **Saved *filter* presets stay app-wide in localStorage — decided 2026-07-26, don't re-raise as
+  written.** Backlog item 33 asked for saved views *and* filters to move into doc meta; the views half
+  shipped, the filter half was declined on recon. `FilterCriteria` is entirely generic (text / markers /
+  tags / due / priority / completion / relationship direction + type) with **no map-specific ids**, and
+  `filter.ts` documents the presets as "persisted app-wide, reusable across maps". Scoping them to a
+  document would *remove* that reuse — a preset saved on one map would stop appearing on the next —
+  turning a working feature into a per-map one. The real gap (getting them to a second machine) is a
+  settings export, listed under *Open residuals*.
 
 - **UI localisation (i18n) — analysed 2026-07-25, deferred by decision; the *bugs* it surfaced are
   fixed.** The app is English-only with no infrastructure: no library, zero `Intl.*` calls, no

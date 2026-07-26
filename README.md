@@ -234,7 +234,9 @@ brainstorming MVP, the editor/UX redesign, the MindManager canvas-fidelity pass,
 gap-closing effort (19-tool survey), and the 2026 review programmes (the UX + feature-gap audit,
 two UI reviews, and the MindManager-inspired review — all tiers shipped). The app is **live** at
 <https://mindmap-studio.struktureretsundfornuft.dk/> (GitHub Pages, custom domain, redeployed on
-every push to `main`). Remaining work is documentation housekeeping only — see `NEXT_STEPS.md`.
+every push to `main`). Documentation coverage is complete (the user manual covers 100% of the feature
+catalogue) and the review backlog closed on 2026-07-26; what remains is two small deliberate
+residuals — see `NEXT_STEPS.md`.
 Scope intentionally excludes the task / Gantt / resource PM layer and real-time collaboration —
 recorded decisions, not gaps.
 

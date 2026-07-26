@@ -25,8 +25,8 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
 catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
 handlers plus the whole keyboard cheat sheet, the ⌘K command registry, the **entire editor toolbar** and
-the **entire canvas** (`TopicNode` + `FlowMindMap`) are migrated (**423 catalogue entries** so far — 334
-eager + 89 in the lazy canvas chunk), behind a lint guard that fails on any new hardcoded user-facing
+the **entire canvas** (`TopicNode` + `FlowMindMap`) and **`App.tsx`** are migrated (**503 catalogue
+entries** so far — 414 eager + 89 in the lazy canvas chunk), behind a lint guard that fails on any new hardcoded user-facing
 string in a migrated file. English is the only locale and is expected to stay that way for now — adding
 one means adding a JSON catalogue, not changing the app.
 
@@ -97,13 +97,17 @@ than from a number written down here — `node scripts/i18n-scan.mjs <file>` run
 detectors over any file, so you see what it will hold you to *before* joining the allowlist:
 
 ```sh
-node scripts/i18n-scan.mjs src/Panels.tsx src/App.tsx --count
+node scripts/i18n-scan.mjs src/Panels.tsx --count
 ```
 
-As of 2026-07-26 that reports **233 `Panels.tsx` + 83 `App.tsx` = 316**, and those two are what's left
-of the chrome. **`App.tsx` was missing from this plan entirely** until the scanner was pointed at it.
-Both are eager, so unlike the canvas their strings land in the entry chunk — measure after, and expect
-`Panels.tsx` to be the one that finally forces the ceiling decision.
+As of 2026-07-26 that reports **233 in `Panels.tsx`**, and it is the last of the chrome. It is eager, so
+unlike the canvas its strings land in the entry chunk; the ceiling was already raised to 175 to cover
+it, and the note in `scripts/bundle-budget.mjs` asks for that ceiling to be **re-measured and tightened
+once this lands**.
+
+`App.tsx` is done (83 strings, +1.2 kB gz). It was **missing from this plan entirely** until the scanner
+was pointed at it — which is the argument for running the scanner over the whole tree rather than
+working from this list.
 
 The counts move whenever a detector is added (they went 301 → 374 → 316 in a day: two new detectors
 found more, then migrating the canvas removed a file). That is why the command above is the source of
@@ -115,7 +119,7 @@ translation) and the ~103 locale-unsafe `toLowerCase` sites. Then the exporters 
 attributes, PPTX `lang="en-US"` + its empty `<a:ea>`/`<a:cs>`, XLSX's Calibri-only font) and the PWA
 manifest strings.
 
-`editorCommands.ts`, `Toolbar.tsx`, `TopicNode.tsx` and `FlowMindMap.tsx` are **done** — don't re-plan
+`editorCommands.ts`, `Toolbar.tsx`, `TopicNode.tsx`, `FlowMindMap.tsx` and `App.tsx` are **done** — don't re-plan
 them. The design once recorded here
 for `editorCommands.ts` (drop the label argument and derive the key from the command id inside `add()`)
 was **rejected on implementation and should not be revived**: a template-literal key cannot be verified

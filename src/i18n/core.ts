@@ -424,6 +424,130 @@ export const CORE_EN = {
   "toolbar.exportGroup.presentation": "Presentation",
   "toolbar.copyImageToClipboard": "Copy image to clipboard",
   "toolbar.exportPdfLetter": ".pdf (Letter portrait)",
+
+  // --- App.tsx --------------------------------------------------------------------------------------
+  // Mostly `showHint` toasts. The "select something first" family is deliberately one message PER
+  // action rather than a generic "nothing selected": each names what the user was reaching for, which
+  // is the difference between a hint and a scold — and a translator needs the verb to inflect.
+
+  "hint.outlineCopied": "Outline copied to clipboard",
+  "hint.tableCopied": "Map copied as a table (TSV)",
+  "hint.topicLinkCopied": "Link to this topic copied",
+  "hint.mapLinkCopied": "Link to this map copied",
+  "hint.clipboardDenied": "Couldn't access the clipboard",
+  "hint.upToDate": "You're on the latest version.",
+  "hint.updateDownloading":
+    "New version found — the refresh prompt will appear once it finishes downloading.",
+  "hint.updateUnavailable": "Update checks aren't available here (no service worker running).",
+  "hint.openInAnotherTab":
+    "This map is open in another tab — edits here may overwrite the other tab's autosaves.",
+
+  "hint.imageAdded": "Image added to the selected node.",
+  "hint.imageFailed": "Could not add image",
+  "hint.backgroundSet": "Background image set for this map.",
+  "hint.backgroundFailed": "Could not set background image",
+  "hint.fileFailed": "Could not add that file.",
+  "hint.attachFailed": "Could not attach that file.",
+  "hint.fillImageFailed": "Could not set the fill image",
+
+  "hint.noRollups": "No roll-ups yet — pick a source map in the ⤵ Roll-up menu first.",
+  "hint.selectTopicToPromote": "Select a topic first to promote it to a new map.",
+  "hint.pickBranchToPromote": "Pick a branch (not the central topic) to promote.",
+  "hint.promoteFailed": "Couldn't create the new map.",
+  "hint.selectTopicToMerge": "Select a topic first to merge a map under it.",
+  "hint.pickDifferentMap": "Pick a different map to merge in.",
+  "hint.mapLoadFailed": "Couldn't load that map.",
+  "hint.mergeFailed": "Couldn't merge that map.",
+  "hint.noMatchesToExtract": "No matches to extract — adjust the filter first.",
+
+  "hint.selectNodeForImage": "Select a node first, then add an image.",
+  "hint.selectTopicForStyle": "Select a topic first, then apply a named style.",
+  "hint.selectNodeForMarker": "Select a node first, then click a marker.",
+  "hint.selectNodeForSticker": "Select a node first, then pick a sticker.",
+  "hint.selectNodeForStyle": "Select a node first, then style it.",
+  "hint.selectNodeForBranchColour": "Select a node first, then set its branch colour.",
+  "hint.selectTopicForFillImage": "Select a topic first, then set its fill image.",
+  "hint.selectNodeForProgress": "Select a node first, then set its progress.",
+  "hint.selectNodeForDue": "Select a node first, then set a due date.",
+  "hint.selectNodeForStart": "Select a node first, then set a start date.",
+  "hint.selectNodeForPriority": "Select a node first, then set its priority.",
+  "hint.selectNodeForAttachment": "Select a node first, then attach a file.",
+  "hint.selectNodeForLink": "Select a node first, then add a link.",
+  "hint.selectNodeShort": "Select a node first",
+
+  "hint.commandHistoryCleared": "Command history cleared.",
+  "hint.branchClipboardCleared": "Branch clipboard cleared.",
+  "hint.showAll": "Show all",
+  "hint.designApplied": "Applied the {name} design.",
+  "hint.viewSaved": 'Saved view "{name}".',
+  "hint.viewReplaced": 'Replaced view "{name}".',
+  "hint.viewDeleted": 'Deleted view "{name}".',
+  "hint.filteringBy": "Filtering by {kind} “{key}”.",
+
+  // Counts. Every one of these was a hand-written `=== 1 ? "" : "s"` before; `Intl.PluralRules` picks
+  // the arm, so a locale with four categories needs no call-site change.
+  "hint.restoredMaps": {
+    one: "Restored {n} map from backup.",
+    other: "Restored {n} maps from backup.",
+  },
+  "hint.importedMaps": {
+    one: "Imported {n} of {total} maps",
+    other: "Imported {n} of {total} maps",
+  },
+  "hint.importFailedSuffix": { one: " ({n} failed).", other: " ({n} failed)." },
+  "hint.importFailed": "Import failed — {error}",
+  "hint.noReadableMaps": "no readable maps",
+  "hint.rollupsRefreshed": {
+    one: "Refreshed {n} roll-up{missing}.",
+    other: "Refreshed {n} roll-ups{missing}.",
+  },
+  "hint.rollupsMissing": {
+    one: " ({n} source map missing)",
+    other: " ({n} source maps missing)",
+  },
+  "hint.extracted": {
+    one: "Extracted {n} matching topic to a new map.",
+    other: "Extracted {n} matching topics to a new map.",
+  },
+  "dialog.deleteMapRefs": {
+    one: "{n} other map links to this one ({names}). Those links will break.",
+    other: "{n} other maps link to this one ({names}). Those links will break.",
+  },
+
+  // App chrome
+  "app.skipToCanvas": "Skip to canvas",
+  "app.dismissImportError": "Dismiss import error",
+  "app.dismissImportNotes": "Dismiss import notes",
+  "app.resizePanel": "Resize panel — drag, arrow keys to resize, Escape to close",
+
+  // Search-across-every-map overlay. The OPERATOR list in the tooltip stays literal — `tag:`,
+  // `due:overdue` and friends are syntax the user types, not prose.
+  "search.title": "Search all maps",
+  "search.close": "Close search",
+  "search.placeholder": "Find across every map… (try tag:foo  priority:1  has:note  -exclude)",
+  "search.queryLabel": "Search query",
+  "search.operatorsHelp": "Search every map by text, or use operators:",
+
+  // About dialog. The product name is a message so a locale that requires transliteration can supply
+  // one; most will leave it exactly as it is.
+  "about.appName": "MindMap Studio",
+  "about.close": "Close about dialog",
+  "about.tagline":
+    "Local-first mind mapping — a MindManager replacement. Your maps stay in your browser.",
+  "about.licenseHeading": "License (dual)",
+  "about.licenseCode": "Software — Apache License 2.0",
+  "about.licenseBook": "Book and docs — CC BY-NC 4.0",
+  "about.userGuide": "User guide",
+  "about.thirdParty": "Third-party notices",
+  "about.dashboard": "Live dashboard",
+  "about.checkUpdates": "Check for updates",
+
+  // Paste-outline dialog + the command palette's search box
+  "paste.title": "Paste text → topics",
+  "paste.inputLabel": "Paste outline text",
+  "paste.tags": "Tags",
+  "paste.addUnder": 'Add under "{topic}"',
+  "palette.placeholder": "Search commands…",
 } as const satisfies Catalogue;
 
 export type CoreKey = keyof typeof CORE_EN;

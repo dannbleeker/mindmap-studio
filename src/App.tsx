@@ -530,9 +530,7 @@ export function App() {
   // Cross-tab clobber guard: warn once if the active map is also open in another tab (both would
   // autosave to the same IndexedDB key, and the last write would silently win).
   const onTabConflict = useCallback(() => {
-    showHint(
-      "This map is open in another tab — edits here may overwrite the other tab's autosaves.",
-    );
+    showHint(t("hint.openInAnotherTab"));
   }, [showHint]);
   useTabPresence(view === "editor" ? doc.id : null, onTabConflict);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -636,14 +634,11 @@ export function App() {
   const checkForUpdates = useCallback(async () => {
     const result = await checkForUpdate();
     if (result === "up-to-date") {
-      showToast("success", "You're on the latest version.");
+      showToast("success", t("hint.upToDate"));
     } else if (result === "newly-found") {
-      showToast(
-        "info",
-        "New version found — the refresh prompt will appear once it finishes downloading.",
-      );
+      showToast("info", t("hint.updateDownloading"));
     } else if (result === "unsupported") {
-      showToast("info", "Update checks aren't available here (no service worker running).");
+      showToast("info", t("hint.updateUnavailable"));
     }
     // 'already-pending' — checkForUpdate already re-surfaced the "Refresh now" prompt.
   }, [showToast]);
@@ -655,9 +650,9 @@ export function App() {
       const d = liveDocRef.current;
       const nums = panels.numbered ? outlineNumbers(d.root, d.meta?.numberStyle) : undefined;
       await navigator.clipboard.writeText(toMarkdown(d, nums));
-      showHint("Outline copied to clipboard");
+      showHint(t("hint.outlineCopied"));
     } catch {
-      showHint("Couldn't access the clipboard");
+      showHint(t("hint.clipboardDenied"));
     }
   }
 
@@ -666,9 +661,9 @@ export function App() {
   async function copyTable() {
     try {
       await navigator.clipboard.writeText(mapToTsv(liveDocRef.current));
-      showHint("Map copied as a table (TSV)");
+      showHint(t("hint.tableCopied"));
     } catch {
-      showHint("Couldn't access the clipboard");
+      showHint(t("hint.clipboardDenied"));
     }
   }
 
@@ -682,9 +677,9 @@ export function App() {
       if (nodeId) url.searchParams.set("node", nodeId);
       else url.searchParams.delete("node");
       await navigator.clipboard.writeText(url.toString());
-      showHint(nodeId ? "Link to this topic copied" : "Link to this map copied");
+      showHint(nodeId ? t("hint.topicLinkCopied") : t("hint.mapLinkCopied"));
     } catch {
-      showHint("Couldn't access the clipboard");
+      showHint(t("hint.clipboardDenied"));
     }
   }
 
@@ -920,7 +915,7 @@ export function App() {
             await saveFolders([...existing, ...backupFolders.filter((f) => !seen.has(f.id))]);
           }
           await refreshMaps();
-          load(lib[0] ?? buildTemplate("blank"), [`Restored ${lib.length} maps from backup.`]);
+          load(lib[0] ?? buildTemplate("blank"), [t("hint.restoredMaps", { n: lib.length })]);
         } catch (err) {
           setError(err instanceof Error ? err.message : String(err));
         }
@@ -959,7 +954,7 @@ export function App() {
       }
       if (!lastDoc) {
         // Nothing parsed — surface the first failure rather than returning silently.
-        setError(`Import failed — ${firstError || "no readable maps"}`);
+        setError(t("hint.importFailed", { error: firstError || t("hint.noReadableMaps") }));
         return;
       }
       // Render the last good import; lead with a one-line summary that owns up to any failures.
@@ -968,7 +963,8 @@ export function App() {
         lastDoc,
         batch
           ? [
-              `Imported ${ok} of ${files.length} maps${failed ? ` (${failed} failed)` : ""}.`,
+              t("hint.importedMaps", { n: ok, total: files.length }) +
+                (failed ? t("hint.importFailedSuffix", { n: failed }) : ""),
               ...batchNotes,
             ]
           : lastWarnings,
@@ -985,11 +981,9 @@ export function App() {
     try {
       const image = await fileToMapImage(file);
       const applied = mapRef.current?.setSelectedImage(image);
-      showHint(
-        applied ? "Image added to the selected node." : "Select a node first, then add an image.",
-      );
+      showHint(applied ? t("hint.imageAdded") : t("hint.selectNodeForImage"));
     } catch (err) {
-      showHint(err instanceof Error ? err.message : "Could not add image");
+      showHint(err instanceof Error ? err.message : t("hint.imageFailed"));
     }
   }
 
@@ -1002,9 +996,9 @@ export function App() {
       // non-image files reject during decode and surface a hint.
       const { url } = await fileToMapImage(file);
       mapRef.current?.setBackgroundImage(url);
-      showHint("Background image set for this map.");
+      showHint(t("hint.backgroundSet"));
     } catch (err) {
-      showHint(err instanceof Error ? err.message : "Could not set background image");
+      showHint(err instanceof Error ? err.message : t("hint.backgroundFailed"));
     }
   }
 
@@ -1047,12 +1041,12 @@ export function App() {
   async function refreshRollupsNow() {
     const res = await refreshRollups(liveDocRef.current, loadMap);
     if (res.count === 0) {
-      showHint("No roll-ups yet — pick a source map in the ⤵ Roll-up menu first.");
+      showHint(t("hint.noRollups"));
       return;
     }
     load(res.doc);
-    const miss = res.missing.length ? ` (${res.missing.length} source map missing)` : "";
-    showHint(`Refreshed ${res.count} roll-up${res.count === 1 ? "" : "s"}${miss}.`);
+    const miss = res.missing.length ? t("hint.rollupsMissing", { n: res.missing.length }) : "";
+    showHint(t("hint.rollupsRefreshed", { n: res.count, missing: miss }));
   }
 
   function duplicateMap() {
@@ -1069,12 +1063,12 @@ export function App() {
   async function promoteBranchToMap() {
     const id = selected?.id;
     if (!id) {
-      showHint("Select a topic first to promote it to a new map.");
+      showHint(t("hint.selectTopicToPromote"));
       return;
     }
     const fresh = newMapFromBranch(liveDocRef.current, id);
     if (!fresh) {
-      showHint("Pick a branch (not the central topic) to promote.");
+      showHint(t("hint.pickBranchToPromote"));
       return;
     }
     fresh.id = crypto.randomUUID();
@@ -1084,7 +1078,7 @@ export function App() {
       load(fresh);
       showHint(`Promoted "${fresh.title}" to a new map.`);
     } catch {
-      showHint("Couldn't create the new map.");
+      showHint(t("hint.promoteFailed"));
     }
   }
 
@@ -1092,23 +1086,23 @@ export function App() {
   // so ids never clash). The inverse of promote-to-map; reuses the cross-map branch-graft path.
   async function mergeMapAsBranch(sourceId: string) {
     if (!selected) {
-      showHint("Select a topic first to merge a map under it.");
+      showHint(t("hint.selectTopicToMerge"));
       return;
     }
     if (sourceId === liveDocRef.current.id) {
-      showHint("Pick a different map to merge in.");
+      showHint(t("hint.pickDifferentMap"));
       return;
     }
     try {
       const src = await loadMap(sourceId);
       if (!src) {
-        showHint("Couldn't load that map.");
+        showHint(t("hint.mapLoadFailed"));
         return;
       }
       const ok = mapRef.current?.addSubtreeToSelected([src.root]);
-      showHint(ok ? `Merged "${src.title}" under the selection.` : "Select a topic first.");
+      showHint(ok ? `Merged "${src.title}" under the selection.` : t("hint.selectTopicFirst"));
     } catch {
-      showHint("Couldn't merge that map.");
+      showHint(t("hint.mergeFailed"));
     }
   }
 
@@ -1117,16 +1111,16 @@ export function App() {
   function extractFilterMatches() {
     const lit = filterHits?.lit;
     if (!lit || !filterHits || filterHits.matches === 0) {
-      showHint("No matches to extract — adjust the filter first.");
+      showHint(t("hint.noMatchesToExtract"));
       return;
     }
     const extracted = filterToDoc(liveDocRef.current, lit, crypto.randomUUID());
     if (!extracted) {
-      showHint("No matches to extract — adjust the filter first.");
+      showHint(t("hint.noMatchesToExtract"));
       return;
     }
     load(extracted);
-    showHint(`Extracted ${filterHits.matches} matching topics to a new map.`);
+    showHint(t("hint.extracted", { n: filterHits.matches }));
   }
 
   async function deleteCurrent() {
@@ -1144,7 +1138,7 @@ export function App() {
         const more = refs.length > 3 ? `, and ${refs.length - 3} more` : "";
         const ok = await editorConfirm({
           title: "Delete this map?",
-          body: `${refs.length} other map${refs.length === 1 ? "" : "s"} link to this one (${names}${more}). Those links will break.`,
+          body: t("dialog.deleteMapRefs", { n: refs.length, names: `${names}${more}` }),
           confirmText: "Delete anyway",
           danger: true,
         });
@@ -1497,7 +1491,7 @@ export function App() {
     mapRef.current?.setConnectorStyle(design.connectorStyle); // map-wide connector (undoable)
     mapRef.current?.setBranchGrowth(design.branchGrowth); // map-wide branch weight (undoable)
     mapRef.current?.setAccentColor(design.accentColor); // relationship + boundary accent (undoable)
-    showHint(`Applied the ${design.name} design.`);
+    showHint(t("hint.designApplied", { name: design.name }));
   };
 
   // The toolbar prop groups, built once and shared with both <Toolbar> and the ⌘K command registry
@@ -1634,7 +1628,7 @@ export function App() {
           drillId,
           criteria: active ? filter.criteria : null,
         });
-        showHint(replaced ? `Replaced view "${name}".` : `Saved view "${name}".`);
+        showHint(replaced ? t("hint.viewReplaced", { name }) : t("hint.viewSaved", { name }));
       },
       onApply: (id: string) => {
         const v = savedViews.list.find((x) => x.id === id);
@@ -1654,7 +1648,7 @@ export function App() {
         const v = savedViews.list.find((x) => x.id === id);
         savedViews.remove(id);
         if (v)
-          showToast("info", `Deleted view "${v.name}".`, {
+          showToast("info", t("hint.viewDeleted", { name: v.name }), {
             action: {
               label: "Undo",
               run: () =>
@@ -1762,7 +1756,7 @@ export function App() {
       {/* First focusable element — lets keyboard / switch users skip the rail + toolbar straight to
           the map (WCAG 2.4.1). Targets the canvas wrapper's id; off-screen until focused. */}
       <a className="mm-skip-link" href="#mm-canvas">
-        Skip to canvas
+        {t("app.skipToCanvas")}
       </a>
       <IconRail
         onHome={goHome}
@@ -1810,7 +1804,7 @@ export function App() {
             <span style={{ flex: 1 }}>Import failed: {error}</span>
             <button
               type="button"
-              aria-label="Dismiss import error"
+              aria-label={t("app.dismissImportError")}
               onClick={() => setError(null)}
               style={bannerDismissStyle}
             >
@@ -1841,12 +1835,12 @@ export function App() {
                   onClick={() => setWarningsExpanded((v) => !v)}
                   style={bannerLinkStyle}
                 >
-                  {warningsExpanded ? "Hide" : "Show all"}
+                  {warningsExpanded ? "Hide" : t("hint.showAll")}
                 </button>
               )}
               <button
                 type="button"
-                aria-label="Dismiss import notes"
+                aria-label={t("app.dismissImportNotes")}
                 onClick={() => setWarnings([])}
                 style={bannerDismissStyle}
               >
@@ -1880,7 +1874,7 @@ export function App() {
             }}
           >
             <span>
-              ◎ Focusing branch: <strong>{focus.topic || "(untitled)"}</strong>
+              ◎ Focusing branch: <strong>{focus.topic || t("common.untitled")}</strong>
             </span>
             <button
               type="button"
@@ -1907,7 +1901,7 @@ export function App() {
             }}
           >
             <span>
-              ⤢ Drilled into: <strong>{drillTopic || "(untitled)"}</strong>
+              ⤢ Drilled into: <strong>{drillTopic || t("common.untitled")}</strong>
             </span>
             <button
               type="button"
@@ -1941,7 +1935,7 @@ export function App() {
               className="mm-sheet-handle"
               role="separator"
               aria-orientation="horizontal"
-              aria-label="Resize panel — drag, arrow keys to resize, Escape to close"
+              aria-label={t("app.resizePanel")}
               tabIndex={0}
               data-dragging={sheetDrag.dragging || undefined}
               {...sheetDrag.handleProps}
@@ -1996,7 +1990,7 @@ export function App() {
                         if (kind === "marker") filter.toggleMarker(key);
                         else filter.toggleTag(key);
                         if (!panels.filterOpen) panels.toggleFilter();
-                        showHint(`Filtering by ${kind} “${key}”.`);
+                        showHint(t("hint.filteringBy", { kind, key }));
                       }}
                     />
                   ),
@@ -2148,7 +2142,7 @@ export function App() {
                       onSaveStyle={saveNamedStyle}
                       onApplyStyle={(style) => {
                         const ok = mapRef.current?.setSelectedStyle(style);
-                        if (!ok) showHint("Select a topic first, then apply a named style.");
+                        if (!ok) showHint(t("hint.selectTopicForStyle"));
                       }}
                       onDeleteStyle={deleteNamedStyle}
                     />
@@ -2255,7 +2249,7 @@ export function App() {
                       }
                     }
                   } catch (err) {
-                    showHint(err instanceof Error ? err.message : "Could not add that file.");
+                    showHint(err instanceof Error ? err.message : t("hint.fileFailed"));
                   }
                 }}
                 onExportBranch={(id) => setBranchExportId(id)}
@@ -2404,7 +2398,7 @@ export function App() {
                 markers={MARKER_PALETTE}
                 onToggleMarker={(mk) => {
                   const ok = mapRef.current?.toggleSelectedIcon(mk);
-                  if (!ok) showHint("Select a node first, then click a marker.");
+                  if (!ok) showHint(t("hint.selectNodeForMarker"));
                 }}
                 bulkMarkers={selectionMarkerTags?.markers}
                 bulkTags={selectionMarkerTags?.tags}
@@ -2412,24 +2406,24 @@ export function App() {
                 onBulkToggleTag={(t) => mapRef.current?.bulkToggleSelectedTag(t)}
                 onPickSticker={(s) => {
                   const ok = mapRef.current?.setSelectedImage(stickerImage(s));
-                  if (!ok) showHint("Select a node first, then pick a sticker.");
+                  if (!ok) showHint(t("hint.selectNodeForSticker"));
                 }}
                 onStyle={(patch) => {
                   const ok = mapRef.current?.setSelectedStyle(patch);
-                  if (!ok) showHint("Select a node first, then style it.");
+                  if (!ok) showHint(t("hint.selectNodeForStyle"));
                 }}
                 onBranchColor={(color) => {
                   const ok = mapRef.current?.setSelectedBranchColor(color);
-                  if (!ok) showHint("Select a node first, then set its branch colour.");
+                  if (!ok) showHint(t("hint.selectNodeForBranchColour"));
                 }}
                 namedStyles={namedStyles}
                 onSetFillImage={async (file) => {
                   try {
                     const { url } = await fileToMapImage(file);
                     const ok = mapRef.current?.setSelectedStyle({ fillImage: url });
-                    if (!ok) showHint("Select a topic first, then set its fill image.");
+                    if (!ok) showHint(t("hint.selectTopicForFillImage"));
                   } catch (err) {
-                    showHint(err instanceof Error ? err.message : "Could not set the fill image");
+                    showHint(err instanceof Error ? err.message : t("hint.fillImageFailed"));
                   }
                 }}
                 onClearFillImage={() => mapRef.current?.setSelectedStyle({ fillImage: "" })}
@@ -2444,37 +2438,37 @@ export function App() {
                 allTags={allTags}
                 onSetProgress={(progress) => {
                   const ok = mapRef.current?.setSelectedProgress(progress);
-                  if (!ok) showHint("Select a node first, then set its progress.");
+                  if (!ok) showHint(t("hint.selectNodeForProgress"));
                 }}
                 onSetDue={(d) => {
                   const ok = mapRef.current?.setSelectedDue(d);
-                  if (!ok) showHint("Select a node first, then set a due date.");
+                  if (!ok) showHint(t("hint.selectNodeForDue"));
                 }}
                 onSetStart={(d) => {
                   const ok = mapRef.current?.setSelectedStart(d);
-                  if (!ok) showHint("Select a node first, then set a start date.");
+                  if (!ok) showHint(t("hint.selectNodeForStart"));
                 }}
                 onSetPriority={(p) => {
                   const ok = mapRef.current?.setSelectedPriority(p);
-                  if (!ok) showHint("Select a node first, then set its priority.");
+                  if (!ok) showHint(t("hint.selectNodeForPriority"));
                 }}
                 onAddAttachment={async (file) => {
                   try {
                     const att = await fileToAttachment(file);
                     const ok = mapRef.current?.addSelectedAttachment(att);
-                    if (!ok) showHint("Select a node first, then attach a file.");
+                    if (!ok) showHint(t("hint.selectNodeForAttachment"));
                   } catch (err) {
-                    showHint(err instanceof Error ? err.message : "Could not attach that file.");
+                    showHint(err instanceof Error ? err.message : t("hint.attachFailed"));
                   }
                 }}
                 onRemoveAttachment={(i) => mapRef.current?.removeSelectedAttachment(i)}
                 onSetHyperlink={(url) => {
                   const ok = mapRef.current?.setSelectedHyperlink(url);
-                  if (!ok) showHint("Select a node first, then add a link.");
+                  if (!ok) showHint(t("hint.selectNodeForLink"));
                 }}
                 onAddHyperlink={(url) => {
                   const ok = mapRef.current?.addSelectedHyperlink(url);
-                  if (!ok) showHint("Select a node first, then add a link.");
+                  if (!ok) showHint(t("hint.selectNodeForLink"));
                 }}
                 onRemoveHyperlink={(i) => mapRef.current?.removeSelectedHyperlink(i)}
                 maps={maps
@@ -2579,12 +2573,12 @@ export function App() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <strong style={{ fontSize: 15, flex: 1 }}>Search all maps</strong>
+          <strong style={{ fontSize: 15, flex: 1 }}>{t("search.title")}</strong>
           <button
             type="button"
             onClick={() => setSearchAllOpen(false)}
             style={controlStyle}
-            aria-label="Close search"
+            aria-label={t("search.close")}
           >
             ✕
           </button>
@@ -2592,13 +2586,13 @@ export function App() {
         <input
           value={libQuery}
           onChange={(e) => setLibQuery(e.target.value)}
-          placeholder="Find across every map… (try tag:foo  priority:1  has:note  -exclude)"
-          title={
-            "Search every map by text, or use operators:\n" +
-            'tag:foo  marker:flag-red  priority:1  due:overdue  has:note  level:>=2  -exclude  "exact phrase"'
-          }
+          placeholder={t("search.placeholder")}
+          // The operator list stays literal: `tag:`, `marker:`, `due:overdue` are SYNTAX the user
+          // types, not prose — the same reasoning that keeps physical key names literal in the cheat
+          // sheet. Only the sentence introducing them is a message.
+          title={`${t("search.operatorsHelp")}\ntag:foo  marker:flag-red  priority:1  due:overdue  has:note  level:>=2  -exclude  "exact phrase"`}
           style={{ ...inputStyle, width: "100%", boxSizing: "border-box" }}
-          aria-label="Search query"
+          aria-label={t("search.queryLabel")}
         />
         {libQuery.trim() && (
           <SearchResults
@@ -2637,28 +2631,28 @@ export function App() {
             gap: 12,
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 18 }}>MindMap Studio</h2>
+          <h2 style={{ margin: 0, fontSize: 18 }}>{t("about.appName")}</h2>
           <button
             type="button"
             onClick={() => setAboutOpen(false)}
             style={controlStyle}
-            aria-label="Close about dialog"
+            aria-label={t("about.close")}
           >
             ✕
           </button>
         </div>
         <p style={{ margin: "8px 0 14px", color: "var(--ed-muted)", fontSize: 13 }}>
-          Local-first mind mapping — a MindManager replacement. Your maps stay in your browser.
+          {t("about.tagline")}
         </p>
         <p style={{ margin: "0 0 14px", fontSize: 13 }}>© 2026 Dann Bleeker Pedersen</p>
         <div style={{ fontSize: 13, marginBottom: 14 }}>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>License (dual)</div>
-          <div>Software — Apache License 2.0</div>
-          <div>Book and docs — CC BY-NC 4.0</div>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>{t("about.licenseHeading")}</div>
+          <div>{t("about.licenseCode")}</div>
+          <div>{t("about.licenseBook")}</div>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 13 }}>
           <a href="/user-guide.html" target="_blank" rel="noopener noreferrer">
-            User guide
+            {t("about.userGuide")}
           </a>
           <a href="/Thinking-in-Maps.pdf" target="_blank" rel="noopener noreferrer">
             Book (PDF)
@@ -2667,10 +2661,10 @@ export function App() {
             Book (EPUB)
           </a>
           <a href="/notices.html" target="_blank" rel="noopener noreferrer">
-            Third-party notices
+            {t("about.thirdParty")}
           </a>
           <a href="/dashboard.html" target="_blank" rel="noopener noreferrer">
-            Live dashboard
+            {t("about.dashboard")}
           </a>
           <a
             href="https://github.com/dannbleeker/mindmap-studio"
@@ -2700,7 +2694,7 @@ export function App() {
             }}
             style={controlStyle}
           >
-            Check for updates
+            {t("about.checkUpdates")}
           </button>
           {/* Renders only when installation is offered (otherwise nothing). */}
           <InstallButton className="mm-install-about" />
@@ -2751,11 +2745,11 @@ export function App() {
         onReShowGettingStarted={reShowFirstRun}
         onClearRecents={() => {
           clearRecents();
-          showHint("Command history cleared.");
+          showHint(t("hint.commandHistoryCleared"));
         }}
         onClearBranchClipboard={() => {
           clearBranch();
-          showHint("Branch clipboard cleared.");
+          showHint(t("hint.branchClipboardCleared"));
         }}
         onExportSettings={() => {
           const file = collectSettings(new Date().toISOString());
@@ -2818,17 +2812,17 @@ export function App() {
         style={{ padding: 0, width: "min(560px, 92vw)" }}
       >
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-          <strong style={{ color: "var(--ed-ink)" }}>Paste text → topics</strong>
+          <strong style={{ color: "var(--ed-ink)" }}>{t("paste.title")}</strong>
           <p style={{ margin: 0, fontSize: 13, color: "var(--ed-muted)" }}>
             Paste an outline, a bullet list, or Markdown — indentation (or <code>#</code> headings)
             sets the hierarchy. A spreadsheet selection (Excel / Sheets) becomes one topic per row,
-            with extra columns as the note and a <code>Tags</code> column as tags.
+            with extra columns as the note and a <code>{t("paste.tags")}</code> column as tags.
           </p>
           <textarea
             value={paste.text}
             onChange={(e) => paste.setText(e.target.value)}
             placeholder={"- Theme\n  - Idea\n  - Idea\n- Next theme"}
-            aria-label="Paste outline text"
+            aria-label={t("paste.inputLabel")}
             rows={10}
             style={{
               resize: "vertical",
@@ -2863,7 +2857,11 @@ export function App() {
                 onClick={paste.addUnderSelected}
                 disabled={!selected}
                 style={controlStyle}
-                title={selected ? `Add under "${selected.topic}"` : "Select a node first"}
+                title={
+                  selected
+                    ? t("paste.addUnder", { topic: selected.topic })
+                    : t("hint.selectNodeShort")
+                }
               >
                 ➕ Add under selected
               </button>
@@ -2880,7 +2878,7 @@ export function App() {
         <CommandPalette
           commands={buildEditorCommands(toolbarProps)}
           onClose={() => setCmdkOpen(false)}
-          placeholder="Search commands…"
+          placeholder={t("palette.placeholder")}
           // When a topic is selected these kinds are enabled, so ⌘K (empty query) leads with the
           // node-scoped actions under a "For the selected topic" header.
           contextKinds={["node", "marker", "priority"]}

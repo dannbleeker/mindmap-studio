@@ -174,6 +174,24 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   A fifth shadowed `t` turned up in the relationship-type chips, which is why that `aria-label` had
   stayed hardcoded through the first canvas pass.
 
+  **`App.tsx` is migrated (83 strings)** — the shell's toasts, the about dialog, the search-all-maps
+  overlay, the paste-outline dialog and the skip link. It was **missing from the migration plan
+  entirely** until the scanner was pointed at it. Nine more `=== 1 ? "" : "s"` ternaries became plural
+  messages (`Restored {n} maps`, `Refreshed {n} roll-ups`, `{n} other maps link to this one`).
+
+  Two judgement calls worth recording. The "select something first" family stays **one message per
+  action** rather than collapsing into a generic "nothing selected": each names what the user was
+  reaching for, which is the difference between a hint and a scold, and a translator needs the verb to
+  inflect. And the search tooltip was a two-part string concatenation — only the sentence introducing
+  the operators became a message; `tag:`, `due:overdue` and the rest stay literal, because they are
+  **syntax the user types**, the same reasoning that keeps physical key names literal in the cheat
+  sheet.
+
+  Cost: **+1.2 kB gz, entry 170.6 → 171.8** against the ceiling raised to 175 for this migration.
+  Unlike the toolbar's 93 strings at +0.5 kB, almost none of these reuse an existing message — there is
+  no second surface saying "Couldn't access the clipboard" — which is why reuse, not string count,
+  predicts the cost.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

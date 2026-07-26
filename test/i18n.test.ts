@@ -3,7 +3,7 @@
 // The localisation layer. English is the only shipped locale, so these assert the machinery rather than
 // any translation: key typing, plural selection via Intl.PluralRules, locale resolution, the document
 // lang/dir wiring, and locale-aware collation.
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Catalogue } from "../src/i18n";
@@ -23,6 +23,15 @@ import {
 } from "../src/i18n";
 import { CORE_EN } from "../src/i18n/core";
 import { CANVAS_EN } from "../src/mindmap/flow/messages";
+
+// EVERY catalogue in the app, in load order (eager first). The duplicate checks below iterate this
+// rather than naming a pair, because the migration is adding more of them: a hardcoded CORE-vs-CANVAS
+// check would stay green while catalogue #3 repeated either one. Add a catalogue here when you create
+// it — `lazy-chunk modules import the registry directly` will also start covering its file.
+const CATALOGUES = [
+  { name: "CORE_EN", catalogue: CORE_EN as Catalogue },
+  { name: "CANVAS_EN", catalogue: CANVAS_EN as Catalogue },
+] as const;
 
 beforeEach(() => {
   localStorage.clear();
@@ -89,10 +98,7 @@ describe("catalogue", () => {
     // surface it was slugged from, and move it to `common.` when neither surface owns it.
     const seen = new Map<string, string>();
     const dupes: string[] = [];
-    for (const [name, catalogue] of [
-      ["CORE_EN", CORE_EN],
-      ["CANVAS_EN", CANVAS_EN],
-    ] as const) {
+    for (const { name, catalogue } of CATALOGUES) {
       seen.clear();
       for (const [key, message] of Object.entries(catalogue)) {
         if (typeof message !== "string") continue;
@@ -102,6 +108,53 @@ describe("catalogue", () => {
       }
     }
     expect(dupes).toEqual([]);
+  });
+
+  it("has no dead keys — every catalogue entry is referenced by the app", () => {
+    // The mirror of the hardcoded-string guard. That one fails when the app has a string the catalogue
+    // doesn't; this fails when the catalogue has a string the app doesn't. Dead keys are not harmless:
+    // they ship bytes in the entry chunk and they hand a translator work that renders nowhere, which is
+    // worse than untranslated because it looks done.
+    //
+    // The exception list below is a SHRINKING one, not a parking space. Every entry is a key added in
+    // anticipation of a caller that never arrived; either wire it up or delete it. Do not add to this
+    // list to make a build pass — a key nothing calls should simply be removed.
+    const UNREFERENCED = new Set([
+      "settings.language", // the locale picker's label — SettingsDialog renders the control without it
+      // A `count.*` family built for call sites that ended up using bespoke plural messages instead.
+      "count.topics",
+      "count.nodes",
+      "count.maps",
+      "count.folders",
+      "count.commands",
+      "count.matches",
+      "count.attachments",
+      "count.subTopics",
+      "count.rollUps",
+      "count.otherMaps",
+      "count.notes",
+      "count.branchesCopied",
+    ]);
+
+    const sources: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
+        const rel = `${dir}/${entry.name}`;
+        if (entry.isDirectory()) walk(rel);
+        else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith(".d.ts"))
+          sources.push(readFileSync(join(process.cwd(), rel), "utf8"));
+      }
+    };
+    walk("src");
+    // The catalogues quote their own keys; a key is only "referenced" if some OTHER file names it.
+    const appCode = sources.filter((src) => !src.includes("satisfies Catalogue")).join("\n");
+
+    const dead = CATALOGUES.flatMap(({ name, catalogue }) =>
+      Object.keys(catalogue)
+        .filter((key) => !UNREFERENCED.has(key) && !appCode.includes(`"${key}"`))
+        .map((key) => `${name}.${key}`),
+    );
+    expect(dead).toEqual([]);
   });
 
   it("never says the same thing twice across catalogues", () => {
@@ -128,15 +181,24 @@ describe("catalogue", () => {
       "canvas.branchLayout.radial",
     ]);
 
-    const coreByText = new Map<string, string>();
-    for (const [key, message] of Object.entries(CORE_EN))
-      if (typeof message === "string" && !coreByText.has(message)) coreByText.set(message, key);
-
+    // Pairwise over every catalogue, not CORE-vs-CANVAS: three more catalogues are coming, and a
+    // hardcoded pair would go on passing while catalogue #3 duplicated either of the first two.
     const dupes: string[] = [];
-    for (const [key, message] of Object.entries(CANVAS_EN)) {
-      if (typeof message !== "string" || HOMONYMS.has(key)) continue;
-      const existing = coreByText.get(message);
-      if (existing) dupes.push(`${key} duplicates ${existing} — both say "${message}"`);
+    for (let i = 0; i < CATALOGUES.length; i++) {
+      const byText = new Map<string, string>();
+      for (const [key, message] of Object.entries(CATALOGUES[i].catalogue))
+        if (typeof message === "string" && !byText.has(message)) byText.set(message, key);
+
+      for (let j = i + 1; j < CATALOGUES.length; j++) {
+        for (const [key, message] of Object.entries(CATALOGUES[j].catalogue)) {
+          if (typeof message !== "string" || HOMONYMS.has(key)) continue;
+          const existing = byText.get(message);
+          if (existing)
+            dupes.push(
+              `${CATALOGUES[j].name}.${key} duplicates ${CATALOGUES[i].name}.${existing} — both say "${message}"`,
+            );
+        }
+      }
     }
     expect(dupes).toEqual([]);
   });
@@ -242,7 +304,39 @@ describe("bundle locality", () => {
   // catalogue, so one wrong import path silently drags every chrome string into that chunk. Confirmed by
   // build measurement (canvas strings land in FlowMindMap-*.js, chrome strings in index-*.js); this is
   // the cheap regression net for it.
-  const LAZY_FILES = ["src/mindmap/flow/messages.ts", "src/mindmap/flow/TopicNode.tsx"];
+  // DERIVED, not listed. A hardcoded array covers exactly the files someone remembered to add, which is
+  // the failure this whole programme keeps repeating — so instead: every module that registers a
+  // catalogue, plus every module that imports one. The floor stops an empty or broken glob from passing
+  // as "all clear"; raise it when a catalogue is added.
+  const LAZY_FILES = (() => {
+    const found: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
+        const rel = `${dir}/${entry.name}`;
+        if (entry.isDirectory()) walk(rel);
+        else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith(".d.ts")) {
+          const src = readFileSync(join(process.cwd(), rel), "utf8");
+          // The catalogue itself, or a module that pulls one in — both must avoid the barrel.
+          // `src/i18n/` is the layer itself — core.ts is the EAGER catalogue and registry.ts owns
+          // registerMessages. Neither is a lazy chunk, and core.ts deliberately has no i18n import to
+          // find (it imports ./registry relatively), so including them fails the barrel check on a
+          // file the check was never about.
+          if (rel.startsWith("src/i18n/")) continue;
+          const registers = src.includes("registerMessages(");
+          const importsOne = /import "\.[^"]*messages";/.test(src);
+          if (registers || importsOne) found.push(rel);
+        }
+      }
+    };
+    walk("src");
+    return found;
+  })();
+
+  it("finds the lazy catalogues rather than trusting a list", () => {
+    // A floor, so a glob that silently matches nothing can't report success.
+    expect(LAZY_FILES.length).toBeGreaterThanOrEqual(2);
+    expect(LAZY_FILES).toContain("src/mindmap/flow/messages.ts");
+  });
 
   const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
 

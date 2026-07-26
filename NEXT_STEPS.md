@@ -83,7 +83,7 @@ detectors over any file, so you see what it will hold you to *before* joining th
 node scripts/i18n-scan.mjs src/Panels.tsx src/App.tsx src/mindmap/FlowMindMap.tsx --count
 ```
 
-As of 2026-07-26 that reports **193 `Panels.tsx` + 75 `App.tsx` + 34 `FlowMindMap.tsx` = 302**.
+As of 2026-07-26 that reports **193 `Panels.tsx` + 75 `App.tsx` + 33 `FlowMindMap.tsx` = 301**.
 `FlowMindMap.tsx` is lazy, so its catalogue belongs in `flow/messages.ts`, not `i18n/core.ts`.
 **`App.tsx` was missing from this plan entirely** until the scanner was pointed at it.
 

@@ -154,4 +154,25 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(proseViolations("            style?.background ??")).toHaveLength(0);
     expect(proseViolations("        boxShadow: dropTarget")).toHaveLength(0);
   });
+
+  it("does not mistake a multi-line block comment's continuation lines for prose", () => {
+    // The one false positive this guard produced in anger: a JSX block comment whose opener is on the
+    // first line, so the CONTINUATION lines start with prose rather than a star and looked like copy.
+    const jsxComment = [
+      "        {/* Move project item 14 shifts every task date in this branch by a preset,",
+      "            preserving relative offsets. Shown only when the branch actually has dated",
+      "            tasks, so this stays honest */}",
+      "        Branch layout follows",
+    ].join("\n");
+    const hits = proseViolations(jsxComment);
+    // Only the real JSX copy on the last line survives — all three comment lines are skipped.
+    expect(hits.map((h) => h.line)).toEqual([4]);
+
+    // An opener INSIDE a string must not start a phantom block that swallows everything after it.
+    const notAComment = [
+      '        const glob = "src/**/*.tsx";',
+      "        Real copy lives here",
+    ].join("\n");
+    expect(proseViolations(notAComment)).toHaveLength(1);
+  });
 });

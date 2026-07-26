@@ -28,6 +28,40 @@ export const ALLOWED_LITERALS = new Set([
 
 const isComment = (line) => /^\s*(\/\/|\/\*|\*)/.test(line);
 
+// Which lines sit inside a comment, tracked ACROSS lines.
+//
+// `isComment` above is per-line, and that is not enough for the multi-line JSX block comments this
+// codebase is full of: the opener is a brace-slash-star, but the CONTINUATION lines open with prose
+// rather than with a star. The bare-prose detector read those continuations as JSX copy and reported a
+// false positive in FlowMindMap.tsx. A false positive is the one failure this guard cannot afford — it
+// trains people to ignore the output — so the fix is to narrow the check, not to except the file.
+//
+// A block only OPENS on a block-comment opener that STARTS its line (optionally behind the JSX brace).
+// Requiring that keeps an opener sitting inside a string literal — a URL, a regex — from starting a
+// phantom block that would silently swallow every line until the next closer and hide real strings.
+//
+// (Written with line comments rather than a doc comment on purpose: the delimiters it has to talk
+// about cannot be quoted inside a block comment without ending it.)
+function commentLineSet(src) {
+  const inComment = new Set();
+  let inBlock = false;
+  src.split("\n").forEach((line, i) => {
+    if (inBlock) {
+      inComment.add(i);
+      if (line.includes("*/")) inBlock = false;
+      return;
+    }
+    if (/^\s*\{?\s*\/\*/.test(line)) {
+      inComment.add(i);
+      // A single-line `/* … */` opens and closes on the same line; only a dangling opener continues.
+      if (!line.includes("*/")) inBlock = true;
+      return;
+    }
+    if (isComment(line)) inComment.add(i);
+  });
+  return inComment;
+}
+
 /** A literal in a user-facing prop — `title="Save"` instead of `title={t("…")}`. */
 export function propViolations(src) {
   const out = [];
@@ -55,11 +89,12 @@ export function propViolations(src) {
  *  purpose, because it names a physical key — which is why the preceding character matters. */
 export function argumentViolations(src) {
   const out = [];
+  const inComment = commentLineSet(src);
   src.split("\n").forEach((line, i) => {
     // Comments are prose on purpose, INCLUDING `/** … */` doc comments — those quote UI text to explain
     // a prop ("…a new standalone library map (\"New map from topic\")"), and flagging them would push the
     // migration into rewriting commentary, which is exactly the mistake the Toolbar pass made once.
-    if (isComment(line)) return;
+    if (inComment.has(i)) return;
     // The rules below overlap on purpose — a wrapped `? "…"` arm is both an argument position and a
     // ternary arm — so a literal is reported once per line, not once per rule that noticed it.
     const seen = new Set();
@@ -101,8 +136,9 @@ export function argumentViolations(src) {
  *  class names — are lowercase throughout or single tokens, so they don't match. */
 export function templateViolations(src) {
   const out = [];
+  const inComment = commentLineSet(src);
   src.split("\n").forEach((line, i) => {
-    if (isComment(line)) return;
+    if (inComment.has(i)) return;
     for (const m of line.matchAll(/`([^`]*)`/g)) {
       const text = m[1].replace(/\$\{[^}]*\}/g, " ");
       if (!/[A-Z][a-z]+\s+[a-z]+/.test(text)) continue;
@@ -118,8 +154,9 @@ export function templateViolations(src) {
  *  letters and spaces only inside the parens, which no regex, format string or selector matches. */
 export function placeholderViolations(src) {
   const out = [];
+  const inComment = commentLineSet(src);
   src.split("\n").forEach((line, i) => {
-    if (isComment(line)) return;
+    if (inComment.has(i)) return;
     for (const m of line.matchAll(/"(\([a-z][a-z ]*\))"/g))
       out.push({ line: i + 1, text: `"${m[1]}"`, why: "user-facing placeholder literal" });
   });
@@ -134,11 +171,13 @@ export function placeholderViolations(src) {
  *  which is the common case. */
 export function proseViolations(src) {
   const out = [];
+  const inComment = commentLineSet(src);
   src.split("\n").forEach((line, i) => {
     const trimmed = line.trim();
     if (trimmed.length < 12) return;
-    // Comments are prose on purpose.
-    if (/^(\/\/|\/\*|\*)/.test(trimmed)) return;
+    // Comments are prose on purpose — including the CONTINUATION lines of a multi-line block comment,
+    // which open with prose rather than with a star. That was this detector's one false-positive shape.
+    if (inComment.has(i)) return;
     // Code punctuation — includes `:` and `?`, which object literals and optional chaining use.
     if (/[<>{}=`"';(),[\]?:]/.test(trimmed)) return;
     // Property access (`navigator.storage`) reads as two words once the dot is allowed; a full stop in

@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-26T18:50:15.091Z",
-  "commit": "bf1919a",
+  "generatedAt": "2026-07-26T19:00:44.813Z",
+  "commit": "927eba1",
   "headline": {
-    "linesTsJs": 81468,
-    "tests": 2246,
+    "linesTsJs": 81545,
+    "tests": 2249,
     "lineCoveragePct": 90.1,
-    "commits": 1166,
+    "commits": 1168,
     "ageDays": 45,
-    "trackedFiles": 524,
+    "trackedFiles": 525,
     "featureManualPct": 100,
     "featureBookPct": 96.8,
     "featureExamplePct": 59.3
@@ -20,8 +20,8 @@
     },
     {
       "category": "Unit tests",
-      "files": 212,
-      "lines": 31718
+      "files": 213,
+      "lines": 31795
     },
     {
       "category": "Build scripts",
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 86.79,
-      "covered": 9017,
-      "total": 10389
+      "covered": 9016,
+      "total": 10388
     }
   },
   "tests": {
-    "unit": 2246,
+    "unit": 2249,
     "e2e": 0,
-    "durationMs": 111185,
+    "durationMs": 110256,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 27750
+        "ms": 29077
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 26587
+        "ms": 26833
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 10155
+        "ms": 10706
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8602
+        "ms": 9030
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 6355
+        "ms": 6170
       }
     ]
   },
@@ -320,16 +320,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 45,
-    "commits": 1166,
-    "commits7d": 70,
+    "commits": 1168,
+    "commits7d": 72,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 558
+        "count": 559
       },
       {
         "name": "github-actions[bot]",
-        "count": 533
+        "count": 534
       },
       {
         "name": "Claude",
@@ -337,8 +337,8 @@
       }
     ],
     "churn30d": {
-      "added": 42951,
-      "removed": 13199
+      "added": 43074,
+      "removed": 13231
     },
     "changelogEntries": 441
   }

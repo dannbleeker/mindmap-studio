@@ -414,6 +414,16 @@ export const CORE_EN = {
   "hint.structureInserted": "Inserted the {name} structure.",
   "hint.stickyColourAdded": "{colour} sticky note added.",
   "hint.shapeAdded": "Added a {shape} — drag to move, drag a corner to resize.",
+
+  // Export menu. The FORMAT labels are not here — they reuse `cmd.export.*`, because this menu and the
+  // ⌘K "Export …" rows offer the same list and must not drift. Only the group headings and the two
+  // entries with no ⌘K equivalent are toolbar-local.
+  "toolbar.exportGroup.data": "Data & outline",
+  "toolbar.exportGroup.image": "Image",
+  "toolbar.exportGroup.document": "Document",
+  "toolbar.exportGroup.presentation": "Presentation",
+  "toolbar.copyImageToClipboard": "Copy image to clipboard",
+  "toolbar.exportPdfLetter": ".pdf (Letter portrait)",
 } as const satisfies Catalogue;
 
 export type CoreKey = keyof typeof CORE_EN;

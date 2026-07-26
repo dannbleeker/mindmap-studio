@@ -10,6 +10,7 @@ import {
   proseViolations,
   scanSource,
   templateViolations,
+  tupleLabelViolations,
 } from "../scripts/lib/i18nDetectors.mjs";
 
 // The guard that stops the localisation work rotting.
@@ -22,14 +23,15 @@ import {
 // deliberately an ALLOWLIST rather than a whole-tree scan: a file joins the list when it's migrated, so
 // the guard grows with the work instead of blocking every file that hasn't been touched yet.
 //
-// It checks six shapes, chosen because they're where user-facing text actually lives and because they
+// It checks seven shapes, chosen because they're where user-facing text actually lives and because they
 // can be detected without false positives on CSS values, class names and DOM plumbing:
 //   1. a literal in a user-facing prop  — title="Save" rather than title={t("…")}
 //   2. prose in a positional argument   — add("open-file", "Open file…", …), or a tuple member
 //   3. prose in a template literal      — title={`Delete view ${v.name}`}
 //   4. a user-facing placeholder        — "(untitled)"
-//   5. JSX text between its tags        — <MenuLabel>Arrowheads</MenuLabel>
-//   6. a line of bare prose             — the multi-line paragraphs inside <p>…</p>
+//   5. a label in a label/action tuple  — ["Copy image to clipboard", () => io.copyPng()]
+//   6. JSX text between its tags        — <MenuLabel>Arrowheads</MenuLabel>
+//   7. a line of bare prose             — the multi-line paragraphs inside <p>…</p>
 //
 // Each detector past the first exists because the ones before it were demonstrably blind. (2) was added
 // after putting `editorCommands.ts` on the list made it PASS with ~50 labels still hardcoded — an
@@ -42,8 +44,9 @@ import {
 // Remaining limitation, stated so nobody assumes otherwise: (2) needs a capitalised MULTI-WORD literal,
 // so a single-word label — `add("present", "Present", …)` — still slips through. Widening it to single
 // words would collide with ids, `kind` values and technical tokens, and a noisy guard gets switched off.
-// (5) is what makes single words safe in the ONE place they can be told apart — between JSX tags,
-// where `>Type</` is unambiguously rendered content rather than an id or a discriminator.
+// (5) and (6) are what make single words safe in the two places they CAN be told apart: between JSX
+// tags, where `>Type</` is unambiguously rendered content, and as the first member of a tuple whose
+// second member is a function, where the shape itself proves the string is a label.
 //
 // When this fires, the fix is to move the string into a catalogue — not to add the file to an ignore
 // list. If a genuinely non-user-facing string trips it, narrow the check rather than widening the
@@ -80,7 +83,7 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     });
   }
 
-  it("actually detects all six shapes it claims to", () => {
+  it("actually detects all seven shapes it claims to", () => {
     // A guard that can't fail is worse than none — pin that each detector fires on its own shape.
     expect(propViolations('        title="Save the map"')).toHaveLength(1);
     expect(propViolations('        title={t("map.save")}')).toHaveLength(0);
@@ -143,7 +146,18 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(placeholderViolations('  {mm.title || "(untitled)"}')).toHaveLength(1);
     expect(placeholderViolations('  {mm.title || t("common.untitled")}')).toHaveLength(0);
     expect(placeholderViolations('  const re = /"(a|b)"/')).toHaveLength(0);
-    // (5) JSX text between its tags — the one place a SINGLE word is safe to flag.
+    // (5) a label/action tuple — the shape proves it's a label, so no capitalisation rule is needed.
+    expect(tupleLabelViolations('  ["Copy image to clipboard", () => io.copyPng()],')).toHaveLength(
+      1,
+    );
+    expect(tupleLabelViolations('  [".svg (vector)", io.exportSvg],')).toHaveLength(1);
+    expect(tupleLabelViolations('  ["Rename", () => startEdit(id)],')).toHaveLength(1);
+    expect(tupleLabelViolations('  [t("cmd.export.svg"), io.exportSvg],')).toHaveLength(0);
+    // A plain data array of strings holds ids, not labels — it must NOT fire.
+    expect(
+      tupleLabelViolations('  (["relates-to", "depends-on", "causes"] as const).map((kind) => ('),
+    ).toHaveLength(0);
+    // (6) JSX text between its tags — the one place a SINGLE word is safe to flag.
     expect(jsxTextViolations("        <MenuLabel>Arrowheads</MenuLabel>")).toHaveLength(1);
     expect(jsxTextViolations('        <option value="left">Left side</option>')).toHaveLength(1);
     expect(jsxTextViolations('        <option value="org-down">Org chart ↓</option>')).toHaveLength(

@@ -17,6 +17,7 @@ export function propViolations(src: string): Violation[];
 export function argumentViolations(src: string): Violation[];
 export function templateViolations(src: string): Violation[];
 export function placeholderViolations(src: string): Violation[];
+export function tupleLabelViolations(src: string): Violation[];
 export function jsxTextViolations(src: string): Violation[];
 export function proseViolations(src: string): Violation[];
 export function scanSource(src: string): Violation[];

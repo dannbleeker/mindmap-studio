@@ -163,6 +163,30 @@ export function placeholderViolations(src) {
   return out;
 }
 
+/** A label/action TUPLE — `["Copy image to clipboard", () => io.copyPng()]`, `[".svg (vector)",
+ *  io.exportSvg]`. Menus built from data rather than from JSX use this shape, and nothing else sees it:
+ *  the first member is preceded by `[`, which the argument rule excludes, and many of these labels open
+ *  with a `.` so they aren't "capitalised" either. 23 export labels sat behind that in `Toolbar.tsx`
+ *  after it was declared migrated, and 13 context-menu items in `FlowMindMap.tsx`.
+ *
+ *  The second member must LOOK like a function — an arrow, or a dotted/bare identifier closing the
+ *  array. That is what separates a label/action pair from a plain data array of strings such as
+ *  `(["relates-to", "depends-on"] as const)`, whose members are ids and must not be flagged. Because
+ *  the shape itself proves the string is a label, this detector needs no capitalisation or word-count
+ *  rule, so it catches the short ones the others give up on (`"Rename"`, `"+1d"`). */
+export function tupleLabelViolations(src) {
+  const out = [];
+  const inComment = commentLineSet(src);
+  src.split("\n").forEach((line, i) => {
+    if (inComment.has(i)) return;
+    for (const m of line.matchAll(/\[\s*"([^"]{2,})"\s*,\s*(?:\(|(?:\w+\.)*\w+\s*\])/g)) {
+      if (ALLOWED_LITERALS.has(m[1].toLowerCase())) continue;
+      out.push({ line: i + 1, text: `"${m[1]}"`, why: "label in a label/action tuple" });
+    }
+  });
+  return out;
+}
+
 /** JSX text content sitting on ONE line between its tags — `<MenuLabel>Arrowheads</MenuLabel>`,
  *  `<option value="left">Left side</option>`, `<span>Double-tap to edit</span>`.
  *
@@ -225,6 +249,7 @@ export function scanSource(src) {
     ...argumentViolations(src),
     ...templateViolations(src),
     ...placeholderViolations(src),
+    ...tupleLabelViolations(src),
     ...jsxTextViolations(src),
     ...proseViolations(src),
   ];

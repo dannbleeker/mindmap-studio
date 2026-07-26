@@ -381,52 +381,55 @@ export function Toolbar({
   const importInputRef = useRef<HTMLInputElement>(null);
   const nodeImageInputRef = useRef<HTMLInputElement>(null);
 
+  // The format labels reuse the `cmd.export.*` keys rather than minting `toolbar.*` twins: this menu
+  // and the ⌘K "Export …" rows offer the same formats, so one message keeps them from drifting apart
+  // in translation. Only the two labels with no ⌘K equivalent are toolbar-local.
   const EXPORTS: { group: string; items: [string, () => void][] }[] = [
     {
-      group: "Data & outline",
+      group: t("toolbar.exportGroup.data"),
       items: [
-        [".json (lossless)", io.exportJson],
-        [".md (Markdown)", io.exportMarkdown],
-        [".opml (outline)", io.exportOpml],
-        [".mm (FreeMind/Freeplane)", io.exportFreemind],
-        [".mmd (Mermaid)", io.exportMermaid],
-        [".xmind (XMind)", io.exportXmind],
-        [".smmx (SimpleMind)", io.exportSmmx],
-        [".mmap (MindManager)", io.exportMmap],
+        [t("cmd.export.json"), io.exportJson],
+        [t("cmd.export.md"), io.exportMarkdown],
+        [t("cmd.export.opml"), io.exportOpml],
+        [t("cmd.export.freemind"), io.exportFreemind],
+        [t("cmd.export.mermaid"), io.exportMermaid],
+        [t("cmd.export.xmind"), io.exportXmind],
+        [t("cmd.export.smmx"), io.exportSmmx],
+        [t("cmd.export.mmap"), io.exportMmap],
       ],
     },
     {
-      group: "Image",
+      group: t("toolbar.exportGroup.image"),
       items: [
-        [".png (image)", () => io.exportPng()],
-        [".png @2× (sharp)", () => io.exportPng({ scale: 2 })],
-        [".png @4× (print)", () => io.exportPng({ scale: 4 })],
-        [".png (transparent)", () => io.exportPng({ transparent: true })],
-        ["Copy image to clipboard", () => io.copyPng()],
-        [".svg (vector)", io.exportSvg],
+        [t("cmd.export.png"), () => io.exportPng()],
+        [t("cmd.export.png2x"), () => io.exportPng({ scale: 2 })],
+        [t("cmd.export.png4x"), () => io.exportPng({ scale: 4 })],
+        [t("cmd.export.png-transparent"), () => io.exportPng({ transparent: true })],
+        [t("toolbar.copyImageToClipboard"), () => io.copyPng()],
+        [t("cmd.export.svg"), io.exportSvg],
       ],
     },
     {
-      group: "Document",
+      group: t("toolbar.exportGroup.document"),
       items: [
-        [".html (standalone)", io.exportHtml],
-        [".html (interactive)", io.exportInteractiveHtml],
-        [".pdf (fit to map)", () => io.exportPdfFile({ pageSize: "fit" })],
+        [t("cmd.export.html"), io.exportHtml],
+        [t("cmd.export.ihtml"), io.exportInteractiveHtml],
+        [t("cmd.export.pdf-fit"), () => io.exportPdfFile({ pageSize: "fit" })],
         [
-          ".pdf (A4 landscape)",
+          t("cmd.export.pdf-a4"),
           () => io.exportPdfFile({ pageSize: "a4", orientation: "landscape" }),
         ],
-        [".pdf (Letter portrait)", () => io.exportPdfFile({ pageSize: "letter" })],
-        [".pdf (via print dialog)", io.exportPdf],
-        [".docx (Word)", io.exportDocx],
-        [".xlsx (Excel)", io.exportXlsx],
+        [t("toolbar.exportPdfLetter"), () => io.exportPdfFile({ pageSize: "letter" })],
+        [t("cmd.export.pdf-print"), io.exportPdf],
+        [t("cmd.export.docx"), io.exportDocx],
+        [t("cmd.export.xlsx"), io.exportXlsx],
       ],
     },
     {
-      group: "Presentation",
+      group: t("toolbar.exportGroup.presentation"),
       items: [
-        [".html (slide deck)", io.exportDeck],
-        [".pptx (PowerPoint)", io.exportPptx],
+        [t("cmd.export.deck"), io.exportDeck],
+        [t("cmd.export.pptx"), io.exportPptx],
       ],
     },
   ];

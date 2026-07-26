@@ -37,6 +37,7 @@ const MIGRATED = [
   "src/mindmap/flow/TopicNode.tsx",
   "src/shortcuts.ts",
   "src/components/editorCommands.ts",
+  "src/components/Toolbar.tsx",
 ];
 
 /** Props whose value is read by a user or a screen reader. */
@@ -78,7 +79,10 @@ function propViolations(src: string): Violation[] {
 function argumentViolations(src: string): Violation[] {
   const out: Violation[] = [];
   src.split("\n").forEach((line, i) => {
-    if (/^\s*(\/\/|\*)/.test(line)) return;
+    // Comments are prose on purpose, INCLUDING `/** … */` doc comments — those quote UI text to explain
+    // a prop ("…a new standalone library map (\"New map from topic\")"), and flagging them would push the
+    // migration into rewriting commentary, which is exactly the mistake the Toolbar pass made once.
+    if (/^\s*(\/\/|\/\*|\*)/.test(line)) return;
     for (const m of line.matchAll(/[(,]\s*"([A-Z][^"]*\s[^"]*)"/g)) {
       const value = m[1];
       if (ALLOWED_LITERALS.has(value.toLowerCase())) continue;
@@ -146,6 +150,11 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(argumentViolations('  ["json", "JSON (lossless)", io.exportJson],')).toHaveLength(1);
     // An object property is NOT an argument: shortcuts.ts keeps key names literal on purpose.
     expect(argumentViolations('      { keys: "Ctrl/⌘ + Z", action: t("x") },')).toHaveLength(0);
+    // A doc comment quoting UI text must NOT be flagged — the Toolbar migration rewrote exactly this
+    // shape once, turning commentary into a t() call mid-sentence.
+    expect(
+      argumentViolations('  /** Copy the branch into a new library map ("New map from topic"). */'),
+    ).toHaveLength(0);
     // Documented limitation: a single-word label isn't caught.
     expect(argumentViolations('  add("present", "Present", "map", run);')).toHaveLength(0);
     expect(

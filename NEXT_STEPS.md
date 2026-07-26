@@ -24,7 +24,7 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
 The **locale layer is built and English runs on it**; `src/i18n/` holds the registry, the typed English
 catalogue and the `Intl`-based plural/collation helpers, and `SettingsDialog` + the preferences-file
-handlers plus the `TopicNode` canvas strings and the whole keyboard cheat sheet are migrated (**237 catalogue entries** so far), behind a lint guard that fails on any new hardcoded user-facing string in a migrated file. English is the only locale and is expected to stay
+handlers plus the `TopicNode` canvas strings and the whole keyboard cheat sheet are migrated (**292 catalogue entries** so far), behind a lint guard that fails on any new hardcoded user-facing string in a migrated file. English is the only locale and is expected to stay
 that way for now — adding one means adding a JSON catalogue, not changing the app.
 
 **Bundle strategy — decided 2026-07-26.** Measured on the first 43 catalogue entries: the layer itself
@@ -53,8 +53,8 @@ fetching clearly wins. The architecture already supports it — `registerMessage
 later registrations overlay earlier ones, which is exactly the hook a fetched translation needs — so
 build it in the commit that adds the second language, where it earns its complexity, not before.
 
-Also still open from the plan: the remaining ~1,200 chrome strings (the top files being `Panels.tsx`
-342, `Toolbar.tsx` 220, `App.tsx` 127, `editorCommands.ts` 123, `FlowMindMap.tsx` 121 — ~340 of the
+Also still open from the plan: the remaining ~1,150 chrome strings (the biggest remaining being `Panels.tsx`
+(342 counted) and `FlowMindMap.tsx` (121, and lazy — so its catalogue belongs in `flow/messages.ts`) — ~340 of the
 total need hand conversion, not mechanical replacement); the rest of the `Intl` adoption (`ui.ts`
 `timeAgo`, `taskDate.ts` months + `parseNaturalDate`, the ~103 locale-unsafe `toLowerCase` sites, and
 wiring `compareText` into the 21 collation sites); the exporters taking the locale (`lang` attributes,

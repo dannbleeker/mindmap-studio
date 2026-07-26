@@ -51,6 +51,17 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   indistinguishable from `background: style?.fillImage` without a parser. On its first run it found five
   genuinely un-migrated paragraphs in `SettingsDialog`, now moved into the catalogue.
 
+  **The editor toolbar is migrated (55 entries).** 70 literals across four shapes — prop attributes, JSX
+  text nodes, positional arguments and `label:`/`name:` object properties — collapsing to 55 messages,
+  because identical text shares one key (a label repeated across two menus appears once).
+
+  The scripted pass initially rewrote quoted UI text **inside doc comments**, turning
+  `/** …library map ("New map from topic"). */` into a `t()` call mid-sentence. It compiled, being a
+  comment, but produced nonsense prose and keys slugged from commentary. Caught by reading the diff,
+  reverted, and re-run line-by-line with comments excluded. The lint guard then flagged those same two
+  comment lines — the guard skipped `//` and `*` but not `/**`, so it was wrong too; both are fixed and
+  the doc-comment shape is pinned as a must-not-fire case.
+
   **The ⌘K command registry is migrated (82 entries).** All 87 palette rows now come from the catalogue.
   This was the shape the plan called hand-work, and it split three ways: ~60 uniform
   `add("id", "Label", …)` sites done by script; 10 labels living in data tuples with no key naming them

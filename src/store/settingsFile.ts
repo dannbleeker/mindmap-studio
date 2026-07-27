@@ -24,9 +24,19 @@ const KIND = "mindmap-studio-settings";
 
 /** Preference keys deliberately NOT carried between machines:
  *  - `mindmap-branch-clipboard` is a copied subtree, not a setting (and can be large);
- *  - `mindmap-cmdk-recent` is this machine's own usage history.
+ *  - `mindmap-cmdk-recent` is this machine's own usage history;
+ *  - `mindmap-search-history` is the same category, and it is the user's own search TERMS — those
+ *    should not leave the machine inside a file they may hand to someone else;
+ *  - `mindmap-last-export` is usage history too, and it stores the export menu's LABEL as its
+ *    identity key, so on a machine running another locale it would not match anything anyway
+ *    (that is a real defect in Toolbar.tsx, recorded in NEXT_STEPS — excluding it here does not fix it).
  *  Everything else in LOCAL_PREF_KEYS is a genuine preference and travels. */
-const EXCLUDED = new Set<string>(["mindmap-branch-clipboard", "mindmap-cmdk-recent"]);
+const EXCLUDED = new Set<string>([
+  "mindmap-branch-clipboard",
+  "mindmap-cmdk-recent",
+  "mindmap-search-history",
+  "mindmap-last-export",
+]);
 
 /** The keys a settings file may carry — the single allowlist used by both export and import. */
 export const PORTABLE_PREF_KEYS: readonly string[] = LOCAL_PREF_KEYS.filter(

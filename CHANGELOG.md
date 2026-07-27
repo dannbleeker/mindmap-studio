@@ -327,6 +327,24 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **"Clear all local data" was missing seven preference keys.** `LOCAL_PREF_KEYS` claims to centralise
+  every preference the app writes, so that one action can wipe them all — but `mindmap-contrast`,
+  `-info-tab`, `-last-export`, `-layout`, `-minimap-open`, `-search-history` and `-sticky-color` were
+  never on it. They survived the wipe and never travelled in a settings file.
+
+  The list had drifted because nothing checked it: the existing test writes the keys the list names
+  and asserts those get cleared, which is true of **any** list, including a wrong one. It now derives
+  the truth from source instead — every `"mindmap-*"` literal in `src/` must be either a declared
+  preference or an explicitly documented non-preference, so a new key cannot appear without a decision
+  about which it is. Four are documented as not-storage: the IndexedDB database name, two
+  file-format `kind` markers, and a BroadcastChannel name.
+
+  Two of the seven deliberately do **not** travel between machines, following the rule already in
+  `settingsFile.ts` that usage history stays put: `mindmap-search-history` is the user's own search
+  terms, which should not leave the machine inside a file they might hand to someone else, and
+  `mindmap-last-export` stores the export menu's *label* as its identity key — so on a machine running
+  another locale it would not match anything anyway.
+
 - **The string detectors could not see three whole shapes, and 56 strings were hiding in files the
   allowlist had already certified clean.** An independent AST sweep — deliberately not built from the
   detectors' own rules — found 149 candidates inside allowlisted files; 56 were real. Three blind spots,

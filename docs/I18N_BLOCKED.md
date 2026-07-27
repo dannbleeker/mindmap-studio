@@ -185,12 +185,32 @@ export const PANEL_LABELS = {
   …
 ```
 
-**This is not broken today, and that is exactly what makes it worth writing down.** Nothing outside
-tests calls `setLocale`, and the registry resolves the stored locale before any catalogue-consuming
-module loads — so the frozen strings are currently correct. They stop being correct the moment a
-language picker ships, and they fail *quietly*: the app switches to Danish and the panel tabs, slash
-commands, edge presets, Start sidebar and theme names stay English. A half-translated UI reads as a
-broken translation, not as a code defect, so it would be reported late and diagnosed slowly.
+**⚠️ CORRECTED 2026-07-27 — the original write-up below got the trigger wrong, in the dangerous
+direction.** It said the frozen strings were "currently correct" because "the registry resolves the
+stored locale before any catalogue-consuming module loads", and that they arm "the moment a language
+picker ships". Both were false, and the second is the sentence on which "just require a reload" rested.
+
+Measured: `main.tsx` called `initLocale()` in its body, *below* `import { App }`. ES imports are hoisted
+and evaluated depth-first, so the entire eager graph had already run its module-scope `t()` calls
+against `DEFAULT_LOCALE` — **99 of the 194 froze before resolution ever ran.** That is fixed (the call
+now lives in the `src/i18n` barrel body, pinned by `test/i18n-init-order.test.ts`), but it means the
+"currently correct" reassurance was luck, not design: it held only because `LOCALES` has one entry.
+
+And the trigger is **`LOCALES` gaining a second entry, not a picker.** `resolveLocale()` already reads
+`navigator.languages`, so the day a second catalogue ships, a Danish browser gets a half-English first
+paint — panel tabs, slash commands, edge presets, Start sidebar and theme names in English — **with no
+user action and no UI involved**. A half-translated UI reads as a broken translation rather than a code
+defect, so it would be reported late and diagnosed slowly.
+
+**A related blind spot, recorded so it is not rediscovered:** the ratchet counts `t(` calls, so it
+cannot see a module-scope *derivation* that materialises its inputs — `MapPanel.tsx:112`,
+`Kanban.tsx:27` and `icons.ts:116` each read a table once at import. Migrate their sources to getters
+and they silently re-freeze while the detector reports 0. Their contents (layout names, marker-group
+names) are also raw English literals today, so they score 0 on every existing check.
+
+**Checked and clear:** module-scope *collation* was suspected as a second family of the same bug. An
+independent AST scan found zero — `collator()` builds a fresh `Intl.Collator(active, …)` per call, and
+`taskDate.ts` re-keys its `DateTimeFormat` on `getLocale()`. Do not re-litigate.
 
 **Measured spread** — 194 calls in 23 files, concentrated in the ones that build label tables:
 `panelLabels.ts` (26), `stickers.ts` (25), `EdgeInspector.tsx` (15), `start/sections/Layouts.tsx` (15),

@@ -10,6 +10,26 @@
 // `registerMessages` from `./registry` directly — importing this barrel instead would drag the eager
 // core catalogue into that chunk.
 import "./core";
+import { initLocale } from "./registry";
+
+// RESOLVE THE LOCALE HERE, not in main.tsx, and for the same reason the catalogue import is here.
+//
+// `main.tsx` called `initLocale()` in its body — but its body runs AFTER its imports, and one of those
+// is `App`, which statically pulls in the whole eager graph. ES imports are hoisted and evaluated
+// depth-first, so by the time that call ran, every module-scope `t()` in the eager graph had already
+// been evaluated: 99 of them, frozen against DEFAULT_LOCALE rather than the resolved one.
+//
+// That was invisible because `LOCALES` has one entry, so `resolveLocale()` could only ever return
+// "en". It stops being invisible the moment a second locale is added — and note the trigger is that
+// entry, NOT a language picker: `resolveLocale()` reads `navigator.languages`, so a Danish browser
+// would get a half-English first paint with no user action at all.
+//
+// Putting it in the barrel body makes it order-independent: any module that imports `t` from here has
+// necessarily finished evaluating this module first, so the locale is resolved before its own
+// module-scope calls run. The alternative — an `import "./init"` placed above `import { App }` in
+// main.tsx — looks equivalent and is not: `biome check --write` sorts imports alphabetically, so
+// "./App" would move above it and silently undo the fix.
+initLocale();
 
 export type { Catalogue, Locale, Message, MessageVars } from "./registry";
 export {

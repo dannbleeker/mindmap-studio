@@ -327,6 +327,42 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **Fixed: Recent's date buckets could have taken your maps off the page.** The Start screen's Recent
+  section keyed its buckets by the *rendered label* — `GROUPS` held `t("start.earlierThisWeek")` while
+  `groupOf()` returned the English literal `"Earlier this week"`. Those agree only while the catalogue
+  is English; under a second locale the lookup stops matching and three of the six sections — **with
+  every map inside them** — vanish. That reads as data loss, not as a translation glitch. Buckets are
+  keyed on stable ids now and labels resolve at render. The type system could not have caught it:
+  `t()` returns `string`, so the old `type Group` collapsed to `string` and `groupOf` was free to
+  return anything; the ids make it a real union. `"Today"`, `"Yesterday"` and `"Older"` were also
+  hardcoded English here and are now catalogued.
+
+- **The locale is resolved before the eager import graph, not after it.** `main.tsx` called
+  `initLocale()` in its body, below `import { App }` — and ES imports are hoisted, so the whole eager
+  graph had already evaluated its module-scope `t()` calls against the *default* locale. 99 of the 194
+  froze before resolution ever ran. The call now lives in the `src/i18n` barrel body, which makes it
+  order-independent; an `import "./init"` above `import { App }` would have looked equivalent and been
+  silently undone by biome's import sorting.
+
+  **This also corrects the documented story, in the dangerous direction.** `docs/I18N_BLOCKED.md` said
+  the frozen strings were "currently correct" because the registry resolved the locale first, and that
+  they arm "the moment a language picker ships". Neither was true. The trigger is **`LOCALES` gaining a
+  second entry** — `resolveLocale()` reads `navigator.languages`, so the day a second catalogue ships a
+  Danish browser gets a half-English first paint with no user action at all.
+
+- **`stickers.ts` and `slashCommands.ts` follow the locale (34 sites).** Converted to getters, which
+  cost no call site anything — both have zero consumers outside their own module. The frozen budget
+  drops 194 → 157. A clearance test pins one eager and one lazy module actually following `setLocale`,
+  since they freeze at different times and an eager-only test would pass while every lazy chunk stayed
+  broken. **Deliberately not a 23-file sweep:** the detector counts `t(` calls, so a module-scope
+  derivation that materialises its inputs is invisible to it (`MapPanel.tsx:112`, `Kanban.tsx:27`,
+  `icons.ts:116`), and the layout and marker-group names those tables carry are raw English literals
+  scoring 0 everywhere. Emptying the table while the layout picker still reads "Radial / hub" in Danish
+  would be the same green-tick-that-measured-nothing pattern.
+
+  **Checked and cleared:** module-scope *collation* was suspected as a second family of the same bug.
+  An independent AST scan found zero — `collator()` builds a fresh `Intl.Collator(active, …)` per call.
+
 - **Fixed: the About panel rendered `Book &amp; docs`.** `t()` returns a plain string, and React
   *escapes* a string child — unlike JSX text, which the compiler decodes. So an `&amp;` captured from
   the JSX source during extraction shipped verbatim to the Start screen's licence line. The catalogue

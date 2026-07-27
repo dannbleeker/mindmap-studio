@@ -19,55 +19,73 @@ export interface SlashCommand {
 export const SLASH_COMMANDS: SlashCommand[] = [
   {
     id: "child",
-    label: t("canvas.addChildTopic"),
+    get label() {
+      return t("canvas.addChildTopic");
+    },
     hint: "⇥",
     keywords: ["child", "subtopic", "sub", "add"],
   },
   {
     id: "sibling",
-    label: t("canvas.addSiblingTopic"),
+    get label() {
+      return t("canvas.addSiblingTopic");
+    },
     hint: "⏎",
     keywords: ["sibling", "add", "next"],
   },
   {
     id: "todo",
-    label: t("canvas.markAsToDo"),
+    get label() {
+      return t("canvas.markAsToDo");
+    },
     hint: "☐",
     keywords: ["todo", "task", "checkbox", "check"],
   },
   {
     id: "done",
-    label: t("canvas.markAsDone"),
+    get label() {
+      return t("canvas.markAsDone");
+    },
     hint: "☑",
     keywords: ["done", "complete", "finished"],
   },
   {
     id: "due-today",
-    label: t("canvas.dueToday"),
+    get label() {
+      return t("canvas.dueToday");
+    },
     hint: "📅",
     keywords: ["due", "date", "today", "deadline"],
   },
   {
     id: "priority-high",
-    label: t("canvas.highPriority"),
+    get label() {
+      return t("canvas.highPriority");
+    },
     hint: "❗",
     keywords: ["priority", "high", "important", "urgent"],
   },
   {
     id: "boundary",
-    label: t("canvas.groupInABoundary"),
+    get label() {
+      return t("canvas.groupInABoundary");
+    },
     hint: "▢",
     keywords: ["boundary", "group", "box"],
   },
   {
     id: "note",
-    label: t("canvas.addANote"),
+    get label() {
+      return t("canvas.addANote");
+    },
     hint: "📝",
     keywords: ["note", "comment", "annotation"],
   },
   {
     id: "marker-star",
-    label: t("canvas.starMarker"),
+    get label() {
+      return t("canvas.starMarker");
+    },
     hint: "⭐",
     keywords: ["star", "marker", "favourite"],
   },

@@ -4,10 +4,19 @@
 // `setLocale`; a call at module scope runs ONCE, when the module is first imported, and the string it
 // returned is frozen into a `const` forever.
 //
-// Today nothing calls `setLocale` outside tests, so the frozen strings happen to be right: the registry
-// resolves the stored locale before any catalogue-consuming module loads. The moment a language picker
-// lands, ~194 strings across 23 files stop following it and the UI half-translates — panel tabs, slash
-// commands, edge presets and the Start sidebar staying English inside an otherwise Danish app.
+// CORRECTED 2026-07-27. This comment used to say the frozen strings "happen to be right, because the
+// registry resolves the stored locale before any catalogue-consuming module loads". That was FALSE.
+// `main.tsx` called `initLocale()` in its body, below `import { App }` — and ES imports are hoisted, so
+// the whole eager graph had already evaluated its module-scope `t()` calls against DEFAULT_LOCALE.
+// 99 of the 194 froze before resolution ever ran. Fixed by moving the call into the `src/i18n` barrel
+// body (see test/i18n-init-order.test.ts); the remaining freeze-at-import behaviour is what this file
+// documents.
+//
+// The trigger is also not what was written here. It is not a language picker — it is `LOCALES`
+// (registry.ts) gaining a second entry. `resolveLocale()` consults `navigator.languages`, so the day a
+// second catalogue ships, a Danish browser gets a half-English first paint with no user action at all:
+// panel tabs, slash commands, edge presets and the Start sidebar in English inside an otherwise Danish
+// app. Nothing outside tests calls `setLocale`, which is why this is still latent rather than live.
 //
 // This file PINS the mechanism in both directions so the trap cannot be rediscovered by a user. It is
 // deliberately not a fix: converting 194 constants to getters is a behaviour-neutral refactor with real
@@ -56,6 +65,32 @@ describe("module-level t() freezes the string at import time", () => {
     expect(t("panel.outline")).toBe("Disposition");
     // ...but the dock tab reads from the frozen constant and is not.
     expect(PANEL_LABELS.outline.tab).toBe("Outline");
+  });
+
+  it("CLEARANCE: the converted files really do follow a locale change", async () => {
+    // The counterpart to the two tests above. Those pin the DEFECT on a file that still has it; this
+    // pins the FIX on files that were converted, so a later "tidy-up" that turns the getters back into
+    // plain properties fails here instead of silently re-freezing.
+    //
+    // One eager module and one lazy one, because they freeze at different times: an eager module
+    // evaluates during app boot, a lazy chunk whenever it first loads. A test that only covered the
+    // eager side would pass while every lazy chunk was still broken.
+    registerMessages(DA, {
+      "app.star": "Stjerne",
+      "canvas.addChildTopic": "Tilføj underemne",
+    });
+
+    const { STICKERS } = await import("../src/stickers"); // eager
+    const { SLASH_COMMANDS } = await import("../src/mindmap/flow/slashCommands"); // lazy chunk
+    const star = STICKERS.find((s) => s.id === "star");
+    const addChild = SLASH_COMMANDS.find((c) => c.label === "Add child topic");
+    expect(star?.label).toBe("Star");
+    expect(addChild).toBeDefined();
+
+    setLocale(DA);
+
+    expect(star?.label).toBe("Stjerne");
+    expect(SLASH_COMMANDS.find((c) => c.id === addChild?.id)?.label).toBe("Tilføj underemne");
   });
 
   it("a getter-shaped constant does follow the locale — the fix, pinned", () => {

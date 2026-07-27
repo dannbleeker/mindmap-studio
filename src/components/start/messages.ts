@@ -140,8 +140,15 @@ export const START_EN = {
   "start.aFewPrinciplesThatMake":
     "A few principles that make maps clearer and faster to think with.",
   "start.goDeeperTheBook": "Go deeper — the book",
+  // Recent's date buckets. These are LABELS ONLY — `Recent.tsx` groups on stable ids, never on the
+  // rendered text. It used to group on the text, which meant a translated label could no longer match
+  // the English one `groupOf()` returned, and the whole bucket (with every map in it) disappeared from
+  // the page. Three of the six were already hardcoded English here for the same reason.
+  "start.today": "Today",
+  "start.yesterday": "Yesterday",
   "start.earlierThisWeek": "Earlier this week",
   "start.thisMonth": "This month",
+  "start.older": "Older",
   "start.notYetSaved": "Not yet saved",
   "start.yourMapsNewestFirst": "Your maps, newest first.",
   "start.searchTemplates": "Search templates…",

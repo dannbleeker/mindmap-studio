@@ -16,13 +16,11 @@ import { frozenByFile } from "../scripts/lib/i18nFrozen.mjs";
 // the ones worth fixing first — sit at the top.
 const BUDGET: ReadonlyArray<readonly [string, number]> = [
   ["src/panelLabels.ts", 26],
-  ["src/stickers.ts", 25],
   ["src/components/EdgeInspector.tsx", 15],
   ["src/components/start/sections/Layouts.tsx", 15],
   ["src/components/start/sections/Learn.tsx", 12],
   ["src/components/editorCommands.ts", 11],
   ["src/components/start/StartSidebar.tsx", 10],
-  ["src/mindmap/flow/slashCommands.ts", 9],
   ["src/components/BranchExportDialog.tsx", 7],
   ["src/components/start/AppTips.tsx", 7],
   ["src/components/start/CaptureCard.tsx", 7],
@@ -34,11 +32,24 @@ const BUDGET: ReadonlyArray<readonly [string, number]> = [
   ["src/components/ThemeDesignerDialog.tsx", 4],
   ["src/mindmap/theme.ts", 4],
   ["src/components/MapPanel.tsx", 3],
-  ["src/components/start/sections/Recent.tsx", 3],
   ["src/mindmap/flow/CanvasOverlays.tsx", 3],
   ["src/Kanban.tsx", 2],
   ["src/mapParts.ts", 1],
 ];
+// Cleared 2026-07-27: stickers.ts (25) and mindmap/flow/slashCommands.ts (9) converted to getters —
+// both had zero consumers outside their own module, so it cost no call site anything. Recent.tsx (3)
+// went too, but as a side effect of fixing a data-loss bug rather than as a freeze fix: it keyed its
+// date buckets on the rendered label, so a translated label stopped matching and whole sections of
+// maps disappeared. See test/start-library-sections.test.tsx.
+//
+// WHAT THIS NUMBER DOES NOT MEAN. Driving it to 0 would not finish the job, and chasing it is a trap:
+//   - The detector counts `t(` calls, so a module-scope DERIVATION that materialises its inputs is
+//     invisible. `MapPanel.tsx:112`, `Kanban.tsx:27` and `icons.ts:116` each read a table once at
+//     import; convert their sources to getters and they silently re-freeze while this reports 0.
+//   - The layout names, marker-group names and sticker categories those tables carry are raw English
+//     literals — not `t()` calls — so they score 0 here and 0 in the scanner while being untranslated.
+// A sweep that empties this table while the layout picker still reads "Radial / hub" in Danish is the
+// "green tick that measured nothing" pattern this codebase keeps rediscovering.
 
 const TOTAL = BUDGET.reduce((sum, [, n]) => sum + n, 0);
 

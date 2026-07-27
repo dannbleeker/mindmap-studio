@@ -91,7 +91,31 @@ controls that no longer exist under those names — they become wrong, not merel
 
 ---
 
-## 3. The bundle gate measures a subset of first-load JS
+## 3. ✅ RESOLVED (2026-07-27) — the bundle gate measured a subset of first-load JS
+
+**Decision: gate on true first load, re-based to 182 kB**, recorded as a metric correction rather than
+an allowance. Measured at the switch: 157.9 entry + 22.4 preloaded = **180.3 kB**.
+
+**182, not the ~185 first sketched.** 185 would leave ~4.7 kB of unguarded slack, which is precisely
+what the `171 → 175` note in `bundle-budget.mjs` warned about and then demonstrated — "unrelated bloat
+can ride in unnoticed". The usual argument for a fat margin does not apply: this figure is
+deterministic, so unlike the coverage floor it cannot flake under concurrent CI/Deploy/Stats runners.
+That is the same reasoning that accepted 0.9 kB of headroom at 175. 182 leaves 1.7 kB.
+
+Two things came out of doing it that were not in the original write-up:
+
+- **The dashboard would have drifted from the gate.** `build-stats.mjs` computed its own `withinBudget`
+  from `index-*.js`, so after the flip it would have reported green against a ceiling it was measuring
+  differently — the same failure `bundle-budget.mjs` exists to prevent, one level up from the constant.
+  The measurement now lives in `scripts/lib/firstLoad.mjs` and both import it.
+- **It is guarded by a test, not just by having been done once.** `test/first-load-budget.test.ts`
+  pins that a modulepreloaded chunk counts and a dynamically-imported one does not. Mutation-checked:
+  reverting the rule to entry-only fails two of its three cases. Verified end-to-end too — with the
+  ceiling temporarily at 179 (above the entry, below true first load) the gate fails, where the old
+  metric would have passed.
+
+<details>
+<summary>Original write-up, kept for the rationale</summary>
 
 `scripts/size-budget.mjs`, `scripts/bundle-budget.mjs`
 
@@ -127,6 +151,8 @@ sideways.
 
 Worth noting either way: `primitives-*.js` at 16.6 kB is the UI-primitive layer, pulled in eagerly. If
 first-load size matters, that chunk — not the catalogue — is where the weight actually is.
+
+</details>
 
 ---
 

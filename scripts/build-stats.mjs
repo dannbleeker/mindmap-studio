@@ -18,6 +18,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { BUDGET_KB } from "./bundle-budget.mjs";
+import { measureFirstLoad } from "./lib/firstLoad.mjs";
 
 const ROOT = process.cwd();
 const sh = (cmd) =>
@@ -232,7 +233,13 @@ const perFileCov = safe(() => {
   return out;
 }, []);
 
-// --- bundle size (gzip of built dist/; budget = the entry chunk ≤ 150 kB) -------
+// --- bundle size (gzip of built dist/; budget = TRUE FIRST LOAD ≤ BUDGET_KB) ---
+//
+// `withinBudget` must be computed from the same figure the gate defends, or the dashboard reports a
+// green tick against a ceiling it is interpreting differently — the same class of drift that made
+// bundle-budget.mjs necessary, one level up. Hence `measureFirstLoad`, shared with size-budget.mjs.
+// `entryGzipKb` stays in the payload for continuity of the historical series, but it is no longer what
+// the budget is judged against.
 const bundle = safe(
   () => {
     const distDir = join(ROOT, "dist");
@@ -242,13 +249,13 @@ const bundle = safe(
         cssGzipKb: null,
         totalGzipKb: null,
         entryGzipKb: null,
-        budgetKb: 150,
+        firstLoadGzipKb: null,
+        budgetKb: BUDGET_KB,
         withinBudget: true,
       };
     }
     let jsBytes = 0;
     let cssBytes = 0;
-    let entryBytes = 0;
     for (const e of readdirSync(distDir, { recursive: true })) {
       const rel = String(e).replace(/\\/g, "/");
       if (!/\.(js|css)$/.test(rel)) continue;
@@ -257,16 +264,17 @@ const bundle = safe(
       const gz = gzipSync(buf).length;
       if (rel.endsWith(".css")) cssBytes += gz;
       else jsBytes += gz;
-      if (/(^|\/)assets\/index-[^/]+\.js$/.test(rel)) entryBytes = gz; // the entry chunk
     }
+    const { entry, initial } = measureFirstLoad(distDir);
     const budgetKb = BUDGET_KB; // imported, not mirrored — see scripts/bundle-budget.mjs
     return {
       jsGzipKb: round1(jsBytes),
       cssGzipKb: round1(cssBytes),
       totalGzipKb: round1(jsBytes + cssBytes),
-      entryGzipKb: round1(entryBytes),
+      entryGzipKb: round1(entry * 1024),
+      firstLoadGzipKb: round1(initial * 1024),
       budgetKb,
-      withinBudget: round1(entryBytes) <= budgetKb,
+      withinBudget: round1(initial * 1024) <= budgetKb,
     };
   },
   {
@@ -274,7 +282,8 @@ const bundle = safe(
     cssGzipKb: null,
     totalGzipKb: null,
     entryGzipKb: null,
-    budgetKb: 150,
+    firstLoadGzipKb: null,
+    budgetKb: BUDGET_KB,
     withinBudget: true,
   },
 );

@@ -327,6 +327,24 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **The bundle gate now measures what a browser actually downloads.** It weighed `index-*.js` and
+  called that "the initial bundle", but Vite emits `<link rel="modulepreload">` for shared eager chunks
+  and the browser fetches those on first paint too. The gate filed them as lazy and stopped counting —
+  so it once reported a 10.5 kB *improvement* (168.5 → 158.0) for a change that added 141 catalogue
+  keys, because ~16.6 kB had moved sideways into `primitives-*.js`. A ceiling you can satisfy by
+  relocating weight is not a ceiling, and the failure looks like progress in CI.
+
+  `BUDGET_KB` is re-based 175 → **182** against the new metric (measured 180.3). **The number going up
+  does not mean anything got slower** — the ruler got honest; the true figure had been above the old
+  ceiling since before the i18n work started. 182 rather than a rounder 185 because ~4.7 kB of
+  unguarded slack is the exact risk the previous bump's own note warned about, and a thin margin cannot
+  flake here the way the coverage floor does — this figure is deterministic.
+
+  The measurement moved into `scripts/lib/firstLoad.mjs` because `build-stats.mjs` computed its own
+  `withinBudget` from the entry chunk: left alone, the dashboard would have reported green against a
+  ceiling it was interpreting differently — the drift `bundle-budget.mjs` exists to prevent, one level
+  up from the constant. `test/first-load-budget.test.ts` pins the definition.
+
 - **Sentences that interleave prose with markup are one message again (`tNodes`).** `Press
   <kbd>Tab</kbd> for a child` used to be three JSX fragments in a fixed order, which a translator
   cannot reorder — and most languages need to. German moves the verb, Japanese puts the particle after

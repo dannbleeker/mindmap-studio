@@ -319,7 +319,17 @@ export function jsxTextViolations(src) {
   const inComment = commentLineSet(src);
   src.split("\n").forEach((line, i) => {
     if (inComment.has(i)) return;
-    for (const m of line.matchAll(/>([A-Z][^<>{}]*)<\//g)) {
+    // `<kbd>` is HTML's keyboard-input element, and its content is a PHYSICAL KEY NAME — `Tab`,
+    // `Enter`, `Shift`. Policy is that those stay literal: a locale does not rename the Tab key. That
+    // is already pinned elsewhere (`keys: "Ctrl/⌘ + Z"` is a documented must-not-fire case in
+    // test/i18n-no-hardcoded-strings.test.ts), and this is the same rule for the JSX shape.
+    //
+    // Stripping the ELEMENT rather than exempting the text keeps the rule anchored on markup: a real
+    // label cannot escape by happening to match a key name, only by actually being marked up as one.
+    // Verified against every allowlisted file before landing — no file loses a detection, because the
+    // only `<kbd>` contents in the tree are key names and already-migrated `{t(…)}` interpolations.
+    const withoutKeyNames = line.replace(/<kbd>[^<>]*<\/kbd>/g, " ");
+    for (const m of withoutKeyNames.matchAll(/>([A-Z][^<>{}]*)<\//g)) {
       const text = m[1].trim();
       // A single character is a glyph or an initial, not a label — `<kbd>K</kbd>`.
       if (text.length < 2) continue;

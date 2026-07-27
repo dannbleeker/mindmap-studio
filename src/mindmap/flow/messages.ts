@@ -199,6 +199,20 @@ export const CANVAS_EN = {
   "canvas.bulk.setPriority": "Set priority {level} on the selection",
   "canvas.bulk.branchColour": "Branch colour {colour} on the selection",
   "canvas.shapeColour": "Shape colour {colour}",
+
+  // Empty-map coachmark. These interleave prose with <kbd> markup, so they are rendered through
+  // `tNodes` (i18n/nodes.tsx) rather than `t` — one message per sentence, with the key names as
+  // placeholders the translator can move anywhere. The key names themselves stay literal in the JSX:
+  // `Tab` and `Enter` denote physical keys and a locale does not rename them.
+  "canvas.coach.editKeys":
+    "Press {child} for a child · {sibling} for a sibling · double-click to rename",
+  "canvas.coach.multiSelect": "{shift}-drag the canvas to select several topics",
+  "canvas.coach.touchKeys": "Tap {add} on a topic to add a child · double-tap a topic to rename",
+
+  // Drag-to-reparent label. Was hardcoded and invisible to the guard — no detector matches JSX text
+  // that is broken up by an interpolation — and the component shadowed `t` with a local, so migrating
+  // it needed the rename above.
+  "canvas.makeChildOf": "↳ Make child of “{topic}”",
 } as const satisfies Catalogue;
 
 export type CanvasKey = keyof typeof CANVAS_EN;

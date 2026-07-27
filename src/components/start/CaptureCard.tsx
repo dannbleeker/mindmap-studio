@@ -1,3 +1,4 @@
+import { tNodes } from "../../i18n/nodes";
 import { t } from "../../i18n/registry";
 import "./messages";
 import { useState } from "react";
@@ -127,8 +128,10 @@ export function CaptureCard({
       {tab === "blank" ? (
         <div>
           <p className="st-explain">
-            Keyboard-first: <kbd>Enter</kbd> adds a sibling, <kbd>Tab</kbd> adds a child. Pick a
-            starting layout (you can switch it any time):
+            {tNodes("start.keyboardFirst", {
+              sibling: <kbd>Enter</kbd>,
+              child: <kbd>Tab</kbd>,
+            })}
           </p>
           <div className="st-layout-row">
             {BLANK_LAYOUTS.map((l) => (

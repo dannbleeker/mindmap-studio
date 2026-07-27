@@ -163,6 +163,11 @@ export const START_EN = {
     other:
       "Every starter map from the New-map gallery. Pick one and it opens pre-filled — unlike a layout, which is an empty view. {n} templates · Blank canvas lives in the Start screen.",
   },
+
+  // Interleaves prose with <kbd> markup, so it renders through `tNodes` (i18n/nodes.tsx) as one
+  // message rather than three fragments a translator cannot reorder.
+  "start.keyboardFirst":
+    "Keyboard-first: {sibling} adds a sibling, {child} adds a child. Pick a starting layout (you can switch it any time):",
 } as const satisfies Catalogue;
 
 export type StartKey = keyof typeof START_EN;

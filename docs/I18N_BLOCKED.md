@@ -9,7 +9,34 @@ allowlist until the item is resolved, so it cannot be mistaken for finished work
 
 ---
 
-## 1. The empty-canvas coachmark interleaves a sentence with `<kbd>` markup
+## 1. ✅ RESOLVED (2026-07-27) — markup interleaved with prose
+
+**Decision: build the node interpolator.** Keep the `<kbd>`/`<strong>` styling *and* make each sentence
+one reorderable message. Shipped as `tNodes` in `src/i18n/nodes.tsx`.
+
+The scope turned out to be **three files, not one**. Grepping `<kbd>` found the same shape in
+`FirstRunCard.tsx` (five list items, `<strong>` as well as `<kbd>`) and `CaptureCard.tsx`, both of which
+this file had counted under "blocked" without naming. All three are migrated and now on the guard's
+allowlist.
+
+Two things worth keeping, because they are the reason this was not as done as it looked:
+
+- **The scanner cannot see this shape at all.** No detector matches a sentence that a JSX element has
+  cut in half, so after the `<kbd>` exemption landed all three files reported *zero hardcoded strings*
+  while their prose was still hardcoded. `test/i18n-pseudo-render.test.tsx` renders them instead, and
+  that is what actually holds them — the allowlist entry is bookkeeping.
+- **The harness had the same blind spot, from the other side.** `tNodes` splits a message into sibling
+  text nodes, so wrapping a whole message in `⟦…⟧` left every interior run unmarked and reported as
+  hardcoded. `applyMarkerLocale` now marks each *segment*. Found by pointing the harness at the real
+  component, not by review.
+
+Also fixed in passing, both invisible to every detector: `DropLabel` shadowed the imported `t` with a
+local variable (so its label could not be migrated without a silent runtime error), and
+`"3 things to try"` escaped the JSX-text rule because the rule requires a leading `[A-Z]` and `3` is
+not one.
+
+<details>
+<summary>Original write-up, kept for the rationale</summary>
 
 `src/mindmap/flow/CanvasOverlays.tsx:41,45`
 
@@ -42,6 +69,8 @@ and `{sibling}` placeholders — cannot carry the `<kbd>` elements. Resolving it
 
 Until then `CanvasOverlays.tsx` stays off the allowlist. Everything else in it is migrated; the file
 reports exactly these three key names.
+
+</details>
 
 ---
 

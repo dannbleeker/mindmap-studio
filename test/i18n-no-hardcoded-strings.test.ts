@@ -119,13 +119,15 @@ const MIGRATED = [
   "src/components/start/tokens.ts",
   "src/components/start/types.ts",
   "src/components/start/useLibrary.ts",
+  // Markup-in-prose, unblocked by `tNodes` (src/i18n/nodes.tsx) — one message per sentence, with the
+  // <kbd>/<strong> parts as placeholders a translator can move. Their guard is NOT this scan: no
+  // detector matches a sentence a JSX element has cut in half, so all three reported zero while the
+  // prose was still hardcoded. test/i18n-pseudo-render.test.tsx renders them and is what actually
+  // holds them.
+  "src/mindmap/flow/CanvasOverlays.tsx",
+  "src/components/FirstRunCard.tsx",
+  "src/components/start/CaptureCard.tsx",
 ];
-
-// NOT on the list, deliberately: src/mindmap/flow/CanvasOverlays.tsx. It is migrated except for three
-// physical key names (<kbd>Tab</kbd>, <kbd>Enter</kbd>, <kbd>Shift</kbd>) that policy keeps literal —
-// but they sit inside a sentence the surrounding markup has already fragmented, which a translator
-// could not reorder. Resolving that changes either the design or the rendering, so it is an owner
-// decision: see docs/I18N_BLOCKED.md.
 
 const scan = (rel: string): Violation[] =>
   scanSource(readFileSync(join(process.cwd(), rel), "utf8"));

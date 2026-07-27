@@ -1,3 +1,4 @@
+import { tNodes } from "../../i18n/nodes";
 import { t } from "../../i18n/registry";
 import "./messages";
 import { MiniMap, NodeToolbar, Panel, Position, useStore } from "@xyflow/react";
@@ -30,20 +31,18 @@ export function CoachMark({
         <strong>{t("canvas.startYourMap")}</strong>
         {touch ? (
           <>
-            <span>
-              Tap <kbd>＋</kbd> on a topic to add a child · double-tap a topic to rename
-            </span>
+            <span>{tNodes("canvas.coach.touchKeys", { add: <kbd>＋</kbd> })}</span>
             <span>{t("app.dragTheBackgroundToPan")}</span>
           </>
         ) : (
           <>
             <span>
-              Press <kbd>Tab</kbd> for a child · <kbd>Enter</kbd> for a sibling · double-click to
-              rename
+              {tNodes("canvas.coach.editKeys", {
+                child: <kbd>Tab</kbd>,
+                sibling: <kbd>Enter</kbd>,
+              })}
             </span>
-            <span>
-              <kbd>Shift</kbd>-drag the canvas to select several topics
-            </span>
+            <span>{tNodes("canvas.coach.multiSelect", { shift: <kbd>Shift</kbd> })}</span>
           </>
         )}
       </div>
@@ -55,11 +54,13 @@ export function CoachMark({
  *  the highlighted drop target. */
 export function DropLabel({ dropTargetId, doc }: { dropTargetId: string | null; doc: MindMapDoc }) {
   if (!dropTargetId) return null;
-  const t = findAnyNode(doc, dropTargetId);
+  // Named `target`, not `t` — `t` is the message lookup imported at the top of this file, and shadowing
+  // it here made the label below unmigratable without a silent runtime error.
+  const target = findAnyNode(doc, dropTargetId);
   return (
     <NodeToolbar nodeId={dropTargetId} isVisible position={Position.Top} offset={8}>
       <div className="mm-drop-label nodrag nopan">
-        ↳ Make child of “{t?.topic?.trim() || "topic"}”
+        {t("canvas.makeChildOf", { topic: target?.topic?.trim() || t("common.topic") })}
       </div>
     </NodeToolbar>
   );

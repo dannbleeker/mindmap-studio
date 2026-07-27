@@ -1,4 +1,5 @@
 import { t } from "../i18n";
+import { tNodes } from "../i18n/nodes";
 // First-run "3 things to try" card (#13). A one-time, dismissible overlay for a brand-new user;
 // App gates it on a localStorage flag and auto-dismisses it permanently after the first real edit.
 // Theme-reactive via the .mm-firstrun* classes (offline-safe — no network, no web fonts).
@@ -17,28 +18,26 @@ export function FirstRunCard({ onDismiss }: { onDismiss: () => void }) {
       >
         ×
       </button>
-      <strong className="mm-firstrun-title">3 things to try</strong>
+      <strong className="mm-firstrun-title">{t("app.firstRun.title")}</strong>
       <ol className="mm-firstrun-list">
         {touch ? (
           <>
-            <li>
-              <strong>{t("app.tap")}</strong> a topic to select it
-            </li>
-            <li>
-              Tap the <strong>＋</strong> on a topic to add a child
-            </li>
+            <li>{tNodes("app.firstRun.tapSelect", { tap: <strong>{t("app.tap")}</strong> })}</li>
+            <li>{tNodes("app.firstRun.tapAdd", { plus: <strong>＋</strong> })}</li>
             <li>{t("app.dragTheBackgroundToPan")}</li>
           </>
         ) : (
           <>
             <li>
-              <strong>{t("app.doubleClick")}</strong> a topic to rename it
+              {tNodes("app.firstRun.doubleClickRename", {
+                doubleClick: <strong>{t("app.doubleClick")}</strong>,
+              })}
             </li>
+            <li>{tNodes("app.firstRun.tabChild", { tab: <kbd>Tab</kbd> })}</li>
             <li>
-              Press <kbd>Tab</kbd> to add a child
-            </li>
-            <li>
-              Press <kbd>{t("app.ctrlK")}</kbd> for anything
+              {tNodes("app.firstRun.paletteAnything", {
+                palette: <kbd>{t("app.ctrlK")}</kbd>,
+              })}
             </li>
           </>
         )}

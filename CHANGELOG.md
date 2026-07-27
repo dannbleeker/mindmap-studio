@@ -327,6 +327,32 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **Sentences that interleave prose with markup are one message again (`tNodes`).** `Press
+  <kbd>Tab</kbd> for a child` used to be three JSX fragments in a fixed order, which a translator
+  cannot reorder — and most languages need to. German moves the verb, Japanese puts the particle after
+  the key name. Worse, the fragments were individually meaningless: "Press" alone has no single correct
+  rendering. `src/i18n/nodes.tsx` keeps the sentence whole and resolves `{child}` to a React node, so
+  the `<kbd>` styling survives and the word order belongs to the locale. Key names stay literal —
+  `Tab` denotes a physical key, not a word.
+
+  The shape turned out to live in **three** files, not the one the blocked-decisions doc named:
+  `CanvasOverlays` (both the pointer and touch coachmarks), `FirstRunCard` (five list items, `<strong>`
+  as well as `<kbd>`) and `CaptureCard`.
+
+  **Neither the scanner nor the harness could see it, in opposite directions.** No detector matches a
+  sentence a JSX element has cut in half, so once `<kbd>` contents were exempted as key names all three
+  files reported *zero hardcoded strings* while their prose was still hardcoded — a clean tick over an
+  unmigrated file. And the pseudo-locale harness wrapped each message in `⟦…⟧` as a whole, so once
+  `tNodes` split a message across sibling text nodes every interior run came back unmarked and was
+  reported as hardcoded; it now marks each segment. Both were found by rendering the real components,
+  not by review. Two more strings surfaced the same way: `DropLabel` shadowed the imported `t` with a
+  local (so its label could not be migrated without a silent runtime error), and `"3 things to try"`
+  slipped the JSX-text rule because that rule needs a leading `[A-Z]` and `3` is not one.
+
+  The harness also only overlaid 2 of the 5 catalogues. That is not a coverage gap but a correctness
+  one: a component using the Start catalogue would have had all its strings reported as unmarked, and
+  the natural response — adding them to the ignore list — would have taught the harness to lie.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

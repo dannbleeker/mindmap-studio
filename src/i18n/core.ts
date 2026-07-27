@@ -17,6 +17,20 @@ export const CORE_EN = {
   // translator sees it once and the wording can't drift between the toolbar, the canvas and ⌘K.
   // `untitled` is the fallback shown wherever a map or topic has no title; it had 20 hardcoded copies.
   "common.untitled": "(untitled)",
+  // Stand-in for a topic with no text yet, used where a label has to name one ("Make child of …").
+  "common.topic": "topic",
+
+  // First-run card. Each list item is ONE message with a placeholder for the emphasised gesture or
+  // key, rendered through `tNodes` (i18n/nodes.tsx) so the emphasis survives and a translator can put
+  // it anywhere in the sentence. Splitting them into `<strong>{t("app.tap")}</strong> a topic to
+  // select it` is what they used to be — the trailing prose was hardcoded and no detector saw it,
+  // because a fragment interrupted by an element matches none of the shapes the scanner looks for.
+  "app.firstRun.title": "3 things to try",
+  "app.firstRun.tapSelect": "{tap} a topic to select it",
+  "app.firstRun.tapAdd": "Tap the {plus} on a topic to add a child",
+  "app.firstRun.doubleClickRename": "{doubleClick} a topic to rename it",
+  "app.firstRun.tabChild": "Press {tab} to add a child",
+  "app.firstRun.paletteAnything": "Press {palette} for anything",
   // Named by the CONCEPT, not by a surface: the toolbar's menu and the cheat sheet's group heading are
   // both "View", and neither owns the word. They were two keys until a duplicate-text check found them.
   "common.view": "View",

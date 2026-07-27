@@ -12,6 +12,11 @@ import { type Catalogue, registerMessages } from "../../i18n/registry";
 // asserts these strings are absent from the entry chunk.
 
 export const CANVAS_EN = {
+  // Status-bar counts. These were `{n} topic{n === 1 ? "" : "s"}` — a hand-rolled English plural,
+  // which is precisely the shape i18n/registry.ts calls out as the reason plural messages exist:
+  // English needs two forms, Slavic four, Arabic six, and a ternary can only ever express two.
+  "canvas.topicCount": { one: "{n} topic", other: "{n} topics" },
+  "canvas.selectedCount": { one: "{n} selected", other: "{n} selected" },
   "canvas.arrowheadsNamed": "Arrowheads: {arrow}",
   "canvas.addMarkerNamed": "Add marker {marker}",
   "canvas.removeMarkerNamed": "Remove marker {marker}",

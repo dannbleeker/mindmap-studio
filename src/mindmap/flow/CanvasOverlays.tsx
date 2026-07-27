@@ -174,9 +174,7 @@ export function StatusBar({
         }}
       >
         {onSetView && activeView ? <ViewSwitcher active={activeView} onSet={onSetView} /> : null}
-        <span>
-          {topics} topic{topics === 1 ? "" : "s"}
-        </span>
+        <span>{t("canvas.topicCount", { n: topics })}</span>
         {selected > 0 ? (
           onFitSelection ? (
             <button
@@ -185,10 +183,10 @@ export function StatusBar({
               title={t("canvas.zoomToFitTheSelection")}
               onClick={onFitSelection}
             >
-              {selected} selected
+              {t("canvas.selectedCount", { n: selected })}
             </button>
           ) : (
-            <span>{selected} selected</span>
+            <span>{t("canvas.selectedCount", { n: selected })}</span>
           )
         ) : null}
         {onResetZoom ? (

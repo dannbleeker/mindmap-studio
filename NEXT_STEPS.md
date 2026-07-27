@@ -61,16 +61,32 @@ interactive HTML export — and the rest are file-picker descriptions, default m
 (`io/pptx`, `io/ooxml`, `io/xml`, `io/html` all scan 0), and this row was written after it. Treat this
 bucket as **real user-facing work**, not noise.
 
-**401 is a FLOOR, not a count, and a file scanning 0 is not evidence it is migrated.** The detectors
-have known blind spots — `jsxTextViolations` needs a leading `[A-Z]`, so every emoji-prefixed label is
-invisible; `loneJsxTextViolations` skips any line containing `(`; `proseViolations` skips `( ) ; : ? ,`;
-and nothing matches a sentence a JSX element has cut in half. An independent AST sweep of the 42
-allowlisted `.tsx` files found **~113 more real untranslated strings** — `Panels.tsx` alone carries
-~50, and `Presentation.tsx:440` renders a literal `Presenter view (P)` three lines under a migrated
-`title={t(…)}`. **The allowlist certifies a file against the detectors, not against reality.** The
-`pnpm gate` tick on this is worth exactly what the detectors are worth; the pseudo-locale harness
-(`test/i18n-pseudo-render.test.tsx`) is the only check that can prove a component clean, and it is
-pointed at four of them.
+**The scanner total is a FLOOR, and a file scanning 0 is not evidence it is migrated.** Run
+`pnpm i18n:blindspot` — it walks the TypeScript AST and reports what the line-based detectors cannot
+see inside **allowlisted** files. It is deliberately noisy and gates nothing; it is a worklist.
+
+Three blind spots were closed on 2026-07-27 (leading glyph, parentheses, template-literal props) and
+paid for — 56 strings. **85 remain**, and the composition is what matters:
+
+| class | roughly | what to do |
+| --- | --- | --- |
+| a sentence a JSX element or `{…}` cut in half | ~55 | `tNodes` — see `src/i18n/nodes.tsx`. No line-based rule can ever match these |
+| plain labels the rules still miss (single lowercase words, fragments) | ~20 | migrate normally |
+| legitimately literal | ~10 | physical key names (`Tab`/`Enter`/`Shift`), the copyright line, the search-operator cheatsheet |
+
+**Do not trust that classification without re-checking it** — the first version of this table was wrong
+twice, in the same direction, and both were found only by opening the file. `<option value="relates-to">`
+was rendering the raw **id** to the user while `EdgeInspector` showed a translated label for the same
+five values; and the status bar carried `{n} topic{n === 1 ? "" : "s"}`, a hand-rolled English plural,
+which is the exact shape `i18n/registry.ts` names as the reason plural messages exist. Both are fixed.
+The lesson generalises: "legitimately literal" is the bucket that hides defects, because it is the one
+nobody re-opens.
+
+**The allowlist certifies a file against the detectors, not against reality**, and the `pnpm gate` tick
+is worth exactly what the detectors are worth. `test/i18n-pseudo-render.test.tsx` is the only check
+that can prove a component clean — it renders under a marked-up catalogue and reports anything that
+came back unchanged. It is pointed at four components. Pointing it at `Panels.tsx` and `App.tsx`, which
+between them hold 55 of the 93, is the highest-value next step in this whole area.
 
 **Also open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
 English-only, and it is genuinely logic rather than translation — a second locale needs its own keyword

@@ -327,6 +327,26 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **The relationship filter showed raw ids, and the status bar had a hand-rolled English plural.** The
+  Relationships panel's type dropdown rendered `relates-to`, `depends-on`, `causes`, `supports`,
+  `blocks` — the literal option *values* — while `EdgeInspector` showed proper labels for the same five.
+  And the canvas status bar carried `{n} topic{n === 1 ? "" : "s"}`, which is precisely the shape
+  `i18n/registry.ts` cites as the reason plural messages exist: English needs two forms, Slavic four,
+  Arabic six, and a ternary can only ever express two. Both now go through the catalogue; the English
+  output is byte-identical for every count.
+
+  Both were sitting in the "legitimately literal" bucket of my own triage, and both were found only by
+  opening the file. That bucket is where defects hide, because it is the one nobody re-opens.
+
+- **`pnpm i18n:blindspot` makes the floor visible.** `i18n-scan` is regex-over-lines by design — it has
+  to run on any file without a parse step and be quiet enough that nobody switches it off — so "0
+  hardcoded strings" has always meant "0 that these rules can see". The gap between those two has been
+  the most repeated failure in this migration. The new script walks the TypeScript AST, reports every
+  JSX text node and user-facing prop, and subtracts what the detectors already report. It defaults to
+  **allowlisted files only**, because an unmigrated file full of English is expected whereas an
+  allowlisted one is the gate telling a lie. It is deliberately noisy and gates nothing: a worklist,
+  not a check. Currently **85**.
+
 - **"Clear all local data" was missing seven preference keys.** `LOCAL_PREF_KEYS` claims to centralise
   every preference the app writes, so that one action can wipe them all — but `mindmap-contrast`,
   `-info-tab`, `-last-export`, `-layout`, `-minimap-open`, `-search-history` and `-sticky-color` were

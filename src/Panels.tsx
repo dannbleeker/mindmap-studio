@@ -1924,11 +1924,11 @@ export function FilterPanel({
             style={{ width: "auto", flex: 1 }}
           >
             <option value="">{t("panel.anyType")}</option>
-            <option value="relates-to">relates-to</option>
-            <option value="depends-on">depends-on</option>
-            <option value="causes">causes</option>
-            <option value="supports">supports</option>
-            <option value="blocks">blocks</option>
+            <option value="relates-to">{t("panel.relates")}</option>
+            <option value="depends-on">{t("panel.depends")}</option>
+            <option value="causes">{t("panel.causes")}</option>
+            <option value="supports">{t("panel.supports")}</option>
+            <option value="blocks">{t("panel.blocks")}</option>
           </Select>
         </div>
         {markerEntries.length > 0 ? (

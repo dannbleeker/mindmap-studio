@@ -74,6 +74,43 @@ paid for — 56 strings. **85 remain**, and the composition is what matters:
 | plain labels the rules still miss (single lowercase words, fragments) | ~20 | migrate normally |
 | legitimately literal | ~10 | physical key names (`Tab`/`Enter`/`Shift`), the copyright line, the search-operator cheatsheet |
 
+### ⏸ PARKED 2026-07-27 — resume here
+
+The branch is at a deliberate stopping point, not an abandoned one: **21 commits, tree clean, CI green
+on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173) (draft) at `c9b7792`** — 217 files,
+2421 tests, first load 180.9 kB. Everything below is *remaining*, not *broken*; nothing is half-applied.
+
+**Re-measure before believing any number here** — that is the whole lesson of this programme:
+
+```
+pnpm i18n:blindspot                                    # what the detectors CANNOT see (allowlisted files)
+node scripts/i18n-scan.mjs $(git ls-files 'src/**/*.ts' 'src/**/*.tsx') --count | tail -1
+node -e 'import("./scripts/lib/i18nFrozen.mjs").then(m=>{const x=m.frozenByFile("src");console.log([...x.values()].reduce((a,b)=>a+b,0))})'
+```
+
+Left to do, in the order that makes sense:
+
+1. **The raw untranslated literals** — `MapPanel` layout names (11), `icons.ts` marker-group names (4),
+   `stickers.ts` categories (4), `priority.ts` (3). These are the highest-value items on the list
+   because they are **invisible to every existing check**: they were never `t()` calls, so the scanner,
+   the blindspot probe and the frozen ratchet all score them 0 while they render English.
+2. **The 9 locale-dependent React keys.** ⚠️ **Couple this with item 1 or it becomes a regression.**
+   `EdgeInspector` keys on `EDGE_PRESETS.name`, `MapPanel` on `LAYOUT_GROUPS.label`, `Panels` on
+   `STICKER_CATEGORIES` — all safe *today only because those labels are raw English*. Migrating the
+   labels without splitting id from label **creates** the defect: subtree remount on language change,
+   focus loss on the interactive AppTips buttons, duplicate-key crash on any collision in a target
+   language. Same family as the `Recent.tsx` data-loss bug.
+3. **`src/io/` + `src/import/`** (~68) — real work, not markup noise: user-visible error messages and
+   UI labels compiled into exported artifacts.
+4. **The blindspot residue** (~85) — mostly sentences a JSX element cut in half; `tNodes` is the fix.
+5. **`Toolbar`'s `mindmap-last-export`** — persists a translated *label* as an identity key.
+6. **The 157 frozen `t()`** — mechanical getter conversion, deliberately deprioritised: see the note in
+   `test/i18n-frozen-ratchet.test.ts` for why emptying that table would not finish the job.
+
+Owner decisions and their outcomes are in `docs/I18N_BLOCKED.md` (1–3 resolved, 4 partially).
+
+---
+
 **Do not trust that classification without re-checking it** — the first version of this table was wrong
 twice, in the same direction, and both were found only by opening the file. `<option value="relates-to">`
 was rendering the raw **id** to the user while `EdgeInspector` showed a translated label for the same

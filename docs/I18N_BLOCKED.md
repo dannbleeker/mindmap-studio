@@ -84,10 +84,23 @@ names stay English.
 The accepted consequence, stated plainly: those names render in the "+ New…" dropdown and the Insert ▸
 Map parts menu, so **those menu entries will read English inside an otherwise translated menu**.
 
-One item inside this decision is a *correctness* defect rather than a translation gap, and is worth
-revisiting separately if a second locale ships: a handful of example notes give UI-referential
-instructions ("open Notes", "use the Markers panel"). Once the chrome is translated those sentences name
-controls that no longer exist under those names — they become wrong, not merely untranslated.
+**The correctness defect inside this decision is ✅ FIXED (2026-07-27), by owner decision.** A handful
+of example notes gave UI-referential instructions ("Open the Outline panel", "📝 Notes or 🏷 Markers
+from the toolbar"). Those name controls that will not be called that in a translated UI, so the
+sentence stops being untranslated and starts being *wrong* — and wrong in example content reads as the
+app lying to a new user.
+
+Six strings reworded: `exampleBuilders.ts` (5) and `sampleMap.ts` (1). **The copy is still English —
+the decline stands.** This was a correctness fix, not a migration; nothing moved into a catalogue.
+
+The rule, now recorded at the top of `exampleBuilders.ts`: describe the *action* and keep the **glyph**
+as the finding aid. 🔗, 🧲, 📝, 🏷 and ↓ are not translated, so they point at the right control in
+every locale — "use 🔗 to point this topic at your Strategy map" survives, "🔗 Link" does not.
+
+Audited all three content files, not just the ones already known. `templates.ts` has **zero** —
+every string there describes map content. Deliberately left alone: "switch the layout to right-only"
+(describes the result; the label is "Right") and the four "Link me to your … map" topic texts (ordinary
+verb, not a quoted label). A brittle "(Chapter 5)" cross-reference went at the same time.
 
 ---
 

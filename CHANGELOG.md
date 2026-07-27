@@ -327,6 +327,28 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **Example-map notes no longer name chrome controls.** The sample maps stay English by decision, but
+  a note saying "Open the Outline panel" or "open 📝 Notes or 🏷 Markers from the toolbar" names a
+  control that will not be called that once the chrome is translated — so the sentence stops being
+  untranslated and starts being *wrong*, which in example content reads as the app lying to a new user
+  rather than as a missing translation. Six strings reworded to describe the action and keep the
+  **glyph** as the finding aid: 🔗, 🧲, 📝, 🏷 and ↓ are not translated, so they point at the right
+  control in every locale. Nothing moved into a catalogue — the copy is still English.
+
+  Audited all three content files rather than the ones already known: `templates.ts` has zero. Left
+  alone on purpose, and recorded as such: "switch the layout to right-only" (describes the result; the
+  label is "Right") and the "Link me to your … map" topic texts (ordinary verb, not a quoted label).
+
+- **`build-stats.mjs` refuses to blank the dashboard's coverage figure.** Every coverage number it
+  writes comes from `coverage/coverage-summary.json`, and without that file its `safe()` guards
+  degrade to `null` rather than failing — right for a fresh checkout, wrong for a re-run in a repo that
+  already has real numbers. Running the script on its own silently replaced `lineCoveragePct: 90.1`
+  with `null`; the dashboard then renders "—" and the stats contract test fails with nothing pointing
+  at the cause. It now exits non-zero and writes nothing in that case. This deliberately narrows the
+  `continue-on-error` on the stats workflow's test step: a flaky test still produces partial coverage
+  and refreshes fine, but a run that produced no coverage at all no longer overwrites good numbers.
+  Not refreshing beats corrupting.
+
 - **The bundle gate now measures what a browser actually downloads.** It weighed `index-*.js` and
   called that "the initial bundle", but Vite emits `<link rel="modulepreload">` for shared eager chunks
   and the browser fetches those on first paint too. The gate filed them as lazy and stopped counting —

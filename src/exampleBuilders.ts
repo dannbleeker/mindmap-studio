@@ -7,6 +7,21 @@
 // `src/examples.ts` now holds the name index and is the only thing eager code imports. Anything that
 // actually BUILDS a map reaches this module — statically from the (lazy) Start screen, dynamically
 // from the (eager) toolbar.
+// THIS COPY STAYS ENGLISH (owner decision, 2026-07-26) — but it must stay TRUE when the chrome around
+// it is translated, which is a separate obligation and the reason for the rule below.
+//
+// Do not quote a chrome LABEL in a note. "Open the Outline panel" names a control that will not be
+// called that in a Danish UI, so the sentence stops being untranslated and starts being WRONG — and
+// wrong in example content reads as the app lying to a new user, not as a missing translation.
+//
+// Describe the action, and keep the GLYPH as the finding aid: 🔗, 🧲, 📝, 🏷 and ↓ are not translated,
+// so they still point at the right control in every locale. "Use 🔗 to point this topic at your
+// Strategy map" survives; "🔗 Link" does not.
+//
+// Gestures ("drag", "double-click") and generic nouns ("topic", "layout") are fine — they describe
+// what the user does, not what the button is called. Deliberately NOT reworded: "switch the layout to
+// right-only" (describes the result; the label is "Right") and the four "Link me to your … map" topic
+// texts (ordinary verb, not a quoted label).
 import type { MapNode, MindMapDoc } from "./model/types";
 
 // Pre-built example maps for the "Examples" group in the New menu. Unlike the
@@ -349,7 +364,7 @@ const outline = (): MindMapDoc =>
         leaf("close", "Close: one change to make tomorrow"),
       ],
       {
-        note: "Open the Outline panel to see it as a script; export Markdown for the speaker notes.",
+        note: "Reads top to bottom as a script. Export Markdown to get the speaker notes.",
       },
     ),
   );
@@ -390,7 +405,7 @@ const runbook = (): MindMapDoc =>
   );
 
 // 12 — Cross-map atlas: the "doorways" pattern. Built as the shape + guidance, since live
-// cross-map links point at specific map ids (which you wire to your own maps, Chapter 5).
+// cross-map links point at specific map ids (which you wire to your own maps).
 const atlas = (): MindMapDoc =>
   doc(
     "Company atlas",
@@ -399,7 +414,7 @@ const atlas = (): MindMapDoc =>
       "Company atlas",
       [
         leaf("st", "Strategy ▸", {
-          note: "Select me → 🔗 Link → another map to open your Strategy map.",
+          note: "Select me, then use 🔗 to point this topic at your Strategy map.",
         }),
         leaf("lp", "Product launch ▸", { note: "Link me to your launch map." }),
         leaf("ok", "OKRs ▸", { note: "Link me to your OKRs map." }),
@@ -407,7 +422,7 @@ const atlas = (): MindMapDoc =>
         leaf("hr", "Hiring ▸", { note: "Link me to your hiring plan." }),
       ],
       {
-        note: "An atlas is a high-level map whose nodes are doorways into detailed maps. Wire each node to its own map with 🔗 Link (Chapter 5), then click to hop between them.",
+        note: "An atlas is a high-level map whose topics are doorways into detailed maps. Wire each topic to its own map with 🔗, then click to hop between them.",
       },
     ),
   );
@@ -534,7 +549,7 @@ const flowchart = (): MindMapDoc =>
       ],
       {
         style: { shape: "ellipse" },
-        note: "Shapes mark step types: oval = start/end, diamond = decision, parallelogram = I/O. Switch to the Org chart ↓ layout for a classic top-down flow.",
+        note: "Shapes mark step types: oval = start/end, diamond = decision, parallelogram = I/O. Pick the top-down ↓ layout for a classic flow.",
       },
     ),
     {
@@ -604,7 +619,7 @@ const whiteboard = (): MindMapDoc => {
       ],
       {
         pos: { x: 60, y: 0 },
-        note: "Free layout (🧲) is ON — drag any box anywhere. Mix shapes + arrows to make a flowchart, concept map, or brainstorm wall.",
+        note: "Free placement is ON (🧲) — drag any box anywhere. Mix shapes + arrows to make a flowchart, concept map, or brainstorm wall.",
       },
     ),
     {

@@ -457,6 +457,33 @@ const stats = {
   git: { born, ageDays, commits, commits7d, authors, churn30d, changelogEntries },
 };
 
+// REFUSE to overwrite a good stats.json with a coverage-less one.
+//
+// Every coverage figure here comes from `coverage/coverage-summary.json`, and without it the `safe()`
+// guards degrade to `null` rather than failing — which is right for a first run in a fresh checkout,
+// and wrong for a re-run in a repo that already has real numbers. Running `node scripts/build-stats.mjs`
+// on its own (easy to do: it is a one-liner, and the coverage prerequisite lives in a comment at the
+// top of this file and in stats.yml) then silently replaces `lineCoveragePct: 90.1` with `null`. The
+// dashboard renders "—", `test/dashboard.test.ts` fails on its own contract, and nothing points at the
+// cause. That is not hypothetical — it happened, and the failure surfaced three commits later.
+//
+// So: no coverage + an existing file that HAS coverage = exit non-zero and touch nothing. Use
+// `pnpm stats`, which runs coverage first.
+const priorStats = safe(
+  () => JSON.parse(readFileSync(join(ROOT, "public/stats.json"), "utf8")),
+  null,
+);
+if (!coverage && priorStats?.headline?.lineCoveragePct != null) {
+  console.error(
+    [
+      "✗ Refusing to overwrite public/stats.json: no coverage/coverage-summary.json, but the committed",
+      `  stats.json has real coverage (${priorStats.headline.lineCoveragePct}%). Writing now would blank it.`,
+      "  Run `pnpm stats` (coverage → build → features → stats) instead of this script alone.",
+    ].join("\n"),
+  );
+  process.exit(1);
+}
+
 writeFileSync(join(ROOT, "public/stats.json"), `${JSON.stringify(stats, null, 2)}\n`);
 
 // --- trends: append today's point to public/stats-history.json -----------------

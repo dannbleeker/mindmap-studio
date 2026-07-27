@@ -64,6 +64,11 @@ jobs:
       - name: Validate feature catalogue
         run: node ./scripts/check-feature-coverage.mjs
 
+      # build-stats REFUSES to write if coverage-summary.json is missing and the committed stats.json
+      # already has real coverage, so this step now fails instead of silently blanking the dashboard's
+      # coverage figure. That is a deliberate narrowing of the continue-on-error above: a flaky test
+      # still produces partial coverage and refreshes fine, but a run where coverage was never written
+      # at all no longer overwrites good numbers with nulls. Not refreshing beats corrupting.
       - name: Build stats.json
         run: node ./scripts/build-stats.mjs
 

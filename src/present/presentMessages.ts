@@ -6,6 +6,10 @@ import { type Catalogue, registerMessages } from "../i18n/registry";
 // Imports `registerMessages` from `../i18n/registry`, NOT the `../i18n` barrel.
 
 export const PRESENT_EN = {
+  "present.presenterViewP": "Presenter view (P)",
+  "present.elapsedNamed": "Elapsed {time}",
+  "present.blackScreenHint": "Black screen — click or press any key to resume",
+  "present.whiteScreenHint": "White screen — click or press any key to resume",
   "present.presenterView": "Presenter view",
   "present.decreaseBudget": "Decrease budget",
   "present.increaseBudget": "Increase budget",

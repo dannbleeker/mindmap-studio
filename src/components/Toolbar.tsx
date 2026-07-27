@@ -497,7 +497,7 @@ export function Toolbar({
               aria-label={t("toolbar.newMapFromATemplate")}
               title={t("toolbar.newMapBlankTemplateOr")}
             >
-              <option value="">+ New…</option>
+              <option value="">{t("toolbar.newMenu")}</option>
               <optgroup label={t("toolbar.templates")}>
                 {/* `tpl`, not `t` — see the templates MenuSub below; the shadow is a live trap. */}
                 {templates.map((tpl) => (
@@ -576,7 +576,7 @@ export function Toolbar({
                     <div>
                       <MenuLabel>{t("toolbar.recent")}</MenuLabel>
                       <MenuItem
-                        label={`Last: ${lastItem[0]}`}
+                        label={t("toolbar.lastNamed", { name: lastItem[0] })}
                         onSelect={run(lastItem[0], lastItem[1])}
                       />
                       <MenuSeparator />
@@ -1243,7 +1243,7 @@ export function Toolbar({
                           {mm.title || t("common.untitled")}
                         </option>
                       ))}
-                    <option value="none">— Unbind</option>
+                    <option value="none">{t("toolbar.unbind")}</option>
                   </select>
                 </div>
                 <MenuItem

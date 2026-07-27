@@ -90,6 +90,36 @@ export function propViolations(src) {
       if (ALLOWED_LITERALS.has(value.toLowerCase())) continue;
       out.push({ line: i + 1, text: `${prop}="${value}"`, why: "user-facing prop is a literal" });
     }
+
+    // The TEMPLATE form of the same defect: title={`Apply "${s.name}"`}.
+    //
+    // `templateViolations` cannot catch these. It looks for prose — a capitalised word followed by a
+    // lowercase word — which `Apply "${…}"` and `${ariaLabel}: pick from calendar` never match once
+    // the interpolations are blanked. That rule has to be conservative because a template can hold
+    // anything; here we are anchored on the PROP NAME, which already says the value is read by a user,
+    // so any real words in the static parts are enough. Measured: this is 7 of the strings that were
+    // sitting inside allowlisted files, including `Rename / merge "${key}" — type an existing tag
+    // name to merge`, whose own sibling `aria-label` on the same element is already a `t()` call.
+    for (const prop of USER_FACING_PROPS) {
+      const m = new RegExp(`(?:^|\\s)${prop}=\\{\`([^\`]*)\``).exec(line);
+      if (!m) continue;
+      const statics = m[1].replace(/\$\{[^}]*\}/g, " ");
+      // Two consecutive letters somewhere outside the interpolations. `title={`${n}%`}` is data.
+      if (!/\p{Letter}{2,}/u.test(statics)) continue;
+      // A MACHINE-TOKEN CHEATSHEET is not prose. The search box's tooltip is
+      // `${t("search.operatorsHelp")}\ntag:foo  marker:flag-red  priority:1  due:overdue …` — the
+      // sentence is already a message and the rest is query syntax the user TYPES, so translating it
+      // would break the feature. Same reasoning that keeps physical key names literal. Two or more
+      // `word:value` tokens with no space after the colon is the signature; a colon followed by a
+      // space is ordinary punctuation (`Relationship: ${label}`) and still gets caught.
+      if ((statics.match(/\b[a-z]+:[^\s]/g) ?? []).length >= 2) continue;
+      if (ALLOWED_LITERALS.has(statics.trim().toLowerCase())) continue;
+      out.push({
+        line: i + 1,
+        text: `${prop}={\`${m[1]}\`}`,
+        why: "user-facing prop is a template literal",
+      });
+    }
   });
   return out;
 }
@@ -292,7 +322,12 @@ export function loneJsxTextViolations(src) {
     if (inComment.has(i)) return;
     const text = line.trim();
     if (text.length < 2 || text.length > 80) return;
-    if (/[<>{}=`"';()[\]]/.test(text)) return;
+    // PARENTHESES are punctuation in UI copy, not just code. Excluding them cost real strings —
+    // `Presenter view (P)`, `Exit (Esc)`, `Show all (Esc)` — and the exclusion was never load-bearing
+    // here the way it is in `proseViolations`, because this rule is anchored structurally: the
+    // previous line must end in `>` and the next must open `</`, so the text is unambiguously JSX
+    // content. `{}`, `=`, backtick, quotes and `;` stay excluded — those do still mark it as code.
+    if (/[<>{}=`"';[\]]/.test(text)) return;
     if (!/\p{Letter}/u.test(text)) return;
     if (!/^[A-Z＋✕←→‹›▦☰⏸▶↺−+]/u.test(text)) return;
     if (!/>$/.test((lines[i - 1] ?? "").trim())) return;
@@ -329,7 +364,15 @@ export function jsxTextViolations(src) {
     // Verified against every allowlisted file before landing — no file loses a detection, because the
     // only `<kbd>` contents in the tree are key names and already-migrated `{t(…)}` interpolations.
     const withoutKeyNames = line.replace(/<kbd>[^<>]*<\/kbd>/g, " ");
-    for (const m of withoutKeyNames.matchAll(/>([A-Z][^<>{}]*)<\//g)) {
+    // A LEADING GLYPH does not stop it being a label. The rule anchored on `[A-Z]` immediately after
+    // the `>`, so every emoji-prefixed label in the app was invisible to it: `🔗 Relationships`,
+    // `📊 Map statistics`, `🗓 Agenda`, `🗂 Maps`, `▦ Board`, `＋ New`. That is not a rare shape here —
+    // it is the house style for panel headings, and it hid ~15 strings inside files the allowlist had
+    // already certified as clean. One optional non-alphanumeric glyph is allowed before the capital;
+    // the capital is still required, so `>3<` and `>x<` stay out.
+    for (const m of withoutKeyNames.matchAll(
+      />((?:[^\p{Letter}\p{Number}\s<>{}]\s*)?[A-Z][^<>{}]*)<\//gu,
+    )) {
       const text = m[1].trim();
       // A single character is a glyph or an initial, not a label — `<kbd>K</kbd>`.
       if (text.length < 2) continue;

@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import type { MindMapDoc } from "../../model/types";
 import { MiniMap } from "./MiniMap";
 import { branchLabels, branchSpokes, docNodeCount } from "./nodeStats";
@@ -29,7 +31,7 @@ export function TemplateCard({
       type="button"
       className="st-card st-card-hover st-tile"
       onClick={onOpen}
-      title={`Open ${name}`}
+      title={t("common.openNamed", { name })}
     >
       <div className="st-thumb">
         <MiniMap seed={seed} branches={branchSpokes(doc)} />

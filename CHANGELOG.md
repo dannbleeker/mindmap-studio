@@ -327,6 +327,32 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **The string detectors could not see three whole shapes, and 56 strings were hiding in files the
+  allowlist had already certified clean.** An independent AST sweep — deliberately not built from the
+  detectors' own rules — found 149 candidates inside allowlisted files; 56 were real. Three blind spots,
+  each fixed by anchoring on *structure* rather than on what prose looks like:
+
+  - **A leading glyph stopped a label being a label.** The JSX-text rule required `[A-Z]` immediately
+    after the `>`, so every emoji-prefixed heading was invisible — `🔗 Relationships`, `📊 Map
+    statistics`, `🗓 Agenda`, `▦ Board`, `＋ New`. That is the house style for panel headings, not a
+    rare shape. The glyph now stays inline in the JSX and only the words move into the catalogue, so
+    the fixed form doesn't fire either.
+  - **Parentheses were treated as code.** `Presenter view (P)`, `Exit (Esc)`, `Read (PDF)` all slipped
+    through. Safe to allow here because that rule is anchored on the surrounding tags.
+  - **A user-facing prop could hide in a template literal.** `templateViolations` needs a capitalised
+    word followed by a lowercase one, which `` `Apply "${s.name}"` `` never is once the interpolation
+    is blanked. Anchoring on the *prop name* makes a single word enough. `Panels.tsx:1285` had
+    `` title={`Rename / merge "${key}" — …`} `` whose own `aria-label`, on the same element, was
+    already a `t()` call.
+
+  The narrowing that keeps it honest: a **machine-token cheatsheet is not prose**. The search box's
+  tooltip lists `tag:foo  marker:flag-red  priority:1` — syntax the user types, where translating would
+  break the feature. Two or more `word:value` tokens with no space after the colon is the signature;
+  `Relationship: ${label}` still gets caught. Both directions are pinned as unit tests.
+
+  The scanner total went **401 → 410** despite 56 strings being paid, which is the honest arithmetic of
+  widening a detector: it found more than it fixed. Every new detector in this programme has done that.
+
 - **Fixed: Recent's date buckets could have taken your maps off the page.** The Start screen's Recent
   section keyed its buckets by the *rendered label* — `GROUPS` held `t("start.earlierThisWeek")` while
   `groupOf()` returned the English literal `"Earlier this week"`. Those agree only while the catalogue

@@ -97,7 +97,7 @@ export function Kanban({
           borderBottom: "1px solid var(--ed-border)",
         }}
       >
-        <strong style={{ color: "var(--ed-ink)" }}>▦ Board</strong>
+        <strong style={{ color: "var(--ed-ink)" }}>▦ {t("panel.board")}</strong>
         <label style={{ display: "flex", alignItems: "center", gap: 6, marginRight: "auto" }}>
           <span style={{ color: "var(--ed-muted)", fontSize: 12 }}>{t("app.groupBy")}</span>
           <select

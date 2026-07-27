@@ -114,7 +114,9 @@ export function ThemeDesignerDialog({
                 {t.name}
               </Button>
             ))}
-            <Button onClick={() => setDraft(newCustomTheme(t("theme.myTheme")))}>＋ New</Button>
+            <Button onClick={() => setDraft(newCustomTheme(t("theme.myTheme")))}>
+              ＋ {t("panel.newTheme")}
+            </Button>
           </div>
         </div>
       ) : null}

@@ -140,7 +140,7 @@ export function OverlayInspector({
             placeholder={
               overlay.kind === "boundary" ? t("panel.boundaryLabel") : t("panel.summaryLabel")
             }
-            aria-label={`${KIND_LABEL[overlay.kind]} label`}
+            aria-label={t("panel.overlayKindLabel", { kind: KIND_LABEL[overlay.kind] })}
             style={controlStyle}
           />
         )}
@@ -155,7 +155,7 @@ export function OverlayInspector({
                 key={c}
                 type="button"
                 title={c}
-                aria-label={`Colour ${c}`}
+                aria-label={t("common.colourNamed", { colour: c })}
                 aria-pressed={active}
                 onClick={() => onSetColor(c)}
                 style={{

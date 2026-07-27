@@ -16,6 +16,10 @@ import { type Catalogue, registerMessages } from "../../i18n/registry";
 // the migration nearly free in bundle terms.
 
 export const START_EN = {
+  "start.readPdf": "Read (PDF)",
+  "start.readEpub": "Read (EPUB)",
+  "start.moveNamedTo": "Move “{name}” to…",
+  "start.topLevelNoFolder": "Top level (no folder)",
   "start.openTheCommandPalette": "Open the command palette",
   "start.pressCtrlKAnywhereTo": "Press Ctrl/⌘ + K anywhere to search and run any action.",
   "start.rightClickATopic": "Right-click a topic",

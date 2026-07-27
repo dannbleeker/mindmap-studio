@@ -2637,7 +2637,7 @@ function FlowInner({
                           key={arrow}
                           type="button"
                           className="mm-menu-chip"
-                          aria-label={`Arrowheads: ${arrow}`}
+                          aria-label={t("canvas.arrowheadsNamed", { arrow })}
                           aria-pressed={(link?.arrow ?? "to") === arrow}
                           data-on={(link?.arrow ?? "to") === arrow || undefined}
                           onClick={() => patch({ arrow })}
@@ -2813,7 +2813,11 @@ function FlowInner({
                             type="button"
                             className="mm-menu-chip"
                             aria-pressed={on}
-                            aria-label={`${on ? "Remove" : "Add"} marker ${m}`}
+                            aria-label={
+                              on
+                                ? t("canvas.removeMarkerNamed", { marker: m })
+                                : t("canvas.addMarkerNamed", { marker: m })
+                            }
                             data-on={on || undefined}
                             onClick={() => apply(toggleIcon(docRef.current, id, m))}
                           >
@@ -3016,7 +3020,7 @@ function FlowInner({
                             aria-label={t("toolbar.bindRollUpSource")}
                           >
                             {findNode(docRef.current, id)?.rollup ? (
-                              <option value="">— Unbind</option>
+                              <option value="">{t("toolbar.unbind")}</option>
                             ) : (
                               <option value="">{t("toolbar.bindSourceMap")}</option>
                             )}
@@ -3110,7 +3114,7 @@ function FlowInner({
                           key={c}
                           type="button"
                           className="mm-menu-chip"
-                          aria-label={`Colour ${c}`}
+                          aria-label={t("common.colourNamed", { colour: c })}
                           style={{ background: c }}
                           onClick={() => recolour(c)}
                         />

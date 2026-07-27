@@ -67,7 +67,7 @@ export function Learn() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Read (PDF)
+            {t("start.readPdf")}
           </a>
           <a
             className="st-link"
@@ -75,7 +75,7 @@ export function Learn() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Read (EPUB)
+            {t("start.readEpub")}
           </a>
         </div>
       </div>

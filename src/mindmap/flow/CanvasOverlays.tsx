@@ -83,7 +83,7 @@ const statBtn: CSSProperties = {
 const VIEWS: { id: "map" | "outline" | "board"; label: string }[] = [
   { id: "map", label: t("toolbar.map") },
   { id: "outline", label: t("panel.outline") },
-  { id: "board", label: t("canvas.board") },
+  { id: "board", label: t("panel.board") },
 ];
 
 /** The Map/Outline/Board segmented control — MindManager's status-bar view buttons make these three

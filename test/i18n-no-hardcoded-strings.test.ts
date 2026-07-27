@@ -5,6 +5,7 @@ import {
   type Violation,
   argumentViolations,
   jsxTextViolations,
+  loneJsxTextViolations,
   placeholderViolations,
   propViolations,
   proseViolations,
@@ -242,6 +243,36 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(jsxTextViolations("        <span>{count} selected</span>")).toHaveLength(0);
     // A lone glyph or initial is not a label.
     expect(jsxTextViolations("        <kbd>K</kbd>")).toHaveLength(0);
+    // (6a) A LEADING GLYPH does not stop it being a label. The rule required `[A-Z]` immediately
+    // after the `>`, so the app's emoji-prefixed panel headings were invisible to it — ~15 strings
+    // hiding inside files the allowlist had already certified clean, which is the failure this whole
+    // guard exists to prevent.
+    expect(jsxTextViolations("        <div>🔗 Relationships</div>")).toHaveLength(1);
+    expect(jsxTextViolations("        <strong>▦ Board</strong>")).toHaveLength(1);
+    expect(jsxTextViolations("        <Button>＋ New</Button>")).toHaveLength(1);
+    // The migrated form of exactly that shape — glyph inline, words from the catalogue — must NOT fire.
+    expect(jsxTextViolations('        <div>🔗 {t("app.relationships")}</div>')).toHaveLength(0);
+    // (6b) PARENTHESES are punctuation in UI copy. Excluding them cost `Presenter view (P)`,
+    // `Exit (Esc)` and `Read (PDF)`. Safe here because the rule is anchored on the tags.
+    expect(
+      loneJsxTextViolations("            >\n              Exit (Esc)\n            </button>"),
+    ).toHaveLength(1);
+    // (6c) A user-facing prop must not be a TEMPLATE either. `templateViolations` cannot catch these:
+    // it needs a capitalised word followed by a lowercase one, which `Apply "${s.name}"` never is once
+    // the interpolation is blanked. Anchoring on the prop name is what makes a single word enough.
+    expect(propViolations("        title={`Open ${name}`}")).toHaveLength(1);
+    expect(propViolations("        aria-label={`${ariaLabel}: pick from calendar`}")).toHaveLength(
+      1,
+    );
+    // ...but a MACHINE-TOKEN cheatsheet is not prose. The search tooltip lists query syntax the user
+    // types; translating it would break the feature, and the sentence above it is already a message.
+    expect(
+      propViolations(
+        '        title={`${t("search.operatorsHelp")}\\ntag:foo  marker:flag-red  priority:1`}',
+      ),
+    ).toHaveLength(0);
+    // Pure data interpolation is not a label.
+    expect(propViolations("        title={`${n}%`}")).toHaveLength(0);
     // Lowercase content is a technical token, not a label.
     expect(jsxTextViolations("        <code>npm run dev</code>")).toHaveLength(0);
     expect(

@@ -98,7 +98,10 @@ export function EdgeInspector({
           </div>
           {/* Faint context line under the title, mirroring the node inspector's breadcrumb (P5). */}
           {edge.label ? (
-            <div className="mm-inspector-path" title={`Relationship: ${edge.label}`}>
+            <div
+              className="mm-inspector-path"
+              title={t("panel.relationshipNamed", { label: edge.label })}
+            >
               Relationship: {edge.label}
             </div>
           ) : null}
@@ -220,7 +223,7 @@ export function EdgeInspector({
               key={c}
               type="button"
               title={c}
-              aria-label={`Colour ${c}`}
+              aria-label={t("common.colourNamed", { colour: c })}
               aria-pressed={edge.color.toLowerCase() === c.toLowerCase()}
               onClick={() => onSetStyle({ color: c })}
               style={{

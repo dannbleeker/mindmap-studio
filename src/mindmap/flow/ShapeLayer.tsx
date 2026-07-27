@@ -301,7 +301,7 @@ function ShapeLayer({
             <button
               key={c}
               type="button"
-              title={`Colour ${c}`}
+              title={t("common.colourNamed", { colour: c })}
               aria-label={t("canvas.shapeColour", { colour: c })}
               onClick={() => onColor(selected.id, c)}
               style={{

@@ -1884,7 +1884,7 @@ export function App() {
               onClick={() => setFocus(null)}
               style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
             >
-              Show all (Esc)
+              {t("app.showAllEsc")}
             </button>
           </div>
         )}
@@ -1911,7 +1911,7 @@ export function App() {
               onClick={() => setDrillId(null)}
               style={{ ...controlStyle, padding: "1px 8px", fontSize: 12 }}
             >
-              Exit (Esc)
+              {t("app.exitEsc")}
             </button>
           </div>
         )}
@@ -2658,10 +2658,10 @@ export function App() {
             {t("about.userGuide")}
           </a>
           <a href="/Thinking-in-Maps.pdf" target="_blank" rel="noopener noreferrer">
-            Book (PDF)
+            {t("app.bookPdf")}
           </a>
           <a href="/Thinking-in-Maps.epub" target="_blank" rel="noopener noreferrer">
-            Book (EPUB)
+            {t("app.bookEpub")}
           </a>
           <a href="/notices.html" target="_blank" rel="noopener noreferrer">
             {t("about.thirdParty")}

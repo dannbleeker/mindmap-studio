@@ -48,7 +48,7 @@ export function MapCard({
         type="button"
         className="st-thumb st-thumb-btn"
         onClick={() => onAction("open", entry)}
-        title={`Open ${entry.title}`}
+        title={t("common.openNamed", { name: entry.title })}
       >
         <MiniMap seed={entry.id} branches={entry.branches} />
       </button>

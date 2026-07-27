@@ -1232,7 +1232,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 <button
                   type="button"
                   className="nodrag nopan"
-                  title={`${priorityLabel(priority)} priority — click to cycle`}
+                  title={t("panel.priorityNamedCycle", { level: priorityLabel(priority) })}
                   onClick={(e) => {
                     e.stopPropagation();
                     editing.cyclePriority(id);
@@ -1245,7 +1245,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 </button>
               ) : (
                 <Badge
-                  title={`${priorityLabel(priority)} priority`}
+                  title={t("panel.priorityNamed", { level: priorityLabel(priority) })}
                   bg={priorityColor(priority)}
                   color="#fff"
                   fontWeight={600}

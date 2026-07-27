@@ -186,7 +186,7 @@ export function NaturalDateInput({
       />
       <button
         type="button"
-        aria-label={`${ariaLabel}: pick from calendar`}
+        aria-label={t("panel.pickFromCalendarFor", { label: ariaLabel })}
         title={t("panel.pickFromCalendar")}
         onClick={() => {
           try {
@@ -694,7 +694,7 @@ export function StyleBar({
               key={s.id}
               type="button"
               onClick={() => onStyle(s.style)}
-              title={`Apply "${s.name}"`}
+              title={t("panel.applyNamed", { name: s.name })}
               aria-label={t("panel.applyPreset", { name: s.name })}
               style={{
                 width: 18,
@@ -1282,7 +1282,7 @@ export function MarkerTagIndex({
                         setEditTag(key);
                         setTagDraft(key);
                       }}
-                      title={`Rename / merge "${key}" — type an existing tag name to merge`}
+                      title={t("panel.renameMergeTag", { tag: key })}
                       aria-label={t("panel.renameTagNamed", { tag: key })}
                       style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                     >
@@ -1352,7 +1352,7 @@ export function RelationshipsPanel({
   };
   return (
     <Panel>
-      <div style={panelTitle}>🔗 Relationships</div>
+      <div style={panelTitle}>🔗 {t("app.relationships")}</div>
       {links.length === 0 ? (
         <div style={{ padding: "8px 12px", color: colors.muted, fontSize: fontSize.sm }}>
           {t("panel.noRelationshipsOr")}
@@ -1415,7 +1415,7 @@ export function StatsPanel({ doc }: { doc: MindMapDoc }) {
   );
   return (
     <Panel>
-      <div style={panelTitle}>📊 Map statistics</div>
+      <div style={panelTitle}>📊 {t("app.mapStatistics")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <PanelSection>{t("toolbar.structure")}</PanelSection>
         {row("Topics", s.topics)}
@@ -1466,7 +1466,7 @@ export function AgendaPanel({
             key={it.id}
             type="button"
             onClick={() => onPick(it.id)}
-            title={`${it.topic || t("common.untitled")} — due ${it.due}`}
+            title={t("panel.dueOn", { topic: it.topic || t("common.untitled"), due: it.due })}
             style={{
               ...listRow,
               display: "flex",
@@ -1488,7 +1488,7 @@ export function AgendaPanel({
   };
   return (
     <Panel>
-      <div style={panelTitle}>🗓 Agenda</div>
+      <div style={panelTitle}>🗓 {t("app.agenda")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {agendaIsEmpty(buckets) ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
@@ -1520,7 +1520,7 @@ export function MapsPanel({
   const shown = needle ? maps.filter((m) => (m.title || "").toLowerCase().includes(needle)) : maps;
   return (
     <Panel>
-      <div style={panelTitle}>🗂 Maps</div>
+      <div style={panelTitle}>🗂 {t("app.maps")}</div>
       <div style={{ padding: "0 10px 6px" }}>
         <Input
           value={q}
@@ -1590,7 +1590,7 @@ export function InboxPanel({
   };
   return (
     <Panel>
-      <div style={panelTitle}>📥 Inbox</div>
+      <div style={panelTitle}>📥 {t("app.inbox")}</div>
       <div style={{ padding: "0 10px 6px", display: "flex", gap: 6 }}>
         <Input
           value={draft}
@@ -1642,7 +1642,7 @@ export function InboxPanel({
                 onClick={() => onFile(it.id, it.text)}
                 disabled={!canFile}
                 title={canFile ? t("panel.fileOntoThe") : t("panel.openAMap")}
-                aria-label={`File "${it.text}" onto the map`}
+                aria-label={t("panel.fileOntoMap", { text: it.text })}
                 style={{ padding: "2px 6px", fontSize: fontSize.sm }}
               >
                 {t("panel.toMap")}
@@ -1650,7 +1650,7 @@ export function InboxPanel({
               <Button
                 onClick={() => onDiscard(it.id)}
                 title={t("panel.discard")}
-                aria-label={`Discard "${it.text}"`}
+                aria-label={t("panel.discardNamed", { text: it.text })}
                 style={{ padding: "2px 6px", fontSize: fontSize.sm }}
               >
                 ×
@@ -1689,7 +1689,7 @@ export function SlideDeckEditorPanel({
   const refs = deck.map((d) => d.ref);
   return (
     <Panel>
-      <div style={panelTitle}>🎞 Slide deck</div>
+      <div style={panelTitle}>🎞 {t("panel.slideDeck")}</div>
       <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
         Choose which topics become slides, reorder them, and add speaker notes. Empty = the
         automatic deck (overview + one slide per top branch).
@@ -1726,7 +1726,7 @@ export function SlideDeckEditorPanel({
               <Button
                 onClick={() => onChange(removeSlide(refs, i))}
                 title={t("panel.removeSlide")}
-                aria-label={`Remove ${row.heading}`}
+                aria-label={t("panel.removeNamed", { name: row.heading })}
                 style={{ padding: "0 6px", fontSize: fontSize.sm }}
               >
                 ✕
@@ -1856,7 +1856,7 @@ export function FilterPanel({
   );
   return (
     <Panel>
-      <div style={panelTitle}>🎚 Power Filter</div>
+      <div style={panelTitle}>🎚 {t("app.powerFilter")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <Input
           value={text}
@@ -1981,7 +1981,7 @@ export function FilterPanel({
           }}
         >
           <input type="checkbox" checked={hide} onChange={(e) => onHide?.(e.target.checked)} />
-          Hide non-matches (instead of fading)
+          {t("panel.hideNonMatches")}
         </label>
         {active && onExtract ? (
           <div style={{ padding: "2px 10px 4px" }}>
@@ -2029,7 +2029,7 @@ export function FilterPanel({
               <button
                 type="button"
                 onClick={() => onDeleteFilter(f.id)}
-                title={`Delete "${f.name}"`}
+                title={t("panel.deleteNamed", { name: f.name })}
                 style={{
                   border: "none",
                   background: "transparent",
@@ -2101,7 +2101,7 @@ export function HistoryPanel({
           alignItems: "center",
         }}
       >
-        <span>🕔 History</span>
+        <span>🕔 {t("app.history")}</span>
         <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
           {t("common.close")}
         </Button>
@@ -2581,7 +2581,7 @@ export function StylesPanel({
   });
   return (
     <Panel>
-      <div style={panelTitle}>🎨 Styles</div>
+      <div style={panelTitle}>🎨 {t("app.styles")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <PanelSection>{t("panel.conditionalFormatting")}</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
@@ -2731,7 +2731,7 @@ export function StylesPanel({
             <button
               type="button"
               onClick={() => onApplyStyle(s.style)}
-              title={`Apply "${s.name}" to the selected topic`}
+              title={t("panel.applyNamedToSelected", { name: s.name })}
               style={{
                 flex: 1,
                 textAlign: "left",
@@ -3271,7 +3271,7 @@ export function InfoPanel({
                                 key={m}
                                 type="button"
                                 onClick={() => onToggleMarker(m)}
-                                title={`Add ${m} (suggested from the topic text)`}
+                                title={t("panel.addMarkerSuggested", { marker: m })}
                                 style={{
                                   border: "1px dashed var(--ed-accent)",
                                   background: "var(--ed-card)",
@@ -3474,7 +3474,7 @@ export function InfoPanel({
                             key={p}
                             className="mm-keep-color"
                             onClick={() => onSetPriority(p)}
-                            title={`${priorityLabel(p)} priority`}
+                            title={t("panel.priorityNamed", { level: priorityLabel(p) })}
                             style={{
                               padding: "1px 8px",
                               fontSize: fontSize.sm,
@@ -3530,7 +3530,7 @@ export function InfoPanel({
                               <a
                                 href={a.dataUrl}
                                 download={a.name}
-                                title={`Download ${a.name}`}
+                                title={t("panel.downloadNamed", { name: a.name })}
                                 style={{
                                   color: "var(--ed-ink)",
                                   flex: 1,
@@ -3604,7 +3604,7 @@ export function InfoPanel({
                           aria-label={t("panel.linkToAnother")}
                           style={{ width: "auto", margin: "0 10px 4px" }}
                         >
-                          <option value="">🔗 Link to a map…</option>
+                          <option value="">🔗 {t("panel.linkToAMap")}</option>
                           {maps.map((m) => (
                             <option key={m.id} value={m.id}>
                               {m.title}
@@ -3617,7 +3617,7 @@ export function InfoPanel({
                           aria-label={t("panel.jumpToAnother")}
                           style={{ width: "auto", margin: "0 10px 4px" }}
                         >
-                          <option value="">↪ Jump to a topic…</option>
+                          <option value="">↪ {t("panel.jumpToATopic")}</option>
                           {jumpTargets.map((row) => (
                             <option key={row.id} value={row.id}>
                               {`${"  ".repeat(row.depth)}${row.topic || t("common.untitled")}`}
@@ -3694,7 +3694,7 @@ export function InfoPanel({
                                 <button
                                   type="button"
                                   onClick={() => onOpenLink(h)}
-                                  title={`Open ${h}`}
+                                  title={t("common.openNamed", { name: h })}
                                   style={{
                                     ...listRow,
                                     padding: 0,
@@ -3949,7 +3949,7 @@ export function NoteEditorPanel({
       ) : (
         <>
           <div style={{ ...panelTitle, display: "flex", justifyContent: "space-between" }}>
-            <span>📝 Note editor</span>
+            <span>📝 {t("panel.noteEditor")}</span>
             <button
               type="button"
               onClick={onClose}

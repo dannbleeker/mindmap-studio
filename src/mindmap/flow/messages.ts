@@ -12,6 +12,9 @@ import { type Catalogue, registerMessages } from "../../i18n/registry";
 // asserts these strings are absent from the entry chunk.
 
 export const CANVAS_EN = {
+  "canvas.arrowheadsNamed": "Arrowheads: {arrow}",
+  "canvas.addMarkerNamed": "Add marker {marker}",
+  "canvas.removeMarkerNamed": "Remove marker {marker}",
   // Inline rich-text toolbar (shown while editing a topic)
   "canvas.format.bold": "Bold (Ctrl/⌘+B)",
   "canvas.format.italic": "Italic (Ctrl/⌘+I)",
@@ -169,7 +172,6 @@ export const CANVAS_EN = {
   "canvas.showMinimap": "Show minimap",
   "canvas.minimap": "Minimap ▾",
   "canvas.minimap2": "Minimap ▴",
-  "canvas.board": "Board",
   "canvas.startYourMap": "Start your map",
   "canvas.groupInABoundary": "Group in a boundary",
   "canvas.clearPriorityOnTheSelection": "Clear priority on the selection",

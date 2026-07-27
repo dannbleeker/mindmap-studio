@@ -248,7 +248,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
       <Dialog
         open={moveEntry != null}
         onClose={() => setMoveEntry(null)}
-        title={`Move “${moveEntry?.title || t("common.untitled")}” to…`}
+        title={t("start.moveNamedTo", { name: moveEntry?.title || t("common.untitled") })}
         style={{ width: "min(92vw, 320px)", padding: 20 }}
       >
         <div style={{ display: "grid", gap: 6 }}>
@@ -256,7 +256,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
             onClick={() => void doMove(null)}
             style={{ justifyContent: "flex-start", width: "100%" }}
           >
-            Top level (no folder)
+            {t("start.topLevelNoFolder")}
           </Button>
           {folders.map((f) => (
             <Button

@@ -391,7 +391,7 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           {t("present.next")}
         </button>
         <span
-          aria-label={`Elapsed ${mmss(elapsed)}`}
+          aria-label={t("present.elapsedNamed", { time: mmss(elapsed) })}
           title={t("present.elapsedTimeSetABudget")}
           style={{
             fontSize: 15,
@@ -437,10 +437,10 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           title={t("present.togglePresenterViewP")}
           style={presenter ? ctrlOnStyle : ctrlStyle}
         >
-          Presenter view (P)
+          {t("present.presenterViewP")}
         </button>
         <button type="button" onClick={onExit} style={ctrlStyle}>
-          Exit (Esc)
+          {t("app.exitEsc")}
         </button>
       </div>
 
@@ -449,7 +449,9 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
       {blackout && (
         <button
           type="button"
-          aria-label={`${blackout === "black" ? "Black" : "White"} screen — click or press any key to resume`}
+          aria-label={
+            blackout === "black" ? t("present.blackScreenHint") : t("present.whiteScreenHint")
+          }
           onClick={() => setBlackout(null)}
           style={{
             position: "fixed",

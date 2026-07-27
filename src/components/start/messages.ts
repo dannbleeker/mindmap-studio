@@ -90,7 +90,7 @@ export const START_EN = {
   "start.updates": "Updates",
   "start.openSourceAndASibling": "Open-source, and a sibling to TP Studio and MECE Studio.",
   "start.thinkingInMaps": "Thinking in Maps",
-  "start.softwareApacheLicense20": "Software — Apache License 2.0 · Book &amp; docs — CC BY-NC 4.0",
+  "start.softwareApacheLicense20": "Software — Apache License 2.0 · Book & docs — CC BY-NC 4.0",
   "start.searchYourMaps": "Search your maps…",
   "start.searchYourMaps2": "Search your maps",
   "start.sortMaps": "Sort maps",
@@ -149,7 +149,6 @@ export const START_EN = {
   "start.trashIsEmpty": "Trash is empty.",
   "start.suggestionLaunch": "Plan a product launch",
   "start.newMapNamed": 'New map: "{name}"',
-  "start.deleteMap": "Delete",
   "start.openFolder": "Open folder {name}",
   "start.noMapsMatch": "No maps match \u201c{query}\u201d.",
   // Whole paragraphs. One message each, not per line: prettier wrapped them, and rewriting only the

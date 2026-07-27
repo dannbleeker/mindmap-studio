@@ -327,6 +327,32 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **Fixed: the About panel rendered `Book &amp; docs`.** `t()` returns a plain string, and React
+  *escapes* a string child — unlike JSX text, which the compiler decodes. So an `&amp;` captured from
+  the JSX source during extraction shipped verbatim to the Start screen's licence line. The catalogue
+  test written to catch exactly this had been iterating **two of the five catalogues** while its
+  comment said "EVERY catalogue in the app", and the entity check did not even use that array — it
+  spread the same two inline. 171 keys, 14% of the corpus, sat outside every check. Widening it to all
+  five turned the test red on the real defect, which is how the list was found to be wrong; it also
+  surfaced **10 cross-catalogue duplicates**, now collapsed onto the eager key (a lazy chunk may
+  reference an eager key, never the reverse), including a new shared `common.delete` for the three
+  lazy catalogues that each had their own "Delete".
+
+- **`NEXT_STEPS.md`'s i18n status is measured again, and says what the numbers are worth.** It had read
+  "684 catalogue entries across eight migrated files" and "entry bundle 174.2 kB against a 175 ceiling"
+  for sixteen commits after each stopped being true — branch-point values left behind while the work
+  moved on, and "eight migrated files" was the exact phrasing of the retracted completeness claim that
+  section exists to correct. Measured: **1214 entries across five catalogues, 62 files on the
+  allowlist, 180.3 kB first-load against 182**.
+
+  Two corrections beyond the arithmetic. The `src/io/` bucket was labelled "mostly XML/SVG markup the
+  template rule reads as prose" — **one** of its 68 is markup; 37 are error messages shown to the user
+  verbatim and 15 are UI labels compiled into exported HTML, so it is real work, not noise. And the
+  scanner total is now stated as a **floor**: an independent AST sweep found ~113 further real strings
+  *inside already-allowlisted files*, because the detectors need a leading `[A-Z]`, skip lines
+  containing `(`, and cannot see a sentence a JSX element has cut in half. Being on the allowlist means
+  clean by the scanner, not clean.
+
 - **Example-map notes no longer name chrome controls.** The sample maps stay English by decision, but
   a note saying "Open the Outline panel" or "open 📝 Notes or 🏷 Markers from the toolbar" names a
   control that will not be called that once the chrome is translated — so the sentence stops being

@@ -110,7 +110,6 @@ export const CANVAS_EN = {
   "canvas.menu.unlockPosition": "Unlock position",
   "canvas.menu.reattach": "Re-attach to centre",
   "canvas.menu.detach": "Detach to floating topic",
-  "canvas.menu.delete": "Delete",
 
   // Date shifting. The preset chips are messages too — a locale may not abbreviate day/week/month the
   // way English does — and the aria-label is plural-formed so "by 1 day" doesn't read "by 1 days".

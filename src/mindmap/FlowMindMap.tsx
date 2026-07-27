@@ -2784,7 +2784,7 @@ function FlowInner({
                     t("canvas.menu.detach"),
                     () => apply(detachBranch(docRef.current, id)),
                   ]);
-                items.push([t("canvas.menu.delete"), () => deleteNodeWithUndo(id), true]);
+                items.push([t("common.delete"), () => deleteNodeWithUndo(id), true]);
                 // Live marker/priority state so the quick-setters reflect the node (and toggle off).
                 const node = findAnyNode(docRef.current, id);
                 const activeMarkers = node?.icons ?? [];
@@ -3163,7 +3163,7 @@ function FlowInner({
                     ) : null}
                     <MenuSeparator />
                     <MenuItem
-                      label={t("canvas.menu.delete")}
+                      label={t("common.delete")}
                       danger
                       onSelect={() => {
                         deleteSelectedOverlay();

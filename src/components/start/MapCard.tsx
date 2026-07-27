@@ -25,7 +25,7 @@ const KEBAB: { key: string; label: string }[] = [
   { key: "duplicate", label: t("start.duplicate") },
   { key: "move", label: t("start.moveToFolder") },
   { key: "export", label: t("start.export") },
-  { key: "delete", label: t("start.deleteMap") },
+  { key: "delete", label: t("common.delete") },
 ];
 
 export function MapCard({

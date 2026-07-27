@@ -18,7 +18,7 @@ import { Dialog } from "./Dialog";
 // storage plumbing stays out of the entry bundle. `onChange` re-reads the theme list (dropdown refresh).
 
 const FONTS: { value: string; label: string }[] = [
-  { value: "", label: t("theme.default") },
+  { value: "", label: t("panel.default") },
   { value: "Inter, system-ui, sans-serif", label: t("panel.sans") },
   { value: "Georgia, 'Times New Roman', serif", label: t("panel.serif") },
   { value: "'Courier New', ui-monospace, monospace", label: t("panel.mono") },
@@ -148,12 +148,12 @@ export function ThemeDesignerDialog({
             </div>
           </div>
           <label style={field}>
-            <span style={{ width: 74 }}>{t("theme.background")}</span>
+            <span style={{ width: 74 }}>{t("panel.background")}</span>
             <input
               type="color"
               value={draft.background}
               onChange={(e) => set({ background: e.target.value })}
-              aria-label={t("theme.backgroundColour")}
+              aria-label={t("panel.backgroundColour")}
               style={swatch}
             />
           </label>
@@ -168,7 +168,7 @@ export function ThemeDesignerDialog({
             />
           </label>
           <label style={field}>
-            <span style={{ width: 74 }}>{t("theme.font")}</span>
+            <span style={{ width: 74 }}>{t("panel.font2")}</span>
             <select
               value={draft.fontFamily}
               onChange={(e) => set({ fontFamily: e.target.value })}
@@ -183,15 +183,15 @@ export function ThemeDesignerDialog({
             </select>
           </label>
           <label style={field}>
-            <span style={{ width: 74 }}>{t("theme.branchWeight")}</span>
+            <span style={{ width: 74 }}>{t("panel.branchWeight")}</span>
             <select
               value={draft.branchGrowth}
               onChange={(e) => set({ branchGrowth: e.target.value as BranchGrowth })}
               aria-label={t("theme.themeBranchWeight")}
               style={{ flex: 1 }}
             >
-              <option value="fine">{t("theme.fine")}</option>
-              <option value="regular">{t("theme.regular")}</option>
+              <option value="fine">{t("panel.fine")}</option>
+              <option value="regular">{t("panel.regular")}</option>
               <option value="bold">{t("panel.bold")}</option>
             </select>
           </label>
@@ -250,7 +250,7 @@ export function ThemeDesignerDialog({
         <Button onClick={save}>{t("theme.saveTheme")}</Button>
         {themes.some((t) => t.id === draft.id) ? (
           <Button onClick={remove} style={{ color: "var(--ed-danger)" }}>
-            {t("theme.delete")}
+            {t("common.delete")}
           </Button>
         ) : null}
         <span style={{ flex: 1 }} />

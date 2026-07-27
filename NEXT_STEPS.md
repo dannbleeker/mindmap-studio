@@ -25,27 +25,52 @@ nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 Shipped detail lives in `CHANGELOG.md`. This section keeps the **decisions**, so they don't get
 re-litigated, and the open work.
 
-`src/i18n/` holds the registry, the typed English catalogue and the `Intl` plural/collation helpers.
-**684 catalogue entries** (599 eager + 85 in the lazy canvas chunk) across **eight** migrated files;
-`node scripts/i18n-scan.mjs <file> --count` reports 0 for each of those. Entry bundle **174.2 kB against
-a 175 ceiling**, recorded in `scripts/bundle-budget.mjs` as measured rather than projected. English is
-the only locale and is expected to stay that way — adding one means adding a JSON catalogue, not
-changing the app.
+`src/i18n/` holds the registry, the typed English catalogues and the `Intl` plural/collation helpers.
+**1214 catalogue entries across five catalogues** — `core` 930 (eager), `canvas` 122, `start` 129,
+`present` 17, `theme` 16 (all chunk-local) — reached from **62 files on the guard's allowlist**.
+First-load JS is **180.3 kB gz against a 182 ceiling**; note that ceiling measures entry *plus*
+modulepreloaded chunks, so it is not comparable to any figure recorded before 2026-07-27 (see the
+header of `scripts/bundle-budget.mjs`). English is the only locale and is expected to stay that way —
+adding one means adding a JSON catalogue, not changing the app.
 
-**Progress, on branch `i18n/complete-migration` (not merged).** The tree-wide scanner total went
-768 → 405, and the number is only comparable because three more detectors were added along the way —
-it briefly rose to 1001 when they landed. What is left breaks down as:
+> Every number in this section is measured, and each says how. They were all wrong once: this
+> paragraph read "684 entries across eight migrated files" and "174.2 kB against a 175 ceiling" for
+> sixteen commits after each of those stopped being true — the branch-point values, left in place while
+> the work moved on. "Eight migrated files" was also the exact phrasing of the retracted
+> completeness claim this section exists to correct. **Re-measure before editing these:**
+> `node scripts/i18n-scan.mjs $(git ls-files 'src/**/*.ts' 'src/**/*.tsx') --count | tail -1`,
+> and `node scripts/size-budget.mjs` after a build.
+
+**Progress, on branch `i18n/complete-migration` (not merged).** The tree-wide scanner reports **401**,
+down from 768 at the branch point — and the two are only loosely comparable, because four more
+detectors landed in between; the count rose to 1001 when they did. What it reports breaks down as:
 
 | bucket | strings | status |
 | --- | --- | --- |
 | declined map CONTENT | 213 | owner decision, recorded — `exampleBuilders` 169, `templates` 30, `sampleMap` 14 |
 | catalogue self-hits | 46 | permanent false positive: a catalogue quoting its own English. The five catalogue files must never join the allowlist |
-| `src/io/` + `src/import/` | 68 | mixed — mostly XML/SVG markup the template rule still reads as prose, plus a handful of real import diagnostics |
-| blocked on a decision | 15 | `docs/I18N_BLOCKED.md` — interleaved `<kbd>`/`<strong>` markup, and ErrorBoundary |
-| genuinely remaining chrome | ~63 | a long tail across ~20 small files, none over 6 strings |
+| `src/io/` + `src/import/` | 68 | **not** markup false positives — see below |
+| remaining chrome | ~74 | a long tail across ~29 files, none over 6 strings |
 
-**41 files are on the guard's allowlist** and scan 0. Five catalogues now exist: `i18n/core.ts` (eager)
-plus chunk-local ones for the canvas, the Start screen, the theme designer and presentation mode.
+**The 68 in `io/` and `import/` were mislabelled here as "mostly XML/SVG markup".** Measured: **one**
+of the 68 is markup. 37 are error messages thrown and shown to the user verbatim (`App.tsx:973` renders
+`err.message` straight into the error banner), 15 are UI labels compiled into *exported* artifacts —
+`interactiveHtml.ts` ships "Expand all", "Collapse all", `aria-label="Filter topics"` into every
+interactive HTML export — and the rest are file-picker descriptions, default map titles and
+`(untitled)` fallbacks. The rationale was stale: commit `2587348` had already removed the markup class
+(`io/pptx`, `io/ooxml`, `io/xml`, `io/html` all scan 0), and this row was written after it. Treat this
+bucket as **real user-facing work**, not noise.
+
+**401 is a FLOOR, not a count, and a file scanning 0 is not evidence it is migrated.** The detectors
+have known blind spots — `jsxTextViolations` needs a leading `[A-Z]`, so every emoji-prefixed label is
+invisible; `loneJsxTextViolations` skips any line containing `(`; `proseViolations` skips `( ) ; : ? ,`;
+and nothing matches a sentence a JSX element has cut in half. An independent AST sweep of the 42
+allowlisted `.tsx` files found **~113 more real untranslated strings** — `Panels.tsx` alone carries
+~50, and `Presentation.tsx:440` renders a literal `Presenter view (P)` three lines under a migrated
+`title={t(…)}`. **The allowlist certifies a file against the detectors, not against reality.** The
+`pnpm gate` tick on this is worth exactly what the detectors are worth; the pseudo-locale harness
+(`test/i18n-pseudo-render.test.tsx`) is the only check that can prove a component clean, and it is
+pointed at four of them.
 
 **Also open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
 English-only, and it is genuinely logic rather than translation — a second locale needs its own keyword
@@ -128,8 +153,12 @@ and hurts them when they don't. With one shipped locale it changes nothing today
 up, do it as **one `foldForSearch()` seam over that subset only**, and leave every machine-token site
 explicitly invariant.
 
-All eight migrated files — `SettingsDialog`, `shortcuts`, `editorCommands`, `Toolbar`, `TopicNode`,
-`FlowMindMap`, `App` and `Panels` — are **done**; don't re-plan them. The design once recorded here
+The first eight files migrated — `SettingsDialog`, `shortcuts`, `editorCommands`, `Toolbar`,
+`TopicNode`, `FlowMindMap`, `App` and `Panels` — plus the 54 that followed them onto the allowlist,
+are **done against the detectors**; don't re-plan them wholesale. That is a weaker claim than the one
+this line used to make ("all eight migrated files are done", written when eight was the whole list):
+`Panels.tsx` still carries roughly 50 strings the detectors cannot see, so "on the allowlist" means
+"clean by the scanner", not "clean". The design once recorded here
 for `editorCommands.ts` (drop the label argument and derive the key from the command id inside `add()`)
 was **rejected on implementation and should not be revived**: a template-literal key cannot be verified
 by `tsc`, and compile-time key checking is the property the typed catalogue exists for. Each call site

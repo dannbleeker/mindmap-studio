@@ -6,6 +6,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { START_EN } from "../src/components/start/messages";
+import { THEME_EN } from "../src/components/themeDesignerMessages";
 import type { Catalogue } from "../src/i18n";
 import {
   DEFAULT_LOCALE,
@@ -23,14 +25,26 @@ import {
 } from "../src/i18n";
 import { CORE_EN } from "../src/i18n/core";
 import { CANVAS_EN } from "../src/mindmap/flow/messages";
+import { PRESENT_EN } from "../src/present/presentMessages";
 
 // EVERY catalogue in the app, in load order (eager first). The duplicate checks below iterate this
 // rather than naming a pair, because the migration is adding more of them: a hardcoded CORE-vs-CANVAS
 // check would stay green while catalogue #3 repeated either one. Add a catalogue here when you create
 // it — `lazy-chunk modules import the registry directly` will also start covering its file.
+//
+// THIS LIST SAID "EVERY CATALOGUE" WHILE NAMING TWO OF FIVE, for three catalogues' worth of commits.
+// 171 keys — 14% of the corpus — sat outside every check that iterates it, and the entity check below
+// did not even use the array: it spread the same two inline. That is not a coverage gap, it is a guard
+// asserting something it never measured, which the header of the sibling guard test calls "worse than
+// no tick". It shipped a real one: `start.softwareApacheLicense20` carried a literal `&amp;` and
+// rendered "Book &amp; docs" on the Start screen's About panel. Adding the missing three turns that
+// red — which is how this list was found to be wrong.
 const CATALOGUES = [
   { name: "CORE_EN", catalogue: CORE_EN as Catalogue },
   { name: "CANVAS_EN", catalogue: CANVAS_EN as Catalogue },
+  { name: "START_EN", catalogue: START_EN as Catalogue },
+  { name: "THEME_EN", catalogue: THEME_EN as Catalogue },
+  { name: "PRESENT_EN", catalogue: PRESENT_EN as Catalogue },
 ] as const;
 
 beforeEach(() => {
@@ -58,7 +72,9 @@ describe("catalogue", () => {
     // test caught it. Extraction is scripted, so this checks the whole catalogue rather than trusting
     // the next script.
     const entity = /&(?:amp|lt|gt|quot|apos|nbsp|mdash|ndash|hellip|#\d+|#x[0-9a-f]+);/i;
-    const offenders = [...Object.entries(CORE_EN), ...Object.entries(CANVAS_EN)]
+    // Iterate CATALOGUES — this used to spread CORE_EN and CANVAS_EN inline, so it did not even
+    // benefit from that array being extended, and missed the one real offender the app shipped.
+    const offenders = CATALOGUES.flatMap(({ catalogue }) => Object.entries(catalogue))
       .flatMap(([key, message]) =>
         (typeof message === "string" ? [message] : Object.values(message)).map(
           (form) => [key, form] as const,

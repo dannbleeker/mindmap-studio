@@ -40,6 +40,9 @@ export const CORE_EN = {
   "common.markers": "Markers",
   "common.tags": "Tags",
   "common.cancel": "Cancel",
+  // Shared by the canvas topic menu, the Start map card and the theme designer — three LAZY chunks,
+  // so the single survivor must live here, in the eager catalogue.
+  "common.delete": "Delete",
   // Shared by the canvas context menu and the Start screen's map cards. EAGER on purpose: two
   // different LAZY chunks need it, and neither can rely on the other having loaded.
   "common.rename": "Rename",

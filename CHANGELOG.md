@@ -327,6 +327,27 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **Fixed: the import toast lost its full stop on success, and a post-merge audit found 21 more
+  latent defects.** A 6-lens adversarial hunt over the merged migration raised 25 candidates; 21
+  survived a verifier instructed to refute them. Only one was live in English: the migration moved the
+  sentence terminator off `hint.importedMaps` and onto `hint.importFailedSuffix`, so a clean import
+  rendered "Imported 3 of 3 maps" unterminated while a failed one ended in a stop — from the same
+  toast. The fix interpolates the parenthetical *inside* the frame (`…maps{failed}.`), which is what
+  the `hint.rollupsRefreshed`/`hint.rollupsMissing` pair three entries below already did correctly;
+  concatenating the suffix on the outside can only ever terminate one of the two branches. **No test
+  in the repo mentioned either key** — which is why it survived the whole migration — so the fix ships
+  with a composed-message test asserting both branches, mutation-proven by reverting it.
+
+  The other 20 are **all latent**: `LOCALES` is `["en"]` and `Locale` is typed off it, so none is
+  visible today and all arm on the commit that adds a second entry. They are catalogued in
+  `NEXT_STEPS.md` rather than fixed here. The two worth naming: `FlowMindMap`'s canvas context menu
+  looks its keyboard hints up in a table **keyed by English display text** while the labels are now
+  `t()` results — a fifth instance of the "a label is not an identity" defect already fixed four
+  times, verified by rendering the menu under a non-English overlay and watching all six hints vanish;
+  and `StartScreen.tsx`'s ten section headings **were never migrated at all** despite the file being
+  added to the guard's allowlist, which is the "the allowlist certifies against the detectors, not
+  against reality" warning coming true in the same programme that wrote it down.
+
 - **The frozen-`t()` ratchet is closed: 145 → 0 (decision 4 in `docs/I18N_BLOCKED.md`, now resolved).**
   Every remaining module-scope `t()` call — the ones that resolve once at import and can never follow a
   later `setLocale` — turned out to be the same shape across all 17 files: an array or object literal

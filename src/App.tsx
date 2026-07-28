@@ -964,8 +964,11 @@ export function App() {
         lastDoc,
         batch
           ? [
-              t("hint.importedMaps", { n: ok, total: files.length }) +
-                (failed ? t("hint.importFailedSuffix", { n: failed }) : ""),
+              t("hint.importedMaps", {
+                n: ok,
+                total: files.length,
+                failed: failed ? t("hint.importFailedSuffix", { n: failed }) : "",
+              }),
               ...batchNotes,
             ]
           : lastWarnings,

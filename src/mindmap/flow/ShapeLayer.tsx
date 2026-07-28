@@ -95,11 +95,10 @@ function primEl(p: ShapePrim): ReactElement {
 // whole gesture is a single undo step (mirroring the topic drag). Rendering is ungated (a shape shows
 // whenever the doc has one); adding a shape flips free-canvas mode on so it reads as a whiteboard object.
 
-// The display name for a shape kind — a FUNCTION, not a lookup into SHAPE_KINDS below: SHAPE_KINDS
-// is itself a frozen module-level table (already budgeted in the frozen-t() ratchet), and adding a
-// second reader of it would not change that, but a fresh per-call resolution is simpler to reason
-// about here and costs nothing extra. Reuses the same catalogue keys SHAPE_KINDS and Toolbar's
-// SHAPE_ITEMS already use for these six kinds, so the three surfaces cannot drift.
+// The display name for a shape kind — a FUNCTION, not a lookup into SHAPE_KINDS below, because a
+// fresh per-call resolution is simpler to reason about here and costs nothing extra. Reuses the same
+// catalogue keys SHAPE_KINDS and Toolbar's SHAPE_ITEMS already use for these six kinds, so the three
+// surfaces cannot drift.
 function shapeKindLabel(kind: CanvasShapeKind): string {
   switch (kind) {
     case "rect":

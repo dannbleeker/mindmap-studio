@@ -89,6 +89,36 @@ came back unchanged.
 > allowlisted (so they read as "clean") while being provable only by rendering. Point the harness at
 > them. This is the one item in this section that is genuinely not done.
 
+### Post-merge audit findings (2026-07-28) — 21 confirmed, OPEN
+
+A 6-lens adversarial hunt over the merged migration raised 25 candidates; 21 survived a skeptical
+verifier instructed to refute them. **Every one is LATENT** — `LOCALES = ["en"]` and `Locale` is typed
+off it, so none is visible today; all arm on the single commit that adds a second entry. Two were
+fixed on the spot (the import-toast full stop, which was live in English; and two stale comments).
+The rest are recorded here rather than lost:
+
+| # | site | sev | defect |
+| --- | --- | --- | --- |
+| 1 | `flow/FlowMindMap.tsx:270,2799` | med | `MENU_SHORTCUT` is keyed by **English display text** while the lookup key is now a `t()` result — all six canvas right-click keyboard hints vanish at once on locale #2. `key={label}` on :2796 is the same defect. **Verified empirically**: rendered under the repo's own marker overlay, hints came back `[]`. |
+| 2 | `start/StartScreen.tsx:23` | med | The ten Start-screen section headings are a hardcoded English `Record` that was **never migrated** — the file was added to the allowlist without being done. Keys already exist (`StartSidebar.tsx` uses them). Largest single block of untranslated chrome left. |
+| 3 | `test/i18n.test.ts:482,491` | med | The cross-chunk-key guard walks only two directories, checks only the `start`↔`canvas` prefix pair, and matches `t("` only — so it misses `FlowMindMap.tsx` entirely, never treats `io.*`/`present.*`/`theme.*` as foreign, and cannot see `tNodes()`. **Mutation-proved**: injecting `t("start.viewWord")` into `FlowMindMap.tsx` left all 33 i18n tests green, and in a prod build renders the raw key to the user. Resolve foreignness by **catalogue membership, not prefix** (`theme.ocean` is legitimately eager). |
+| 4 | `OverlayInspector.tsx:22` + `App.tsx:503` | med | Context line built by concatenation with an English glue word (`` `${KIND_LABEL[k]} around …` ``); the English kind label is then injected as a *variable* into translated frames, so the delete button reads half-translated. `test/overlay-inspector.test.tsx:36` currently **pins the defect** and must be rewritten with the fix. |
+| 5 | `io/interactiveHtml.ts:147,220` | med | The exported HTML's inlined `SCRIPT` hardcodes English and **overwrites the correctly-translated button** on first click; `Visual map` has no catalogue key at all. Search counter hardcodes English two-form plurals into an `aria-live` region. Emitting via `data-*` attrs does **not** breach the file's XSS invariant (that forbids interpolating map *content*, not chrome). |
+| 6 | `App.tsx:1673` +6 | med | Five raw English literals passed to `showHint` (typed `(message: string) => void`, no lookup). Worst is :1139 welding a hardcoded `", and N more"` onto the **already-translated** `dialog.deleteMapRefs`. |
+| 7 | 8 sites | low | Hand-rolled `n === 1 ? "" : "s"` while `count.matches`/`commands`/`attachments`/`subTopics`/`folders` sit **parked in the UNREFERENCED dead-key set**. Same repair already applied once to `count.topics`/`nodes`/`maps` — that commit missed these. |
+| 8 | `App.tsx:2575` | low | Focuses its input via `querySelector('input[aria-label="Search query"]')` against a now-`t()` label. Measured: focus falls back to the ✕ button (native `showModal`), so one extra Tab, not a trap. Use a ref. |
+| 9 | `flow/exportSvg.ts:794` | low | Legend heading is a literal `>Legend</text>` while canvas + toolbar both resolve `t("toolbar.legend")` — all five export formats ship an English heading contradicting the screen. `i18n-scan` reports this as the file's **only** violation, so fix + allowlist together. |
+| 10 | `Panels.tsx:3280,3292,3341,3393` | low | Bare `"Markers"`/`"Tags"` into `sectionLabel` (a pass-through) while the same file renders both from `common.markers`/`common.tags` elsewhere — the exact drift those keys were minted to prevent. |
+| 11 | `io/deck.ts:135,155` | low | Deck footer keyboard hint is a raw English sentence beside three `t()` buttons; the "N for notes" mnemonic stops making sense once the button is translated. |
+| 12 | `test/i18n.test.ts:349` | low | `LAZY_FILES` regex lacks the `i` flag, so the two **camelCase** catalogues' consumers (`Presentation.tsx`, `ThemeDesignerDialog.tsx`) are silently exempt from the barrel-import check. Mutation-proved. Fix: `[Mm]essages`. |
+
+**Read the audit's own limits before trusting the count as complete:** no second locale exists, so
+every "on locale #2" claim is reasoned from code plus three throwaway fake-catalogue harnesses — not a
+real translated build. No exported artifact was opened. No RTL, string expansion, or plural categories
+beyond one/other were examined. The detectors are structurally blind to single-word literals and prose
+inside template-literal HTML constants, so findings 4/6/10 are **samples from that pool, not its
+inventory**. Treat every number here as a floor.
+
 **Also open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
 English-only, and it is genuinely logic rather than translation — a second locale needs its own keyword
 table and its own relative-date shapes, not a catalogue entry. Nothing to do until a second locale

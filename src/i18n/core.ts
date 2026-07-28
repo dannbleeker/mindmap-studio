@@ -649,11 +649,16 @@ export const CORE_EN = {
     one: "Restored {n} map from backup.",
     other: "Restored {n} maps from backup.",
   },
+  // `{failed}` is interpolated INSIDE the sentence, before the full stop, exactly like
+  // `hint.rollupsRefreshed`/`hint.rollupsMissing` three entries below. Concatenating the suffix onto
+  // the OUTSIDE instead (which is what this pair did until 2026-07-28) forces a choice between a
+  // success toast with no terminator and a failure toast reading "…maps. (1 failed)." — two
+  // sentences. Keeping the terminator on the frame means a translator can move the parenthetical.
   "hint.importedMaps": {
-    one: "Imported {n} of {total} maps",
-    other: "Imported {n} of {total} maps",
+    one: "Imported {n} of {total} maps{failed}.",
+    other: "Imported {n} of {total} maps{failed}.",
   },
-  "hint.importFailedSuffix": { one: " ({n} failed).", other: " ({n} failed)." },
+  "hint.importFailedSuffix": { one: " ({n} failed)", other: " ({n} failed)" },
   "hint.importFailed": "Import failed — {error}",
   "hint.noReadableMaps": "no readable maps",
   "hint.rollupsRefreshed": {

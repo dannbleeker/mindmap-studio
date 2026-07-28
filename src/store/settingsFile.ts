@@ -27,9 +27,9 @@ const KIND = "mindmap-studio-settings";
  *  - `mindmap-cmdk-recent` is this machine's own usage history;
  *  - `mindmap-search-history` is the same category, and it is the user's own search TERMS — those
  *    should not leave the machine inside a file they may hand to someone else;
- *  - `mindmap-last-export` is usage history too, and it stores the export menu's LABEL as its
- *    identity key, so on a machine running another locale it would not match anything anyway
- *    (that is a real defect in Toolbar.tsx, recorded in NEXT_STEPS — excluding it here does not fix it).
+ *  - `mindmap-last-export` is usage history too. (It once stored the export menu's rendered LABEL as
+ *    its identity key, which would not have matched on a machine running another locale; Toolbar.tsx
+ *    persists a stable id as of `aeb7705`. The exclusion stands on the usage-history ground alone.)
  *  Everything else in LOCAL_PREF_KEYS is a genuine preference and travels. */
 const EXCLUDED = new Set<string>([
   "mindmap-branch-clipboard",

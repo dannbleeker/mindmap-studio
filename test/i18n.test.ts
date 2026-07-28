@@ -535,3 +535,39 @@ describe("collation", () => {
     expect(["banana", "Apple"].sort(compareText)).toEqual(["Apple", "banana"]);
   });
 });
+
+// A message assembled from two catalogue entries has a failure mode neither entry shows on its own:
+// the terminator can end up on the optional half. The import toast shipped exactly that — the full
+// stop lived on the FAILURE suffix, so a clean import rendered unterminated and a failed one did not.
+// Nothing covered it (no test in the repo mentioned either key), which is why it survived the whole
+// migration. These assert the COMPOSED English, both branches, because that is the only place the
+// defect is visible.
+describe("composed messages terminate correctly in both branches", () => {
+  it("the import toast ends in a full stop whether or not anything failed", () => {
+    const clean = t("hint.importedMaps", { n: 3, total: 3, failed: "" });
+    const withFailures = t("hint.importedMaps", {
+      n: 2,
+      total: 3,
+      failed: t("hint.importFailedSuffix", { n: 1 }),
+    });
+
+    expect(clean).toBe("Imported 3 of 3 maps.");
+    expect(withFailures).toBe("Imported 2 of 3 maps (1 failed).");
+
+    // The regression this pins is specifically a MISSING or DOUBLED terminator, so assert the shape
+    // rather than only the literal — a future reword should still fail if it drops the full stop.
+    for (const s of [clean, withFailures]) {
+      expect(s.endsWith(".")).toBe(true);
+      expect(s.endsWith("..")).toBe(false);
+    }
+  });
+
+  it("the roll-up toast — the pair the import fix was modelled on — still does the same", () => {
+    // Kept beside it so the CONVENTION is what's pinned, not one message: the terminator belongs to
+    // the frame, and the optional parenthetical interpolates before it.
+    expect(t("hint.rollupsRefreshed", { n: 2, missing: "" })).toBe("Refreshed 2 roll-ups.");
+    expect(t("hint.rollupsRefreshed", { n: 2, missing: t("hint.rollupsMissing", { n: 1 }) })).toBe(
+      "Refreshed 2 roll-ups (1 source map missing).",
+    );
+  });
+});

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { type RefObject, createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Toolbar } from "../src/components/Toolbar";
+import { type Locale, registerMessages, setLocale } from "../src/i18n";
 import type { MindMapHandle, SelectedNode } from "../src/mindmap";
 import { themeById } from "../src/mindmap/theme";
 import type { MindMapDoc } from "../src/model/types";
@@ -284,6 +285,32 @@ describe("Toolbar — Export menu", () => {
     await u.click(screen.getByRole("button", { name: /^export/i }));
     await u.click(await screen.findByRole("menuitem", { name: /^Last:.*pptx/i }));
     expect(t.io.exportPptx).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps resolving the last-used format across a locale change", async () => {
+    // THE REGRESSION GUARD. "Last used" persisted the rendered LABEL under "mindmap-last-export" and
+    // matched it back with `lbl === last`. A label is not an identity — it follows the locale — so a
+    // user who exported in English, then switched the app to Danish, would find the pinned row simply
+    // gone: the stored English label no longer matched any (now-Danish) export entry, and the feature
+    // would silently never fire again for that install. Persisting the stable id fixes it.
+    localStorage.removeItem("mindmap-last-export");
+    registerMessages("da" as Locale, { "cmd.export.pptx": "PowerPoint (da)" });
+
+    const t = setup();
+    await u.click(screen.getByRole("button", { name: /^export/i }));
+    await u.click(screen.getByRole("menuitem", { name: /\.pptx/i }));
+    expect(t.io.exportPptx).toHaveBeenCalledTimes(1);
+
+    setLocale("da" as Locale);
+    cleanup();
+    const t2 = setup();
+    await u.click(screen.getByRole("button", { name: /^export/i }));
+    // Still resolves and still re-runs the SAME format — because the id survived the locale change,
+    // even though the label it was recorded under no longer exists in any catalogue.
+    await u.click(await screen.findByRole("menuitem", { name: /^Last:.*PowerPoint \(da\)/i }));
+    expect(t2.io.exportPptx).toHaveBeenCalledTimes(1);
+
+    setLocale("en");
   });
 });
 

@@ -327,6 +327,29 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **Fixed: "last used export" could silently stop working forever after a locale change, plus five
+  more defects in the same file, none caught by any existing detector.** `Toolbar.tsx` persisted the
+  export menu's *rendered label* as its identity key (`localStorage["mindmap-last-export"]`) and
+  matched it back with `lbl === last` — the comment even called the label "the stable id". A label is
+  not an identity: the moment a second locale existed, a stored English label would stop matching any
+  current (now-translated) entry, and the "Last used" row would just never appear again for that
+  install. Every export item now carries a real id alongside its label; the id is what's persisted,
+  matched and used as the React key (which was also reading the translated label). Guarded by a test
+  that exports in English, switches to a second locale, and proves the pinned row still resolves and
+  re-fires the same format — mutation-checked by reverting to label-keying, which fails it exactly as
+  predicted.
+
+  Found in the same file while fixing that: **two JSX-text sentences no rule can see** (`Import
+  files…`, `Image on selected node…` — plain text following a self-closing icon on the same line,
+  which matches none of the `>text</` shapes any detector looks for) and **a "File" heading** split by
+  a computed suffix (`File{io.fileName ? … : ""}`). And **six menu triggers said their own word
+  twice**, hardcoded both times: once as a plain string argument to `menuTrigger("icon", "Word", …)`,
+  again inside `triggerAriaLabel={isMobile ? "Word" : undefined}` for the mobile screen-reader label.
+  Neither shape matches anything in the guard — a bare string argument isn't the two-argument
+  `add(id, "Label", …)` pattern, and `prop={ternary}` has no literal for the prop-literal rule to find.
+  All six now reuse the existing `toolbar.trigger.*` / `common.view` keys already used by the same
+  button's tooltip, so the visible label, the tooltip and the screen-reader label can't drift apart.
+
 - **Import failures and exported chrome are translatable (~65 strings).** Every adapter under `io/`
   reported its failures in hardcoded English — and those are not internal diagnostics: `App.tsx`
   renders `err.message` verbatim into the error banner, so "Not a valid .mup file" is copy. The

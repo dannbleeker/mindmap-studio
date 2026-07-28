@@ -74,11 +74,10 @@ paid for — 56 strings. **85 remain**, and the composition is what matters:
 | plain labels the rules still miss (single lowercase words, fragments) | ~20 | migrate normally |
 | legitimately literal | ~10 | physical key names (`Tab`/`Enter`/`Shift`), the copyright line, the search-operator cheatsheet |
 
-### ⏸ PARKED 2026-07-27 — resume here
+### Status 2026-07-28
 
-The branch is at a deliberate stopping point, not an abandoned one: **21 commits, tree clean, CI green
-on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173) (draft) at `c9b7792`** — 217 files,
-2421 tests, first load 180.9 kB. Everything below is *remaining*, not *broken*; nothing is half-applied.
+**25+ commits, tree clean, CI green on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173)
+(draft).** 217 files, 2462 tests, first load 181.2 kB against a 182 ceiling (0.8 kB headroom).
 
 **Re-measure before believing any number here** — that is the whole lesson of this programme:
 
@@ -87,25 +86,26 @@ pnpm i18n:blindspot                                    # what the detectors CANN
 node scripts/i18n-scan.mjs $(git ls-files 'src/**/*.ts' 'src/**/*.tsx') --count | tail -1
 node -e 'import("./scripts/lib/i18nFrozen.mjs").then(m=>{const x=m.frozenByFile("src");console.log([...x.values()].reduce((a,b)=>a+b,0))})'
 ```
+Last measured: scanner **350**, blindspot **82** (22 files), frozen **145** (17 files).
 
-Left to do, in the order that makes sense:
+**Done since the branch was last parked:**
+- Raw untranslated literals (`MapPanel` layouts, `icons.ts` marker groups, `stickers.ts` categories,
+  `priority.ts`) — migrated together with the React keys that read them, so the fix didn't create the
+  `Recent.tsx`-shaped bug it was warning against.
+- `src/io/` + `src/import/` (~65 strings) — import failures (rendered verbatim in the error banner) and
+  chrome baked into exported HTML/decks. Own catalogue (`src/io/messages.ts`); took three attempts to
+  place correctly without breaking the size gate (see CHANGELOG for the sideways-movement near-miss).
+- `Toolbar.tsx`'s `mindmap-last-export` — was keying "last used" on the rendered label, not an id; five
+  more defects found in the same file in the process (two blindspot sentences, six duplicated trigger
+  labels). See CHANGELOG.
 
-1. **The raw untranslated literals** — `MapPanel` layout names (11), `icons.ts` marker-group names (4),
-   `stickers.ts` categories (4), `priority.ts` (3). These are the highest-value items on the list
-   because they are **invisible to every existing check**: they were never `t()` calls, so the scanner,
-   the blindspot probe and the frozen ratchet all score them 0 while they render English.
-2. **The 9 locale-dependent React keys.** ⚠️ **Couple this with item 1 or it becomes a regression.**
-   `EdgeInspector` keys on `EDGE_PRESETS.name`, `MapPanel` on `LAYOUT_GROUPS.label`, `Panels` on
-   `STICKER_CATEGORIES` — all safe *today only because those labels are raw English*. Migrating the
-   labels without splitting id from label **creates** the defect: subtree remount on language change,
-   focus loss on the interactive AppTips buttons, duplicate-key crash on any collision in a target
-   language. Same family as the `Recent.tsx` data-loss bug.
-3. **`src/io/` + `src/import/`** (~68) — real work, not markup noise: user-visible error messages and
-   UI labels compiled into exported artifacts.
-4. **The blindspot residue** (~85) — mostly sentences a JSX element cut in half; `tNodes` is the fix.
-5. **`Toolbar`'s `mindmap-last-export`** — persists a translated *label* as an identity key.
-6. **The 157 frozen `t()`** — mechanical getter conversion, deliberately deprioritised: see the note in
-   `test/i18n-frozen-ratchet.test.ts` for why emptying that table would not finish the job.
+**Left to do:**
+
+1. **The blindspot residue** (~82, mostly `Panels.tsx` and `App.tsx`) — mostly sentences a JSX element
+   or interpolation cut in half; `tNodes` (`src/i18n/nodes.tsx`) is the fix, and
+   `test/i18n-pseudo-render.test.tsx` is the only check that can prove one clean afterward.
+2. **The 145 frozen `t()`** — mechanical getter conversion, deliberately deprioritised: see the note in
+   `test/i18n-frozen-ratchet.test.ts` for why emptying that table would not finish the job on its own.
 
 Owner decisions and their outcomes are in `docs/I18N_BLOCKED.md` (1–3 resolved, 4 partially).
 

@@ -410,6 +410,11 @@ export const CORE_EN = {
   "toolbar.openRecent": "Open recent",
   "toolbar.map": "Map",
   "toolbar.importBackup": "Import / backup",
+  // The "More" menu heading names the open file, when there is one. Two messages rather than one with
+  // an optional placeholder — "File — {name}" reads oddly with an empty {name} in most languages.
+  "toolbar.fileMenuHeadingNamed": "File — {name}",
+  "toolbar.importFiles": "Import files…",
+  "toolbar.imageOnSelectedNode": "Image on selected node…",
   "toolbar.structure": "Structure",
   "toolbar.analysis": "Analysis",
   "toolbar.workflow": "Workflow",

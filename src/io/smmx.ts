@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { XMLParser } from "fast-xml-parser";
 import { strFromU8, strToU8, zipSync } from "fflate";
 import type { CrossLink, MapNode, MindMapDoc } from "../model/types";
@@ -59,7 +61,7 @@ export function fromSmmx(bytes: Uint8Array): MindMapDoc {
   const tree = parser.parse(strFromU8(xml));
   const mindmap = asList(tree?.["simplemind-mindmaps"]?.mindmap ?? tree?.mindmap)[0];
   const topics = asList(mindmap?.topics?.topic);
-  if (topics.length === 0) throw new Error("SimpleMind file has no topics");
+  if (topics.length === 0) throw new Error(t("io.err.smmxNoTopics"));
 
   // Pass 1: build a node per topic, keyed by its SimpleMind id, remembering its parent ref.
   const byId = new Map<string, { node: MapNode; parent: string }>();
@@ -81,7 +83,7 @@ export function fromSmmx(bytes: Uint8Array): MindMapDoc {
     if (at && at.node !== node) at.node.children.push(node);
     else roots.push(node);
   }
-  const root = roots[0] ?? { id: "sm-root", topic: "Imported SimpleMind map", children: [] };
+  const root = roots[0] ?? { id: "sm-root", topic: t("io.title.importedSimpleMind"), children: [] };
   const floatingTopics = roots.slice(1);
 
   // Relations -> cross-links (only those whose endpoints both exist).
@@ -99,7 +101,9 @@ export function fromSmmx(bytes: Uint8Array): MindMapDoc {
     });
   });
 
-  const title = String(mindmap?.meta?.title?.["@_text"] ?? root.topic ?? "Imported SimpleMind map");
+  const title = String(
+    mindmap?.meta?.title?.["@_text"] ?? root.topic ?? t("io.title.importedSimpleMind"),
+  );
   return {
     schemaVersion: 1,
     id: `sm-${guid()}`,

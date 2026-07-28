@@ -327,6 +327,35 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **Import failures and exported chrome are translatable (~65 strings).** Every adapter under `io/`
+  reported its failures in hardcoded English — and those are not internal diagnostics: `App.tsx`
+  renders `err.message` verbatim into the error banner, so "Not a valid .mup file" is copy. The
+  interactive-HTML and slide-deck exports also baked their own controls in ("Expand all", "‹ Prev",
+  the footer), and those files are opened later or sent to someone else, so they are as much product
+  as anything on the canvas. Format names, extensions, XML element names and internal paths stay
+  literal — they are tokens, not words.
+
+  They live in a sixth catalogue, `src/io/messages.ts`, and getting that right took three attempts —
+  each caught by the size gate, none by review:
+
+  1. The premise was wrong. "Every adapter is behind a dynamic `import()`" is false for ten of them;
+     `App.tsx` and `useMapExports` import `attachment`, `image`, `importDispatch`, `library`,
+     `fileSystem`, `json`, `mermaid` and more *statically*. Each `import "./messages"` from those
+     dragged all ~60 keys into the entry chunk: **+1.3 kB, gate red**.
+  2. Deferring `importDispatch` looked like the fix — entry fell **10.9 kB**. True first load went
+     **up 0.2**. The weight moved into a preloaded sibling; under the old entry-only metric this would
+     have been recorded as a 10.9 kB win. It was reverted.
+  3. The actual fix: eager files' keys moved to the eager catalogue, the twelve per-format "what this
+     import loses" notes load on demand inside `parseImport` (already `async`), and three eager files
+     were importing the catalogue **without using a single key from it**. First load: **181.2 kB**,
+     flat against the 181.1 baseline despite the ~65 new strings.
+
+  **`test/i18n.test.ts` now guards it**: a static-import walk from `main.tsx` fails if any eagerly-
+  reached file imports a lazy catalogue. It found two flaws in itself first — it matched a comment
+  *quoting* the import it warns against, and flagged `keys.ts`, whose `import type` erases at build
+  time and is the whole point of that file. Mutation-checked against the exact defect that broke the
+  budget.
+
 - **The layout picker, marker groups, sticker headings, priority levels and line presets were never
   translated — and no check could see them.** ~30 strings that were raw English literals rather than
   `t()` calls, so the scanner, the blind-spot probe and the frozen-`t()` ratchet all scored the files

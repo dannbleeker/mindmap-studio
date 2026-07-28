@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 import { normalizeDoc } from "../model/normalize";
 import type { MindMapDoc } from "../model/types";
 import type { Folder } from "../store/mapStore";
@@ -44,7 +45,7 @@ export function parseLibrary(text: string): MindMapDoc[] {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("Not valid JSON");
+    throw new Error(t("io.err.notValidJson"));
   }
   if (
     !data ||
@@ -52,11 +53,11 @@ export function parseLibrary(text: string): MindMapDoc[] {
     (data as { kind?: unknown }).kind !== KIND ||
     !Array.isArray((data as { maps?: unknown }).maps)
   ) {
-    throw new Error("Not a MindMap Studio library backup");
+    throw new Error(t("io.err.notStudioLibrary"));
   }
   const maps = (data as { maps: unknown[] }).maps;
   return maps.map((m) => {
-    if (!isValidDoc(m)) throw new Error("Library backup contains an invalid map");
+    if (!isValidDoc(m)) throw new Error(t("io.err.libraryInvalidMap"));
     return normalizeDoc(m); // salvage a schema-drifted map to a projectable shape
   });
 }

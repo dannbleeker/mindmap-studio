@@ -480,7 +480,10 @@ describe("parseMmap", () => {
 </ap:Map>`),
     );
     expect(doc.floatingTopics?.map((t) => t.topic)).toEqual(["Legend"]);
-    expect(warnings.some((w) => /floating topic\(s\) imported/.test(w))).toBe(true);
+    // Plural-formed now, not the "topic(s)" hack — one Legend topic, so the singular arm. That `(s)`
+    // was exactly the shape a plural message exists to replace: it cannot express a language with
+    // more than two forms, and reads as a placeholder in any of them.
+    expect(warnings.some((w) => /1 floating topic imported/.test(w))).toBe(true);
   });
 
   it("warns about topics it cannot reach", () => {

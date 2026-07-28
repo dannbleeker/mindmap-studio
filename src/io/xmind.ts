@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { XMLParser } from "fast-xml-parser";
 import { strFromU8, strToU8, zipSync } from "fflate";
 import type { CrossLink, MapNode, MindMapDoc, NodeStyle } from "../model/types";
@@ -341,13 +343,13 @@ function fromXmindXml(xmlBytes: Uint8Array): MindMapDoc {
 
   // Root element is <xmap-content>; fast-xml-parser keys it as "xmap-content".
   const xmapContent = tree?.["xmap-content"];
-  if (!xmapContent) throw new Error("XMind content.xml: missing <xmap-content> root element");
+  if (!xmapContent) throw new Error(t("io.err.xmindNoRootElement"));
 
   const sheet = asList(xmapContent?.sheet)[0];
-  if (!sheet) throw new Error("XMind content.xml: no <sheet> found");
+  if (!sheet) throw new Error(t("io.err.xmindNoSheet"));
 
   const rootTopicEl = asList(sheet?.topic)[0];
-  if (!rootTopicEl) throw new Error("XMind content.xml: sheet has no root <topic>");
+  if (!rootTopicEl) throw new Error(t("io.err.xmindSheetNoTopic"));
 
   const idMap = new Map<string, string>();
   const root = xmlTopicToNode(rootTopicEl, idMap);
@@ -410,7 +412,7 @@ export function fromXmind(bytes: Uint8Array): MindMapDoc {
     const sheets = JSON.parse(strFromU8(content));
     const sheet = Array.isArray(sheets) ? sheets[0] : sheets;
     const rootTopic = sheet?.rootTopic;
-    if (!rootTopic) throw new Error("XMind file has no root topic");
+    if (!rootTopic) throw new Error(t("io.err.xmindNoRootTopic"));
     const idMap = new Map<string, string>();
     const root = topicToNode(rootTopic, idMap);
     // Detached topics hang off the root in XMind's model but are top-level in ours.
@@ -434,7 +436,7 @@ export function fromXmind(bytes: Uint8Array): MindMapDoc {
     return fromXmindXml(xmlContent);
   }
 
-  throw new Error("Unsupported .xmind: no content.json or content.xml found");
+  throw new Error(t("io.err.xmindUnsupported"));
 }
 
 // --- export ---------------------------------------------------------------

@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { XMLParser } from "fast-xml-parser";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { escapeXmlAttr as escapeXml } from "./xml";
@@ -47,9 +49,9 @@ export function fromOpml(text: string): MindMapDoc {
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
   const tree = parser.parse(text);
   const opml = tree?.opml;
-  if (!opml || opml.body === undefined) throw new Error("Not an OPML file");
+  if (!opml || opml.body === undefined) throw new Error(t("io.err.notOpml"));
 
-  const title = String(opml.head?.title ?? "Imported outline");
+  const title = String(opml.head?.title ?? t("io.title.importedOutline"));
   const toNode = (o: Xml): MapNode => {
     opmlId += 1;
     const node: MapNode = {
@@ -70,7 +72,7 @@ export function fromOpml(text: string): MindMapDoc {
   return {
     schemaVersion: 1,
     id: `op${opmlId + 1}`,
-    title: title || root.topic || "Imported outline",
+    title: title || root.topic || t("io.title.importedOutline"),
     root,
     meta: { source: "opml" },
   };

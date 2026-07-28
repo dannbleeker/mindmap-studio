@@ -47,6 +47,19 @@ export const CORE_EN = {
   // different LAZY chunks need it, and neither can rely on the other having loaded.
   "common.rename": "Rename",
   "common.grid": "Grid",
+  // Import/export strings reached from the EAGER graph — App.tsx statically imports attachment,
+  // image, importDispatch, library and fileSystem, and useMapExports imports json and mermaid. Their
+  // keys cannot live in src/io/messages.ts: importing that catalogue from an eager file pulls all of
+  // it into the entry chunk, which is exactly how this batch first broke the size gate.
+  "io.err.couldNotReadFile": "Could not read file",
+  "io.err.couldNotDecodeImage": "Could not decode image",
+  "io.err.notValidJson": "Not valid JSON",
+  "io.err.notStudioJson": "Not a MindMap Studio .json file",
+  "io.err.notStudioLibrary": "Not a MindMap Studio library backup",
+  "io.err.libraryInvalidMap": "Library backup contains an invalid map",
+  "io.err.notMermaid": "Not a Mermaid mindmap (no nodes found)",
+  "io.picker.studioMap": "MindMap Studio map",
+  "io.picker.mindManagerMap": "MindManager map (import)",
   "common.colourNamed": "Colour {colour}",
   "common.openNamed": "Open {name}",
   "panel.applyNamed": 'Apply "{name}"',
@@ -101,6 +114,10 @@ export const CORE_EN = {
   "panel.preset.curvedTitle": "Solid line bowed into an arc",
   "panel.preset.double": "Double",
   "panel.preset.doubleTitle": "Solid line with arrowheads at both ends",
+  // Deck navigation. Used by BOTH the presentation chunk and the interactive-HTML export — two lazy
+  // chunks, which may not reference each other, so the single survivor lives here.
+  "common.prev": "‹ Prev",
+  "common.next": "Next ›",
   "common.status": "Status",
   "common.mood": "Mood",
   "common.vote": "Vote",

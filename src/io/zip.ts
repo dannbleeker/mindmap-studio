@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { unzipSync } from "fflate";
 
 // Shared ZIP helper for the container-format importers (.docx / .xlsx / .smmx / .xmind / .itmz /
@@ -10,6 +12,6 @@ export function unzipOrThrow(bytes: Uint8Array, ext: string): Record<string, Uin
   try {
     return unzipSync(bytes);
   } catch {
-    throw new Error(`Not a valid ${ext} file (could not unzip)`);
+    throw new Error(t("io.err.notZip", { ext }));
   }
 }

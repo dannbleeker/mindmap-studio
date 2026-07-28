@@ -20,8 +20,6 @@ export const PRESENT_EN = {
   "present.pauseTimer": "Pause timer",
   "present.resumeTimer": "Resume timer",
   "present.noNotesForThisSlide": "No notes for this slide.",
-  "present.prev": "‹ Prev",
-  "present.next": "Next ›",
   "present.homeSpacePBW": "← → · Home · Space · P · B/W · Esc",
   "present.speakerNotes": "Speaker notes",
   "present.nextUp": "Next up",

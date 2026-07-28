@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 import type { MapImage } from "../model/types";
 
 // Turn a picked image file into a self-contained MapImage (a downscaled data URL
@@ -41,7 +42,7 @@ function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error ?? new Error("Could not read file"));
+    reader.onerror = () => reject(reader.error ?? new Error(t("io.err.couldNotReadFile")));
     reader.readAsDataURL(file);
   });
 }
@@ -50,7 +51,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Could not decode image"));
+    img.onerror = () => reject(new Error(t("io.err.couldNotDecodeImage")));
     img.src = src;
   });
 }

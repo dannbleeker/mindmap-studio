@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 import type { MindMapDoc } from "../model/types";
 import { parseDoc } from "./json";
 
@@ -12,22 +13,47 @@ import { parseDoc } from "./json";
 // single honest line per format sets correct expectations so a user doesn't trust a faithful round-trip
 // and delete their source. `.json`/`.mmst` are our own lossless schema (no note); `.mmap` returns its
 // own richer, content-specific warnings (so it's not in this table).
-const LOSSY_NOTE: Record<string, string> = {
-  markmap: "Imported from Markdown — visual styling and layout aren’t part of the format.",
-  mermaid: "Imported from Mermaid — only the diagram structure is converted.",
-  opml: "Imported from OPML — an outline format; styling, markers and images aren’t included.",
-  freemind: "Imported from FreeMind/Freeplane — some styling and icons may not map exactly.",
-  xmind:
-    "Imported from XMind — styling, relationships and some markers may not be fully preserved.",
-  smmx: "Imported from SimpleMind — styling and some elements may not be fully preserved.",
-  docx: "Imported from Word — headings and lists become topics; document formatting isn’t preserved.",
-  xlsx: "Imported from Excel — rows become topics; cell formatting isn’t preserved.",
-  ithoughts: "Imported from iThoughts — styling and some elements may not be fully preserved.",
-  mindmeister: "Imported from MindMeister — styling and some elements may not be fully preserved.",
-  mindmup: "Imported from MindMup — styling and some elements may not be fully preserved.",
-  textbundle:
-    "Imported from TextBundle — a Markdown outline; visual styling isn’t part of the format.",
-};
+// A FUNCTION, not a const: a module-scope t() freezes at import, and these are the one line a user
+// reads about what their import lost.
+type LossyKind =
+  | "markmap"
+  | "mermaid"
+  | "opml"
+  | "freemind"
+  | "xmind"
+  | "smmx"
+  | "docx"
+  | "xlsx"
+  | "ithoughts"
+  | "mindmeister"
+  | "mindmup"
+  | "textbundle";
+
+// ASYNC, and it loads the io catalogue itself.
+//
+// This module is reached from the EAGER graph (App.tsx imports parseImport), so a static
+// `import "./messages"` here would pull the whole io catalogue into the entry chunk — which is
+// exactly how this batch first broke the size gate, +1.3 kB. These twelve notes are the longest
+// strings in it and nothing needs them until a user actually opens a foreign file. `parseImport` is
+// already async, so awaiting the catalogue costs a caller nothing.
+async function lossyNote(kind: LossyKind): Promise<string> {
+  await import("./messages");
+  const notes: Record<LossyKind, string> = {
+    markmap: t("io.warn.fromMarkdown"),
+    mermaid: t("io.warn.fromMermaid"),
+    opml: t("io.warn.fromOpml"),
+    freemind: t("io.warn.fromFreemind"),
+    xmind: t("io.warn.fromXmind"),
+    smmx: t("io.warn.fromSimpleMind"),
+    docx: t("io.warn.fromWord"),
+    xlsx: t("io.warn.fromExcel"),
+    ithoughts: t("io.warn.fromIthoughts"),
+    mindmeister: t("io.warn.fromMindmeister"),
+    mindmup: t("io.warn.fromMindmup"),
+    textbundle: t("io.warn.fromTextBundle"),
+  };
+  return notes[kind];
+}
 
 export async function parseImport(
   file: File,
@@ -38,11 +64,11 @@ export async function parseImport(
     // Markmap files are Markdown (optionally with a `---` frontmatter block); fromMarkmap strips
     // any frontmatter then delegates to the Markdown parser, so plain .md still imports fine.
     const { fromMarkmap } = await import("./markmap");
-    return { doc: fromMarkmap(await file.text()), warnings: [LOSSY_NOTE.markmap] };
+    return { doc: fromMarkmap(await file.text()), warnings: [await lossyNote("markmap")] };
   }
   if (name.endsWith(".mmd") || name.endsWith(".mermaid")) {
     const { fromMermaid } = await import("./mermaid");
-    return { doc: fromMermaid(await file.text()), warnings: [LOSSY_NOTE.mermaid] };
+    return { doc: fromMermaid(await file.text()), warnings: [await lossyNote("mermaid")] };
   }
   if (name.endsWith(".json") || name.endsWith(".mmst")) {
     // `.mmst` is MindMap Studio's native file — the same lossless schema-v1 JSON (no lossy note).
@@ -50,54 +76,63 @@ export async function parseImport(
   }
   if (name.endsWith(".opml")) {
     const { fromOpml } = await import("./opml");
-    return { doc: fromOpml(await file.text()), warnings: [LOSSY_NOTE.opml] };
+    return { doc: fromOpml(await file.text()), warnings: [await lossyNote("opml")] };
   }
   if (name.endsWith(".mm")) {
     const { fromFreemind } = await import("./freemind");
-    return { doc: fromFreemind(await file.text()), warnings: [LOSSY_NOTE.freemind] };
+    return { doc: fromFreemind(await file.text()), warnings: [await lossyNote("freemind")] };
   }
   if (name.endsWith(".xmind")) {
     const { fromXmind } = await import("./xmind");
     return {
       doc: fromXmind(new Uint8Array(await file.arrayBuffer())),
-      warnings: [LOSSY_NOTE.xmind],
+      warnings: [await lossyNote("xmind")],
     };
   }
   if (name.endsWith(".smmx")) {
     const { fromSmmx } = await import("./smmx");
-    return { doc: fromSmmx(new Uint8Array(await file.arrayBuffer())), warnings: [LOSSY_NOTE.smmx] };
+    return {
+      doc: fromSmmx(new Uint8Array(await file.arrayBuffer())),
+      warnings: [await lossyNote("smmx")],
+    };
   }
   if (name.endsWith(".docx")) {
     const { fromDocx } = await import("./docx");
-    return { doc: fromDocx(new Uint8Array(await file.arrayBuffer())), warnings: [LOSSY_NOTE.docx] };
+    return {
+      doc: fromDocx(new Uint8Array(await file.arrayBuffer())),
+      warnings: [await lossyNote("docx")],
+    };
   }
   if (name.endsWith(".xlsx")) {
     const { fromXlsx } = await import("./xlsx");
-    return { doc: fromXlsx(new Uint8Array(await file.arrayBuffer())), warnings: [LOSSY_NOTE.xlsx] };
+    return {
+      doc: fromXlsx(new Uint8Array(await file.arrayBuffer())),
+      warnings: [await lossyNote("xlsx")],
+    };
   }
   if (name.endsWith(".itmz")) {
     const { fromIthoughts } = await import("./ithoughts");
     return {
       doc: fromIthoughts(new Uint8Array(await file.arrayBuffer())),
-      warnings: [LOSSY_NOTE.ithoughts],
+      warnings: [await lossyNote("ithoughts")],
     };
   }
   if (name.endsWith(".mind")) {
     const { fromMind } = await import("./mindmeister");
     return {
       doc: fromMind(new Uint8Array(await file.arrayBuffer())),
-      warnings: [LOSSY_NOTE.mindmeister],
+      warnings: [await lossyNote("mindmeister")],
     };
   }
   if (name.endsWith(".mup")) {
     const { fromMindMup } = await import("./mindmup");
-    return { doc: fromMindMup(await file.text()), warnings: [LOSSY_NOTE.mindmup] };
+    return { doc: fromMindMup(await file.text()), warnings: [await lossyNote("mindmup")] };
   }
   if (name.endsWith(".textpack") || name.endsWith(".textbundle")) {
     const { fromTextBundle } = await import("./textbundle");
     return {
       doc: fromTextBundle(new Uint8Array(await file.arrayBuffer())),
-      warnings: [LOSSY_NOTE.textbundle],
+      warnings: [await lossyNote("textbundle")],
     };
   }
   const { parseMmap } = await importMmap();

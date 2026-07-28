@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 import type { MapNode, MindMapDoc } from "../model/types";
 
 // Mermaid `mindmap` <-> canonical model.
@@ -76,7 +77,7 @@ export function fromMermaid(text: string): MindMapDoc {
     parent.children.push(node);
     stack.push({ indent, node });
   }
-  if (!root) throw new Error("Not a Mermaid mindmap (no nodes found)");
+  if (!root) throw new Error(t("io.err.notMermaid"));
   return {
     schemaVersion: 1,
     id: `mm${mmId + 1}`,

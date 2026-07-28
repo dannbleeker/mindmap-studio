@@ -23,6 +23,7 @@ import { THEME_EN } from "../../src/components/themeDesignerMessages";
 import type { Catalogue, Message } from "../../src/i18n";
 import { registerMessages } from "../../src/i18n";
 import { CORE_EN } from "../../src/i18n/core";
+import { IO_EN } from "../../src/io/messages";
 import { CANVAS_EN } from "../../src/mindmap/flow/messages";
 import { PRESENT_EN } from "../../src/present/presentMessages";
 
@@ -40,6 +41,7 @@ const CATALOGUES: Catalogue[] = [
   START_EN as Catalogue,
   THEME_EN as Catalogue,
   PRESENT_EN as Catalogue,
+  IO_EN as Catalogue,
 ];
 
 const mapMessage = (message: Message, f: (s: string) => string): Message =>

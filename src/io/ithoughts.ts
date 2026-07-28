@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { XMLParser } from "fast-xml-parser";
 import { strFromU8 } from "fflate";
 import type { CrossLink, MapNode, MindMapDoc } from "../model/types";
@@ -76,7 +78,7 @@ function topicToNode(o: Xml, uuidMap: Map<string, string>): MapNode {
 
   const node: MapNode = {
     id,
-    topic: strAttr(o, "text") || "(untitled)",
+    topic: strAttr(o, "text") || t("common.untitled"),
     children: asList(o?.topic).map((c: Xml) => topicToNode(c, uuidMap)),
   };
 
@@ -95,7 +97,7 @@ export function fromIthoughts(bytes: Uint8Array): MindMapDoc {
   const files = unzipOrThrow(bytes, ".itmz");
 
   const xmlBytes = files[MAPDATA_PATH];
-  if (!xmlBytes) throw new Error("Not a valid .itmz file (no mapdata.xml)");
+  if (!xmlBytes) throw new Error(t("io.err.itmzNoMapdata"));
 
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
   const tree = parser.parse(strFromU8(xmlBytes));
@@ -103,7 +105,7 @@ export function fromIthoughts(bytes: Uint8Array): MindMapDoc {
   // The root XML element may be <iThoughts> (containing <topics>) or bare <topics>.
   const root = tree?.iThoughts ?? tree;
   const topicsEl = root?.topics;
-  if (!topicsEl) throw new Error("Not a valid .itmz file (mapdata.xml has no <topics> element)");
+  if (!topicsEl) throw new Error(t("io.err.itmzNoTopicsElement"));
 
   // Collect all <topic> children of <topics>. The first is the map centre (main root);
   // additional peers are floating topics.
@@ -120,7 +122,7 @@ export function fromIthoughts(bytes: Uint8Array): MindMapDoc {
   const uuidMap = new Map<string, string>();
 
   if (topicEls.length === 0) {
-    throw new Error("Not a valid .itmz file (no topics found)");
+    throw new Error(t("io.err.itmzNoTopics"));
   }
 
   // First <topic> = the central root; remaining peers = floating.

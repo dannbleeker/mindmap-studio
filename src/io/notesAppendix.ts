@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 // Build a "Notes" appendix (HTML) for the print/PDF export: every topic that carries a note, listed
 // with its outline number + title and the note rendered from the same safe markdown subset the editor
 // uses. The PDF export is otherwise an SVG of the canvas, which omits notes — this appends them so a
@@ -16,7 +17,7 @@ export function buildNotesAppendix(doc: MindMapDoc): string {
   const visit = (n: MapNode) => {
     if (n.note?.trim()) {
       const num = numbers.get(n.id);
-      const heading = `${num ? `${escapeHtml(num)} ` : ""}${escapeHtml(n.topic || "(untitled)")}`;
+      const heading = `${num ? `${escapeHtml(num)} ` : ""}${escapeHtml(n.topic || t("common.untitled"))}`;
       items.push(`<article><h3>${heading}</h3>${renderNote(n.note)}</article>`);
     }
     for (const c of n.children) visit(c);
@@ -24,5 +25,5 @@ export function buildNotesAppendix(doc: MindMapDoc): string {
   visit(doc.root);
   for (const f of doc.floatingTopics ?? []) visit(f);
   if (items.length === 0) return "";
-  return `<section class="mm-notes-appendix"><h2>Notes</h2>${items.join("")}</section>`;
+  return `<section class="mm-notes-appendix"><h2>${escapeHtml(t("panel.tab.notes"))}</h2>${items.join("")}</section>`;
 }

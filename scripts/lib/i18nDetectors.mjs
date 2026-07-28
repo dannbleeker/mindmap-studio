@@ -88,6 +88,12 @@ export function propViolations(src) {
       if (!m) continue;
       const value = m[1];
       if (ALLOWED_LITERALS.has(value.toLowerCase())) continue;
+      // An INTERPOLATION is not a literal. The exporters build HTML inside template literals, so
+      // `aria-label="${escapeHtml(t("io.deck.slides"))}"` is already migrated — but the regex above
+      // stops at the first `"`, which here is the one inside `t("…`, leaving a truncated value that
+      // looks like a literal. Skipping any value containing `${` is safe: a genuine JSX literal cannot
+      // contain one, and a JSX prop that IS a template is caught by the template rule below.
+      if (value.includes("${")) continue;
       out.push({ line: i + 1, text: `${prop}="${value}"`, why: "user-facing prop is a literal" });
     }
 

@@ -15,7 +15,8 @@
 //   • The runtime <script> and <style> are static string constants — no map
 //     content is interpolated into them.
 
-import { getLocale } from "../i18n/registry";
+import { getLocale, t } from "../i18n/registry";
+import "./messages";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
 // Quote- and slash-safe: escaping `"`/`'` keeps text safe in attributes, and escaping `/` means a
@@ -30,7 +31,7 @@ function nodeHtml(node: MapNode): string {
   const hasKids = node.children.length > 0;
   const topic = escapeHtml(node.topic);
   const toggle = hasKids
-    ? `<button type="button" class="toggle" aria-label="Toggle children">▾</button>`
+    ? `<button type="button" class="toggle" aria-label="${escapeHtml(t("io.html.toggleChildren"))}">▾</button>`
     : `<span class="bullet" aria-hidden="true">•</span>`;
   // Only http(s)/mailto links are emitted; renderNote/escapeHtml neutralise the rest.
   const link =
@@ -256,7 +257,7 @@ export function buildInteractiveHtml(doc: MindMapDoc, svg?: string): string {
   // native <text> (no scripts / handlers / foreignObject), so it carries no scripting surface.
   const visual = hasVisual ? `<div id="visual">${svg}</div>` : "";
   const modeToggle = hasVisual
-    ? `<button type="button" class="ctl" id="mode" aria-pressed="false" title="Switch between the visual map and the text outline">Outline view</button>`
+    ? `<button type="button" class="ctl" id="mode" aria-pressed="false" title="${escapeHtml(t("io.html.modeToggleTitle"))}">${escapeHtml(t("io.html.outlineView"))}</button>`
     : "";
   return `<!doctype html>
 <html lang="${getLocale()}">
@@ -271,11 +272,11 @@ export function buildInteractiveHtml(doc: MindMapDoc, svg?: string): string {
 <h1>${escapeHtml(title)}</h1>
 <span class="spacer"></span>
 ${modeToggle}
-<input id="q" type="search" placeholder="Filter topics…" aria-label="Filter topics" autocomplete="off" />
+<input id="q" type="search" placeholder="${escapeHtml(t("io.html.filterTopicsPlaceholder"))}" aria-label="${escapeHtml(t("io.html.filterTopics"))}" autocomplete="off" />
 <span id="count" aria-live="polite"></span>
-<button type="button" class="ctl" id="expand">Expand all</button>
-<button type="button" class="ctl" id="collapse">Collapse all</button>
-<button type="button" class="ctl" id="reset" title="Reset pan / zoom">Reset view</button>
+<button type="button" class="ctl" id="expand">${escapeHtml(t("io.html.expandAll"))}</button>
+<button type="button" class="ctl" id="collapse">${escapeHtml(t("io.html.collapseAll"))}</button>
+<button type="button" class="ctl" id="reset" title="${escapeHtml(t("io.html.resetPanZoom"))}">${escapeHtml(t("io.html.resetView"))}</button>
 </header>
 <div id="scroll">
 <div id="pan">
@@ -283,7 +284,7 @@ ${visual}
 ${tree}
 </div>
 </div>
-<footer>Interactive map — ${hasVisual ? "Visual map + " : ""}collapsible outline · filter to search · Ctrl/⌘ + scroll to zoom, drag to pan · self-contained, offline</footer>
+<footer>${escapeHtml(hasVisual ? t("io.html.footerWithVisual") : t("io.html.footerOutlineOnly"))}</footer>
 <script type="application/json" id="map-data">${embedJson(doc)}</script>
 <script>${SCRIPT}</script>
 </body>

@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "../io/messages";
 import { XMLParser } from "fast-xml-parser";
 import { strFromU8, unzipSync } from "fflate";
 import { mindManagerIconToEmoji } from "../icons";
@@ -268,7 +270,7 @@ function extractImage(topic: Xml, ctx: ParseContext): MapImage | undefined {
   };
   const result = fromData(img.ImageData) ?? fromData(img.AlternateImageData);
   if (!result) {
-    ctx.warnings.push("An embedded image was skipped (unsupported format or missing data).");
+    ctx.warnings.push(t("io.warn.mmapImageSkipped"));
     return undefined;
   }
   // ImageSize is in millimetres; convert at 96dpi and cap the on-canvas display (aspect preserved).
@@ -579,9 +581,7 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
 
   const entryName = Object.keys(files).find((k) => /(^|\/)document\.xml$/i.test(k));
   if (!entryName) {
-    throw new Error(
-      `Not a MindManager .mmap: Document.xml not found. Archive entries: ${Object.keys(files).join(", ")}`,
-    );
+    throw new Error(t("io.err.mmapNoDocument", { entries: Object.keys(files).join(", ") }));
   }
 
   const xml = strFromU8(files[entryName]);
@@ -593,11 +593,11 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
   const tree = parser.parse(xml);
 
   const map = tree?.Map;
-  if (!map) throw new Error("Unexpected .mmap: no <Map> root element in Document.xml.");
+  if (!map) throw new Error(t("io.err.mmapNoMapRoot"));
 
   const rootTopic = map?.OneTopic?.Topic ?? map?.Topic;
   if (!rootTopic) {
-    throw new Error("Unexpected .mmap: no root <Topic> under <Map>/<OneTopic>.");
+    throw new Error(t("io.err.mmapNoRootTopic"));
   }
 
   idCounter = 0;
@@ -628,9 +628,7 @@ export function parseMmap(zipBytes: Uint8Array): MmapImportResult {
 
   // Floating (detached) topics are imported as-is; note that so their placement isn't a surprise.
   if (floatingTopics.length > 0) {
-    ctx.warnings.push(
-      `${floatingTopics.length} floating topic(s) imported — shown in a separate, editable "Floating topics" branch.`,
-    );
+    ctx.warnings.push(t("io.warn.mmapFloatingTopics", { n: floatingTopics.length }));
   }
 
   const doc: MindMapDoc = {

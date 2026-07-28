@@ -377,7 +377,7 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
         }}
       >
         <button type="button" onClick={prev} disabled={index === 0} style={ctrlStyle}>
-          {t("present.prev")}
+          {t("common.prev")}
         </button>
         <span style={{ fontSize: 13, color: "#cecbf6" }}>
           {index + 1} / {slides.length}
@@ -388,7 +388,7 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           disabled={index === slides.length - 1}
           style={ctrlStyle}
         >
-          {t("present.next")}
+          {t("common.next")}
         </button>
         <span
           aria-label={t("present.elapsedNamed", { time: mmss(elapsed) })}

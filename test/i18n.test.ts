@@ -24,6 +24,7 @@ import {
   t,
 } from "../src/i18n";
 import { CORE_EN } from "../src/i18n/core";
+import { IO_EN } from "../src/io/messages";
 import { CANVAS_EN } from "../src/mindmap/flow/messages";
 import { PRESENT_EN } from "../src/present/presentMessages";
 
@@ -45,6 +46,7 @@ const CATALOGUES = [
   { name: "START_EN", catalogue: START_EN as Catalogue },
   { name: "THEME_EN", catalogue: THEME_EN as Catalogue },
   { name: "PRESENT_EN", catalogue: PRESENT_EN as Catalogue },
+  { name: "IO_EN", catalogue: IO_EN as Catalogue },
 ] as const;
 
 beforeEach(() => {
@@ -370,6 +372,88 @@ describe("bundle locality", () => {
       }
       expect(read(rel)).toContain('i18n/registry"');
     }
+  });
+
+  it("no EAGERLY-REACHED file imports a lazy catalogue", () => {
+    // The mirror of the rule above, and the one that actually bites. A lazy catalogue costs nothing
+    // while only its own chunk imports it — but a single `import "./messages"` from a file the entry
+    // graph reaches drags the WHOLE catalogue into the entry chunk, silently.
+    //
+    // Not hypothetical: creating `src/io/messages.ts` (~60 keys) put +1.3 kB in the entry and broke
+    // the size gate, because ten `io/` modules are reached statically from App.tsx and useMapExports
+    // rather than through a dynamic import(). Three of them did not even use an `io.*` key — they had
+    // picked up the import while being migrated. The gate caught the SIZE; nothing named the cause.
+    //
+    // "Eagerly reached" here is a static-import walk from src/main.tsx: follow every `from "…"` that
+    // is not inside an `await import(...)`, and anything you land on is in the entry chunk.
+    const LAZY_CATALOGUES = [
+      "src/io/messages.ts",
+      "src/mindmap/flow/messages.ts",
+      "src/components/start/messages.ts",
+      "src/components/themeDesignerMessages.ts",
+      "src/present/presentMessages.ts",
+    ];
+
+    const resolve = (fromFile: string, spec: string): string | null => {
+      if (!spec.startsWith(".")) return null;
+      const base = join(fromFile, "..", spec).replaceAll("\\", "/");
+      for (const cand of [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]) {
+        try {
+          readFileSync(join(process.cwd(), cand));
+          return cand;
+        } catch {}
+      }
+      return null;
+    };
+
+    const eager = new Set<string>();
+    const queue = ["src/main.tsx"];
+    while (queue.length) {
+      const file = queue.shift() as string;
+      if (eager.has(file)) continue;
+      eager.add(file);
+      let src: string;
+      try {
+        src = read(file);
+      } catch {
+        continue;
+      }
+      // Blank out dynamic imports so their targets are NOT treated as eager.
+      const staticOnly = src.replace(/await\s+import\(\s*"[^"]+"\s*\)/g, "");
+      for (const m of staticOnly.matchAll(/(?:from|import)\s*"(\.[^"]+)"/g)) {
+        const next = resolve(file, m[1]);
+        if (next) queue.push(next);
+      }
+    }
+
+    const offenders: string[] = [];
+    for (const file of eager) {
+      if (LAZY_CATALOGUES.includes(file)) continue;
+      // Resolve each import to a real PATH before judging it. Three of the five catalogues are named
+      // `messages.ts`, so a basename match cannot tell `io/messages` from `flow/messages`. Comments
+      // must be stripped first, too: importDispatch carries a comment QUOTING `import "./messages"`
+      // to explain why it must not do that, and the first version of this check read the warning as
+      // the offence.
+      const src = read(file)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/^\s*\/\/.*$/gm, "")
+        .replace(/await\s+import\(\s*"[^"]+"\s*\)/g, "")
+        // `import type` erases at build time and costs nothing — which is exactly why `i18n/keys.ts`
+        // builds the MessageKey union from all five catalogues that way. Counting it here would flag
+        // the one file whose whole design is to reference them for free.
+        .replace(/^\s*import\s+type\s[^;]*;/gm, "");
+      for (const m of src.matchAll(/(?:from|import)\s*"(\.[^"]+)"/g)) {
+        const target = resolve(file, m[1]);
+        if (target && LAZY_CATALOGUES.includes(target)) offenders.push(`${file} imports ${target}`);
+      }
+    }
+
+    expect(
+      offenders,
+      "An eagerly-reached file imported a LAZY catalogue, which puts all of its keys in the entry\n" +
+        "chunk. Either move those keys into src/i18n/core.ts (the eager catalogue), or make the\n" +
+        "importing module genuinely lazy.",
+    ).toEqual([]);
   });
 
   it("no lazy chunk references another lazy chunk's key", () => {

@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 // Excel (.xlsx) export + import: the map as an indented outline worksheet — each node on
 // its own row, its topic placed in the column matching its depth (so the tree reads as an
 // indented outline across columns), with a trailing Notes column.
@@ -238,7 +240,7 @@ function parseRows(xml: string, sharedStrings: string[]): ParsedRow[] {
 
 /** Stack-based outline builder: ordered (depth, topic, note) rows → MapNode tree. */
 function buildTree(rows: ParsedRow[]): MapNode {
-  if (rows.length === 0) throw new Error("No rows found in .xlsx");
+  if (rows.length === 0) throw new Error(t("io.err.xlsxNoRows"));
 
   // Each entry: [node, depth]
   const stack: Array<[MapNode, number]> = [];
@@ -269,7 +271,7 @@ function buildTree(rows: ParsedRow[]): MapNode {
     stack.push([node, row.depth]);
   }
 
-  if (!root) throw new Error("No rows found in .xlsx");
+  if (!root) throw new Error(t("io.err.xlsxNoRows"));
   return root;
 }
 
@@ -284,7 +286,7 @@ export function fromXlsx(bytes: Uint8Array): MindMapDoc {
   const files = unzipOrThrow(bytes, ".xlsx");
 
   const sheetEntry = files["xl/worksheets/sheet1.xml"];
-  if (!sheetEntry) throw new Error("No xl/worksheets/sheet1.xml found in .xlsx");
+  if (!sheetEntry) throw new Error(t("io.err.xlsxNoSheet"));
 
   // Parse shared strings if present (real Excel files use them; our exporter does not)
   const sharedStrings: string[] = [];
@@ -294,7 +296,7 @@ export function fromXlsx(bytes: Uint8Array): MindMapDoc {
   }
 
   const rows = parseRows(strFromU8(sheetEntry), sharedStrings);
-  if (rows.length === 0) throw new Error("No rows found in .xlsx");
+  if (rows.length === 0) throw new Error(t("io.err.xlsxNoRows"));
 
   const root = buildTree(rows);
   const title = root.topic;

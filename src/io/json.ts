@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 // Native, lossless JSON I/O for the canonical model. Unlike Markdown/PNG/SVG
 // (lossy or derived), this round-trips the full doc — notes, links, boundaries,
 // icons, tags — so a map can be saved and restored exactly. Pure + deterministic.
@@ -14,7 +15,7 @@ export function parseDoc(text: string): MindMapDoc {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("Not valid JSON");
+    throw new Error(t("io.err.notValidJson"));
   }
   if (
     !data ||
@@ -23,7 +24,7 @@ export function parseDoc(text: string): MindMapDoc {
     typeof (data as { root?: unknown }).root !== "object" ||
     (data as { root?: unknown }).root === null
   ) {
-    throw new Error("Not a MindMap Studio .json file");
+    throw new Error(t("io.err.notStudioJson"));
   }
   // Coerce a hand-edited / schema-drifted file to a projectable shape (real children arrays etc.).
   return normalizeDoc(data as MindMapDoc);

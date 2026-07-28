@@ -1,38 +1,31 @@
-// Bundle-size budget — the GATE for the INITIAL-load JS ceiling. Fails the build
-// when the entry chunk's gzipped JS exceeds BUDGET_KB.
-// Lazy (code-split) chunks load on demand and are reported but not gated.
+// Bundle-size budget — the GATE for the INITIAL-load JS ceiling. Fails the build when the JS a browser
+// fetches before first paint exceeds BUDGET_KB.
+//
+// The measurement (entry + every modulepreloaded chunk, and why that is the right definition) lives in
+// scripts/lib/firstLoad.mjs, shared with the dashboard so the gate and the reported figure cannot mean
+// different things. The ceiling itself, plus the rationale history for every bump, lives in
+// scripts/bundle-budget.mjs, imported by both for the same reason.
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { gzipSync } from "node:zlib";
 import { BUDGET_KB } from "./bundle-budget.mjs";
+import { measureFirstLoad } from "./lib/firstLoad.mjs";
 
-// The ceiling itself — plus the full rationale history for every bump — lives in bundle-budget.mjs,
-// which build-stats.mjs imports too so the gate and the dashboard can never disagree.
+const distDir = join(import.meta.dirname, "..", "dist");
+const assetsDir = join(distDir, "assets");
 
-const assetsDir = join(import.meta.dirname, "..", "dist", "assets");
-
-let entry = 0;
-let lazy = 0;
-const rows = [];
-for (const name of readdirSync(assetsDir)) {
-  if (!name.endsWith(".js")) continue;
-  const kb = gzipSync(readFileSync(join(assetsDir, name))).length / 1024;
-  const isEntry = /^index-/.test(name); // vite names the entry chunk index-*
-  if (isEntry) entry += kb;
-  else lazy += kb;
-  rows.push(`  ${name}  ${kb.toFixed(1)} kB gz  ${isEntry ? "(entry)" : "(lazy)"}`);
-}
+const { entry, initial, lazy, rows } = measureFirstLoad(distDir);
 
 for (const row of rows) console.log(row);
 console.log(
-  `  ───\n  entry  ${entry.toFixed(1)} kB gz  (budget ${BUDGET_KB} kB)    lazy  ${lazy.toFixed(1)} kB gz`,
+  `  ───\n  first load  ${initial.toFixed(1)} kB gz  (budget ${BUDGET_KB} kB)    lazy  ${lazy.toFixed(1)} kB gz\n` +
+    `  of that first load, ${entry.toFixed(1)} kB is the entry chunk and ${(initial - entry).toFixed(1)} kB is preloaded siblings.`,
 );
 
-if (entry > BUDGET_KB) {
-  console.error(`\n✗ Initial bundle over budget: ${entry.toFixed(1)} kB > ${BUDGET_KB} kB`);
+if (initial > BUDGET_KB) {
+  console.error(`\n✗ First-load JS over budget: ${initial.toFixed(1)} kB > ${BUDGET_KB} kB`);
   process.exit(1);
 }
-console.log(`\n✓ Initial bundle within budget: ${entry.toFixed(1)} kB ≤ ${BUDGET_KB} kB`);
+console.log(`\n✓ First-load JS within budget: ${initial.toFixed(1)} kB ≤ ${BUDGET_KB} kB`);
 
 // Critical-CSS guard. React Flow ships its core stylesheet as a SEPARATE file that must be
 // imported (src/mindmap/FlowMindMap.tsx -> "@xyflow/react/dist/style.css"). If that import is

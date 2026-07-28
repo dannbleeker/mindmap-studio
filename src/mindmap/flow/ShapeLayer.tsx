@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { ViewportPortal, useReactFlow } from "@xyflow/react";
 import {
   type ReactElement,
@@ -93,13 +95,73 @@ function primEl(p: ShapePrim): ReactElement {
 // whole gesture is a single undo step (mirroring the topic drag). Rendering is ungated (a shape shows
 // whenever the doc has one); adding a shape flips free-canvas mode on so it reads as a whiteboard object.
 
+// The display name for a shape kind — a FUNCTION, not a lookup into SHAPE_KINDS below: SHAPE_KINDS
+// is itself a frozen module-level table (already budgeted in the frozen-t() ratchet), and adding a
+// second reader of it would not change that, but a fresh per-call resolution is simpler to reason
+// about here and costs nothing extra. Reuses the same catalogue keys SHAPE_KINDS and Toolbar's
+// SHAPE_ITEMS already use for these six kinds, so the three surfaces cannot drift.
+function shapeKindLabel(kind: CanvasShapeKind): string {
+  switch (kind) {
+    case "rect":
+      return t("toolbar.rectangle");
+    case "ellipse":
+      return t("toolbar.ellipse");
+    case "blockArrow":
+      return t("toolbar.blockArrow");
+    case "chevron":
+      return t("toolbar.chevron");
+    case "swimlane":
+      return t("cmd.layout.swimlane");
+    default:
+      return t("canvas.matrix");
+  }
+}
+
+// `title` is a getter: a plain `title: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `kind` (the React key) and `glyph` stay plain literals.
 const SHAPE_KINDS: { kind: CanvasShapeKind; glyph: string; title: string }[] = [
-  { kind: "rect", glyph: "▭", title: "Rectangle" },
-  { kind: "ellipse", glyph: "⬭", title: "Ellipse" },
-  { kind: "blockArrow", glyph: "➜", title: "Block arrow" },
-  { kind: "chevron", glyph: "❯", title: "Chevron" },
-  { kind: "swimlane", glyph: "▥", title: "Swimlane" },
-  { kind: "matrix", glyph: "▦", title: "Matrix" },
+  {
+    kind: "rect",
+    glyph: "▭",
+    get title() {
+      return t("toolbar.rectangle");
+    },
+  },
+  {
+    kind: "ellipse",
+    glyph: "⬭",
+    get title() {
+      return t("toolbar.ellipse");
+    },
+  },
+  {
+    kind: "blockArrow",
+    glyph: "➜",
+    get title() {
+      return t("toolbar.blockArrow");
+    },
+  },
+  {
+    kind: "chevron",
+    glyph: "❯",
+    get title() {
+      return t("toolbar.chevron");
+    },
+  },
+  {
+    kind: "swimlane",
+    glyph: "▥",
+    get title() {
+      return t("cmd.layout.swimlane");
+    },
+  },
+  {
+    kind: "matrix",
+    glyph: "▦",
+    get title() {
+      return t("canvas.matrix");
+    },
+  },
 ];
 
 const COLORS = ["#8a84c6", "#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"];
@@ -240,7 +302,7 @@ function ShapeLayer({
               pointerEvents: "none",
             }}
           >
-            <title>{shape.kind} shape</title>
+            <title>{t("canvas.shapeTitle", { kind: shapeKindLabel(shape.kind) })}</title>
             {/* An invisible hit-rect over the whole box: click to select, drag the body to move. */}
             <rect
               x={bbox.x}
@@ -299,8 +361,8 @@ function ShapeLayer({
             <button
               key={c}
               type="button"
-              title={`Colour ${c}`}
-              aria-label={`Shape colour ${c}`}
+              title={t("common.colourNamed", { colour: c })}
+              aria-label={t("canvas.shapeColour", { colour: c })}
               onClick={() => onColor(selected.id, c)}
               style={{
                 width: 16,
@@ -347,8 +409,8 @@ function ShapeLayer({
           />
           <button
             type="button"
-            title="Delete shape"
-            aria-label="Delete shape"
+            title={t("canvas.deleteShape")}
+            aria-label={t("canvas.deleteShape")}
             onClick={() => onDelete(selected.id)}
             style={{
               fontSize: 13,

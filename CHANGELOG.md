@@ -291,6 +291,371 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   at the summary level: a tick that claims coverage nobody measured. Point the scanner at a file before
   calling it clean.
 
+  **The migration continued on `i18n/complete-migration` (11 batches).** The canvas chunk, the Start
+  screen, the theme designer, presentation mode, the eager inspectors, the panel labels, the stickers
+  and the eager hook tail are migrated — roughly 750 strings into five chunk-local catalogues. Scanner
+  hits across the whole tree went 768 → 405, and the two numbers are only comparable because three more
+  detectors landed in between; the count rose to 1001 when they did. What remains is 213 declined map
+  content, 46 catalogues quoting their own English (a permanent false positive), 68 in the XML-building
+  exporters, 15 blocked on a decision, and ~63 real chrome in a long tail.
+
+  **Three tools were built because the gate could not see this work.** The migration is observationally
+  a no-op — every string comes back identical in English — so a passing suite proves nothing about it.
+  A **pseudo-locale harness** overlays catalogues via `registerMessages` and renders components under
+  markers, which catches an unmigrated string as text that failed to change. Adding it immediately found
+  two. The **detectors became one shared module** (`scripts/lib/i18nDetectors.mjs`) so the guard test and
+  the tree-wide scanner cannot disagree; each new detector had to run clean over every already-migrated
+  file before being added, and the three that landed exposed 85 strings previous batches had ticked off.
+  And the catalogue tests now walk N catalogues pairwise, fail on dead keys, catch HTML entities
+  captured from JSX (`Find &amp; replace` would have shipped verbatim), and reject a lazy chunk
+  referencing another lazy chunk's key — which throws on first use.
+
+  **A trap found at the end, and pinned rather than fixed.** `t()` reads the active locale *at call
+  time*, so a call at module scope freezes its string at import. 194 of the migrated strings are that
+  shape. They are all correct today — nothing calls `setLocale` outside tests — and all of them stop
+  being correct the day a language picker ships, quietly: the app switches locale and the panel tabs,
+  slash commands and edge presets stay English. An AST walker now counts them (a regex cannot tell
+  module-scope `{ label: t("x") }` from the identical text inside JSX), a test proves the mechanism in
+  both directions, and a per-file ratchet stops the count growing. The fix is 194 behaviour-neutral call
+  sites and wants its own review; it is decision 4 in `docs/I18N_BLOCKED.md`.
+
+  **`scripts/size-budget.mjs` was measuring a subset of first load.** It weighed `index-*.js` only, but
+  Vite emits `<link rel="modulepreload">` for shared eager chunks and the browser fetches those on first
+  paint too. So the gate reported a 10.5 kB *improvement* (168.5 → 158.0) for a change that added 141
+  catalogue keys — 16.6 kB had moved sideways into `primitives-*.js`. It now computes and prints true
+  first load (180.0 kB against a 175 ceiling), and still gates on the old metric deliberately: the true
+  figure was already over before this work started, so flipping it silently would read as a regression
+  this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
+
+- **The frozen-`t()` ratchet is closed: 145 → 0 (decision 4 in `docs/I18N_BLOCKED.md`, now resolved).**
+  Every remaining module-scope `t()` call — the ones that resolve once at import and can never follow a
+  later `setLocale` — turned out to be the same shape across all 17 files: an array or object literal
+  with one identity field (`id`/`kind`/`key`/`href`/`w`/`d`/`a`/`value` — never a `t()` call, always what
+  callers key React lists and compare on) and one display field (`label`/`name`/`title`/`body`/`tab`/
+  `menu`) that was the frozen call. Every display field became a getter (`get label() { return
+  t("…"); }`); every identity field was left untouched. That makes it a true drop-in fix — a getter is
+  read exactly like a plain property, so `PANEL_LABELS.outline.tab`, `SHAPE_ITEMS[i].name` and every
+  other call site across `App.tsx`/`Toolbar.tsx`/etc. needed zero changes, closing the call-site-churn
+  concern the original write-up worried about.
+
+  **One real bug fell out of the sweep.** `CaptureCard.tsx`'s three suggested-prompt buttons keyed their
+  React list on the translated text itself (`key={ex}`) — the identical "translated label used as
+  identity" defect already fixed once for Toolbar's last-export id and Recent's date buckets, just not
+  yet found here because the array was still frozen (so the text never actually changed, and the bug
+  never fired). Converting it to a live function surfaced the key bug in the same motion; it's now
+  `suggestedExamples()` returning stable `{ id, text }` pairs, keyed on `id`.
+
+  `test/i18n-frozen-ratchet.test.ts`'s BUDGET is now `[]` — its three checks (no file over budget, no
+  new file, total non-increasing) still run, so a reintroduced frozen call is caught rather than
+  silently re-widening the table. `test/i18n-frozen-constants.test.ts`'s PANEL_LABELS test flipped from
+  pinning the defect on a real file to a CLEARANCE test proving it now follows a locale change —
+  mutation-proven by reverting one getter back to a plain field and watching both that test and the
+  ratchet's three fail, then restoring.
+
+- **The blindspot residue is closed: 82 → 8, and every one of the 8 is genuinely literal.** Roughly 70
+  strings across `Panels.tsx`, `App.tsx` and a dozen Start-screen files were sentences a JSX element or
+  a computed suffix had cut in half — the exact class no line-based rule can ever match, because there
+  is no single line containing the whole sentence to check. `tNodes` handles the ones with a real React
+  node embedded (`◎ Focusing branch: <strong>{topic}</strong>`, the paste-outline explainer with two
+  `<code>` spans); a plain `t()` with a placeholder handles the rest (`Import failed: {error}`, the
+  progress-bar summary, the multi-select banner).
+
+  **Two more classes of hardcoded literal, found only by reading every remaining line by hand:**
+  - **A ternary as a bare JSX child** — `{cond ? "Word" : other}` with no surrounding prop — matches
+    nothing in the guard, which only checks props and text between two tags. Six sites: "Hide" vs
+    `t("hint.showAll")`, "Pause"/"Play", "Relationship" vs a `t()` call, "Rename"/"Create",
+    "Expand"/"Collapse", "Find" and "Layout" (the last two inside a ternary sharing a slot with `t()`,
+    which is exactly why the shape hides — half the ternary already looked migrated).
+  - **A widening `loneJsxTextViolations` needed anyway**: its leading-character check was still the
+    OLD fixed glyph set (`[A-Z＋✕←→‹›▦☰⏸▶↺−+]`) that `jsxTextViolations` had already moved past for the
+    single-line shape — so `⤢ Open in dock` and `☑ List` were invisible on the multi-line wrapped-tag
+    shape even though the identical text one line shorter was already caught. Same fix, same file,
+    applied to the twin rule; verified clean against every allowlisted file before landing.
+
+  **Two dead catalogue keys got real callers.** `count.topics` and `count.nodes` and `count.maps`
+  existed already, unreferenced, built for call sites that ended up hand-rolling
+  `{n} topic${n === 1 ? "" : "s"}` instead — three separate places, none of them talking to each other.
+  Wiring them up is a correctness fix as much as a translation one: `AllMaps.tsx`'s node count never
+  pluralised at all before this (always "nodes", even for one).
+
+  **Found a second `&amp;` entity bug, same class as the About panel's.** `StartSidebar.tsx`'s
+  "Local &amp; private…" was still raw JSX text (not yet a `t()` string), so the entity currently
+  renders correctly — but migrating it verbatim would have shipped the second instance of exactly the
+  bug already fixed once. Written with a real ampersand.
+
+  **My own AST probe had a bug**, found while explaining away what looked like a false hit: for a
+  template-literal prop it read `e.getText()` — the raw SOURCE including the `${…}` code — instead of
+  the static text around the interpolations, so a function name like `timeAgo` inside one counted as
+  if it were prose. Fixed to walk the template's own `head` + span structure, the same static-vs-dynamic
+  split the real detector's regex achieves for the non-AST case.
+
+- **Fixed: "last used export" could silently stop working forever after a locale change, plus five
+  more defects in the same file, none caught by any existing detector.** `Toolbar.tsx` persisted the
+  export menu's *rendered label* as its identity key (`localStorage["mindmap-last-export"]`) and
+  matched it back with `lbl === last` — the comment even called the label "the stable id". A label is
+  not an identity: the moment a second locale existed, a stored English label would stop matching any
+  current (now-translated) entry, and the "Last used" row would just never appear again for that
+  install. Every export item now carries a real id alongside its label; the id is what's persisted,
+  matched and used as the React key (which was also reading the translated label). Guarded by a test
+  that exports in English, switches to a second locale, and proves the pinned row still resolves and
+  re-fires the same format — mutation-checked by reverting to label-keying, which fails it exactly as
+  predicted.
+
+  Found in the same file while fixing that: **two JSX-text sentences no rule can see** (`Import
+  files…`, `Image on selected node…` — plain text following a self-closing icon on the same line,
+  which matches none of the `>text</` shapes any detector looks for) and **a "File" heading** split by
+  a computed suffix (`File{io.fileName ? … : ""}`). And **six menu triggers said their own word
+  twice**, hardcoded both times: once as a plain string argument to `menuTrigger("icon", "Word", …)`,
+  again inside `triggerAriaLabel={isMobile ? "Word" : undefined}` for the mobile screen-reader label.
+  Neither shape matches anything in the guard — a bare string argument isn't the two-argument
+  `add(id, "Label", …)` pattern, and `prop={ternary}` has no literal for the prop-literal rule to find.
+  All six now reuse the existing `toolbar.trigger.*` / `common.view` keys already used by the same
+  button's tooltip, so the visible label, the tooltip and the screen-reader label can't drift apart.
+
+- **Import failures and exported chrome are translatable (~65 strings).** Every adapter under `io/`
+  reported its failures in hardcoded English — and those are not internal diagnostics: `App.tsx`
+  renders `err.message` verbatim into the error banner, so "Not a valid .mup file" is copy. The
+  interactive-HTML and slide-deck exports also baked their own controls in ("Expand all", "‹ Prev",
+  the footer), and those files are opened later or sent to someone else, so they are as much product
+  as anything on the canvas. Format names, extensions, XML element names and internal paths stay
+  literal — they are tokens, not words.
+
+  They live in a sixth catalogue, `src/io/messages.ts`, and getting that right took three attempts —
+  each caught by the size gate, none by review:
+
+  1. The premise was wrong. "Every adapter is behind a dynamic `import()`" is false for ten of them;
+     `App.tsx` and `useMapExports` import `attachment`, `image`, `importDispatch`, `library`,
+     `fileSystem`, `json`, `mermaid` and more *statically*. Each `import "./messages"` from those
+     dragged all ~60 keys into the entry chunk: **+1.3 kB, gate red**.
+  2. Deferring `importDispatch` looked like the fix — entry fell **10.9 kB**. True first load went
+     **up 0.2**. The weight moved into a preloaded sibling; under the old entry-only metric this would
+     have been recorded as a 10.9 kB win. It was reverted.
+  3. The actual fix: eager files' keys moved to the eager catalogue, the twelve per-format "what this
+     import loses" notes load on demand inside `parseImport` (already `async`), and three eager files
+     were importing the catalogue **without using a single key from it**. First load: **181.2 kB**,
+     flat against the 181.1 baseline despite the ~65 new strings.
+
+  **`test/i18n.test.ts` now guards it**: a static-import walk from `main.tsx` fails if any eagerly-
+  reached file imports a lazy catalogue. It found two flaws in itself first — it matched a comment
+  *quoting* the import it warns against, and flagged `keys.ts`, whose `import type` erases at build
+  time and is the whole point of that file. Mutation-checked against the exact defect that broke the
+  budget.
+
+- **The layout picker, marker groups, sticker headings, priority levels and line presets were never
+  translated — and no check could see them.** ~30 strings that were raw English literals rather than
+  `t()` calls, so the scanner, the blind-spot probe and the frozen-`t()` ratchet all scored the files
+  **0** while the layout gallery rendered "Radial / hub" in every locale. Nine of the eleven layout
+  names already had `cmd.layout.*` keys from the command palette; they now share them.
+
+  **Identity split from label everywhere it mattered.** `Sticker.category` is a discriminator, a React
+  key *and* a heading; `MARKER_GROUPS.id` and `PRIORITY_LABEL`'s numeric keys are looked up. Those stay
+  literal; only the rendered name follows the locale — the same rule the `Recent.tsx` fix established
+  after keying on a translated label would have made maps disappear.
+
+- **Nine React keys were the rendered label; six were already locale-dependent.** `AppTips`,
+  `Learn`, `BranchExportDialog` and `ShortcutsDialog` keyed on titles that were *already* `t()` results,
+  so a language change would have remounted those subtrees — losing focus on the interactive tip button
+  — and crashed outright on any two labels that collide in a target language. All now key on stable ids.
+  This had to land **with** the item above: migrating those labels first would have converted the three
+  remaining latent cases into live ones.
+
+- **Three module-scope derivations would have silently re-frozen.** `MapPanel`'s `LAYOUT_NAME` and
+  `Kanban`'s `SOURCES` materialised their inputs at import, so making the underlying labels live would
+  have been undone one line later — while the ratchet reported 0, because it counts `t(` calls and
+  those tables contain none. Both are functions now. The frozen budget also drops 194 → **145**.
+
+- **The relationship filter showed raw ids, and the status bar had a hand-rolled English plural.** The
+  Relationships panel's type dropdown rendered `relates-to`, `depends-on`, `causes`, `supports`,
+  `blocks` — the literal option *values* — while `EdgeInspector` showed proper labels for the same five.
+  And the canvas status bar carried `{n} topic{n === 1 ? "" : "s"}`, which is precisely the shape
+  `i18n/registry.ts` cites as the reason plural messages exist: English needs two forms, Slavic four,
+  Arabic six, and a ternary can only ever express two. Both now go through the catalogue; the English
+  output is byte-identical for every count.
+
+  Both were sitting in the "legitimately literal" bucket of my own triage, and both were found only by
+  opening the file. That bucket is where defects hide, because it is the one nobody re-opens.
+
+- **`pnpm i18n:blindspot` makes the floor visible.** `i18n-scan` is regex-over-lines by design — it has
+  to run on any file without a parse step and be quiet enough that nobody switches it off — so "0
+  hardcoded strings" has always meant "0 that these rules can see". The gap between those two has been
+  the most repeated failure in this migration. The new script walks the TypeScript AST, reports every
+  JSX text node and user-facing prop, and subtracts what the detectors already report. It defaults to
+  **allowlisted files only**, because an unmigrated file full of English is expected whereas an
+  allowlisted one is the gate telling a lie. It is deliberately noisy and gates nothing: a worklist,
+  not a check. Currently **85**.
+
+- **"Clear all local data" was missing seven preference keys.** `LOCAL_PREF_KEYS` claims to centralise
+  every preference the app writes, so that one action can wipe them all — but `mindmap-contrast`,
+  `-info-tab`, `-last-export`, `-layout`, `-minimap-open`, `-search-history` and `-sticky-color` were
+  never on it. They survived the wipe and never travelled in a settings file.
+
+  The list had drifted because nothing checked it: the existing test writes the keys the list names
+  and asserts those get cleared, which is true of **any** list, including a wrong one. It now derives
+  the truth from source instead — every `"mindmap-*"` literal in `src/` must be either a declared
+  preference or an explicitly documented non-preference, so a new key cannot appear without a decision
+  about which it is. Four are documented as not-storage: the IndexedDB database name, two
+  file-format `kind` markers, and a BroadcastChannel name.
+
+  Two of the seven deliberately do **not** travel between machines, following the rule already in
+  `settingsFile.ts` that usage history stays put: `mindmap-search-history` is the user's own search
+  terms, which should not leave the machine inside a file they might hand to someone else, and
+  `mindmap-last-export` stores the export menu's *label* as its identity key — so on a machine running
+  another locale it would not match anything anyway.
+
+- **The string detectors could not see three whole shapes, and 56 strings were hiding in files the
+  allowlist had already certified clean.** An independent AST sweep — deliberately not built from the
+  detectors' own rules — found 149 candidates inside allowlisted files; 56 were real. Three blind spots,
+  each fixed by anchoring on *structure* rather than on what prose looks like:
+
+  - **A leading glyph stopped a label being a label.** The JSX-text rule required `[A-Z]` immediately
+    after the `>`, so every emoji-prefixed heading was invisible — `🔗 Relationships`, `📊 Map
+    statistics`, `🗓 Agenda`, `▦ Board`, `＋ New`. That is the house style for panel headings, not a
+    rare shape. The glyph now stays inline in the JSX and only the words move into the catalogue, so
+    the fixed form doesn't fire either.
+  - **Parentheses were treated as code.** `Presenter view (P)`, `Exit (Esc)`, `Read (PDF)` all slipped
+    through. Safe to allow here because that rule is anchored on the surrounding tags.
+  - **A user-facing prop could hide in a template literal.** `templateViolations` needs a capitalised
+    word followed by a lowercase one, which `` `Apply "${s.name}"` `` never is once the interpolation
+    is blanked. Anchoring on the *prop name* makes a single word enough. `Panels.tsx:1285` had
+    `` title={`Rename / merge "${key}" — …`} `` whose own `aria-label`, on the same element, was
+    already a `t()` call.
+
+  The narrowing that keeps it honest: a **machine-token cheatsheet is not prose**. The search box's
+  tooltip lists `tag:foo  marker:flag-red  priority:1` — syntax the user types, where translating would
+  break the feature. Two or more `word:value` tokens with no space after the colon is the signature;
+  `Relationship: ${label}` still gets caught. Both directions are pinned as unit tests.
+
+  The scanner total went **401 → 410** despite 56 strings being paid, which is the honest arithmetic of
+  widening a detector: it found more than it fixed. Every new detector in this programme has done that.
+
+- **Fixed: Recent's date buckets could have taken your maps off the page.** The Start screen's Recent
+  section keyed its buckets by the *rendered label* — `GROUPS` held `t("start.earlierThisWeek")` while
+  `groupOf()` returned the English literal `"Earlier this week"`. Those agree only while the catalogue
+  is English; under a second locale the lookup stops matching and three of the six sections — **with
+  every map inside them** — vanish. That reads as data loss, not as a translation glitch. Buckets are
+  keyed on stable ids now and labels resolve at render. The type system could not have caught it:
+  `t()` returns `string`, so the old `type Group` collapsed to `string` and `groupOf` was free to
+  return anything; the ids make it a real union. `"Today"`, `"Yesterday"` and `"Older"` were also
+  hardcoded English here and are now catalogued.
+
+- **The locale is resolved before the eager import graph, not after it.** `main.tsx` called
+  `initLocale()` in its body, below `import { App }` — and ES imports are hoisted, so the whole eager
+  graph had already evaluated its module-scope `t()` calls against the *default* locale. 99 of the 194
+  froze before resolution ever ran. The call now lives in the `src/i18n` barrel body, which makes it
+  order-independent; an `import "./init"` above `import { App }` would have looked equivalent and been
+  silently undone by biome's import sorting.
+
+  **This also corrects the documented story, in the dangerous direction.** `docs/I18N_BLOCKED.md` said
+  the frozen strings were "currently correct" because the registry resolved the locale first, and that
+  they arm "the moment a language picker ships". Neither was true. The trigger is **`LOCALES` gaining a
+  second entry** — `resolveLocale()` reads `navigator.languages`, so the day a second catalogue ships a
+  Danish browser gets a half-English first paint with no user action at all.
+
+- **`stickers.ts` and `slashCommands.ts` follow the locale (34 sites).** Converted to getters, which
+  cost no call site anything — both have zero consumers outside their own module. The frozen budget
+  drops 194 → 157. A clearance test pins one eager and one lazy module actually following `setLocale`,
+  since they freeze at different times and an eager-only test would pass while every lazy chunk stayed
+  broken. **Deliberately not a 23-file sweep:** the detector counts `t(` calls, so a module-scope
+  derivation that materialises its inputs is invisible to it (`MapPanel.tsx:112`, `Kanban.tsx:27`,
+  `icons.ts:116`), and the layout and marker-group names those tables carry are raw English literals
+  scoring 0 everywhere. Emptying the table while the layout picker still reads "Radial / hub" in Danish
+  would be the same green-tick-that-measured-nothing pattern.
+
+  **Checked and cleared:** module-scope *collation* was suspected as a second family of the same bug.
+  An independent AST scan found zero — `collator()` builds a fresh `Intl.Collator(active, …)` per call.
+
+- **Fixed: the About panel rendered `Book &amp; docs`.** `t()` returns a plain string, and React
+  *escapes* a string child — unlike JSX text, which the compiler decodes. So an `&amp;` captured from
+  the JSX source during extraction shipped verbatim to the Start screen's licence line. The catalogue
+  test written to catch exactly this had been iterating **two of the five catalogues** while its
+  comment said "EVERY catalogue in the app", and the entity check did not even use that array — it
+  spread the same two inline. 171 keys, 14% of the corpus, sat outside every check. Widening it to all
+  five turned the test red on the real defect, which is how the list was found to be wrong; it also
+  surfaced **10 cross-catalogue duplicates**, now collapsed onto the eager key (a lazy chunk may
+  reference an eager key, never the reverse), including a new shared `common.delete` for the three
+  lazy catalogues that each had their own "Delete".
+
+- **`NEXT_STEPS.md`'s i18n status is measured again, and says what the numbers are worth.** It had read
+  "684 catalogue entries across eight migrated files" and "entry bundle 174.2 kB against a 175 ceiling"
+  for sixteen commits after each stopped being true — branch-point values left behind while the work
+  moved on, and "eight migrated files" was the exact phrasing of the retracted completeness claim that
+  section exists to correct. Measured: **1214 entries across five catalogues, 62 files on the
+  allowlist, 180.3 kB first-load against 182**.
+
+  Two corrections beyond the arithmetic. The `src/io/` bucket was labelled "mostly XML/SVG markup the
+  template rule reads as prose" — **one** of its 68 is markup; 37 are error messages shown to the user
+  verbatim and 15 are UI labels compiled into exported HTML, so it is real work, not noise. And the
+  scanner total is now stated as a **floor**: an independent AST sweep found ~113 further real strings
+  *inside already-allowlisted files*, because the detectors need a leading `[A-Z]`, skip lines
+  containing `(`, and cannot see a sentence a JSX element has cut in half. Being on the allowlist means
+  clean by the scanner, not clean.
+
+- **Example-map notes no longer name chrome controls.** The sample maps stay English by decision, but
+  a note saying "Open the Outline panel" or "open 📝 Notes or 🏷 Markers from the toolbar" names a
+  control that will not be called that once the chrome is translated — so the sentence stops being
+  untranslated and starts being *wrong*, which in example content reads as the app lying to a new user
+  rather than as a missing translation. Six strings reworded to describe the action and keep the
+  **glyph** as the finding aid: 🔗, 🧲, 📝, 🏷 and ↓ are not translated, so they point at the right
+  control in every locale. Nothing moved into a catalogue — the copy is still English.
+
+  Audited all three content files rather than the ones already known: `templates.ts` has zero. Left
+  alone on purpose, and recorded as such: "switch the layout to right-only" (describes the result; the
+  label is "Right") and the "Link me to your … map" topic texts (ordinary verb, not a quoted label).
+
+- **`build-stats.mjs` refuses to blank the dashboard's coverage figure.** Every coverage number it
+  writes comes from `coverage/coverage-summary.json`, and without that file its `safe()` guards
+  degrade to `null` rather than failing — right for a fresh checkout, wrong for a re-run in a repo that
+  already has real numbers. Running the script on its own silently replaced `lineCoveragePct: 90.1`
+  with `null`; the dashboard then renders "—" and the stats contract test fails with nothing pointing
+  at the cause. It now exits non-zero and writes nothing in that case. This deliberately narrows the
+  `continue-on-error` on the stats workflow's test step: a flaky test still produces partial coverage
+  and refreshes fine, but a run that produced no coverage at all no longer overwrites good numbers.
+  Not refreshing beats corrupting.
+
+- **The bundle gate now measures what a browser actually downloads.** It weighed `index-*.js` and
+  called that "the initial bundle", but Vite emits `<link rel="modulepreload">` for shared eager chunks
+  and the browser fetches those on first paint too. The gate filed them as lazy and stopped counting —
+  so it once reported a 10.5 kB *improvement* (168.5 → 158.0) for a change that added 141 catalogue
+  keys, because ~16.6 kB had moved sideways into `primitives-*.js`. A ceiling you can satisfy by
+  relocating weight is not a ceiling, and the failure looks like progress in CI.
+
+  `BUDGET_KB` is re-based 175 → **182** against the new metric (measured 180.3). **The number going up
+  does not mean anything got slower** — the ruler got honest; the true figure had been above the old
+  ceiling since before the i18n work started. 182 rather than a rounder 185 because ~4.7 kB of
+  unguarded slack is the exact risk the previous bump's own note warned about, and a thin margin cannot
+  flake here the way the coverage floor does — this figure is deterministic.
+
+  The measurement moved into `scripts/lib/firstLoad.mjs` because `build-stats.mjs` computed its own
+  `withinBudget` from the entry chunk: left alone, the dashboard would have reported green against a
+  ceiling it was interpreting differently — the drift `bundle-budget.mjs` exists to prevent, one level
+  up from the constant. `test/first-load-budget.test.ts` pins the definition.
+
+- **Sentences that interleave prose with markup are one message again (`tNodes`).** `Press
+  <kbd>Tab</kbd> for a child` used to be three JSX fragments in a fixed order, which a translator
+  cannot reorder — and most languages need to. German moves the verb, Japanese puts the particle after
+  the key name. Worse, the fragments were individually meaningless: "Press" alone has no single correct
+  rendering. `src/i18n/nodes.tsx` keeps the sentence whole and resolves `{child}` to a React node, so
+  the `<kbd>` styling survives and the word order belongs to the locale. Key names stay literal —
+  `Tab` denotes a physical key, not a word.
+
+  The shape turned out to live in **three** files, not the one the blocked-decisions doc named:
+  `CanvasOverlays` (both the pointer and touch coachmarks), `FirstRunCard` (five list items, `<strong>`
+  as well as `<kbd>`) and `CaptureCard`.
+
+  **Neither the scanner nor the harness could see it, in opposite directions.** No detector matches a
+  sentence a JSX element has cut in half, so once `<kbd>` contents were exempted as key names all three
+  files reported *zero hardcoded strings* while their prose was still hardcoded — a clean tick over an
+  unmigrated file. And the pseudo-locale harness wrapped each message in `⟦…⟧` as a whole, so once
+  `tNodes` split a message across sibling text nodes every interior run came back unmarked and was
+  reported as hardcoded; it now marks each segment. Both were found by rendering the real components,
+  not by review. Two more strings surfaced the same way: `DropLabel` shadowed the imported `t` with a
+  local (so its label could not be migrated without a silent runtime error), and `"3 things to try"`
+  slipped the JSX-text rule because that rule needs a leading `[A-Z]` and `3` is not one.
+
+  The harness also only overlaid 2 of the 5 catalogues. That is not a coverage gap but a correctness
+  one: a component using the Start catalogue would have had all its strings reported as unmarked, and
+  the natural response — adding them to the ignore list — would have taught the harness to lie.
+
 - **Export / import your preferences (closes the settings-export residual).** The app has no account,
   so preferences live in this browser and stop there — and saved Power-Filter presets are deliberately
   app-wide rather than stored on a map (see the item-33 note below), which means moving machines used to

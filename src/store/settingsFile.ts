@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { LOCAL_PREF_KEYS } from "./localPrefs";
 
 // Settings export / import — carry your preferences to another machine.
@@ -23,9 +24,19 @@ const KIND = "mindmap-studio-settings";
 
 /** Preference keys deliberately NOT carried between machines:
  *  - `mindmap-branch-clipboard` is a copied subtree, not a setting (and can be large);
- *  - `mindmap-cmdk-recent` is this machine's own usage history.
+ *  - `mindmap-cmdk-recent` is this machine's own usage history;
+ *  - `mindmap-search-history` is the same category, and it is the user's own search TERMS — those
+ *    should not leave the machine inside a file they may hand to someone else;
+ *  - `mindmap-last-export` is usage history too, and it stores the export menu's LABEL as its
+ *    identity key, so on a machine running another locale it would not match anything anyway
+ *    (that is a real defect in Toolbar.tsx, recorded in NEXT_STEPS — excluding it here does not fix it).
  *  Everything else in LOCAL_PREF_KEYS is a genuine preference and travels. */
-const EXCLUDED = new Set<string>(["mindmap-branch-clipboard", "mindmap-cmdk-recent"]);
+const EXCLUDED = new Set<string>([
+  "mindmap-branch-clipboard",
+  "mindmap-cmdk-recent",
+  "mindmap-search-history",
+  "mindmap-last-export",
+]);
 
 /** The keys a settings file may carry — the single allowlist used by both export and import. */
 export const PORTABLE_PREF_KEYS: readonly string[] = LOCAL_PREF_KEYS.filter(
@@ -68,21 +79,21 @@ export function parseSettingsFile(text: string): SettingsFile {
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error("That file isn't valid JSON.");
+    throw new Error(t("app.thatFileIsnTValid"));
   }
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error("That file isn't a MindMap Studio settings file.");
+    throw new Error(t("app.thatFileIsnTA"));
   }
   const obj = raw as Record<string, unknown>;
   if (obj.kind !== KIND) {
-    throw new Error("That file isn't a MindMap Studio settings file.");
+    throw new Error(t("app.thatFileIsnTA"));
   }
   if (typeof obj.version !== "number" || obj.version > SETTINGS_FILE_VERSION) {
-    throw new Error("That settings file was written by a newer version of MindMap Studio.");
+    throw new Error(t("app.thatSettingsFileWasWritten"));
   }
   const prefsRaw = obj.prefs;
   if (!prefsRaw || typeof prefsRaw !== "object" || Array.isArray(prefsRaw)) {
-    throw new Error("That settings file has no preferences in it.");
+    throw new Error(t("app.thatSettingsFileHasNo"));
   }
   // Keep only allowlisted string values — anything else is dropped rather than trusted.
   const prefs: Record<string, string> = {};

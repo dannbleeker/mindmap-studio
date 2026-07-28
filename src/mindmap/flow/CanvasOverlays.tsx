@@ -1,3 +1,6 @@
+import { tNodes } from "../../i18n/nodes";
+import { t } from "../../i18n/registry";
+import "./messages";
 import { MiniMap, NodeToolbar, Panel, Position, useStore } from "@xyflow/react";
 import type { CSSProperties } from "react";
 import { colors } from "../../design/tokens";
@@ -25,23 +28,21 @@ export function CoachMark({
   return (
     <NodeToolbar nodeId={rootId} isVisible position={Position.Bottom} offset={18}>
       <div className="mm-coachmark nodrag nopan">
-        <strong>Start your map</strong>
+        <strong>{t("canvas.startYourMap")}</strong>
         {touch ? (
           <>
-            <span>
-              Tap <kbd>＋</kbd> on a topic to add a child · double-tap a topic to rename
-            </span>
-            <span>Drag the background to pan · pinch to zoom</span>
+            <span>{tNodes("canvas.coach.touchKeys", { add: <kbd>＋</kbd> })}</span>
+            <span>{t("app.dragTheBackgroundToPan")}</span>
           </>
         ) : (
           <>
             <span>
-              Press <kbd>Tab</kbd> for a child · <kbd>Enter</kbd> for a sibling · double-click to
-              rename
+              {tNodes("canvas.coach.editKeys", {
+                child: <kbd>Tab</kbd>,
+                sibling: <kbd>Enter</kbd>,
+              })}
             </span>
-            <span>
-              <kbd>Shift</kbd>-drag the canvas to select several topics
-            </span>
+            <span>{tNodes("canvas.coach.multiSelect", { shift: <kbd>Shift</kbd> })}</span>
           </>
         )}
       </div>
@@ -53,11 +54,13 @@ export function CoachMark({
  *  the highlighted drop target. */
 export function DropLabel({ dropTargetId, doc }: { dropTargetId: string | null; doc: MindMapDoc }) {
   if (!dropTargetId) return null;
-  const t = findAnyNode(doc, dropTargetId);
+  // Named `target`, not `t` — `t` is the message lookup imported at the top of this file, and shadowing
+  // it here made the label below unmigratable without a silent runtime error.
+  const target = findAnyNode(doc, dropTargetId);
   return (
     <NodeToolbar nodeId={dropTargetId} isVisible position={Position.Top} offset={8}>
       <div className="mm-drop-label nodrag nopan">
-        ↳ Make child of “{t?.topic?.trim() || "topic"}”
+        {t("canvas.makeChildOf", { topic: target?.topic?.trim() || t("common.topic") })}
       </div>
     </NodeToolbar>
   );
@@ -77,10 +80,27 @@ const statBtn: CSSProperties = {
   padding: 0,
 };
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `id` (the React key / active-view state) stays a plain literal.
 const VIEWS: { id: "map" | "outline" | "board"; label: string }[] = [
-  { id: "map", label: "Map" },
-  { id: "outline", label: "Outline" },
-  { id: "board", label: "Board" },
+  {
+    id: "map",
+    get label() {
+      return t("toolbar.map");
+    },
+  },
+  {
+    id: "outline",
+    get label() {
+      return t("panel.outline");
+    },
+  },
+  {
+    id: "board",
+    get label() {
+      return t("panel.board");
+    },
+  },
 ];
 
 /** The Map/Outline/Board segmented control — MindManager's status-bar view buttons make these three
@@ -96,7 +116,7 @@ function ViewSwitcher({
     // biome-ignore lint/a11y/useSemanticElements: a toolbar-style button group, not a form <fieldset>.
     <div
       role="group"
-      aria-label="Switch view"
+      aria-label={t("canvas.switchView")}
       style={{
         display: "flex",
         gap: 2,
@@ -111,7 +131,7 @@ function ViewSwitcher({
             key={v.id}
             type="button"
             aria-pressed={isActive}
-            title={`Switch to ${v.label} view`}
+            title={t("canvas.switchToView", { view: v.label })}
             onClick={() => onSet(v.id)}
             style={{
               border: "none",
@@ -171,25 +191,28 @@ export function StatusBar({
         }}
       >
         {onSetView && activeView ? <ViewSwitcher active={activeView} onSet={onSetView} /> : null}
-        <span>
-          {topics} topic{topics === 1 ? "" : "s"}
-        </span>
+        <span>{t("canvas.topicCount", { n: topics })}</span>
         {selected > 0 ? (
           onFitSelection ? (
             <button
               type="button"
               style={statBtn}
-              title="Zoom to fit the selection"
+              title={t("canvas.zoomToFitTheSelection")}
               onClick={onFitSelection}
             >
-              {selected} selected
+              {t("canvas.selectedCount", { n: selected })}
             </button>
           ) : (
-            <span>{selected} selected</span>
+            <span>{t("canvas.selectedCount", { n: selected })}</span>
           )
         ) : null}
         {onResetZoom ? (
-          <button type="button" style={statBtn} title="Reset zoom to 100%" onClick={onResetZoom}>
+          <button
+            type="button"
+            style={statBtn}
+            title={t("shortcuts.action.resetZoomTo100")}
+            onClick={onResetZoom}
+          >
             {Math.round(zoom * 100)}%
           </button>
         ) : (
@@ -220,7 +243,7 @@ export function LegendPanel({ doc }: { doc: MindMapDoc }) {
           boxShadow: "0 1px 3px #0002",
         }}
       >
-        <div style={{ fontWeight: 600, marginBottom: 4, opacity: 0.7 }}>Legend</div>
+        <div style={{ fontWeight: 600, marginBottom: 4, opacity: 0.7 }}>{t("toolbar.legend")}</div>
         {entries.map((e, i) => (
           <div
             key={`${e.kind}:${e.label}:${i}`}
@@ -270,7 +293,7 @@ export function MinimapPanel({ open, onToggle }: { open: boolean; onToggle: () =
         <button
           type="button"
           onClick={onToggle}
-          title={open ? "Hide minimap" : "Show minimap"}
+          title={open ? t("canvas.hideMinimap") : t("canvas.showMinimap")}
           style={{
             font: "12px system-ui, sans-serif",
             padding: "2px 8px",
@@ -282,7 +305,7 @@ export function MinimapPanel({ open, onToggle }: { open: boolean; onToggle: () =
             boxShadow: "0 1px 3px #0002",
           }}
         >
-          {open ? "Minimap ▾" : "Minimap ▴"}
+          {open ? t("canvas.minimap") : t("canvas.minimap2")}
         </button>
       </Panel>
     </>

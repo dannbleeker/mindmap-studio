@@ -12,6 +12,19 @@ import { type Catalogue, registerMessages } from "../../i18n/registry";
 // asserts these strings are absent from the entry chunk.
 
 export const CANVAS_EN = {
+  "canvas.bulk.selectedCount": { one: "{n} topic selected", other: "{n} topics selected" },
+  "canvas.shapeTitle": "{kind} shape",
+  "canvas.expand": "Expand",
+  "canvas.collapse": "Collapse",
+
+  // Status-bar counts. These were `{n} topic{n === 1 ? "" : "s"}` — a hand-rolled English plural,
+  // which is precisely the shape i18n/registry.ts calls out as the reason plural messages exist:
+  // English needs two forms, Slavic four, Arabic six, and a ternary can only ever express two.
+  "canvas.topicCount": { one: "{n} topic", other: "{n} topics" },
+  "canvas.selectedCount": { one: "{n} selected", other: "{n} selected" },
+  "canvas.arrowheadsNamed": "Arrowheads: {arrow}",
+  "canvas.addMarkerNamed": "Add marker {marker}",
+  "canvas.removeMarkerNamed": "Remove marker {marker}",
   // Inline rich-text toolbar (shown while editing a topic)
   "canvas.format.bold": "Bold (Ctrl/⌘+B)",
   "canvas.format.italic": "Italic (Ctrl/⌘+I)",
@@ -86,17 +99,14 @@ export const CANVAS_EN = {
 
   // Relationship (edge) menu
   "canvas.link.editLabel": "Edit label",
-  "canvas.link.delete": "Delete relationship",
   "canvas.link.arrowheads": "Arrowheads",
   "canvas.link.line": "Line",
-  "canvas.link.type": "Type",
   "canvas.link.lineStyle": "Line style: {style}",
   "canvas.link.typeNamed": "Relationship type: {type}",
 
   // Topic context menu
   "canvas.menu.addChild": "Add child",
   "canvas.menu.addSibling": "Add sibling",
-  "canvas.menu.rename": "Rename",
   "canvas.menu.addNote": "Add note",
   "canvas.menu.linkTo": "Link to…",
   "canvas.menu.addCallout": "Add callout",
@@ -113,7 +123,6 @@ export const CANVAS_EN = {
   "canvas.menu.unlockPosition": "Unlock position",
   "canvas.menu.reattach": "Re-attach to centre",
   "canvas.menu.detach": "Detach to floating topic",
-  "canvas.menu.delete": "Delete",
 
   // Date shifting. The preset chips are messages too — a locale may not abbreviate day/week/month the
   // way English does — and the aria-label is plural-formed so "by 1 day" doesn't read "by 1 days".
@@ -132,7 +141,6 @@ export const CANVAS_EN = {
   "canvas.menu.branchLayout": "Branch layout",
   "canvas.branchLayout.default": "Default (map)",
   "canvas.branchLayout.radial": "Radial",
-  "canvas.branchLayout.grid": "Grid",
   "canvas.branchLayout.brace": "Brace",
   "canvas.menu.mapSide": "Map side",
   "canvas.branchSide.auto": "Auto (balance)",
@@ -154,10 +162,67 @@ export const CANVAS_EN = {
 
   // Canvas-shape toolbar
   "canvas.shape.recolour": "Recolour",
-  "canvas.shape.shape": "Shape",
-  "canvas.shape.outline": "Outline",
   // Trailing space is deliberate: the label reads "New tag: #foo", with the `#tag` in its own span.
   "canvas.slash.newTagPrefix": "New tag: ",
+  // Context-menu accessible names, and the chip labels prettier wrapped onto their own lines.
+  "canvas.menu.relationshipActions": "Relationship actions",
+  "canvas.menu.topicActions": "Topic actions",
+  "canvas.menu.canvasActions": "Canvas actions",
+  "canvas.menu.overlayActions": "Overlay actions",
+  // One concept — "reset to the default colour" — shared by the branch-colour and shape-recolour
+  // chips. They were two keys until the duplicate check refused them.
+  "canvas.hint.clickTargetToLink": "Click a target node to draw a relationship · Esc to cancel",
+  // --- the rest of the canvas chunk -----------------------------------------------------------------
+  // CanvasOverlays, BulkNodeMenu, ShapeLayer, NodePopover, CrosslinkEdge, slashCommands. All in the
+  // lazy FlowMindMap chunk, so these cost the entry bundle nothing.
+  "canvas.switchView": "Switch view",
+  "canvas.zoomToFitTheSelection": "Zoom to fit the selection",
+  "canvas.hideMinimap": "Hide minimap",
+  "canvas.showMinimap": "Show minimap",
+  "canvas.minimap": "Minimap ▾",
+  "canvas.minimap2": "Minimap ▴",
+  "canvas.startYourMap": "Start your map",
+  "canvas.groupInABoundary": "Group in a boundary",
+  "canvas.clearPriorityOnTheSelection": "Clear priority on the selection",
+  "canvas.defaultBranchColourOnThe": "Default branch colour on the selection",
+  "canvas.deleteShape": "Delete shape",
+  "canvas.matrix": "Matrix",
+  "canvas.moreActions": "More actions",
+  "canvas.openNote": "Open note",
+  "canvas.cyclePriority": "Cycle priority",
+  "canvas.addPriority": "Add priority",
+  "canvas.dragToReshapeTheRelationship": "Drag to reshape the relationship",
+  "canvas.reshapeRelationship": "Reshape relationship",
+  "canvas.label": "label…",
+  "canvas.addChildTopic": "Add child topic",
+  "canvas.addSiblingTopic": "Add sibling topic",
+  "canvas.markAsToDo": "Mark as to-do",
+  "canvas.markAsDone": "Mark as done",
+  "canvas.dueToday": "Due today",
+  "canvas.highPriority": "High priority",
+  "canvas.addANote": "Add a note",
+  "canvas.starMarker": "Star marker",
+  // Interpolated canvas labels. Plural where a count drives the wording.
+  "canvas.switchToView": "Switch to {view} view",
+  "canvas.bulk.deleteTopics": { one: "Delete {n} topic", other: "Delete {n} topics" },
+  "canvas.bulk.toggleMarker": "Toggle marker {marker} on the selection",
+  "canvas.bulk.setPriority": "Set priority {level} on the selection",
+  "canvas.bulk.branchColour": "Branch colour {colour} on the selection",
+  "canvas.shapeColour": "Shape colour {colour}",
+
+  // Empty-map coachmark. These interleave prose with <kbd> markup, so they are rendered through
+  // `tNodes` (i18n/nodes.tsx) rather than `t` — one message per sentence, with the key names as
+  // placeholders the translator can move anywhere. The key names themselves stay literal in the JSX:
+  // `Tab` and `Enter` denote physical keys and a locale does not rename them.
+  "canvas.coach.editKeys":
+    "Press {child} for a child · {sibling} for a sibling · double-click to rename",
+  "canvas.coach.multiSelect": "{shift}-drag the canvas to select several topics",
+  "canvas.coach.touchKeys": "Tap {add} on a topic to add a child · double-tap a topic to rename",
+
+  // Drag-to-reparent label. Was hardcoded and invisible to the guard — no detector matches JSX text
+  // that is broken up by an interpolation — and the component shadowed `t` with a local, so migrating
+  // it needed the rename above.
+  "canvas.makeChildOf": "↳ Make child of “{topic}”",
 } as const satisfies Catalogue;
 
 export type CanvasKey = keyof typeof CANVAS_EN;

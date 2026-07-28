@@ -5,6 +5,7 @@ import {
   type Violation,
   argumentViolations,
   jsxTextViolations,
+  loneJsxTextViolations,
   placeholderViolations,
   propViolations,
   proseViolations,
@@ -68,6 +69,108 @@ const MIGRATED = [
   "src/mindmap/FlowMindMap.tsx",
   "src/App.tsx",
   "src/Panels.tsx",
+  "src/mindmap/flow/BulkNodeMenu.tsx",
+  "src/mindmap/flow/ShapeLayer.tsx",
+  "src/mindmap/flow/NodePopover.tsx",
+  "src/mindmap/flow/CrosslinkEdge.tsx",
+  "src/mindmap/flow/slashCommands.ts",
+  "src/components/start/AppTips.tsx",
+  "src/components/start/CommandPalette.tsx",
+  "src/components/start/MapCard.tsx",
+  "src/components/start/MapDialogs.tsx",
+  "src/components/start/MiniMap.tsx",
+  "src/components/start/StartHeader.tsx",
+  "src/components/start/StartHome.tsx",
+  "src/components/start/StartScreen.tsx",
+  "src/components/start/StartSidebar.tsx",
+  "src/components/start/TemplateCard.tsx",
+  "src/components/start/docBuilders.ts",
+  "src/components/start/mapActions.ts",
+  "src/components/start/nodeStats.ts",
+  "src/components/start/sections/AllMaps.tsx",
+  "src/components/start/sections/EmptyMaps.tsx",
+  "src/components/start/sections/Examples.tsx",
+  "src/components/start/sections/ImportView.tsx",
+  "src/components/start/sections/Layouts.tsx",
+  "src/components/start/sections/Learn.tsx",
+  "src/components/start/sections/Recent.tsx",
+  "src/components/start/sections/Templates.tsx",
+  "src/components/start/sections/Trash.tsx",
+  "src/components/ThemeDesignerDialog.tsx",
+  "src/present/Presentation.tsx",
+  "src/components/MapPanel.tsx",
+  "src/components/EdgeInspector.tsx",
+  "src/components/FindReplaceOverlay.tsx",
+  "src/components/OverlayInspector.tsx",
+  "src/components/IconRail.tsx",
+  "src/components/BranchExportDialog.tsx",
+  "src/mindmap/theme.ts",
+  "src/panelLabels.ts",
+  "src/stickers.ts",
+  "src/hooks/useVersionHistory.ts",
+  "src/hooks/useDiskFile.ts",
+  "src/Kanban.tsx",
+  "src/components/CommandPalette.tsx",
+  "src/hooks/usePasteOutline.ts",
+  "src/hooks/useClipboardImagePaste.ts",
+  "src/hooks/useFormatPainter.ts",
+  "src/useMapExports.ts",
+  "src/store/settingsFile.ts",
+  "src/mapParts.ts",
+  "src/components/start/tokens.ts",
+  "src/components/start/types.ts",
+  "src/components/start/useLibrary.ts",
+  // Markup-in-prose, unblocked by `tNodes` (src/i18n/nodes.tsx) — one message per sentence, with the
+  // <kbd>/<strong> parts as placeholders a translator can move. Their guard is NOT this scan: no
+  // detector matches a sentence a JSX element has cut in half, so all three reported zero while the
+  // prose was still hardcoded. test/i18n-pseudo-render.test.tsx renders them and is what actually
+  // holds them.
+  "src/mindmap/flow/CanvasOverlays.tsx",
+  "src/components/FirstRunCard.tsx",
+  "src/components/start/CaptureCard.tsx",
+  // Import/export adapters. Their strings live in src/io/messages.ts — its own catalogue because every
+  // adapter is behind a dynamic import(), and ~60 keys in the eager one would have blown the entry
+  // budget. src/io/messages.ts itself is NOT here: a catalogue quotes its own English by definition,
+  // and src/io/pdf.ts keeps one brand string in PDF metadata.
+  "src/io/attachment.ts",
+  "src/io/deck.ts",
+  "src/io/docx.ts",
+  "src/io/download.ts",
+  "src/io/fileName.ts",
+  "src/io/fileSystem.ts",
+  "src/io/freemind.ts",
+  "src/io/html.ts",
+  "src/io/htmlEscape.ts",
+  "src/io/image.ts",
+  "src/io/importDispatch.ts",
+  "src/io/interactiveHtml.ts",
+  "src/io/ithoughts.ts",
+  "src/io/json.ts",
+  "src/io/library.ts",
+  "src/io/markdown.ts",
+  "src/io/markmap.ts",
+  "src/io/mermaid.ts",
+  "src/io/mindmeister.ts",
+  "src/io/mindmup.ts",
+  "src/io/mmap.ts",
+  "src/io/notesAppendix.ts",
+  "src/io/ooxml.ts",
+  "src/io/opml.ts",
+  "src/io/pasteOutline.ts",
+  "src/io/pasteTable.ts",
+  "src/io/pptx.ts",
+  "src/io/richText.ts",
+  "src/io/searchHistory.ts",
+  "src/io/smmx.ts",
+  "src/io/svgSanitize.ts",
+  "src/io/tableExport.ts",
+  "src/io/textbundle.ts",
+  "src/io/urlSafety.ts",
+  "src/io/xlsx.ts",
+  "src/io/xmind.ts",
+  "src/io/xml.ts",
+  "src/io/zip.ts",
+  "src/import/mmap.ts",
 ];
 
 const scan = (rel: string): Violation[] =>
@@ -136,6 +239,16 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(templateViolations("  title={`Delete view ${v.name}`}")).toHaveLength(1);
     expect(templateViolations("  showHint(`Inserted the ${p.name} map part.`)")).toHaveLength(1);
     expect(templateViolations('  title={t("view.delete", { name: v.name })}')).toHaveLength(0);
+    // MARKUP is stripped before the prose rule runs — the exporters build OOXML and SVG by
+    // concatenation, and a tag or attribute name reads exactly like "capitalised word, lowercase word".
+    expect(templateViolations('  `<a:p><a:r><a:rPr lang="en"/></a:r></a:p>`')).toHaveLength(0);
+    expect(
+      templateViolations('  `<Relationships xmlns="http://x"><Sld name="Blank"/>`'),
+    ).toHaveLength(0);
+    // …but prose BETWEEN tags must still fire. Stripping the tags must not strip the file.
+    expect(
+      templateViolations('  `<div class="warn">Could not render ${n} topics</div>`'),
+    ).toHaveLength(1);
     // Machine-facing templates that must NOT trip it — all real shapes from the canvas and exporters.
     expect(templateViolations("  transform: `translate(${x}px, ${y}px) scale(${s})`")).toHaveLength(
       0,
@@ -173,6 +286,52 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(jsxTextViolations("        <span>{count} selected</span>")).toHaveLength(0);
     // A lone glyph or initial is not a label.
     expect(jsxTextViolations("        <kbd>K</kbd>")).toHaveLength(0);
+    // (6a) A LEADING GLYPH does not stop it being a label. The rule required `[A-Z]` immediately
+    // after the `>`, so the app's emoji-prefixed panel headings were invisible to it — ~15 strings
+    // hiding inside files the allowlist had already certified clean, which is the failure this whole
+    // guard exists to prevent.
+    expect(jsxTextViolations("        <div>🔗 Relationships</div>")).toHaveLength(1);
+    expect(jsxTextViolations("        <strong>▦ Board</strong>")).toHaveLength(1);
+    expect(jsxTextViolations("        <Button>＋ New</Button>")).toHaveLength(1);
+    // The migrated form of exactly that shape — glyph inline, words from the catalogue — must NOT fire.
+    expect(jsxTextViolations('        <div>🔗 {t("app.relationships")}</div>')).toHaveLength(0);
+    // (6b) PARENTHESES are punctuation in UI copy. Excluding them cost `Presenter view (P)`,
+    // `Exit (Esc)` and `Read (PDF)`. Safe here because the rule is anchored on the tags.
+    expect(
+      loneJsxTextViolations("            >\n              Exit (Esc)\n            </button>"),
+    ).toHaveLength(1);
+    // (6b′) A LEADING GLYPH does not stop it being a label here either — same fix as (6a), applied to
+    // the MULTI-LINE wrapped-tag shape. This one required its first character to come from a fixed set
+    // (`[A-Z＋✕←→‹›▦☰⏸▶↺−+]`), so a new glyph the house style reached for — ⤢, ☑ — was invisible even
+    // though the identical text on ONE line was already caught by (6a).
+    expect(
+      loneJsxTextViolations(
+        "                    >\n                      ⤢ Open in dock\n                    </button>",
+      ),
+    ).toHaveLength(1);
+    expect(
+      loneJsxTextViolations("            >\n              ☑ List\n            </Button>"),
+    ).toHaveLength(1);
+    // A bare glyph alone is still not a label.
+    expect(
+      loneJsxTextViolations("            >\n              ✕\n            </button>"),
+    ).toHaveLength(0);
+    // (6c) A user-facing prop must not be a TEMPLATE either. `templateViolations` cannot catch these:
+    // it needs a capitalised word followed by a lowercase one, which `Apply "${s.name}"` never is once
+    // the interpolation is blanked. Anchoring on the prop name is what makes a single word enough.
+    expect(propViolations("        title={`Open ${name}`}")).toHaveLength(1);
+    expect(propViolations("        aria-label={`${ariaLabel}: pick from calendar`}")).toHaveLength(
+      1,
+    );
+    // ...but a MACHINE-TOKEN cheatsheet is not prose. The search tooltip lists query syntax the user
+    // types; translating it would break the feature, and the sentence above it is already a message.
+    expect(
+      propViolations(
+        '        title={`${t("search.operatorsHelp")}\\ntag:foo  marker:flag-red  priority:1`}',
+      ),
+    ).toHaveLength(0);
+    // Pure data interpolation is not a label.
+    expect(propViolations("        title={`${n}%`}")).toHaveLength(0);
     // Lowercase content is a technical token, not a label.
     expect(jsxTextViolations("        <code>npm run dev</code>")).toHaveLength(0);
     expect(
@@ -189,6 +348,13 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(proseViolations("          background: style?.fillImage")).toHaveLength(0);
     expect(proseViolations("            style?.background ??")).toHaveLength(0);
     expect(proseViolations("        boxShadow: dropTarget")).toHaveLength(0);
+    // A control-flow keyword plus ONE identifier is a wrapped statement, not a sentence. Seven of
+    // these exist in src and none is prose.
+    expect(proseViolations("      return parsed")).toHaveLength(0);
+    expect(proseViolations("      return folderName")).toHaveLength(0);
+    expect(proseViolations("      throw err")).toHaveLength(0);
+    // Anchored to end-of-line, so real copy opening with the same word keeps firing.
+    expect(proseViolations("      Return to the map to continue")).toHaveLength(1);
     // Short prose is allowed through only when it's sentence-cased. `Map side` is a real label in the
     // branch menu and only 8 characters; the length floor alone was hiding it. JS keywords are
     // lowercase, which is what keeps the short code lines out.

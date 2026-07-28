@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 import type { MapNode } from "../model/types";
 import { parseOutline } from "./pasteOutline";
 import { isDangerousUrl } from "./urlSafety";
@@ -62,7 +63,7 @@ export function tableToForest(rows: string[][]): MapNode[] {
         noteParts.push(headers?.[i] ? `${headers[i]}: ${v}` : v);
       }
     });
-    const node: MapNode = { id: nextId(), topic: topic || "(untitled)", children: [] };
+    const node: MapNode = { id: nextId(), topic: topic || t("common.untitled"), children: [] };
     if (noteParts.length > 0) node.note = noteParts.join("\n");
     if (tags.length > 0) node.tags = tags;
     out.push(node);

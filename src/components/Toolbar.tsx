@@ -8,7 +8,7 @@ import {
   MenuSeparator,
   MenuSub,
 } from "../design/primitives";
-import { buildExample, examples } from "../examples";
+import { examples } from "../examples";
 import type { SaveState } from "../hooks/useIdbAutosave";
 import { t } from "../i18n";
 import { MAP_PARTS, buildMapPart } from "../mapParts";
@@ -23,21 +23,59 @@ import type { MapSummary } from "../store/mapStore";
 import { buildTemplate, insertableTemplates, templateSubtree, templates } from "../templates";
 import { EditorIcon, type EditorIconName } from "./EditorIcons";
 
-// Remember the last-chosen export format (by its menu label, the stable id) so the Export menu can pin a
-// one-click "Last used" row at the top — the common case is re-exporting the same format. Best-effort
+// Remember the last-chosen export format, BY ITS STABLE ID, so the Export menu can pin a one-click
+// "Last used" row at the top — the common case is re-exporting the same format. Best-effort
 // localStorage, mirroring the ⌘K recents.
+//
+// This used to persist the rendered LABEL and call it "the stable id" — which stopped being true the
+// moment i18n existed. A label is not an identity: it follows the locale, so the stored string could
+// stop matching any current export the next time the app opened in a different language, and the
+// feature would just quietly never fire again. It is also what the menu's React `key` used to read.
 const LAST_EXPORT_KEY = "mindmap-last-export";
 
-/** Background shapes + smart containers offered in the Insert → Shapes fly-out (Tier 4 items 23 + 22). */
+/** Background shapes + smart containers offered in the Insert → Shapes fly-out (Tier 4 items 23 + 22).
+ *  `name` is a getter: a plain `name: t("…")` here resolves ONCE at import and never follows a later
+ *  `setLocale`. `kind` (the React key) stays a plain literal. */
 const SHAPE_ITEMS: { kind: CanvasShapeKind; name: string }[] = [
-  { kind: "rect", name: t("toolbar.rectangle") },
-  { kind: "ellipse", name: t("toolbar.ellipse") },
-  { kind: "blockArrow", name: t("toolbar.blockArrow") },
-  { kind: "chevron", name: t("toolbar.chevron") },
-  { kind: "swimlane", name: t("toolbar.swimlaneContainer") },
-  { kind: "matrix", name: t("toolbar.matrixContainer") },
+  {
+    kind: "rect",
+    get name() {
+      return t("toolbar.rectangle");
+    },
+  },
+  {
+    kind: "ellipse",
+    get name() {
+      return t("toolbar.ellipse");
+    },
+  },
+  {
+    kind: "blockArrow",
+    get name() {
+      return t("toolbar.blockArrow");
+    },
+  },
+  {
+    kind: "chevron",
+    get name() {
+      return t("toolbar.chevron");
+    },
+  },
+  {
+    kind: "swimlane",
+    get name() {
+      return t("toolbar.swimlaneContainer");
+    },
+  },
+  {
+    kind: "matrix",
+    get name() {
+      return t("toolbar.matrixContainer");
+    },
+  },
 ];
 
+/** The stable id of the last export format used — never its label, which follows the locale. */
 function loadLastExport(): string | null {
   try {
     const v = localStorage.getItem(LAST_EXPORT_KEY);
@@ -384,52 +422,69 @@ export function Toolbar({
   // The format labels reuse the `cmd.export.*` keys rather than minting `toolbar.*` twins: this menu
   // and the ⌘K "Export …" rows offer the same formats, so one message keeps them from drifting apart
   // in translation. Only the two labels with no ⌘K equivalent are toolbar-local.
-  const EXPORTS: { group: string; items: [string, () => void][] }[] = [
+  // Each item carries a STABLE ID alongside its label. "Last used" persists the id, never the label —
+  // a translated label is not an identity, and the previous shape (keying on the rendered string)
+  // silently stopped matching the moment a second locale existed. Group headings also carry an id, for
+  // the same reason their React `key` must not be the group's translated name.
+  const EXPORTS: { groupId: string; group: string; items: [string, string, () => void][] }[] = [
     {
+      groupId: "data",
       group: t("toolbar.exportGroup.data"),
       items: [
-        [t("cmd.export.json"), io.exportJson],
-        [t("cmd.export.md"), io.exportMarkdown],
-        [t("cmd.export.opml"), io.exportOpml],
-        [t("cmd.export.freemind"), io.exportFreemind],
-        [t("cmd.export.mermaid"), io.exportMermaid],
-        [t("cmd.export.xmind"), io.exportXmind],
-        [t("cmd.export.smmx"), io.exportSmmx],
-        [t("cmd.export.mmap"), io.exportMmap],
+        ["json", t("cmd.export.json"), io.exportJson],
+        ["md", t("cmd.export.md"), io.exportMarkdown],
+        ["opml", t("cmd.export.opml"), io.exportOpml],
+        ["freemind", t("cmd.export.freemind"), io.exportFreemind],
+        ["mermaid", t("cmd.export.mermaid"), io.exportMermaid],
+        ["xmind", t("cmd.export.xmind"), io.exportXmind],
+        ["smmx", t("cmd.export.smmx"), io.exportSmmx],
+        ["mmap", t("cmd.export.mmap"), io.exportMmap],
       ],
     },
     {
+      groupId: "image",
       group: t("toolbar.exportGroup.image"),
       items: [
-        [t("cmd.export.png"), () => io.exportPng()],
-        [t("cmd.export.png2x"), () => io.exportPng({ scale: 2 })],
-        [t("cmd.export.png4x"), () => io.exportPng({ scale: 4 })],
-        [t("cmd.export.png-transparent"), () => io.exportPng({ transparent: true })],
-        [t("toolbar.copyImageToClipboard"), () => io.copyPng()],
-        [t("cmd.export.svg"), io.exportSvg],
+        ["png", t("cmd.export.png"), () => io.exportPng()],
+        ["png2x", t("cmd.export.png2x"), () => io.exportPng({ scale: 2 })],
+        ["png4x", t("cmd.export.png4x"), () => io.exportPng({ scale: 4 })],
+        [
+          "png-transparent",
+          t("cmd.export.png-transparent"),
+          () => io.exportPng({ transparent: true }),
+        ],
+        ["copy-image", t("toolbar.copyImageToClipboard"), () => io.copyPng()],
+        ["svg", t("cmd.export.svg"), io.exportSvg],
       ],
     },
     {
+      groupId: "document",
       group: t("toolbar.exportGroup.document"),
       items: [
-        [t("cmd.export.html"), io.exportHtml],
-        [t("cmd.export.ihtml"), io.exportInteractiveHtml],
-        [t("cmd.export.pdf-fit"), () => io.exportPdfFile({ pageSize: "fit" })],
+        ["html", t("cmd.export.html"), io.exportHtml],
+        ["ihtml", t("cmd.export.ihtml"), io.exportInteractiveHtml],
+        ["pdf-fit", t("cmd.export.pdf-fit"), () => io.exportPdfFile({ pageSize: "fit" })],
         [
+          "pdf-a4",
           t("cmd.export.pdf-a4"),
           () => io.exportPdfFile({ pageSize: "a4", orientation: "landscape" }),
         ],
-        [t("toolbar.exportPdfLetter"), () => io.exportPdfFile({ pageSize: "letter" })],
-        [t("cmd.export.pdf-print"), io.exportPdf],
-        [t("cmd.export.docx"), io.exportDocx],
-        [t("cmd.export.xlsx"), io.exportXlsx],
+        [
+          "pdf-letter",
+          t("toolbar.exportPdfLetter"),
+          () => io.exportPdfFile({ pageSize: "letter" }),
+        ],
+        ["pdf-print", t("cmd.export.pdf-print"), io.exportPdf],
+        ["docx", t("cmd.export.docx"), io.exportDocx],
+        ["xlsx", t("cmd.export.xlsx"), io.exportXlsx],
       ],
     },
     {
+      groupId: "presentation",
       group: t("toolbar.exportGroup.presentation"),
       items: [
-        [t("cmd.export.deck"), io.exportDeck],
-        [t("cmd.export.pptx"), io.exportPptx],
+        ["deck", t("cmd.export.deck"), io.exportDeck],
+        ["pptx", t("cmd.export.pptx"), io.exportPptx],
       ],
     },
   ];
@@ -480,14 +535,24 @@ export function Toolbar({
             <select
               className="mm-select"
               value=""
-              onChange={(e) => {
+              onChange={async (e) => {
                 const v = e.target.value;
-                if (v) map.load(v.startsWith("ex:") ? buildExample(v.slice(3)) : buildTemplate(v));
+                if (!v) return;
+                // The example BODIES load on demand. This module is eager, so a static import here
+                // would pull every example map into the entry chunk — measured at 6.7 kB gz, carried
+                // by every first visit whether or not anyone opens one. Templates stay static: they
+                // are small, and `buildTemplate` is also reached from the synchronous Insert menu.
+                if (v.startsWith("ex:")) {
+                  const { buildExample } = await import("../exampleBuilders");
+                  map.load(buildExample(v.slice(3)));
+                } else {
+                  map.load(buildTemplate(v));
+                }
               }}
               aria-label={t("toolbar.newMapFromATemplate")}
               title={t("toolbar.newMapBlankTemplateOr")}
             >
-              <option value="">+ New…</option>
+              <option value="">{t("toolbar.newMenu")}</option>
               <optgroup label={t("toolbar.templates")}>
                 {/* `tpl`, not `t` — see the templates MenuSub below; the shadow is a live trap. */}
                 {templates.map((tpl) => (
@@ -534,7 +599,7 @@ export function Toolbar({
         <span className="mm-grow" />
         <TBtn
           icon="search"
-          text={isMobile ? undefined : "Find"}
+          text={isMobile ? undefined : t("toolbar.find")}
           label={t("toolbar.findReplace")}
           ghost
           onClick={nav.openFind}
@@ -542,9 +607,9 @@ export function Toolbar({
         {/* Export + More menus — output / overflow group. */}
         <div className="mm-cluster">
           <Menu
-            trigger={menuTrigger("export", "Export", isMobile)}
-            triggerTitle="Export"
-            triggerAriaLabel={isMobile ? "Export" : undefined}
+            trigger={menuTrigger("export", t("toolbar.trigger.export"), isMobile)}
+            triggerTitle={t("toolbar.trigger.export")}
+            triggerAriaLabel={isMobile ? t("toolbar.trigger.export") : undefined}
             align="right"
             sheet={isMobile}
           >
@@ -553,10 +618,10 @@ export function Toolbar({
             {() => {
               const last = loadLastExport();
               const lastItem = last
-                ? EXPORTS.flatMap((g) => g.items).find(([lbl]) => lbl === last)
+                ? EXPORTS.flatMap((g) => g.items).find(([id]) => id === last)
                 : undefined;
-              const run = (lbl: string, fn: () => void) => () => {
-                saveLastExport(lbl);
+              const run = (id: string, fn: () => void) => () => {
+                saveLastExport(id);
                 fn();
               };
               return (
@@ -566,17 +631,17 @@ export function Toolbar({
                     <div>
                       <MenuLabel>{t("toolbar.recent")}</MenuLabel>
                       <MenuItem
-                        label={`Last: ${lastItem[0]}`}
-                        onSelect={run(lastItem[0], lastItem[1])}
+                        label={t("toolbar.lastNamed", { name: lastItem[1] })}
+                        onSelect={run(lastItem[0], lastItem[2])}
                       />
                       <MenuSeparator />
                     </div>
                   ) : null}
                   {EXPORTS.map((g) => (
-                    <div key={g.group}>
+                    <div key={g.groupId}>
                       <MenuLabel>{g.group}</MenuLabel>
-                      {g.items.map(([lbl, fn]) => (
-                        <MenuItem key={lbl} label={lbl} onSelect={run(lbl, fn)} />
+                      {g.items.map(([id, lbl, fn]) => (
+                        <MenuItem key={id} label={lbl} onSelect={run(id, fn)} />
                       ))}
                     </div>
                   ))}
@@ -585,16 +650,20 @@ export function Toolbar({
             }}
           </Menu>
           <Menu
-            trigger={menuTrigger("dots", "More", isMobile)}
-            triggerTitle="More"
-            triggerAriaLabel={isMobile ? "More" : undefined}
+            trigger={menuTrigger("dots", t("toolbar.trigger.more"), isMobile)}
+            triggerTitle={t("toolbar.trigger.more")}
+            triggerAriaLabel={isMobile ? t("toolbar.trigger.more") : undefined}
             align="right"
             sheet={isMobile}
           >
             {(close) => (
               <>
                 <MenuLabel>
-                  File{io.fileName ? ` — ${io.dirty ? "● " : ""}${io.fileName}` : ""}
+                  {io.fileName
+                    ? t("toolbar.fileMenuHeadingNamed", {
+                        name: `${io.dirty ? "● " : ""}${io.fileName}`,
+                      })
+                    : t("shortcuts.group.file")}
                 </MenuLabel>
                 <MenuItem
                   icon={mi("import")}
@@ -659,7 +728,7 @@ export function Toolbar({
                   className="mm-menu-item"
                   onClick={() => importInputRef.current?.click()}
                 >
-                  <EditorIcon name="import" size={15} /> Import files…
+                  <EditorIcon name="import" size={15} /> {t("toolbar.importFiles")}
                 </button>
                 <input
                   ref={importInputRef}
@@ -723,9 +792,9 @@ export function Toolbar({
       {/* ── Row 2 — view / edit / canvas ── */}
       <div className={`mm-topbar-row mm-topbar-row2${isMobile ? "" : " mm-wrap"}`}>
         <Menu
-          trigger={menuTrigger("layers", "Panels", isMobile)}
-          triggerTitle="Panels"
-          triggerAriaLabel={isMobile ? "Panels" : undefined}
+          trigger={menuTrigger("layers", t("toolbar.trigger.panels"), isMobile)}
+          triggerTitle={t("toolbar.trigger.panels")}
+          triggerAriaLabel={isMobile ? t("toolbar.trigger.panels") : undefined}
           sheet={isMobile}
         >
           {/* Grouped into Structure / Analysis / Workflow so 12 flat toggles read as three short lists,
@@ -842,9 +911,9 @@ export function Toolbar({
         {/* View menu — fit / collapse / expand / focus folded into one labelled dropdown so the bar
             reads clearly instead of four ambiguous icons (#4). Mirrored 1:1 in ⌘K (kind "view"). */}
         <Menu
-          trigger={menuTrigger("fit", "View", isMobile)}
-          triggerTitle="View actions"
-          triggerAriaLabel={isMobile ? "View" : undefined}
+          trigger={menuTrigger("fit", t("common.view"), isMobile)}
+          triggerTitle={t("toolbar.trigger.viewActions")}
+          triggerAriaLabel={isMobile ? t("common.view") : undefined}
           sheet={isMobile}
         >
           <MenuItem icon={mi("fit")} label={t("cmd.fit")} onSelect={() => m()?.fit()} />
@@ -1038,10 +1107,10 @@ export function Toolbar({
         {/* Insert + Canvas menus — content/styling group. */}
         <div className="mm-cluster">
           <Menu
-            trigger={menuTrigger("plus", "Insert", isMobile)}
+            trigger={menuTrigger("plus", t("toolbar.trigger.insert"), isMobile)}
             triggerClassName="mm-tbtn mm-tbtn-accent"
-            triggerTitle="Insert"
-            triggerAriaLabel={isMobile ? "Insert" : undefined}
+            triggerTitle={t("toolbar.trigger.insert")}
+            triggerAriaLabel={isMobile ? t("toolbar.trigger.insert") : undefined}
             sheet={isMobile}
           >
             {(close) => (
@@ -1131,7 +1200,7 @@ export function Toolbar({
                   className="mm-menu-item"
                   onClick={() => nodeImageInputRef.current?.click()}
                 >
-                  <EditorIcon name="image" size={15} /> Image on selected node…
+                  <EditorIcon name="image" size={15} /> {t("toolbar.imageOnSelectedNode")}
                 </button>
                 <input
                   ref={nodeImageInputRef}
@@ -1233,7 +1302,7 @@ export function Toolbar({
                           {mm.title || t("common.untitled")}
                         </option>
                       ))}
-                    <option value="none">— Unbind</option>
+                    <option value="none">{t("toolbar.unbind")}</option>
                   </select>
                 </div>
                 <MenuItem
@@ -1245,9 +1314,9 @@ export function Toolbar({
             )}
           </Menu>
           <Menu
-            trigger={menuTrigger("palette", "Canvas", isMobile)}
-            triggerTitle="Canvas"
-            triggerAriaLabel={isMobile ? "Canvas" : undefined}
+            trigger={menuTrigger("palette", t("toolbar.trigger.canvas"), isMobile)}
+            triggerTitle={t("toolbar.trigger.canvas")}
+            triggerAriaLabel={isMobile ? t("toolbar.trigger.canvas") : undefined}
             sheet={isMobile}
           >
             {(close) => (
@@ -1282,8 +1351,8 @@ export function Toolbar({
         {isMobile ? (
           <Menu
             trigger={menuTrigger("settings", "Options", true)}
-            triggerTitle="View options & layout"
-            triggerAriaLabel="Options"
+            triggerTitle={t("toolbar.trigger.viewOptions")}
+            triggerAriaLabel={t("toolbar.trigger.optionsAria")}
             sheet
           >
             <MenuLabel>{t("common.view")}</MenuLabel>
@@ -1373,7 +1442,7 @@ export function Toolbar({
               value={canvas.layout}
               onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
               aria-label={t("toolbar.layout")}
-              title={liveDoc.meta?.freeform ? t("toolbar.layoutPaused") : "Layout"}
+              title={liveDoc.meta?.freeform ? t("toolbar.layoutPaused") : t("toolbar.layout")}
               disabled={!!liveDoc.meta?.freeform}
             >
               <optgroup label={t("toolbar.layoutGroupRadial")}>

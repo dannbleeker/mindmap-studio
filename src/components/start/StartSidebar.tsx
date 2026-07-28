@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { type ReactNode, useEffect, useState } from "react";
 import { InstallButton } from "../InstallButton";
 import { ACCENT } from "./tokens";
@@ -6,17 +8,69 @@ import type { StartSection } from "./types";
 // Left rail: brand, primary New-map button, section nav (All maps shows a live count), and the
 // "local & private" footer card.
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `id` (the section's identity, also the React key) stays a plain literal.
 const NAV: { id: StartSection; label: string }[] = [
-  { id: "start", label: "Start" },
-  { id: "all", label: "All maps" },
-  { id: "recent", label: "Recent" },
-  { id: "templates", label: "Templates" },
-  { id: "examples", label: "Examples" },
-  { id: "layouts", label: "Layouts" },
-  { id: "import", label: "Import" },
-  { id: "learn", label: "Learn mind mapping" },
-  { id: "about", label: "About" },
-  { id: "trash", label: "Trash" },
+  {
+    id: "start",
+    get label() {
+      return t("start.start");
+    },
+  },
+  {
+    id: "all",
+    get label() {
+      return t("toolbar.allMaps");
+    },
+  },
+  {
+    id: "recent",
+    get label() {
+      return t("toolbar.recent");
+    },
+  },
+  {
+    id: "templates",
+    get label() {
+      return t("toolbar.templates");
+    },
+  },
+  {
+    id: "examples",
+    get label() {
+      return t("toolbar.examples");
+    },
+  },
+  {
+    id: "layouts",
+    get label() {
+      return t("start.layouts");
+    },
+  },
+  {
+    id: "import",
+    get label() {
+      return t("start.import");
+    },
+  },
+  {
+    id: "learn",
+    get label() {
+      return t("start.learnMindMapping");
+    },
+  },
+  {
+    id: "about",
+    get label() {
+      return t("start.about");
+    },
+  },
+  {
+    id: "trash",
+    get label() {
+      return t("start.trash");
+    },
+  },
 ];
 
 /** Inline 20×20 line icons for the section nav (stroke = currentColor, so the active emerald tint flows
@@ -163,18 +217,18 @@ export function StartSidebar({
   }, [drawerOpen]);
 
   return (
-    <nav className="st-sidebar" aria-label="Start sections">
+    <nav className="st-sidebar" aria-label={t("start.startSections")}>
       <div className="st-brand">
         <BrandGlyph />
-        MindMap Studio
+        {t("about.appName")}
       </div>
       <button type="button" className="st-new" onClick={onNewMap}>
-        <span aria-hidden="true">＋</span> New map
+        <span aria-hidden="true">＋</span> {t("common.newMap")}
       </button>
       <button
         type="button"
         className="st-hamburger"
-        aria-label="Sections menu"
+        aria-label={t("start.sectionsMenu")}
         aria-expanded={drawerOpen}
         aria-controls="st-nav-drawer"
         onClick={() => setDrawerOpen((v) => !v)}
@@ -185,7 +239,7 @@ export function StartSidebar({
         <button
           type="button"
           className="st-nav-backdrop"
-          aria-label="Close sections menu"
+          aria-label={t("start.closeSectionsMenu")}
           onClick={() => setDrawerOpen(false)}
         />
       ) : null}
@@ -214,9 +268,7 @@ export function StartSidebar({
       <InstallButton className="st-install" />
       <div className="st-foot">
         <span aria-hidden="true">🔒</span>
-        <span>
-          Local &amp; private — runs in your browser, works offline, nothing leaves this device.
-        </span>
+        <span>{t("start.localAndPrivate")}</span>
       </div>
     </nav>
   );

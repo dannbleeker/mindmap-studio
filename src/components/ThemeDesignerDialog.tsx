@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./themeDesignerMessages";
 import { useRef, useState } from "react";
 import { Button, Input } from "../design/primitives";
 import { downloadBlob } from "../io/download";
@@ -15,11 +17,33 @@ import { Dialog } from "./Dialog";
 // the built-ins), delete it, or export / import it as a .json. Self-contained + lazy-loaded so its
 // storage plumbing stays out of the entry bundle. `onChange` re-reads the theme list (dropdown refresh).
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `value` (the actual CSS font-family, also the <option> value/React key) stays literal.
 const FONTS: { value: string; label: string }[] = [
-  { value: "", label: "Default" },
-  { value: "Inter, system-ui, sans-serif", label: "Sans" },
-  { value: "Georgia, 'Times New Roman', serif", label: "Serif" },
-  { value: "'Courier New', ui-monospace, monospace", label: "Mono" },
+  {
+    value: "",
+    get label() {
+      return t("panel.default");
+    },
+  },
+  {
+    value: "Inter, system-ui, sans-serif",
+    get label() {
+      return t("panel.sans");
+    },
+  },
+  {
+    value: "Georgia, 'Times New Roman', serif",
+    get label() {
+      return t("panel.serif");
+    },
+  },
+  {
+    value: "'Courier New', ui-monospace, monospace",
+    get label() {
+      return t("panel.mono");
+    },
+  },
 ];
 
 export function ThemeDesignerDialog({
@@ -30,7 +54,7 @@ export function ThemeDesignerDialog({
   onChange: () => void;
 }) {
   const [themes, setThemes] = useState<CustomTheme[]>(() => getCustomThemes());
-  const [draft, setDraft] = useState<CustomTheme>(() => newCustomTheme("My theme"));
+  const [draft, setDraft] = useState<CustomTheme>(() => newCustomTheme(t("theme.myTheme")));
   const fileRef = useRef<HTMLInputElement>(null);
 
   const set = (patch: Partial<CustomTheme>) => setDraft((d) => ({ ...d, ...patch }));
@@ -56,7 +80,7 @@ export function ThemeDesignerDialog({
   };
   const remove = () => {
     persist(themes.filter((t) => t.id !== draft.id));
-    setDraft(newCustomTheme("My theme"));
+    setDraft(newCustomTheme(t("theme.myTheme")));
   };
   const exportJson = () =>
     downloadBlob(
@@ -93,12 +117,14 @@ export function ThemeDesignerDialog({
     <Dialog
       open
       onClose={onClose}
-      title="Theme designer"
+      title={t("theme.themeDesigner")}
       style={{ width: "min(94vw, 540px)", padding: 20, boxShadow: "var(--ed-shadow-pop)" }}
     >
       {themes.length > 0 ? (
         <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 12, color: "var(--ed-muted)", marginBottom: 4 }}>Your themes</div>
+          <div style={{ fontSize: 12, color: "var(--ed-muted)", marginBottom: 4 }}>
+            {t("theme.yourThemes")}
+          </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {themes.map((t) => (
               <Button
@@ -110,7 +136,9 @@ export function ThemeDesignerDialog({
                 {t.name}
               </Button>
             ))}
-            <Button onClick={() => setDraft(newCustomTheme("My theme"))}>＋ New</Button>
+            <Button onClick={() => setDraft(newCustomTheme(t("theme.myTheme")))}>
+              ＋ {t("panel.newTheme")}
+            </Button>
           </div>
         </div>
       ) : null}
@@ -119,16 +147,16 @@ export function ThemeDesignerDialog({
         {/* Controls */}
         <div style={{ display: "grid", gap: 8 }}>
           <div style={field}>
-            <span style={{ width: 74 }}>Name</span>
+            <span style={{ width: 74 }}>{t("theme.name")}</span>
             <Input
               value={draft.name}
               onChange={(e) => set({ name: e.target.value })}
-              aria-label="Theme name"
+              aria-label={t("theme.themeName")}
               style={{ flex: 1 }}
             />
           </div>
           <div style={field}>
-            <span style={{ width: 74 }}>Palette</span>
+            <span style={{ width: 74 }}>{t("theme.palette")}</span>
             <div style={{ display: "flex", gap: 4 }}>
               {Array.from({ length: 6 }, (_, i) => (
                 <input
@@ -137,65 +165,65 @@ export function ThemeDesignerDialog({
                   type="color"
                   value={draft.palette[i] ?? "#888888"}
                   onChange={(e) => setPalette(i, e.target.value)}
-                  aria-label={`Branch colour ${i + 1}`}
+                  aria-label={t("theme.branchColourN", { n: i + 1 })}
                   style={swatch}
                 />
               ))}
             </div>
           </div>
           <label style={field}>
-            <span style={{ width: 74 }}>Background</span>
+            <span style={{ width: 74 }}>{t("panel.background")}</span>
             <input
               type="color"
               value={draft.background}
               onChange={(e) => set({ background: e.target.value })}
-              aria-label="Background colour"
+              aria-label={t("panel.backgroundColour")}
               style={swatch}
             />
           </label>
           <label style={field}>
-            <span style={{ width: 74 }}>Node fill</span>
+            <span style={{ width: 74 }}>{t("theme.nodeFill")}</span>
             <input
               type="color"
               value={draft.nodeFill}
               onChange={(e) => set({ nodeFill: e.target.value })}
-              aria-label="Node fill colour"
+              aria-label={t("theme.nodeFillColour")}
               style={swatch}
             />
           </label>
           <label style={field}>
-            <span style={{ width: 74 }}>Font</span>
+            <span style={{ width: 74 }}>{t("panel.font2")}</span>
             <select
               value={draft.fontFamily}
               onChange={(e) => set({ fontFamily: e.target.value })}
-              aria-label="Theme font"
+              aria-label={t("theme.themeFont")}
               style={{ flex: 1 }}
             >
               {FONTS.map((f) => (
-                <option key={f.label} value={f.value}>
+                <option key={f.value} value={f.value}>
                   {f.label}
                 </option>
               ))}
             </select>
           </label>
           <label style={field}>
-            <span style={{ width: 74 }}>Branch weight</span>
+            <span style={{ width: 74 }}>{t("panel.branchWeight")}</span>
             <select
               value={draft.branchGrowth}
               onChange={(e) => set({ branchGrowth: e.target.value as BranchGrowth })}
-              aria-label="Theme branch weight"
+              aria-label={t("theme.themeBranchWeight")}
               style={{ flex: 1 }}
             >
-              <option value="fine">Fine</option>
-              <option value="regular">Regular</option>
-              <option value="bold">Bold</option>
+              <option value="fine">{t("panel.fine")}</option>
+              <option value="regular">{t("panel.regular")}</option>
+              <option value="bold">{t("panel.bold")}</option>
             </select>
           </label>
         </div>
 
         {/* Live preview: the background with a root node + branch chips in the palette colours. */}
         <div
-          aria-label="Theme preview"
+          aria-label={t("theme.themePreview")}
           style={{
             background: draft.background,
             borderRadius: 10,
@@ -235,7 +263,7 @@ export function ThemeDesignerDialog({
                   padding: "2px 8px",
                 }}
               >
-                Branch
+                {t("theme.branch")}
               </span>
             ))}
           </div>
@@ -243,15 +271,15 @@ export function ThemeDesignerDialog({
       </div>
 
       <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-        <Button onClick={save}>Save theme</Button>
+        <Button onClick={save}>{t("theme.saveTheme")}</Button>
         {themes.some((t) => t.id === draft.id) ? (
           <Button onClick={remove} style={{ color: "var(--ed-danger)" }}>
-            Delete
+            {t("common.delete")}
           </Button>
         ) : null}
         <span style={{ flex: 1 }} />
-        <Button onClick={exportJson}>Download .json</Button>
-        <Button onClick={() => fileRef.current?.click()}>Import .json</Button>
+        <Button onClick={exportJson}>{t("theme.downloadJson")}</Button>
+        <Button onClick={() => fileRef.current?.click()}>{t("theme.importJson")}</Button>
         <input
           ref={fileRef}
           type="file"

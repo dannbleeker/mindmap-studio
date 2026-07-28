@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
 
@@ -72,7 +74,7 @@ export function fromMindMup(text: string): MindMapDoc {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("Not a valid .mup file (not valid JSON)");
+    throw new Error(t("io.err.mupBadJson"));
   }
 
   // The top-level object must look like a MindMup document: it must have at
@@ -82,7 +84,7 @@ export function fromMindMup(text: string): MindMapDoc {
     typeof data !== "object" ||
     (data.title === undefined && data.ideas === undefined && data.formatVersion === undefined)
   ) {
-    throw new Error("Not a valid .mup file (missing title, ideas, and formatVersion fields)");
+    throw new Error(t("io.err.mupMissingFields"));
   }
 
   const root = toNode(data);

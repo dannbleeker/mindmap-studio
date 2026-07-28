@@ -1,3 +1,6 @@
+import { tNodes } from "../../../i18n/nodes";
+import { t } from "../../../i18n/registry";
+import "../messages";
 import type { BackdropKind, MindMapDoc } from "../../../model/types";
 import { blankDoc } from "../docBuilders";
 import type { StartContext } from "../types";
@@ -5,25 +8,102 @@ import type { StartContext } from "../types";
 // Structural layouts + diagram backdrops. Each opens a BLANK map in that view — and the copy makes
 // clear a layout is just a view you can switch any time; your topics don't move.
 
+// `label` is a getter: a plain `label: t("…")` in these module-scope arrays would resolve ONCE at
+// import and never follow a later `setLocale`. `kind` (the React key) stays a plain literal.
 const LAYOUTS: { kind: string; label: string }[] = [
-  { kind: "side", label: "Two-sided" },
-  { kind: "right", label: "All right" },
-  { kind: "left", label: "All left" },
-  { kind: "radial", label: "Radial / hub" },
-  { kind: "org-down", label: "Org chart ↓" },
-  { kind: "org-up", label: "Org chart ↑" },
-  { kind: "timeline", label: "Timeline" },
-  { kind: "fishbone", label: "Fishbone" },
-  { kind: "grid", label: "Grid / matrix" },
-  { kind: "swimlane", label: "Swimlane" },
-  { kind: "brace", label: "Brace map" },
+  {
+    kind: "side",
+    get label() {
+      return t("start.twoSided");
+    },
+  },
+  {
+    kind: "right",
+    get label() {
+      return t("start.allRight");
+    },
+  },
+  {
+    kind: "left",
+    get label() {
+      return t("start.allLeft");
+    },
+  },
+  {
+    kind: "radial",
+    get label() {
+      return t("cmd.layout.radial");
+    },
+  },
+  {
+    kind: "org-down",
+    get label() {
+      return t("toolbar.orgChart");
+    },
+  },
+  {
+    kind: "org-up",
+    get label() {
+      return t("toolbar.orgChart2");
+    },
+  },
+  {
+    kind: "timeline",
+    get label() {
+      return t("cmd.layout.timeline");
+    },
+  },
+  {
+    kind: "fishbone",
+    get label() {
+      return t("cmd.layout.fishbone");
+    },
+  },
+  {
+    kind: "grid",
+    get label() {
+      return t("cmd.layout.grid");
+    },
+  },
+  {
+    kind: "swimlane",
+    get label() {
+      return t("cmd.layout.swimlane");
+    },
+  },
+  {
+    kind: "brace",
+    get label() {
+      return t("cmd.layout.brace");
+    },
+  },
 ];
 
 const BACKDROPS: { kind: BackdropKind; label: string }[] = [
-  { kind: "onion", label: "Onion" },
-  { kind: "funnel", label: "Funnel" },
-  { kind: "venn2", label: "Venn (2)" },
-  { kind: "venn3", label: "Venn (3)" },
+  {
+    kind: "onion",
+    get label() {
+      return t("start.onion");
+    },
+  },
+  {
+    kind: "funnel",
+    get label() {
+      return t("start.funnel");
+    },
+  },
+  {
+    kind: "venn2",
+    get label() {
+      return t("start.venn2");
+    },
+  },
+  {
+    kind: "venn3",
+    get label() {
+      return t("start.venn3");
+    },
+  },
 ];
 
 function backdropDoc(kind: BackdropKind): MindMapDoc {
@@ -35,16 +115,15 @@ export function Layouts({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Layouts</h2>
+        <h2 className="st-section-title">{t("start.layouts")}</h2>
         <p className="st-section-sub">
-          A layout is a <strong>view</strong> you can switch any time from the toolbar — your topics
-          don't move. Open a blank map in one to start.
+          {tNodes("start.layoutExplain", { view: <strong>{t("start.viewWord")}</strong> })}
         </p>
       </section>
 
       <section>
         <h3 className="st-section-title" style={{ fontSize: 13, color: "var(--st-muted)" }}>
-          Structural layouts
+          {t("start.structuralLayouts")}
         </h3>
         <div className="st-grid" style={{ marginTop: 10 }}>
           {LAYOUTS.map((l) => (
@@ -66,9 +145,9 @@ export function Layouts({ ctx }: { ctx: StartContext }) {
 
       <section>
         <h3 className="st-section-title" style={{ fontSize: 13, color: "var(--st-muted)" }}>
-          Diagram backdrops
+          {t("start.diagramBackdrops")}
         </h3>
-        <p className="st-section-sub">A geometric frame behind free-positioned topics.</p>
+        <p className="st-section-sub">{t("start.aGeometricFrameBehindFree")}</p>
         <div className="st-grid" style={{ marginTop: 10 }}>
           {BACKDROPS.map((b) => (
             <button

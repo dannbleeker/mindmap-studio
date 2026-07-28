@@ -1,3 +1,5 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { deleteMap, emptyTrash, restoreMapFromTrash } from "../../../store/mapStore";
 import type { StartContext } from "../types";
 import { useTrashMaps } from "../useLibrary";
@@ -24,14 +26,11 @@ export function Trash({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Trash</h2>
-        <p className="st-section-sub">
-          Deleted maps are kept here until you empty the Trash — restore one anytime. Emptying is
-          permanent (it also drops the map's version history).
-        </p>
+        <h2 className="st-section-title">{t("start.trash")}</h2>
+        <p className="st-section-sub">{t("start.trashBlurb")}</p>
       </section>
       {entries.length === 0 ? (
-        <p style={{ color: "var(--st-muted)" }}>Trash is empty.</p>
+        <p style={{ color: "var(--st-muted)" }}>{t("start.trashIsEmpty")}</p>
       ) : (
         <section>
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
@@ -41,7 +40,7 @@ export function Trash({ ctx }: { ctx: StartContext }) {
               onClick={empty}
               style={{ color: "var(--st-danger, #b23b3a)" }}
             >
-              Empty Trash ({entries.length})
+              {t("start.emptyTrashCount", { n: entries.length })}
             </button>
           </div>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 }}>
@@ -65,10 +64,10 @@ export function Trash({ ctx }: { ctx: StartContext }) {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {e.title || "(untitled)"}
+                  {e.title || t("common.untitled")}
                 </span>
                 <button type="button" className="st-btn" onClick={() => restore(e.id)}>
-                  Restore
+                  {t("common.restore")}
                 </button>
                 <button
                   type="button"
@@ -76,7 +75,7 @@ export function Trash({ ctx }: { ctx: StartContext }) {
                   onClick={() => purge(e.id)}
                   style={{ color: "var(--st-danger, #b23b3a)" }}
                 >
-                  Delete forever
+                  {t("start.deleteForever")}
                 </button>
               </li>
             ))}

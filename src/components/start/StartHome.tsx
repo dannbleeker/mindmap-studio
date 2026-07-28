@@ -1,5 +1,8 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { useState } from "react";
-import { EXAMPLE_DESCRIPTIONS, buildExample, examples } from "../../examples";
+import { EXAMPLE_DESCRIPTIONS, buildExample } from "../../exampleBuilders";
+import { examples } from "../../examples";
 import { TEMPLATE_DESCRIPTIONS, buildTemplate, templates } from "../../templates";
 import { AppTips } from "./AppTips";
 import { CaptureCard } from "./CaptureCard";
@@ -18,13 +21,18 @@ import { useLibrary } from "./useLibrary";
 const FEATURED_TEMPLATES = ["brainstorm", "swot", "project", "five-whys"];
 const FEATURED_EXAMPLES = ["launch", "okrs", "retro", "runbook"];
 
-function pick<
-  T extends { id: string; name: string; build: () => import("../../model/types").MindMapDoc },
->(all: T[], ids: string[], descriptions: Record<string, string>) {
+// Takes the BUILDER as an argument rather than reading a `build` off each entry: the example index is
+// now id+name only, so that its bodies can stay out of the entry chunk (see src/examples.ts).
+function pick<T extends { id: string; name: string }>(
+  all: T[],
+  ids: string[],
+  descriptions: Record<string, string>,
+  build: (id: string) => import("../../model/types").MindMapDoc,
+) {
   return ids
     .map((id) => all.find((x) => x.id === id))
     .filter((x): x is T => !!x)
-    .map((x) => ({ id: x.id, name: x.name, description: descriptions[x.id], doc: x.build() }));
+    .map((x) => ({ id: x.id, name: x.name, description: descriptions[x.id], doc: build(x.id) }));
 }
 
 export function StartHome({ ctx }: { ctx: StartContext }) {
@@ -35,8 +43,8 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
       return (b.updatedAt ?? 0) - (a.updatedAt ?? 0);
     })
     .slice(0, 3);
-  const featured = pick(templates, FEATURED_TEMPLATES, TEMPLATE_DESCRIPTIONS);
-  const featuredExamples = pick(examples, FEATURED_EXAMPLES, EXAMPLE_DESCRIPTIONS);
+  const featured = pick(templates, FEATURED_TEMPLATES, TEMPLATE_DESCRIPTIONS, buildTemplate);
+  const featuredExamples = pick(examples, FEATURED_EXAMPLES, EXAMPLE_DESCRIPTIONS, buildExample);
   const [newHereDismissed, setNewHereDismissed] = useState(false);
   const touch = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
 
@@ -45,10 +53,8 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
       {ctx.showNewHere && !newHereDismissed ? (
         <div className="st-newhere" role="note">
           <div>
-            <strong>New here?</strong>{" "}
-            {touch
-              ? "Capture a thought below, then tap ＋ on a topic to grow it — pinch to zoom."
-              : "Capture a thought below, then press Tab to add topics and ⌘K for anything."}
+            <strong>{t("start.newHere")}</strong>{" "}
+            {touch ? t("start.captureAThoughtBelowThen") : t("start.captureAThoughtBelowThen2")}
           </div>
           <div className="st-newhere-actions">
             <button
@@ -56,12 +62,12 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
               className="st-new st-empty-new"
               onClick={() => ctx.onOpen(blankDoc())}
             >
-              <span aria-hidden="true">＋</span> Start your own
+              <span aria-hidden="true">＋</span> {t("start.startYourOwn")}
             </button>
             <button
               type="button"
               className="st-newhere-x"
-              aria-label="Dismiss"
+              aria-label={t("start.dismiss")}
               onClick={() => setNewHereDismissed(true)}
             >
               ×
@@ -81,9 +87,9 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
       {recent.length > 0 ? (
         <section>
           <div className="st-row">
-            <h2 className="st-section-title">Pick up where you left off</h2>
+            <h2 className="st-section-title">{t("start.pickUpWhereYouLeft")}</h2>
             <button type="button" className="st-link" onClick={() => ctx.go("all")}>
-              View all maps →
+              {t("start.viewAllMaps")}
             </button>
           </div>
           <div className="st-grid" style={{ marginTop: 12 }}>
@@ -96,9 +102,9 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
 
       <section>
         <div className="st-row">
-          <h2 className="st-section-title">Start from a template</h2>
+          <h2 className="st-section-title">{t("start.startFromATemplate")}</h2>
           <button type="button" className="st-link" onClick={() => ctx.go("templates")}>
-            Browse all templates →
+            {t("start.browseAllTemplates")}
           </button>
         </div>
         <div className="st-grid" style={{ marginTop: 12 }}>
@@ -117,9 +123,9 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
 
       <section>
         <div className="st-row">
-          <h2 className="st-section-title">Or open a worked example</h2>
+          <h2 className="st-section-title">{t("start.orOpenAWorkedExample")}</h2>
           <button type="button" className="st-link" onClick={() => ctx.go("examples")}>
-            Browse all examples →
+            {t("start.browseAllExamples")}
           </button>
         </div>
         <div className="st-grid" style={{ marginTop: 12 }}>

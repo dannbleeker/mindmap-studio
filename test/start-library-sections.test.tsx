@@ -8,6 +8,7 @@ import { AllMaps } from "../src/components/start/sections/AllMaps";
 import { Recent } from "../src/components/start/sections/Recent";
 import { Templates } from "../src/components/start/sections/Templates";
 import type { StartContext } from "../src/components/start/types";
+import { type Locale, registerMessages, setLocale } from "../src/i18n";
 
 // Library-backed Start sections (All maps / Recent) + the leaf cards (MapCard / Templates) and the
 // static About blurb. AllMaps/Recent read the library through useLibrary (IndexedDB); we mock that
@@ -42,6 +43,9 @@ const u = userEvent.setup();
 afterEach(() => {
   libEntries = [];
   libFolders = [];
+  // The active locale is module-level global state — without this the Danish case below leaks into
+  // whatever test file runs next and fails it somewhere unrelated.
+  setLocale("en");
 });
 
 describe("MapCard", () => {
@@ -265,5 +269,41 @@ describe("Recent section", () => {
     expect(screen.getByRole("heading", { name: "Not yet saved" })).toBeTruthy();
     expect(screen.getByText("Fresh")).toBeTruthy();
     expect(screen.getByText("MidWeek")).toBeTruthy();
+  });
+
+  it("keeps every bucket and every map when the locale is not English", () => {
+    // THE REGRESSION GUARD. Buckets used to be keyed by their rendered LABEL: `GROUPS` held
+    // `t("start.earlierThisWeek")` while `groupOf()` returned the English literal. Those agree only
+    // while the catalogue is English — under a second locale `byGroup.has()` stops matching and the
+    // section, WITH EVERY MAP IN IT, disappears from the page. Not a translation glitch: data the user
+    // can see going missing. The test above cannot catch it, because it only ever runs under `en`.
+    //
+    // `t()` returns `string`, so the old `type Group = (typeof GROUPS)[number]` collapsed to `string`
+    // and tsc could not catch the drift either. Buckets are keyed on ids now, labels resolved at
+    // render.
+    registerMessages("da" as Locale, {
+      "start.today": "I dag",
+      "start.earlierThisWeek": "Tidligere i denne uge",
+      "start.notYetSaved": "Ikke gemt endnu",
+    });
+    setLocale("da" as Locale);
+
+    const now = Date.now();
+    const DAY = 86_400_000;
+    libEntries = [
+      { id: "t", title: "Fresh", nodeCount: 1, updatedAt: now },
+      { id: "w", title: "MidWeek", nodeCount: 1, updatedAt: now - 4 * DAY },
+      { id: "n", title: "Unsaved", nodeCount: 1, updatedAt: undefined },
+    ];
+    render(<Recent ctx={mkCtx()} />);
+
+    // Headings follow the locale...
+    expect(screen.getByRole("heading", { name: "I dag" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Tidligere i denne uge" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Ikke gemt endnu" })).toBeTruthy();
+    // ...and — the part that actually mattered — the maps are still on the page.
+    expect(screen.getByText("Fresh")).toBeTruthy();
+    expect(screen.getByText("MidWeek")).toBeTruthy();
+    expect(screen.getByText("Unsaved")).toBeTruthy();
   });
 });

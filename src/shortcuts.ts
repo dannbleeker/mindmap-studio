@@ -12,6 +12,8 @@ export interface Shortcut {
 }
 
 export interface ShortcutGroup {
+  /** Stable identity — the React key. Never the title, which follows the locale. */
+  id: string;
   title: string;
   items: Shortcut[];
 }
@@ -20,6 +22,7 @@ export interface ShortcutGroup {
 export function shortcutGroups(): ShortcutGroup[] {
   return [
     {
+      id: "editing",
       title: t("shortcuts.group.editing"),
       items: [
         { keys: "Enter", action: t("shortcuts.action.addASiblingTopic") },
@@ -51,6 +54,7 @@ export function shortcutGroups(): ShortcutGroup[] {
       ],
     },
     {
+      id: "selectionMoving",
       title: t("shortcuts.group.selectionMoving"),
       items: [
         { keys: "Arrow keys", action: t("shortcuts.action.moveTheSelectionThroughTheTree") },
@@ -71,6 +75,7 @@ export function shortcutGroups(): ShortcutGroup[] {
       ],
     },
     {
+      id: "file",
       title: t("shortcuts.group.file"),
       items: [
         { keys: "Ctrl/⌘ + S", action: t("shortcuts.action.saveToTheLinkedFile") },
@@ -79,6 +84,7 @@ export function shortcutGroups(): ShortcutGroup[] {
       ],
     },
     {
+      id: "navigation",
       title: t("shortcuts.group.navigation"),
       items: [
         { keys: "Ctrl/⌘ + K", action: t("shortcuts.action.openTheCommandPaletteDoAnything") },
@@ -92,6 +98,7 @@ export function shortcutGroups(): ShortcutGroup[] {
       ],
     },
     {
+      id: "view",
       title: t("common.view"),
       items: [
         { keys: "Drag the background", action: t("shortcuts.action.panTheCanvas") },

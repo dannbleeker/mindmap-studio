@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { useRef, useState } from "react";
 import { typeScale } from "../../design/tokens";
 import { softDeleteMap } from "../../store/mapStore";
@@ -64,14 +66,14 @@ export function MapDialogs({
         <Dialog
           open
           onClose={onClose}
-          ariaLabel="Rename map"
+          ariaLabel={t("start.renameMap")}
           onOpen={() => {
             setName(pending?.kind === "rename" ? pending.title : "");
             inputRef.current?.focus();
           }}
           style={SURFACE}
         >
-          <h3 style={{ ...typeScale.title, margin: "0 0 12px" }}>Rename map</h3>
+          <h3 style={{ ...typeScale.title, margin: "0 0 12px" }}>{t("start.renameMap")}</h3>
           <input
             ref={inputRef}
             className="st-input"
@@ -80,12 +82,12 @@ export function MapDialogs({
             onKeyDown={(e) => {
               if (e.key === "Enter") confirmRename();
             }}
-            placeholder="Map name"
-            aria-label="New map name"
+            placeholder={t("start.mapName")}
+            aria-label={t("start.newMapName")}
           />
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
             <button type="button" className="st-btn" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="button"
@@ -93,22 +95,23 @@ export function MapDialogs({
               disabled={!name.trim()}
               onClick={confirmRename}
             >
-              Rename
+              {t("common.rename")}
             </button>
           </div>
         </Dialog>
       ) : null}
 
       {deleting ? (
-        <Dialog open onClose={onClose} ariaLabel="Delete map" style={SURFACE}>
-          <h3 style={{ ...typeScale.title, margin: "0 0 8px" }}>Move map to Trash</h3>
+        <Dialog open onClose={onClose} ariaLabel={t("cmd.delete-map")} style={SURFACE}>
+          <h3 style={{ ...typeScale.title, margin: "0 0 8px" }}>{t("start.moveMapToTrash")}</h3>
           <p style={{ margin: "0 0 4px", color: "var(--st-ink2)" }}>
-            Move “{pending?.kind === "delete" ? pending.title || "(untitled)" : ""}” to the Trash?
-            You can restore it from Trash until you empty it.
+            {t("start.moveMapToTrashConfirm", {
+              name: pending?.kind === "delete" ? pending.title || t("common.untitled") : "",
+            })}
           </p>
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
             <button type="button" className="st-btn" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="button"
@@ -120,7 +123,7 @@ export function MapDialogs({
               }}
               onClick={confirmDelete}
             >
-              Move to Trash
+              {t("start.moveToTrash")}
             </button>
           </div>
         </Dialog>

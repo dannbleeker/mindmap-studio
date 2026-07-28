@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { t } from "./i18n";
 import { downloadBlob } from "./io/download";
 import { buildPrintDoc, wrapSvgHtml } from "./io/html";
 import { serializeDoc } from "./io/json";
@@ -106,8 +107,7 @@ export function useMapExports(
   // The renderer-backed formats (png/svg/html/pdf) need a live canvas; when there isn't one (e.g. the
   // command runs while the Board overlay is open, or before the canvas mounts) the SVG is null and the
   // export used to no-op silently. Tell the user instead of doing nothing.
-  const noCanvas = () =>
-    onHint?.("Open a map on the canvas first to export an image, SVG, HTML or PDF.");
+  const noCanvas = () => onHint?.(t("app.openAMapOnThe"));
 
   // The rendered map as a clean, portable SVG string. The exporter (flow/exportSvg.ts) authors
   // native <text> from the model, so this only needs sanitizeSvg (strip XSS) for the file to
@@ -236,16 +236,16 @@ export function useMapExports(
       }
       const blob = await svgToPng(clean, opts);
       if (!blob) {
-        onHint?.("Couldn't render the map to an image.");
+        onHint?.(t("app.couldnTRenderTheMap"));
         return;
       }
       try {
         if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write)
           throw new Error("clipboard image write unsupported");
         await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        onHint?.("Map copied to the clipboard as an image.");
+        onHint?.(t("app.mapCopiedToTheClipboard"));
       } catch {
-        onHint?.("Couldn't copy the image — your browser may block clipboard image writes.");
+        onHint?.(t("app.couldnTCopyTheImage"));
       }
     },
     async exportSvg() {
@@ -323,7 +323,7 @@ export function useMapExports(
       // Render at 2× for a crisp embed; keep the page-size/orientation for pdf-lib.
       const png = await svgToPng(clean, { scale: 2 });
       if (!png) {
-        onHint?.("Couldn't render the map to an image for the PDF.");
+        onHint?.(t("app.couldnTRenderTheMap2"));
         return;
       }
       const { buildMapPdf } = await import("./io/pdf");

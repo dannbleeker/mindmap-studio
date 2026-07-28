@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 import { NodeToolbar, Position } from "@xyflow/react";
 import { EditorIcon, type EditorIconName } from "../../components/EditorIcons";
 import { colors } from "../../design/tokens";
@@ -101,21 +103,25 @@ export function NodePopover({
       >
         <PopBtn
           icon="note"
-          label={hasNote ? "Open note" : "Add note"}
+          label={hasNote ? t("canvas.openNote") : t("canvas.menu.addNote")}
           active={hasNote}
           onClick={() => onOpenNote(sid)}
         />
         <PopBtn
           glyph="⚑"
-          label={hasPriority ? "Cycle priority" : "Add priority"}
+          label={hasPriority ? t("canvas.cyclePriority") : t("canvas.addPriority")}
           active={hasPriority}
           onClick={() => onCyclePriority(sid)}
         />
-        <PopBtn icon="link" label="Link to…" onClick={() => onStartLink(sid)} />
+        <PopBtn icon="link" label={t("canvas.menu.linkTo")} onClick={() => onStartLink(sid)} />
         {hasKids ? (
-          <PopBtn icon="minus" label="Collapse / expand" onClick={() => onToggleCollapse(sid)} />
+          <PopBtn
+            icon="minus"
+            label={t("canvas.menu.collapseExpand")}
+            onClick={() => onToggleCollapse(sid)}
+          />
         ) : null}
-        <PopBtn icon="dots" label="More actions" onClick={() => onMore(sid)} />
+        <PopBtn icon="dots" label={t("canvas.moreActions")} onClick={() => onMore(sid)} />
       </div>
     </NodeToolbar>
   );

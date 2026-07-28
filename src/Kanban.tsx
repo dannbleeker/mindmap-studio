@@ -10,6 +10,7 @@ import {
   reMarkForMove,
   retagForMove,
 } from "./board";
+import { t } from "./i18n";
 import { MARKER_GROUPS } from "./icons";
 import type { MindMapDoc } from "./model/types";
 import { isOverdue, todayISO } from "./taskDate";
@@ -20,16 +21,23 @@ import { controlStyle } from "./ui";
 // that topic on the canvas; DRAG a card between columns to re-tag / re-mark / re-schedule the topic
 // (one undoable edit). Rendered in place of the canvas while open; themed via --ed-*.
 
-/** The column-source options shown in the header selector. */
-const SOURCES: { value: string; label: string; source: BoardSource }[] = [
-  { value: "tag", label: "Tags", source: { kind: "tag" } },
-  ...MARKER_GROUPS.map((g) => ({
-    value: `marker:${g.id}`,
-    label: g.name,
-    source: { kind: "marker" as const, group: g.id },
-  })),
-  { value: "schedule", label: "Schedule (dates)", source: { kind: "schedule" } },
-];
+/** The column-source options shown in the header selector.
+ *
+ *  A FUNCTION, not a module-level const. The spread over MARKER_GROUPS reads `g.name` once — and
+ *  `g.name` is now a getter precisely so it follows the locale, which a module-scope materialisation
+ *  would undo. The frozen-t() detector cannot see that: it counts `t(` calls, and this file has none
+ *  in the spread, so the re-freeze would have been silent and scored 0. */
+function sources(): { value: string; label: string; source: BoardSource }[] {
+  return [
+    { value: "tag", label: t("common.tags"), source: { kind: "tag" } },
+    ...MARKER_GROUPS.map((g) => ({
+      value: `marker:${g.id}`,
+      label: g.name,
+      source: { kind: "marker" as const, group: g.id },
+    })),
+    { value: "schedule", label: t("app.scheduleDates"), source: { kind: "schedule" } },
+  ];
+}
 
 /** A card's payload carried on the drag (its full tag/marker set, so the drop can compute the change). */
 interface DragPayload {
@@ -58,7 +66,7 @@ export function Kanban({
   onClose: () => void;
 }) {
   const [sourceValue, setSourceValue] = useState("tag");
-  const source = SOURCES.find((s) => s.value === sourceValue)?.source ?? { kind: "tag" };
+  const source = sources().find((s) => s.value === sourceValue)?.source ?? { kind: "tag" };
   const today = todayISO();
   const columns = buildBoard(doc, source, today);
 
@@ -96,16 +104,16 @@ export function Kanban({
           borderBottom: "1px solid var(--ed-border)",
         }}
       >
-        <strong style={{ color: "var(--ed-ink)" }}>▦ Board</strong>
+        <strong style={{ color: "var(--ed-ink)" }}>▦ {t("panel.board")}</strong>
         <label style={{ display: "flex", alignItems: "center", gap: 6, marginRight: "auto" }}>
-          <span style={{ color: "var(--ed-muted)", fontSize: 12 }}>Group by</span>
+          <span style={{ color: "var(--ed-muted)", fontSize: 12 }}>{t("app.groupBy")}</span>
           <select
             className="mm-select"
             value={sourceValue}
             onChange={(e) => setSourceValue(e.target.value)}
-            aria-label="Group the board by"
+            aria-label={t("app.groupTheBoardBy")}
           >
-            {SOURCES.map((s) => (
+            {sources().map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>
@@ -113,11 +121,13 @@ export function Kanban({
           </select>
         </label>
         <button type="button" onClick={onClose} style={controlStyle}>
-          ✕ Close board
+          {t("app.closeBoard")}
         </button>
       </div>
       {columns.length === 0 ? (
-        <div style={{ padding: 24, color: "var(--ed-muted)", fontSize: 14 }}>No topics yet.</div>
+        <div style={{ padding: 24, color: "var(--ed-muted)", fontSize: 14 }}>
+          {t("app.noTopicsYet")}
+        </div>
       ) : (
         <div
           style={{ flex: 1, minHeight: 0, overflow: "auto", display: "flex", gap: 12, padding: 14 }}
@@ -212,7 +222,7 @@ function Column({
                 e.dataTransfer.effectAllowed = "move";
               }}
               onClick={() => onPick(card.id)}
-              title="Drag to another column to re-file · click to jump to this topic"
+              title={t("app.dragToAnotherColumnTo")}
               style={{
                 textAlign: "left",
                 background: "var(--ed-card)",
@@ -227,7 +237,7 @@ function Column({
                 gap: 4,
               }}
             >
-              <span>{card.topic || "(untitled)"}</span>
+              <span>{card.topic || t("common.untitled")}</span>
               {card.progress !== undefined || card.due ? (
                 <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}>
                   {card.progress !== undefined ? (

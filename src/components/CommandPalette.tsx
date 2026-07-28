@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
+import { t } from "../i18n";
 import "./CommandPalette.css";
 
 // A generic ⌘K command palette: fuzzy (subsequence) search over a list of commands, arrow-key nav,
@@ -144,11 +145,12 @@ export function CommandPalette({
       const recentSet = new Set(recent.map((c) => c.id));
       const rest = enabled.filter((c) => !contextSet.has(c.id) && !recentSet.has(c.id));
       const sections: { at: number; label: string }[] = [];
-      if (context.length) sections.push({ at: 0, label: contextLabel ?? "For the selected topic" });
-      if (recent.length) sections.push({ at: context.length, label: "Recent" });
+      if (context.length)
+        sections.push({ at: 0, label: contextLabel ?? t("app.forTheSelectedTopic") });
+      if (recent.length) sections.push({ at: context.length, label: t("toolbar.recent") });
       // "All commands" only earns a header when something sits above it.
       if (rest.length && (context.length || recent.length))
-        sections.push({ at: context.length + recent.length, label: "All commands" });
+        sections.push({ at: context.length + recent.length, label: t("app.allCommands") });
       return { items: [...context, ...recent, ...rest], sections };
     }
     const matched = enabled.filter((c) =>
@@ -210,7 +212,7 @@ export function CommandPalette({
 
   return (
     <div className="st-cmdk-backdrop" role="presentation">
-      <div className="st-cmdk" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div className="st-cmdk" role="dialog" aria-modal="true" aria-label={t("app.commandPalette")}>
         <input
           ref={inputRef}
           className="st-cmdk-input"
@@ -257,11 +259,11 @@ export function CommandPalette({
           className="st-cmdk-list"
           id={listId}
           role="listbox"
-          aria-label="Commands"
+          aria-label={t("app.commands")}
           tabIndex={-1}
         >
           {items.length === 0 ? (
-            <div className="st-cmdk-empty">No matches.</div>
+            <div className="st-cmdk-empty">{t("app.noMatches2")}</div>
           ) : (
             items.map((c, i) => (
               <Fragment key={c.id}>
@@ -299,7 +301,7 @@ export function CommandPalette({
         </div>
         <div aria-live="polite" style={srOnly}>
           {items.length === 0
-            ? "No matches"
+            ? t("app.noMatches")
             : `${items.length} command${items.length === 1 ? "" : "s"}`}
         </div>
       </div>

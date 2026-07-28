@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 import type { MapNode, MindMapDoc } from "../model/types";
 
 // Export a map as a flat table (the inverse of io/pasteTable): one row per topic with its depth, note,
@@ -18,7 +19,7 @@ export function mapToRows(doc: MindMapDoc): string[][] {
   const rows: string[][] = [[...TABLE_HEADERS]];
   const walk = (n: MapNode, depth: number) => {
     rows.push([
-      cell(n.topic) || "(untitled)",
+      cell(n.topic) || t("common.untitled"),
       String(depth),
       cell(n.note ?? ""),
       (n.tags ?? []).join(", "),

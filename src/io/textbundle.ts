@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { strFromU8, unzipSync } from "fflate";
 import type { MindMapDoc } from "../model/types";
 import { fromMarkmap } from "./markmap";
@@ -10,6 +12,6 @@ export function fromTextBundle(bytes: Uint8Array): MindMapDoc {
   const files = unzipSync(bytes);
   // The text file sits at the zip root or one folder deep (e.g. "My Note.textbundle/text.md").
   const key = Object.keys(files).find((p) => /(^|\/)text\.(md|markdown|txt)$/i.test(p));
-  if (!key) throw new Error("No text.md found in the TextBundle (.textpack)");
+  if (!key) throw new Error(t("io.err.noTextBundle"));
   return fromMarkmap(strFromU8(files[key]));
 }

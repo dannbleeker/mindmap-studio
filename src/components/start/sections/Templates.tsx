@@ -1,3 +1,5 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { useState } from "react";
 import { TEMPLATE_DESCRIPTIONS, buildTemplate, templates } from "../../../templates";
 import { TemplateCard } from "../TemplateCard";
@@ -29,21 +31,17 @@ export function Templates({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Templates</h2>
-        <p className="st-section-sub">
-          Every starter map from the New-map gallery. Pick one and it opens pre-filled — unlike a
-          layout, which is an empty view. {built.length} templates · Blank canvas lives in the Start
-          screen.
-        </p>
+        <h2 className="st-section-title">{t("toolbar.templates")}</h2>
+        <p className="st-section-sub">{t("start.templatesBlurb", { n: built.length })}</p>
       </section>
       <input
         className="st-input"
-        placeholder="Search templates…"
+        placeholder={t("start.searchTemplates")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
       {shown.length === 0 ? (
-        <div className="st-empty">No templates match "{q}".</div>
+        <div className="st-empty">{t("start.noTemplatesMatch", { query: q })}</div>
       ) : (
         <div className="st-grid">
           {shown.map((t) => (

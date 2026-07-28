@@ -16,7 +16,7 @@ export const sampleDoc: MindMapDoc = {
   root: {
     id: "root",
     topic: "Q3 Retail Plan",
-    note: "Welcome! Select a node, then open 📝 Notes or 🏷 Markers from the toolbar.",
+    note: "Welcome! Select a topic, then use 📝 for notes or 🏷 for markers in the toolbar.",
     children: [
       {
         id: "merch",

@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 import type { MapAttachment } from "../model/types";
 
 // Turn a picked file into a self-contained MapAttachment (a data URL + name + size). Inline storage
@@ -18,7 +19,7 @@ export async function fileToAttachment(file: File): Promise<MapAttachment> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error ?? new Error("Could not read file"));
+    reader.onerror = () => reject(reader.error ?? new Error(t("io.err.couldNotReadFile")));
     reader.readAsDataURL(file);
   });
   return { name: file.name, dataUrl, size: file.size };

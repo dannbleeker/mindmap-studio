@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { strFromU8 } from "fflate";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
@@ -81,20 +83,20 @@ export function fromMind(bytes: Uint8Array): MindMapDoc {
   mmId = 0;
   const files = unzipOrThrow(bytes, ".mind");
   const mapJson = files["map.json"];
-  if (!mapJson) throw new Error("Not a valid .mind file (no map.json)");
+  if (!mapJson) throw new Error(t("io.err.mindNoMapJson"));
 
   let data: Json;
   try {
     data = JSON.parse(strFromU8(mapJson));
   } catch {
-    throw new Error("Not a valid .mind file (map.json is not valid JSON)");
+    throw new Error(t("io.err.mindBadJson"));
   }
 
   // Root node: confirmed key is `root`; fall back through `map.root` and bare
   // `data` (in case a stripped export omits the wrapper object)
   const rootRaw: Json = data?.root ?? data?.map?.root ?? data;
   if (!rootRaw || typeof rootRaw !== "object") {
-    throw new Error("Not a valid .mind file (no root node found in map.json)");
+    throw new Error(t("io.err.mindNoRoot"));
   }
 
   const root = toNode(rootRaw);

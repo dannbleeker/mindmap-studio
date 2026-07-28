@@ -70,4 +70,28 @@
 // nothing (this figure is deterministic, so a thin margin can't flake the way the coverage floor does)
 // while making the next legitimate change a two-line edit. The "~4 kB of unguarded slack" the bump
 // above warned about is closed: the slack is now 0.9 kB.
-export const BUDGET_KB = 175;
+// 175 → 182, and the METRIC CHANGED (2026-07-27, owner decision — docs/I18N_BLOCKED.md item 3).
+//
+// READ THIS BEFORE COMPARING THE NUMBER TO ANY BUMP ABOVE. Every figure above measures `index-*.js`
+// alone. From here the budget measures TRUE FIRST LOAD: the entry chunk plus every chunk index.html
+// preloads, because Vite emits <link rel="modulepreload"> for shared eager chunks and the browser
+// fetches those on first paint exactly like the entry. The number going up does NOT mean anything got
+// slower — it means the ruler got honest. Measured at the moment of the switch: 157.9 kB entry +
+// 22.4 kB preloaded = 180.3 kB true first load.
+//
+// The old rule was not merely imprecise, it was GAMEABLE, and it had already been gamed by accident:
+// migrating the eager inspectors moved ~16.6 kB into primitives-*.js and the gate reported a 10.5 kB
+// improvement (168.5 → 158.0) for a change that ADDED 141 catalogue keys. Real first load went UP
+// ~2 kB. A ceiling you can satisfy by relocating weight is not a ceiling.
+//
+// Why 182 and not the ~185 first sketched: 185 would leave ~4.7 kB of unguarded slack, which is the
+// exact failure the 171 → 175 note above warned about and then demonstrated ("unrelated bloat can ride
+// in unnoticed"). And the counter-argument for a fat margin does not apply here — this figure is
+// deterministic, so unlike the coverage floor it cannot flake under concurrent CI/Deploy/Stats
+// runners. That is the same reasoning that accepted 0.9 kB of headroom at 175. 182 leaves 1.7 kB:
+// enough that a legitimate small change isn't a two-line edit, too little to hide a regression.
+//
+// The true figure has been ABOVE the old 175 ceiling since before the i18n branch started (measured
+// 176.5 at the branch point), so this is not a regression that work introduced — it is the first
+// honest reading. primitives-*.js at ~16.6 kB is where the weight actually is, if it needs shedding.
+export const BUDGET_KB = 182;

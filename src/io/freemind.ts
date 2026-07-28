@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 import { XMLParser } from "fast-xml-parser";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { isDangerousUrl } from "./urlSafety";
@@ -85,7 +87,7 @@ export function fromFreemind(text: string): MindMapDoc {
   const tree = parser.parse(text);
   const map = tree?.map;
   const rootEl = asList(map?.node)[0];
-  if (!map || !rootEl) throw new Error("Not a FreeMind/Freeplane .mm file");
+  if (!map || !rootEl) throw new Error(t("io.err.notFreeMind"));
 
   const toNode = (o: Xml): MapNode => {
     fmId += 1;

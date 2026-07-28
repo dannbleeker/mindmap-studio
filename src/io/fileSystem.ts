@@ -1,3 +1,4 @@
+import { t } from "../i18n/registry";
 // Native file open / save / autosave, on top of the lossless JSON serializer.
 //
 // MindMap Studio's library always lives in IndexedDB (the safety net — see store/mapStore).
@@ -25,12 +26,17 @@ const NATIVE_EXTS = [NATIVE_EXT, ".json"];
 const IMPORT_EXTS = [".mmap", ".mmp"];
 
 /** Picker filter: Save offers only `.mmst`; Open accepts native files + importable MindManager files. */
-const SAVE_TYPES: FilePickerAcceptType[] = [
-  { description: "MindMap Studio map", accept: { [NATIVE_MIME]: [NATIVE_EXT] } },
+// FUNCTIONS, not consts: these are read when the picker opens, and a module-scope t() would freeze
+// the description at import.
+const saveTypes = (): FilePickerAcceptType[] => [
+  { description: t("io.picker.studioMap"), accept: { [NATIVE_MIME]: [NATIVE_EXT] } },
 ];
-const OPEN_TYPES: FilePickerAcceptType[] = [
-  { description: "MindMap Studio map", accept: { [NATIVE_MIME]: NATIVE_EXTS } },
-  { description: "MindManager map (import)", accept: { "application/octet-stream": IMPORT_EXTS } },
+const openTypes = (): FilePickerAcceptType[] => [
+  { description: t("io.picker.studioMap"), accept: { [NATIVE_MIME]: NATIVE_EXTS } },
+  {
+    description: t("io.picker.mindManagerMap"),
+    accept: { "application/octet-stream": IMPORT_EXTS },
+  },
 ];
 
 /** True for a file we open natively (`.mmst`/`.json`) vs one we import one-way (`.mmap`). */
@@ -94,7 +100,7 @@ export async function openMapFile(): Promise<OpenResult | null> {
   let handle: FileSystemFileHandle | undefined;
   try {
     [handle] = await window.showOpenFilePicker({
-      types: OPEN_TYPES,
+      types: openTypes(),
       multiple: false,
       id: "mindmap",
     });
@@ -113,7 +119,7 @@ export async function pickSaveHandle(doc: MindMapDoc): Promise<FileSystemFileHan
   try {
     return await window.showSaveFilePicker({
       suggestedName: suggestedFileName(doc),
-      types: SAVE_TYPES,
+      types: saveTypes(),
       id: "mindmap",
     });
   } catch (err) {

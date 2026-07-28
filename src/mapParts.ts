@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import type { MapNode } from "./model/types";
 
 // "Map parts" — ready-made mini-structures inserted under the selected topic (MindManager's map
@@ -25,7 +26,16 @@ export const MAP_PARTS: readonly MapPart[] = [
     name: "SWOT",
     build: () => tree("SWOT", ["Strengths", "Weaknesses", "Opportunities", "Threats"]),
   },
-  { id: "pros-cons", name: "Pros & cons", build: () => tree("Pros & cons", ["Pros", "Cons"]) },
+  {
+    id: "pros-cons",
+    // Getter, not a plain field: a plain `name: t("…")` here would resolve ONCE at import and never
+    // follow a later `setLocale`. (The other MAP_PARTS entries are declined content and stay literal
+    // English on purpose — this one predates that decision and already routes through the catalogue.)
+    get name() {
+      return t("app.prosCons");
+    },
+    build: () => tree(t("app.prosCons"), ["Pros", "Cons"]),
+  },
   {
     id: "5w1h",
     name: "5W1H",
@@ -35,7 +45,13 @@ export const MAP_PARTS: readonly MapPart[] = [
     id: "agenda",
     name: "Meeting agenda",
     build: () =>
-      tree("Meeting agenda", ["Attendees", "Topics", "Decisions", "Action items", "Next steps"]),
+      tree(t("app.meetingAgenda"), [
+        "Attendees",
+        "Topics",
+        "Decisions",
+        t("app.actionItems"),
+        t("app.nextSteps"),
+      ]),
   },
 ];
 

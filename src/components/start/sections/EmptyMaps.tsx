@@ -1,3 +1,5 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { blankDoc } from "../docBuilders";
 import type { StartContext } from "../types";
 
@@ -14,9 +16,9 @@ import type { StartContext } from "../types";
 export function EmptyMaps({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-empty">
-      <p style={{ margin: "0 0 14px" }}>No maps yet — start fresh, or open a template.</p>
+      <p style={{ margin: "0 0 14px" }}>{t("start.noMapsYetStartFresh")}</p>
       <button type="button" className="st-new st-empty-new" onClick={() => ctx.onOpen(blankDoc())}>
-        <span aria-hidden="true">＋</span> New map
+        <span aria-hidden="true">＋</span> {t("common.newMap")}
       </button>
       <button
         type="button"
@@ -34,7 +36,7 @@ export function EmptyMaps({ ctx }: { ctx: StartContext }) {
           cursor: "pointer",
         }}
       >
-        Browse templates →
+        {t("start.browseTemplates2")}
       </button>
     </div>
   );

@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { Button } from "../design/primitives";
 import { space } from "../design/tokens";
+import { t } from "../i18n";
 import type { MindMapHandle } from "../mindmap";
 import { findAnyNode, subtreeExportDoc } from "../mindmap/flow/ops";
 import type { MindMapDoc } from "../model/types";
@@ -24,14 +25,59 @@ type BranchIo = Pick<
   | "exportMarkdown"
 >;
 
-const FORMATS: { label: string; run: (io: BranchIo) => void | Promise<void> }[] = [
-  { label: "PNG image", run: (io) => io.exportPng() },
-  { label: "SVG vector", run: (io) => io.exportSvg() },
-  { label: "HTML (standalone picture)", run: (io) => io.exportHtml() },
-  { label: "HTML (interactive)", run: (io) => io.exportInteractiveHtml() },
-  { label: "PDF (print)", run: (io) => io.exportPdf() },
-  { label: ".json (lossless)", run: (io) => io.exportJson() },
-  { label: "Markdown", run: (io) => io.exportMarkdown() },
+// `label` is a getter, not a plain field: a plain `label: t("…")` in this module-scope array would
+// resolve ONCE at import and never follow a later `setLocale`. `id` stays a plain literal — it's the
+// React key and what BranchExportDialog persists as "last used" elsewhere in the export menu.
+const FORMATS: { id: string; label: string; run: (io: BranchIo) => void | Promise<void> }[] = [
+  {
+    id: "png",
+    get label() {
+      return t("panel.pngImage");
+    },
+    run: (io) => io.exportPng(),
+  },
+  {
+    id: "svg",
+    get label() {
+      return t("panel.svgVector");
+    },
+    run: (io) => io.exportSvg(),
+  },
+  {
+    id: "html",
+    get label() {
+      return t("panel.htmlStandalonePicture");
+    },
+    run: (io) => io.exportHtml(),
+  },
+  {
+    id: "html-interactive",
+    get label() {
+      return t("panel.htmlInteractive");
+    },
+    run: (io) => io.exportInteractiveHtml(),
+  },
+  {
+    id: "pdf",
+    get label() {
+      return t("panel.pdfPrint");
+    },
+    run: (io) => io.exportPdf(),
+  },
+  {
+    id: "json",
+    get label() {
+      return t("cmd.export.json");
+    },
+    run: (io) => io.exportJson(),
+  },
+  {
+    id: "markdown",
+    get label() {
+      return t("panel.markdown");
+    },
+    run: (io) => io.exportMarkdown(),
+  },
 ];
 
 export function BranchExportDialog({
@@ -63,16 +109,16 @@ export function BranchExportDialog({
     <Dialog
       open
       onClose={onClose}
-      title={`Export branch: ${branchName || "(untitled)"}`}
+      title={t("panel.exportBranchNamed", { name: branchName || t("common.untitled") })}
       style={{ width: "min(92vw, 340px)", padding: space.xxl, boxShadow: "var(--ed-shadow-pop)" }}
     >
       <p style={{ margin: `0 0 ${space.lg}px`, color: "var(--ed-muted)", fontSize: 13 }}>
-        Export just this topic and everything under it.
+        {t("panel.exportJustThisTopicAnd")}
       </p>
       <div style={{ display: "grid", gap: space.sm }}>
         {FORMATS.map((f) => (
           <Button
-            key={f.label}
+            key={f.id}
             onClick={() => {
               void f.run(exports);
               onClose();

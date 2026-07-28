@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { t } from "../i18n";
 import type { SelectedOverlay } from "../mindmap";
 import { InspectorResizer } from "./InspectorResizer";
 import { SWATCHES, fieldLabel, seg, segRow } from "./inspectorControls";
@@ -17,7 +18,7 @@ const KIND_LABEL: Record<SelectedOverlay["kind"], string> = {
 /** A one-line context describing what the overlay covers — mirrors the node inspector's breadcrumb so
  *  every inspector reads the same way (P5). caption is already "N topics" for boundary/summary. */
 function overlayContext(kind: SelectedOverlay["kind"], caption: string): string {
-  if (kind === "callout") return caption ? `Callout on ${caption}` : "Callout";
+  if (kind === "callout") return caption ? t("panel.calloutOn", { caption }) : "Callout";
   return `${KIND_LABEL[kind]} around ${caption || "0 topics"}`;
 }
 
@@ -68,7 +69,11 @@ export function OverlayInspector({
   const labelTitle = isCallout ? "Text" : "Label";
   const current = overlay.color?.toLowerCase();
   return (
-    <aside className="mm-inspector" aria-label="Overlay info" style={width ? { width } : undefined}>
+    <aside
+      className="mm-inspector"
+      aria-label={t("panel.overlayInfo")}
+      style={width ? { width } : undefined}
+    >
       {width && onResize ? <InspectorResizer width={width} onResize={onResize} /> : null}
       <div
         className="mm-inspector-head"
@@ -100,8 +105,8 @@ export function OverlayInspector({
           <button
             type="button"
             className="mm-inspector-min"
-            title="Minimize"
-            aria-label="Minimize overlay info"
+            title={t("panel.minimize")}
+            aria-label={t("panel.minimizeOverlayInfo")}
             onClick={onMinimize}
           >
             ›
@@ -118,8 +123,8 @@ export function OverlayInspector({
             onBlur={(e) => {
               if (e.target.value !== overlay.label) onSetLabel(e.target.value);
             }}
-            placeholder="Callout text"
-            aria-label="Callout text"
+            placeholder={t("panel.calloutText")}
+            aria-label={t("panel.calloutText")}
             style={{ ...controlStyle, resize: "vertical" }}
           />
         ) : (
@@ -132,14 +137,16 @@ export function OverlayInspector({
             onBlur={(e) => {
               if (e.target.value.trim() !== overlay.label) onSetLabel(e.target.value.trim());
             }}
-            placeholder={overlay.kind === "boundary" ? "Boundary label" : "Summary label"}
-            aria-label={`${KIND_LABEL[overlay.kind]} label`}
+            placeholder={
+              overlay.kind === "boundary" ? t("panel.boundaryLabel") : t("panel.summaryLabel")
+            }
+            aria-label={t("panel.overlayKindLabel", { kind: KIND_LABEL[overlay.kind] })}
             style={controlStyle}
           />
         )}
 
         {/* Colour — re-tints the whole object (stroke/fill/label); "" resets to the default accent. */}
-        <div style={fieldLabel}>Colour</div>
+        <div style={fieldLabel}>{t("panel.colour")}</div>
         <div style={segRow}>
           {SWATCHES.map((c) => {
             const active = current === c.toLowerCase();
@@ -148,7 +155,7 @@ export function OverlayInspector({
                 key={c}
                 type="button"
                 title={c}
-                aria-label={`Colour ${c}`}
+                aria-label={t("common.colourNamed", { colour: c })}
                 aria-pressed={active}
                 onClick={() => onSetColor(c)}
                 style={{
@@ -168,8 +175,8 @@ export function OverlayInspector({
             type="color"
             value={current || "#888888"}
             onChange={(e) => onSetColor(e.target.value)}
-            aria-label="Custom colour"
-            title="Custom colour"
+            aria-label={t("panel.customColour")}
+            title={t("panel.customColour")}
             style={{
               width: 24,
               height: 22,
@@ -182,7 +189,7 @@ export function OverlayInspector({
           />
           <button
             type="button"
-            title="Reset to the default colour"
+            title={t("panel.resetToTheDefaultColour")}
             aria-pressed={!current}
             onClick={() => onSetColor("")}
             style={{
@@ -196,14 +203,14 @@ export function OverlayInspector({
               padding: "3px 9px",
             }}
           >
-            Default
+            {t("panel.default")}
           </button>
         </div>
 
         {/* Boundary shape + outline (boundary kind only). */}
         {overlay.kind === "boundary" ? (
           <>
-            <div style={fieldLabel}>Shape</div>
+            <div style={fieldLabel}>{t("panel.shape")}</div>
             <div style={segRow}>
               {(["roundRect", "rect", "ellipse", "cloud", "polygon"] as const).map((s) => {
                 const active = (overlay.shape ?? "roundRect") === s;
@@ -220,7 +227,7 @@ export function OverlayInspector({
                 );
               })}
             </div>
-            <div style={fieldLabel}>Outline</div>
+            <div style={fieldLabel}>{t("panel.outline")}</div>
             <div style={segRow}>
               {(["solid", "dashed", "dotted"] as const).map((d) => {
                 const active = (overlay.dash ?? "solid") === d;
@@ -257,7 +264,7 @@ export function OverlayInspector({
               padding: "6px 0",
             }}
           >
-            Delete {KIND_LABEL[overlay.kind].toLowerCase()}
+            {t("panel.deleteKindLower", { kind: KIND_LABEL[overlay.kind].toLowerCase() })}
           </button>
         ) : null}
       </div>

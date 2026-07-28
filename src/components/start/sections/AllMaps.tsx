@@ -1,6 +1,10 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { useState } from "react";
 import { Button, Input } from "../../../design/primitives";
-import { compareText } from "../../../i18n";
+// `/i18n/registry`, not the barrel: this file is in the lazy Start chunk, and the barrel
+// side-effect-imports the EAGER core catalogue, which would drag every chrome string in with it.
+import { compareText } from "../../../i18n/registry";
 import { createFolder, deleteFolder, moveMapToFolder, renameFolder } from "../../../store/mapStore";
 import { timeAgo } from "../../../ui";
 import { Dialog } from "../../Dialog";
@@ -43,7 +47,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
   });
   const query = q.trim().toLowerCase();
   const shown = query
-    ? sorted.filter((e) => (e.title || "(untitled)").toLowerCase().includes(query))
+    ? sorted.filter((e) => (e.title || t("common.untitled")).toLowerCase().includes(query))
     : sorted;
   const countIn = (fid: string) => entries.filter((e) => e.folderId === fid).length;
 
@@ -87,12 +91,12 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
                   onClick={() => setFolderId(null)}
                   style={{ color: "var(--st-muted)", fontWeight: 600 }}
                 >
-                  All maps
+                  {t("toolbar.allMaps")}
                 </button>{" "}
                 <span style={{ color: "var(--st-muted)" }}>/</span> {openFolder.name}
               </>
             ) : (
-              "All maps"
+              t("toolbar.allMaps")
             )}
           </h2>
           <p className="st-section-sub">
@@ -109,15 +113,15 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
                 className="st-btn"
                 onClick={() => setNamePrompt({ id: openFolder.id, value: openFolder.name })}
               >
-                Rename folder
+                {t("start.renameFolder")}
               </button>
               <button type="button" className="st-btn" onClick={removeFolder}>
-                Delete folder
+                {t("start.deleteFolder")}
               </button>
             </>
           ) : (
             <button type="button" className="st-btn" onClick={() => setNamePrompt({ value: "" })}>
-              ＋ New folder
+              {t("start.newFolder2")}
             </button>
           )}
           <input
@@ -125,18 +129,18 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
             style={{ width: 160 }}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search your maps…"
-            aria-label="Search your maps"
+            placeholder={t("start.searchYourMaps")}
+            aria-label={t("start.searchYourMaps2")}
           />
           <select
             className="st-select"
             value={sort}
             onChange={(e) => setSort(e.target.value as Sort)}
-            aria-label="Sort maps"
+            aria-label={t("start.sortMaps")}
           >
-            <option value="edited">Recently edited</option>
-            <option value="name">Name A–Z</option>
-            <option value="nodes">Most nodes</option>
+            <option value="edited">{t("start.recentlyEdited")}</option>
+            <option value="name">{t("start.nameAZ")}</option>
+            <option value="nodes">{t("start.mostNodes")}</option>
           </select>
           <button type="button" className="st-btn" onClick={() => setList((v) => !v)}>
             {list ? "▦ Grid" : "☰ List"}
@@ -154,7 +158,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
               className="st-card st-card-hover st-tile"
               onClick={() => setFolderId(f.id)}
               style={{ textAlign: "left", cursor: "pointer" }}
-              title={`Open folder ${f.name}`}
+              title={t("start.openFolder", { name: f.name })}
             >
               <div
                 className="st-thumb"
@@ -169,9 +173,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
               </div>
               <div className="st-tile-body">
                 <div className="st-card-title">{f.name}</div>
-                <div className="st-card-meta">
-                  {countIn(f.id)} map{countIn(f.id) === 1 ? "" : "s"}
-                </div>
+                <div className="st-card-meta">{t("count.maps", { n: countIn(f.id) })}</div>
               </div>
             </button>
           ))}
@@ -182,7 +184,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
         <EmptyMaps ctx={ctx} />
       ) : shown.length === 0 ? (
         <div className="st-empty">
-          {query ? `No maps match “${q}”.` : "No maps here yet — move one in from its ⋯ menu."}
+          {query ? t("start.noMapsMatch", { query: q }) : t("start.noMapsHereYetMove")}
         </div>
       ) : list ? (
         <div className="st-list">
@@ -194,10 +196,10 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
                 style={{ flex: 1, textAlign: "left", color: "var(--st-ink)", fontWeight: 600 }}
                 onClick={() => handleMapAction("open", e, ctx)}
               >
-                {e.title || "(untitled)"}
+                {e.title || t("common.untitled")}
               </button>
               <span className="st-card-meta">
-                {e.nodeCount} nodes
+                {t("count.nodes", { n: e.nodeCount })}
                 {e.updatedAt ? ` · ${timeAgo(e.updatedAt)}` : ""}
               </span>
             </div>
@@ -215,7 +217,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
       <Dialog
         open={namePrompt != null}
         onClose={() => setNamePrompt(null)}
-        title={namePrompt?.id ? "Rename folder" : "New folder"}
+        title={namePrompt?.id ? t("start.renameFolder") : t("start.newFolder")}
         style={{ width: "min(92vw, 320px)", padding: 20 }}
       >
         <form
@@ -227,15 +229,15 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
           <Input
             value={namePrompt?.value ?? ""}
             onChange={(e) => setNamePrompt((p) => (p ? { ...p, value: e.target.value } : p))}
-            placeholder="Folder name"
-            aria-label="Folder name"
+            placeholder={t("start.folderName")}
+            aria-label={t("start.folderName")}
             style={{ width: "100%", marginBottom: 12 }}
           />
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <Button type="button" onClick={() => setNamePrompt(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
-            <Button type="submit">{namePrompt?.id ? "Rename" : "Create"}</Button>
+            <Button type="submit">{namePrompt?.id ? t("common.rename") : t("start.create")}</Button>
           </div>
         </form>
       </Dialog>
@@ -244,7 +246,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
       <Dialog
         open={moveEntry != null}
         onClose={() => setMoveEntry(null)}
-        title={`Move “${moveEntry?.title || "(untitled)"}” to…`}
+        title={t("start.moveNamedTo", { name: moveEntry?.title || t("common.untitled") })}
         style={{ width: "min(92vw, 320px)", padding: 20 }}
       >
         <div style={{ display: "grid", gap: 6 }}>
@@ -252,7 +254,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
             onClick={() => void doMove(null)}
             style={{ justifyContent: "flex-start", width: "100%" }}
           >
-            Top level (no folder)
+            {t("start.topLevelNoFolder")}
           </Button>
           {folders.map((f) => (
             <Button
@@ -270,7 +272,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
             }}
             style={{ justifyContent: "flex-start", width: "100%", opacity: 0.85 }}
           >
-            ＋ New folder & move here
+            {t("start.newFolderMoveHere")}
           </Button>
         </div>
       </Dialog>

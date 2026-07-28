@@ -1,4 +1,5 @@
 import { type RefObject, useEffect } from "react";
+import { t } from "../i18n";
 import { fileToMapImage } from "../io/image";
 import { parsePaste } from "../io/pasteTable";
 import type { MindMapHandle } from "../mindmap";
@@ -35,13 +36,9 @@ export function useClipboardImagePaste(
           try {
             const image = await fileToMapImage(file);
             const ok = mapRef.current?.setSelectedImage(image);
-            showHint(
-              ok
-                ? "Image pasted onto the selected topic."
-                : "Select a topic first, then paste an image.",
-            );
+            showHint(ok ? t("app.imagePastedOntoTheSelected") : t("app.selectATopicFirstThen"));
           } catch (err) {
-            showHint(err instanceof Error ? err.message : "Couldn't paste that image.");
+            showHint(err instanceof Error ? err.message : t("app.couldnTPasteThatImage"));
           }
         })();
         return;
@@ -54,11 +51,11 @@ export function useClipboardImagePaste(
       e.preventDefault();
       const ok = mapRef.current?.addSubtreeToSelected(forest);
       if (!ok) {
-        showHint("Select a topic first to paste text under it (or use Paste text → map).");
+        showHint(t("app.selectATopicFirstTo"));
         return;
       }
       const n = forest.reduce((s, node) => s + 1 + countKids(node.children), 0);
-      showHint(`Pasted ${n} topic${n === 1 ? "" : "s"} under the selection.`);
+      showHint(t("hint.pastedTopics", { n }));
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);

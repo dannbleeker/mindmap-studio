@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 // Marker palette shown in the UI; emoji render as node markers on the canvas.
 export const MARKER_PALETTE = [
   "✅",
@@ -99,10 +100,36 @@ export interface MarkerGroup {
 }
 
 export const MARKER_GROUPS: readonly MarkerGroup[] = [
-  { id: "priority", name: "Priority", members: ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"] },
-  { id: "status", name: "Status", members: ["🔴", "🟡", "🟢", "🔵", "🟠", "🟣"] },
-  { id: "mood", name: "Mood", members: ["🙂", "😐", "🙁"] },
-  { id: "vote", name: "Vote", members: ["👍", "👎"] },
+  // `name` is a getter: these are rendered as picker headings, and a plain t() at module scope
+  // freezes at import. `id` is what everything else keys on, and stays a literal.
+  {
+    id: "priority",
+    get name() {
+      return t("common.priority");
+    },
+    members: ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"],
+  },
+  {
+    id: "status",
+    get name() {
+      return t("common.status");
+    },
+    members: ["🔴", "🟡", "🟢", "🔵", "🟠", "🟣"],
+  },
+  {
+    id: "mood",
+    get name() {
+      return t("common.mood");
+    },
+    members: ["🙂", "😐", "🙁"],
+  },
+  {
+    id: "vote",
+    get name() {
+      return t("common.vote");
+    },
+    members: ["👍", "👎"],
+  },
 ];
 
 const GROUP_OF = new Map<string, string>();

@@ -18,6 +18,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { BUDGET_KB } from "./bundle-budget.mjs";
+import { measureFirstLoad } from "./lib/firstLoad.mjs";
 
 const ROOT = process.cwd();
 const sh = (cmd) =>
@@ -232,7 +233,13 @@ const perFileCov = safe(() => {
   return out;
 }, []);
 
-// --- bundle size (gzip of built dist/; budget = the entry chunk ≤ 150 kB) -------
+// --- bundle size (gzip of built dist/; budget = TRUE FIRST LOAD ≤ BUDGET_KB) ---
+//
+// `withinBudget` must be computed from the same figure the gate defends, or the dashboard reports a
+// green tick against a ceiling it is interpreting differently — the same class of drift that made
+// bundle-budget.mjs necessary, one level up. Hence `measureFirstLoad`, shared with size-budget.mjs.
+// `entryGzipKb` stays in the payload for continuity of the historical series, but it is no longer what
+// the budget is judged against.
 const bundle = safe(
   () => {
     const distDir = join(ROOT, "dist");
@@ -242,13 +249,13 @@ const bundle = safe(
         cssGzipKb: null,
         totalGzipKb: null,
         entryGzipKb: null,
-        budgetKb: 150,
+        firstLoadGzipKb: null,
+        budgetKb: BUDGET_KB,
         withinBudget: true,
       };
     }
     let jsBytes = 0;
     let cssBytes = 0;
-    let entryBytes = 0;
     for (const e of readdirSync(distDir, { recursive: true })) {
       const rel = String(e).replace(/\\/g, "/");
       if (!/\.(js|css)$/.test(rel)) continue;
@@ -257,16 +264,17 @@ const bundle = safe(
       const gz = gzipSync(buf).length;
       if (rel.endsWith(".css")) cssBytes += gz;
       else jsBytes += gz;
-      if (/(^|\/)assets\/index-[^/]+\.js$/.test(rel)) entryBytes = gz; // the entry chunk
     }
+    const { entry, initial } = measureFirstLoad(distDir);
     const budgetKb = BUDGET_KB; // imported, not mirrored — see scripts/bundle-budget.mjs
     return {
       jsGzipKb: round1(jsBytes),
       cssGzipKb: round1(cssBytes),
       totalGzipKb: round1(jsBytes + cssBytes),
-      entryGzipKb: round1(entryBytes),
+      entryGzipKb: round1(entry * 1024),
+      firstLoadGzipKb: round1(initial * 1024),
       budgetKb,
-      withinBudget: round1(entryBytes) <= budgetKb,
+      withinBudget: round1(initial * 1024) <= budgetKb,
     };
   },
   {
@@ -274,7 +282,8 @@ const bundle = safe(
     cssGzipKb: null,
     totalGzipKb: null,
     entryGzipKb: null,
-    budgetKb: 150,
+    firstLoadGzipKb: null,
+    budgetKb: BUDGET_KB,
     withinBudget: true,
   },
 );
@@ -447,6 +456,33 @@ const stats = {
   featureCoverage,
   git: { born, ageDays, commits, commits7d, authors, churn30d, changelogEntries },
 };
+
+// REFUSE to overwrite a good stats.json with a coverage-less one.
+//
+// Every coverage figure here comes from `coverage/coverage-summary.json`, and without it the `safe()`
+// guards degrade to `null` rather than failing — which is right for a first run in a fresh checkout,
+// and wrong for a re-run in a repo that already has real numbers. Running `node scripts/build-stats.mjs`
+// on its own (easy to do: it is a one-liner, and the coverage prerequisite lives in a comment at the
+// top of this file and in stats.yml) then silently replaces `lineCoveragePct: 90.1` with `null`. The
+// dashboard renders "—", `test/dashboard.test.ts` fails on its own contract, and nothing points at the
+// cause. That is not hypothetical — it happened, and the failure surfaced three commits later.
+//
+// So: no coverage + an existing file that HAS coverage = exit non-zero and touch nothing. Use
+// `pnpm stats`, which runs coverage first.
+const priorStats = safe(
+  () => JSON.parse(readFileSync(join(ROOT, "public/stats.json"), "utf8")),
+  null,
+);
+if (!coverage && priorStats?.headline?.lineCoveragePct != null) {
+  console.error(
+    [
+      "✗ Refusing to overwrite public/stats.json: no coverage/coverage-summary.json, but the committed",
+      `  stats.json has real coverage (${priorStats.headline.lineCoveragePct}%). Writing now would blank it.`,
+      "  Run `pnpm stats` (coverage → build → features → stats) instead of this script alone.",
+    ].join("\n"),
+  );
+  process.exit(1);
+}
 
 writeFileSync(join(ROOT, "public/stats.json"), `${JSON.stringify(stats, null, 2)}\n`);
 

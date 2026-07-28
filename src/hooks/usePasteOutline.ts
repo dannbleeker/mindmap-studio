@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { t } from "../i18n";
 import { parsePaste } from "../io/pasteTable";
 import type { MindMapHandle } from "../mindmap";
 import type { MapNode, MindMapDoc } from "../model/types";
@@ -46,7 +47,7 @@ export function usePasteOutline(opts: {
   const addAsNewMap = useCallback(() => {
     const forest = parsePaste(text);
     if (forest.length === 0) {
-      showHint("Nothing to add — paste an outline first.");
+      showHint(t("app.nothingToAddPasteAn"));
       return;
     }
     const root: MapNode =
@@ -60,22 +61,22 @@ export function usePasteOutline(opts: {
     });
     setOpen(false);
     setText("");
-    showHint("Created a map from the pasted text.");
+    showHint(t("app.createdAMapFromThe"));
   }, [text, load, showHint]);
 
   const addUnderSelected = useCallback(() => {
     const forest = parsePaste(text);
     if (forest.length === 0) {
-      showHint("Nothing to add — paste an outline first.");
+      showHint(t("app.nothingToAddPasteAn"));
       return;
     }
     if (!mapRef.current?.addSubtreeToSelected(forest)) {
-      showHint("Select a node first, or use New map.");
+      showHint(t("app.selectANodeFirstOr"));
       return;
     }
     setOpen(false);
     setText("");
-    showHint(`Added ${forest.length} topic${forest.length === 1 ? "" : "s"} under the selection.`);
+    showHint(t("hint.addedTopics", { n: forest.length }));
   }, [text, mapRef, showHint]);
 
   return { open, setOpen, text, setText, count, addAsNewMap, addUnderSelected };

@@ -31,6 +31,8 @@ export async function buildMapPdf(
   pxH = 0,
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
+  // The product NAME, in PDF metadata — a brand, not copy. Stays literal in every locale, the same
+  // way the app name does everywhere else.
   pdf.setProducer("MindMap Studio");
   const png = await pdf.embedPng(pngBytes);
   const imgW = pxW || png.width;

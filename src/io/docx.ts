@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./messages";
 // Word (.docx) import + export: the map as an indented outline document.
 //
 // A .docx is an Open Packaging Conventions ZIP of XML parts.
@@ -177,7 +179,7 @@ export function fromDocx(bytes: Uint8Array): MindMapDoc {
   // Unzip and locate word/document.xml.
   const files = unzipOrThrow(bytes, ".docx");
   const xmlEntry = files["word/document.xml"];
-  if (!xmlEntry) throw new Error("No word/document.xml found in .docx");
+  if (!xmlEntry) throw new Error(t("io.err.docxNoDocument"));
 
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
   const tree = parser.parse(strFromU8(xmlEntry));
@@ -187,7 +189,7 @@ export function fromDocx(bytes: Uint8Array): MindMapDoc {
     tree?.["w:document"]?.["w:body"] ?? tree?.["w:document"]?.["w:body"] ?? tree?.document?.body;
   const rawParas = asList(body?.["w:p"] ?? null);
 
-  if (rawParas.length === 0) throw new Error("No paragraphs found in .docx");
+  if (rawParas.length === 0) throw new Error(t("io.err.docxNoParagraphs"));
 
   // Build (text, depth, indent, italic) rows — skip empty paragraphs.
   const rows: ParaRow[] = [];
@@ -200,7 +202,7 @@ export function fromDocx(bytes: Uint8Array): MindMapDoc {
     rows.push({ text, depth, indent, italic: isAllItalic(p) });
   }
 
-  if (rows.length === 0) throw new Error("No paragraphs found in .docx");
+  if (rows.length === 0) throw new Error(t("io.err.docxNoParagraphs"));
 
   // Stack-based outline builder.
   // Stack entries: { node, depth, indent } — we carry `indent` so that our exporter's

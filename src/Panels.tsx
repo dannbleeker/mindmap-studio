@@ -73,7 +73,7 @@ import {
 } from "./outline";
 import { addSlide, removeSlide, reorderSlides, setSlideNote } from "./present/deckEdit";
 import { OVERVIEW_SLIDE_ID } from "./present/slides";
-import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS, priorityLabel } from "./priority";
+import { PRIORITY_COLOR, PRIORITY_LEVELS, priorityHasName, priorityLabel } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import {
   type InlineTag,
@@ -85,7 +85,13 @@ import {
 } from "./richTextCommands";
 import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
-import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from "./stickers";
+import {
+  type Sticker,
+  searchStickers,
+  stickerCategories,
+  stickerCategoryLabel,
+  stickerDataUrl,
+} from "./stickers";
 import { MAX_VERSIONS, type VersionMeta } from "./store/mapStore";
 import { formatDateShort, parseNaturalDate, todayISO } from "./taskDate";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
@@ -186,7 +192,7 @@ export function NaturalDateInput({
       />
       <button
         type="button"
-        aria-label={`${ariaLabel}: pick from calendar`}
+        aria-label={t("panel.pickFromCalendarFor", { label: ariaLabel })}
         title={t("panel.pickFromCalendar")}
         onClick={() => {
           try {
@@ -469,17 +475,17 @@ export function StyleBar({
     );
   };
   const geomShapes: { shape: NodeShape; title: string }[] = [
-    { shape: "diamond", title: "Diamond (decision)" },
-    { shape: "ellipse", title: "Oval (start / end)" },
-    { shape: "parallelogram", title: "Parallelogram (input / output)" },
-    { shape: "hexagon", title: "Hexagon (preparation)" },
-    { shape: "cylinder", title: "Cylinder (data store)" },
-    { shape: "trapezoid", title: "Trapezoid (manual operation)" },
-    { shape: "octagon", title: "Octagon (stop / limit)" },
-    { shape: "document", title: "Document (report / output)" },
-    { shape: "callout", title: "Callout (speech / annotation)" },
-    { shape: "star", title: "Star (highlight)" },
-    { shape: "cloud", title: "Cloud (idea / external system)" },
+    { shape: "diamond", title: t("panel.shape.diamond") },
+    { shape: "ellipse", title: t("panel.shape.oval") },
+    { shape: "parallelogram", title: t("panel.shape.parallelogram") },
+    { shape: "hexagon", title: t("panel.shape.hexagon") },
+    { shape: "cylinder", title: t("panel.shape.cylinder") },
+    { shape: "trapezoid", title: t("panel.shape.trapezoid") },
+    { shape: "octagon", title: t("panel.shape.octagon") },
+    { shape: "document", title: t("panel.shape.document") },
+    { shape: "callout", title: t("panel.shape.callout") },
+    { shape: "star", title: t("panel.shape.star") },
+    { shape: "cloud", title: t("panel.shape.cloud") },
   ];
   // Which controls match the current single selection (so the bar reflects state, not just writes it).
   const s = style;
@@ -694,7 +700,7 @@ export function StyleBar({
               key={s.id}
               type="button"
               onClick={() => onStyle(s.style)}
-              title={`Apply "${s.name}"`}
+              title={t("panel.applyNamed", { name: s.name })}
               aria-label={t("panel.applyPreset", { name: s.name })}
               style={{
                 width: 18,
@@ -730,7 +736,7 @@ export function StyleBar({
           })
         }
       >
-        Reset
+        {t("common.reset")}
       </button>
     </div>
   );
@@ -1282,7 +1288,7 @@ export function MarkerTagIndex({
                         setEditTag(key);
                         setTagDraft(key);
                       }}
-                      title={`Rename / merge "${key}" — type an existing tag name to merge`}
+                      title={t("panel.renameMergeTag", { tag: key })}
                       aria-label={t("panel.renameTagNamed", { tag: key })}
                       style={{ ...styleBtn, fontSize: 11, padding: "1px 5px" }}
                     >
@@ -1318,8 +1324,8 @@ export function MarkerTagIndex({
             {t("panel.noMarkersOr")}
           </div>
         ) : null}
-        {group("Markers", markers, "marker")}
-        {group("Tags", tags, "tag", manageTags)}
+        {group(t("common.markers"), markers, "marker")}
+        {group(t("common.tags"), tags, "tag", manageTags)}
       </div>
     </Panel>
   );
@@ -1352,7 +1358,7 @@ export function RelationshipsPanel({
   };
   return (
     <Panel>
-      <div style={panelTitle}>🔗 Relationships</div>
+      <div style={panelTitle}>🔗 {t("app.relationships")}</div>
       {links.length === 0 ? (
         <div style={{ padding: "8px 12px", color: colors.muted, fontSize: fontSize.sm }}>
           {t("panel.noRelationshipsOr")}
@@ -1372,7 +1378,7 @@ export function RelationshipsPanel({
             >
               <span
                 style={{ color: colors.muted }}
-                title={l.kind === "relationship" ? "Relationship" : t("panel.topicLink")}
+                title={l.kind === "relationship" ? t("panel.relationship") : t("panel.topicLink")}
               >
                 {l.kind === "relationship" ? "↬" : "↪"}
               </span>
@@ -1415,7 +1421,7 @@ export function StatsPanel({ doc }: { doc: MindMapDoc }) {
   );
   return (
     <Panel>
-      <div style={panelTitle}>📊 Map statistics</div>
+      <div style={panelTitle}>📊 {t("app.mapStatistics")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <PanelSection>{t("toolbar.structure")}</PanelSection>
         {row("Topics", s.topics)}
@@ -1466,7 +1472,7 @@ export function AgendaPanel({
             key={it.id}
             type="button"
             onClick={() => onPick(it.id)}
-            title={`${it.topic || t("common.untitled")} — due ${it.due}`}
+            title={t("panel.dueOn", { topic: it.topic || t("common.untitled"), due: it.due })}
             style={{
               ...listRow,
               display: "flex",
@@ -1488,7 +1494,7 @@ export function AgendaPanel({
   };
   return (
     <Panel>
-      <div style={panelTitle}>🗓 Agenda</div>
+      <div style={panelTitle}>🗓 {t("app.agenda")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {agendaIsEmpty(buckets) ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
@@ -1520,7 +1526,7 @@ export function MapsPanel({
   const shown = needle ? maps.filter((m) => (m.title || "").toLowerCase().includes(needle)) : maps;
   return (
     <Panel>
-      <div style={panelTitle}>🗂 Maps</div>
+      <div style={panelTitle}>🗂 {t("app.maps")}</div>
       <div style={{ padding: "0 10px 6px" }}>
         <Input
           value={q}
@@ -1590,7 +1596,7 @@ export function InboxPanel({
   };
   return (
     <Panel>
-      <div style={panelTitle}>📥 Inbox</div>
+      <div style={panelTitle}>📥 {t("app.inbox")}</div>
       <div style={{ padding: "0 10px 6px", display: "flex", gap: 6 }}>
         <Input
           value={draft}
@@ -1606,13 +1612,13 @@ export function InboxPanel({
           style={{ width: "auto", flex: 1 }}
         />
         <Button onClick={capture} disabled={!draft.trim()} style={{ padding: "2px 8px" }}>
-          Add
+          {t("common.add")}
         </Button>
       </div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {items.length === 0 ? (
           <div style={{ padding: "4px 10px", fontSize: fontSize.md, color: colors.faint }}>
-            Nothing unfiled. Jot ideas here, file them onto a map later.
+            {t("panel.inboxEmpty")}
           </div>
         ) : (
           items.map((it) => (
@@ -1642,15 +1648,15 @@ export function InboxPanel({
                 onClick={() => onFile(it.id, it.text)}
                 disabled={!canFile}
                 title={canFile ? t("panel.fileOntoThe") : t("panel.openAMap")}
-                aria-label={`File "${it.text}" onto the map`}
+                aria-label={t("panel.fileOntoMap", { text: it.text })}
                 style={{ padding: "2px 6px", fontSize: fontSize.sm }}
               >
-                → map
+                {t("panel.toMap")}
               </Button>
               <Button
                 onClick={() => onDiscard(it.id)}
                 title={t("panel.discard")}
-                aria-label={`Discard "${it.text}"`}
+                aria-label={t("panel.discardNamed", { text: it.text })}
                 style={{ padding: "2px 6px", fontSize: fontSize.sm }}
               >
                 ×
@@ -1689,10 +1695,9 @@ export function SlideDeckEditorPanel({
   const refs = deck.map((d) => d.ref);
   return (
     <Panel>
-      <div style={panelTitle}>🎞 Slide deck</div>
+      <div style={panelTitle}>🎞 {t("panel.slideDeck")}</div>
       <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-        Choose which topics become slides, reorder them, and add speaker notes. Empty = the
-        automatic deck (overview + one slide per top branch).
+        {t("panel.deckExplain")}
       </div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {deck.map((row, i) => (
@@ -1726,7 +1731,7 @@ export function SlideDeckEditorPanel({
               <Button
                 onClick={() => onChange(removeSlide(refs, i))}
                 title={t("panel.removeSlide")}
-                aria-label={`Remove ${row.heading}`}
+                aria-label={t("panel.removeNamed", { name: row.heading })}
                 style={{ padding: "0 6px", fontSize: fontSize.sm }}
               >
                 ✕
@@ -1765,7 +1770,7 @@ export function SlideDeckEditorPanel({
           }}
           style={{ fontSize: fontSize.sm }}
         >
-          + Add
+          {t("panel.addRow")}
         </Button>
       </div>
       {isCustom ? (
@@ -1856,7 +1861,7 @@ export function FilterPanel({
   );
   return (
     <Panel>
-      <div style={panelTitle}>🎚 Power Filter</div>
+      <div style={panelTitle}>🎚 {t("app.powerFilter")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <Input
           value={text}
@@ -1887,7 +1892,9 @@ export function FilterPanel({
           <option value={0}>{t("panel.any")}</option>
           {PRIORITY_LEVELS.map((p) => (
             <option key={p} value={p}>
-              {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]}` : String(p)}
+              {priorityHasName(p)
+                ? t("panel.priorityNumbered", { n: p, label: priorityLabel(p) })
+                : String(p)}
             </option>
           ))}
         </Select>
@@ -1924,11 +1931,11 @@ export function FilterPanel({
             style={{ width: "auto", flex: 1 }}
           >
             <option value="">{t("panel.anyType")}</option>
-            <option value="relates-to">relates-to</option>
-            <option value="depends-on">depends-on</option>
-            <option value="causes">causes</option>
-            <option value="supports">supports</option>
-            <option value="blocks">blocks</option>
+            <option value="relates-to">{t("panel.relates")}</option>
+            <option value="depends-on">{t("panel.depends")}</option>
+            <option value="causes">{t("panel.causes")}</option>
+            <option value="supports">{t("panel.supports")}</option>
+            <option value="blocks">{t("panel.blocks")}</option>
           </Select>
         </div>
         {markerEntries.length > 0 ? (
@@ -1943,7 +1950,7 @@ export function FilterPanel({
         ) : null}
         {tagEntries.length > 0 ? (
           <>
-            <PanelSection>{t("paste.tags")}</PanelSection>
+            <PanelSection>{t("common.tags")}</PanelSection>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 10px" }}>
               {tagEntries.map((e) => chip(e.key, tags.includes(e.key), () => onToggleTag(e.key)))}
             </div>
@@ -1965,7 +1972,7 @@ export function FilterPanel({
           </span>
           {active ? (
             <Button onClick={onClear} style={{ padding: "2px 8px" }}>
-              Clear
+              {t("common.clear")}
             </Button>
           ) : null}
         </div>
@@ -1981,7 +1988,7 @@ export function FilterPanel({
           }}
         >
           <input type="checkbox" checked={hide} onChange={(e) => onHide?.(e.target.checked)} />
-          Hide non-matches (instead of fading)
+          {t("panel.hideNonMatches")}
         </label>
         {active && onExtract ? (
           <div style={{ padding: "2px 10px 4px" }}>
@@ -1991,8 +1998,7 @@ export function FilterPanel({
           </div>
         ) : null}
         <div style={{ padding: "6px 10px", fontSize: fontSize.xs, color: colors.faint }}>
-          Read-only: non-matching topics are {hide ? "hidden" : "dimmed"}, the map itself is
-          unchanged.
+          {hide ? t("panel.readOnlyHidden") : t("panel.readOnlyDimmed")}
         </div>
 
         <PanelSection>{t("panel.savedFilters")}</PanelSection>
@@ -2029,7 +2035,7 @@ export function FilterPanel({
               <button
                 type="button"
                 onClick={() => onDeleteFilter(f.id)}
-                title={`Delete "${f.name}"`}
+                title={t("panel.deleteNamed", { name: f.name })}
                 style={{
                   border: "none",
                   background: "transparent",
@@ -2066,7 +2072,7 @@ export function FilterPanel({
               }}
               style={{ padding: "2px 8px", fontSize: fontSize.sm }}
             >
-              Save
+              {t("common.save")}
             </Button>
           </div>
         ) : null}
@@ -2101,16 +2107,16 @@ export function HistoryPanel({
           alignItems: "center",
         }}
       >
-        <span>🕔 History</span>
+        <span>🕔 {t("app.history")}</span>
         <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
-          Close
+          {t("common.close")}
         </Button>
       </div>
       <Button
         onClick={onSaveNow}
         style={{ margin: "0 10px 6px", padding: "4px 8px", fontSize: fontSize.sm }}
       >
-        ＋ Save version now
+        {t("panel.saveVersionNow")}
       </Button>
       <Button
         onClick={onPlay}
@@ -2118,7 +2124,7 @@ export function HistoryPanel({
         title={versions.length < 2 ? t("panel.saveAtLeast") : t("panel.playTheMap")}
         style={{ margin: "0 10px 8px", padding: "4px 8px", fontSize: fontSize.sm }}
       >
-        ▶ Play timeline
+        {t("panel.playTimeline")}
       </Button>
       {/* Be honest that auto-history is finite + throttled, so a user doesn't expect to roll back to
           an arbitrary point on a busy map (snapshots coalesce to ~3 min; the last MAX_VERSIONS kept). */}
@@ -2152,13 +2158,16 @@ export function HistoryPanel({
                 }}
                 title={new Date(v.ts).toLocaleString()}
               >
-                {timeAgo(v.ts)} <span style={{ color: colors.faint }}>· {v.nodeCount} topics</span>
+                {timeAgo(v.ts)}{" "}
+                <span style={{ color: colors.faint }}>
+                  · {t("count.topics", { n: v.nodeCount })}
+                </span>
               </span>
               <Button
                 onClick={() => onRestore(v.id)}
                 style={{ padding: "1px 8px", fontSize: fontSize.sm }}
               >
-                Restore
+                {t("common.restore")}
               </Button>
             </div>
           ))
@@ -2221,7 +2230,11 @@ export function PlaybackBar({
       >
         ⏮
       </Button>
-      <Button onClick={onPlayPause} style={btn} aria-label={playing ? "Pause" : "Play"}>
+      <Button
+        onClick={onPlayPause}
+        style={btn}
+        aria-label={playing ? t("panel.pause") : t("panel.play")}
+      >
         {playing ? "⏸" : "▶"}
       </Button>
       <Button
@@ -2249,7 +2262,7 @@ export function PlaybackBar({
         {t("panel.restoreThis")}
       </Button>
       <Button onClick={onExit} style={btn} title={t("panel.exitPlaybackEsc")}>
-        Exit
+        {t("common.exit")}
       </Button>
     </div>
   );
@@ -2350,7 +2363,7 @@ export function WalkBar({
           </Button>
         ) : null}
         <Button onClick={onExit} style={btn} title={t("panel.exitWalkEsc")}>
-          Exit
+          {t("common.exit")}
         </Button>
       </div>
       {note?.trim() ? (
@@ -2496,7 +2509,9 @@ export function StylesPanel({
           <option value="">{t("panel.pickAPriority")}</option>
           {PRIORITY_LEVELS.map((p) => (
             <option key={p} value={p}>
-              {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]} & up` : `${p} & up`}
+              {priorityHasName(p)
+                ? t("panel.priorityNumberedUp", { n: p, label: priorityLabel(p) })
+                : t("panel.priorityAndUp", { n: p })}
             </option>
           ))}
         </Select>
@@ -2519,27 +2534,27 @@ export function StylesPanel({
           aria-label={label}
           style={{ width: "auto", margin: "0 10px 4px" }}
         >
-          <option value="">any relationship</option>
-          <option value="relates-to">relates-to</option>
-          <option value="depends-on">depends-on</option>
-          <option value="causes">causes</option>
-          <option value="supports">supports</option>
-          <option value="blocks">blocks</option>
+          <option value="">{t("panel.anyRelationship")}</option>
+          <option value="relates-to">{t("panel.relates")}</option>
+          <option value="depends-on">{t("panel.depends")}</option>
+          <option value="causes">{t("panel.causes")}</option>
+          <option value="supports">{t("panel.supports")}</option>
+          <option value="blocks">{t("panel.blocks")}</option>
         </Select>
       );
     return null; // completed / overdue / dueSoon / hasAttachment need no value
   };
   const conditionKindOptions = (
     <>
-      <option value="tag">has tag</option>
-      <option value="marker">has marker</option>
-      <option value="completed">is completed</option>
-      <option value="overdue">is overdue</option>
-      <option value="dueSoon">is due soon</option>
-      <option value="priority">priority ≤</option>
-      <option value="textContains">text contains</option>
-      <option value="hasAttachment">has attachment</option>
-      <option value="relationshipType">has relationship</option>
+      <option value="tag">{t("panel.conditionHasTag")}</option>
+      <option value="marker">{t("panel.conditionHasMarker")}</option>
+      <option value="completed">{t("panel.conditionIsCompleted")}</option>
+      <option value="overdue">{t("panel.conditionIsOverdue")}</option>
+      <option value="dueSoon">{t("panel.conditionIsDueSoon")}</option>
+      <option value="priority">{t("panel.conditionPriorityLte")}</option>
+      <option value="textContains">{t("panel.conditionTextContains")}</option>
+      <option value="hasAttachment">{t("panel.conditionHasAttachment")}</option>
+      <option value="relationshipType">{t("panel.conditionHasRelationship")}</option>
     </>
   );
   const swatchRow = (
@@ -2581,7 +2596,7 @@ export function StylesPanel({
   });
   return (
     <Panel>
-      <div style={panelTitle}>🎨 Styles</div>
+      <div style={panelTitle}>🎨 {t("app.styles")}</div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         <PanelSection>{t("panel.conditionalFormatting")}</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
@@ -2624,7 +2639,7 @@ export function StylesPanel({
             title={t("panel.invertThisCondition")}
           >
             <input type="checkbox" checked={negate} onChange={(e) => setNegate(e.target.checked)} />
-            NOT
+            {t("panel.not")}
           </label>
           <Select
             value={kind}
@@ -2657,7 +2672,7 @@ export function StylesPanel({
                   checked={!!c.negate}
                   onChange={(e) => updateAlso(i, { negate: e.target.checked })}
                 />
-                NOT
+                {t("panel.not")}
               </label>
               <Select
                 value={c.kind}
@@ -2691,7 +2706,7 @@ export function StylesPanel({
           }
           style={{ margin: "0 10px 4px", fontSize: fontSize.sm }}
         >
-          + AND condition
+          {t("panel.addAndCondition")}
         </Button>
         {swatchRow(FILL_SWATCHES, fill, setFill, "Fill")}
         {swatchRow(BORDER_SWATCHES, border, setBorder, "Border")}
@@ -2715,12 +2730,12 @@ export function StylesPanel({
         </div>
         {swatchRow(BORDER_SWATCHES, actionColor, setActionColor, "Branch")}
         <Button onClick={add} style={{ margin: "4px 10px", fontSize: fontSize.sm }}>
-          + Add rule
+          {t("panel.addRule")}
         </Button>
 
         <PanelSection>{t("panel.namedStyles")}</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-          Save the selected topic's look, then reuse it on others.
+          {t("panel.namedStylesExplain")}
         </div>
         {namedStyles.map((s) => (
           <div
@@ -2731,7 +2746,7 @@ export function StylesPanel({
             <button
               type="button"
               onClick={() => onApplyStyle(s.style)}
-              title={`Apply "${s.name}" to the selected topic`}
+              title={t("panel.applyNamedToSelected", { name: s.name })}
               style={{
                 flex: 1,
                 textAlign: "left",
@@ -2770,7 +2785,7 @@ export function StylesPanel({
             }}
             style={{ fontSize: fontSize.sm }}
           >
-            Save
+            {t("common.save")}
           </Button>
         </div>
       </div>
@@ -2786,14 +2801,36 @@ export function StylesPanel({
 type InfoTab = "details" | "notes" | "style";
 // Details holds markers/tags/task/links; the note editor gets its own roomy Notes tab (P3) so Details
 // isn't one long scroll. Style stays the trailing tab.
+// `label`/`title` are getters: plain fields here would resolve ONCE at import and never follow a
+// later `setLocale`. `id` (the React key / active-tab state) stays a plain literal.
 const INFO_TABS: readonly TabItem[] = [
   {
     id: "details",
-    label: "Details",
-    title: "Markers, tags, progress, dates, priority, attachments & links",
+    get label() {
+      return t("panel.tab.details");
+    },
+    get title() {
+      return t("panel.tab.detailsHint");
+    },
   },
-  { id: "notes", label: "Notes", title: "The selected topic's rich-text note" },
-  { id: "style", label: "Style", title: "Shape, colour, font & stickers" },
+  {
+    id: "notes",
+    get label() {
+      return t("panel.tab.notes");
+    },
+    get title() {
+      return t("panel.tab.notesHint");
+    },
+  },
+  {
+    id: "style",
+    get label() {
+      return t("panel.tab.style");
+    },
+    get title() {
+      return t("panel.tab.styleHint");
+    },
+  },
 ];
 
 export function InfoPanel({
@@ -2969,7 +3006,7 @@ export function InfoPanel({
   // A faint "Mixed" tag shown next to a bulk-edit control whose selected topics hold differing values.
   const mixedHint = (
     <span style={{ color: "var(--ed-faint)", fontSize: fontSize.sm, fontStyle: "italic" }}>
-      Mixed
+      {t("panel.mixed")}
     </span>
   );
   const sectionLabel = (text: string) => <PanelSection>{text}</PanelSection>;
@@ -2996,9 +3033,13 @@ export function InfoPanel({
           >
             {info ? <ProgressPie fraction={info.progress} size={20} /> : null}
             <span style={{ color: "var(--ed-ink)", fontVariantNumeric: "tabular-nums" }}>
-              {pct}% · {info?.done}/{info?.total} done
+              {t("panel.progressSummary", {
+                pct: pct ?? 0,
+                done: info?.done ?? 0,
+                total: info?.total ?? 0,
+              })}
             </span>
-            <span style={{ color: "var(--ed-faint)" }}>(auto)</span>
+            <span style={{ color: "var(--ed-faint)" }}>{t("panel.autoSuffix")}</span>
           </div>
         ) : (
           <div
@@ -3106,7 +3147,7 @@ export function InfoPanel({
             tabs={tabs}
             active={activeTab}
             onChange={(id) => setTab(id as InfoTab)}
-            ariaLabel="Topic info sections"
+            ariaLabel={t("panel.topicInfoSections")}
             idBase="topic-info"
           />
           {
@@ -3128,7 +3169,7 @@ export function InfoPanel({
                     fontWeight: fontWeight.semibold,
                   }}
                 >
-                  {selectedCount} topics selected — changes apply to all
+                  {t("panel.multiSelectAppliesToAll", { n: selectedCount ?? 0 })}
                   <div
                     style={{
                       fontWeight: fontWeight.normal,
@@ -3137,8 +3178,7 @@ export function InfoPanel({
                       color: "var(--ed-ink2)",
                     }}
                   >
-                    Per-topic fields (note, links, attachments) are hidden — select one topic to
-                    edit them.
+                    {t("panel.perTopicFieldsHidden")}
                   </div>
                 </div>
               )}
@@ -3169,7 +3209,7 @@ export function InfoPanel({
                           }}
                         >
                           <label style={{ ...styleBtn, fontSize: fontSize.sm, cursor: "pointer" }}>
-                            Fill image…
+                            {t("panel.fillImage")}
                             <input
                               type="file"
                               accept="image/*"
@@ -3218,7 +3258,7 @@ export function InfoPanel({
                         cursor: "pointer",
                       }}
                     >
-                      ⤢ Open in dock
+                      ⤢ {t("panel.openInDock")}
                     </button>
                   ) : null}
                   <NotesPanel
@@ -3264,14 +3304,14 @@ export function InfoPanel({
                             }}
                           >
                             <span style={{ fontSize: fontSize.xs, color: "var(--ed-faint)" }}>
-                              Suggested:
+                              {t("panel.suggested")}
                             </span>
                             {suggested.map((m) => (
                               <button
                                 key={m}
                                 type="button"
                                 onClick={() => onToggleMarker(m)}
-                                title={`Add ${m} (suggested from the topic text)`}
+                                title={t("panel.addMarkerSuggested", { marker: m })}
                                 style={{
                                   border: "1px dashed var(--ed-accent)",
                                   background: "var(--ed-card)",
@@ -3432,25 +3472,25 @@ export function InfoPanel({
                         <input> inside, so the label associates with it at runtime (biome can't see
                         through the component); the input also self-labels via ariaLabel. */}
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                        Start
+                        {t("panel.taskStart")}
                         <NaturalDateInput
                           key={`${node.id}:start${mixed.start ? ":mixed" : ""}`}
                           value={node.task?.start ?? ""}
                           mixed={mixed.start}
                           onSet={onSetStart}
-                          ariaLabel="Start date"
+                          ariaLabel={t("panel.startDate")}
                         />
                         {mixed.start ? mixedHint : null}
                       </label>
                       {/* biome-ignore lint/a11y/noLabelWithoutControl: see the Start label above. */}
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                        Due
+                        {t("panel.taskDue")}
                         <NaturalDateInput
                           key={`${node.id}:due${mixed.due ? ":mixed" : ""}`}
                           value={node.task?.due ?? ""}
                           mixed={mixed.due}
                           onSet={onSetDue}
-                          ariaLabel="Due date"
+                          ariaLabel={t("panel.dueDate")}
                         />
                         {mixed.due ? mixedHint : null}
                       </label>
@@ -3474,7 +3514,7 @@ export function InfoPanel({
                             key={p}
                             className="mm-keep-color"
                             onClick={() => onSetPriority(p)}
-                            title={`${priorityLabel(p)} priority`}
+                            title={t("panel.priorityNamed", { level: priorityLabel(p) })}
                             style={{
                               padding: "1px 8px",
                               fontSize: fontSize.sm,
@@ -3530,7 +3570,7 @@ export function InfoPanel({
                               <a
                                 href={a.dataUrl}
                                 download={a.name}
-                                title={`Download ${a.name}`}
+                                title={t("panel.downloadNamed", { name: a.name })}
                                 style={{
                                   color: "var(--ed-ink)",
                                   flex: 1,
@@ -3564,7 +3604,7 @@ export function InfoPanel({
                               color: "var(--ed-ink2)",
                             }}
                           >
-                            + Attach file
+                            + {t("panel.attachFile")}
                             <input
                               type="file"
                               onChange={(e) => {
@@ -3604,7 +3644,7 @@ export function InfoPanel({
                           aria-label={t("panel.linkToAnother")}
                           style={{ width: "auto", margin: "0 10px 4px" }}
                         >
-                          <option value="">🔗 Link to a map…</option>
+                          <option value="">🔗 {t("panel.linkToAMap")}</option>
                           {maps.map((m) => (
                             <option key={m.id} value={m.id}>
                               {m.title}
@@ -3617,7 +3657,7 @@ export function InfoPanel({
                           aria-label={t("panel.jumpToAnother")}
                           style={{ width: "auto", margin: "0 10px 4px" }}
                         >
-                          <option value="">↪ Jump to a topic…</option>
+                          <option value="">↪ {t("panel.jumpToATopic")}</option>
                           {jumpTargets.map((row) => (
                             <option key={row.id} value={row.id}>
                               {`${"  ".repeat(row.depth)}${row.topic || t("common.untitled")}`}
@@ -3635,7 +3675,7 @@ export function InfoPanel({
                             aria-label={t("panel.focusATopic")}
                             style={{ width: "auto", margin: "0 10px 4px" }}
                           >
-                            <option value="">🗺 …and a topic (whole map)</option>
+                            <option value="">🗺 {t("panel.andATopicWholeMap")}</option>
                             {crossLinkTopics.map((row) => (
                               <option key={row.id} value={row.id}>
                                 {`${"  ".repeat(row.depth)}${row.topic || t("common.untitled")}`}
@@ -3652,13 +3692,14 @@ export function InfoPanel({
                               margin: "0 10px 6px",
                             }}
                           >
-                            ✕ Remove link (
-                            {link.startsWith("#map=")
-                              ? "map"
-                              : link.startsWith("#node=")
-                                ? "topic"
-                                : "web"}
-                            )
+                            ✕{" "}
+                            {t("panel.removeLinkKind", {
+                              kind: link.startsWith("#map=")
+                                ? t("panel.linkKindMap")
+                                : link.startsWith("#node=")
+                                  ? t("common.topic")
+                                  : t("panel.linkKindWeb"),
+                            })}
                           </Button>
                         )}
                         {/* Additional links beyond the primary — a topic can point at more than one
@@ -3694,7 +3735,7 @@ export function InfoPanel({
                                 <button
                                   type="button"
                                   onClick={() => onOpenLink(h)}
-                                  title={`Open ${h}`}
+                                  title={t("common.openNamed", { name: h })}
                                   style={{
                                     ...listRow,
                                     padding: 0,
@@ -3949,7 +3990,7 @@ export function NoteEditorPanel({
       ) : (
         <>
           <div style={{ ...panelTitle, display: "flex", justifyContent: "space-between" }}>
-            <span>📝 Note editor</span>
+            <span>📝 {t("panel.noteEditor")}</span>
             <button
               type="button"
               onClick={onClose}
@@ -4047,8 +4088,8 @@ export function NotesPanel({
   const insertImage = async () => {
     const url = (
       await editorPrompt({
-        title: "Insert image",
-        label: "Image URL",
+        title: t("panel.insertImage"),
+        label: t("panel.imageUrl"),
         placeholder: "https://… or data:image/…",
       })
     )?.trim();
@@ -4066,8 +4107,8 @@ export function NotesPanel({
     const hasText = !!range && range.toString().trim().length > 0;
     const url = (
       await editorPrompt({
-        title: "Insert link",
-        label: "Link URL",
+        title: t("panel.insertLink"),
+        label: t("panel.linkUrl"),
         placeholder: "https://… or mailto:…",
       })
     )?.trim();
@@ -4112,11 +4153,11 @@ export function NotesPanel({
     color: colors.text,
   } as const;
   const fmtBtns = [
-    { cmd: "b", label: <b>B</b>, title: "Bold (Ctrl+B)", list: false },
-    { cmd: "i", label: <i>I</i>, title: "Italic (Ctrl+I)", list: false },
-    { cmd: "s", label: <s>S</s>, title: "Strikethrough", list: false },
-    { cmd: "ul", label: "• List", title: "Bulleted list", list: true },
-    { cmd: "ol", label: "1. List", title: "Numbered list", list: true },
+    { cmd: "b", label: <b>B</b>, title: t("panel.rt.bold"), list: false },
+    { cmd: "i", label: <i>I</i>, title: t("panel.rt.italic"), list: false },
+    { cmd: "s", label: <s>S</s>, title: t("panel.rt.strikethrough"), list: false },
+    { cmd: "ul", label: "• List", title: t("panel.rt.bulletList"), list: true },
+    { cmd: "ol", label: "1. List", title: t("panel.rt.numberedList"), list: true },
   ] as const;
 
   return (
@@ -4141,10 +4182,12 @@ export function NotesPanel({
           color: "var(--ed-muted)",
         }}
       >
-        <span>📝 Note{selected ? ` — ${selected.topic}` : ""}</span>
+        <span>
+          📝 {selected ? t("panel.noteHeadingNamed", { topic: selected.topic }) : t("app.note")}
+        </span>
         {onClose && (
           <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
-            Close
+            {t("common.close")}
           </Button>
         )}
       </div>
@@ -4181,7 +4224,7 @@ export function NotesPanel({
               title={t("panel.heading1")}
               style={tbBtn}
             >
-              H1
+              {t("panel.rt.h1")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4189,7 +4232,7 @@ export function NotesPanel({
               title={t("panel.heading2")}
               style={tbBtn}
             >
-              H2
+              {t("panel.rt.h2")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4197,7 +4240,7 @@ export function NotesPanel({
               title={t("panel.heading3")}
               style={tbBtn}
             >
-              H3
+              {t("panel.rt.h3")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4221,7 +4264,7 @@ export function NotesPanel({
               title={t("panel.checklist")}
               style={tbBtn}
             >
-              ☑ List
+              ☑ {t("panel.listToolbarButton")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4229,7 +4272,7 @@ export function NotesPanel({
               title={t("panel.insertLinkWraps")}
               style={tbBtn}
             >
-              🔗 Link
+              🔗 {t("panel.linkToolbarButton")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4237,7 +4280,7 @@ export function NotesPanel({
               title={t("panel.insertImageBy")}
               style={tbBtn}
             >
-              🖼 Image
+              🖼 {t("toolbar.exportGroup.image")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4250,7 +4293,7 @@ export function NotesPanel({
                 color: colors.text,
               }}
             >
-              ▦ Table
+              {t("panel.rt.table")}
             </Button>
           </div>
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: contentEditable note editor — the onClick only reroutes in-app links through the canvas; the same targets stay keyboard-reachable via the inspector's Links section + the Outline jumps. */}
@@ -4375,7 +4418,7 @@ export function StickerBar({ onPick }: { onPick: (sticker: Sticker) => void }) {
                 fontWeight: fontWeight.semibold,
               }}
             >
-              {g.category}
+              {stickerCategoryLabel(g.category)}
             </div>
             {grid(g.stickers)}
           </div>
@@ -4404,7 +4447,7 @@ export function MarkerBar({
   return (
     <div style={{ ...barRow, gap: 4 }}>
       <span style={{ fontSize: fontSize.sm, color: "var(--ed-muted)", marginRight: 4 }}>
-        Markers:
+        {t("panel.markersLabel")}
       </span>
       <input
         type="search"

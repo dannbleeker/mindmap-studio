@@ -1,4 +1,8 @@
+import type { StartKey } from "../components/start/messages";
+import type { ThemeKey } from "../components/themeDesignerMessages";
+import type { IoKey } from "../io/messages";
 import type { CanvasKey } from "../mindmap/flow/messages";
+import type { PresentKey } from "../present/presentMessages";
 import type { CoreKey } from "./core";
 
 // The union of every message key any catalogue declares — what `t()` accepts, so a typo or a key that
@@ -9,4 +13,4 @@ import type { CoreKey } from "./core";
 // chunk-local while the key type stays global. Keep them `import type`; a value import would undo it.
 //
 // As each catalogue is added (io, …) add its key type to this union.
-export type MessageKey = CoreKey | CanvasKey;
+export type MessageKey = CoreKey | CanvasKey | StartKey | ThemeKey | PresentKey | IoKey;

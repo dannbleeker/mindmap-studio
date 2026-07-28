@@ -1,3 +1,5 @@
+import { t } from "../../i18n/registry";
+import "./messages";
 // Slim top bar for the start screen: the active section title + a ⌘K command trigger.
 
 const IS_MAC = typeof navigator !== "undefined" && /Mac|iP(hone|ad|od)/.test(navigator.platform);
@@ -10,10 +12,10 @@ export function StartHeader({ title, onCommand }: { title: string; onCommand: ()
         type="button"
         className="st-cmdk-trigger"
         onClick={onCommand}
-        aria-label="Search and commands"
+        aria-label={t("start.searchAndCommands")}
       >
-        <span>Search & commands</span>
-        <span className="st-kbd">{IS_MAC ? "⌘K" : "Ctrl K"}</span>
+        <span>{t("start.searchCommands")}</span>
+        <span className="st-kbd">{IS_MAC ? "⌘K" : t("start.ctrlK")}</span>
       </button>
     </header>
   );

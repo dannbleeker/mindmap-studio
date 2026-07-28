@@ -2605,7 +2605,7 @@ function FlowInner({
               x={edgeMenu.x}
               y={edgeMenu.y}
               onClose={() => setEdgeMenu(null)}
-              menuAriaLabel="Relationship actions"
+              menuAriaLabel={t("canvas.menu.relationshipActions")}
               sheet={isMobile}
             >
               {(() => {
@@ -2637,7 +2637,7 @@ function FlowInner({
                           key={arrow}
                           type="button"
                           className="mm-menu-chip"
-                          aria-label={`Arrowheads: ${arrow}`}
+                          aria-label={t("canvas.arrowheadsNamed", { arrow })}
                           aria-pressed={(link?.arrow ?? "to") === arrow}
                           data-on={(link?.arrow ?? "to") === arrow || undefined}
                           onClick={() => patch({ arrow })}
@@ -2662,7 +2662,7 @@ function FlowInner({
                         </button>
                       ))}
                     </div>
-                    <MenuLabel>{t("canvas.link.type")}</MenuLabel>
+                    <MenuLabel>{t("panel.type")}</MenuLabel>
                     <div className="mm-menu-row">
                       {(["relates-to", "depends-on", "causes", "supports", "blocks"] as const).map(
                         // `kind`, not `t` — the loop variable shadowed the translation function, which
@@ -2684,7 +2684,7 @@ function FlowInner({
                     </div>
                     <MenuSeparator />
                     <MenuItem
-                      label={t("canvas.link.delete")}
+                      label={t("panel.deleteRelationship")}
                       danger
                       onSelect={() => {
                         apply(deleteLink(docRef.current, id));
@@ -2701,7 +2701,7 @@ function FlowInner({
               x={menu.x}
               y={menu.y}
               onClose={() => setMenu(null)}
-              menuAriaLabel="Topic actions"
+              menuAriaLabel={t("canvas.menu.topicActions")}
               sheet={isMobile}
             >
               {(() => {
@@ -2723,7 +2723,7 @@ function FlowInner({
                 const items: [string, () => void, boolean?][] = [
                   [t("canvas.menu.addChild"), () => apply(addChild(docRef.current, id), true)],
                   [t("canvas.menu.addSibling"), () => apply(addSibling(docRef.current, id), true)],
-                  [t("canvas.menu.rename"), () => startEdit(id)],
+                  [t("common.rename"), () => startEdit(id)],
                   [
                     t("canvas.menu.addNote"),
                     () => {
@@ -2784,7 +2784,7 @@ function FlowInner({
                     t("canvas.menu.detach"),
                     () => apply(detachBranch(docRef.current, id)),
                   ]);
-                items.push([t("canvas.menu.delete"), () => deleteNodeWithUndo(id), true]);
+                items.push([t("common.delete"), () => deleteNodeWithUndo(id), true]);
                 // Live marker/priority state so the quick-setters reflect the node (and toggle off).
                 const node = findAnyNode(docRef.current, id);
                 const activeMarkers = node?.icons ?? [];
@@ -2813,7 +2813,11 @@ function FlowInner({
                             type="button"
                             className="mm-menu-chip"
                             aria-pressed={on}
-                            aria-label={`${on ? "Remove" : "Add"} marker ${m}`}
+                            aria-label={
+                              on
+                                ? t("canvas.removeMarkerNamed", { marker: m })
+                                : t("canvas.addMarkerNamed", { marker: m })
+                            }
                             data-on={on || undefined}
                             onClick={() => apply(toggleIcon(docRef.current, id, m))}
                           >
@@ -2852,7 +2856,7 @@ function FlowInner({
                         data-on={!curPriority || undefined}
                         onClick={() => apply(setPriority(docRef.current, id, undefined))}
                       >
-                        None
+                        {t("common.none")}
                       </button>
                     </div>
                     {/* "Move project" (item 14): shift every task date in THIS branch by a preset,
@@ -2918,7 +2922,7 @@ function FlowInner({
                         <option value="radial">{t("canvas.branchLayout.radial")}</option>
                         <option value="timeline">{t("cmd.layout.timeline")}</option>
                         <option value="fishbone">{t("cmd.layout.fishbone")}</option>
-                        <option value="grid">{t("canvas.branchLayout.grid")}</option>
+                        <option value="grid">{t("common.grid")}</option>
                         <option value="brace">{t("canvas.branchLayout.brace")}</option>
                       </select>
                     </label>
@@ -2978,7 +2982,7 @@ function FlowInner({
                         className="mm-menu-chip"
                         onClick={() => apply(setBranchColor(docRef.current, id, ""))}
                       >
-                        Default
+                        {t("panel.default")}
                       </button>
                     </div>
                     <MenuLabel>{t("canvas.menu.branchLine")}</MenuLabel>
@@ -3016,7 +3020,7 @@ function FlowInner({
                             aria-label={t("toolbar.bindRollUpSource")}
                           >
                             {findNode(docRef.current, id)?.rollup ? (
-                              <option value="">— Unbind</option>
+                              <option value="">{t("toolbar.unbind")}</option>
                             ) : (
                               <option value="">{t("toolbar.bindSourceMap")}</option>
                             )}
@@ -3042,7 +3046,7 @@ function FlowInner({
               x={paneMenu.x}
               y={paneMenu.y}
               onClose={() => setPaneMenu(null)}
-              menuAriaLabel="Canvas actions"
+              menuAriaLabel={t("canvas.menu.canvasActions")}
               sheet={isMobile}
             >
               <MenuItem
@@ -3084,7 +3088,7 @@ function FlowInner({
               x={overlayMenu.x}
               y={overlayMenu.y}
               onClose={() => setOverlayMenu(null)}
-              menuAriaLabel="Overlay actions"
+              menuAriaLabel={t("canvas.menu.overlayActions")}
               sheet={isMobile}
             >
               {(() => {
@@ -3110,18 +3114,18 @@ function FlowInner({
                           key={c}
                           type="button"
                           className="mm-menu-chip"
-                          aria-label={`Colour ${c}`}
+                          aria-label={t("common.colourNamed", { colour: c })}
                           style={{ background: c }}
                           onClick={() => recolour(c)}
                         />
                       ))}
                       <button type="button" className="mm-menu-chip" onClick={() => recolour("")}>
-                        Default
+                        {t("panel.default")}
                       </button>
                     </div>
                     {ov.kind === "boundary" ? (
                       <>
-                        <MenuLabel>{t("canvas.shape.shape")}</MenuLabel>
+                        <MenuLabel>{t("panel.shape")}</MenuLabel>
                         <div className="mm-menu-row">
                           {SHAPES.map(([sh, lbl]) => (
                             <button
@@ -3140,7 +3144,7 @@ function FlowInner({
                             </button>
                           ))}
                         </div>
-                        <MenuLabel>{t("canvas.shape.outline")}</MenuLabel>
+                        <MenuLabel>{t("panel.outline")}</MenuLabel>
                         <div className="mm-menu-row">
                           {(["solid", "dashed", "dotted"] as const).map((d) => (
                             <button
@@ -3163,7 +3167,7 @@ function FlowInner({
                     ) : null}
                     <MenuSeparator />
                     <MenuItem
-                      label={t("canvas.menu.delete")}
+                      label={t("common.delete")}
                       danger
                       onSelect={() => {
                         deleteSelectedOverlay();
@@ -3192,7 +3196,7 @@ function FlowInner({
                 pointerEvents: "none",
               }}
             >
-              Click a target node to draw a relationship · Esc to cancel
+              {t("canvas.hint.clickTargetToLink")}
             </div>
           ) : null}
         </section>

@@ -19,6 +19,17 @@ export const LOCAL_PREF_KEYS = [
   "mindmap-cinematic-walk",
   "mindmap-reduce-motion",
   "mindmap-locale",
+  // Added 2026-07-27. These were written by the app but missing from this list, so "clear all local
+  // data" silently left them behind and they never travelled in a settings file. The list had drifted
+  // because nothing checked it — `test/local-prefs.test.ts` only ever asserted that the keys IT names
+  // get cleared, which is true of any list, including a wrong one. There is a completeness guard now.
+  "mindmap-contrast",
+  "mindmap-info-tab",
+  "mindmap-last-export",
+  "mindmap-layout",
+  "mindmap-minimap-open",
+  "mindmap-search-history",
+  "mindmap-sticky-color",
 ] as const;
 
 /** Remove every app preference key from localStorage (best-effort — never throws). */

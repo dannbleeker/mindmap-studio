@@ -29,18 +29,75 @@ function topicLabel(topic: string): string {
 // nothing is selected. Pure + side-effect-free to build (each `run` defers to the existing handler),
 // so it's trivially unit-testable.
 
+// `label` is a getter: a plain `label: t("…")` in this module-scope array would resolve ONCE at
+// import and never follow a later `setLocale`. `id` (the palette entry's identity) stays literal.
 const LAYOUTS: { id: LayoutKind; label: string }[] = [
-  { id: "side", label: t("cmd.layout.side") },
-  { id: "right", label: t("cmd.layout.right") },
-  { id: "left", label: t("cmd.layout.left") },
-  { id: "radial", label: t("cmd.layout.radial") },
-  { id: "org-down", label: t("cmd.layout.org-down") },
-  { id: "org-up", label: t("cmd.layout.org-up") },
-  { id: "timeline", label: t("cmd.layout.timeline") },
-  { id: "fishbone", label: t("cmd.layout.fishbone") },
-  { id: "grid", label: t("cmd.layout.grid") },
-  { id: "swimlane", label: t("cmd.layout.swimlane") },
-  { id: "brace", label: t("cmd.layout.brace") },
+  {
+    id: "side",
+    get label() {
+      return t("cmd.layout.side");
+    },
+  },
+  {
+    id: "right",
+    get label() {
+      return t("cmd.layout.right");
+    },
+  },
+  {
+    id: "left",
+    get label() {
+      return t("cmd.layout.left");
+    },
+  },
+  {
+    id: "radial",
+    get label() {
+      return t("cmd.layout.radial");
+    },
+  },
+  {
+    id: "org-down",
+    get label() {
+      return t("cmd.layout.org-down");
+    },
+  },
+  {
+    id: "org-up",
+    get label() {
+      return t("cmd.layout.org-up");
+    },
+  },
+  {
+    id: "timeline",
+    get label() {
+      return t("cmd.layout.timeline");
+    },
+  },
+  {
+    id: "fishbone",
+    get label() {
+      return t("cmd.layout.fishbone");
+    },
+  },
+  {
+    id: "grid",
+    get label() {
+      return t("cmd.layout.grid");
+    },
+  },
+  {
+    id: "swimlane",
+    get label() {
+      return t("cmd.layout.swimlane");
+    },
+  },
+  {
+    id: "brace",
+    get label() {
+      return t("cmd.layout.brace");
+    },
+  },
 ];
 
 const EXPORTS = (io: ToolbarProps["io"]): [string, string, () => void][] => [

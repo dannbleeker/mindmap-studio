@@ -4,9 +4,13 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { initLocale } from "./i18n";
 import "./mobile.css";
 
-// Resolve the locale and stamp <html lang> / <html dir> before anything renders, so the first paint is
-// already right rather than corrected. English is the only locale today, so this always lands on "en" —
-// the resolution path is real, not stubbed, so adding a catalogue works without touching startup.
+// The locale is resolved and <html lang>/<html dir> stamped by the `src/i18n` barrel, at import time.
+// It CANNOT be done here: this statement runs after the imports above, and `./App` drags in the whole
+// eager graph — including 99 module-scope `t()` calls that would already have frozen against the
+// default locale. See the comment in src/i18n/index.ts.
+//
+// This call is kept as a belt-and-braces no-op for any entry point that reaches main.tsx without
+// having imported the barrel. It re-resolves to the same value; `initLocale` is idempotent.
 initLocale();
 
 // StrictMode intentionally omitted: its double-invoked effects re-init the canvas

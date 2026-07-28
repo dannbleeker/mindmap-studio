@@ -1,5 +1,8 @@
+import { t } from "../../../i18n/registry";
+import "../messages";
 import { useState } from "react";
-import { EXAMPLE_DESCRIPTIONS, buildExample, examples } from "../../../examples";
+import { EXAMPLE_DESCRIPTIONS, buildExample } from "../../../exampleBuilders";
+import { examples } from "../../../examples";
 import { TemplateCard } from "../TemplateCard";
 import { branchLabels } from "../nodeStats";
 import type { StartContext } from "../types";
@@ -14,7 +17,7 @@ export function Examples({ ctx }: { ctx: StartContext }) {
     id: e.id,
     name: e.name,
     description: EXAMPLE_DESCRIPTIONS[e.id],
-    doc: e.build(),
+    doc: buildExample(e.id),
   }));
   const query = q.trim().toLowerCase();
   const shown = query
@@ -28,20 +31,17 @@ export function Examples({ ctx }: { ctx: StartContext }) {
   return (
     <div className="st-content">
       <section>
-        <h2 className="st-section-title">Examples</h2>
-        <p className="st-section-sub">
-          Complete, worked maps — open one to explore, then make it your own. The same set as the
-          editor's New-map gallery. {built.length} examples.
-        </p>
+        <h2 className="st-section-title">{t("toolbar.examples")}</h2>
+        <p className="st-section-sub">{t("start.examplesExplain", { n: built.length })}</p>
       </section>
       <input
         className="st-input"
-        placeholder="Search examples…"
+        placeholder={t("start.searchExamples")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
       {shown.length === 0 ? (
-        <div className="st-empty">No examples match "{q}".</div>
+        <div className="st-empty">{t("start.noExamplesMatch", { query: q })}</div>
       ) : (
         <div className="st-grid">
           {shown.map((e) => (

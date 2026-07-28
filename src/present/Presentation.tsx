@@ -1,3 +1,5 @@
+import { t } from "../i18n/registry";
+import "./presentMessages";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
@@ -80,7 +82,7 @@ function PresenterSidebar({
   const clockColor = pacingColor(elapsed, budgetMin * 60);
   return (
     <aside
-      aria-label="Presenter view"
+      aria-label={t("present.presenterView")}
       style={{
         width: "clamp(280px, 30vw, 420px)",
         flexShrink: 0,
@@ -95,7 +97,7 @@ function PresenterSidebar({
     >
       {/* 1. Speaker notes for the current slide. */}
       <section>
-        <h2 style={sectionLabelStyle}>Speaker notes</h2>
+        <h2 style={sectionLabelStyle}>{t("present.speakerNotes")}</h2>
         {ctx.notes ? (
           <div
             style={{ fontSize: 16, lineHeight: 1.65, color: "#ecebfb" }}
@@ -106,22 +108,24 @@ function PresenterSidebar({
           />
         ) : (
           <p style={{ fontSize: 15, color: "#7e78b8", fontStyle: "italic", margin: 0 }}>
-            No notes for this slide.
+            {t("present.noNotesForThisSlide")}
           </p>
         )}
       </section>
 
       {/* 2. Peek at what's coming next. */}
       <section>
-        <h2 style={sectionLabelStyle}>Next up</h2>
+        <h2 style={sectionLabelStyle}>{t("present.nextUp")}</h2>
         <p style={{ fontSize: 17, fontWeight: 600, color: "#fff", margin: 0 }}>
-          {ctx.nextHeading ?? <span style={{ color: "#7e78b8", fontWeight: 400 }}>End of map</span>}
+          {ctx.nextHeading ?? (
+            <span style={{ color: "#7e78b8", fontWeight: 400 }}>{t("present.endOfMap")}</span>
+          )}
         </p>
       </section>
 
       {/* 3. Pacing timer — elapsed clock (coloured vs the budget) + a total-talk budget stepper. */}
       <section>
-        <h2 style={sectionLabelStyle}>Timer</h2>
+        <h2 style={sectionLabelStyle}>{t("present.timer")}</h2>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
           <span
             style={{
@@ -143,10 +147,10 @@ function PresenterSidebar({
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-          <span style={{ fontSize: 13, color: "#9a93e0" }}>Budget</span>
+          <span style={{ fontSize: 13, color: "#9a93e0" }}>{t("present.budget")}</span>
           <button
             type="button"
-            aria-label="Decrease budget"
+            aria-label={t("present.decreaseBudget")}
             onClick={() => onBudgetChange(Math.max(0, budgetMin - 5))}
             style={ctrlStyle}
           >
@@ -160,7 +164,7 @@ function PresenterSidebar({
           </span>
           <button
             type="button"
-            aria-label="Increase budget"
+            aria-label={t("present.increaseBudget")}
             onClick={() => onBudgetChange(budgetMin + 5)}
             style={ctrlStyle}
           >
@@ -172,7 +176,7 @@ function PresenterSidebar({
       {/* 4. Agenda — the "map" of the talk; current slide highlighted, click to jump. */}
       <section style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
         <h2 style={sectionLabelStyle}>
-          Agenda{" "}
+          {t("app.agenda")}{" "}
           <span style={{ color: "#6d68a8" }}>
             · {index + 1} / {slides.length}
           </span>
@@ -316,7 +320,7 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
       // (we don't want showModal/top-layer/backdrop semantics) — role="dialog" + aria-modal is correct.
       role="dialog"
       aria-modal="true"
-      aria-label="Presentation"
+      aria-label={t("toolbar.exportGroup.presentation")}
       tabIndex={-1}
     >
       {/* The audience slide + the (optional) presenter sidebar share one row, so
@@ -373,7 +377,7 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
         }}
       >
         <button type="button" onClick={prev} disabled={index === 0} style={ctrlStyle}>
-          ‹ Prev
+          {t("common.prev")}
         </button>
         <span style={{ fontSize: 13, color: "#cecbf6" }}>
           {index + 1} / {slides.length}
@@ -384,11 +388,11 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           disabled={index === slides.length - 1}
           style={ctrlStyle}
         >
-          Next ›
+          {t("common.next")}
         </button>
         <span
-          aria-label={`Elapsed ${mmss(elapsed)}`}
-          title="Elapsed time (set a budget in presenter view for pacing colour)"
+          aria-label={t("present.elapsedNamed", { time: mmss(elapsed) })}
+          title={t("present.elapsedTimeSetABudget")}
           style={{
             fontSize: 15,
             fontWeight: 700,
@@ -404,8 +408,8 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
           type="button"
           onClick={() => setRunning((r) => !r)}
           aria-pressed={!running}
-          aria-label={running ? "Pause timer" : "Resume timer"}
-          title={running ? "Pause timer" : "Resume timer"}
+          aria-label={running ? t("present.pauseTimer") : t("present.resumeTimer")}
+          title={running ? t("present.pauseTimer") : t("present.resumeTimer")}
           style={ctrlStyle}
         >
           {running ? "⏸" : "▶"}
@@ -416,27 +420,27 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
             setElapsed(0);
             setRunning(true);
           }}
-          aria-label="Reset timer"
-          title="Reset timer"
+          aria-label={t("present.resetTimer")}
+          title={t("present.resetTimer")}
           style={ctrlStyle}
         >
           ↺
         </button>
         <span style={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "#7e78b8", letterSpacing: "0.02em" }}>
-          ← → · Home · Space · P · B/W · Esc
+          {t("present.homeSpacePBW")}
         </span>
         <button
           type="button"
           onClick={togglePresenter}
           aria-pressed={presenter}
-          title="Toggle presenter view (P)"
+          title={t("present.togglePresenterViewP")}
           style={presenter ? ctrlOnStyle : ctrlStyle}
         >
-          Presenter view (P)
+          {t("present.presenterViewP")}
         </button>
         <button type="button" onClick={onExit} style={ctrlStyle}>
-          Exit (Esc)
+          {t("app.exitEsc")}
         </button>
       </div>
 
@@ -445,7 +449,9 @@ export function Presentation({ doc, onExit }: { doc: MindMapDoc; onExit: () => v
       {blackout && (
         <button
           type="button"
-          aria-label={`${blackout === "black" ? "Black" : "White"} screen — click or press any key to resume`}
+          aria-label={
+            blackout === "black" ? t("present.blackScreenHint") : t("present.whiteScreenHint")
+          }
           onClick={() => setBlackout(null)}
           style={{
             position: "fixed",

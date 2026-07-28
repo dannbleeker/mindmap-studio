@@ -5,7 +5,8 @@
 // only escaped topic text is interpolated into the document (the nav script is
 // static), so there is no scripting surface from map content.
 
-import { getLocale } from "../i18n/registry";
+import { getLocale, t } from "../i18n/registry";
+import "./messages";
 import type { MapNode, MindMapDoc } from "../model/types";
 import { renderNote } from "../noteFormat";
 import { resolveSlides, slideKey } from "../present/slides";
@@ -143,14 +144,14 @@ export function buildDeckHtml(doc: MindMapDoc, branchSvgs?: Map<string, string>)
 </head>
 <body>
 <div class="deck">
-<main id="stage" aria-label="Slides">
+<main id="stage" aria-label="${escapeHtml(t("io.deck.slides"))}">
 ${sections}
 </main>
 <footer>
-<button type="button" id="prev">‹ Prev</button>
+<button type="button" id="prev">${escapeHtml(t("common.prev"))}</button>
 <span id="counter"></span>
-<button type="button" id="next">Next ›</button>
-<button type="button" id="notes-toggle" aria-pressed="false" title="Toggle speaker notes (N)">Notes</button>
+<button type="button" id="next">${escapeHtml(t("common.next"))}</button>
+<button type="button" id="notes-toggle" aria-pressed="false" title="${escapeHtml(t("io.deck.toggleNotes"))}">${escapeHtml(t("panel.tab.notes"))}</button>
 <span class="hint">← → or click to navigate · N for notes</span>
 </footer>
 </div>

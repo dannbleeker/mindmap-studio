@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type { SelectedEdge } from "../mindmap";
 import type { RelationshipType } from "../model/types";
 import { InspectorResizer } from "./InspectorResizer";
@@ -9,28 +10,110 @@ import { SWATCHES, fieldLabel, seg, segRow } from "./inspectorControls";
 // re-themes with the chrome. Edits go through the canvas's edge mutators (setLinkLabel/Arrow/Style,
 // deleteLink); the `edge` prop is the resolved SelectedEdge (every field has a concrete value).
 
+// Every label/title below is a getter, not a plain field: a plain `label: t("…")` in a module-scope
+// array literal resolves ONCE at import and never follows a later `setLocale` (the identity fields —
+// w/d/a/t — are plain literals on purpose; they're what the buttons key and compare on).
 const WIDTHS: { w: number; label: string }[] = [
-  { w: 1, label: "Thin" },
-  { w: 1.5, label: "Medium" },
-  { w: 3, label: "Thick" },
+  {
+    w: 1,
+    get label() {
+      return t("panel.thin");
+    },
+  },
+  {
+    w: 1.5,
+    get label() {
+      return t("panel.medium");
+    },
+  },
+  {
+    w: 3,
+    get label() {
+      return t("panel.thick");
+    },
+  },
 ];
 const DASHES: { d: SelectedEdge["dash"]; label: string }[] = [
-  { d: "dashed", label: "Dashed" },
-  { d: "solid", label: "Solid" },
-  { d: "dotted", label: "Dotted" },
+  {
+    d: "dashed",
+    get label() {
+      return t("panel.dashed");
+    },
+  },
+  {
+    d: "solid",
+    get label() {
+      return t("panel.solid");
+    },
+  },
+  {
+    d: "dotted",
+    get label() {
+      return t("panel.dotted");
+    },
+  },
 ];
 const ARROWS: { a: SelectedEdge["arrow"]; glyph: string; title: string }[] = [
-  { a: "to", glyph: "→", title: "Arrow at the target end" },
-  { a: "from", glyph: "←", title: "Arrow at the source end" },
-  { a: "both", glyph: "↔", title: "Arrows at both ends" },
-  { a: "none", glyph: "—", title: "No arrowheads (a plain line)" },
+  {
+    a: "to",
+    glyph: "→",
+    get title() {
+      return t("panel.arrowAtTheTargetEnd");
+    },
+  },
+  {
+    a: "from",
+    glyph: "←",
+    get title() {
+      return t("panel.arrowAtTheSourceEnd");
+    },
+  },
+  {
+    a: "both",
+    glyph: "↔",
+    get title() {
+      return t("panel.arrowsAtBothEnds");
+    },
+  },
+  {
+    a: "none",
+    glyph: "—",
+    get title() {
+      return t("panel.noArrowheadsAPlainLine");
+    },
+  },
 ];
 const TYPES: { t: RelationshipType; label: string }[] = [
-  { t: "relates-to", label: "Relates" },
-  { t: "depends-on", label: "Depends" },
-  { t: "causes", label: "Causes" },
-  { t: "supports", label: "Supports" },
-  { t: "blocks", label: "Blocks" },
+  {
+    t: "relates-to",
+    get label() {
+      return t("panel.relates");
+    },
+  },
+  {
+    t: "depends-on",
+    get label() {
+      return t("panel.depends");
+    },
+  },
+  {
+    t: "causes",
+    get label() {
+      return t("panel.causes");
+    },
+  },
+  {
+    t: "supports",
+    get label() {
+      return t("panel.supports");
+    },
+  },
+  {
+    t: "blocks",
+    get label() {
+      return t("panel.blocks");
+    },
+  },
 ];
 
 export function EdgeInspector({
@@ -69,7 +152,7 @@ export function EdgeInspector({
   return (
     <aside
       className="mm-inspector"
-      aria-label="Relationship info"
+      aria-label={t("panel.relationshipInfo")}
       style={width ? { width } : undefined}
     >
       {width && onResize ? <InspectorResizer width={width} onResize={onResize} /> : null}
@@ -79,7 +162,7 @@ export function EdgeInspector({
       >
         <div style={{ flex: 1, overflow: "hidden" }}>
           <div style={{ fontSize: 11.5, color: "var(--ed-muted)", marginBottom: 5 }}>
-            Relationship
+            {t("panel.relationship")}
           </div>
           <div
             style={{
@@ -92,13 +175,16 @@ export function EdgeInspector({
             }}
             title={`${fromTopic} → ${toTopic}`}
           >
-            {fromTopic || "(untitled)"} <span style={{ color: "var(--ed-faint)" }}>→</span>{" "}
-            {toTopic || "(untitled)"}
+            {fromTopic || t("common.untitled")} <span style={{ color: "var(--ed-faint)" }}>→</span>{" "}
+            {toTopic || t("common.untitled")}
           </div>
           {/* Faint context line under the title, mirroring the node inspector's breadcrumb (P5). */}
           {edge.label ? (
-            <div className="mm-inspector-path" title={`Relationship: ${edge.label}`}>
-              Relationship: {edge.label}
+            <div
+              className="mm-inspector-path"
+              title={t("panel.relationshipNamed", { label: edge.label })}
+            >
+              {t("panel.relationshipNamed", { label: edge.label })}
             </div>
           ) : null}
         </div>
@@ -106,8 +192,8 @@ export function EdgeInspector({
           <button
             type="button"
             className="mm-inspector-min"
-            title="Minimize"
-            aria-label="Minimize relationship info"
+            title={t("panel.minimize")}
+            aria-label={t("panel.minimizeRelationshipInfo")}
             onClick={onMinimize}
           >
             ›
@@ -116,11 +202,11 @@ export function EdgeInspector({
       </div>
       <div className="mm-inspector-body">
         {/* Presets — one click sets the whole look (dash + width + curve + arrowhead). */}
-        <div style={fieldLabel}>Presets</div>
+        <div style={fieldLabel}>{t("panel.presets")}</div>
         <div style={segRow}>
           {EDGE_PRESETS.map((p) => (
             <button
-              key={p.name}
+              key={p.id}
               type="button"
               title={p.title}
               onClick={() => onSetStyle(p.patch)}
@@ -132,7 +218,7 @@ export function EdgeInspector({
         </div>
 
         {/* Label */}
-        <div style={fieldLabel}>Label</div>
+        <div style={fieldLabel}>{t("panel.label")}</div>
         <input
           key={`${edge.id}:label`}
           defaultValue={edge.label}
@@ -143,8 +229,8 @@ export function EdgeInspector({
             const v = e.target.value.trim();
             if (v !== edge.label) onSetLabel(v);
           }}
-          placeholder="Relationship label"
-          aria-label="Relationship label"
+          placeholder={t("panel.relationshipLabel")}
+          aria-label={t("panel.relationshipLabel")}
           style={{
             width: "100%",
             boxSizing: "border-box",
@@ -158,7 +244,7 @@ export function EdgeInspector({
         />
 
         {/* Direction / arrowheads */}
-        <div style={fieldLabel}>Direction</div>
+        <div style={fieldLabel}>{t("panel.direction")}</div>
         <div style={segRow}>
           {ARROWS.map(({ a, glyph, title }) => (
             <button
@@ -175,16 +261,18 @@ export function EdgeInspector({
         </div>
 
         {/* Type — a semantic category (B3), independent of the free label above. */}
-        <div style={fieldLabel}>Type</div>
+        <div style={fieldLabel}>{t("panel.type")}</div>
         <div style={segRow}>
-          {TYPES.map(({ t, label }) => (
+          {/* `type`, not `t` — a destructured local shadows the translation function just as a
+              plain one does, and this shape is invisible to the migration tool's shadow check. */}
+          {TYPES.map(({ t: type, label }) => (
             <button
-              key={t}
+              key={type}
               type="button"
-              title={`Mark this relationship as “${t}”`}
-              aria-pressed={edge.type === t}
-              onClick={() => onSetStyle({ type: t })}
-              style={seg(edge.type === t)}
+              title={t("panel.markRelationshipAs", { type })}
+              aria-pressed={edge.type === type}
+              onClick={() => onSetStyle({ type })}
+              style={seg(edge.type === type)}
             >
               {label}
             </button>
@@ -206,18 +294,18 @@ export function EdgeInspector({
             checked={edge.showTypes}
             onChange={(e) => onToggleShowTypes(e.target.checked)}
           />
-          Show type labels on the canvas
+          {t("panel.showTypeLabelsOnThe")}
         </label>
 
         {/* Line colour */}
-        <div style={fieldLabel}>Colour</div>
+        <div style={fieldLabel}>{t("panel.colour")}</div>
         <div style={segRow}>
           {SWATCHES.map((c) => (
             <button
               key={c}
               type="button"
               title={c}
-              aria-label={`Colour ${c}`}
+              aria-label={t("common.colourNamed", { colour: c })}
               aria-pressed={edge.color.toLowerCase() === c.toLowerCase()}
               onClick={() => onSetStyle({ color: c })}
               style={{
@@ -239,8 +327,8 @@ export function EdgeInspector({
             type="color"
             value={edge.color || "#888888"}
             onChange={(e) => onSetStyle({ color: e.target.value })}
-            aria-label="Custom relationship colour"
-            title="Custom colour"
+            aria-label={t("panel.customRelationshipColour")}
+            title={t("panel.customColour")}
             style={{
               width: 24,
               height: 22,
@@ -253,16 +341,16 @@ export function EdgeInspector({
           />
           <button
             type="button"
-            title="Reset to the default colour"
+            title={t("panel.resetToTheDefaultColour")}
             onClick={() => onSetStyle({ color: "" })}
             style={seg(false)}
           >
-            Default
+            {t("panel.default")}
           </button>
         </div>
 
         {/* Width */}
-        <div style={fieldLabel}>Width</div>
+        <div style={fieldLabel}>{t("panel.width")}</div>
         <div style={segRow}>
           {WIDTHS.map(({ w, label }) => (
             <button
@@ -278,7 +366,7 @@ export function EdgeInspector({
         </div>
 
         {/* Dash */}
-        <div style={fieldLabel}>Style</div>
+        <div style={fieldLabel}>{t("panel.tab.style")}</div>
         <div style={segRow}>
           {DASHES.map(({ d, label }) => (
             <button
@@ -294,41 +382,41 @@ export function EdgeInspector({
         </div>
 
         {/* Curve — reshape the arc to route around clutter (perpendicular bow). */}
-        <div style={fieldLabel}>Curve</div>
+        <div style={fieldLabel}>{t("panel.curve")}</div>
         <div style={segRow}>
           <button
             type="button"
-            title="Gentle automatic bow"
+            title={t("panel.gentleAutomaticBow")}
             aria-pressed={edge.curve == null}
             onClick={() => onSetStyle({ curve: undefined })}
             style={seg(edge.curve == null)}
           >
-            Auto
+            {t("panel.auto")}
           </button>
           <button
             type="button"
-            title="A straight line"
+            title={t("panel.aStraightLine")}
             aria-pressed={edge.curve === 0}
             onClick={() => onSetStyle({ curve: 0 })}
             style={seg(edge.curve === 0)}
           >
-            Straight
+            {t("panel.straight")}
           </button>
           <button
             type="button"
-            title="Bow more one way"
+            title={t("panel.bowMoreOneWay")}
             onClick={() => onSetStyle({ curve: (edge.curve ?? 0) - 25 })}
             style={seg(false)}
           >
-            Bow −
+            {t("panel.bow")}
           </button>
           <button
             type="button"
-            title="Bow more the other way"
+            title={t("panel.bowMoreTheOtherWay")}
             onClick={() => onSetStyle({ curve: (edge.curve ?? 0) + 25 })}
             style={seg(false)}
           >
-            Bow +
+            {t("panel.bow2")}
           </button>
         </div>
 
@@ -349,7 +437,7 @@ export function EdgeInspector({
             padding: "6px 0",
           }}
         >
-          Delete relationship
+          {t("panel.deleteRelationship")}
         </button>
       </div>
     </aside>

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-28T17:53:52.186Z",
-  "commit": "364fe38",
+  "generatedAt": "2026-07-28T18:15:43.856Z",
+  "commit": "5540788",
   "headline": {
-    "linesTsJs": 85807,
+    "linesTsJs": 85823,
     "tests": 2283,
     "lineCoveragePct": 90.49,
-    "commits": 1203,
+    "commits": 1205,
     "ageDays": 46,
     "trackedFiles": 544,
     "featureManualPct": 100,
@@ -26,7 +26,7 @@
     {
       "category": "Build scripts",
       "files": 13,
-      "lines": 2592
+      "lines": 2608
     },
     {
       "category": "Styles (CSS)",
@@ -36,7 +36,7 @@
     {
       "category": "Docs (Markdown)",
       "files": 18,
-      "lines": 3353
+      "lines": 3359
     }
   ],
   "coverage": {
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 2283,
     "e2e": 0,
-    "durationMs": 118140,
+    "durationMs": 119486,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 30317
+        "ms": 30825
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 26868
+        "ms": 26752
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 10077
+        "ms": 10319
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8924
+        "ms": 9247
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 6293
+        "ms": 6206
       }
     ]
   },
@@ -193,7 +193,7 @@
     "totalGzipKb": 548.5,
     "entryGzipKb": 157.8,
     "firstLoadGzipKb": 181.9,
-    "budgetKb": 182,
+    "budgetKb": 184,
     "withinBudget": true
   },
   "docs": {
@@ -321,16 +321,16 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 46,
-    "commits": 1203,
-    "commits7d": 106,
+    "commits": 1205,
+    "commits7d": 108,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
-        "count": 588
+        "count": 589
       },
       {
         "name": "github-actions[bot]",
-        "count": 538
+        "count": 539
       },
       {
         "name": "Claude",
@@ -338,8 +338,8 @@
       }
     ],
     "churn30d": {
-      "added": 46114,
-      "removed": 14452
+      "added": 46268,
+      "removed": 14621
     },
     "changelogEntries": 461
   }

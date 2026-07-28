@@ -94,4 +94,20 @@
 // The true figure has been ABOVE the old 175 ceiling since before the i18n branch started (measured
 // 176.5 at the branch point), so this is not a regression that work introduced — it is the first
 // honest reading. primitives-*.js at ~16.6 kB is where the weight actually is, if it needs shedding.
-export const BUDGET_KB = 182;
+//
+// 182 → 184 (2026-07-28, owner-approved). NOT a policy change — a restoration of the working headroom
+// 182 was chosen to provide. That note set the ceiling 1.7 kB above a measured 180.3 "enough that a
+// legitimate small change isn't a two-line edit, too little to hide a regression". The rest of the i18n
+// migration then consumed almost all of it: measured 181.9 at the merge of PR #173, i.e. 0.1 kB left,
+// which fails the "not a two-line edit" half of that test — the next string anyone adds turns the gate
+// red for a reason nobody will remember.
+//
+// Why 184 and not the ~190 first suggested: the reasoning two paragraphs up still holds and argues
+// against a fat margin. 190 would leave ~8 kB of unguarded slack — nearly double the 4.7 kB that the
+// 171 → 175 note warned about and that this file then watched ride in unnoticed. 184 restores ~2.1 kB,
+// which is the same margin 182 was picked to give, measured against today's number instead of
+// July's. The pressure that ate the headroom is also gone: the eager catalogue migration is COMPLETE
+// (all four items in docs/I18N_BLOCKED.md resolved), so there is no further batch queued to spend it.
+// If this needs raising again, shed primitives-*.js first — a third bump without shedding is the
+// signal that the ceiling has stopped meaning anything.
+export const BUDGET_KB = 184;

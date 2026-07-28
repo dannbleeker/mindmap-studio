@@ -20,123 +20,74 @@ Tiers 1–5). Per-item detail lives in `CHANGELOG.md`. Three of that review's ca
 or *Out of scope*, so the decisions don't get re-litigated. Known-thin areas that are neither open work
 nor decided sit in [`docs/KNOWN_ROUGH_EDGES.md`](docs/KNOWN_ROUGH_EDGES.md).
 
-## Localisation (i18n) — the LAYER is done; a long tail of chrome is not
+## Localisation (i18n) — the programme is SHIPPED; this section is the rules that keep it true
 
-Shipped detail lives in `CHANGELOG.md`. This section keeps the **decisions**, so they don't get
-re-litigated, and the open work.
+**Merged to `main` 2026-07-28 in [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173)
+(28 commits).** All four owner decisions in `docs/I18N_BLOCKED.md` are resolved or declined. Per-item
+detail is in `CHANGELOG.md` — **don't re-plan the migration from this file.** What survives here is the
+**decisions and the traps**, so they don't get re-litigated or re-discovered the expensive way.
 
 `src/i18n/` holds the registry, the typed English catalogues and the `Intl` plural/collation helpers.
-**1214 catalogue entries across five catalogues** — `core` 930 (eager), `canvas` 122, `start` 129,
-`present` 17, `theme` 16 (all chunk-local) — reached from **62 files on the guard's allowlist**.
-First-load JS is **180.3 kB gz against a 182 ceiling**; note that ceiling measures entry *plus*
+**1346 catalogue entries across six catalogues** — `core` 979 (eager); `canvas` 129, `start` 149,
+`io` 54, `present` 19, `theme` 16 (all lazy, chunk-local) — reached from **101 files on the guard's
+allowlist**. First-load JS is **181.9 kB gz against a 184 ceiling**; that ceiling measures entry *plus*
 modulepreloaded chunks, so it is not comparable to any figure recorded before 2026-07-27 (see the
 header of `scripts/bundle-budget.mjs`). English is the only locale and is expected to stay that way —
 adding one means adding a JSON catalogue, not changing the app.
 
-> Every number in this section is measured, and each says how. They were all wrong once: this
-> paragraph read "684 entries across eight migrated files" and "174.2 kB against a 175 ceiling" for
-> sixteen commits after each of those stopped being true — the branch-point values, left in place while
-> the work moved on. "Eight migrated files" was also the exact phrasing of the retracted
-> completeness claim this section exists to correct. **Re-measure before editing these:**
-> `node scripts/i18n-scan.mjs $(git ls-files 'src/**/*.ts' 'src/**/*.tsx') --count | tail -1`,
-> and `node scripts/size-budget.mjs` after a build.
-
-**Progress, on branch `i18n/complete-migration` (not merged).** The tree-wide scanner reports **401**,
-down from 768 at the branch point — and the two are only loosely comparable, because four more
-detectors landed in between; the count rose to 1001 when they did. What it reports breaks down as:
-
-| bucket | strings | status |
-| --- | --- | --- |
-| declined map CONTENT | 213 | owner decision, recorded — `exampleBuilders` 169, `templates` 30, `sampleMap` 14 |
-| catalogue self-hits | 46 | permanent false positive: a catalogue quoting its own English. The five catalogue files must never join the allowlist |
-| `src/io/` + `src/import/` | 68 | **not** markup false positives — see below |
-| remaining chrome | ~74 | a long tail across ~29 files, none over 6 strings |
-
-**The 68 in `io/` and `import/` were mislabelled here as "mostly XML/SVG markup".** Measured: **one**
-of the 68 is markup. 37 are error messages thrown and shown to the user verbatim (`App.tsx:973` renders
-`err.message` straight into the error banner), 15 are UI labels compiled into *exported* artifacts —
-`interactiveHtml.ts` ships "Expand all", "Collapse all", `aria-label="Filter topics"` into every
-interactive HTML export — and the rest are file-picker descriptions, default map titles and
-`(untitled)` fallbacks. The rationale was stale: commit `2587348` had already removed the markup class
-(`io/pptx`, `io/ooxml`, `io/xml`, `io/html` all scan 0), and this row was written after it. Treat this
-bucket as **real user-facing work**, not noise.
-
-**The scanner total is a FLOOR, and a file scanning 0 is not evidence it is migrated.** Run
-`pnpm i18n:blindspot` — it walks the TypeScript AST and reports what the line-based detectors cannot
-see inside **allowlisted** files. It is deliberately noisy and gates nothing; it is a worklist.
-
-Three blind spots were closed on 2026-07-27 (leading glyph, parentheses, template-literal props) and
-paid for — 56 strings. **85 remain**, and the composition is what matters:
-
-| class | roughly | what to do |
-| --- | --- | --- |
-| a sentence a JSX element or `{…}` cut in half | ~55 | `tNodes` — see `src/i18n/nodes.tsx`. No line-based rule can ever match these |
-| plain labels the rules still miss (single lowercase words, fragments) | ~20 | migrate normally |
-| legitimately literal | ~10 | physical key names (`Tab`/`Enter`/`Shift`), the copyright line, the search-operator cheatsheet |
-
-### Status 2026-07-28 (updated)
-
-**28+ commits, tree clean, CI green on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173)
-(draft).** 217 files, 2462 tests, first load 181.9 kB against a 182 ceiling (0.1 kB headroom — the next
-eager batch needs the ceiling looked at, see `docs/I18N_BLOCKED.md` item 3).
+> Every number above is measured, and each says how. They were all wrong once: this paragraph read
+> "684 entries across eight migrated files" and "174.2 kB against a 175 ceiling" for sixteen commits
+> after each stopped being true, and said "five catalogues" for a further ten after `io` made it six.
+> **Re-measure before editing them** (commands below).
 
 **Re-measure before believing any number here** — that is the whole lesson of this programme:
 
 ```
 pnpm i18n:blindspot                                    # what the detectors CANNOT see (allowlisted files)
-node scripts/i18n-scan.mjs $(git ls-files 'src/**/*.ts' 'src/**/*.tsx') --count | tail -1
+node scripts/i18n-scan.mjs $(git ls-files 'src/*.ts' 'src/*.tsx' 'src/**/*.ts' 'src/**/*.tsx' | sort -u) --count | tail -1
 node -e 'import("./scripts/lib/i18nFrozen.mjs").then(m=>{const x=m.frozenByFile("src");console.log([...x.values()].reduce((a,b)=>a+b,0))})'
 ```
-Last measured: scanner **360**, blindspot **8** (4 files — every one legitimately literal: physical key
-names, the copyright line, the search-operator cheatsheet), frozen **0** (was 145 across 17 files —
-closed this session, see below).
 
-**Done since the branch was last parked:**
-- Raw untranslated literals (`MapPanel` layouts, `icons.ts` marker groups, `stickers.ts` categories,
-  `priority.ts`) — migrated together with the React keys that read them, so the fix didn't create the
-  `Recent.tsx`-shaped bug it was warning against.
-- `src/io/` + `src/import/` (~65 strings) — import failures (rendered verbatim in the error banner) and
-  chrome baked into exported HTML/decks. Own catalogue (`src/io/messages.ts`); took three attempts to
-  place correctly without breaking the size gate (see CHANGELOG for the sideways-movement near-miss).
-- `Toolbar.tsx`'s `mindmap-last-export` — was keying "last used" on the rendered label, not an id; five
-  more defects found in the same file in the process (two blindspot sentences, six duplicated trigger
-  labels). See CHANGELOG.
-- **The blindspot residue, 82 → 8.** `tNodes` for the sentences with a real React node embedded; plain
-  `t()` + placeholders for the rest. Two new hardcoded-literal shapes found along the way and fixed
-  wherever they occurred: a ternary as a bare JSX child (`{cond ? "Word" : other}`, no prop, no tag
-  pair — six sites), and `loneJsxTextViolations`' leading-glyph check still using the OLD fixed
-  character set `jsxTextViolations` had already moved past. Revived two dead catalogue keys
-  (`count.topics`, `count.nodes`, `count.maps`) that existed unreferenced while call sites hand-rolled
-  the same plural logic — one of them (`AllMaps.tsx`'s node count) had never pluralised at all before
-  this. Found and fixed a second `&amp;`-entity bug, same class as the About panel's. See CHANGELOG.
-- **The frozen-`t()` ratchet, 145 → 0 (all 17 files).** Every site was the same shape (identity field +
-  frozen display field); every display field became a getter, no consumer needed a change. One real bug
-  fell out: `CaptureCard.tsx` keyed its suggested-prompt buttons on the translated text itself. See
-  CHANGELOG. `docs/I18N_BLOCKED.md` item 4 is now resolved.
+> **The scan command above was WRONG until 2026-07-28 and undercounted badly.** It read
+> `git ls-files 'src/**/*.ts' 'src/**/*.tsx'`, which matches 198 of the 249 source files — it silently
+> omits every *top-level* `src/*.ts(x)`, i.e. `App.tsx`, `Panels.tsx`, `examples.ts`, `templates.ts`,
+> `stickers.ts` and 46 others, including the two files this section says hold most of the remainder.
+> Following the documented instruction returned **147** where the true figure was **360**: a phantom
+> 60% improvement, in a doc whose entire thesis is "re-measure, don't trust the recorded number".
+> The antidote had the disease. Fixed above; if you edit it, check the file count is 249.
 
-**Left to do:**
+Last measured (2026-07-28, post-merge): scanner **360**, blindspot **8**, frozen **0**.
 
-1. **The bundle ceiling has 0.1 kB of headroom.** Every batch since the io/ catalogue has landed within
-   budget without raising it, but the margin is now thin enough that the next eager addition should
-   re-examine `docs/I18N_BLOCKED.md` item 3 rather than assume there's room.
+**What the scanner's 360 is, so nobody re-plans it as work:** ~213 declined map CONTENT
+(`exampleBuilders`, `templates`, `sampleMap` — owner decision, see *Out of scope*), ~46 catalogue
+self-hits (a catalogue quoting its own English — a **permanent** false positive; the six catalogue
+files must never join the allowlist), and the rest a long literal tail. **The total is a FLOOR, not a
+count**, and a file scanning 0 is not evidence it is migrated — `pnpm i18n:blindspot` walks the AST and
+reports what the line-based rules structurally cannot see inside already-allowlisted files. It is
+deliberately noisy, gates nothing, and is a worklist rather than a score.
 
-Owner decisions and their outcomes are in `docs/I18N_BLOCKED.md` (all 4 resolved).
+The 8 remaining blindspot hits are **all legitimately literal** and should stay that way: physical key
+names (`Tab`/`Enter`/`Shift`), the copyright line, and the search-operator cheatsheet.
 
 ---
 
-**Do not trust that classification without re-checking it** — the first version of this table was wrong
-twice, in the same direction, and both were found only by opening the file. `<option value="relates-to">`
-was rendering the raw **id** to the user while `EdgeInspector` showed a translated label for the same
-five values; and the status bar carried `{n} topic{n === 1 ? "" : "s"}`, a hand-rolled English plural,
-which is the exact shape `i18n/registry.ts` names as the reason plural messages exist. Both are fixed.
-The lesson generalises: "legitimately literal" is the bucket that hides defects, because it is the one
-nobody re-opens.
+**Do not trust the "legitimately literal" classification without re-opening the files.** Earlier
+versions of that bucket were wrong twice, in the same direction, and both were caught only by reading
+the code rather than the label: `<option value="relates-to">` was rendering the raw **id** to the user
+while `EdgeInspector` showed a translated label for the same five values; and the status bar carried
+`{n} topic{n === 1 ? "" : "s"}`, a hand-rolled English plural, which is the exact shape
+`i18n/registry.ts` names as the reason plural messages exist. Both are fixed. The lesson generalises:
+**"legitimately literal" is the bucket that hides defects, because it is the one nobody re-opens.**
 
 **The allowlist certifies a file against the detectors, not against reality**, and the `pnpm gate` tick
 is worth exactly what the detectors are worth. `test/i18n-pseudo-render.test.tsx` is the only check
 that can prove a component clean — it renders under a marked-up catalogue and reports anything that
-came back unchanged. It is pointed at four components. Pointing it at `Panels.tsx` and `App.tsx`, which
-between them hold 55 of the 93, is the highest-value next step in this whole area.
+came back unchanged.
+
+> **OPEN — the highest-value remaining work in this area.** The pseudo-render harness is pointed at
+> only four components. `Panels.tsx` and `App.tsx` are the two largest surfaces in the app and are
+> allowlisted (so they read as "clean") while being provable only by rendering. Point the harness at
+> them. This is the one item in this section that is genuinely not done.
 
 **Also open:** `parseNaturalDate`'s INPUT grammar ("today", "tomorrow", "+7d", weekday names) is
 English-only, and it is genuinely logic rather than translation — a second locale needs its own keyword

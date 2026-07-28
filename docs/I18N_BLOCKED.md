@@ -1,11 +1,17 @@
-# i18n — blocked on an owner decision
+# i18n — owner decisions and their outcomes
 
-Items the migration reached and deliberately did **not** decide. Each changes visible copy, changes
-behaviour, or asks a question the migration has no standing to answer on its own. They are recorded
+> **STATUS 2026-07-28: nothing in this file is blocked any more.** All four items are RESOLVED or
+> DECLINED, and the i18n programme merged to `main` in PR #173. The filename is kept because
+> `NEXT_STEPS.md`, `scripts/bundle-budget.mjs` and `scripts/lib/i18nFrozen.mjs` all point at it by
+> path; read it as a **decision record**, not a worklist.
+
+Items the migration reached and deliberately did **not** decide on its own. Each changed visible copy,
+changed behaviour, or asked a question the migration had no standing to answer. They were recorded
 here rather than guessed at, and rather than left as a silent gap.
 
-Everything here is **known and bounded** — the file it lives in simply does not join the guard's
-allowlist until the item is resolved, so it cannot be mistaken for finished work.
+Each is kept with its full reasoning **after** resolution, not deleted, because the arguments are the
+reusable part — three of the four were resolved in a way that contradicted the first analysis written
+about them, and that pattern is the most useful thing in this file.
 
 ---
 

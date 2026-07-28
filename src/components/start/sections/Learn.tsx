@@ -1,3 +1,4 @@
+import { tNodes } from "../../../i18n/nodes";
 import { t } from "../../../i18n/registry";
 import "../messages";
 // Six short principles of mind mapping. Static content.
@@ -63,8 +64,9 @@ export function Learn() {
       <div className="st-card" style={{ padding: 18 }}>
         <h3 style={{ margin: "0 0 6px", fontSize: 15 }}>{t("start.goDeeperTheBook")}</h3>
         <p className="st-prose" style={{ marginTop: 0 }}>
-          <strong>{t("start.thinkingInMaps")}</strong> is the companion book: the why and how of
-          mapping, worked examples, and every feature in context.
+          {tNodes("start.thinkingInMapsExplain", {
+            book: <strong>{t("start.thinkingInMaps")}</strong>,
+          })}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
           <a

@@ -176,7 +176,7 @@ function PresenterSidebar({
       {/* 4. Agenda — the "map" of the talk; current slide highlighted, click to jump. */}
       <section style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
         <h2 style={sectionLabelStyle}>
-          Agenda{" "}
+          {t("app.agenda")}{" "}
           <span style={{ color: "#6d68a8" }}>
             · {index + 1} / {slides.length}
           </span>

@@ -47,6 +47,66 @@ export const CORE_EN = {
   // different LAZY chunks need it, and neither can rely on the other having loaded.
   "common.rename": "Rename",
   "common.grid": "Grid",
+  // Power Filter's second relationship-type dropdown, reusing the panel.relates/depends/… keys
+  // migrated for the first one — and the condition-kind list of the same rule builder.
+  "panel.anyRelationship": "any relationship",
+  "panel.conditionHasTag": "has tag",
+  "panel.conditionHasMarker": "has marker",
+  "panel.conditionIsCompleted": "is completed",
+  "panel.conditionIsOverdue": "is overdue",
+  "panel.conditionIsDueSoon": "is due soon",
+  "panel.conditionPriorityLte": "priority ≤",
+  "panel.conditionTextContains": "text contains",
+  "panel.conditionHasAttachment": "has attachment",
+  "panel.conditionHasRelationship": "has relationship",
+
+  "panel.deckExplain":
+    "Choose which topics become slides, reorder them, and add speaker notes. Empty = the automatic deck (overview + one slide per top branch).",
+  "panel.readOnlyHidden": "Read-only: non-matching topics are hidden, the map itself is unchanged.",
+  "panel.readOnlyDimmed": "Read-only: non-matching topics are dimmed, the map itself is unchanged.",
+  "panel.namedStylesExplain": "Save the selected topic's look, then reuse it on others.",
+  // One combined message rather than three fragments — natural word order varies enough by locale
+  // that splicing "done" onto a computed fraction does not translate reliably.
+  "panel.progressSummary": "{pct}% · {done}/{total} done",
+  "panel.autoSuffix": "(auto)",
+  "panel.multiSelectAppliesToAll": {
+    one: "{n} topic selected — changes apply to all",
+    other: "{n} topics selected — changes apply to all",
+  },
+  "panel.perTopicFieldsHidden":
+    "Per-topic fields (note, links, attachments) are hidden — select one topic to edit them.",
+  "panel.fillImage": "Fill image…",
+  "panel.openInDock": "Open in dock",
+  "panel.taskStart": "Start",
+  "panel.taskDue": "Due",
+  "panel.attachFile": "Attach file",
+  "panel.andATopicWholeMap": "…and a topic (whole map)",
+  "panel.removeLinkKind": "Remove link ({kind})",
+  "panel.linkKindMap": "map",
+  "panel.linkKindWeb": "web",
+  "panel.noteHeadingNamed": "Note — {topic}",
+  "panel.listToolbarButton": "List",
+  "panel.linkToolbarButton": "Link",
+  "panel.pause": "Pause",
+  "panel.play": "Play",
+  "panel.deleteKindLower": "Delete {kind}",
+  "common.hide": "Hide",
+  "common.none": "None",
+  "common.newMap": "New map",
+  "toolbar.find": "Find",
+  "app.importFailed": "Import failed: {error}",
+  "app.importedWithNotes": {
+    one: "Imported with {n} note: {note}",
+    other: "Imported with {n} notes: {note}",
+  },
+  "app.importedMoreSuffix": " (+{n} more)",
+  "app.focusingBranch": "Focusing branch: {topic}",
+  "app.drilledInto": "Drilled into: {topic}",
+  "app.pasteOutlineExplain":
+    "Paste an outline, a bullet list, or Markdown — indentation (or {hashHeadings} headings) sets the hierarchy. A spreadsheet selection (Excel / Sheets) becomes one topic per row, with extra columns as the note and a {tagsColumn} column as tags.",
+  "app.pasteOutlinePlaceholder": "- Theme\n  - Idea\n  - Idea\n- Next theme",
+  "app.addUnderSelected": "Add under selected",
+
   // Import/export strings reached from the EAGER graph — App.tsx statically imports attachment,
   // image, importDispatch, library and fileSystem, and useMapExports imports json and mermaid. Their
   // keys cannot live in src/io/messages.ts: importing that catalogue from an eager file pulls all of

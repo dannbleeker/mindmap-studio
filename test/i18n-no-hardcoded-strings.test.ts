@@ -300,6 +300,22 @@ describe("migrated files carry no hardcoded user-facing strings", () => {
     expect(
       loneJsxTextViolations("            >\n              Exit (Esc)\n            </button>"),
     ).toHaveLength(1);
+    // (6b′) A LEADING GLYPH does not stop it being a label here either — same fix as (6a), applied to
+    // the MULTI-LINE wrapped-tag shape. This one required its first character to come from a fixed set
+    // (`[A-Z＋✕←→‹›▦☰⏸▶↺−+]`), so a new glyph the house style reached for — ⤢, ☑ — was invisible even
+    // though the identical text on ONE line was already caught by (6a).
+    expect(
+      loneJsxTextViolations(
+        "                    >\n                      ⤢ Open in dock\n                    </button>",
+      ),
+    ).toHaveLength(1);
+    expect(
+      loneJsxTextViolations("            >\n              ☑ List\n            </Button>"),
+    ).toHaveLength(1);
+    // A bare glyph alone is still not a label.
+    expect(
+      loneJsxTextViolations("            >\n              ✕\n            </button>"),
+    ).toHaveLength(0);
     // (6c) A user-facing prop must not be a TEMPLATE either. `templateViolations` cannot catch these:
     // it needs a capitalised word followed by a lowercase one, which `Apply "${s.name}"` never is once
     // the interpolation is blanked. Anchoring on the prop name is what makes a single word enough.

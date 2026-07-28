@@ -102,7 +102,7 @@ export function EdgeInspector({
               className="mm-inspector-path"
               title={t("panel.relationshipNamed", { label: edge.label })}
             >
-              Relationship: {edge.label}
+              {t("panel.relationshipNamed", { label: edge.label })}
             </div>
           ) : null}
         </div>

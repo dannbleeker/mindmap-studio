@@ -12,6 +12,11 @@ import { type Catalogue, registerMessages } from "../../i18n/registry";
 // asserts these strings are absent from the entry chunk.
 
 export const CANVAS_EN = {
+  "canvas.bulk.selectedCount": { one: "{n} topic selected", other: "{n} topics selected" },
+  "canvas.shapeTitle": "{kind} shape",
+  "canvas.expand": "Expand",
+  "canvas.collapse": "Collapse",
+
   // Status-bar counts. These were `{n} topic{n === 1 ? "" : "s"}` — a hand-rolled English plural,
   // which is precisely the shape i18n/registry.ts calls out as the reason plural messages exist:
   // English needs two forms, Slavic four, Arabic six, and a ternary can only ever express two.
@@ -164,7 +169,6 @@ export const CANVAS_EN = {
   "canvas.menu.topicActions": "Topic actions",
   "canvas.menu.canvasActions": "Canvas actions",
   "canvas.menu.overlayActions": "Overlay actions",
-  "canvas.priority.none": "None",
   // One concept — "reset to the default colour" — shared by the branch-colour and shape-recolour
   // chips. They were two keys until the duplicate check refused them.
   "canvas.hint.clickTargetToLink": "Click a target node to draw a relationship · Esc to cancel",

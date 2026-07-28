@@ -16,6 +16,32 @@ import { type Catalogue, registerMessages } from "../../i18n/registry";
 // the migration nearly free in bundle terms.
 
 export const START_EN = {
+  "start.heroSub":
+    "Capture a thought, paste an outline, or open a blank canvas — it all becomes a map you own.",
+  "start.moveMapToTrashConfirm":
+    "Move “{name}” to the Trash? You can restore it from Trash until you empty it.",
+  // Straight ampersand, not the HTML entity: t() returns a plain string React ESCAPES rather than
+  // decodes, so "&amp;" captured from JSX source would have shipped to the user literally.
+  "start.localAndPrivate":
+    "Local & private — runs in your browser, works offline, nothing leaves this device.",
+
+  "start.startYourOwn": "Start your own",
+  "start.examplesExplain": {
+    one: "Complete, worked maps — open one to explore, then make it your own. The same set as the editor's New-map gallery. {n} example.",
+    other:
+      "Complete, worked maps — open one to explore, then make it your own. The same set as the editor's New-map gallery. {n} examples.",
+  },
+  "start.noExamplesMatch": 'No examples match "{query}".',
+  "start.viewWord": "view",
+  "start.layoutExplain":
+    "A layout is a {view} you can switch any time from the toolbar — your topics don't move. Open a blank map in one to start.",
+  "start.create": "Create",
+  "start.thinkingInMapsExplain":
+    "{book} is the companion book: the why and how of mapping, worked examples, and every feature in context.",
+  "start.noTemplatesMatch": 'No templates match "{query}".',
+  "start.emptyTrashCount": "Empty Trash ({n})",
+  "start.unpin": "Unpin",
+
   "start.cmdkForAnyCommand": "⌘K for any command",
   "start.readPdf": "Read (PDF)",
   "start.readEpub": "Read (EPUB)",
@@ -31,7 +57,6 @@ export const START_EN = {
   "start.shareAMapAsPptx": "Share a map as .pptx, PDF, PNG or SVG from the Export menu.",
   "start.learnTheApp": "Learn the app",
   "start.fourShortcutsThatMakeThe": "Four shortcuts that make the editor faster.",
-  "start.newMap": "New map",
   "start.eGLaunchPlanFor": "e.g. Launch plan for Q3",
   "start.organizeMyResearch": "Organize my research",
   "start.mapTheNewOnboarding": "Map the new onboarding",

@@ -71,7 +71,13 @@ for (const file of files) {
       else if (ts.isJsxExpression(init) && init.expression) {
         const e = init.expression;
         if (ts.isStringLiteral(e) || ts.isNoSubstitutionTemplateLiteral(e)) text = e.text;
-        else if (ts.isTemplateExpression(e)) text = e.getText();
+        else if (ts.isTemplateExpression(e)) {
+          // STATIC spans only — `e.getText()` returns the raw SOURCE including the `${…}`
+          // interpolation code, so a variable or function name inside one (`timeAgo`, `playback`)
+          // reads as if it were prose. Walking `head` + each span's trailing literal is what the real
+          // detector's regex-blank achieves for the non-AST case; here the AST already has it split.
+          text = e.head.text + e.templateSpans.map((s) => s.literal.text).join("");
+        }
       }
       if (text && /\p{Letter}{2,}/u.test(text)) {
         const { line } = sf.getLineAndCharacterOfPosition(node.getStart());

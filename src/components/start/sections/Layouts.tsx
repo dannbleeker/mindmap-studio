@@ -1,3 +1,4 @@
+import { tNodes } from "../../../i18n/nodes";
 import { t } from "../../../i18n/registry";
 import "../messages";
 import type { BackdropKind, MindMapDoc } from "../../../model/types";
@@ -39,8 +40,7 @@ export function Layouts({ ctx }: { ctx: StartContext }) {
       <section>
         <h2 className="st-section-title">{t("start.layouts")}</h2>
         <p className="st-section-sub">
-          A layout is a <strong>view</strong> you can switch any time from the toolbar — your topics
-          don't move. Open a blank map in one to start.
+          {tNodes("start.layoutExplain", { view: <strong>{t("start.viewWord")}</strong> })}
         </p>
       </section>
 

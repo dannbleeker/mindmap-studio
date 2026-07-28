@@ -567,7 +567,7 @@ export function Toolbar({
         <span className="mm-grow" />
         <TBtn
           icon="search"
-          text={isMobile ? undefined : "Find"}
+          text={isMobile ? undefined : t("toolbar.find")}
           label={t("toolbar.findReplace")}
           ghost
           onClick={nav.openFind}
@@ -1410,7 +1410,7 @@ export function Toolbar({
               value={canvas.layout}
               onChange={(e) => canvas.changeLayout(e.target.value as LayoutKind)}
               aria-label={t("toolbar.layout")}
-              title={liveDoc.meta?.freeform ? t("toolbar.layoutPaused") : "Layout"}
+              title={liveDoc.meta?.freeform ? t("toolbar.layoutPaused") : t("toolbar.layout")}
               disabled={!!liveDoc.meta?.freeform}
             >
               <optgroup label={t("toolbar.layoutGroupRadial")}>

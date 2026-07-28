@@ -18,7 +18,7 @@ export function EmptyMaps({ ctx }: { ctx: StartContext }) {
     <div className="st-empty">
       <p style={{ margin: "0 0 14px" }}>{t("start.noMapsYetStartFresh")}</p>
       <button type="button" className="st-new st-empty-new" onClick={() => ctx.onOpen(blankDoc())}>
-        <span aria-hidden="true">＋</span> New map
+        <span aria-hidden="true">＋</span> {t("common.newMap")}
       </button>
       <button
         type="button"

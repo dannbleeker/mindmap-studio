@@ -173,9 +173,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
               </div>
               <div className="st-tile-body">
                 <div className="st-card-title">{f.name}</div>
-                <div className="st-card-meta">
-                  {countIn(f.id)} map{countIn(f.id) === 1 ? "" : "s"}
-                </div>
+                <div className="st-card-meta">{t("count.maps", { n: countIn(f.id) })}</div>
               </div>
             </button>
           ))}
@@ -201,7 +199,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
                 {e.title || t("common.untitled")}
               </button>
               <span className="st-card-meta">
-                {e.nodeCount} nodes
+                {t("count.nodes", { n: e.nodeCount })}
                 {e.updatedAt ? ` · ${timeAgo(e.updatedAt)}` : ""}
               </span>
             </div>
@@ -239,7 +237,7 @@ export function AllMaps({ ctx }: { ctx: StartContext }) {
             <Button type="button" onClick={() => setNamePrompt(null)}>
               {t("common.cancel")}
             </Button>
-            <Button type="submit">{namePrompt?.id ? "Rename" : "Create"}</Button>
+            <Button type="submit">{namePrompt?.id ? t("common.rename") : t("start.create")}</Button>
           </div>
         </form>
       </Dialog>

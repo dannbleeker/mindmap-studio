@@ -1295,7 +1295,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         <button
           type="button"
           className="mm-collapse-toggle nodrag nopan"
-          title={collapsed ? "Expand" : "Collapse"}
+          title={collapsed ? t("canvas.expand") : t("canvas.collapse")}
           aria-expanded={!collapsed}
           aria-label={
             collapsed ? `Expand${hiddenCount ? ` (${hiddenCount} hidden)` : ""}` : "Collapse"

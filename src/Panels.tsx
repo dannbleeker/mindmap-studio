@@ -1378,7 +1378,7 @@ export function RelationshipsPanel({
             >
               <span
                 style={{ color: colors.muted }}
-                title={l.kind === "relationship" ? "Relationship" : t("panel.topicLink")}
+                title={l.kind === "relationship" ? t("panel.relationship") : t("panel.topicLink")}
               >
                 {l.kind === "relationship" ? "↬" : "↪"}
               </span>
@@ -1697,8 +1697,7 @@ export function SlideDeckEditorPanel({
     <Panel>
       <div style={panelTitle}>🎞 {t("panel.slideDeck")}</div>
       <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-        Choose which topics become slides, reorder them, and add speaker notes. Empty = the
-        automatic deck (overview + one slide per top branch).
+        {t("panel.deckExplain")}
       </div>
       <div style={{ overflowY: "auto", padding: "0 0 8px" }}>
         {deck.map((row, i) => (
@@ -1999,8 +1998,7 @@ export function FilterPanel({
           </div>
         ) : null}
         <div style={{ padding: "6px 10px", fontSize: fontSize.xs, color: colors.faint }}>
-          Read-only: non-matching topics are {hide ? "hidden" : "dimmed"}, the map itself is
-          unchanged.
+          {hide ? t("panel.readOnlyHidden") : t("panel.readOnlyDimmed")}
         </div>
 
         <PanelSection>{t("panel.savedFilters")}</PanelSection>
@@ -2160,7 +2158,10 @@ export function HistoryPanel({
                 }}
                 title={new Date(v.ts).toLocaleString()}
               >
-                {timeAgo(v.ts)} <span style={{ color: colors.faint }}>· {v.nodeCount} topics</span>
+                {timeAgo(v.ts)}{" "}
+                <span style={{ color: colors.faint }}>
+                  · {t("count.topics", { n: v.nodeCount })}
+                </span>
               </span>
               <Button
                 onClick={() => onRestore(v.id)}
@@ -2229,7 +2230,11 @@ export function PlaybackBar({
       >
         ⏮
       </Button>
-      <Button onClick={onPlayPause} style={btn} aria-label={playing ? "Pause" : "Play"}>
+      <Button
+        onClick={onPlayPause}
+        style={btn}
+        aria-label={playing ? t("panel.pause") : t("panel.play")}
+      >
         {playing ? "⏸" : "▶"}
       </Button>
       <Button
@@ -2529,27 +2534,27 @@ export function StylesPanel({
           aria-label={label}
           style={{ width: "auto", margin: "0 10px 4px" }}
         >
-          <option value="">any relationship</option>
-          <option value="relates-to">relates-to</option>
-          <option value="depends-on">depends-on</option>
-          <option value="causes">causes</option>
-          <option value="supports">supports</option>
-          <option value="blocks">blocks</option>
+          <option value="">{t("panel.anyRelationship")}</option>
+          <option value="relates-to">{t("panel.relates")}</option>
+          <option value="depends-on">{t("panel.depends")}</option>
+          <option value="causes">{t("panel.causes")}</option>
+          <option value="supports">{t("panel.supports")}</option>
+          <option value="blocks">{t("panel.blocks")}</option>
         </Select>
       );
     return null; // completed / overdue / dueSoon / hasAttachment need no value
   };
   const conditionKindOptions = (
     <>
-      <option value="tag">has tag</option>
-      <option value="marker">has marker</option>
-      <option value="completed">is completed</option>
-      <option value="overdue">is overdue</option>
-      <option value="dueSoon">is due soon</option>
-      <option value="priority">priority ≤</option>
-      <option value="textContains">text contains</option>
-      <option value="hasAttachment">has attachment</option>
-      <option value="relationshipType">has relationship</option>
+      <option value="tag">{t("panel.conditionHasTag")}</option>
+      <option value="marker">{t("panel.conditionHasMarker")}</option>
+      <option value="completed">{t("panel.conditionIsCompleted")}</option>
+      <option value="overdue">{t("panel.conditionIsOverdue")}</option>
+      <option value="dueSoon">{t("panel.conditionIsDueSoon")}</option>
+      <option value="priority">{t("panel.conditionPriorityLte")}</option>
+      <option value="textContains">{t("panel.conditionTextContains")}</option>
+      <option value="hasAttachment">{t("panel.conditionHasAttachment")}</option>
+      <option value="relationshipType">{t("panel.conditionHasRelationship")}</option>
     </>
   );
   const swatchRow = (
@@ -2730,7 +2735,7 @@ export function StylesPanel({
 
         <PanelSection>{t("panel.namedStyles")}</PanelSection>
         <div style={{ padding: "0 10px 4px", fontSize: fontSize.sm, color: colors.faint }}>
-          Save the selected topic's look, then reuse it on others.
+          {t("panel.namedStylesExplain")}
         </div>
         {namedStyles.map((s) => (
           <div
@@ -3006,9 +3011,13 @@ export function InfoPanel({
           >
             {info ? <ProgressPie fraction={info.progress} size={20} /> : null}
             <span style={{ color: "var(--ed-ink)", fontVariantNumeric: "tabular-nums" }}>
-              {pct}% · {info?.done}/{info?.total} done
+              {t("panel.progressSummary", {
+                pct: pct ?? 0,
+                done: info?.done ?? 0,
+                total: info?.total ?? 0,
+              })}
             </span>
-            <span style={{ color: "var(--ed-faint)" }}>(auto)</span>
+            <span style={{ color: "var(--ed-faint)" }}>{t("panel.autoSuffix")}</span>
           </div>
         ) : (
           <div
@@ -3138,7 +3147,7 @@ export function InfoPanel({
                     fontWeight: fontWeight.semibold,
                   }}
                 >
-                  {selectedCount} topics selected — changes apply to all
+                  {t("panel.multiSelectAppliesToAll", { n: selectedCount ?? 0 })}
                   <div
                     style={{
                       fontWeight: fontWeight.normal,
@@ -3147,8 +3156,7 @@ export function InfoPanel({
                       color: "var(--ed-ink2)",
                     }}
                   >
-                    Per-topic fields (note, links, attachments) are hidden — select one topic to
-                    edit them.
+                    {t("panel.perTopicFieldsHidden")}
                   </div>
                 </div>
               )}
@@ -3179,7 +3187,7 @@ export function InfoPanel({
                           }}
                         >
                           <label style={{ ...styleBtn, fontSize: fontSize.sm, cursor: "pointer" }}>
-                            Fill image…
+                            {t("panel.fillImage")}
                             <input
                               type="file"
                               accept="image/*"
@@ -3228,7 +3236,7 @@ export function InfoPanel({
                         cursor: "pointer",
                       }}
                     >
-                      ⤢ Open in dock
+                      ⤢ {t("panel.openInDock")}
                     </button>
                   ) : null}
                   <NotesPanel
@@ -3442,7 +3450,7 @@ export function InfoPanel({
                         <input> inside, so the label associates with it at runtime (biome can't see
                         through the component); the input also self-labels via ariaLabel. */}
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                        Start
+                        {t("panel.taskStart")}
                         <NaturalDateInput
                           key={`${node.id}:start${mixed.start ? ":mixed" : ""}`}
                           value={node.task?.start ?? ""}
@@ -3454,7 +3462,7 @@ export function InfoPanel({
                       </label>
                       {/* biome-ignore lint/a11y/noLabelWithoutControl: see the Start label above. */}
                       <label style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                        Due
+                        {t("panel.taskDue")}
                         <NaturalDateInput
                           key={`${node.id}:due${mixed.due ? ":mixed" : ""}`}
                           value={node.task?.due ?? ""}
@@ -3574,7 +3582,7 @@ export function InfoPanel({
                               color: "var(--ed-ink2)",
                             }}
                           >
-                            + Attach file
+                            + {t("panel.attachFile")}
                             <input
                               type="file"
                               onChange={(e) => {
@@ -3645,7 +3653,7 @@ export function InfoPanel({
                             aria-label={t("panel.focusATopic")}
                             style={{ width: "auto", margin: "0 10px 4px" }}
                           >
-                            <option value="">🗺 …and a topic (whole map)</option>
+                            <option value="">🗺 {t("panel.andATopicWholeMap")}</option>
                             {crossLinkTopics.map((row) => (
                               <option key={row.id} value={row.id}>
                                 {`${"  ".repeat(row.depth)}${row.topic || t("common.untitled")}`}
@@ -3662,13 +3670,14 @@ export function InfoPanel({
                               margin: "0 10px 6px",
                             }}
                           >
-                            ✕ Remove link (
-                            {link.startsWith("#map=")
-                              ? "map"
-                              : link.startsWith("#node=")
-                                ? "topic"
-                                : "web"}
-                            )
+                            ✕{" "}
+                            {t("panel.removeLinkKind", {
+                              kind: link.startsWith("#map=")
+                                ? t("panel.linkKindMap")
+                                : link.startsWith("#node=")
+                                  ? t("common.topic")
+                                  : t("panel.linkKindWeb"),
+                            })}
                           </Button>
                         )}
                         {/* Additional links beyond the primary — a topic can point at more than one
@@ -4151,7 +4160,9 @@ export function NotesPanel({
           color: "var(--ed-muted)",
         }}
       >
-        <span>📝 Note{selected ? ` — ${selected.topic}` : ""}</span>
+        <span>
+          📝 {selected ? t("panel.noteHeadingNamed", { topic: selected.topic }) : t("app.note")}
+        </span>
         {onClose && (
           <Button onClick={onClose} style={{ padding: "2px 8px", fontSize: fontSize.sm }}>
             {t("common.close")}
@@ -4231,7 +4242,7 @@ export function NotesPanel({
               title={t("panel.checklist")}
               style={tbBtn}
             >
-              ☑ List
+              ☑ {t("panel.listToolbarButton")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4239,7 +4250,7 @@ export function NotesPanel({
               title={t("panel.insertLinkWraps")}
               style={tbBtn}
             >
-              🔗 Link
+              🔗 {t("panel.linkToolbarButton")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}
@@ -4247,7 +4258,7 @@ export function NotesPanel({
               title={t("panel.insertImageBy")}
               style={tbBtn}
             >
-              🖼 Image
+              🖼 {t("toolbar.exportGroup.image")}
             </Button>
             <Button
               onMouseDown={(e) => e.preventDefault()}

@@ -171,7 +171,7 @@ export function StartSidebar({
         {t("about.appName")}
       </div>
       <button type="button" className="st-new" onClick={onNewMap}>
-        <span aria-hidden="true">＋</span> New map
+        <span aria-hidden="true">＋</span> {t("common.newMap")}
       </button>
       <button
         type="button"
@@ -216,9 +216,7 @@ export function StartSidebar({
       <InstallButton className="st-install" />
       <div className="st-foot">
         <span aria-hidden="true">🔒</span>
-        <span>
-          Local &amp; private — runs in your browser, works offline, nothing leaves this device.
-        </span>
+        <span>{t("start.localAndPrivate")}</span>
       </div>
     </nav>
   );

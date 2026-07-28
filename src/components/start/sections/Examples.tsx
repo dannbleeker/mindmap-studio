@@ -32,10 +32,7 @@ export function Examples({ ctx }: { ctx: StartContext }) {
     <div className="st-content">
       <section>
         <h2 className="st-section-title">{t("toolbar.examples")}</h2>
-        <p className="st-section-sub">
-          Complete, worked maps — open one to explore, then make it your own. The same set as the
-          editor's New-map gallery. {built.length} examples.
-        </p>
+        <p className="st-section-sub">{t("start.examplesExplain", { n: built.length })}</p>
       </section>
       <input
         className="st-input"
@@ -44,7 +41,7 @@ export function Examples({ ctx }: { ctx: StartContext }) {
         onChange={(e) => setQ(e.target.value)}
       />
       {shown.length === 0 ? (
-        <div className="st-empty">No examples match "{q}".</div>
+        <div className="st-empty">{t("start.noExamplesMatch", { query: q })}</div>
       ) : (
         <div className="st-grid">
           {shown.map((e) => (

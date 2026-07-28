@@ -140,9 +140,9 @@ describe("catalogue", () => {
     const UNREFERENCED = new Set([
       "settings.language", // the locale picker's label — SettingsDialog renders the control without it
       // A `count.*` family built for call sites that ended up using bespoke plural messages instead.
-      "count.topics",
-      "count.nodes",
-      "count.maps",
+      // `count.topics`, `count.nodes` and `count.maps` were revived from this exact list — three call
+      // sites (Panels.tsx, App.tsx, TemplateCard.tsx, AllMaps.tsx) had hand-rolled `n === 1 ? "" : "s"`
+      // instead of using the plural key that already existed for them.
       "count.folders",
       "count.commands",
       "count.matches",
@@ -197,6 +197,11 @@ describe("catalogue", () => {
       // The optgroup heading names the radial FAMILY of layouts (both-sides, right, left, radial/hub);
       // the branch-layout option names the radial layout itself. English spells both "Radial".
       "canvas.branchLayout.radial",
+      // The Start SIDEBAR's nav tab (a place you go) versus a task's START DATE field (a point in
+      // time) — unrelated senses that only coincide in English. Kept apart deliberately rather than
+      // collapsed onto one key, unlike the "Due" field, which has no such twin anywhere else in the
+      // app: nothing else forced a decision for it, so it stayed its own key without needing this set.
+      "start.start",
     ]);
 
     // Pairwise over every catalogue, not CORE-vs-CANVAS: three more catalogues are coming, and a

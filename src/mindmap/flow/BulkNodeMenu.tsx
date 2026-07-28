@@ -37,7 +37,7 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
     apply(applyAcrossIds(getDoc(), ids, op));
   return (
     <>
-      <MenuLabel>{ids.length} topics selected</MenuLabel>
+      <MenuLabel>{t("canvas.bulk.selectedCount", { n: ids.length })}</MenuLabel>
       <MenuItem
         label={t("canvas.bulk.deleteTopics", { n: ids.length })}
         danger
@@ -85,7 +85,7 @@ export function BulkNodeMenu({ ids, getDoc, apply, onDelete }: BulkNodeMenuProps
           aria-label={t("canvas.clearPriorityOnTheSelection")}
           onClick={() => across((d, i) => setPriority(d, i, undefined))}
         >
-          {t("canvas.priority.none")}
+          {t("common.none")}
         </button>
       </div>
       <MenuLabel>{t("common.branchColour")}</MenuLabel>

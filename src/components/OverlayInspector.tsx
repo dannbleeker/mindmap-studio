@@ -264,7 +264,7 @@ export function OverlayInspector({
               padding: "6px 0",
             }}
           >
-            Delete {KIND_LABEL[overlay.kind].toLowerCase()}
+            {t("panel.deleteKindLower", { kind: KIND_LABEL[overlay.kind].toLowerCase() })}
           </button>
         ) : null}
       </div>

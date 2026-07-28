@@ -41,7 +41,7 @@ export function Templates({ ctx }: { ctx: StartContext }) {
         onChange={(e) => setQ(e.target.value)}
       />
       {shown.length === 0 ? (
-        <div className="st-empty">No templates match "{q}".</div>
+        <div className="st-empty">{t("start.noTemplatesMatch", { query: q })}</div>
       ) : (
         <div className="st-grid">
           {shown.map((t) => (

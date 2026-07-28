@@ -62,7 +62,7 @@ export function StartHome({ ctx }: { ctx: StartContext }) {
               className="st-new st-empty-new"
               onClick={() => ctx.onOpen(blankDoc())}
             >
-              <span aria-hidden="true">＋</span> Start your own
+              <span aria-hidden="true">＋</span> {t("start.startYourOwn")}
             </button>
             <button
               type="button"

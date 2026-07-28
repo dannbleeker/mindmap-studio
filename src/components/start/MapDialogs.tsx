@@ -105,8 +105,9 @@ export function MapDialogs({
         <Dialog open onClose={onClose} ariaLabel={t("cmd.delete-map")} style={SURFACE}>
           <h3 style={{ ...typeScale.title, margin: "0 0 8px" }}>{t("start.moveMapToTrash")}</h3>
           <p style={{ margin: "0 0 4px", color: "var(--st-ink2)" }}>
-            Move “{pending?.kind === "delete" ? pending.title || t("common.untitled") : ""}” to the
-            Trash? You can restore it from Trash until you empty it.
+            {t("start.moveMapToTrashConfirm", {
+              name: pending?.kind === "delete" ? pending.title || t("common.untitled") : "",
+            })}
           </p>
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
             <button type="button" className="st-btn" onClick={onClose}>

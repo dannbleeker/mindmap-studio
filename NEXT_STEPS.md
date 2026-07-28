@@ -74,10 +74,11 @@ paid for — 56 strings. **85 remain**, and the composition is what matters:
 | plain labels the rules still miss (single lowercase words, fragments) | ~20 | migrate normally |
 | legitimately literal | ~10 | physical key names (`Tab`/`Enter`/`Shift`), the copyright line, the search-operator cheatsheet |
 
-### Status 2026-07-28
+### Status 2026-07-28 (updated)
 
-**25+ commits, tree clean, CI green on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173)
-(draft).** 217 files, 2462 tests, first load 181.2 kB against a 182 ceiling (0.8 kB headroom).
+**27+ commits, tree clean, CI green on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173)
+(draft).** 217 files, 2462 tests, first load 181.8 kB against a 182 ceiling (0.2 kB headroom — the next
+eager batch needs the ceiling looked at, see `docs/I18N_BLOCKED.md` item 3).
 
 **Re-measure before believing any number here** — that is the whole lesson of this programme:
 
@@ -86,7 +87,8 @@ pnpm i18n:blindspot                                    # what the detectors CANN
 node scripts/i18n-scan.mjs $(git ls-files 'src/**/*.ts' 'src/**/*.tsx') --count | tail -1
 node -e 'import("./scripts/lib/i18nFrozen.mjs").then(m=>{const x=m.frozenByFile("src");console.log([...x.values()].reduce((a,b)=>a+b,0))})'
 ```
-Last measured: scanner **350**, blindspot **82** (22 files), frozen **145** (17 files).
+Last measured: scanner **360**, blindspot **8** (4 files — every one legitimately literal: physical key
+names, the copyright line, the search-operator cheatsheet), frozen **145** (17 files).
 
 **Done since the branch was last parked:**
 - Raw untranslated literals (`MapPanel` layouts, `icons.ts` marker groups, `stickers.ts` categories,
@@ -98,14 +100,22 @@ Last measured: scanner **350**, blindspot **82** (22 files), frozen **145** (17 
 - `Toolbar.tsx`'s `mindmap-last-export` — was keying "last used" on the rendered label, not an id; five
   more defects found in the same file in the process (two blindspot sentences, six duplicated trigger
   labels). See CHANGELOG.
+- **The blindspot residue, 82 → 8.** `tNodes` for the sentences with a real React node embedded; plain
+  `t()` + placeholders for the rest. Two new hardcoded-literal shapes found along the way and fixed
+  wherever they occurred: a ternary as a bare JSX child (`{cond ? "Word" : other}`, no prop, no tag
+  pair — six sites), and `loneJsxTextViolations`' leading-glyph check still using the OLD fixed
+  character set `jsxTextViolations` had already moved past. Revived two dead catalogue keys
+  (`count.topics`, `count.nodes`, `count.maps`) that existed unreferenced while call sites hand-rolled
+  the same plural logic — one of them (`AllMaps.tsx`'s node count) had never pluralised at all before
+  this. Found and fixed a second `&amp;`-entity bug, same class as the About panel's. See CHANGELOG.
 
 **Left to do:**
 
-1. **The blindspot residue** (~82, mostly `Panels.tsx` and `App.tsx`) — mostly sentences a JSX element
-   or interpolation cut in half; `tNodes` (`src/i18n/nodes.tsx`) is the fix, and
-   `test/i18n-pseudo-render.test.tsx` is the only check that can prove one clean afterward.
-2. **The 145 frozen `t()`** — mechanical getter conversion, deliberately deprioritised: see the note in
+1. **The 145 frozen `t()`** — mechanical getter conversion, deliberately deprioritised: see the note in
    `test/i18n-frozen-ratchet.test.ts` for why emptying that table would not finish the job on its own.
+2. **The bundle ceiling has 0.2 kB of headroom.** Every batch since the io/ catalogue has landed within
+   budget without raising it, but the margin is now thin enough that the next eager addition should
+   re-examine `docs/I18N_BLOCKED.md` item 3 rather than assume there's room.
 
 Owner decisions and their outcomes are in `docs/I18N_BLOCKED.md` (1–3 resolved, 4 partially).
 

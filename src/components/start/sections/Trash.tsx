@@ -40,7 +40,7 @@ export function Trash({ ctx }: { ctx: StartContext }) {
               onClick={empty}
               style={{ color: "var(--st-danger, #b23b3a)" }}
             >
-              Empty Trash ({entries.length})
+              {t("start.emptyTrashCount", { n: entries.length })}
             </button>
           </div>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 }}>

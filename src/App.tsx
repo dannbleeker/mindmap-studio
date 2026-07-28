@@ -71,6 +71,7 @@ import { useSheetDrag } from "./hooks/useSheetDrag";
 import { useToast } from "./hooks/useToast";
 import { useVersionHistory } from "./hooks/useVersionHistory";
 import { t } from "./i18n";
+import { tNodes } from "./i18n/nodes";
 import { MARKER_PALETTE } from "./icons";
 import { fileToAttachment } from "./io/attachment";
 import { downloadBlob } from "./io/download";
@@ -1804,7 +1805,7 @@ export function App() {
               borderBottom: "1px solid var(--ed-toast-error-border, #f7c1c1)",
             }}
           >
-            <span style={{ flex: 1 }}>Import failed: {error}</span>
+            <span style={{ flex: 1 }}>{t("app.importFailed", { error })}</span>
             <button
               type="button"
               aria-label={t("app.dismissImportError")}
@@ -1829,8 +1830,14 @@ export function App() {
           >
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
               <span style={{ flex: 1 }}>
-                Imported with {warnings.length} note{warnings.length > 1 ? "s" : ""}: {warnings[0]}
-                {warnings.length > 1 && !warningsExpanded ? ` (+${warnings.length - 1} more)` : ""}
+                {t("app.importedWithNotes", {
+                  n: warnings.length,
+                  note:
+                    warnings[0] +
+                    (warnings.length > 1 && !warningsExpanded
+                      ? t("app.importedMoreSuffix", { n: warnings.length - 1 })
+                      : ""),
+                })}
               </span>
               {warnings.length > 1 && (
                 <button
@@ -1838,7 +1845,7 @@ export function App() {
                   onClick={() => setWarningsExpanded((v) => !v)}
                   style={bannerLinkStyle}
                 >
-                  {warningsExpanded ? "Hide" : t("hint.showAll")}
+                  {warningsExpanded ? t("common.hide") : t("hint.showAll")}
                 </button>
               )}
               <button
@@ -1877,7 +1884,10 @@ export function App() {
             }}
           >
             <span>
-              ◎ Focusing branch: <strong>{focus.topic || t("common.untitled")}</strong>
+              ◎{" "}
+              {tNodes("app.focusingBranch", {
+                topic: <strong>{focus.topic || t("common.untitled")}</strong>,
+              })}
             </span>
             <button
               type="button"
@@ -1904,7 +1914,10 @@ export function App() {
             }}
           >
             <span>
-              ⤢ Drilled into: <strong>{drillTopic || t("common.untitled")}</strong>
+              ⤢{" "}
+              {tNodes("app.drilledInto", {
+                topic: <strong>{drillTopic || t("common.untitled")}</strong>,
+              })}
             </span>
             <button
               type="button"
@@ -2817,14 +2830,15 @@ export function App() {
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
           <strong style={{ color: "var(--ed-ink)" }}>{t("cmd.paste-topics")}</strong>
           <p style={{ margin: 0, fontSize: 13, color: "var(--ed-muted)" }}>
-            Paste an outline, a bullet list, or Markdown — indentation (or <code>#</code> headings)
-            sets the hierarchy. A spreadsheet selection (Excel / Sheets) becomes one topic per row,
-            with extra columns as the note and a <code>{t("common.tags")}</code> column as tags.
+            {tNodes("app.pasteOutlineExplain", {
+              hashHeadings: <code>#</code>,
+              tagsColumn: <code>{t("common.tags")}</code>,
+            })}
           </p>
           <textarea
             value={paste.text}
             onChange={(e) => paste.setText(e.target.value)}
-            placeholder={"- Theme\n  - Idea\n  - Idea\n- Next theme"}
+            placeholder={t("app.pasteOutlinePlaceholder")}
             aria-label={t("paste.inputLabel")}
             rows={10}
             style={{
@@ -2846,7 +2860,9 @@ export function App() {
               gap: 8,
             }}
           >
-            <span style={{ fontSize: 12, color: "var(--ed-muted)" }}>{paste.count} topics</span>
+            <span style={{ fontSize: 12, color: "var(--ed-muted)" }}>
+              {t("count.topics", { n: paste.count })}
+            </span>
             <span style={{ display: "flex", gap: 6 }}>
               <button
                 type="button"
@@ -2866,10 +2882,11 @@ export function App() {
                     : t("hint.selectNodeShort")
                 }
               >
-                ➕ Add under selected
+                ➕ {t("app.addUnderSelected")}
               </button>
               <button type="button" onClick={paste.addAsNewMap} style={controlStyle}>
-                📋 New map
+                {"📋 "}
+                {t("common.newMap")}
               </button>
             </span>
           </div>

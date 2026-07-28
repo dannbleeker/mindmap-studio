@@ -38,7 +38,7 @@ export function TemplateCard({
       </div>
       <div className="st-tile-body">
         <div className="st-card-title">{name}</div>
-        <div className="st-card-meta">{count} nodes</div>
+        <div className="st-card-meta">{t("count.nodes", { n: count })}</div>
         {description ? <div className="st-card-desc">{description}</div> : null}
         <div className="st-pills">
           {shown.map((b) => (

@@ -327,6 +327,43 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **The blindspot residue is closed: 82 → 8, and every one of the 8 is genuinely literal.** Roughly 70
+  strings across `Panels.tsx`, `App.tsx` and a dozen Start-screen files were sentences a JSX element or
+  a computed suffix had cut in half — the exact class no line-based rule can ever match, because there
+  is no single line containing the whole sentence to check. `tNodes` handles the ones with a real React
+  node embedded (`◎ Focusing branch: <strong>{topic}</strong>`, the paste-outline explainer with two
+  `<code>` spans); a plain `t()` with a placeholder handles the rest (`Import failed: {error}`, the
+  progress-bar summary, the multi-select banner).
+
+  **Two more classes of hardcoded literal, found only by reading every remaining line by hand:**
+  - **A ternary as a bare JSX child** — `{cond ? "Word" : other}` with no surrounding prop — matches
+    nothing in the guard, which only checks props and text between two tags. Six sites: "Hide" vs
+    `t("hint.showAll")`, "Pause"/"Play", "Relationship" vs a `t()` call, "Rename"/"Create",
+    "Expand"/"Collapse", "Find" and "Layout" (the last two inside a ternary sharing a slot with `t()`,
+    which is exactly why the shape hides — half the ternary already looked migrated).
+  - **A widening `loneJsxTextViolations` needed anyway**: its leading-character check was still the
+    OLD fixed glyph set (`[A-Z＋✕←→‹›▦☰⏸▶↺−+]`) that `jsxTextViolations` had already moved past for the
+    single-line shape — so `⤢ Open in dock` and `☑ List` were invisible on the multi-line wrapped-tag
+    shape even though the identical text one line shorter was already caught. Same fix, same file,
+    applied to the twin rule; verified clean against every allowlisted file before landing.
+
+  **Two dead catalogue keys got real callers.** `count.topics` and `count.nodes` and `count.maps`
+  existed already, unreferenced, built for call sites that ended up hand-rolling
+  `{n} topic${n === 1 ? "" : "s"}` instead — three separate places, none of them talking to each other.
+  Wiring them up is a correctness fix as much as a translation one: `AllMaps.tsx`'s node count never
+  pluralised at all before this (always "nodes", even for one).
+
+  **Found a second `&amp;` entity bug, same class as the About panel's.** `StartSidebar.tsx`'s
+  "Local &amp; private…" was still raw JSX text (not yet a `t()` string), so the entity currently
+  renders correctly — but migrating it verbatim would have shipped the second instance of exactly the
+  bug already fixed once. Written with a real ampersand.
+
+  **My own AST probe had a bug**, found while explaining away what looked like a false hit: for a
+  template-literal prop it read `e.getText()` — the raw SOURCE including the `${…}` code — instead of
+  the static text around the interpolations, so a function name like `timeAgo` inside one counted as
+  if it were prose. Fixed to walk the template's own `head` + span structure, the same static-vs-dynamic
+  split the real detector's regex achieves for the non-AST case.
+
 - **Fixed: "last used export" could silently stop working forever after a locale change, plus five
   more defects in the same file, none caught by any existing detector.** `Toolbar.tsx` persisted the
   export menu's *rendered label* as its identity key (`localStorage["mindmap-last-export"]`) and

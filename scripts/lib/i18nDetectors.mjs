@@ -335,7 +335,13 @@ export function loneJsxTextViolations(src) {
     // content. `{}`, `=`, backtick, quotes and `;` stay excluded — those do still mark it as code.
     if (/[<>{}=`"';[\]]/.test(text)) return;
     if (!/\p{Letter}/u.test(text)) return;
-    if (!/^[A-Z＋✕←→‹›▦☰⏸▶↺−+]/u.test(text)) return;
+    // A LEADING GLYPH does not stop it being a label — same fix as `jsxTextViolations`, and the same
+    // reason: this used to require the FIRST character to come from a fixed set
+    // (`[A-Z＋✕←→‹›▦☰⏸▶↺−+]`), so any new glyph the house style reached for (⤢, ☑, 🔗, 📝, 🖼…) was
+    // invisible here even though the identical text on ONE line was already caught. One optional
+    // non-letter/non-number glyph is allowed before the required capital, so `>3<` and a bare `>x<`
+    // still don't qualify.
+    if (!/^(?:[^\p{Letter}\p{Number}]\s*)?[A-Z]/u.test(text)) return;
     if (!/>$/.test((lines[i - 1] ?? "").trim())) return;
     if (!/^<\//.test((lines[i + 1] ?? "").trim())) return;
     out.push({ line: i + 1, text: `>${text}<`, why: "user-facing JSX text (wrapped tag)" });

@@ -2856,7 +2856,7 @@ function FlowInner({
                         data-on={!curPriority || undefined}
                         onClick={() => apply(setPriority(docRef.current, id, undefined))}
                       >
-                        {t("canvas.priority.none")}
+                        {t("common.none")}
                       </button>
                     </div>
                     {/* "Move project" (item 14): shift every task date in THIS branch by a preset,

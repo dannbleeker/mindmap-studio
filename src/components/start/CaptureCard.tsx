@@ -38,11 +38,9 @@ export function CaptureCard({
     <section className="st-card st-hero">
       <div className="st-eyebrow">{t("start.localFirstMindMapping")}</div>
       <h1>{t("start.whatSOnYourMind")}</h1>
-      <p className="st-hero-sub">
-        Capture a thought, paste an outline, or open a blank canvas — it all becomes a map you own.
-      </p>
+      <p className="st-hero-sub">{t("start.heroSub")}</p>
 
-      <div className="st-tabs" role="tablist" aria-label={t("start.newMap")}>
+      <div className="st-tabs" role="tablist" aria-label={t("common.newMap")}>
         <button
           type="button"
           role="tab"

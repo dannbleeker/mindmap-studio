@@ -39,7 +39,7 @@ export function MapCard({
   if (entry.updatedAt) meta.push(timeAgo(entry.updatedAt));
   // Pin/unpin leads the kebab so a curated map can be kept at (or released from) the top of the lists.
   const kebabItems = [
-    { key: "pin", label: entry.pinned ? "Unpin" : t("start.pinToTop") },
+    { key: "pin", label: entry.pinned ? t("start.unpin") : t("start.pinToTop") },
     ...KEBAB,
   ];
   return (

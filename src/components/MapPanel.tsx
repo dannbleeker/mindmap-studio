@@ -620,7 +620,7 @@ export function MapPanel({
                   }}
                   aria-label={t("panel.addADiagramBackdrop")}
                 >
-                  <option value="">None</option>
+                  <option value="">{t("common.none")}</option>
                   <option value="onion">{t("panel.onionRings")}</option>
                   <option value="funnel">{t("panel.funnelStages")}</option>
                   <option value="venn2">{t("panel.venn2Circles")}</option>

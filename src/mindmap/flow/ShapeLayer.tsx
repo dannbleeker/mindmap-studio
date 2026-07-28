@@ -117,13 +117,51 @@ function shapeKindLabel(kind: CanvasShapeKind): string {
   }
 }
 
+// `title` is a getter: a plain `title: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `kind` (the React key) and `glyph` stay plain literals.
 const SHAPE_KINDS: { kind: CanvasShapeKind; glyph: string; title: string }[] = [
-  { kind: "rect", glyph: "▭", title: t("toolbar.rectangle") },
-  { kind: "ellipse", glyph: "⬭", title: t("toolbar.ellipse") },
-  { kind: "blockArrow", glyph: "➜", title: t("toolbar.blockArrow") },
-  { kind: "chevron", glyph: "❯", title: t("toolbar.chevron") },
-  { kind: "swimlane", glyph: "▥", title: t("cmd.layout.swimlane") },
-  { kind: "matrix", glyph: "▦", title: t("canvas.matrix") },
+  {
+    kind: "rect",
+    glyph: "▭",
+    get title() {
+      return t("toolbar.rectangle");
+    },
+  },
+  {
+    kind: "ellipse",
+    glyph: "⬭",
+    get title() {
+      return t("toolbar.ellipse");
+    },
+  },
+  {
+    kind: "blockArrow",
+    glyph: "➜",
+    get title() {
+      return t("toolbar.blockArrow");
+    },
+  },
+  {
+    kind: "chevron",
+    glyph: "❯",
+    get title() {
+      return t("toolbar.chevron");
+    },
+  },
+  {
+    kind: "swimlane",
+    glyph: "▥",
+    get title() {
+      return t("cmd.layout.swimlane");
+    },
+  },
+  {
+    kind: "matrix",
+    glyph: "▦",
+    get title() {
+      return t("canvas.matrix");
+    },
+  },
 ];
 
 const COLORS = ["#8a84c6", "#e23b3b", "#3b8bd4", "#27852f", "#d98a17", "#7a3fb0", "#555555"];

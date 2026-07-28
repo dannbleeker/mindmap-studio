@@ -25,18 +25,59 @@ type BranchIo = Pick<
   | "exportMarkdown"
 >;
 
+// `label` is a getter, not a plain field: a plain `label: t("…")` in this module-scope array would
+// resolve ONCE at import and never follow a later `setLocale`. `id` stays a plain literal — it's the
+// React key and what BranchExportDialog persists as "last used" elsewhere in the export menu.
 const FORMATS: { id: string; label: string; run: (io: BranchIo) => void | Promise<void> }[] = [
-  { id: "png", label: t("panel.pngImage"), run: (io) => io.exportPng() },
-  { id: "svg", label: t("panel.svgVector"), run: (io) => io.exportSvg() },
-  { id: "html", label: t("panel.htmlStandalonePicture"), run: (io) => io.exportHtml() },
+  {
+    id: "png",
+    get label() {
+      return t("panel.pngImage");
+    },
+    run: (io) => io.exportPng(),
+  },
+  {
+    id: "svg",
+    get label() {
+      return t("panel.svgVector");
+    },
+    run: (io) => io.exportSvg(),
+  },
+  {
+    id: "html",
+    get label() {
+      return t("panel.htmlStandalonePicture");
+    },
+    run: (io) => io.exportHtml(),
+  },
   {
     id: "html-interactive",
-    label: t("panel.htmlInteractive"),
+    get label() {
+      return t("panel.htmlInteractive");
+    },
     run: (io) => io.exportInteractiveHtml(),
   },
-  { id: "pdf", label: t("panel.pdfPrint"), run: (io) => io.exportPdf() },
-  { id: "json", label: t("cmd.export.json"), run: (io) => io.exportJson() },
-  { id: "markdown", label: t("panel.markdown"), run: (io) => io.exportMarkdown() },
+  {
+    id: "pdf",
+    get label() {
+      return t("panel.pdfPrint");
+    },
+    run: (io) => io.exportPdf(),
+  },
+  {
+    id: "json",
+    get label() {
+      return t("cmd.export.json");
+    },
+    run: (io) => io.exportJson(),
+  },
+  {
+    id: "markdown",
+    get label() {
+      return t("panel.markdown");
+    },
+    run: (io) => io.exportMarkdown(),
+  },
 ];
 
 export function BranchExportDialog({

@@ -1,6 +1,7 @@
 // Find FROZEN module-level `t()` calls — the ones evaluated once at import, whose string can never
 // follow a later `setLocale`. See test/i18n-frozen-constants.test.ts, which proves the mechanism in
-// both directions, and docs/I18N_BLOCKED.md item 4 for why they are catalogued rather than fixed.
+// both directions, and docs/I18N_BLOCKED.md item 4 for the investigation + resolution history (the
+// BUDGET in test/i18n-frozen-ratchet.test.ts is empty now — this still runs so a regression is caught).
 //
 // Precision matters here: a regex cannot tell `{ label: t("x") }` at module scope from the same text
 // inside a component's JSX, and the difference is exactly what makes one frozen and the other live. So

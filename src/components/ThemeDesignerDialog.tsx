@@ -17,11 +17,33 @@ import { Dialog } from "./Dialog";
 // the built-ins), delete it, or export / import it as a .json. Self-contained + lazy-loaded so its
 // storage plumbing stays out of the entry bundle. `onChange` re-reads the theme list (dropdown refresh).
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `value` (the actual CSS font-family, also the <option> value/React key) stays literal.
 const FONTS: { value: string; label: string }[] = [
-  { value: "", label: t("panel.default") },
-  { value: "Inter, system-ui, sans-serif", label: t("panel.sans") },
-  { value: "Georgia, 'Times New Roman', serif", label: t("panel.serif") },
-  { value: "'Courier New', ui-monospace, monospace", label: t("panel.mono") },
+  {
+    value: "",
+    get label() {
+      return t("panel.default");
+    },
+  },
+  {
+    value: "Inter, system-ui, sans-serif",
+    get label() {
+      return t("panel.sans");
+    },
+  },
+  {
+    value: "Georgia, 'Times New Roman', serif",
+    get label() {
+      return t("panel.serif");
+    },
+  },
+  {
+    value: "'Courier New', ui-monospace, monospace",
+    get label() {
+      return t("panel.mono");
+    },
+  },
 ];
 
 export function ThemeDesignerDialog({

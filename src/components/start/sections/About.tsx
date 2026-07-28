@@ -5,13 +5,45 @@ import { InstallButton } from "../../InstallButton";
 // Local-first / format-agnostic / open-source blurb, plus the book, user guide, and other resource
 // links — mirrors the editor's ⓘ About so the Start screen exposes the same downloads.
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `href` (the link target, also the React key) stays a plain literal.
 const LINKS: { href: string; label: string }[] = [
-  { href: "/user-guide.html", label: t("about.userGuide") },
-  { href: "/Thinking-in-Maps.pdf", label: t("start.bookThinkingInMapsPdf") },
-  { href: "/Thinking-in-Maps.epub", label: t("start.bookThinkingInMapsEpub") },
-  { href: "/notices.html", label: t("about.thirdParty") },
-  { href: "/dashboard.html", label: t("about.dashboard") },
-  { href: "https://github.com/dannbleeker/mindmap-studio", label: t("about.source") },
+  {
+    href: "/user-guide.html",
+    get label() {
+      return t("about.userGuide");
+    },
+  },
+  {
+    href: "/Thinking-in-Maps.pdf",
+    get label() {
+      return t("start.bookThinkingInMapsPdf");
+    },
+  },
+  {
+    href: "/Thinking-in-Maps.epub",
+    get label() {
+      return t("start.bookThinkingInMapsEpub");
+    },
+  },
+  {
+    href: "/notices.html",
+    get label() {
+      return t("about.thirdParty");
+    },
+  },
+  {
+    href: "/dashboard.html",
+    get label() {
+      return t("about.dashboard");
+    },
+  },
+  {
+    href: "https://github.com/dannbleeker/mindmap-studio",
+    get label() {
+      return t("about.source");
+    },
+  },
 ];
 
 export function About({ onCheckForUpdates }: { onCheckForUpdates?: () => void }) {

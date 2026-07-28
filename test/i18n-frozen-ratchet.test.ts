@@ -12,31 +12,24 @@
 import { describe, expect, it } from "vitest";
 import { frozenByFile } from "../scripts/lib/i18nFrozen.mjs";
 
-// Measured 2026-07-26 on branch i18n/complete-migration. Sorted by count so the expensive files —
-// the ones worth fixing first — sit at the top.
-const BUDGET: ReadonlyArray<readonly [string, number]> = [
-  ["src/panelLabels.ts", 26],
-  ["src/components/EdgeInspector.tsx", 15],
-  ["src/components/start/sections/Layouts.tsx", 15],
-  ["src/components/start/sections/Learn.tsx", 12],
-  ["src/components/editorCommands.ts", 11],
-  ["src/components/start/StartSidebar.tsx", 10],
-  ["src/components/BranchExportDialog.tsx", 7],
-  ["src/components/start/CaptureCard.tsx", 7],
-  ["src/components/start/MapCard.tsx", 6],
-  ["src/components/start/sections/About.tsx", 6],
-  ["src/components/Toolbar.tsx", 6],
-  ["src/mindmap/flow/ShapeLayer.tsx", 6],
-  ["src/Panels.tsx", 6],
-  ["src/components/ThemeDesignerDialog.tsx", 4],
-  ["src/mindmap/theme.ts", 4],
-  ["src/mindmap/flow/CanvasOverlays.tsx", 3],
-  ["src/mapParts.ts", 1],
-];
-// Re-measured 2026-07-27: 194 → 145. Cleared so far: stickers.ts (25), flow/slashCommands.ts (9),
+// Measured 2026-07-26 on branch i18n/complete-migration, re-measured down to 0 on 2026-07-28 (every
+// remaining file converted to getters — see below). Empty budget: the "no NEW file" and "no file
+// exceeds its budget" checks below still guard against a regression re-introducing one.
+const BUDGET: ReadonlyArray<readonly [string, number]> = [];
+// Re-measured 2026-07-27: 194 → 145. Cleared then: stickers.ts (25), flow/slashCommands.ts (9),
 // start/AppTips.tsx (8) and Recent.tsx (3). Recent's was a side effect of fixing a data-loss bug, not
 // a freeze fix — it keyed date buckets on the rendered label, so a translated label stopped matching
 // and whole sections of maps disappeared (test/start-library-sections.test.tsx).
+//
+// Re-measured 2026-07-28: 145 → 0. The remaining 17 files were all the same shape — a module-scope
+// array/object literal with one identity field (id/kind/key/href/w/d/a/value, never a t() call) and
+// one display field (label/name/title/body/menu/tab) that was the frozen `t(...)`. Every display field
+// became a `get x() { return t("…"); }` accessor; every identity field was left untouched. Getters are
+// a drop-in replacement for every READ site (`obj.label` behaves identically), so no consumer changed
+// — except one real bug the sweep surfaced: CaptureCard.tsx's suggested-prompt buttons keyed on the
+// translated text itself (`key={ex}`), the same "translated label used as identity" class already
+// fixed for Toolbar's last-export id and Recent's date buckets. That array is now a function
+// (`suggestedExamples()`) returning `{ id, text }` pairs, keyed on `id`.
 //
 // WHAT THIS NUMBER DOES NOT MEAN — still true, and the reason not to chase it to 0:
 //   - The detector counts `t(` calls, so a module-scope DERIVATION that materialises its inputs is

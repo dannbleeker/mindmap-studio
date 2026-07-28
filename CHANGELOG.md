@@ -327,6 +327,31 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **The frozen-`t()` ratchet is closed: 145 → 0 (decision 4 in `docs/I18N_BLOCKED.md`, now resolved).**
+  Every remaining module-scope `t()` call — the ones that resolve once at import and can never follow a
+  later `setLocale` — turned out to be the same shape across all 17 files: an array or object literal
+  with one identity field (`id`/`kind`/`key`/`href`/`w`/`d`/`a`/`value` — never a `t()` call, always what
+  callers key React lists and compare on) and one display field (`label`/`name`/`title`/`body`/`tab`/
+  `menu`) that was the frozen call. Every display field became a getter (`get label() { return
+  t("…"); }`); every identity field was left untouched. That makes it a true drop-in fix — a getter is
+  read exactly like a plain property, so `PANEL_LABELS.outline.tab`, `SHAPE_ITEMS[i].name` and every
+  other call site across `App.tsx`/`Toolbar.tsx`/etc. needed zero changes, closing the call-site-churn
+  concern the original write-up worried about.
+
+  **One real bug fell out of the sweep.** `CaptureCard.tsx`'s three suggested-prompt buttons keyed their
+  React list on the translated text itself (`key={ex}`) — the identical "translated label used as
+  identity" defect already fixed once for Toolbar's last-export id and Recent's date buckets, just not
+  yet found here because the array was still frozen (so the text never actually changed, and the bug
+  never fired). Converting it to a live function surfaced the key bug in the same motion; it's now
+  `suggestedExamples()` returning stable `{ id, text }` pairs, keyed on `id`.
+
+  `test/i18n-frozen-ratchet.test.ts`'s BUDGET is now `[]` — its three checks (no file over budget, no
+  new file, total non-increasing) still run, so a reintroduced frozen call is caught rather than
+  silently re-widening the table. `test/i18n-frozen-constants.test.ts`'s PANEL_LABELS test flipped from
+  pinning the defect on a real file to a CLEARANCE test proving it now follows a locale change —
+  mutation-proven by reverting one getter back to a plain field and watching both that test and the
+  ratchet's three fail, then restoring.
+
 - **The blindspot residue is closed: 82 → 8, and every one of the 8 is genuinely literal.** Roughly 70
   strings across `Panels.tsx`, `App.tsx` and a dozen Start-screen files were sentences a JSX element or
   a computed suffix had cut in half — the exact class no line-based rule can ever match, because there

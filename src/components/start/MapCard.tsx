@@ -19,13 +19,45 @@ export interface MapEntry {
   folderId?: string;
 }
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `key` (the action's identity, also the React key) stays a plain literal.
 const KEBAB: { key: string; label: string }[] = [
-  { key: "open", label: t("start.open") },
-  { key: "rename", label: t("common.rename") },
-  { key: "duplicate", label: t("start.duplicate") },
-  { key: "move", label: t("start.moveToFolder") },
-  { key: "export", label: t("start.export") },
-  { key: "delete", label: t("common.delete") },
+  {
+    key: "open",
+    get label() {
+      return t("start.open");
+    },
+  },
+  {
+    key: "rename",
+    get label() {
+      return t("common.rename");
+    },
+  },
+  {
+    key: "duplicate",
+    get label() {
+      return t("start.duplicate");
+    },
+  },
+  {
+    key: "move",
+    get label() {
+      return t("start.moveToFolder");
+    },
+  },
+  {
+    key: "export",
+    get label() {
+      return t("start.export");
+    },
+  },
+  {
+    key: "delete",
+    get label() {
+      return t("common.delete");
+    },
+  },
 ];
 
 export function MapCard({

@@ -8,17 +8,47 @@ import { useState } from "react";
 
 type Tab = "topic" | "paste" | "blank";
 
-const EXAMPLES = [
-  t("start.suggestionLaunch"),
-  t("start.organizeMyResearch"),
-  t("start.mapTheNewOnboarding"),
-];
+// A plain `t("…")` array here would resolve ONCE at import and never follow a later `setLocale`, so
+// this is a function re-run on every render instead of a frozen module-scope constant. Each entry also
+// needs a stable identity distinct from its (now locale-live) text: the render below used to key its
+// buttons on the example text itself, which is exactly the "translated label used as identity" bug
+// already fixed elsewhere in this codebase (Toolbar's last-export id, Recent's date buckets) — a
+// locale switch while this screen is open would have changed the key out from under React mid-render.
+function suggestedExamples(): { id: string; text: string }[] {
+  return [
+    { id: "launch", text: t("start.suggestionLaunch") },
+    { id: "research", text: t("start.organizeMyResearch") },
+    { id: "onboarding", text: t("start.mapTheNewOnboarding") },
+  ];
+}
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `kind` (the React key) stays a plain literal.
 const BLANK_LAYOUTS: { kind: string; label: string }[] = [
-  { kind: "side", label: t("start.twoSided") },
-  { kind: "org-down", label: t("start.orgChart") },
-  { kind: "radial", label: t("toolbar.layoutGroupRadial") },
-  { kind: "grid", label: t("common.grid") },
+  {
+    kind: "side",
+    get label() {
+      return t("start.twoSided");
+    },
+  },
+  {
+    kind: "org-down",
+    get label() {
+      return t("start.orgChart");
+    },
+  },
+  {
+    kind: "radial",
+    get label() {
+      return t("toolbar.layoutGroupRadial");
+    },
+  },
+  {
+    kind: "grid",
+    get label() {
+      return t("common.grid");
+    },
+  },
 ];
 
 export function CaptureCard({
@@ -93,9 +123,14 @@ export function CaptureCard({
           </div>
           <div className="st-try">
             <span>{t("start.try")}</span>
-            {EXAMPLES.map((ex) => (
-              <button key={ex} type="button" className="st-pill" onClick={() => onTopic(ex)}>
-                {ex}
+            {suggestedExamples().map((ex) => (
+              <button
+                key={ex.id}
+                type="button"
+                className="st-pill"
+                onClick={() => onTopic(ex.text)}
+              >
+                {ex.text}
               </button>
             ))}
           </div>

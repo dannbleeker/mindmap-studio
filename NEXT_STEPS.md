@@ -76,8 +76,8 @@ paid for — 56 strings. **85 remain**, and the composition is what matters:
 
 ### Status 2026-07-28 (updated)
 
-**27+ commits, tree clean, CI green on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173)
-(draft).** 217 files, 2462 tests, first load 181.8 kB against a 182 ceiling (0.2 kB headroom — the next
+**28+ commits, tree clean, CI green on [PR #173](https://github.com/dannbleeker/mindmap-studio/pull/173)
+(draft).** 217 files, 2462 tests, first load 181.9 kB against a 182 ceiling (0.1 kB headroom — the next
 eager batch needs the ceiling looked at, see `docs/I18N_BLOCKED.md` item 3).
 
 **Re-measure before believing any number here** — that is the whole lesson of this programme:
@@ -88,7 +88,8 @@ node scripts/i18n-scan.mjs $(git ls-files 'src/**/*.ts' 'src/**/*.tsx') --count 
 node -e 'import("./scripts/lib/i18nFrozen.mjs").then(m=>{const x=m.frozenByFile("src");console.log([...x.values()].reduce((a,b)=>a+b,0))})'
 ```
 Last measured: scanner **360**, blindspot **8** (4 files — every one legitimately literal: physical key
-names, the copyright line, the search-operator cheatsheet), frozen **145** (17 files).
+names, the copyright line, the search-operator cheatsheet), frozen **0** (was 145 across 17 files —
+closed this session, see below).
 
 **Done since the branch was last parked:**
 - Raw untranslated literals (`MapPanel` layouts, `icons.ts` marker groups, `stickers.ts` categories,
@@ -108,16 +109,18 @@ names, the copyright line, the search-operator cheatsheet), frozen **145** (17 f
   (`count.topics`, `count.nodes`, `count.maps`) that existed unreferenced while call sites hand-rolled
   the same plural logic — one of them (`AllMaps.tsx`'s node count) had never pluralised at all before
   this. Found and fixed a second `&amp;`-entity bug, same class as the About panel's. See CHANGELOG.
+- **The frozen-`t()` ratchet, 145 → 0 (all 17 files).** Every site was the same shape (identity field +
+  frozen display field); every display field became a getter, no consumer needed a change. One real bug
+  fell out: `CaptureCard.tsx` keyed its suggested-prompt buttons on the translated text itself. See
+  CHANGELOG. `docs/I18N_BLOCKED.md` item 4 is now resolved.
 
 **Left to do:**
 
-1. **The 145 frozen `t()`** — mechanical getter conversion, deliberately deprioritised: see the note in
-   `test/i18n-frozen-ratchet.test.ts` for why emptying that table would not finish the job on its own.
-2. **The bundle ceiling has 0.2 kB of headroom.** Every batch since the io/ catalogue has landed within
+1. **The bundle ceiling has 0.1 kB of headroom.** Every batch since the io/ catalogue has landed within
    budget without raising it, but the margin is now thin enough that the next eager addition should
    re-examine `docs/I18N_BLOCKED.md` item 3 rather than assume there's room.
 
-Owner decisions and their outcomes are in `docs/I18N_BLOCKED.md` (1–3 resolved, 4 partially).
+Owner decisions and their outcomes are in `docs/I18N_BLOCKED.md` (all 4 resolved).
 
 ---
 

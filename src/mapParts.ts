@@ -28,7 +28,12 @@ export const MAP_PARTS: readonly MapPart[] = [
   },
   {
     id: "pros-cons",
-    name: t("app.prosCons"),
+    // Getter, not a plain field: a plain `name: t("…")` here would resolve ONCE at import and never
+    // follow a later `setLocale`. (The other MAP_PARTS entries are declined content and stay literal
+    // English on purpose — this one predates that decision and already routes through the catalogue.)
+    get name() {
+      return t("app.prosCons");
+    },
     build: () => tree(t("app.prosCons"), ["Pros", "Cons"]),
   },
   {

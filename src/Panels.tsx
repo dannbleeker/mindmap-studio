@@ -2801,14 +2801,36 @@ export function StylesPanel({
 type InfoTab = "details" | "notes" | "style";
 // Details holds markers/tags/task/links; the note editor gets its own roomy Notes tab (P3) so Details
 // isn't one long scroll. Style stays the trailing tab.
+// `label`/`title` are getters: plain fields here would resolve ONCE at import and never follow a
+// later `setLocale`. `id` (the React key / active-tab state) stays a plain literal.
 const INFO_TABS: readonly TabItem[] = [
   {
     id: "details",
-    label: t("panel.tab.details"),
-    title: t("panel.tab.detailsHint"),
+    get label() {
+      return t("panel.tab.details");
+    },
+    get title() {
+      return t("panel.tab.detailsHint");
+    },
   },
-  { id: "notes", label: t("panel.tab.notes"), title: t("panel.tab.notesHint") },
-  { id: "style", label: t("panel.tab.style"), title: t("panel.tab.styleHint") },
+  {
+    id: "notes",
+    get label() {
+      return t("panel.tab.notes");
+    },
+    get title() {
+      return t("panel.tab.notesHint");
+    },
+  },
+  {
+    id: "style",
+    get label() {
+      return t("panel.tab.style");
+    },
+    get title() {
+      return t("panel.tab.styleHint");
+    },
+  },
 ];
 
 export function InfoPanel({

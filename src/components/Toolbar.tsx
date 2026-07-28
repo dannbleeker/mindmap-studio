@@ -33,14 +33,46 @@ import { EditorIcon, type EditorIconName } from "./EditorIcons";
 // feature would just quietly never fire again. It is also what the menu's React `key` used to read.
 const LAST_EXPORT_KEY = "mindmap-last-export";
 
-/** Background shapes + smart containers offered in the Insert → Shapes fly-out (Tier 4 items 23 + 22). */
+/** Background shapes + smart containers offered in the Insert → Shapes fly-out (Tier 4 items 23 + 22).
+ *  `name` is a getter: a plain `name: t("…")` here resolves ONCE at import and never follows a later
+ *  `setLocale`. `kind` (the React key) stays a plain literal. */
 const SHAPE_ITEMS: { kind: CanvasShapeKind; name: string }[] = [
-  { kind: "rect", name: t("toolbar.rectangle") },
-  { kind: "ellipse", name: t("toolbar.ellipse") },
-  { kind: "blockArrow", name: t("toolbar.blockArrow") },
-  { kind: "chevron", name: t("toolbar.chevron") },
-  { kind: "swimlane", name: t("toolbar.swimlaneContainer") },
-  { kind: "matrix", name: t("toolbar.matrixContainer") },
+  {
+    kind: "rect",
+    get name() {
+      return t("toolbar.rectangle");
+    },
+  },
+  {
+    kind: "ellipse",
+    get name() {
+      return t("toolbar.ellipse");
+    },
+  },
+  {
+    kind: "blockArrow",
+    get name() {
+      return t("toolbar.blockArrow");
+    },
+  },
+  {
+    kind: "chevron",
+    get name() {
+      return t("toolbar.chevron");
+    },
+  },
+  {
+    kind: "swimlane",
+    get name() {
+      return t("toolbar.swimlaneContainer");
+    },
+  },
+  {
+    kind: "matrix",
+    get name() {
+      return t("toolbar.matrixContainer");
+    },
+  },
 ];
 
 /** The stable id of the last export format used — never its label, which follows the locale. */

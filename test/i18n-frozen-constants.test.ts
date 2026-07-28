@@ -14,13 +14,15 @@
 //
 // The trigger is also not what was written here. It is not a language picker — it is `LOCALES`
 // (registry.ts) gaining a second entry. `resolveLocale()` consults `navigator.languages`, so the day a
-// second catalogue ships, a Danish browser gets a half-English first paint with no user action at all:
-// panel tabs, slash commands, edge presets and the Start sidebar in English inside an otherwise Danish
-// app. Nothing outside tests calls `setLocale`, which is why this is still latent rather than live.
+// second catalogue ships, a Danish browser gets a half-English first paint with no user action at all.
+// Nothing outside tests calls `setLocale`, which is why this was latent rather than live.
 //
-// This file PINS the mechanism in both directions so the trap cannot be rediscovered by a user. It is
-// deliberately not a fix: converting 194 constants to getters is a behaviour-neutral refactor with real
-// call-site churn, and it is listed in docs/I18N_BLOCKED.md for the owner.
+// RESOLVED 2026-07-28. All 145 real module-scope `t()` sites (test/i18n-frozen-ratchet.test.ts's
+// BUDGET is now empty) were converted to getters — a behaviour-neutral refactor: every read site
+// (`obj.label`) is unchanged, only the definition defers evaluation. This file still PINS the
+// mechanism in both directions with synthetic examples (so the trap cannot be rediscovered even
+// though no real instance of it remains), plus a CLEARANCE test proving actual converted files —
+// eager, lazy, and the last one fixed — really do follow a locale change.
 import { afterEach, describe, expect, it } from "vitest";
 import { type Locale, getLocale, registerMessages, setLocale, t } from "../src/i18n";
 
@@ -52,7 +54,11 @@ describe("module-level t() freezes the string at import time", () => {
     expect(FROZEN.label).toBe("Grid");
   });
 
-  it("PANEL_LABELS is one of the frozen constants — its tabs would stay English", async () => {
+  it("CLEARANCE: PANEL_LABELS — the dock tab / Panels menu follow a locale change", async () => {
+    // The counterpart to the test above, and the same shape as the CLEARANCE test below: this was the
+    // very first file this suite pinned as frozen (see the deleted "would stay English" version of
+    // this test, prior to 2026-07-28). It's a getter-backed object now, not an array, so it gets its
+    // own pin rather than folding into the array-shaped CLEARANCE test.
     registerMessages(DA, { "panel.outline": "Disposition" });
 
     // Import AFTER `en` is active, exactly as the app does at boot.
@@ -61,10 +67,10 @@ describe("module-level t() freezes the string at import time", () => {
 
     setLocale(DA);
 
-    // A live lookup of the same key is translated...
     expect(t("panel.outline")).toBe("Disposition");
-    // ...but the dock tab reads from the frozen constant and is not.
-    expect(PANEL_LABELS.outline.tab).toBe("Outline");
+    // The dock tab and the Panels-menu label share the same key and now both follow it.
+    expect(PANEL_LABELS.outline.tab).toBe("Disposition");
+    expect(PANEL_LABELS.outline.menu).toBe("Disposition");
   });
 
   it("CLEARANCE: the converted files really do follow a locale change", async () => {

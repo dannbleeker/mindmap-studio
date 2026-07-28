@@ -80,10 +80,27 @@ const statBtn: CSSProperties = {
   padding: 0,
 };
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `id` (the React key / active-view state) stays a plain literal.
 const VIEWS: { id: "map" | "outline" | "board"; label: string }[] = [
-  { id: "map", label: t("toolbar.map") },
-  { id: "outline", label: t("panel.outline") },
-  { id: "board", label: t("panel.board") },
+  {
+    id: "map",
+    get label() {
+      return t("toolbar.map");
+    },
+  },
+  {
+    id: "outline",
+    get label() {
+      return t("panel.outline");
+    },
+  },
+  {
+    id: "board",
+    get label() {
+      return t("panel.board");
+    },
+  },
 ];
 
 /** The Map/Outline/Board segmented control — MindManager's status-bar view buttons make these three

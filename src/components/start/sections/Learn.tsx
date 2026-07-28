@@ -3,42 +3,68 @@ import { t } from "../../../i18n/registry";
 import "../messages";
 // Six short principles of mind mapping. Static content.
 
+// `title`/`body` are getters: plain `title: t("…")` fields here would resolve ONCE at import and
+// never follow a later `setLocale`. `id` (the React key) and `icon` stay plain literals.
 const PRINCIPLES: { id: string; icon: string; title: string; body: string }[] = [
   {
     id: "p1",
     icon: "◎",
-    title: t("start.startCentral"),
-    body: t("start.putTheSubjectInThe"),
+    get title() {
+      return t("start.startCentral");
+    },
+    get body() {
+      return t("start.putTheSubjectInThe");
+    },
   },
   {
     id: "p2",
     icon: "✦",
-    title: t("start.oneKeywordPerBranch"),
-    body: t("start.aSingleWordOrShort"),
+    get title() {
+      return t("start.oneKeywordPerBranch");
+    },
+    get body() {
+      return t("start.aSingleWordOrShort");
+    },
   },
   {
     id: "p3",
     icon: "❖",
-    title: t("start.radialHierarchy"),
-    body: t("start.mainBranchesNearTheCentre"),
+    get title() {
+      return t("start.radialHierarchy");
+    },
+    get body() {
+      return t("start.mainBranchesNearTheCentre");
+    },
   },
   {
     id: "p4",
     icon: "🎨",
-    title: t("start.colourByTheme"),
-    body: t("start.giveEachMainBranchIts"),
+    get title() {
+      return t("start.colourByTheme");
+    },
+    get body() {
+      return t("start.giveEachMainBranchIts");
+    },
   },
   {
     id: "p5",
     icon: "↔",
-    title: t("start.crossLinks"),
-    body: t("start.drawARelationshipArrowBetween"),
+    get title() {
+      return t("start.crossLinks");
+    },
+    get body() {
+      return t("start.drawARelationshipArrowBetween");
+    },
   },
   {
     id: "p6",
     icon: "⚡",
-    title: t("start.captureThenTidy"),
-    body: t("start.getEverythingDownFirstRearrange"),
+    get title() {
+      return t("start.captureThenTidy");
+    },
+    get body() {
+      return t("start.getEverythingDownFirstRearrange");
+    },
   },
 ];
 

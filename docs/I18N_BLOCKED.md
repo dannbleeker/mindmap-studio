@@ -169,10 +169,27 @@ first-load size matters, that chunk — not the catalogue — is where the weigh
 
 ---
 
-## 4. 194 strings are frozen at import and will not follow a language picker
+## 4. ✅ RESOLVED (2026-07-28) — 194 strings were frozen at import and would not follow a language picker
 
-`test/i18n-frozen-ratchet.test.ts` holds the per-file list; `test/i18n-frozen-constants.test.ts` proves
-the mechanism.
+`test/i18n-frozen-ratchet.test.ts` holds the per-file list (BUDGET is now empty — the total went
+194 → 145 → 0 across three sessions); `test/i18n-frozen-constants.test.ts` proves the mechanism and
+pins the fix with CLEARANCE tests.
+
+**Resolved by converting every site to a getter** (`get tab() { return t("panel.outline"); }` instead
+of `tab: t("panel.outline")`), the first option listed below — chosen because it is a true drop-in
+replacement: every READ site (`PANEL_LABELS.outline.tab`) is byte-identical before and after, so
+`App.tsx` and `Toolbar.tsx` needed zero call-site changes. The identity field on every one of these
+tables (id/kind/key/href/w/d/a/value — never the translated field) was left as a plain literal on
+purpose, since that is what callers key React lists and persist by; getters only touch the
+purely-for-display field. One real bug surfaced along the way: `CaptureCard.tsx`'s suggested-prompt
+buttons keyed their React list on the translated text itself (`key={ex}`) — the same "translated label
+used as identity" defect already fixed for Toolbar's last-export id and Recent's date buckets. That
+array is now a function returning stable `{ id, text }` pairs, keyed on `id`.
+
+The rest of this section is kept as a historical record of the investigation — the trigger analysis,
+the blind-spot note about hidden derivations, and the options considered — since the "why it isn't just
+fixed here" framing and the options list are still useful context for the next time this class of bug
+shows up.
 
 `t()` reads the **active** locale at call time. A call inside a render function therefore follows a
 later `setLocale`. A call at **module scope** runs once, when the module is first imported, and freezes
@@ -216,21 +233,21 @@ independent AST scan found zero — `collator()` builds a fresh `Intl.Collator(a
 `panelLabels.ts` (26), `stickers.ts` (25), `EdgeInspector.tsx` (15), `start/sections/Layouts.tsx` (15),
 `start/sections/Learn.tsx` (12), `editorCommands.ts` (11), then a tail.
 
-**Why it isn't just fixed here:** the fix is mechanical but not free. Each site becomes either a getter
-or a function call, and the second form changes every consumer — `PANEL_LABELS.outline.tab` becomes
-`panelLabels().outline.tab` in `App.tsx` and `Toolbar.tsx`. Across 194 sites that is a wide,
-behaviour-neutral diff touching files this branch has otherwise finished with, landed at the end of a
-long migration, and impossible to verify by eye. It wants its own change with its own review.
+**Why it wasn't just fixed at the time:** the fix was mechanical but not free — each site becomes
+either a getter or a function call, and the function form changes every consumer. Landed at the end of
+a long migration, that looked like a wide, impossible-to-verify-by-eye diff that wanted its own change.
+In the event, **every one of the 145 remaining sites turned out to be the getter shape** (an array/object
+literal with an identity field and a display field), so the "changes every consumer" cost never
+materialized — see the resolution note at the top of this section.
 
-**The options:**
+**The options that were on the table:**
 
 - **Getters** (`get tab() { return t("panel.outline"); }`) — no call-site churn at all, since property
-  access already looks like property access. Pinned as working in the third test. Slight cost: the
-  object is no longer a plain frozen literal, and `as const satisfies` typing needs a look.
-- **Functions** (`panelLabels()`) — the most explicit about the cost, and the most churn.
+  access already looks like property access. Pinned as working in the third test. **This is what shipped.**
+- **Functions** (`panelLabels()`) — the most explicit about the cost, and the most churn. Not needed —
+  no site was a bare exported binding rather than an object property.
 - **Accept it and drop `setLocale`'s dynamism** — decide the locale is fixed for a session and require
-  a reload to change it. Legitimate, much smaller, and needs saying out loud rather than emerging by
-  accident. If this is the choice, `setLocale` should reload the page so the contract is honest.
+  a reload to change it. Not chosen, since the getter fix cost nothing extra.
 
-Until then the ratchet holds the line: the count cannot grow, no new file can join, and the budget
-table is the worklist.
+The ratchet still holds the line for the future: the count cannot grow above its (now empty) budget,
+and no new file can join without editing `test/i18n-frozen-ratchet.test.ts` by hand.

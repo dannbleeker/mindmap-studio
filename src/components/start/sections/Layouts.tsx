@@ -8,25 +8,102 @@ import type { StartContext } from "../types";
 // Structural layouts + diagram backdrops. Each opens a BLANK map in that view — and the copy makes
 // clear a layout is just a view you can switch any time; your topics don't move.
 
+// `label` is a getter: a plain `label: t("…")` in these module-scope arrays would resolve ONCE at
+// import and never follow a later `setLocale`. `kind` (the React key) stays a plain literal.
 const LAYOUTS: { kind: string; label: string }[] = [
-  { kind: "side", label: t("start.twoSided") },
-  { kind: "right", label: t("start.allRight") },
-  { kind: "left", label: t("start.allLeft") },
-  { kind: "radial", label: t("cmd.layout.radial") },
-  { kind: "org-down", label: t("toolbar.orgChart") },
-  { kind: "org-up", label: t("toolbar.orgChart2") },
-  { kind: "timeline", label: t("cmd.layout.timeline") },
-  { kind: "fishbone", label: t("cmd.layout.fishbone") },
-  { kind: "grid", label: t("cmd.layout.grid") },
-  { kind: "swimlane", label: t("cmd.layout.swimlane") },
-  { kind: "brace", label: t("cmd.layout.brace") },
+  {
+    kind: "side",
+    get label() {
+      return t("start.twoSided");
+    },
+  },
+  {
+    kind: "right",
+    get label() {
+      return t("start.allRight");
+    },
+  },
+  {
+    kind: "left",
+    get label() {
+      return t("start.allLeft");
+    },
+  },
+  {
+    kind: "radial",
+    get label() {
+      return t("cmd.layout.radial");
+    },
+  },
+  {
+    kind: "org-down",
+    get label() {
+      return t("toolbar.orgChart");
+    },
+  },
+  {
+    kind: "org-up",
+    get label() {
+      return t("toolbar.orgChart2");
+    },
+  },
+  {
+    kind: "timeline",
+    get label() {
+      return t("cmd.layout.timeline");
+    },
+  },
+  {
+    kind: "fishbone",
+    get label() {
+      return t("cmd.layout.fishbone");
+    },
+  },
+  {
+    kind: "grid",
+    get label() {
+      return t("cmd.layout.grid");
+    },
+  },
+  {
+    kind: "swimlane",
+    get label() {
+      return t("cmd.layout.swimlane");
+    },
+  },
+  {
+    kind: "brace",
+    get label() {
+      return t("cmd.layout.brace");
+    },
+  },
 ];
 
 const BACKDROPS: { kind: BackdropKind; label: string }[] = [
-  { kind: "onion", label: t("start.onion") },
-  { kind: "funnel", label: t("start.funnel") },
-  { kind: "venn2", label: t("start.venn2") },
-  { kind: "venn3", label: t("start.venn3") },
+  {
+    kind: "onion",
+    get label() {
+      return t("start.onion");
+    },
+  },
+  {
+    kind: "funnel",
+    get label() {
+      return t("start.funnel");
+    },
+  },
+  {
+    kind: "venn2",
+    get label() {
+      return t("start.venn2");
+    },
+  },
+  {
+    kind: "venn3",
+    get label() {
+      return t("start.venn3");
+    },
+  },
 ];
 
 function backdropDoc(kind: BackdropKind): MindMapDoc {

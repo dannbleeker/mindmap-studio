@@ -10,28 +10,110 @@ import { SWATCHES, fieldLabel, seg, segRow } from "./inspectorControls";
 // re-themes with the chrome. Edits go through the canvas's edge mutators (setLinkLabel/Arrow/Style,
 // deleteLink); the `edge` prop is the resolved SelectedEdge (every field has a concrete value).
 
+// Every label/title below is a getter, not a plain field: a plain `label: t("…")` in a module-scope
+// array literal resolves ONCE at import and never follows a later `setLocale` (the identity fields —
+// w/d/a/t — are plain literals on purpose; they're what the buttons key and compare on).
 const WIDTHS: { w: number; label: string }[] = [
-  { w: 1, label: t("panel.thin") },
-  { w: 1.5, label: t("panel.medium") },
-  { w: 3, label: t("panel.thick") },
+  {
+    w: 1,
+    get label() {
+      return t("panel.thin");
+    },
+  },
+  {
+    w: 1.5,
+    get label() {
+      return t("panel.medium");
+    },
+  },
+  {
+    w: 3,
+    get label() {
+      return t("panel.thick");
+    },
+  },
 ];
 const DASHES: { d: SelectedEdge["dash"]; label: string }[] = [
-  { d: "dashed", label: t("panel.dashed") },
-  { d: "solid", label: t("panel.solid") },
-  { d: "dotted", label: t("panel.dotted") },
+  {
+    d: "dashed",
+    get label() {
+      return t("panel.dashed");
+    },
+  },
+  {
+    d: "solid",
+    get label() {
+      return t("panel.solid");
+    },
+  },
+  {
+    d: "dotted",
+    get label() {
+      return t("panel.dotted");
+    },
+  },
 ];
 const ARROWS: { a: SelectedEdge["arrow"]; glyph: string; title: string }[] = [
-  { a: "to", glyph: "→", title: t("panel.arrowAtTheTargetEnd") },
-  { a: "from", glyph: "←", title: t("panel.arrowAtTheSourceEnd") },
-  { a: "both", glyph: "↔", title: t("panel.arrowsAtBothEnds") },
-  { a: "none", glyph: "—", title: t("panel.noArrowheadsAPlainLine") },
+  {
+    a: "to",
+    glyph: "→",
+    get title() {
+      return t("panel.arrowAtTheTargetEnd");
+    },
+  },
+  {
+    a: "from",
+    glyph: "←",
+    get title() {
+      return t("panel.arrowAtTheSourceEnd");
+    },
+  },
+  {
+    a: "both",
+    glyph: "↔",
+    get title() {
+      return t("panel.arrowsAtBothEnds");
+    },
+  },
+  {
+    a: "none",
+    glyph: "—",
+    get title() {
+      return t("panel.noArrowheadsAPlainLine");
+    },
+  },
 ];
 const TYPES: { t: RelationshipType; label: string }[] = [
-  { t: "relates-to", label: t("panel.relates") },
-  { t: "depends-on", label: t("panel.depends") },
-  { t: "causes", label: t("panel.causes") },
-  { t: "supports", label: t("panel.supports") },
-  { t: "blocks", label: t("panel.blocks") },
+  {
+    t: "relates-to",
+    get label() {
+      return t("panel.relates");
+    },
+  },
+  {
+    t: "depends-on",
+    get label() {
+      return t("panel.depends");
+    },
+  },
+  {
+    t: "causes",
+    get label() {
+      return t("panel.causes");
+    },
+  },
+  {
+    t: "supports",
+    get label() {
+      return t("panel.supports");
+    },
+  },
+  {
+    t: "blocks",
+    get label() {
+      return t("panel.blocks");
+    },
+  },
 ];
 
 export function EdgeInspector({

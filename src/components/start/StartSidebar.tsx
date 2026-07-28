@@ -8,17 +8,69 @@ import type { StartSection } from "./types";
 // Left rail: brand, primary New-map button, section nav (All maps shows a live count), and the
 // "local & private" footer card.
 
+// `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
+// `setLocale`. `id` (the section's identity, also the React key) stays a plain literal.
 const NAV: { id: StartSection; label: string }[] = [
-  { id: "start", label: t("start.start") },
-  { id: "all", label: t("toolbar.allMaps") },
-  { id: "recent", label: t("toolbar.recent") },
-  { id: "templates", label: t("toolbar.templates") },
-  { id: "examples", label: t("toolbar.examples") },
-  { id: "layouts", label: t("start.layouts") },
-  { id: "import", label: t("start.import") },
-  { id: "learn", label: t("start.learnMindMapping") },
-  { id: "about", label: t("start.about") },
-  { id: "trash", label: t("start.trash") },
+  {
+    id: "start",
+    get label() {
+      return t("start.start");
+    },
+  },
+  {
+    id: "all",
+    get label() {
+      return t("toolbar.allMaps");
+    },
+  },
+  {
+    id: "recent",
+    get label() {
+      return t("toolbar.recent");
+    },
+  },
+  {
+    id: "templates",
+    get label() {
+      return t("toolbar.templates");
+    },
+  },
+  {
+    id: "examples",
+    get label() {
+      return t("toolbar.examples");
+    },
+  },
+  {
+    id: "layouts",
+    get label() {
+      return t("start.layouts");
+    },
+  },
+  {
+    id: "import",
+    get label() {
+      return t("start.import");
+    },
+  },
+  {
+    id: "learn",
+    get label() {
+      return t("start.learnMindMapping");
+    },
+  },
+  {
+    id: "about",
+    get label() {
+      return t("start.about");
+    },
+  },
+  {
+    id: "trash",
+    get label() {
+      return t("start.trash");
+    },
+  },
 ];
 
 /** Inline 20×20 line icons for the section nav (stroke = currentColor, so the active emerald tint flows

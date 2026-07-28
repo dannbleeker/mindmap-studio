@@ -91,12 +91,38 @@ export interface CanvasTheme {
   theme: MindMapTheme;
 }
 
-// The canvas style gallery, in pick order. id is persisted in localStorage.
+// The canvas style gallery, in pick order. id is persisted in localStorage, so it stays a plain
+// literal; `name` is a getter — a plain `name: t("…")` field here would resolve ONCE at import and
+// never follow a later `setLocale`.
 export const canvasThemes: CanvasTheme[] = [
-  { id: "light", name: t("common.light"), theme: mindManagerTheme },
-  { id: "dark", name: t("common.dark"), theme: mindManagerDarkTheme },
-  { id: "ocean", name: t("theme.ocean"), theme: oceanTheme },
-  { id: "sunset", name: t("theme.sunset"), theme: sunsetTheme },
+  {
+    id: "light",
+    get name() {
+      return t("common.light");
+    },
+    theme: mindManagerTheme,
+  },
+  {
+    id: "dark",
+    get name() {
+      return t("common.dark");
+    },
+    theme: mindManagerDarkTheme,
+  },
+  {
+    id: "ocean",
+    get name() {
+      return t("theme.ocean");
+    },
+    theme: oceanTheme,
+  },
+  {
+    id: "sunset",
+    get name() {
+      return t("theme.sunset");
+    },
+    theme: sunsetTheme,
+  },
 ];
 
 export function themeById(id: string): CanvasTheme {

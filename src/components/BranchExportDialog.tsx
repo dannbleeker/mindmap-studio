@@ -25,14 +25,18 @@ type BranchIo = Pick<
   | "exportMarkdown"
 >;
 
-const FORMATS: { label: string; run: (io: BranchIo) => void | Promise<void> }[] = [
-  { label: t("panel.pngImage"), run: (io) => io.exportPng() },
-  { label: t("panel.svgVector"), run: (io) => io.exportSvg() },
-  { label: t("panel.htmlStandalonePicture"), run: (io) => io.exportHtml() },
-  { label: t("panel.htmlInteractive"), run: (io) => io.exportInteractiveHtml() },
-  { label: t("panel.pdfPrint"), run: (io) => io.exportPdf() },
-  { label: t("cmd.export.json"), run: (io) => io.exportJson() },
-  { label: t("panel.markdown"), run: (io) => io.exportMarkdown() },
+const FORMATS: { id: string; label: string; run: (io: BranchIo) => void | Promise<void> }[] = [
+  { id: "png", label: t("panel.pngImage"), run: (io) => io.exportPng() },
+  { id: "svg", label: t("panel.svgVector"), run: (io) => io.exportSvg() },
+  { id: "html", label: t("panel.htmlStandalonePicture"), run: (io) => io.exportHtml() },
+  {
+    id: "html-interactive",
+    label: t("panel.htmlInteractive"),
+    run: (io) => io.exportInteractiveHtml(),
+  },
+  { id: "pdf", label: t("panel.pdfPrint"), run: (io) => io.exportPdf() },
+  { id: "json", label: t("cmd.export.json"), run: (io) => io.exportJson() },
+  { id: "markdown", label: t("panel.markdown"), run: (io) => io.exportMarkdown() },
 ];
 
 export function BranchExportDialog({
@@ -73,7 +77,7 @@ export function BranchExportDialog({
       <div style={{ display: "grid", gap: space.sm }}>
         {FORMATS.map((f) => (
           <Button
-            key={f.label}
+            key={f.id}
             onClick={() => {
               void f.run(exports);
               onClose();

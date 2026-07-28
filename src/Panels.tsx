@@ -73,7 +73,7 @@ import {
 } from "./outline";
 import { addSlide, removeSlide, reorderSlides, setSlideNote } from "./present/deckEdit";
 import { OVERVIEW_SLIDE_ID } from "./present/slides";
-import { PRIORITY_COLOR, PRIORITY_LABEL, PRIORITY_LEVELS, priorityLabel } from "./priority";
+import { PRIORITY_COLOR, PRIORITY_LEVELS, priorityHasName, priorityLabel } from "./priority";
 import { hasTaskDescendants, nodeProgress, toPercent } from "./progress";
 import {
   type InlineTag,
@@ -85,7 +85,13 @@ import {
 } from "./richTextCommands";
 import { describeRule, describeRuleActions } from "./rules";
 import { mapStats } from "./stats";
-import { type Sticker, searchStickers, stickerCategories, stickerDataUrl } from "./stickers";
+import {
+  type Sticker,
+  searchStickers,
+  stickerCategories,
+  stickerCategoryLabel,
+  stickerDataUrl,
+} from "./stickers";
 import { MAX_VERSIONS, type VersionMeta } from "./store/mapStore";
 import { formatDateShort, parseNaturalDate, todayISO } from "./taskDate";
 import { controlStyle, inputStyle, timeAgo } from "./ui";
@@ -1887,7 +1893,9 @@ export function FilterPanel({
           <option value={0}>{t("panel.any")}</option>
           {PRIORITY_LEVELS.map((p) => (
             <option key={p} value={p}>
-              {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]}` : String(p)}
+              {priorityHasName(p)
+                ? t("panel.priorityNumbered", { n: p, label: priorityLabel(p) })
+                : String(p)}
             </option>
           ))}
         </Select>
@@ -2496,7 +2504,9 @@ export function StylesPanel({
           <option value="">{t("panel.pickAPriority")}</option>
           {PRIORITY_LEVELS.map((p) => (
             <option key={p} value={p}>
-              {PRIORITY_LABEL[p] ? `${p} — ${PRIORITY_LABEL[p]} & up` : `${p} & up`}
+              {priorityHasName(p)
+                ? t("panel.priorityNumberedUp", { n: p, label: priorityLabel(p) })
+                : t("panel.priorityAndUp", { n: p })}
             </option>
           ))}
         </Select>
@@ -4375,7 +4385,7 @@ export function StickerBar({ onPick }: { onPick: (sticker: Sticker) => void }) {
                 fontWeight: fontWeight.semibold,
               }}
             >
-              {g.category}
+              {stickerCategoryLabel(g.category)}
             </div>
             {grid(g.stickers)}
           </div>

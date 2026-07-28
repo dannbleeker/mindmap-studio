@@ -21,16 +21,23 @@ import { controlStyle } from "./ui";
 // that topic on the canvas; DRAG a card between columns to re-tag / re-mark / re-schedule the topic
 // (one undoable edit). Rendered in place of the canvas while open; themed via --ed-*.
 
-/** The column-source options shown in the header selector. */
-const SOURCES: { value: string; label: string; source: BoardSource }[] = [
-  { value: "tag", label: t("common.tags"), source: { kind: "tag" } },
-  ...MARKER_GROUPS.map((g) => ({
-    value: `marker:${g.id}`,
-    label: g.name,
-    source: { kind: "marker" as const, group: g.id },
-  })),
-  { value: "schedule", label: t("app.scheduleDates"), source: { kind: "schedule" } },
-];
+/** The column-source options shown in the header selector.
+ *
+ *  A FUNCTION, not a module-level const. The spread over MARKER_GROUPS reads `g.name` once — and
+ *  `g.name` is now a getter precisely so it follows the locale, which a module-scope materialisation
+ *  would undo. The frozen-t() detector cannot see that: it counts `t(` calls, and this file has none
+ *  in the spread, so the re-freeze would have been silent and scored 0. */
+function sources(): { value: string; label: string; source: BoardSource }[] {
+  return [
+    { value: "tag", label: t("common.tags"), source: { kind: "tag" } },
+    ...MARKER_GROUPS.map((g) => ({
+      value: `marker:${g.id}`,
+      label: g.name,
+      source: { kind: "marker" as const, group: g.id },
+    })),
+    { value: "schedule", label: t("app.scheduleDates"), source: { kind: "schedule" } },
+  ];
+}
 
 /** A card's payload carried on the drag (its full tag/marker set, so the drop can compute the change). */
 interface DragPayload {
@@ -59,7 +66,7 @@ export function Kanban({
   onClose: () => void;
 }) {
   const [sourceValue, setSourceValue] = useState("tag");
-  const source = SOURCES.find((s) => s.value === sourceValue)?.source ?? { kind: "tag" };
+  const source = sources().find((s) => s.value === sourceValue)?.source ?? { kind: "tag" };
   const today = todayISO();
   const columns = buildBoard(doc, source, today);
 
@@ -106,7 +113,7 @@ export function Kanban({
             onChange={(e) => setSourceValue(e.target.value)}
             aria-label={t("app.groupTheBoardBy")}
           >
-            {SOURCES.map((s) => (
+            {sources().map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>

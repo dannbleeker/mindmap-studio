@@ -124,7 +124,7 @@ export function EdgeInspector({
         <div style={segRow}>
           {EDGE_PRESETS.map((p) => (
             <button
-              key={p.name}
+              key={p.id}
               type="button"
               title={p.title}
               onClick={() => onSetStyle(p.patch)}

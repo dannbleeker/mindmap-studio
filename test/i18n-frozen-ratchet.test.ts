@@ -22,32 +22,31 @@ const BUDGET: ReadonlyArray<readonly [string, number]> = [
   ["src/components/editorCommands.ts", 11],
   ["src/components/start/StartSidebar.tsx", 10],
   ["src/components/BranchExportDialog.tsx", 7],
-  ["src/components/start/AppTips.tsx", 7],
   ["src/components/start/CaptureCard.tsx", 7],
-  ["src/Panels.tsx", 6],
-  ["src/components/Toolbar.tsx", 6],
   ["src/components/start/MapCard.tsx", 6],
   ["src/components/start/sections/About.tsx", 6],
+  ["src/components/Toolbar.tsx", 6],
   ["src/mindmap/flow/ShapeLayer.tsx", 6],
+  ["src/Panels.tsx", 6],
   ["src/components/ThemeDesignerDialog.tsx", 4],
   ["src/mindmap/theme.ts", 4],
-  ["src/components/MapPanel.tsx", 3],
   ["src/mindmap/flow/CanvasOverlays.tsx", 3],
-  ["src/Kanban.tsx", 2],
   ["src/mapParts.ts", 1],
 ];
-// Cleared 2026-07-27: stickers.ts (25) and mindmap/flow/slashCommands.ts (9) converted to getters —
-// both had zero consumers outside their own module, so it cost no call site anything. Recent.tsx (3)
-// went too, but as a side effect of fixing a data-loss bug rather than as a freeze fix: it keyed its
-// date buckets on the rendered label, so a translated label stopped matching and whole sections of
-// maps disappeared. See test/start-library-sections.test.tsx.
+// Re-measured 2026-07-27: 194 → 145. Cleared so far: stickers.ts (25), flow/slashCommands.ts (9),
+// start/AppTips.tsx (8) and Recent.tsx (3). Recent's was a side effect of fixing a data-loss bug, not
+// a freeze fix — it keyed date buckets on the rendered label, so a translated label stopped matching
+// and whole sections of maps disappeared (test/start-library-sections.test.tsx).
 //
-// WHAT THIS NUMBER DOES NOT MEAN. Driving it to 0 would not finish the job, and chasing it is a trap:
+// WHAT THIS NUMBER DOES NOT MEAN — still true, and the reason not to chase it to 0:
 //   - The detector counts `t(` calls, so a module-scope DERIVATION that materialises its inputs is
-//     invisible. `MapPanel.tsx:112`, `Kanban.tsx:27` and `icons.ts:116` each read a table once at
-//     import; convert their sources to getters and they silently re-freeze while this reports 0.
-//   - The layout names, marker-group names and sticker categories those tables carry are raw English
-//     literals — not `t()` calls — so they score 0 here and 0 in the scanner while being untranslated.
+//     invisible to it. Three such sites existed and are now FIXED — `MapPanel`'s `LAYOUT_NAME` and
+//     `Kanban`'s `SOURCES` became functions, and `icons.ts`'s group names became getters — but the
+//     class is not detectable, so the next one will be silent too. If you convert a table to getters,
+//     check what reads it at module scope.
+//   - Strings that are raw English LITERALS score 0 here and 0 in the scanner while rendering
+//     untranslated. That was the layout names, marker-group names, sticker categories and priority
+//     labels; all migrated 2026-07-27. `pnpm i18n:blindspot` is what finds the rest.
 // A sweep that empties this table while the layout picker still reads "Radial / hub" in Danish is the
 // "green tick that measured nothing" pattern this codebase keeps rediscovering.
 

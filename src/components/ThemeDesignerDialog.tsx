@@ -178,7 +178,7 @@ export function ThemeDesignerDialog({
               style={{ flex: 1 }}
             >
               {FONTS.map((f) => (
-                <option key={f.label} value={f.value}>
+                <option key={f.value} value={f.value}>
                   {f.label}
                 </option>
               ))}

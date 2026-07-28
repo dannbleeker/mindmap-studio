@@ -17,9 +17,26 @@ const ACCENT = "#6c63d6";
 /** On-canvas display size for a picked sticker (square; matches the image pipeline's display cap). */
 export const STICKER_DISPLAY_PX = 72;
 
-/** Sticker categories shown as headings in the picker (display order). */
+/** Sticker category IDS, in display order. These are identity — the discriminator on every Sticker,
+ *  the React key in the picker, and the literal union `StickerCategory` — so they stay literal and
+ *  English forever. `stickerCategoryLabel` is what the user actually reads. */
 export const STICKER_CATEGORIES = ["Status", "Symbols", "Actions", "Objects"] as const;
 export type StickerCategory = (typeof STICKER_CATEGORIES)[number];
+
+/** The heading shown above a category in the picker. Resolved per call, so it follows the locale;
+ *  the id above must NOT, because `Sticker.category` is matched against it. */
+export function stickerCategoryLabel(category: StickerCategory): string {
+  switch (category) {
+    case "Status":
+      return t("common.status");
+    case "Symbols":
+      return t("common.symbols");
+    case "Actions":
+      return t("common.actions");
+    default:
+      return t("common.objects");
+  }
+}
 
 export interface Sticker {
   /** Stable id (used as a React key and in tests). */

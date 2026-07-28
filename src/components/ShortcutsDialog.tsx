@@ -23,7 +23,7 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
     >
       <div className="mm-shortcuts">
         {shortcutGroups().map((group) => (
-          <section key={group.title} className="mm-shortcuts-group">
+          <section key={group.id} className="mm-shortcuts-group">
             <h3>{group.title}</h3>
             <dl>
               {group.items.map((s) => (

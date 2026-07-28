@@ -90,6 +90,31 @@ export const CORE_EN = {
   "common.restore": "Restore",
   "common.exit": "Exit",
   "common.priority": "Priority",
+  // Marker-group and sticker-category headings, plus the three named priority levels. All were raw
+  // English literals — never t() calls — so every scanner scored them 0 while they rendered untranslated.
+  // Relationship line presets — name + tooltip. Raw literals until now, so invisible to every scanner.
+  "panel.preset.arrow": "Arrow",
+  "panel.preset.arrowTitle": "Solid straight line, single arrowhead",
+  "panel.preset.dashedTitle": "Dashed line with a gentle auto-bow",
+  "panel.preset.dottedTitle": "Dotted line, single arrowhead",
+  "panel.preset.thickTitle": "Thick solid line, single arrowhead",
+  "panel.preset.curvedTitle": "Solid line bowed into an arc",
+  "panel.preset.double": "Double",
+  "panel.preset.doubleTitle": "Solid line with arrowheads at both ends",
+  "common.status": "Status",
+  "common.mood": "Mood",
+  "common.vote": "Vote",
+  "common.symbols": "Symbols",
+  "common.actions": "Actions",
+  "common.objects": "Objects",
+  // The Power Filter renders "1 — High" and "1 — High & up"; the separator and the "& up" are copy,
+  // so they are messages rather than a template literal built at the call site.
+  "panel.priorityNumbered": "{n} — {label}",
+  "panel.priorityNumberedUp": "{n} — {label} & up",
+  "panel.priorityAndUp": "{n} & up",
+  "common.priorityHigh": "High",
+  "common.priorityMed": "Med",
+  "common.priorityLow": "Low",
   "common.branchColour": "Branch colour",
   "common.addTag": "Add a tag",
 

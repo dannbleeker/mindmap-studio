@@ -81,37 +81,116 @@ function LayoutPreview({ kind }: { kind: LayoutKind }) {
 }
 
 /** Layout gallery rows, grouped exactly like the native select's optgroups (Radial / Tree / Diagram). */
-const LAYOUT_GROUPS: { label: string; kinds: { kind: LayoutKind; name: string }[] }[] = [
-  {
-    label: t("toolbar.layoutGroupRadial"),
-    kinds: [
-      { kind: "side", name: "Both sides" },
-      { kind: "right", name: "Right" },
-      { kind: "left", name: "Left" },
-      { kind: "radial", name: "Radial / hub" },
-    ],
-  },
-  {
-    label: t("toolbar.layoutGroupTree"),
-    kinds: [
-      { kind: "org-down", name: "Org chart ↓" },
-      { kind: "org-up", name: "Org chart ↑" },
-    ],
-  },
-  {
-    label: t("toolbar.layoutGroupDiagram"),
-    kinds: [
-      { kind: "timeline", name: "Timeline" },
-      { kind: "fishbone", name: "Fishbone" },
-      { kind: "grid", name: "Grid / matrix" },
-      { kind: "swimlane", name: "Swimlane" },
-      { kind: "brace", name: "Brace map" },
-    ],
-  },
-];
-const LAYOUT_NAME: Record<string, string> = Object.fromEntries(
-  LAYOUT_GROUPS.flatMap((g) => g.kinds.map(({ kind, name }) => [kind, name])),
-);
+// Every label is a GETTER and every group carries a stable `id`.
+//
+// The names were raw English literals, so the scanner, the blindspot probe and the frozen-t() ratchet
+// all reported this file clean while the layout picker rendered "Radial / hub" in every locale. They
+// reuse the `cmd.layout.*` keys the command palette already had for the same eleven layouts.
+//
+// The getters matter as much as the keys: a plain `t()` here is evaluated once, when this module is
+// imported, and freezes. And `id` exists because the group was keyed on `g.label` in the render —
+// which is already a `t()` result, so that React key was ALREADY locale-dependent.
+const LAYOUT_GROUPS: { id: string; label: string; kinds: { kind: LayoutKind; name: string }[] }[] =
+  [
+    {
+      id: "radial",
+      get label() {
+        return t("toolbar.layoutGroupRadial");
+      },
+      kinds: [
+        {
+          kind: "side",
+          get name() {
+            return t("cmd.layout.side");
+          },
+        },
+        {
+          kind: "right",
+          get name() {
+            return t("cmd.layout.right");
+          },
+        },
+        {
+          kind: "left",
+          get name() {
+            return t("cmd.layout.left");
+          },
+        },
+        {
+          kind: "radial",
+          get name() {
+            return t("cmd.layout.radial");
+          },
+        },
+      ],
+    },
+    {
+      id: "tree",
+      get label() {
+        return t("toolbar.layoutGroupTree");
+      },
+      kinds: [
+        {
+          kind: "org-down",
+          get name() {
+            return t("toolbar.orgChart");
+          },
+        },
+        {
+          kind: "org-up",
+          get name() {
+            return t("toolbar.orgChart2");
+          },
+        },
+      ],
+    },
+    {
+      id: "diagram",
+      get label() {
+        return t("toolbar.layoutGroupDiagram");
+      },
+      kinds: [
+        {
+          kind: "timeline",
+          get name() {
+            return t("cmd.layout.timeline");
+          },
+        },
+        {
+          kind: "fishbone",
+          get name() {
+            return t("cmd.layout.fishbone");
+          },
+        },
+        {
+          kind: "grid",
+          get name() {
+            return t("cmd.layout.grid");
+          },
+        },
+        {
+          kind: "swimlane",
+          get name() {
+            return t("cmd.layout.swimlane");
+          },
+        },
+        {
+          kind: "brace",
+          get name() {
+            return t("cmd.layout.brace");
+          },
+        },
+      ],
+    },
+  ];
+
+/** The display name for a layout kind. A FUNCTION, not a lookup table: a module-scope
+ *  `Object.fromEntries(...)` over the groups would read every getter once, at import, and re-freeze
+ *  exactly the strings the getters above exist to keep live — while every detector still reported 0. */
+function layoutName(kind: string): string {
+  for (const g of LAYOUT_GROUPS) for (const k of g.kinds) if (k.kind === kind) return k.name;
+  return kind;
+}
 
 type ConnectorStyle = "organic" | "curved" | "elbow" | "straight";
 type FontScale = "compact" | "comfortable" | "large";
@@ -358,17 +437,17 @@ export function MapPanel({
               trigger={
                 <>
                   <LayoutPreview kind={layout} />
-                  {LAYOUT_NAME[layout] ?? layout}
+                  {layoutName(layout)}
                 </>
               }
               triggerClassName="mm-map-control mm-layout-trigger"
               triggerAriaLabel={t("toolbar.layout")}
               disabled={!!freeform}
-              triggerTitle={freeform ? t("toolbar.layoutPaused") : "Layout"}
+              triggerTitle={freeform ? t("toolbar.layoutPaused") : t("toolbar.layout")}
               menuAriaLabel={t("panel.chooseALayout")}
             >
               {LAYOUT_GROUPS.map((g) => (
-                <div key={g.label}>
+                <div key={g.id}>
                   <MenuLabel>{g.label}</MenuLabel>
                   {g.kinds.map(({ kind, name }) => (
                     <MenuItem

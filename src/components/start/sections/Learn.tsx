@@ -2,33 +2,39 @@ import { t } from "../../../i18n/registry";
 import "../messages";
 // Six short principles of mind mapping. Static content.
 
-const PRINCIPLES: { icon: string; title: string; body: string }[] = [
+const PRINCIPLES: { id: string; icon: string; title: string; body: string }[] = [
   {
+    id: "p1",
     icon: "◎",
     title: t("start.startCentral"),
     body: t("start.putTheSubjectInThe"),
   },
   {
+    id: "p2",
     icon: "✦",
     title: t("start.oneKeywordPerBranch"),
     body: t("start.aSingleWordOrShort"),
   },
   {
+    id: "p3",
     icon: "❖",
     title: t("start.radialHierarchy"),
     body: t("start.mainBranchesNearTheCentre"),
   },
   {
+    id: "p4",
     icon: "🎨",
     title: t("start.colourByTheme"),
     body: t("start.giveEachMainBranchIts"),
   },
   {
+    id: "p5",
     icon: "↔",
     title: t("start.crossLinks"),
     body: t("start.drawARelationshipArrowBetween"),
   },
   {
+    id: "p6",
     icon: "⚡",
     title: t("start.captureThenTidy"),
     body: t("start.getEverythingDownFirstRearrange"),
@@ -44,7 +50,7 @@ export function Learn() {
       </section>
       <div className="st-principles">
         {PRINCIPLES.map((p) => (
-          <div key={p.title} className="st-card st-principle">
+          <div key={p.id} className="st-card st-principle">
             <div style={{ fontSize: 22, color: "var(--st-accent)" }} aria-hidden="true">
               {p.icon}
             </div>

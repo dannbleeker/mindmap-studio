@@ -327,6 +327,29 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
   figure was already over before this work started, so flipping it silently would read as a regression
   this branch caused. Decision 3 in `docs/I18N_BLOCKED.md`.
 
+- **The layout picker, marker groups, sticker headings, priority levels and line presets were never
+  translated — and no check could see them.** ~30 strings that were raw English literals rather than
+  `t()` calls, so the scanner, the blind-spot probe and the frozen-`t()` ratchet all scored the files
+  **0** while the layout gallery rendered "Radial / hub" in every locale. Nine of the eleven layout
+  names already had `cmd.layout.*` keys from the command palette; they now share them.
+
+  **Identity split from label everywhere it mattered.** `Sticker.category` is a discriminator, a React
+  key *and* a heading; `MARKER_GROUPS.id` and `PRIORITY_LABEL`'s numeric keys are looked up. Those stay
+  literal; only the rendered name follows the locale — the same rule the `Recent.tsx` fix established
+  after keying on a translated label would have made maps disappear.
+
+- **Nine React keys were the rendered label; six were already locale-dependent.** `AppTips`,
+  `Learn`, `BranchExportDialog` and `ShortcutsDialog` keyed on titles that were *already* `t()` results,
+  so a language change would have remounted those subtrees — losing focus on the interactive tip button
+  — and crashed outright on any two labels that collide in a target language. All now key on stable ids.
+  This had to land **with** the item above: migrating those labels first would have converted the three
+  remaining latent cases into live ones.
+
+- **Three module-scope derivations would have silently re-frozen.** `MapPanel`'s `LAYOUT_NAME` and
+  `Kanban`'s `SOURCES` materialised their inputs at import, so making the underlying labels live would
+  have been undone one line later — while the ratchet reported 0, because it counts `t(` calls and
+  those tables contain none. Both are functions now. The frozen budget also drops 194 → **145**.
+
 - **The relationship filter showed raw ids, and the status bar had a hand-rolled English plural.** The
   Relationships panel's type dropdown rendered `relates-to`, `depends-on`, `causes`, `supports`,
   `blocks` — the literal option *values* — while `EdgeInspector` showed proper labels for the same five.

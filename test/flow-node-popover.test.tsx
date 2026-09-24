@@ -28,6 +28,8 @@ describe("NodePopover", () => {
         onCyclePriority={noop}
         onStartLink={noop}
         onMore={noop}
+        onAddChild={noop}
+        onAddSibling={noop}
       />,
     );
     expect(container.firstChild).toBeNull();
@@ -44,6 +46,8 @@ describe("NodePopover", () => {
         onCyclePriority={noop}
         onStartLink={noop}
         onMore={noop}
+        onAddChild={noop}
+        onAddSibling={noop}
       />,
     );
     expect(container.firstChild).toBeNull();

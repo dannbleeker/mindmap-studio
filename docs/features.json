@@ -405,7 +405,7 @@
     },
     {
       "id": "add-affordances",
-      "name": "Hover ＋ to add a child or sibling topic",
+      "name": "＋ to add a child or sibling topic (on hover; in the action bar on touch)",
       "area": "editing",
       "since": "2026-06-18",
       "manual": true,

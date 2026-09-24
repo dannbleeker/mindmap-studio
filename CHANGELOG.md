@@ -754,6 +754,16 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **A selected topic is readable again on a phone.** Tapping a topic buried its label: the two on-node
+  ＋ buttons (44px touch targets anchored inside the box) covered most of a short topic, a tap's
+  compat `mouseenter` never got its `mouseleave` so the "Double-tap to edit" hint stuck on, and the
+  sticky touch `:hover` revealed the ☐ task checkbox over the first letter (still a live 44px target —
+  a tap on the first word silently made the topic a task). On touch, Add child / Add sibling now live
+  in the selection action bar (touch-only buttons, 40px targets); hover counts only for mouse/pen; the
+  ☐ reveals only where hover is real and isn't tappable while hidden. The action bar also anchors to
+  the node's near edge when centring would push it off-screen. Touch coach copy updated to match.
+  Desktop is unchanged.
+
 - **The XMind round trip no longer loses half the map (backlog item 34).** The `.xmind` writer already
   emitted floating topics as `children.detached` and relationship arrows as sheet `relationships` —
   but our own importer read neither back, so exporting to XMind and reimporting silently dropped every

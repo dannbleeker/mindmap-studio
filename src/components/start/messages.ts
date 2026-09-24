@@ -97,7 +97,7 @@ export const START_EN = {
   "start.searchCommands": "Search & commands",
   "start.dismiss": "Dismiss",
   "start.captureAThoughtBelowThen":
-    "Capture a thought below, then tap ＋ on a topic to grow it — pinch to zoom.",
+    "Capture a thought below, then tap a topic and ＋ to grow it — pinch to zoom.",
   "start.captureAThoughtBelowThen2":
     "Capture a thought below, then press Tab to add topics and ⌘K for anything.",
   "start.viewAllMaps": "View all maps →",

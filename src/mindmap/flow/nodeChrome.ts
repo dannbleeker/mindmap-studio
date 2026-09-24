@@ -15,3 +15,19 @@ export function showNodeAffordances(
   if (hovered) return true;
   return selected && !multiSelected;
 }
+
+/** Which edge of the selected node the action bar (NodePopover) aligns to, so it stays on-screen.
+ *  Centred by default; a node near the pane's left/right edge would push a centred bar off-screen
+ *  (on a phone the 7-button touch bar is ~300px — most of the width), so it anchors to that node's
+ *  near edge instead and grows inward. All values are pane-relative screen pixels. */
+export function popoverAlign(
+  nodeLeft: number,
+  nodeRight: number,
+  paneWidth: number,
+  barWidth: number,
+): "start" | "center" | "end" {
+  const centre = (nodeLeft + nodeRight) / 2;
+  if (centre - barWidth / 2 < 0) return "start";
+  if (centre + barWidth / 2 > paneWidth) return "end";
+  return "center";
+}

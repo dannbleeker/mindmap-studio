@@ -857,11 +857,32 @@ describe("FlowMindMap canvas", () => {
     expect(screen.queryByRole("button", { name: /Add child/ })).toBeNull();
     // Hovering a node reveals the ＋ child / ＋ sibling affordances (re-homed off the popover).
     const inner = nodeEl(container, "b").firstElementChild as HTMLElement;
-    run(() => fireEvent.mouseOver(inner));
+    run(() => fireEvent.pointerOver(inner, { pointerType: "mouse" }));
     const addChildBtn = screen.getByRole("button", { name: /Add child/ });
     expect(screen.getByRole("button", { name: /Add sibling/ })).toBeTruthy();
     // Clicking ＋ adds a child and drops straight into editing it.
     run(() => fireEvent.click(addChildBtn));
+    expect(onChange).toHaveBeenCalled();
+    expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
+  });
+
+  it("a touch doesn't count as hover — no sticky ＋ / edit hint after a tap", () => {
+    const { container } = mount();
+    const inner = nodeEl(container, "b").firstElementChild as HTMLElement;
+    run(() => fireEvent.pointerOver(inner, { pointerType: "touch" }));
+    expect(screen.queryByRole("button", { name: /Add child/ })).toBeNull();
+    expect(container.querySelector(".mm-node-hint")).toBeNull();
+  });
+
+  it("the action bar carries touch-only Add child / Add sibling (no sibling on the root)", () => {
+    const { container, onChange } = mount();
+    run(() => fireEvent.click(nodeEl(container, "b")));
+    const bar = (name: RegExp) =>
+      screen.getAllByRole("button", { name }).find((b) => b.classList.contains("mm-pop-touch"));
+    expect(bar(/Add sibling/)).toBeTruthy();
+    const child = bar(/Add child/);
+    expect(child).toBeTruthy();
+    run(() => fireEvent.click(child as HTMLElement));
     expect(onChange).toHaveBeenCalled();
     expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
   });

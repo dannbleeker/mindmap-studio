@@ -1,7 +1,6 @@
 import "@xyflow/react/dist/style.css";
 import {
   ConnectionMode,
-  Controls,
   ReactFlow,
   ReactFlowProvider,
   ViewportPortal,
@@ -412,16 +411,14 @@ function FlowInner({
   // so holding space makes every node pointer-inert (via the `.mm-space-pan` wrapper class), letting the
   // drag fall through to the pane's pan even over a topic, with a grab cursor. Matches Figma / XMind.
   const [spacePan, setSpacePan] = useState(false);
-  // The corner minimap can be collapsed (it covers dense maps); the choice persists. It defaults open
-  // on desktop but closed on a phone, where an open minimap covers a big share of the small canvas and
-  // overlaps the bottom status bar — an explicit stored choice still wins.
+  // The corner minimap (toggled from the status bar's zoom menu); the choice persists. Off by default
+  // everywhere — it covered topics in the bottom-right corner of even a 7-topic map — but an explicit
+  // stored choice wins.
   const [minimapOpen, setMinimapOpen] = useState(() => {
     try {
-      const stored = localStorage.getItem("mindmap-minimap-open");
-      if (stored !== null) return stored !== "false";
-      return !isMobile;
+      return localStorage.getItem("mindmap-minimap-open") === "true";
     } catch {
-      return !isMobile;
+      return false;
     }
   });
   const toggleMinimap = () =>
@@ -2601,25 +2598,38 @@ function FlowInner({
               </ViewportPortal>
             ) : null}
             <AffordanceScale />
-            <Controls showInteractive={false} />
             <StatusBar
               topics={nodes.length}
               selected={selectedIds.size}
               activeView={activeView}
               onSetView={onSetView}
-              onResetZoom={() =>
-                zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport })
-              }
-              onFitSelection={() => {
-                const ids = [...selectedIds];
-                if (ids.length)
+              compact={isMobile}
+              zoom={{
+                zoomIn: () =>
+                  void zoomIn({ duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
+                zoomOut: () =>
+                  void zoomOut({ duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
+                reset: () =>
+                  zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
+                fitMap: () =>
                   fitView({
-                    nodes: ids.map((id) => ({ id })),
                     duration: reducedMotionRef.current ? 0 : motion.dur.fit,
-                  });
+                    maxZoom: FIT_MAX_ZOOM,
+                  }),
+                fitSelection: () => {
+                  const ids = [...selectedIds];
+                  if (ids.length)
+                    fitView({
+                      nodes: ids.map((id) => ({ id })),
+                      duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+                      maxZoom: 1.5,
+                    });
+                },
+                minimapOpen,
+                toggleMinimap,
               }}
             />
-            <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
+            <MinimapPanel open={minimapOpen} />
           </ReactFlow>
           {edgeMenu ? (
             <ContextMenu

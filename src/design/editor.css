@@ -970,6 +970,31 @@
   }
 }
 
+/* The status bar's zoom % — a text-as-button trigger (no chrome) for the zoom menu. */
+.mm-stat-btn {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.mm-stat-btn:hover {
+  background: rgba(0, 0, 0, 0.07);
+}
+.mm-stat-btn:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+}
+@media (pointer: coarse) {
+  /* A tappable target for the zoom menu on touch. */
+  .mm-stat-btn {
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+}
+
 /* Contextual action-bar buttons (NodePopover, UI-3) — the on-selection toolbar above the node.
    Sizing/colour are inline (PopBtn); these add the hover + keyboard-focus affordances. */
 .mm-pop-btn:hover {

@@ -357,11 +357,24 @@ describe("FlowMindMap canvas", () => {
     expect(doc.floatingTopics?.length ?? 0).toBeGreaterThanOrEqual(1); // pasted as a floating topic
   });
 
-  it("the status-bar zoom % + selection count are clickable (reset zoom / fit selection)", () => {
+  it("the status-bar zoom % opens the zoom menu (replaces the +/−/fit stack and minimap button)", () => {
     const { h } = mount();
-    run(() => fireEvent.click(screen.getByTitle("Reset zoom to 100%"))); // no throw (zoomTo)
-    run(() => h.focusNode("a")); // a selection → the fit button appears
-    run(() => fireEvent.click(screen.getByTitle("Zoom to fit the selection"))); // no throw (fitView)
+    // No React Flow controls stack and no standalone minimap button any more.
+    expect(document.querySelector(".react-flow__controls")).toBeNull();
+    expect(screen.queryByText(/Minimap/)).toBeNull();
+    const openZoomMenu = () =>
+      run(() => fireEvent.click(screen.getByRole("button", { name: /zoom and minimap options/ })));
+    openZoomMenu();
+    // Nothing selected → no "fit the selection" row.
+    expect(screen.queryByRole("menuitem", { name: /fit the selection/ })).toBeNull();
+    run(() => fireEvent.click(screen.getByRole("menuitem", { name: /Zoom in/ }))); // stays open
+    run(() => fireEvent.click(screen.getByRole("menuitem", { name: /Zoom out/ })));
+    run(() => fireEvent.click(screen.getByRole("menuitem", { name: /Reset zoom/ }))); // closes
+    openZoomMenu();
+    run(() => fireEvent.click(screen.getByRole("menuitem", { name: /Fit map to screen/ })));
+    run(() => h.focusNode("a"));
+    openZoomMenu();
+    run(() => fireEvent.click(screen.getByRole("menuitem", { name: /fit the selection/ })));
   });
 
   it("Ctrl+Enter adds a child of the selected node (plain Enter still adds a sibling)", () => {
@@ -1146,9 +1159,18 @@ describe("FlowMindMap canvas", () => {
     };
     const onSelectEdge = vi.fn();
     const { container, onMapLink, onChange, h } = mount(doc, { onSelectEdge });
-    // Minimap toggle (the bottom-right Panel button) — covers toggleMinimap + its localStorage write.
-    run(() => fireEvent.click(screen.getByText(/Minimap/)));
-    run(() => fireEvent.click(screen.getByText(/Minimap/)));
+    // Minimap: off by default; toggled from the zoom menu (covers toggleMinimap + its localStorage write).
+    expect(document.querySelector(".react-flow__minimap")).toBeNull();
+    const toggleMinimap = () => {
+      run(() => fireEvent.click(screen.getByRole("button", { name: /zoom and minimap options/ })));
+      run(() => fireEvent.click(screen.getByRole("menuitemcheckbox", { name: /Show minimap/ })));
+    };
+    toggleMinimap();
+    expect(document.querySelector(".react-flow__minimap")).toBeTruthy();
+    expect(localStorage.getItem("mindmap-minimap-open")).toBe("true");
+    run(() => fireEvent.keyDown(document, { key: "Escape" }));
+    toggleMinimap();
+    expect(document.querySelector(".react-flow__minimap")).toBeNull();
     // openLink kinds: in-map jump (#node= → focusNodeById) and map link (#map= → onMapLink).
     run(() =>
       fireEvent.click(within(nodeEl(container, "a") as HTMLElement).getByTitle(/Follow link/)),

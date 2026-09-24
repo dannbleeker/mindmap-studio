@@ -754,6 +754,27 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **One click on a topic shows one thing — its action bar.** A click used to open the inspector
+  (a 300px column on desktop, a sheet over 62% of a phone) and stack both ＋ buttons, the relate
+  grip, the task box and the edit hint on the topic. Now a selected topic shows just its action
+  bar; the ＋ / relate / wrap grips appear on hover, and the inspector opens from the bar's new
+  **ⓘ** (or the Panels menu / ⌘K). *Settings → Open topic info on select* brings back
+  open-on-every-click. Relationships and overlays still open the inspector on click — it's their
+  only editor. A panel layout saved before this starts with the inspector closed once, or
+  existing users would never see the change.
+- **Maps no longer open at 300%.** Fit-to-screen had no upper bound, so a small map filled the
+  pane at the maximum zoom (the 7-topic Brainstorm template opened with house-sized topics). Every
+  whole-map fit now stops at 100%. Separately, node affordances (＋, collapse toggle, relate grip,
+  task box, coach hints) keep their screen size when you zoom in, instead of tripling and running
+  the edit hint off the pane; below 100% they still shrink with the map.
+- **One getting-started helper at a time.** The first-run card, the empty-map coachmark and the
+  hover coaches stacked (card + hover hint on desktop, card + coachmark on a phone); the
+  lower-ranked ones now stay hidden while a higher one is up.
+- **The canvas bottom edge is one strip, not three widgets.** The status bar's zoom % is now a
+  zoom menu (in / out / 100% / fit map / fit selection / **Show minimap**), replacing React Flow's
+  +/−/fit stack and the separate Minimap button. The minimap starts off everywhere (it covered
+  topics even on a 7-topic map); a stored choice still wins. On a phone the status bar keeps only
+  the Map / Outline / Board switcher and the zoom menu.
 - **A selected topic is readable again on a phone.** Tapping a topic buried its label: the two on-node
   ＋ buttons (44px touch targets anchored inside the box) covered most of a short topic, a tap's
   compat `mouseenter` never got its `mouseleave` so the "Double-tap to edit" hint stuck on, and the

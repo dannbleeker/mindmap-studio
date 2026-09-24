@@ -51,11 +51,14 @@ GitHub Pages).
   filter to reuse it as a preset across maps.
 - **Focus a branch** — spotlight one branch (and its path to the root); everything else dims (Esc exits).
 - **Per-map canvas background** — set a background colour for a map; it persists and exports with it.
-- **Minimap + zoom** — a corner overview with a draggable viewport for panning large maps,
-  plus integrated zoom controls (−/+, live %, fit).
+- **Minimap + zoom** — the status bar's live zoom % opens a zoom menu (in / out / 100% / fit map /
+  fit selection) with a **Show minimap** toggle for the corner overview (off by default) whose
+  draggable viewport pans large maps. Fit-to-screen never zooms a small map past 100%.
 - **Topic info panel** — one **ℹ Info** side panel consolidating the selected node's note,
   markers (click-to-toggle, with active highlighted), **tags** (add/remove), style
-  (shape/fill/border/bold), and links, organised into **Details / Style / Notes** tabs.
+  (shape/fill/border/bold), and links, organised into **Details / Style / Notes** tabs. It opens on
+  request — the **ⓘ** in a selected topic's action bar — or on every selection if you turn on
+  *Settings → Open topic info on select*.
 - **Task progress** — set a topic's completion (0–100%) and a small **completion pie**
   (MindManager-style, ✓ at 100%) shows on the node — click the pie to step it (0→25→…→100→0).
   Parents **roll up automatically** (average + done/total count), with the percentage echoed in the

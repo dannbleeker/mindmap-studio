@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 462,
+  "reviewedThroughChangelogBullets": 467,
   "areas": [
     "editing",
     "notes",
@@ -954,7 +954,7 @@
     },
     {
       "id": "minimap-zoom",
-      "name": "Corner minimap + integrated zoom controls",
+      "name": "Status-bar zoom menu (in/out/100%/fit) with a show-minimap toggle; corner minimap",
       "area": "navigation",
       "since": "2026-06-14",
       "manual": true,
@@ -1689,6 +1689,15 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "inspector-on-request",
+      "name": "Topic inspector opens on request (action-bar ⓘ); opt-in open-on-select setting",
+      "area": "editing",
+      "since": "2026-09-24",
+      "manual": true,
+      "book": true,
+      "bookExample": false
     },
     {
       "id": "status-bar",

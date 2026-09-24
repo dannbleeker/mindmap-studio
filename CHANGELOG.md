@@ -754,6 +754,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Ticking a task no longer selects the topic.** On touch the topic's label sat above the ☑ box and
+  took the tap, so tapping a done task selected the topic (popping its action bar) instead of
+  unticking it; the 44px box also covered the label's first letter. The box now sits above the
+  label and is centred on the topic's left edge.
 - **One click on a topic shows one thing — its action bar.** A click used to open the inspector
   (a 300px column on desktop, a sheet over 62% of a phone) and stack both ＋ buttons, the relate
   grip, the task box and the edit hint on the topic. Now a selected topic shows just its action

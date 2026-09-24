@@ -178,6 +178,7 @@ export const CANVAS_EN = {
   "canvas.switchView": "Switch view",
   "canvas.zoomToFitTheSelection": "Zoom to fit the selection",
   "canvas.showMinimap": "Show minimap",
+  "canvas.hint.viewOnly": "Read-only — unlock (🔒) to edit",
   "canvas.zoomIn": "Zoom in",
   "canvas.zoomOut": "Zoom out",
   "canvas.zoomMenu": "Zoom and minimap",

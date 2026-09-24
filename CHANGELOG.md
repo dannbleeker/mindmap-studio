@@ -7,6 +7,15 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Added
 
+- **Full screen.** One tap (the ⛶ in a phone's top bar; **View → Full screen** or ⌘K anywhere)
+  hides the rail, both toolbar rows, the tabs and the breadcrumb so the map fills the window, with
+  a single floating button to come back. Where the browser allows it (Android Chrome, desktop) the
+  browser's own bars go too; Esc / Back leaves the mode. Borrowed from SimpleMind's phone button.
+- **Read-only mode.** A 🔒 in the top bar (and ⌘K) locks editing for the session, across map
+  switches: pan, zoom, fold, search, present and export still work, but typing, adding, deleting,
+  dragging, pasting, dropping, inspector edits and undo/redo are blocked with a "Read-only — unlock
+  to edit" hint. The editing chrome hides with it — action bar, on-topic ＋ / task box / grips,
+  right-click menus, Insert / Canvas menus and Quick add — and dragging a topic pans the map.
 - **A localisation layer, with English as the only locale.** The point isn't a second language — it's
   that adding one later is "write a JSON catalogue" rather than "re-architect the app". `src/i18n/`
   holds a message registry, a typed English catalogue, `Intl.PluralRules`-based plurals and
@@ -754,6 +763,10 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ### Fixed
 
+- **Ticking a task no longer selects the topic.** On touch the topic's label sat above the ☑ box and
+  took the tap, so tapping a done task selected the topic (popping its action bar) instead of
+  unticking it; the 44px box also covered the label's first letter. The box now sits above the
+  label and is centred on the topic's left edge.
 - **One click on a topic shows one thing — its action bar.** A click used to open the inspector
   (a 300px column on desktop, a sheet over 62% of a phone) and stack both ＋ buttons, the relate
   grip, the task box and the edit hint on the topic. Now a selected topic shows just its action

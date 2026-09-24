@@ -131,7 +131,7 @@ const EXPORTS = (io: ToolbarProps["io"]): [string, string, () => void][] => [
 
 /** Build the editor's command list from the toolbar prop groups (the same object App passes Toolbar). */
 export function buildEditorCommands(props: ToolbarProps): Command[] {
-  const { mapRef, nav, panels, map, canvas, io, history, showHint } = props;
+  const { mapRef, nav, panels, map, canvas, io, history, modes, showHint } = props;
   const m = () => mapRef.current;
   const sel = canvas.selected;
   const cmds: Command[] = [];
@@ -187,6 +187,17 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
 
   // View
   add("fit", t("cmd.fit"), "view", () => m()?.fit());
+  add("fullscreen", t("toolbar.fullscreen"), "view", () => modes.toggleFullscreen(), true, {
+    keywords: "full screen focus hide toolbar chrome distraction free",
+  });
+  add(
+    "view-only",
+    modes.viewOnly ? t("toolbar.viewOnlyOff") : t("toolbar.viewOnlyOn"),
+    "view",
+    () => modes.toggleViewOnly(),
+    true,
+    { keywords: "read only lock view mode protect prevent accidental edits" },
+  );
   add(
     "balance-map",
     t("cmd.balance-map"),

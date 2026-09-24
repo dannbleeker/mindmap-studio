@@ -32,6 +32,7 @@ import { CommandPalette, clearRecents } from "./components/CommandPalette";
 import { Dialog } from "./components/Dialog";
 import { DocumentTabs } from "./components/DocumentTabs";
 import { EdgeInspector } from "./components/EdgeInspector";
+import { EditorIcon } from "./components/EditorIcons";
 import { FindReplaceOverlay } from "./components/FindReplaceOverlay";
 import { FirstRunCard } from "./components/FirstRunCard";
 import { IconRail } from "./components/IconRail";
@@ -59,6 +60,7 @@ import { useCommandPaletteHotkey } from "./hooks/useCommandPaletteHotkey";
 import { useDiskFile } from "./hooks/useDiskFile";
 import { useFocusHotkey } from "./hooks/useFocusHotkey";
 import { useFormatPainter } from "./hooks/useFormatPainter";
+import { useFullscreen } from "./hooks/useFullscreen";
 import { useGuidedWalk } from "./hooks/useGuidedWalk";
 import { useIdbAutosave } from "./hooks/useIdbAutosave";
 import { useInbox } from "./hooks/useInbox";
@@ -244,6 +246,10 @@ export function App() {
   // Phone-width: the editor toolbar switches to a compact single horizontally-scrollable strip
   // (the desktop layout wraps into a wall of rows on a narrow screen, burying the canvas).
   const isMobile = useIsMobile();
+  const fullscreen = useFullscreen(view === "editor");
+  // View mode (read-only): the canvas blocks every edit but folds (FlowMindMap readOnly). Session-only
+  // and app-wide, so it holds while switching maps (like SimpleMind's read-only mode).
+  const [viewOnly, setViewOnly] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   // The import-warnings banner collapses to the first note + "(+N more)"; this reveals the full list.
   const [warningsExpanded, setWarningsExpanded] = useState(false);
@@ -1683,6 +1689,16 @@ export function App() {
         showHint("Redone");
       },
     },
+    modes: {
+      fullscreen: fullscreen.on,
+      toggleFullscreen: fullscreen.toggle,
+      viewOnly,
+      toggleViewOnly: () => {
+        const next = !viewOnly;
+        setViewOnly(next);
+        showHint(next ? t("hint.viewOnlyOn") : t("hint.viewOnlyOff"));
+      },
+    },
     showHint,
     saveState,
   };
@@ -1755,6 +1771,10 @@ export function App() {
       data-theme={chromeDark ? "dark" : "light"}
       // While a sheet drag is live, suppress the height transition so it tracks the finger.
       data-sheet-dragging={sheetDrag.dragging || undefined}
+      // Full-screen editing: editor.css hides the chrome (rail, toolbar rows, tabs, breadcrumb).
+      data-fullscreen={fullscreen.on || undefined}
+      // View mode: editor.css hides the editing menus (.mm-edit-chrome).
+      data-view-only={viewOnly || undefined}
       style={{
         ...editorThemeVars(chromeDark, highContrast),
         // Live bottom-sheet height (mobile only); the sheets + handle read this with a 62dvh fallback.
@@ -1768,6 +1788,17 @@ export function App() {
       <a className="mm-skip-link" href="#mm-canvas">
         {t("app.skipToCanvas")}
       </a>
+      {fullscreen.on ? (
+        <button
+          type="button"
+          className="mm-fs-exit"
+          title={t("toolbar.exitFullscreen")}
+          aria-label={t("toolbar.exitFullscreen")}
+          onClick={fullscreen.exit}
+        >
+          <EditorIcon name="fullscreenExit" size={18} />
+        </button>
+      ) : null}
       <IconRail
         onHome={goHome}
         onImage={handleImage}
@@ -2202,6 +2233,7 @@ export function App() {
                 key={playback ? `pb:${playback.index}` : `${doc.id}:${restoreRev}`}
                 ref={mapRef}
                 doc={playback ? playback.snaps[playback.index].doc : doc}
+                readOnly={viewOnly}
                 // Restore this tab's stashed viewport + undo/redo on a switch-back (never during
                 // history playback). Consumed one-shot by the effect below so a later version-restore
                 // remount starts fresh, not from a stale session.

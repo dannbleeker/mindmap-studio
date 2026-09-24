@@ -451,6 +451,8 @@ export const CORE_EN = {
   "hint.stickyAdded": "Sticky note added — drag it anywhere.",
   "hint.mapPartInserted": "Inserted the {name} map part.",
   "hint.selectTopicFirst": "Select a topic first.",
+  "hint.viewOnlyOn": "Read-only — the map is locked (folding still works)",
+  "hint.viewOnlyOff": "Editing on",
   "cmd.goTo": "Go to: {topic}",
 
   // Editor toolbar + its menus (src/components/Toolbar.tsx). No command ids to key off here, so keys
@@ -513,6 +515,10 @@ export const CORE_EN = {
   "toolbar.examples": "Examples",
   "toolbar.searchAllMaps": "Search across every map in your library",
   "toolbar.findReplace": "Find & replace (Ctrl/⌘+F)",
+  "toolbar.fullscreen": "Full screen",
+  "toolbar.viewOnlyOn": "Read-only mode (lock editing)",
+  "toolbar.viewOnlyOff": "Unlock editing",
+  "toolbar.exitFullscreen": "Exit full screen",
   "toolbar.saveAs": "Save as…",
   "toolbar.boardKanban": "Board (Kanban)",
   "toolbar.guidedWalk": "Guided walk (step through topics)",

@@ -133,6 +133,15 @@ squeezing the canvas -- so you can capture an idea or pull up a map on the move 
 laptop later. Same app, same maps, sized for the screen you're holding; paired with the offline
 caching above, it makes "the map is wherever I am" simply true.
 
+Two switches make a small screen work harder. **Full screen** (the ⛶ button in the phone's top
+bar, or **View → Full screen** anywhere) hides every toolbar, tab and breadcrumb so the map gets the
+whole window; one button in the corner brings them back, and on Android and desktop the browser's
+own bars go too. And the **🔒 lock** puts the app in **read-only mode**: you can pan, zoom, fold
+branches, search, present and export, but not change anything -- the editing menus and the buttons
+on topics disappear, and a stray tap or drag can't move or retype a topic. Turn it on before handing
+your phone across the table, or when you're reading a map rather than building it; it stays on as
+you switch maps until you unlock it.
+
 ## A room you can't choose
 
 Present often enough and you'll meet the projector that washes colour out, the huge screen where

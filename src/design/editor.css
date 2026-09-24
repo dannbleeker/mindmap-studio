@@ -1172,7 +1172,8 @@
    (☑, set by aria-pressed) stays visible so completed tasks read at a glance. */
 .mm-task-check {
   position: absolute;
-  left: -10px;
+  /* Centred on the node's left edge, so the box straddles it rather than covering the label. */
+  left: -12px;
   top: 50%;
   transform: translateY(-50%) scale(var(--mm-aff-scale, 1));
   /* 24×24 hit target (WCAG 2.5.8); the ☑ glyph stays small via font-size. */
@@ -1190,6 +1191,9 @@
   color: var(--ed-ink, #23211c);
   opacity: 0;
   transition: opacity var(--ed-dur-fast) var(--ed-ease);
+  /* Above the topic's label, which follows it in the DOM and otherwise swallowed the tap: on touch a
+     tap on ☑ selected the topic (popping the action bar) instead of unticking it. */
+  z-index: 2;
 }
 /* Hover reveal only where hover is real: on touch :hover sticks after a tap, which left the ☐ sitting
    over the first letter of the selected topic. A done ☑ always shows. */
@@ -1240,6 +1244,9 @@
     width: 44px;
     height: 44px;
     font-size: 18px;
+    /* Centre the 44px target on the node's left edge (not 12px inside it), so the ☑ glyph sits on
+       the edge instead of over the label's first letter. */
+    left: -22px;
   }
 }
 
@@ -1708,4 +1715,53 @@
   .react-flow__panel.bottom.right {
     margin-bottom: 56px;
   }
+}
+
+/* Full-screen editing (useFullscreen): the canvas takes the window; one floating button leaves. */
+.mm-editor[data-fullscreen] :is(.mm-rail, .mm-topbar, .mm-doctabs, .mm-breadcrumb) {
+  display: none;
+}
+.mm-fs-exit {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: 10px;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  color: var(--ed-ink);
+  box-shadow: var(--ed-shadow-pop);
+  cursor: pointer;
+  opacity: 0.85;
+}
+.mm-fs-exit:hover,
+.mm-fs-exit:focus-visible {
+  opacity: 1;
+}
+.mm-fs-exit:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 2px;
+}
+
+/* View mode: the toolbar's editing menus (Insert, Canvas, Quick add) go too. */
+.mm-editor[data-view-only] .mm-edit-chrome {
+  display: none !important;
+}
+/* View mode (read-only): no node editing affordances. Collapse toggles stay — folding is reading. */
+.mm-view-only
+  :is(
+    .mm-node-add,
+    .mm-task-check,
+    .mm-relate-handle,
+    .mm-wrap-handle,
+    .mm-node-hint,
+    .mm-relate-hint,
+    .mm-coachmark
+  ) {
+  display: none !important;
 }

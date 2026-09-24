@@ -51,6 +51,9 @@ GitHub Pages).
   filter to reuse it as a preset across maps.
 - **Focus a branch** — spotlight one branch (and its path to the root); everything else dims (Esc exits).
 - **Per-map canvas background** — set a background colour for a map; it persists and exports with it.
+- **Full screen + read-only mode** — ⛶ hides all the chrome so the map fills the window (and the
+  browser goes full screen where it can); the 🔒 lock makes maps read-only for the session — pan,
+  zoom, fold, search, present and export still work, but nothing can be edited by a stray tap.
 - **Minimap + zoom** — the status bar's live zoom % opens a zoom menu (in / out / 100% / fit map /
   fit selection) with a **Show minimap** toggle for the corner overview (off by default) whose
   draggable viewport pans large maps. Fit-to-screen never zooms a small map past 100%.

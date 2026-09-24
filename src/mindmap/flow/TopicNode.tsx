@@ -436,7 +436,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   }, [singleSelected]);
   // Shown on a single-selected node tall enough to clear the centre ＋/relate cluster; kept visible for
   // the whole drag even if the live re-wrap changes the height (so pointer-capture isn't dropped).
-  const showWrapHandle = (singleSelected && wrapHandleFits(boxHeight)) || wrapDragging;
+  // Hover-gated like the ＋ (a selected topic shows only its action bar); a drag in flight keeps it.
+  const showWrapHandle = (singleSelected && hovered && wrapHandleFits(boxHeight)) || wrapDragging;
   const onWrapPointerDown = (e: ReactPointerEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -1377,7 +1378,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           contextual action bar (NodePopover, UI-3) so the node stays uncluttered at rest. Add child/
           sibling stay as the on-node ＋ affordances below — pointer-precise only: on touch their 44px
           targets would bury a short topic's label, so CSS hides them and the action bar carries them. */}
-      {showNodeAffordances(hovered, selected, multiSelected, isEditing) ? (
+      {showNodeAffordances(hovered, isEditing) ? (
         <>
           <button
             type="button"

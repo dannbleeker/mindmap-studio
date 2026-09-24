@@ -299,6 +299,9 @@ export interface ToolbarModes {
   /** Full-screen editing: the editor chrome is hidden (useFullscreen). */
   fullscreen: boolean;
   toggleFullscreen: () => void;
+  /** View mode: the map is read-only; editing menus hide and blocked edits explain themselves. */
+  viewOnly: boolean;
+  toggleViewOnly: () => void;
 }
 
 export interface ToolbarProps {
@@ -334,7 +337,7 @@ export interface ToolbarProps {
   /** Undo / redo for the Row-1 buttons. canUndo/canRedo are reported live from the canvas history so
    *  the buttons disable correctly; undo/redo fire the action and a transient "Undone"/"Redone" toast. */
   history: { canUndo: boolean; canRedo: boolean; undo: () => void; redo: () => void };
-  /** Screen modes: full-screen editing (chrome hidden). */
+  /** Screen modes: full-screen editing (chrome hidden) and View mode (read-only). */
   modes: ToolbarModes;
   /** Transient hint toast (used by the group/summary/note/roll-up actions). */
   showHint: (message: string) => void;
@@ -507,13 +510,13 @@ export function Toolbar({
         <TBtn
           icon="undo"
           label={t("toolbar.undo")}
-          disabled={!history.canUndo}
+          disabled={!history.canUndo || modes.viewOnly}
           onClick={history.undo}
         />
         <TBtn
           icon="redo"
           label={t("toolbar.redo")}
-          disabled={!history.canRedo}
+          disabled={!history.canRedo || modes.viewOnly}
           onClick={history.redo}
         />
         {isMobile ? null : <span className="mm-crumb">{t("toolbar.maps")}</span>}
@@ -607,6 +610,14 @@ export function Toolbar({
           </>
         )}
         <span className="mm-grow" />
+        {/* View mode (read-only) — a pressed lock while on; blocks every canvas edit. */}
+        <TBtn
+          icon="lock"
+          label={modes.viewOnly ? t("toolbar.viewOnlyOff") : t("toolbar.viewOnlyOn")}
+          active={modes.viewOnly}
+          ghost
+          onClick={modes.toggleViewOnly}
+        />
         {/* Phone: full screen is one tap away (SimpleMind's phone button); desktop has it in View. */}
         {isMobile ? (
           <TBtn
@@ -1128,8 +1139,8 @@ export function Toolbar({
             row of non-mnemonic icon buttons here; they now live as labelled checkboxes in the View menu
             (desktop) and the Options menu (mobile), keeping Row 2 from overflowing. */}
         <span className="mm-vdiv" />
-        {/* Insert + Canvas menus — content/styling group. */}
-        <div className="mm-cluster">
+        {/* Insert + Canvas menus — content/styling group (hidden in View mode: .mm-edit-chrome). */}
+        <div className="mm-cluster mm-edit-chrome">
           <Menu
             trigger={menuTrigger("plus", t("toolbar.trigger.insert"), isMobile)}
             triggerClassName="mm-tbtn mm-tbtn-accent"
@@ -1489,7 +1500,7 @@ export function Toolbar({
             </select>
             <span className="mm-vdiv" />
             <input
-              className="mm-input"
+              className="mm-input mm-edit-chrome"
               placeholder={t("toolbar.quickAdd")}
               aria-label={t("toolbar.quickAddTopic")}
               title={t("toolbar.typeATopicAndPress")}

@@ -191,6 +191,14 @@ export function buildEditorCommands(props: ToolbarProps): Command[] {
     keywords: "full screen focus hide toolbar chrome distraction free",
   });
   add(
+    "view-only",
+    modes.viewOnly ? t("toolbar.viewOnlyOff") : t("toolbar.viewOnlyOn"),
+    "view",
+    () => modes.toggleViewOnly(),
+    true,
+    { keywords: "read only lock view mode protect prevent accidental edits" },
+  );
+  add(
     "balance-map",
     t("cmd.balance-map"),
     "view",

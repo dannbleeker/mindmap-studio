@@ -39,6 +39,7 @@ function setup(
     freeform?: boolean;
     selectedCount?: number;
     numbered?: boolean;
+    viewOnly?: boolean;
   } = {},
 ) {
   const handle = mockHandle();
@@ -188,7 +189,12 @@ function setup(
     recentFiles: [],
   } as unknown as Parameters<typeof Toolbar>[0]["io"];
   const showHint = vi.fn();
-  const modes = { fullscreen: false, toggleFullscreen: vi.fn() };
+  const modes = {
+    fullscreen: false,
+    toggleFullscreen: vi.fn(),
+    viewOnly: over.viewOnly ?? false,
+    toggleViewOnly: vi.fn(),
+  };
   const views = { list: [], onSave: vi.fn(), onApply: vi.fn(), onDelete: vi.fn() };
   const history = {
     canUndo: over.canUndo ?? false,
@@ -599,12 +605,26 @@ describe("Toolbar — menu a11y parity net", () => {
 describe("Toolbar — full screen", () => {
   it("View → Full screen toggles it; a phone also gets a one-tap row-1 button", () => {
     const { modes } = setup();
-    fireEvent.click(screen.getByRole("button", { name: /View/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^view/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Full screen" }));
     expect(modes.toggleFullscreen).toHaveBeenCalledTimes(1);
     cleanup();
     const phone = setup({ isMobile: true });
     fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
     expect(phone.modes.toggleFullscreen).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("Toolbar — read-only mode", () => {
+  it("the lock toggles read-only mode; while on, undo/redo are disabled", () => {
+    const off = setup({ canUndo: true });
+    fireEvent.click(screen.getByRole("button", { name: "Read-only mode (lock editing)" }));
+    expect(off.modes.toggleViewOnly).toHaveBeenCalledTimes(1);
+    cleanup();
+    setup({ canUndo: true, canRedo: true, viewOnly: true });
+    const lock = screen.getByRole("button", { name: "Unlock editing" });
+    expect(lock.getAttribute("aria-pressed")).toBe("true");
+    expect((screen.getByRole("button", { name: /Undo/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: /Redo/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

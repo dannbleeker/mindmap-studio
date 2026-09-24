@@ -175,7 +175,12 @@ function mkProps(selected: SelectedNode | null = null): ToolbarProps {
     io,
     views: { list: [], onSave: vi.fn(), onApply: vi.fn(), onDelete: vi.fn() },
     history: { canUndo: false, canRedo: false, undo: vi.fn(), redo: vi.fn() },
-    modes: { fullscreen: false, toggleFullscreen: vi.fn() },
+    modes: {
+      fullscreen: false,
+      toggleFullscreen: vi.fn(),
+      viewOnly: false,
+      toggleViewOnly: vi.fn(),
+    },
     showHint: vi.fn(),
   };
 }

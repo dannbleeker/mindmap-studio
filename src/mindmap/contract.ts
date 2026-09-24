@@ -431,6 +431,9 @@ export interface MindMapProps {
   /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
    *  Notes tab for the (now-selected) node. */
   onOpenNote?: () => void;
+  /** View mode: the map can be read, navigated and folded but not edited (viewOnly.ts). Editing chrome
+   *  (action bar, ＋, context menus, drag) is hidden and blocked edits surface a hint via onHint. */
+  readOnly?: boolean;
   /** Fires from the selection action bar's ⓘ — the app should open the inspector for the (already
    *  selected) topic. The inspector no longer opens on every selection by default. */
   onOpenInfo?: () => void;

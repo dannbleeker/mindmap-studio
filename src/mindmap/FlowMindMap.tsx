@@ -213,6 +213,7 @@ import { moveShapeAndCapture } from "./flow/shapeCapture";
 import { type GuideLine, computeSnap } from "./flow/snap";
 import type { EdgeData, FlowEdge, TopicNode as TopicNodeT } from "./flow/types";
 import { useLatestRef } from "./flow/useLatestRef";
+import { isViewIntent, onlyFoldsChanged } from "./flow/viewOnly";
 import { shouldVirtualize } from "./flow/virtualize";
 import { mindManagerTheme } from "./theme";
 
@@ -317,6 +318,7 @@ function FlowInner({
   onSelectOverlay,
   onOpenNote,
   onOpenInfo,
+  readOnly = false,
   onMapLink,
   onDropFilesOnNode,
   onExportBranch,
@@ -502,6 +504,7 @@ function FlowInner({
   const onMapLinkRef = useLatestRef(onMapLink);
   const onOpenNoteRef = useLatestRef(onOpenNote);
   const onOpenInfoRef = useLatestRef(onOpenInfo);
+  const readOnlyRef = useLatestRef(readOnly);
   const onDropFilesOnNodeRef = useLatestRef(onDropFilesOnNode);
   const onExportBranchRef = useLatestRef(onExportBranch);
   const onHistoryRef = useLatestRef(onHistory);
@@ -715,6 +718,16 @@ function FlowInner({
   // Apply a pure op: persist + re-render; optionally enter edit on the resulting node.
   const apply = useCallback(
     (result: OpResult, edit = false, animate = false, coalesceKey?: string) => {
+      // View mode: every canvas edit funnels through here — let folds through, drop the rest whole
+      // (including its selection, which may name a node the blocked op would have created).
+      if (
+        readOnlyRef.current &&
+        result.doc !== docRef.current &&
+        !onlyFoldsChanged(docRef.current, result.doc)
+      ) {
+        onHintRef.current?.(t("canvas.hint.viewOnly"));
+        return;
+      }
       if (result.doc !== docRef.current) {
         // Coalesce repeated same-key edits within a short window into one undo step (S4): on a matching
         // key inside COALESCE_MS, skip pushing a snapshot (the pre-spree doc is already on top of `past`).
@@ -753,6 +766,10 @@ function FlowInner({
   // Enter inline edit for a node; `seed` is the character to start typing with (type-to-edit),
   // or null for a normal edit (seed the existing topic + select all).
   const startEdit = useCallback((id: string, seed: string | null = null) => {
+    if (readOnlyRef.current) {
+      onHintRef.current?.(t("canvas.hint.viewOnly"));
+      return;
+    }
     suppressCommitRef.current = null; // a fresh edit is never a leftover slash-command suppression
     setEditSeed(seed);
     setEditingId(id);
@@ -775,6 +792,7 @@ function FlowInner({
     [sync, selectOnly, fireSelect],
   );
   const undoAction = useCallback(() => {
+    if (readOnlyRef.current) return; // View mode: history is frozen with the map
     coalesceRef.current = null; // an undo breaks any open coalesce chain (S4)
     const r = undoHistory(historyRef.current, { doc: docRef.current, anchor: selectedRef.current });
     if (r) {
@@ -784,6 +802,7 @@ function FlowInner({
     }
   }, [restore, reportHistory]);
   const redoAction = useCallback(() => {
+    if (readOnlyRef.current) return; // View mode: history is frozen with the map
     coalesceRef.current = null; // a redo breaks any open coalesce chain (S4)
     const r = redoHistory(historyRef.current, { doc: docRef.current, anchor: selectedRef.current });
     if (r) {
@@ -1549,6 +1568,11 @@ function FlowInner({
         },
       );
       if (!intent) return;
+      // View mode: honour only reading / navigating keys; say why an editing key did nothing.
+      if (readOnlyRef.current && !isViewIntent(intent.kind)) {
+        onHintRef.current?.(t("canvas.hint.viewOnly"));
+        return;
+      }
       // Every intent but the two clears consumes the key.
       if (intent.kind !== "clearLinking" && intent.kind !== "clearDropTarget") e.preventDefault();
       switch (intent.kind) {
@@ -2247,7 +2271,11 @@ function FlowInner({
           id="mm-canvas"
           // `mm-space-pan` (A1): while the space bar is held, editor.css makes topics pointer-inert and
           // shows a grab/grabbing cursor so a left drag pans from anywhere, even over a topic.
-          className={spacePan ? "mm-space-pan" : undefined}
+          // `mm-view-only`: editor.css hides the node editing affordances in View mode.
+          className={
+            [spacePan ? "mm-space-pan" : "", readOnly ? "mm-view-only" : ""].join(" ").trim() ||
+            undefined
+          }
           tabIndex={-1}
           aria-roledescription="mind map canvas"
           aria-label={t("canvas.region.label", {
@@ -2341,7 +2369,7 @@ function FlowInner({
             // While space-pan is held, nodes are made pointer-inert by the `.mm-space-pan` class on the
             // wrapper (pointer-events:none in editor.css), so a left drag falls through to the pane and
             // pans even over a topic; `nodesDraggable={!spacePan}` keeps RF's drag state in agreement. (A1)
-            nodesDraggable={!spacePan}
+            nodesDraggable={!spacePan && !readOnly}
             // Drag-to-relate: pulling from a topic's hover handle onto another topic draws a cross-link
             // (loose mode lets the drag end anywhere on the target node, not just its anchor handle).
             nodesConnectable
@@ -2534,7 +2562,8 @@ function FlowInner({
               }
             />
             <NodePopover
-              selectedId={selectedId}
+              // View mode has no action bar — every button in it edits (ⓘ is in the Panels menu).
+              selectedId={readOnly ? null : selectedId}
               editingId={editingId}
               doc={renderDoc}
               onToggleCollapse={(id) => apply(toggleCollapse(docRef.current, id))}
@@ -2631,7 +2660,7 @@ function FlowInner({
             />
             <MinimapPanel open={minimapOpen} />
           </ReactFlow>
-          {edgeMenu ? (
+          {edgeMenu && !readOnly ? (
             <ContextMenu
               x={edgeMenu.x}
               y={edgeMenu.y}
@@ -2727,7 +2756,7 @@ function FlowInner({
               })()}
             </ContextMenu>
           ) : null}
-          {menu ? (
+          {menu && !readOnly ? (
             <ContextMenu
               x={menu.x}
               y={menu.y}
@@ -3072,7 +3101,7 @@ function FlowInner({
             </ContextMenu>
           ) : null}
           {/* Empty-pane right-click menu — the one canvas surface that did nothing on right-click. */}
-          {paneMenu ? (
+          {paneMenu && !readOnly ? (
             <ContextMenu
               x={paneMenu.x}
               y={paneMenu.y}
@@ -3117,7 +3146,7 @@ function FlowInner({
           ) : null}
           {/* Right-click menu for a boundary / summary / callout overlay (recolour · shape · delete).
               The overlay was selected on open, so the selection-based ops target it. */}
-          {overlayMenu ? (
+          {overlayMenu && !readOnly ? (
             <ContextMenu
               x={overlayMenu.x}
               y={overlayMenu.y}

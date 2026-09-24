@@ -247,6 +247,9 @@ export function App() {
   // (the desktop layout wraps into a wall of rows on a narrow screen, burying the canvas).
   const isMobile = useIsMobile();
   const fullscreen = useFullscreen(view === "editor");
+  // View mode (read-only): the canvas blocks every edit but folds (FlowMindMap readOnly). Session-only
+  // and app-wide, so it holds while switching maps (like SimpleMind's read-only mode).
+  const [viewOnly, setViewOnly] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   // The import-warnings banner collapses to the first note + "(+N more)"; this reveals the full list.
   const [warningsExpanded, setWarningsExpanded] = useState(false);
@@ -1689,6 +1692,12 @@ export function App() {
     modes: {
       fullscreen: fullscreen.on,
       toggleFullscreen: fullscreen.toggle,
+      viewOnly,
+      toggleViewOnly: () => {
+        const next = !viewOnly;
+        setViewOnly(next);
+        showHint(next ? t("hint.viewOnlyOn") : t("hint.viewOnlyOff"));
+      },
     },
     showHint,
     saveState,
@@ -1764,6 +1773,8 @@ export function App() {
       data-sheet-dragging={sheetDrag.dragging || undefined}
       // Full-screen editing: editor.css hides the chrome (rail, toolbar rows, tabs, breadcrumb).
       data-fullscreen={fullscreen.on || undefined}
+      // View mode: editor.css hides the editing menus (.mm-edit-chrome).
+      data-view-only={viewOnly || undefined}
       style={{
         ...editorThemeVars(chromeDark, highContrast),
         // Live bottom-sheet height (mobile only); the sheets + handle read this with a 62dvh fallback.
@@ -2222,6 +2233,7 @@ export function App() {
                 key={playback ? `pb:${playback.index}` : `${doc.id}:${restoreRev}`}
                 ref={mapRef}
                 doc={playback ? playback.snaps[playback.index].doc : doc}
+                readOnly={viewOnly}
                 // Restore this tab's stashed viewport + undo/redo on a switch-back (never during
                 // history playback). Consumed one-shot by the effect below so a later version-restore
                 // remount starts fresh, not from a stale session.

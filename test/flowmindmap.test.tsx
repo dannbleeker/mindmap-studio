@@ -900,6 +900,36 @@ describe("FlowMindMap canvas", () => {
     expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
   });
 
+  it("read-only mode blocks every edit but still folds branches", () => {
+    const onHint = vi.fn();
+    const { container, onChange } = mount(baseDoc(), { readOnly: true, onHint });
+    run(() => fireEvent.click(nodeEl(container, "b")));
+    // No action bar and no ＋ affordances, even on hover.
+    expect(screen.queryByRole("button", { name: "Topic info" })).toBeNull();
+    run(() =>
+      fireEvent.pointerOver(nodeEl(container, "b").firstElementChild as HTMLElement, {
+        pointerType: "mouse",
+      }),
+    );
+    expect(container.querySelector(".mm-view-only")).toBeTruthy(); // CSS hides the affordances
+    // Editing keys and double-click do nothing but explain why.
+    run(() => fireEvent.keyDown(document, { key: "Tab" }));
+    run(() => fireEvent.keyDown(document, { key: "Delete" }));
+    run(() => fireEvent.keyDown(document, { key: "x" }));
+    run(() => fireEvent.doubleClick(nodeEl(container, "b").firstElementChild as HTMLElement));
+    expect(container.querySelector('[contenteditable="true"]')).toBeNull();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onHint).toHaveBeenCalledWith(expect.stringMatching(/Read-only/));
+    // No right-click menu.
+    run(() => fireEvent.contextMenu(nodeEl(container, "b")));
+    expect(screen.queryByRole("menu")).toBeNull();
+    // Folding is reading: the collapse toggle still works and is saved.
+    run(() => fireEvent.click(screen.getAllByRole("button", { name: "Collapse" })[0]));
+    const folded = onChange.mock.calls.at(-1)?.[0] as MindMapDoc;
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(!!folded.root.collapsed || folded.root.children.some((c) => c.collapsed)).toBe(true);
+  });
+
   it("the action bar's ⓘ asks the app to open the inspector (it no longer opens on select)", () => {
     const onOpenInfo = vi.fn();
     const { container } = mount(baseDoc(), { onOpenInfo });

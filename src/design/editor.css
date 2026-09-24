@@ -1747,3 +1747,21 @@
   outline: 2px solid var(--ed-accent);
   outline-offset: 2px;
 }
+
+/* View mode: the toolbar's editing menus (Insert, Canvas, Quick add) go too. */
+.mm-editor[data-view-only] .mm-edit-chrome {
+  display: none !important;
+}
+/* View mode (read-only): no node editing affordances. Collapse toggles stay — folding is reading. */
+.mm-view-only
+  :is(
+    .mm-node-add,
+    .mm-task-check,
+    .mm-relate-handle,
+    .mm-wrap-handle,
+    .mm-node-hint,
+    .mm-relate-hint,
+    .mm-coachmark
+  ) {
+  display: none !important;
+}

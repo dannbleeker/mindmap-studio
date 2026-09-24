@@ -1,6 +1,6 @@
 {
   "$comment": "Curated catalogue of user-facing capabilities — the denominator for documentation coverage. One row per capability. `manual` = covered in USER_GUIDE.md; `book` = covered in a docs/guide chapter; `bookExample` = that chapter carries a worked example. `since` is the date the capability shipped (YYYY-MM-DD). Guarded by scripts/check-feature-coverage.mjs and consumed by scripts/build-stats.mjs.",
-  "reviewedThroughChangelogBullets": 467,
+  "reviewedThroughChangelogBullets": 470,
   "areas": [
     "editing",
     "notes",
@@ -1689,6 +1689,24 @@
       "manual": true,
       "book": true,
       "bookExample": true
+    },
+    {
+      "id": "fullscreen-editing",
+      "name": "Full-screen editing (chrome hidden; browser full screen where allowed)",
+      "area": "navigation",
+      "since": "2026-09-24",
+      "manual": true,
+      "book": true,
+      "bookExample": false
+    },
+    {
+      "id": "read-only-mode",
+      "name": "Read-only mode (🔒) — lock editing for the session; folding still works",
+      "area": "presentation",
+      "since": "2026-09-24",
+      "manual": true,
+      "book": true,
+      "bookExample": false
     },
     {
       "id": "inspector-on-request",

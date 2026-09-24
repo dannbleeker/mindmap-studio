@@ -29,6 +29,8 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
     setMotionPref: vi.fn(),
     contrastPref: "system" as const,
     setContrastPref: vi.fn(),
+    infoAutoOpen: false,
+    setInfoAutoOpen: vi.fn(),
     onReShowGettingStarted: vi.fn(),
     onClearRecents: vi.fn(),
     onClearBranchClipboard: vi.fn(),
@@ -42,6 +44,14 @@ function setup(over: Partial<Parameters<typeof SettingsDialog>[0]> = {}) {
 }
 
 describe("SettingsDialog", () => {
+  it("toggles open-topic-info-on-select", () => {
+    const props = setup();
+    fireEvent.change(screen.getByLabelText("Open topic info on select"), {
+      target: { value: "on" },
+    });
+    expect(props.setInfoAutoOpen).toHaveBeenCalledWith(true);
+  });
+
   it("renders the sections", () => {
     setup();
     expect(screen.getByText("Settings")).toBeTruthy();

@@ -24,6 +24,9 @@ export interface SettingsDialogProps {
   /** High-contrast preference — System (follow the OS) / High / Normal. */
   contrastPref: ContrastPref;
   setContrastPref: (p: ContrastPref) => void;
+  /** Open the inspector on every selection (off → it opens on request). */
+  infoAutoOpen: boolean;
+  setInfoAutoOpen: (on: boolean) => void;
   /** Re-show the first-run "3 things to try" card. */
   onReShowGettingStarted: () => void;
   /** Clear the ⌘K most-recently-used list. */
@@ -62,6 +65,8 @@ export function SettingsDialog({
   setMotionPref,
   contrastPref,
   setContrastPref,
+  infoAutoOpen,
+  setInfoAutoOpen,
   onReShowGettingStarted,
   onClearRecents,
   onClearBranchClipboard,
@@ -149,6 +154,21 @@ export function SettingsDialog({
         </label>
         <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
           {t("settings.highContrast.help")}
+        </p>
+        <label className="mm-map-field">
+          <span>{t("settings.infoAutoOpen")}</span>
+          <select
+            className="mm-map-control"
+            value={infoAutoOpen ? "on" : "off"}
+            onChange={(e) => setInfoAutoOpen(e.target.value === "on")}
+            aria-label={t("settings.infoAutoOpen")}
+          >
+            <option value="on">{t("settings.toggle.on")}</option>
+            <option value="off">{t("settings.toggle.off")}</option>
+          </select>
+        </label>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--ed-muted)" }}>
+          {t("settings.infoAutoOpen.help")}
         </p>
       </Section>
 

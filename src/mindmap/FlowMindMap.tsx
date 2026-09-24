@@ -317,6 +317,7 @@ function FlowInner({
   onSelectEdge,
   onSelectOverlay,
   onOpenNote,
+  onOpenInfo,
   onMapLink,
   onDropFilesOnNode,
   onExportBranch,
@@ -503,6 +504,7 @@ function FlowInner({
   const onSelectRef = useLatestRef(onSelect);
   const onMapLinkRef = useLatestRef(onMapLink);
   const onOpenNoteRef = useLatestRef(onOpenNote);
+  const onOpenInfoRef = useLatestRef(onOpenInfo);
   const onDropFilesOnNodeRef = useLatestRef(onDropFilesOnNode);
   const onExportBranchRef = useLatestRef(onExportBranch);
   const onHistoryRef = useLatestRef(onHistory);
@@ -2548,6 +2550,7 @@ function FlowInner({
               onMore={openNodeMenuAt}
               onAddChild={editingApi.addChild}
               onAddSibling={editingApi.addSibling}
+              onOpenInfo={() => onOpenInfoRef.current?.()}
             />
             <CoachMark show={showCoach} rootId={renderDoc.root.id} touch={isMobile} />
             <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />

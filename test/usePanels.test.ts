@@ -34,6 +34,7 @@ describe("usePanels — panel toggles + persistence", () => {
         outlineOpen: true,
         indexOpen: true,
         infoOpen: true,
+        infoAutoOpen: false,
         numbered: true,
         spellcheck: true,
       }),
@@ -45,6 +46,28 @@ describe("usePanels — panel toggles + persistence", () => {
     expect(p.infoOpen).toBe(true);
     expect(p.numbered).toBe(true);
     expect(p.spellcheck).toBe(true);
+  });
+
+  it("starts the inspector closed once for a layout saved before infoAutoOpen existed", () => {
+    // Auto-open used to leave infoOpen:true in almost every saved layout; without this the new
+    // open-on-request default would never be seen by an existing user.
+    localStorage.setItem("mindmap-panels", JSON.stringify({ infoOpen: true }));
+    const legacy = renderHook(() => usePanels());
+    expect(legacy.result.current.panels.infoOpen).toBe(false);
+    expect(legacy.result.current.panels.infoAutoOpen).toBe(false);
+    act(() => legacy.result.current.panels.setInfoOpen(true));
+    legacy.unmount();
+    // Saved again with infoAutoOpen present → an open inspector now survives a reload.
+    const next = renderHook(() => usePanels());
+    expect(next.result.current.panels.infoOpen).toBe(true);
+  });
+
+  it("persists the open-on-select opt-in", () => {
+    const a = renderHook(() => usePanels());
+    expect(a.result.current.panels.infoAutoOpen).toBe(false);
+    act(() => a.result.current.panels.setInfoAutoOpen(true));
+    a.unmount();
+    expect(renderHook(() => usePanels()).result.current.panels.infoAutoOpen).toBe(true);
   });
 
   it("defaults + persists + restores the dock width and active dock tab", () => {

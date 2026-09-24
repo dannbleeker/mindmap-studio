@@ -50,6 +50,9 @@ interface PersistedPanels {
   dockActive?: string | null;
   numbered?: boolean;
   spellcheck?: boolean;
+  /** Open the inspector whenever a topic/edge/overlay is selected (the pre-2026-09 default). Absent in
+   *  layouts saved before the setting existed — see the infoOpen migration in usePanels. */
+  infoAutoOpen?: boolean;
 }
 
 function readPersistedPanels(): PersistedPanels {
@@ -80,6 +83,9 @@ export interface PanelsState {
   setIndexOpen: React.Dispatch<React.SetStateAction<boolean>>;
   infoOpen: boolean;
   setInfoOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Open the inspector on every selection (Settings; off by default — it opens on request). */
+  infoAutoOpen: boolean;
+  setInfoAutoOpen: React.Dispatch<React.SetStateAction<boolean>>;
   /** Inspector collapsed to the right-edge strip. Sticky: suppresses auto-open-on-select. */
   infoMinimized: boolean;
   setInfoMinimized: React.Dispatch<React.SetStateAction<boolean>>;
@@ -198,7 +204,13 @@ export function usePanels(): UsePanels {
   const persisted = readPersistedPanels();
   const [outlineOpen, setOutlineOpen] = useState(!!persisted.outlineOpen);
   const [indexOpen, setIndexOpen] = useState(!!persisted.indexOpen);
-  const [infoOpen, setInfoOpen] = useState(!!persisted.infoOpen);
+  // The inspector used to auto-open on every selection, so nearly every saved layout says
+  // infoOpen:true. A layout saved before infoAutoOpen existed therefore starts with the inspector
+  // closed once — otherwise the new open-on-request default would be invisible to existing users.
+  const [infoOpen, setInfoOpen] = useState(
+    persisted.infoAutoOpen === undefined ? false : !!persisted.infoOpen,
+  );
+  const [infoAutoOpen, setInfoAutoOpen] = useState(!!persisted.infoAutoOpen);
   const [infoMinimized, setInfoMinimized] = useState(!!persisted.infoMinimized);
   const [inspectorWidth, setInspectorWidth] = useState(() =>
     clampInspectorWidth(persisted.inspectorWidth),
@@ -235,6 +247,7 @@ export function usePanels(): UsePanels {
           dockActive,
           numbered,
           spellcheck,
+          infoAutoOpen,
         }),
       );
     } catch {
@@ -250,6 +263,7 @@ export function usePanels(): UsePanels {
     dockActive,
     numbered,
     spellcheck,
+    infoAutoOpen,
   ]);
 
   // --- Power Filter ---
@@ -330,6 +344,8 @@ export function usePanels(): UsePanels {
       setIndexOpen,
       infoOpen,
       setInfoOpen,
+      infoAutoOpen,
+      setInfoAutoOpen,
       infoMinimized,
       setInfoMinimized,
       inspectorWidth,

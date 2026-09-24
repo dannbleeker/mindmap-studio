@@ -201,6 +201,7 @@ export const CORE_EN = {
   "settings.appTheme": "App theme",
   "settings.reduceMotion": "Reduce motion",
   "settings.highContrast": "High contrast",
+  "settings.infoAutoOpen": "Open topic info on select",
   "settings.toggle.system": "System",
   "settings.toggle.on": "On",
   "settings.toggle.off": "Off",
@@ -220,6 +221,8 @@ export const CORE_EN = {
     "Reduce motion makes canvas zoom/fit and the guided walk instant, and drops chrome transitions. System follows your device's reduced-motion setting.",
   "settings.highContrast.help":
     "High contrast strengthens chrome borders, dividers and text, and adds bolder focus rings. System follows your device's contrast / forced-colors setting.",
+  "settings.infoAutoOpen.help":
+    "When on, the topic-info panel opens every time you select a topic. When off, open it from the ⓘ in a selected topic's action bar, the Panels menu or ⌘K.",
   "settings.localData.body":
     "Everything — your maps, version history and preferences — is stored only in this browser.",
   "settings.localData.usage": " About {used} used of {quota} available.",

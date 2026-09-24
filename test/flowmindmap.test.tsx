@@ -887,6 +887,15 @@ describe("FlowMindMap canvas", () => {
     expect(container.querySelector('[contenteditable="true"]')).toBeTruthy();
   });
 
+  it("the action bar's ⓘ asks the app to open the inspector (it no longer opens on select)", () => {
+    const onOpenInfo = vi.fn();
+    const { container } = mount(baseDoc(), { onOpenInfo });
+    run(() => fireEvent.click(nodeEl(container, "b")));
+    expect(onOpenInfo).not.toHaveBeenCalled();
+    run(() => fireEvent.click(screen.getByRole("button", { name: "Topic info" })));
+    expect(onOpenInfo).toHaveBeenCalledTimes(1);
+  });
+
   it("the on-selection action bar wires note + priority quick-actions (UI-3)", () => {
     const onOpenNote = vi.fn();
     const { container, onChange } = mount(baseDoc(), { onOpenNote });

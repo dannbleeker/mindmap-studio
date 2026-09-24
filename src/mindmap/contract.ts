@@ -431,6 +431,9 @@ export interface MindMapProps {
   /** Fires when a node's on-canvas 📝 indicator is clicked — the app should open the inspector's
    *  Notes tab for the (now-selected) node. */
   onOpenNote?: () => void;
+  /** Fires from the selection action bar's ⓘ — the app should open the inspector for the (already
+   *  selected) topic. The inspector no longer opens on every selection by default. */
+  onOpenInfo?: () => void;
   /** Fires when a node's in-app map link (#map=…) is clicked, with the target map id and — for a
    *  `#map=<id>&node=<id>` cross-map topic link — the topic to focus once that map mounts. */
   onMapLink?: (mapId: string, nodeId?: string) => void;

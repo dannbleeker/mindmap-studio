@@ -8,9 +8,9 @@ import type { MindMapDoc } from "../../model/types";
 import { popoverAlign } from "./nodeChrome";
 import { findAnyNode } from "./ops";
 
-// Upper bound on the bar's width (touch: 7 buttons × 41px + padding) — only used to decide whether a
+// Upper bound on the bar's width (touch: 8 buttons × 41px + padding) — only used to decide whether a
 // centred bar would overflow the pane, so erring wide just anchors a little earlier.
-const BAR_W_MAX = 300;
+const BAR_W_MAX = 340;
 
 /** The NodeToolbar alignment that keeps the bar inside the pane (see popoverAlign). A stable string,
  *  so pan/zoom only re-renders the popover when the answer actually flips. */
@@ -89,12 +89,15 @@ export function NodePopover({
   onMore,
   onAddChild,
   onAddSibling,
+  onOpenInfo,
 }: {
   selectedId: string | null;
   editingId: string | null;
   doc: MindMapDoc;
   onAddChild: (id: string) => void;
   onAddSibling: (id: string) => void;
+  /** Open the inspector for the selection (it no longer opens on every click). */
+  onOpenInfo: () => void;
   onToggleCollapse: (id: string) => void;
   onOpenNote: (id: string) => void;
   onCyclePriority: (id: string) => void;
@@ -163,6 +166,7 @@ export function NodePopover({
             onClick={() => onToggleCollapse(sid)}
           />
         ) : null}
+        <PopBtn glyph="ⓘ" label={t("panel.topicInfo")} onClick={onOpenInfo} />
         <PopBtn icon="dots" label={t("canvas.moreActions")} onClick={() => onMore(sid)} />
       </div>
     </AlignedToolbar>

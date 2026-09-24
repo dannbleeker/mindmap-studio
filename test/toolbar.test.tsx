@@ -188,6 +188,7 @@ function setup(
     recentFiles: [],
   } as unknown as Parameters<typeof Toolbar>[0]["io"];
   const showHint = vi.fn();
+  const modes = { fullscreen: false, toggleFullscreen: vi.fn() };
   const views = { list: [], onSave: vi.fn(), onApply: vi.fn(), onDelete: vi.fn() };
   const history = {
     canUndo: over.canUndo ?? false,
@@ -207,10 +208,11 @@ function setup(
       io={io}
       views={views}
       history={history}
+      modes={modes}
       showHint={showHint}
     />,
   );
-  return { handle, nav, panels, map, canvas, find, io, views, history, showHint };
+  return { handle, nav, panels, map, canvas, find, io, views, history, modes, showHint };
 }
 
 const u = userEvent.setup();
@@ -591,5 +593,18 @@ describe("Toolbar — menu a11y parity net", () => {
     expect(screen.getByLabelText("Layout")).toBeTruthy();
     const checks = screen.getAllByRole("menuitemcheckbox");
     expect(checks.length).toBeGreaterThanOrEqual(4); // numbering, line jumps, legend, spell-check
+  });
+});
+
+describe("Toolbar — full screen", () => {
+  it("View → Full screen toggles it; a phone also gets a one-tap row-1 button", () => {
+    const { modes } = setup();
+    fireEvent.click(screen.getByRole("button", { name: /View/ }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Full screen" }));
+    expect(modes.toggleFullscreen).toHaveBeenCalledTimes(1);
+    cleanup();
+    const phone = setup({ isMobile: true });
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    expect(phone.modes.toggleFullscreen).toHaveBeenCalledTimes(1);
   });
 });

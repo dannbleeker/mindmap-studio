@@ -41,6 +41,9 @@ export type EditorIconName =
   | "copy"
   | "paste"
   | "undo"
+  | "fullscreen"
+  | "fullscreenExit"
+  | "lock"
   | "redo";
 
 export function EditorIcon({
@@ -317,6 +320,25 @@ export function EditorIcon({
           <rect x="6" y="4" width="12" height="17" rx="2" />
           <rect x="9" y="2" width="6" height="3.4" rx="1" />
           <path d="M9 11h6M9 15h4" />
+        </svg>
+      );
+    case "fullscreen":
+      return (
+        <svg {...p} aria-hidden="true">
+          <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+        </svg>
+      );
+    case "fullscreenExit":
+      return (
+        <svg {...p} aria-hidden="true">
+          <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+        </svg>
+      );
+    case "lock":
+      return (
+        <svg {...p} aria-hidden="true">
+          <rect x="5" y="11" width="14" height="9" rx="2" />
+          <path d="M8 11V8a4 4 0 018 0v3" />
         </svg>
       );
     case "undo":

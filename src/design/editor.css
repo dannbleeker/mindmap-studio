@@ -1716,3 +1716,34 @@
     margin-bottom: 56px;
   }
 }
+
+/* Full-screen editing (useFullscreen): the canvas takes the window; one floating button leaves. */
+.mm-editor[data-fullscreen] :is(.mm-rail, .mm-topbar, .mm-doctabs, .mm-breadcrumb) {
+  display: none;
+}
+.mm-fs-exit {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: 10px;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  color: var(--ed-ink);
+  box-shadow: var(--ed-shadow-pop);
+  cursor: pointer;
+  opacity: 0.85;
+}
+.mm-fs-exit:hover,
+.mm-fs-exit:focus-visible {
+  opacity: 1;
+}
+.mm-fs-exit:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 2px;
+}

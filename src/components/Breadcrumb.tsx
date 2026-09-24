@@ -12,6 +12,7 @@ export interface Crumb {
 export function Breadcrumb({ crumbs, onPick }: { crumbs: Crumb[]; onPick: (id: string) => void }) {
   return (
     <nav
+      className="mm-breadcrumb"
       aria-label="Topic path"
       style={{
         display: "flex",

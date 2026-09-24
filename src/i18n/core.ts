@@ -513,6 +513,8 @@ export const CORE_EN = {
   "toolbar.examples": "Examples",
   "toolbar.searchAllMaps": "Search across every map in your library",
   "toolbar.findReplace": "Find & replace (Ctrl/⌘+F)",
+  "toolbar.fullscreen": "Full screen",
+  "toolbar.exitFullscreen": "Exit full screen",
   "toolbar.saveAs": "Save as…",
   "toolbar.boardKanban": "Board (Kanban)",
   "toolbar.guidedWalk": "Guided walk (step through topics)",

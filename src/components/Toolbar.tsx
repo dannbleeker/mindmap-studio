@@ -294,6 +294,13 @@ export interface ToolbarViews {
   onDelete: (id: string) => void;
 }
 
+/** Screen modes the bar can toggle. */
+export interface ToolbarModes {
+  /** Full-screen editing: the editor chrome is hidden (useFullscreen). */
+  fullscreen: boolean;
+  toggleFullscreen: () => void;
+}
+
 export interface ToolbarProps {
   /** Phone-width: rows scroll horizontally instead of wrapping. */
   isMobile: boolean;
@@ -327,6 +334,8 @@ export interface ToolbarProps {
   /** Undo / redo for the Row-1 buttons. canUndo/canRedo are reported live from the canvas history so
    *  the buttons disable correctly; undo/redo fire the action and a transient "Undone"/"Redone" toast. */
   history: { canUndo: boolean; canRedo: boolean; undo: () => void; redo: () => void };
+  /** Screen modes: full-screen editing (chrome hidden). */
+  modes: ToolbarModes;
   /** Transient hint toast (used by the group/summary/note/roll-up actions). */
   showHint: (message: string) => void;
   /** Live autosave status → the "Saved locally" badge (so it can't claim "Saved" mid-write or after a
@@ -409,6 +418,7 @@ export function Toolbar({
   io,
   views,
   history,
+  modes,
   showHint,
   saveState,
 }: ToolbarProps) {
@@ -597,6 +607,15 @@ export function Toolbar({
           </>
         )}
         <span className="mm-grow" />
+        {/* Phone: full screen is one tap away (SimpleMind's phone button); desktop has it in View. */}
+        {isMobile ? (
+          <TBtn
+            icon="fullscreen"
+            label={t("toolbar.fullscreen")}
+            ghost
+            onClick={modes.toggleFullscreen}
+          />
+        ) : null}
         <TBtn
           icon="search"
           text={isMobile ? undefined : t("toolbar.find")}
@@ -917,6 +936,11 @@ export function Toolbar({
           sheet={isMobile}
         >
           <MenuItem icon={mi("fit")} label={t("cmd.fit")} onSelect={() => m()?.fit()} />
+          <MenuItem
+            icon={mi("fullscreen")}
+            label={t("toolbar.fullscreen")}
+            onSelect={modes.toggleFullscreen}
+          />
           <MenuItem
             icon={mi("balance")}
             label={t("cmd.balance-map")}

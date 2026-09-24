@@ -502,12 +502,15 @@ export function App() {
     const n = obj?.nodeIds.length ?? 0;
     return `${n} ${n === 1 ? "topic" : "topics"}`;
   }, [selectedOverlay, liveDoc]);
-  // Auto-show the right-side inspector when a node is selected (the redesign's auto-show behaviour).
-  // Sticky minimize wins: if the user has collapsed the inspector to its strip, selecting another
-  // node does NOT force it back open (selectedNode still updates, so re-expanding shows the new node).
+  // Auto-show the right-side inspector on selection. For a TOPIC it's opt-in (Settings → "Open topic
+  // info on select"): a click used to pop a 300px column (62% of a phone) every time, and a topic has
+  // the action bar's ⓘ to open it on request. Relationships and overlays (boundary / summary /
+  // callout) have no action bar — the inspector is their only editor — so they still auto-open. An
+  // already-open inspector follows any selection; sticky minimize wins over both.
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on selection id; setters are stable.
   useEffect(() => {
-    if ((selected || selectedEdge || selectedOverlay) && !panels.infoMinimized)
+    if (panels.infoMinimized) return;
+    if (selectedEdge || selectedOverlay || (selected && panels.infoAutoOpen))
       panels.setInfoOpen(true);
   }, [selected?.id, selectedEdge?.id, selectedOverlay?.id]);
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);
@@ -2244,6 +2247,10 @@ export function App() {
                   panels.setInfoOpen(true);
                   bumpNoteNonce();
                 }}
+                onOpenInfo={() => {
+                  panels.setInfoMinimized(false);
+                  panels.setInfoOpen(true);
+                }}
                 onMapLink={(id, nodeId) => {
                   // Cross-map topic link: focus the target node once the new map mounts (the
                   // pendingFocus effect, keyed on doc). If it's already the current map, focus directly —
@@ -2761,6 +2768,8 @@ export function App() {
         setMotionPref={setMotionPref}
         contrastPref={contrastPref}
         setContrastPref={setContrastPref}
+        infoAutoOpen={panels.infoAutoOpen}
+        setInfoAutoOpen={(on) => panels.setInfoAutoOpen(on)}
         onReShowGettingStarted={reShowFirstRun}
         onClearRecents={() => {
           clearRecents();

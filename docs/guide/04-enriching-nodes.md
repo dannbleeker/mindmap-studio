@@ -27,9 +27,10 @@ glance.
 
 ## Markers: status at a glance
 
-A **marker** is a small icon or tag pinned to a node. Open the **Markers** palette and
-click to toggle one on the selected node: a priority flag, a tick, a question mark, a
-face. Each chip also **drags** -- pull a marker from the palette onto any topic on the
+A **marker** is a small icon or tag pinned to a node. Open the **Markers** palette -- it sits in
+the topic inspector, which the **ⓘ** in a selected topic's action bar opens (or turn on *Settings
+→ Open topic info on select* to have it open on every click) -- and click to toggle one on the
+selected node: a priority flag, a tick, a question mark, a face. Each chip also **drags** -- pull a marker from the palette onto any topic on the
 canvas, selected or not, and it lands where you drop it, which is the natural motion when
 you're triaging a whole map rather than dressing one node. Markers are how a map carries
 *state* without words -- a row of green ticks and one red flag tells a reviewer where to
@@ -225,7 +226,7 @@ convention a team shares -- yes. Six fonts and a gradient on every node -- no. T
 useful maps are usually the plainest ones with enrichment applied exactly where it
 carries meaning.
 
-One quiet piece of bookkeeping needs no decision from you at all. Select a node and the inspector header shows, in faint text under the breadcrumb, when the topic was **created** and last **modified** -- "created 3 d ago, modified 2 h ago", and a plain date once a change is more than a week old. You never set these; the map keeps them. They earn their place when a map outlives the meeting that made it: glancing at a branch and seeing it hasn't been touched in a month tells you whether it's settled or stale before you reopen the argument.
+One quiet piece of bookkeeping needs no decision from you at all. Select a node and open its inspector -- the **ⓘ** in the small action bar above it -- and the header shows, in faint text under the breadcrumb, when the topic was **created** and last **modified** -- "created 3 d ago, modified 2 h ago", and a plain date once a change is more than a week old. You never set these; the map keeps them. They earn their place when a map outlives the meeting that made it: glancing at a branch and seeing it hasn't been touched in a month tells you whether it's settled or stale before you reopen the argument.
 
 ## Now you try
 

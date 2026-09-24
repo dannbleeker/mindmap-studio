@@ -2,11 +2,13 @@ import { tNodes } from "../../i18n/nodes";
 import { t } from "../../i18n/registry";
 import "./messages";
 import { MiniMap, NodeToolbar, Panel, Position, useStore } from "@xyflow/react";
-import type { CSSProperties } from "react";
+import { type CSSProperties, useLayoutEffect } from "react";
+import { Menu, MenuCheckboxItem, MenuItem, MenuSeparator } from "../../design/primitives";
 import { colors } from "../../design/tokens";
 import { markerImage } from "../../icons";
 import { buildLegend } from "../../legend";
 import type { MindMapDoc } from "../../model/types";
+import { affordanceScale } from "./nodeChrome";
 import { findAnyNode } from "./ops";
 import type { TopicNode } from "./types";
 
@@ -50,6 +52,17 @@ export function CoachMark({
   );
 }
 
+/** Publishes `--mm-aff-scale` (affordanceScale of the live zoom) on the React Flow root, where every
+ *  node's affordance CSS reads it. A var write, not a prop: nodes don't re-render on zoom. */
+export function AffordanceScale() {
+  const zoom = useStore((s) => s.transform[2]);
+  const dom = useStore((s) => s.domNode);
+  useLayoutEffect(() => {
+    dom?.style.setProperty("--mm-aff-scale", String(affordanceScale(zoom)));
+  }, [dom, zoom]);
+  return null;
+}
+
 /** Drag-to-reparent label (#11): names the topic the dragged node will become a child of, anchored on
  *  the highlighted drop target. */
 export function DropLabel({ dropTargetId, doc }: { dropTargetId: string | null; doc: MindMapDoc }) {
@@ -69,16 +82,6 @@ export function DropLabel({ dropTargetId, doc }: { dropTargetId: string | null; 
 /** A slim bottom status bar — visible topic count, current selection size, live zoom % (read from the
  *  React Flow store, so it tracks pan/zoom), and the Map/Outline/Board view switcher. Canvas-only,
  *  like the minimap. */
-// A text-as-button inside the status bar (the clickable zoom % / selection-count) — no chrome, just a
-// pointer cursor so the read-out doubles as an action.
-const statBtn: CSSProperties = {
-  border: "none",
-  background: "transparent",
-  color: "inherit",
-  font: "inherit",
-  cursor: "pointer",
-  padding: 0,
-};
 
 // `label` is a getter: a plain `label: t("…")` here resolves ONCE at import and never follows a later
 // `setLocale`. `id` (the React key / active-view state) stays a plain literal.
@@ -157,8 +160,8 @@ export function StatusBar({
   selected,
   activeView,
   onSetView,
-  onResetZoom,
-  onFitSelection,
+  compact = false,
+  zoom: zoomActions,
 }: {
   topics: number;
   selected: number;
@@ -166,14 +169,18 @@ export function StatusBar({
    *  `onSetView` are given (a caller can opt out of the switcher entirely). */
   activeView?: "map" | "outline" | "board";
   onSetView?: (view: "map" | "outline" | "board") => void;
-  /** Click the zoom % → reset to 100%. */
-  onResetZoom?: () => void;
-  /** Click the selection count → zoom to fit the selection. */
-  onFitSelection?: () => void;
+  /** Phone: keep just the view switcher + zoom menu (counts are in the Info panel's statistics). */
+  compact?: boolean;
+  /** The zoom % becomes a menu of these (replacing the old +/−/fit stack and the minimap button). */
+  zoom?: ZoomMenuActions;
 }) {
   const zoom = useStore((s) => s.transform[2]);
+  const pct = `${Math.round(zoom * 100)}%`;
   return (
-    <Panel position="bottom-center">
+    // Full-width, untransformed panel (centred by flex) rather than RF's "bottom-center", which
+    // centres with translateX(-50%): a transformed ancestor would re-anchor the zoom menu's
+    // position:fixed popup to the panel instead of the viewport.
+    <Panel position="bottom-left" style={STATUS_PANEL}>
       <div
         className="nodrag nopan"
         style={{
@@ -188,38 +195,114 @@ export function StatusBar({
           color: `var(--mm-color, ${colors.menu.fallbackColor})`,
           opacity: 0.9,
           boxShadow: "0 1px 3px #0002",
+          pointerEvents: "auto",
         }}
       >
         {onSetView && activeView ? <ViewSwitcher active={activeView} onSet={onSetView} /> : null}
-        <span>{t("canvas.topicCount", { n: topics })}</span>
-        {selected > 0 ? (
-          onFitSelection ? (
-            <button
-              type="button"
-              style={statBtn}
-              title={t("canvas.zoomToFitTheSelection")}
-              onClick={onFitSelection}
-            >
-              {t("canvas.selectedCount", { n: selected })}
-            </button>
-          ) : (
-            <span>{t("canvas.selectedCount", { n: selected })}</span>
-          )
-        ) : null}
-        {onResetZoom ? (
-          <button
-            type="button"
-            style={statBtn}
-            title={t("shortcuts.action.resetZoomTo100")}
-            onClick={onResetZoom}
-          >
-            {Math.round(zoom * 100)}%
-          </button>
+        {compact ? null : <span>{t("canvas.topicCount", { n: topics })}</span>}
+        {compact || selected === 0 ? null : (
+          <span>{t("canvas.selectedCount", { n: selected })}</span>
+        )}
+        {zoomActions ? (
+          <ZoomMenu pct={pct} selected={selected} sheet={compact} actions={zoomActions} />
         ) : (
-          <span>{Math.round(zoom * 100)}%</span>
+          <span>{pct}</span>
         )}
       </div>
     </Panel>
+  );
+}
+
+const STATUS_PANEL: CSSProperties = {
+  left: 0,
+  right: 0,
+  display: "flex",
+  justifyContent: "center",
+  pointerEvents: "none",
+};
+
+export interface ZoomMenuActions {
+  zoomIn: () => void;
+  zoomOut: () => void;
+  reset: () => void;
+  fitMap: () => void;
+  fitSelection: () => void;
+  minimapOpen: boolean;
+  toggleMinimap: () => void;
+}
+
+/** The status bar's zoom % as a menu — zoom in/out, 100%, fit map / selection and the minimap toggle,
+ *  so the canvas needs no separate +/−/fit stack or minimap button. */
+// Keyboard hints on the zoom-menu rows — physical key names, not prose (like FlowMindMap's
+// MENU_SHORTCUT); kept in step with keyIntent (Ctrl/⌘ +/−/0) and the Shift+1/2 fit handler.
+const ZOOM_KEYS = {
+  in: "Ctrl/⌘ +",
+  out: "Ctrl/⌘ −",
+  reset: "Ctrl/⌘ 0",
+  fit: "Shift+1",
+  fitSelection: "Shift+2",
+};
+
+/** The zoom menu; `sheet` (phone) drops the keyboard hints, which a phone can't use. */
+function ZoomMenu({
+  pct,
+  selected,
+  sheet,
+  actions,
+}: {
+  pct: string;
+  selected: number;
+  sheet: boolean;
+  actions: ZoomMenuActions;
+}) {
+  return (
+    <Menu
+      trigger={pct}
+      triggerClassName="mm-stat-btn"
+      triggerTitle={t("canvas.zoomMenu")}
+      triggerAriaLabel={t("canvas.zoomMenuAt", { pct })}
+      menuAriaLabel={t("canvas.zoomMenu")}
+      align="right"
+      sheet={sheet}
+    >
+      <MenuItem
+        label={t("canvas.zoomIn")}
+        shortcut={sheet ? undefined : ZOOM_KEYS.in}
+        closeOnSelect={false}
+        onSelect={actions.zoomIn}
+      />
+      <MenuItem
+        label={t("canvas.zoomOut")}
+        shortcut={sheet ? undefined : ZOOM_KEYS.out}
+        closeOnSelect={false}
+        onSelect={actions.zoomOut}
+      />
+      <MenuItem
+        label={t("canvas.pane.resetZoom")}
+        shortcut={sheet ? undefined : ZOOM_KEYS.reset}
+        onSelect={actions.reset}
+      />
+      <MenuSeparator />
+      <MenuItem
+        label={t("cmd.fit")}
+        shortcut={sheet ? undefined : ZOOM_KEYS.fit}
+        onSelect={actions.fitMap}
+      />
+      {selected > 0 ? (
+        <MenuItem
+          label={t("canvas.zoomToFitTheSelection")}
+          shortcut={sheet ? undefined : ZOOM_KEYS.fitSelection}
+          onSelect={actions.fitSelection}
+        />
+      ) : null}
+      <MenuSeparator />
+      <MenuCheckboxItem
+        label={t("canvas.showMinimap")}
+        checked={actions.minimapOpen}
+        trailing=" ✓"
+        onSelect={actions.toggleMinimap}
+      />
+    </Menu>
   );
 }
 
@@ -276,38 +359,17 @@ export function LegendPanel({ doc }: { doc: MindMapDoc }) {
   );
 }
 
-/** The minimap (when open) + the bottom-right show/hide toggle. */
-export function MinimapPanel({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+/** The minimap, when open. Its show/hide toggle lives in the status bar's zoom menu. */
+export function MinimapPanel({ open }: { open: boolean }) {
+  if (!open) return null;
   return (
-    <>
-      {open ? (
-        <MiniMap
-          pannable
-          zoomable
-          nodeColor={(node) => (node.data as TopicNode["data"])?.branchColor ?? "#bbb"}
-          nodeStrokeWidth={3}
-          style={{ marginBottom: 30 }}
-        />
-      ) : null}
-      <Panel position="bottom-right">
-        <button
-          type="button"
-          onClick={onToggle}
-          title={open ? t("canvas.hideMinimap") : t("canvas.showMinimap")}
-          style={{
-            font: "12px system-ui, sans-serif",
-            padding: "2px 8px",
-            borderRadius: 6,
-            border: `1px solid ${colors.menu.border}`,
-            background: `var(--mm-node-bg, ${colors.menu.fallbackBg})`,
-            color: `var(--mm-color, ${colors.menu.fallbackColor})`,
-            cursor: "pointer",
-            boxShadow: "0 1px 3px #0002",
-          }}
-        >
-          {open ? t("canvas.minimap") : t("canvas.minimap2")}
-        </button>
-      </Panel>
-    </>
+    <MiniMap
+      pannable
+      zoomable
+      nodeColor={(node) => (node.data as TopicNode["data"])?.branchColor ?? "#bbb"}
+      nodeStrokeWidth={3}
+      // Clear the status bar, which spans the bottom edge.
+      style={{ marginBottom: 34 }}
+    />
   );
 }

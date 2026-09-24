@@ -32,18 +32,20 @@ Fit to see where you are.
 
 ## The minimap and zoom
 
-In the bottom-right corner sits a **minimap** -- a shrunk-down overview of the whole map,
-with a highlighted rectangle showing the slice you're currently looking at. On a big map
-it answers the question "where am I, and what else is out there?" at a glance. Click or
-drag inside it to jump the main view somewhere else: the rectangle follows your pointer
-and the canvas pans to match, so the minimap doubles as a fast way to travel across a map
-too large to scroll comfortably.
+At the bottom of the canvas the status bar shows a live **zoom percentage**. Click it and a small
+**zoom menu** opens: zoom in, zoom out, reset to 100%, fit the map, and -- with something
+selected -- fit the selection. It does the same job as the mouse wheel but gives you a precise
+readout and a deliberate step, which matters when you're lining a map up for a screenshot or a
+screen-share. **Fit** here is the same "take me home" as above; on a small map it stops at 100%
+rather than blowing a handful of topics up to fill the screen.
 
-Below it are the **zoom controls** -- minus, a live percentage, plus, and a fit button.
-They do the same job as the mouse wheel but give you a precise readout and a deliberate
-step, which matters when you're lining a map up for a screenshot or a screen-share. The
-percentage tells you exactly how far in you are; the fit button is the same "take me home"
-as **Fit** above, kept within thumb's reach of the zoom buttons.
+The same menu has **Show minimap**. Turn it on and a **minimap** appears in the bottom-right
+corner -- a shrunk-down overview of the whole map, with a highlighted rectangle showing the slice
+you're currently looking at. On a big map it answers the question "where am I, and what else is
+out there?" at a glance. Click or drag inside it to jump the main view somewhere else: the
+rectangle follows your pointer and the canvas pans to match, so the minimap doubles as a fast way
+to travel across a map too large to scroll comfortably. It starts off, because on a small map it
+mostly covers topics; the app remembers your choice.
 
 ## Layouts: the same map, different shape
 

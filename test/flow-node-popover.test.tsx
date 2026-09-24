@@ -30,6 +30,7 @@ describe("NodePopover", () => {
         onMore={noop}
         onAddChild={noop}
         onAddSibling={noop}
+        onOpenInfo={noop}
       />,
     );
     expect(container.firstChild).toBeNull();
@@ -48,6 +49,7 @@ describe("NodePopover", () => {
         onMore={noop}
         onAddChild={noop}
         onAddSibling={noop}
+        onOpenInfo={noop}
       />,
     );
     expect(container.firstChild).toBeNull();

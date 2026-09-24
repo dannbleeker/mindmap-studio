@@ -1,7 +1,6 @@
 import "@xyflow/react/dist/style.css";
 import {
   ConnectionMode,
-  Controls,
   ReactFlow,
   ReactFlowProvider,
   ViewportPortal,
@@ -54,7 +53,14 @@ import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
 import { BulkNodeMenu } from "./flow/BulkNodeMenu";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
-import { CoachMark, DropLabel, LegendPanel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
+import {
+  AffordanceScale,
+  CoachMark,
+  DropLabel,
+  LegendPanel,
+  MinimapPanel,
+  StatusBar,
+} from "./flow/CanvasOverlays";
 import { CanvasOverlaysSR } from "./flow/CanvasOverlaysSR";
 import { CanvasRelationshipsSR } from "./flow/CanvasRelationshipsSR";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
@@ -81,6 +87,7 @@ import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import type { LinkCandidate } from "./flow/linkAutocomplete";
 import { LinkEditContext } from "./flow/linkEdit";
+import { FIT_MAX_ZOOM } from "./flow/nodeChrome";
 import { countDescendants, subtreeIds, walkTree as walkNodeTree } from "./flow/nodeWalk";
 import {
   type OpResult,
@@ -217,6 +224,8 @@ import { mindManagerTheme } from "./theme";
 // onChange, so the model is the single source of truth.
 
 const nodeTypes = { topic: TopicNode };
+// Module-level so the mount fit's options object is referentially stable across renders.
+const FIT_VIEW_OPTIONS = { maxZoom: FIT_MAX_ZOOM };
 const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
 
 // Undo coalescing window (S4): repeated same-key cycle edits (priority/progress/task) inside this many
@@ -307,6 +316,7 @@ function FlowInner({
   onSelectEdge,
   onSelectOverlay,
   onOpenNote,
+  onOpenInfo,
   onMapLink,
   onDropFilesOnNode,
   onExportBranch,
@@ -401,16 +411,14 @@ function FlowInner({
   // so holding space makes every node pointer-inert (via the `.mm-space-pan` wrapper class), letting the
   // drag fall through to the pane's pan even over a topic, with a grab cursor. Matches Figma / XMind.
   const [spacePan, setSpacePan] = useState(false);
-  // The corner minimap can be collapsed (it covers dense maps); the choice persists. It defaults open
-  // on desktop but closed on a phone, where an open minimap covers a big share of the small canvas and
-  // overlaps the bottom status bar — an explicit stored choice still wins.
+  // The corner minimap (toggled from the status bar's zoom menu); the choice persists. Off by default
+  // everywhere — it covered topics in the bottom-right corner of even a 7-topic map — but an explicit
+  // stored choice wins.
   const [minimapOpen, setMinimapOpen] = useState(() => {
     try {
-      const stored = localStorage.getItem("mindmap-minimap-open");
-      if (stored !== null) return stored !== "false";
-      return !isMobile;
+      return localStorage.getItem("mindmap-minimap-open") === "true";
     } catch {
-      return !isMobile;
+      return false;
     }
   });
   const toggleMinimap = () =>
@@ -493,6 +501,7 @@ function FlowInner({
   const onSelectRef = useLatestRef(onSelect);
   const onMapLinkRef = useLatestRef(onMapLink);
   const onOpenNoteRef = useLatestRef(onOpenNote);
+  const onOpenInfoRef = useLatestRef(onOpenInfo);
   const onDropFilesOnNodeRef = useLatestRef(onDropFilesOnNode);
   const onExportBranchRef = useLatestRef(onExportBranch);
   const onHistoryRef = useLatestRef(onHistory);
@@ -605,7 +614,7 @@ function FlowInner({
     }
     sync(docRef.current);
     const raf = requestAnimationFrame(() =>
-      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit, maxZoom: FIT_MAX_ZOOM }),
     );
     return () => cancelAnimationFrame(raf);
   }, [drillId, sync, fitView]);
@@ -1372,7 +1381,7 @@ function FlowInner({
     }
     sync(docRef.current);
     const raf = requestAnimationFrame(() =>
-      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit, maxZoom: FIT_MAX_ZOOM }),
     );
     return () => cancelAnimationFrame(raf);
   }, [direction, sync, fitView]);
@@ -1499,7 +1508,10 @@ function FlowInner({
         if (!inField) {
           e.preventDefault();
           if (e.code === "Digit1")
-            fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit });
+            fitView({
+              duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+              maxZoom: FIT_MAX_ZOOM,
+            });
           else {
             const ids = [...selectedIdsRef.current];
             fitView({
@@ -1909,7 +1921,8 @@ function FlowInner({
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
-      fit: () => fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+      fit: () =>
+        fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit, maxZoom: FIT_MAX_ZOOM }),
       // Snapshot viewport + undo/redo stacks so the tab switcher can restore them on a remount.
       getSession: (): CanvasSession => ({ viewport: getViewport(), history: historyRef.current }),
       getViewport: () => getViewport(),
@@ -2371,6 +2384,7 @@ function FlowInner({
             // Read from the mount-captured session so a later re-render (after App clears the one-shot
             // cache) can't flip fitView back on and re-fit away the restored viewport.
             fitView={!mountSession.current?.viewport}
+            fitViewOptions={FIT_VIEW_OPTIONS}
             defaultViewport={mountSession.current?.viewport}
             // Left-drag the background to pan (the gesture most people reach for first); the +/−/fit
             // controls stay too. Scroll / ⌘-scroll zooms (React Flow's defaults). Hold Shift and drag
@@ -2533,6 +2547,7 @@ function FlowInner({
               onMore={openNodeMenuAt}
               onAddChild={editingApi.addChild}
               onAddSibling={editingApi.addSibling}
+              onOpenInfo={() => onOpenInfoRef.current?.()}
             />
             <CoachMark show={showCoach} rootId={renderDoc.root.id} touch={isMobile} />
             <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />
@@ -2582,25 +2597,39 @@ function FlowInner({
                 ))}
               </ViewportPortal>
             ) : null}
-            <Controls showInteractive={false} />
+            <AffordanceScale />
             <StatusBar
               topics={nodes.length}
               selected={selectedIds.size}
               activeView={activeView}
               onSetView={onSetView}
-              onResetZoom={() =>
-                zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport })
-              }
-              onFitSelection={() => {
-                const ids = [...selectedIds];
-                if (ids.length)
+              compact={isMobile}
+              zoom={{
+                zoomIn: () =>
+                  void zoomIn({ duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
+                zoomOut: () =>
+                  void zoomOut({ duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
+                reset: () =>
+                  zoomTo(1, { duration: reducedMotionRef.current ? 0 : motion.dur.viewport }),
+                fitMap: () =>
                   fitView({
-                    nodes: ids.map((id) => ({ id })),
                     duration: reducedMotionRef.current ? 0 : motion.dur.fit,
-                  });
+                    maxZoom: FIT_MAX_ZOOM,
+                  }),
+                fitSelection: () => {
+                  const ids = [...selectedIds];
+                  if (ids.length)
+                    fitView({
+                      nodes: ids.map((id) => ({ id })),
+                      duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+                      maxZoom: 1.5,
+                    });
+                },
+                minimapOpen,
+                toggleMinimap,
               }}
             />
-            <MinimapPanel open={minimapOpen} onToggle={toggleMinimap} />
+            <MinimapPanel open={minimapOpen} />
           </ReactFlow>
           {edgeMenu ? (
             <ContextMenu
@@ -3072,7 +3101,10 @@ function FlowInner({
               <MenuItem
                 label={t("canvas.pane.fitToView")}
                 onSelect={() =>
-                  fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit })
+                  fitView({
+                    duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+                    maxZoom: FIT_MAX_ZOOM,
+                  })
                 }
               />
               <MenuItem

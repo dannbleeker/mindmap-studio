@@ -929,6 +929,9 @@
   margin-right: 4px;
 }
 
+/* Node affordances (＋, collapse toggle, relate grip, task box, coach hints) counter-scale by
+   --mm-aff-scale (AffordanceScale → nodeChrome.affordanceScale) so zooming in doesn't inflate them. */
+
 /* On-node ＋ add affordances (#1). Sizing lives here so a coarse pointer (touch) gets a ≥44px
    target; the per-button colour comes in via --mm-add-color (the node's branch / ring colour). */
 .mm-node-add {
@@ -967,6 +970,31 @@
   }
 }
 
+/* The status bar's zoom % — a text-as-button trigger (no chrome) for the zoom menu. */
+.mm-stat-btn {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.mm-stat-btn:hover {
+  background: rgba(0, 0, 0, 0.07);
+}
+.mm-stat-btn:focus-visible {
+  outline: 2px solid var(--ed-accent, #1b8a5e);
+  outline-offset: 1px;
+}
+@media (pointer: coarse) {
+  /* A tappable target for the zoom menu on touch. */
+  .mm-stat-btn {
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+}
+
 /* Contextual action-bar buttons (NodePopover, UI-3) — the on-selection toolbar above the node.
    Sizing/colour are inline (PopBtn); these add the hover + keyboard-focus affordances. */
 .mm-pop-btn:hover {
@@ -997,7 +1025,8 @@
   position: absolute;
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--mm-aff-scale, 1));
+  transform-origin: 50% 100%;
   margin-bottom: 8px;
   padding: 3px 8px;
   white-space: nowrap;
@@ -1023,13 +1052,21 @@
     display: inline;
   }
 }
+/* One onboarding helper at a time. The first-run "3 things to try" card outranks the empty-map
+   coachmark, which outranks the per-topic hover coaches — they used to stack (card + hover hint on
+   desktop; card + coachmark on a phone). CSS-only: each helper keeps its own show/retire logic. */
+.mm-editor:has(.mm-firstrun) :is(.mm-node-hint, .mm-relate-hint, .mm-coachmark),
+.mm-editor:has(.mm-coachmark) :is(.mm-node-hint, .mm-relate-hint) {
+  display: none;
+}
 /* One-time drag-to-relate coach (C7) — same top-centre anchor as the edit hint (the two are sequential,
    never shown together) but accent-tinted to read as a "try this" nudge rather than a plain tip. */
 .mm-relate-hint {
   position: absolute;
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--mm-aff-scale, 1));
+  transform-origin: 50% 100%;
   margin-bottom: 8px;
   padding: 3px 8px;
   white-space: nowrap;
@@ -1087,11 +1124,6 @@
 .react-flow__node .mm-relate-handle:hover {
   opacity: 1;
 }
-/* A selected node shows its relate grip clearly at rest, so the link affordance is discoverable
-   without hovering (C7). Sits between the hover (0.7) and grip-hover (1) levels. */
-.react-flow__node.selected .mm-relate-handle {
-  opacity: 0.9;
-}
 /* Touch: hover doesn't exist and the 44px ＋ dominates, so drop the relate grip from the canvas and
    route linking to long-press → the context menu's "Link to…". Keep collapse, but make it tap-sized so
    a collapsed branch stays expandable without the menu (C4). */
@@ -1142,7 +1174,7 @@
   position: absolute;
   left: -10px;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) scale(var(--mm-aff-scale, 1));
   /* 24×24 hit target (WCAG 2.5.8); the ☑ glyph stays small via font-size. */
   width: 24px;
   height: 24px;
@@ -1190,6 +1222,8 @@
    the coarse-pointer escalation below isn't outranked by an inline width. 24px desktop hit target
    (WCAG 2.5.8); 28px on touch. */
 .mm-collapse-toggle {
+  /* No inline transform on the toggle, so the individual `scale` property is safe here. */
+  scale: var(--mm-aff-scale, 1);
   width: 24px;
   height: 24px;
   border-radius: 50%;

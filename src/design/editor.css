@@ -929,6 +929,9 @@
   margin-right: 4px;
 }
 
+/* Node affordances (＋, collapse toggle, relate grip, task box, coach hints) counter-scale by
+   --mm-aff-scale (AffordanceScale → nodeChrome.affordanceScale) so zooming in doesn't inflate them. */
+
 /* On-node ＋ add affordances (#1). Sizing lives here so a coarse pointer (touch) gets a ≥44px
    target; the per-button colour comes in via --mm-add-color (the node's branch / ring colour). */
 .mm-node-add {
@@ -997,7 +1000,8 @@
   position: absolute;
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--mm-aff-scale, 1));
+  transform-origin: 50% 100%;
   margin-bottom: 8px;
   padding: 3px 8px;
   white-space: nowrap;
@@ -1029,7 +1033,8 @@
   position: absolute;
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--mm-aff-scale, 1));
+  transform-origin: 50% 100%;
   margin-bottom: 8px;
   padding: 3px 8px;
   white-space: nowrap;
@@ -1142,7 +1147,7 @@
   position: absolute;
   left: -10px;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) scale(var(--mm-aff-scale, 1));
   /* 24×24 hit target (WCAG 2.5.8); the ☑ glyph stays small via font-size. */
   width: 24px;
   height: 24px;
@@ -1190,6 +1195,8 @@
    the coarse-pointer escalation below isn't outranked by an inline width. 24px desktop hit target
    (WCAG 2.5.8); 28px on touch. */
 .mm-collapse-toggle {
+  /* No inline transform on the toggle, so the individual `scale` property is safe here. */
+  scale: var(--mm-aff-scale, 1);
   width: 24px;
   height: 24px;
   border-radius: 50%;

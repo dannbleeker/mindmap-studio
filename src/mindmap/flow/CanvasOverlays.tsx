@@ -2,11 +2,12 @@ import { tNodes } from "../../i18n/nodes";
 import { t } from "../../i18n/registry";
 import "./messages";
 import { MiniMap, NodeToolbar, Panel, Position, useStore } from "@xyflow/react";
-import type { CSSProperties } from "react";
+import { type CSSProperties, useLayoutEffect } from "react";
 import { colors } from "../../design/tokens";
 import { markerImage } from "../../icons";
 import { buildLegend } from "../../legend";
 import type { MindMapDoc } from "../../model/types";
+import { affordanceScale } from "./nodeChrome";
 import { findAnyNode } from "./ops";
 import type { TopicNode } from "./types";
 
@@ -48,6 +49,17 @@ export function CoachMark({
       </div>
     </NodeToolbar>
   );
+}
+
+/** Publishes `--mm-aff-scale` (affordanceScale of the live zoom) on the React Flow root, where every
+ *  node's affordance CSS reads it. A var write, not a prop: nodes don't re-render on zoom. */
+export function AffordanceScale() {
+  const zoom = useStore((s) => s.transform[2]);
+  const dom = useStore((s) => s.domNode);
+  useLayoutEffect(() => {
+    dom?.style.setProperty("--mm-aff-scale", String(affordanceScale(zoom)));
+  }, [dom, zoom]);
+  return null;
 }
 
 /** Drag-to-reparent label (#11): names the topic the dragged node will become a child of, anchored on

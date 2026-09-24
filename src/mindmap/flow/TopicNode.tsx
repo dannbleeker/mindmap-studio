@@ -836,7 +836,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
             // same edge (a node with children), clamp the grip to ride just above it so the two never
             // overlap on a short node (relateGripGeometry). Grip + toggle always mirror together.
             top: relateGripTopCss(hasChildren),
-            transform: "translateY(-50%)",
+            // Scale inside the transform (not the `scale` property) so the -50% centring composes.
+            transform: "translateY(-50%) scale(var(--mm-aff-scale, 1))",
             border: "2px solid #fff",
             background: branchColor,
             boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
@@ -1391,7 +1392,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
               {
                 right: -13,
                 top: "50%",
-                transform: "translateY(-50%)",
+                transform: "translateY(-50%) scale(var(--mm-aff-scale, 1))",
                 "--mm-add-color": ringColor,
               } as CSSProperties
             }
@@ -1412,7 +1413,7 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
                 {
                   left: "50%",
                   bottom: -13,
-                  transform: "translateX(-50%)",
+                  transform: "translateX(-50%) scale(var(--mm-aff-scale, 1))",
                   "--mm-add-color": ringColor,
                 } as CSSProperties
               }

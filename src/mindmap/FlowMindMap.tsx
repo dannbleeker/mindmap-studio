@@ -54,7 +54,14 @@ import { BraceConnectors } from "./flow/BraceConnectors";
 import { BranchEdge } from "./flow/BranchEdge";
 import { BulkNodeMenu } from "./flow/BulkNodeMenu";
 import { type CalloutAnchor, Callouts } from "./flow/Callouts";
-import { CoachMark, DropLabel, LegendPanel, MinimapPanel, StatusBar } from "./flow/CanvasOverlays";
+import {
+  AffordanceScale,
+  CoachMark,
+  DropLabel,
+  LegendPanel,
+  MinimapPanel,
+  StatusBar,
+} from "./flow/CanvasOverlays";
 import { CanvasOverlaysSR } from "./flow/CanvasOverlaysSR";
 import { CanvasRelationshipsSR } from "./flow/CanvasRelationshipsSR";
 import { CrosslinkEdge } from "./flow/CrosslinkEdge";
@@ -81,6 +88,7 @@ import { keyIntent } from "./flow/keyIntent";
 import { computeLayout, estimateSizeOf } from "./flow/layout";
 import type { LinkCandidate } from "./flow/linkAutocomplete";
 import { LinkEditContext } from "./flow/linkEdit";
+import { FIT_MAX_ZOOM } from "./flow/nodeChrome";
 import { countDescendants, subtreeIds, walkTree as walkNodeTree } from "./flow/nodeWalk";
 import {
   type OpResult,
@@ -217,6 +225,8 @@ import { mindManagerTheme } from "./theme";
 // onChange, so the model is the single source of truth.
 
 const nodeTypes = { topic: TopicNode };
+// Module-level so the mount fit's options object is referentially stable across renders.
+const FIT_VIEW_OPTIONS = { maxZoom: FIT_MAX_ZOOM };
 const edgeTypes = { branch: BranchEdge, crosslink: CrosslinkEdge };
 
 // Undo coalescing window (S4): repeated same-key cycle edits (priority/progress/task) inside this many
@@ -605,7 +615,7 @@ function FlowInner({
     }
     sync(docRef.current);
     const raf = requestAnimationFrame(() =>
-      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit, maxZoom: FIT_MAX_ZOOM }),
     );
     return () => cancelAnimationFrame(raf);
   }, [drillId, sync, fitView]);
@@ -1372,7 +1382,7 @@ function FlowInner({
     }
     sync(docRef.current);
     const raf = requestAnimationFrame(() =>
-      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+      fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit, maxZoom: FIT_MAX_ZOOM }),
     );
     return () => cancelAnimationFrame(raf);
   }, [direction, sync, fitView]);
@@ -1499,7 +1509,10 @@ function FlowInner({
         if (!inField) {
           e.preventDefault();
           if (e.code === "Digit1")
-            fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit });
+            fitView({
+              duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+              maxZoom: FIT_MAX_ZOOM,
+            });
           else {
             const ids = [...selectedIdsRef.current];
             fitView({
@@ -1909,7 +1922,8 @@ function FlowInner({
         );
         return new Blob([svg], { type: "image/svg+xml" });
       },
-      fit: () => fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit }),
+      fit: () =>
+        fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit, maxZoom: FIT_MAX_ZOOM }),
       // Snapshot viewport + undo/redo stacks so the tab switcher can restore them on a remount.
       getSession: (): CanvasSession => ({ viewport: getViewport(), history: historyRef.current }),
       getViewport: () => getViewport(),
@@ -2371,6 +2385,7 @@ function FlowInner({
             // Read from the mount-captured session so a later re-render (after App clears the one-shot
             // cache) can't flip fitView back on and re-fit away the restored viewport.
             fitView={!mountSession.current?.viewport}
+            fitViewOptions={FIT_VIEW_OPTIONS}
             defaultViewport={mountSession.current?.viewport}
             // Left-drag the background to pan (the gesture most people reach for first); the +/−/fit
             // controls stay too. Scroll / ⌘-scroll zooms (React Flow's defaults). Hold Shift and drag
@@ -2582,6 +2597,7 @@ function FlowInner({
                 ))}
               </ViewportPortal>
             ) : null}
+            <AffordanceScale />
             <Controls showInteractive={false} />
             <StatusBar
               topics={nodes.length}
@@ -3072,7 +3088,10 @@ function FlowInner({
               <MenuItem
                 label={t("canvas.pane.fitToView")}
                 onSelect={() =>
-                  fitView({ duration: reducedMotionRef.current ? 0 : motion.dur.fit })
+                  fitView({
+                    duration: reducedMotionRef.current ? 0 : motion.dur.fit,
+                    maxZoom: FIT_MAX_ZOOM,
+                  })
                 }
               />
               <MenuItem

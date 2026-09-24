@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { popoverAlign, showNodeAffordances } from "../src/mindmap/flow/nodeChrome";
+import {
+  FIT_MAX_ZOOM,
+  affordanceScale,
+  popoverAlign,
+  showNodeAffordances,
+} from "../src/mindmap/flow/nodeChrome";
 
 describe("showNodeAffordances", () => {
   it("never shows while editing", () => {
@@ -37,5 +42,23 @@ describe("popoverAlign", () => {
 
   it("anchors to the node's left edge near the pane's left edge", () => {
     expect(popoverAlign(10, 70, 412, 300)).toBe("start");
+  });
+});
+
+describe("affordanceScale", () => {
+  it("counter-scales when zoomed in so affordances keep their screen size", () => {
+    expect(affordanceScale(3)).toBeCloseTo(1 / 3);
+    expect(affordanceScale(1.5)).toBeCloseTo(2 / 3);
+  });
+
+  it("is 1 at or below 100% — affordances shrink with the map rather than burying small topics", () => {
+    expect(affordanceScale(1)).toBe(1);
+    expect(affordanceScale(0.4)).toBe(1);
+  });
+});
+
+describe("FIT_MAX_ZOOM", () => {
+  it("keeps a whole-map fit at or below natural size (a tiny map used to open at 300%)", () => {
+    expect(FIT_MAX_ZOOM).toBeLessThanOrEqual(1);
   });
 });

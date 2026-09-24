@@ -27,7 +27,7 @@ export const CORE_EN = {
   // because a fragment interrupted by an element matches none of the shapes the scanner looks for.
   "app.firstRun.title": "3 things to try",
   "app.firstRun.tapSelect": "{tap} a topic to select it",
-  "app.firstRun.tapAdd": "Tap the {plus} on a topic to add a child",
+  "app.firstRun.tapAdd": "Tap a topic, then {plus} in its action bar to add a child",
   "app.firstRun.doubleClickRename": "{doubleClick} a topic to rename it",
   "app.firstRun.tabChild": "Press {tab} to add a child",
   "app.firstRun.paletteAnything": "Press {palette} for anything",

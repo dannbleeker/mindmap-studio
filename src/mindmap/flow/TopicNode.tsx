@@ -389,7 +389,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
   // with that character (caret at the end) instead of the existing topic + select-all.
   const seed = isEditing ? (editing?.seed ?? null) : null;
   const editRef = useRef<HTMLDivElement>(null);
-  // Hover state drives the lift/shadow (#5) and reveals the ＋ add affordances (#1).
+  // Hover state drives the lift/shadow (#5) and reveals the ＋ add affordances (#1). Mouse/pen only:
+  // a tap fires a compat mouseenter with no matching mouseleave, so touch "hover" used to stick after
+  // the first tap and pin the edit hint over the selected topic. Touch gets its affordances from the
+  // selection action bar (NodePopover) instead.
   const [hovered, setHovered] = useState(false);
   // Is more than one node selected? A branch/marquee select would otherwise pop a per-node action bar
   // + ＋ buttons on EVERY selected node, burying the map — so suppress them in bulk. Reactive: the
@@ -781,8 +784,10 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
         outlineOffset: 2,
         transition: "opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onPointerEnter={(e) => {
+        if (e.pointerType !== "touch") setHovered(true);
+      }}
+      onPointerLeave={() => setHovered(false)}
       onDoubleClick={(e) => {
         e.stopPropagation();
         editing?.beginEdit(id);
@@ -1369,7 +1374,8 @@ function TopicNodeImpl({ id, data, selected }: NodeProps<TopicNodeT>) {
           them never moves the node. Canvas-only — not authored into exports. */}
       {/* Note + priority used to live in an on-hover pill here; they moved into the on-selection
           contextual action bar (NodePopover, UI-3) so the node stays uncluttered at rest. Add child/
-          sibling stay as the on-node ＋ affordances below. */}
+          sibling stay as the on-node ＋ affordances below — pointer-precise only: on touch their 44px
+          targets would bury a short topic's label, so CSS hides them and the action bar carries them. */}
       {showNodeAffordances(hovered, selected, multiSelected, isEditing) ? (
         <>
           <button

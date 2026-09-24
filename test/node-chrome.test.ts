@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { showNodeAffordances } from "../src/mindmap/flow/nodeChrome";
+import { popoverAlign, showNodeAffordances } from "../src/mindmap/flow/nodeChrome";
 
 describe("showNodeAffordances", () => {
   it("never shows while editing", () => {
@@ -20,5 +20,22 @@ describe("showNodeAffordances", () => {
   it("hides when neither hovered nor selected", () => {
     expect(showNodeAffordances(false, false, false, false)).toBe(false);
     expect(showNodeAffordances(false, false, true, false)).toBe(false);
+  });
+});
+
+describe("popoverAlign", () => {
+  // A 412px phone pane and the ~300px touch action bar.
+  it("centres the bar over a node with room on both sides", () => {
+    expect(popoverAlign(180, 240, 412, 300)).toBe("center"); // 1000px pane: plenty of room
+    expect(popoverAlign(480, 520, 1000, 300)).toBe("center");
+  });
+
+  it("anchors to the node's right edge near the pane's right edge (the phone repro)", () => {
+    // The 64px topic at x=338 whose centred bar ran to x=498 on a 412px screen.
+    expect(popoverAlign(338, 402, 412, 300)).toBe("end");
+  });
+
+  it("anchors to the node's left edge near the pane's left edge", () => {
+    expect(popoverAlign(10, 70, 412, 300)).toBe("start");
   });
 });

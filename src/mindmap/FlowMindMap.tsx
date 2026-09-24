@@ -2531,6 +2531,8 @@ function FlowInner({
                 onHintRef.current?.(t("canvas.hint.linkingPointer"));
               }}
               onMore={openNodeMenuAt}
+              onAddChild={editingApi.addChild}
+              onAddSibling={editingApi.addSibling}
             />
             <CoachMark show={showCoach} rootId={renderDoc.root.id} touch={isMobile} />
             <DropLabel dropTargetId={dropTargetId} doc={renderDoc} />

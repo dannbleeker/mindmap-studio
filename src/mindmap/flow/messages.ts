@@ -217,7 +217,7 @@ export const CANVAS_EN = {
   "canvas.coach.editKeys":
     "Press {child} for a child · {sibling} for a sibling · double-click to rename",
   "canvas.coach.multiSelect": "{shift}-drag the canvas to select several topics",
-  "canvas.coach.touchKeys": "Tap {add} on a topic to add a child · double-tap a topic to rename",
+  "canvas.coach.touchKeys": "Tap a topic, then {add} to add a child · double-tap a topic to rename",
 
   // Drag-to-reparent label. Was hardcoded and invisible to the guard — no detector matches JSX text
   // that is broken up by an interpolation — and the component shadowed `t` with a local, so migrating

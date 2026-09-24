@@ -958,11 +958,12 @@
   outline: 2px solid var(--mm-add-color, #1b8a5e);
   outline-offset: 2px;
 }
+/* On touch the on-node ＋ buttons are hidden: at a 44px target they covered most of a short topic's
+   label. The selection action bar (NodePopover) carries Add child / Add sibling there instead
+   (.mm-pop-touch below). */
 @media (pointer: coarse) {
   .mm-node-add {
-    width: 44px;
-    height: 44px;
-    font-size: 24px;
+    display: none;
   }
 }
 
@@ -975,6 +976,20 @@
 .mm-pop-btn:focus-visible {
   outline: 2px solid var(--ed-accent, #1b8a5e);
   outline-offset: 1px;
+}
+/* Touch-only action-bar buttons (Add child / Add sibling — a mouse has them as on-node ＋). On touch
+   every bar button grows to a 40px target; !important beats PopBtn's inline 30px sizing. */
+.mm-pop-touch {
+  display: none !important;
+}
+@media (pointer: coarse) {
+  .mm-pop-touch {
+    display: flex !important;
+  }
+  .mm-pop-btn {
+    width: 40px !important;
+    height: 40px !important;
+  }
 }
 
 /* "Double-click to edit" first-hover microcopy (#5) — a small tooltip above the node. */
@@ -1144,9 +1159,22 @@
   opacity: 0;
   transition: opacity var(--ed-dur-fast) var(--ed-ease);
 }
-.react-flow__node:hover .mm-task-check,
+/* Hover reveal only where hover is real: on touch :hover sticks after a tap, which left the ☐ sitting
+   over the first letter of the selected topic. A done ☑ always shows. */
+@media (hover: hover) {
+  .react-flow__node:hover .mm-task-check {
+    opacity: 0.8;
+  }
+}
 .mm-task-check[aria-pressed="true"] {
   opacity: 0.8;
+}
+/* …and while hidden on touch it must not be a live 44px target over the label either (a tap on the
+   first word silently made the topic a task). Touch sets task state from the inspector's Progress. */
+@media (hover: none) {
+  .mm-task-check:not([aria-pressed="true"]) {
+    pointer-events: none;
+  }
 }
 .mm-task-check:hover,
 /* Reveal + ring on keyboard focus so a Tab-focused checkbox isn't invisible (WCAG 2.4.7). */

@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-09-24T17:29:33.266Z",
-  "commit": "b40af3d",
+  "generatedAt": "2026-09-24T17:52:13.659Z",
+  "commit": "3317d9f",
   "headline": {
-    "linesTsJs": 86219,
-    "tests": 2296,
-    "lineCoveragePct": 90.45,
-    "commits": 1228,
+    "linesTsJs": 86606,
+    "tests": 2306,
+    "lineCoveragePct": 90.48,
+    "commits": 1235,
     "ageDays": 104,
-    "trackedFiles": 544,
+    "trackedFiles": 548,
     "featureManualPct": 100,
     "featureBookPct": 96.9,
-    "featureExamplePct": 59.1
+    "featureExamplePct": 58.6
   },
   "code": [
     {
       "category": "App code (src)",
-      "files": 247,
-      "lines": 50406
+      "files": 249,
+      "lines": 50614
     },
     {
       "category": "Unit tests",
-      "files": 220,
-      "lines": 33205
+      "files": 222,
+      "lines": 33384
     },
     {
       "category": "Build scripts",
@@ -31,66 +31,66 @@
     {
       "category": "Styles (CSS)",
       "files": 4,
-      "lines": 2737
+      "lines": 2793
     },
     {
       "category": "Docs (Markdown)",
       "files": 18,
-      "lines": 3362
+      "lines": 3371
     }
   ],
   "coverage": {
     "lines": {
-      "pct": 90.45,
-      "covered": 32269,
-      "total": 35676
+      "pct": 90.48,
+      "covered": 32412,
+      "total": 35819
     },
     "statements": {
-      "pct": 90.45,
-      "covered": 32269,
-      "total": 35676
+      "pct": 90.48,
+      "covered": 32412,
+      "total": 35819
     },
     "functions": {
-      "pct": 78.59,
-      "covered": 1957,
-      "total": 2490
+      "pct": 78.62,
+      "covered": 1964,
+      "total": 2498
     },
     "branches": {
-      "pct": 87.08,
-      "covered": 9280,
-      "total": 10656
+      "pct": 87.09,
+      "covered": 9332,
+      "total": 10715
     }
   },
   "tests": {
-    "unit": 2296,
+    "unit": 2306,
     "e2e": 0,
-    "durationMs": 116881,
+    "durationMs": 109942,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 28719
+        "ms": 26169
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 25767
+        "ms": 24182
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 10069
+        "ms": 9280
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 8616
+        "ms": 8080
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 6293
+        "ms": 5761
       }
     ]
   },
   "domain": {
     "components": 75,
-    "hooks": 27,
+    "hooks": 28,
     "ioModules": 40,
     "canvasThemes": 4,
     "markers": 15,
@@ -107,11 +107,11 @@
       },
       {
         "name": "mindmap/FlowMindMap.tsx",
-        "lines": 3248
+        "lines": 3277
       },
       {
         "name": "App.tsx",
-        "lines": 2921
+        "lines": 2953
       },
       {
         "name": "mindmap/flow/ops.ts",
@@ -119,7 +119,7 @@
       },
       {
         "name": "components/Toolbar.tsx",
-        "lines": 1489
+        "lines": 1524
       }
     ]
   },
@@ -150,11 +150,11 @@
     "churnHotspots": [
       {
         "file": "App.tsx",
-        "commits": 50
+        "commits": 52
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 45
+        "commits": 46
       },
       {
         "file": "Panels.tsx",
@@ -162,18 +162,18 @@
       },
       {
         "file": "components/Toolbar.tsx",
-        "commits": 29
+        "commits": 31
       },
       {
         "file": "i18n/core.ts",
-        "commits": 28
+        "commits": 30
       }
     ],
     "risky": [
       {
         "file": "App.tsx",
-        "pct": 58.88,
-        "commits": 50
+        "pct": 58.8,
+        "commits": 52
       }
     ]
   },
@@ -188,28 +188,28 @@
     "nonNull": 3
   },
   "bundle": {
-    "jsGzipKb": 539.1,
-    "cssGzipKb": 10.5,
-    "totalGzipKb": 549.5,
-    "entryGzipKb": 157.9,
-    "firstLoadGzipKb": 182.2,
+    "jsGzipKb": 540,
+    "cssGzipKb": 10.6,
+    "totalGzipKb": 550.6,
+    "entryGzipKb": 158.5,
+    "firstLoadGzipKb": 182.8,
     "budgetKb": 184,
     "withinBudget": true
   },
   "docs": {
-    "bookWords": 26792,
+    "bookWords": 26925,
     "chapters": 12,
-    "appLoc": 50406,
+    "appLoc": 50614,
     "docToCodeRatio": 0.53
   },
   "featureCoverage": {
-    "total": 254,
-    "manual": 254,
+    "total": 256,
+    "manual": 256,
     "manualPct": 100,
-    "book": 246,
+    "book": 248,
     "bookPct": 96.9,
     "bookExample": 150,
-    "bookExamplePct": 59.1,
+    "bookExamplePct": 58.6,
     "byArea": {
       "structure": {
         "total": 36,
@@ -227,9 +227,9 @@
         "book": 26
       },
       "navigation": {
-        "total": 58,
-        "manual": 58,
-        "book": 56
+        "total": 59,
+        "manual": 59,
+        "book": 57
       },
       "editing": {
         "total": 33,
@@ -247,9 +247,9 @@
         "book": 22
       },
       "presentation": {
-        "total": 5,
-        "manual": 5,
-        "book": 5
+        "total": 6,
+        "manual": 6,
+        "book": 6
       },
       "notes": {
         "total": 6,
@@ -321,8 +321,8 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 104,
-    "commits": 1228,
-    "commits7d": 13,
+    "commits": 1235,
+    "commits7d": 20,
     "authors": [
       {
         "name": "Dann Bleeker Pedersen",
@@ -330,17 +330,17 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 550
+        "count": 552
       },
       {
         "name": "Claude",
-        "count": 71
+        "count": 75
       }
     ],
     "churn30d": {
-      "added": 884,
-      "removed": 368
+      "added": 1456,
+      "removed": 454
     },
-    "changelogEntries": 467
+    "changelogEntries": 470
   }
 }

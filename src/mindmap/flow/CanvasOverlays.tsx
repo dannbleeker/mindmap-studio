@@ -233,6 +233,17 @@ export interface ZoomMenuActions {
 
 /** The status bar's zoom % as a menu — zoom in/out, 100%, fit map / selection and the minimap toggle,
  *  so the canvas needs no separate +/−/fit stack or minimap button. */
+// Keyboard hints on the zoom-menu rows — physical key names, not prose (like FlowMindMap's
+// MENU_SHORTCUT); kept in step with keyIntent (Ctrl/⌘ +/−/0) and the Shift+1/2 fit handler.
+const ZOOM_KEYS = {
+  in: "Ctrl/⌘ +",
+  out: "Ctrl/⌘ −",
+  reset: "Ctrl/⌘ 0",
+  fit: "Shift+1",
+  fitSelection: "Shift+2",
+};
+
+/** The zoom menu; `sheet` (phone) drops the keyboard hints, which a phone can't use. */
 function ZoomMenu({
   pct,
   selected,
@@ -256,23 +267,31 @@ function ZoomMenu({
     >
       <MenuItem
         label={t("canvas.zoomIn")}
-        shortcut="Ctrl/⌘ +"
+        shortcut={sheet ? undefined : ZOOM_KEYS.in}
         closeOnSelect={false}
         onSelect={actions.zoomIn}
       />
       <MenuItem
         label={t("canvas.zoomOut")}
-        shortcut="Ctrl/⌘ −"
+        shortcut={sheet ? undefined : ZOOM_KEYS.out}
         closeOnSelect={false}
         onSelect={actions.zoomOut}
       />
-      <MenuItem label={t("canvas.pane.resetZoom")} shortcut="Ctrl/⌘ 0" onSelect={actions.reset} />
+      <MenuItem
+        label={t("canvas.pane.resetZoom")}
+        shortcut={sheet ? undefined : ZOOM_KEYS.reset}
+        onSelect={actions.reset}
+      />
       <MenuSeparator />
-      <MenuItem label={t("cmd.fit")} shortcut="Shift 1" onSelect={actions.fitMap} />
+      <MenuItem
+        label={t("cmd.fit")}
+        shortcut={sheet ? undefined : ZOOM_KEYS.fit}
+        onSelect={actions.fitMap}
+      />
       {selected > 0 ? (
         <MenuItem
           label={t("canvas.zoomToFitTheSelection")}
-          shortcut="Shift 2"
+          shortcut={sheet ? undefined : ZOOM_KEYS.fitSelection}
           onSelect={actions.fitSelection}
         />
       ) : null}

@@ -502,14 +502,15 @@ export function App() {
     const n = obj?.nodeIds.length ?? 0;
     return `${n} ${n === 1 ? "topic" : "topics"}`;
   }, [selectedOverlay, liveDoc]);
-  // Auto-show the right-side inspector on selection — opt-in (Settings → "Open topic info on
-  // select"). Off by default: a click used to pop a 300px column (62% of a phone) every time; the
-  // inspector now opens on request (the action bar's ⓘ, the Panels menu, ⌘K). An already-open
-  // inspector still follows the selection. Sticky minimize wins over the opt-in too.
+  // Auto-show the right-side inspector on selection. For a TOPIC it's opt-in (Settings → "Open topic
+  // info on select"): a click used to pop a 300px column (62% of a phone) every time, and a topic has
+  // the action bar's ⓘ to open it on request. Relationships and overlays (boundary / summary /
+  // callout) have no action bar — the inspector is their only editor — so they still auto-open. An
+  // already-open inspector follows any selection; sticky minimize wins over both.
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on selection id; setters are stable.
   useEffect(() => {
-    if (!panels.infoAutoOpen) return;
-    if ((selected || selectedEdge || selectedOverlay) && !panels.infoMinimized)
+    if (panels.infoMinimized) return;
+    if (selectedEdge || selectedOverlay || (selected && panels.infoAutoOpen))
       panels.setInfoOpen(true);
   }, [selected?.id, selectedEdge?.id, selectedOverlay?.id]);
   const [focus, setFocus] = useState<{ id: string; topic: string } | null>(null);

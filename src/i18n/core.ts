@@ -222,7 +222,7 @@ export const CORE_EN = {
   "settings.highContrast.help":
     "High contrast strengthens chrome borders, dividers and text, and adds bolder focus rings. System follows your device's contrast / forced-colors setting.",
   "settings.infoAutoOpen.help":
-    "When on, the topic-info panel opens every time you select a topic. When off, open it from the ⓘ in a selected topic's action bar, the Panels menu or ⌘K.",
+    "When on, the topic-info panel opens every time you select a topic. When off, open it from the ⓘ in a selected topic's action bar, the Panels menu or ⌘K. Relationships, boundaries, summaries and callouts always open it.",
   "settings.localData.body":
     "Everything — your maps, version history and preferences — is stored only in this browser.",
   "settings.localData.usage": " About {used} used of {quota} available.",

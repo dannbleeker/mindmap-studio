@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-05T14:39:42.040Z",
-  "commit": "1f3aa0a",
+  "generatedAt": "2026-10-12T15:26:22.111Z",
+  "commit": "2c4749d",
   "headline": {
     "linesTsJs": 86606,
     "tests": 2306,
     "lineCoveragePct": 90.48,
-    "commits": 1238,
-    "ageDays": 115,
+    "commits": 1239,
+    "ageDays": 122,
     "trackedFiles": 548,
     "featureManualPct": 100,
     "featureBookPct": 96.9,
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 87.09,
-      "covered": 9332,
-      "total": 10715
+      "covered": 9333,
+      "total": 10716
     }
   },
   "tests": {
     "unit": 2306,
     "e2e": 0,
-    "durationMs": 119183,
+    "durationMs": 107013,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 29527
+        "ms": 26711
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 25578
+        "ms": 22258
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 10150
+        "ms": 8771
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 9454
+        "ms": 8236
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 6540
+        "ms": 4844
       }
     ]
   },
@@ -325,8 +325,8 @@
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
-    "ageDays": 115,
-    "commits": 1238,
+    "ageDays": 122,
+    "commits": 1239,
     "commits7d": 0,
     "authors": [
       {
@@ -335,7 +335,7 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 555
+        "count": 556
       },
       {
         "name": "Claude",
@@ -343,8 +343,8 @@
       }
     ],
     "churn30d": {
-      "added": 1533,
-      "removed": 531
+      "added": 1541,
+      "removed": 534
     },
     "changelogEntries": 470
   }

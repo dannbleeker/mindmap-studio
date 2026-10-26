@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-19T13:15:20.750Z",
-  "commit": "085b059",
+  "generatedAt": "2026-10-26T13:03:41.925Z",
+  "commit": "65964ac",
   "headline": {
     "linesTsJs": 86606,
     "tests": 2306,
     "lineCoveragePct": 90.48,
-    "commits": 1240,
-    "ageDays": 129,
+    "commits": 1241,
+    "ageDays": 136,
     "trackedFiles": 548,
     "featureManualPct": 100,
     "featureBookPct": 96.9,
@@ -57,34 +57,34 @@
     },
     "branches": {
       "pct": 87.09,
-      "covered": 9332,
-      "total": 10715
+      "covered": 9331,
+      "total": 10714
     }
   },
   "tests": {
     "unit": 2306,
     "e2e": 0,
-    "durationMs": 74252,
+    "durationMs": 117738,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 18632
+        "ms": 29127
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 15528
+        "ms": 26446
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6238
+        "ms": 9887
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5463
+        "ms": 9108
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3503
+        "ms": 6332
       }
     ]
   },
@@ -150,35 +150,35 @@
     "churnHotspots": [
       {
         "file": "i18n/core.ts",
-        "commits": 30
+        "commits": 10
       },
       {
-        "file": "mindmap/flow/messages.ts",
-        "commits": 18
+        "file": "design/editor.css",
+        "commits": 8
       },
       {
         "file": "App.tsx",
-        "commits": 14
+        "commits": 6
       },
       {
         "file": "mindmap/FlowMindMap.tsx",
-        "commits": 14
+        "commits": 6
       },
       {
         "file": "components/Toolbar.tsx",
-        "commits": 12
+        "commits": 5
       }
     ],
     "risky": [
       {
         "file": "App.tsx",
         "pct": 58.8,
-        "commits": 14
+        "commits": 6
       },
       {
         "file": "mindmap/flow/ShapeLayer.tsx",
         "pct": 20.33,
-        "commits": 5
+        "commits": 3
       }
     ]
   },
@@ -325,8 +325,8 @@
   },
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
-    "ageDays": 129,
-    "commits": 1240,
+    "ageDays": 136,
+    "commits": 1241,
     "commits7d": 1,
     "authors": [
       {
@@ -335,7 +335,7 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 557
+        "count": 558
       },
       {
         "name": "Claude",
@@ -343,8 +343,8 @@
       }
     ],
     "churn30d": {
-      "added": 1528,
-      "removed": 521
+      "added": 144,
+      "removed": 95
     },
     "changelogEntries": 470
   }

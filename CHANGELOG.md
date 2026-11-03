@@ -5,6 +5,13 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 
 ## [Unreleased]
 
+### Changed
+- `fast-xml-parser` 4.5 → 5.11 (major). It is the parser behind every XML importer (`.mmap`,
+  XMind legacy, FreeMind, OPML, SimpleMind, iThoughts, DOCX, XLSX). v5 moved the XML builder
+  into its own package (unused here) and changed some entity error messages. The parser API
+  we call is unchanged, and every importer's tests pass. Supersedes Dependabot #178 and the
+  fast-xml-parser part of #177.
+
 ### Added
 
 - **Full screen.** One tap (the ⛶ in a phone's top bar; **View → Full screen** or ⌘K anywhere)

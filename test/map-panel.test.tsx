@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // MapPanel — the right-panel no-selection state (was MapStats). Covers the read-only stats (topics /
 // branches / task progress over the live doc) AND the new Map settings: title rename, theme + layout
 // selects, background colour, line-jumps toggle. Each control fires the prop App wires to the real

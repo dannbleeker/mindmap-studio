@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Component test for EdgeInspector — the right-panel for a selected relationship. Asserts each
 // control fires the right callback (label commit, direction/arrow, colour/width/dash, delete) so the
 // canvas's edge mutators get the correct args. Visible-text/role/label assertions, not structure.

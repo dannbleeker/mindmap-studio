@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Hook test (renderHook) for usePanels — the panel/filter/saved-filter state extracted from App.tsx.
 // Asserts the behaviours App used to own inline: panels restore from "mindmap-panels", toggling the
 // durable panels persists, closing the Filter panel clears the active filter, and saved-filter

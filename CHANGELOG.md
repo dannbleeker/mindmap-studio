@@ -6,6 +6,11 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 ## [Unreleased]
 
 ### Changed
+- `vitest` 2 → 4 and `@vitest/coverage-v8` 2 → 4 (major). The jsdom test files now set
+  `// @vitest-environment jsdom` on line 1, because vitest 4 dropped `environmentMatchGlobs`.
+  Coverage floors were re-baselined: coverage-v8 4 measures through the AST, so the same suite
+  reports different denominators. Details are in `vitest.config.ts`. Supersedes the rest of
+  Dependabot #177.
 - `fast-xml-parser` 4.5 → 5.11 (major). It is the parser behind every XML importer (`.mmap`,
   XMind legacy, FreeMind, OPML, SimpleMind, iThoughts, DOCX, XLSX). v5 moved the XML builder
   into its own package (unused here) and changed some entity error messages. The parser API

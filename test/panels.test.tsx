@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Render-smoke tests for the left-rail panels in src/Panels.tsx. This is the safety net for the
 // later Panels refactor (Phase D): each panel must mount without throwing AND show a known piece of
 // user-visible content. Assertions target visible text / roles / labels — NOT internal structure —

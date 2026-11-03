@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { type RefObject, createRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

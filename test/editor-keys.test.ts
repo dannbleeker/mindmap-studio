@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { type Mock, describe, expect, it, vi } from "vitest";
 import {
   type EditorKeyActions,
   type EditorKeyEvent,
@@ -16,11 +16,16 @@ const ev = (over: Partial<EditorKeyEvent>): EditorKeyEvent => ({
   ...over,
 });
 
+// Typed per action: vitest 4's bare `vi.fn()` mock no longer satisfies a typed callback signature.
 const actions = (): EditorKeyActions & {
-  format: ReturnType<typeof vi.fn>;
-  commitAndAdd: ReturnType<typeof vi.fn>;
-  cancel: ReturnType<typeof vi.fn>;
-} => ({ format: vi.fn(), commitAndAdd: vi.fn(), cancel: vi.fn() });
+  format: Mock<EditorKeyActions["format"]>;
+  commitAndAdd: Mock<EditorKeyActions["commitAndAdd"]>;
+  cancel: Mock<EditorKeyActions["cancel"]>;
+} => ({
+  format: vi.fn<EditorKeyActions["format"]>(),
+  commitAndAdd: vi.fn<EditorKeyActions["commitAndAdd"]>(),
+  cancel: vi.fn<EditorKeyActions["cancel"]>(),
+});
 
 describe("handleEditorKeyDown", () => {
   // The router now dispatches the SEMANTIC tag richTextCommands applies (b/i/u), not the old

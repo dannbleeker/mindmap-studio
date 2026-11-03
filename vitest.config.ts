@@ -18,57 +18,10 @@ export default defineConfig({
   },
   test: {
     // Default to `node` — the pure-logic + store tests don't need a DOM and run faster without one.
-    // Component/hook tests opt into jsdom per-file via environmentMatchGlobs below (the panels/hooks
-    // need a DOM + the polyfills in test/setup.ts).
+    // Component/hook tests opt into jsdom per file with a `// @vitest-environment jsdom` docblock on
+    // line 1 (vitest 4 dropped the `environmentMatchGlobs` list that used to live here); they need a
+    // DOM + the polyfills in test/setup.ts.
     environment: "node",
-    environmentMatchGlobs: [
-      ["test/panels.test.tsx", "jsdom"],
-      ["test/noteFormat.test.ts", "jsdom"],
-      ["test/hooks.test.tsx", "jsdom"],
-      ["test/usePanels.test.ts", "jsdom"],
-      ["test/dashboard.test.ts", "jsdom"],
-      ["test/icon-rail.test.tsx", "jsdom"],
-      ["test/toolbar.test.tsx", "jsdom"],
-      ["test/install-prompt.test.tsx", "jsdom"],
-      ["test/use-appearance.test.tsx", "jsdom"],
-      ["test/find-replace-overlay.test.tsx", "jsdom"],
-      ["test/kanban.test.tsx", "jsdom"],
-      ["test/brainstorm-timer.test.tsx", "jsdom"],
-      ["test/start-sections.test.tsx", "jsdom"],
-      ["test/start-toast.test.tsx", "jsdom"],
-      ["test/start-library-sections.test.tsx", "jsdom"],
-      ["test/start-extra.test.tsx", "jsdom"],
-      ["test/presentation.test.tsx", "jsdom"],
-      ["test/flowmindmap.test.tsx", "jsdom"],
-      ["test/edge-inspector.test.tsx", "jsdom"],
-      ["test/map-panel.test.tsx", "jsdom"],
-      ["test/overlay-inspector.test.tsx", "jsdom"],
-      ["test/menu-primitive.test.tsx", "jsdom"],
-      ["test/command-palette.test.tsx", "jsdom"],
-      ["test/shortcuts-dialog.test.tsx", "jsdom"],
-      ["test/first-run-card.test.tsx", "jsdom"],
-      ["test/fileSystem.test.ts", "jsdom"],
-      ["test/breadcrumb.test.tsx", "jsdom"],
-      ["test/saved-views-hook.test.tsx", "jsdom"],
-      ["test/use-version-history.test.tsx", "jsdom"],
-      ["test/use-toast.test.tsx", "jsdom"],
-      ["test/use-format-painter.test.tsx", "jsdom"],
-      ["test/use-command-palette-hotkey.test.tsx", "jsdom"],
-      ["test/use-focus-hotkey.test.tsx", "jsdom"],
-      ["test/use-clipboard-image-paste.test.tsx", "jsdom"],
-      ["test/use-guided-walk.test.tsx", "jsdom"],
-      ["test/use-paste-outline.test.tsx", "jsdom"],
-      ["test/use-named-styles.test.tsx", "jsdom"],
-      ["test/use-note-editor.test.tsx", "jsdom"],
-      ["test/use-disk-file.test.tsx", "jsdom"],
-      ["test/use-idb-autosave.test.tsx", "jsdom"],
-      ["test/natural-date-input.test.tsx", "jsdom"],
-      ["test/outline-touch-drag.test.tsx", "jsdom"],
-      ["test/branch-export-dialog.test.tsx", "jsdom"],
-      ["test/custom-themes.test.ts", "jsdom"],
-      ["test/theme-designer-dialog.test.tsx", "jsdom"],
-      ["test/app-integration.test.tsx", "jsdom"],
-    ],
     // setup runs for every file but is guarded to no-op under `node` (see test/setup.ts), so it only
     // takes effect for the jsdom tests.
     setupFiles: ["test/setup.ts"],
@@ -128,11 +81,17 @@ export default defineConfig({
       // toolbar) and its FlowMindMap wiring only run through RF pointer gestures jsdom can't drive —
       // verified in-browser instead (see the .tsx caveat above). Live ≈ 89.8 / 76.28; floor set just
       // under with margin, per the same policy as the moves above. branches keep their comfortable floor.
+      // Re-baselined for vitest 4 (2026-11-03): same tests and source, but @vitest/coverage-v8 4 remaps
+      // v8 coverage through the AST, so the denominators changed. Statements went from 35,819 to 14,728
+      // and functions from 2,498 to 3,970. On the same commit, vitest 2 reported lines/stmts 90.48,
+      // branches 87.09, funcs 78.62, and vitest 4 reports lines 86.31, stmts 84.6, branches 77.59,
+      // funcs 79.62. That is a change of measurement, not lost coverage, so the floors move to just
+      // under the vitest 4 numbers with the usual margin. Ratchet up from here as before.
       thresholds: {
-        lines: 89.6,
-        statements: 89.6,
-        functions: 76.1,
-        branches: 86.4,
+        lines: 86.1,
+        statements: 84.4,
+        functions: 79.4,
+        branches: 77.4,
       },
     },
   },

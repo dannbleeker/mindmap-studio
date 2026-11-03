@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Component test for OverlayInspector — the right panel for a selected boundary / summary / callout.
 // Asserts each control fires the right callback (label/text commit, delete) and the header reflects
 // the kind + caption. Visible-text/role/label assertions.

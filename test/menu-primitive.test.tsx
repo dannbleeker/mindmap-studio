@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // The shared accessible Menu primitive (src/design/primitives.tsx) — the substrate the toolbar's
 // five menus + the canvas context menu migrate onto. Drives it through the keyboard + pointer the
 // way a real user (and a screen reader) would: open, rove with arrows (skipping disabled), Home/End,

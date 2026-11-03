@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Hook tests (renderHook) for the app's small custom hooks. The DOM-backed bits — matchMedia for
 // useIsMobile/useTheme, and the Blob/anchor download path for useMapExports — are mocked here so the
 // hooks' real logic (query cycling, replace counts, format dispatch, persistence) is exercised.

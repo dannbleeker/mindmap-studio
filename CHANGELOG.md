@@ -6,6 +6,9 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 ## [Unreleased]
 
 ### Changed
+- `fast-uri` 3.1.2 → 3.1.9 (lockfile only, used by `ajv` in the PWA build). This supersedes
+  Dependabot #182, whose group also moved `vitest` to 5.1.0 while `@vitest/coverage-v8` stayed on
+  4.1.12. That version mismatch made coverage report 0% and failed the gate.
 - `vitest` 2 → 4 and `@vitest/coverage-v8` 2 → 4 (major). The jsdom test files now set
   `// @vitest-environment jsdom` on line 1, because vitest 4 dropped `environmentMatchGlobs`.
   Coverage floors were re-baselined: coverage-v8 4 measures through the AST, so the same suite

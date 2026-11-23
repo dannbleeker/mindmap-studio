@@ -6,6 +6,12 @@ phase-based. Open work lives in `NEXT_STEPS.md`, not here.
 ## [Unreleased]
 
 ### Changed
+- Security: clear all 35 `pnpm audit` findings (13 high), all dev or build-time. `undici` (under
+  jsdom), `smol-toml` and `zod` (under knip) and `source-map-js` refreshed inside their parents'
+  ranges, lockfile only. `glob` is overridden to `^14.0.2` in `pnpm-workspace.yaml` for
+  GHSA-3g3m-2fjr-6pw4 (and minimatch GHSA-g3hv-75wg-m249 through it): workbox-build declares
+  glob ^11 but only calls `globSync`, and the service-worker precache list is identical (47
+  entries) before and after. Drop the override once workbox-build declares glob >=14.0.2.
 - `fast-uri` 3.1.2 → 3.1.9 (lockfile only, used by `ajv` in the PWA build). This supersedes
   Dependabot #182, whose group also moved `vitest` to 5.1.0 while `@vitest/coverage-v8` stayed on
   4.1.12. That version mismatch made coverage report 0% and failed the gate.

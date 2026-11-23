@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-23T13:12:35.848Z",
-  "commit": "97c6f52",
+  "generatedAt": "2026-11-23T18:08:22.042Z",
+  "commit": "b9d9d58",
   "headline": {
     "linesTsJs": 86657,
     "tests": 2306,
     "lineCoveragePct": 86.32,
-    "commits": 1254,
+    "commits": 1255,
     "ageDays": 164,
     "trackedFiles": 548,
     "featureManualPct": 100,
@@ -64,27 +64,27 @@
   "tests": {
     "unit": 2306,
     "e2e": 0,
-    "durationMs": 65409,
+    "durationMs": 78880,
     "slowest": [
       {
         "file": "test/flowmindmap.test.tsx",
-        "ms": 17635
+        "ms": 21464
       },
       {
         "file": "test/app-integration.test.tsx",
-        "ms": 14448
+        "ms": 18102
       },
       {
         "file": "test/panels.test.tsx",
-        "ms": 6115
+        "ms": 7386
       },
       {
         "file": "test/toolbar.test.tsx",
-        "ms": 5677
+        "ms": 7306
       },
       {
         "file": "test/book-build.test.ts",
-        "ms": 3106
+        "ms": 4224
       }
     ]
   },
@@ -331,7 +331,7 @@
   "git": {
     "born": "2026-06-11T20:30:20+02:00",
     "ageDays": 164,
-    "commits": 1254,
+    "commits": 1255,
     "commits7d": 2,
     "authors": [
       {
@@ -340,7 +340,7 @@
       },
       {
         "name": "github-actions[bot]",
-        "count": 566
+        "count": 567
       },
       {
         "name": "Claude",
@@ -352,8 +352,8 @@
       }
     ],
     "churn30d": {
-      "added": 1844,
-      "removed": 2163
+      "added": 1874,
+      "removed": 2182
     },
     "changelogEntries": 470
   }
